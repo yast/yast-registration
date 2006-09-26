@@ -1,0 +1,48 @@
+@HEADER-COMMENT@
+
+@HEADER@
+Requires:	yast2
+Requires:	suseRegister
+BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite
+BuildRequires:  docbook-xsl-stylesheets doxygen libxslt sgml-skel yast2-core-devel yast2-country
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of registration
+
+%description
+Performs the Registration
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+%if %sles_version
+    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
+%else
+    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
+%endif
+
+@CLEAN@
+
+
+%pre
+/usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
+/usr/sbin/useradd -r -s /bin/bash -c "Novell Customer Center User" -d /var/lib/YaST2/suse-ncc-fakehome -g suse-ncc suse-ncc 2> /dev/null || :
+
+
+%files
+%defattr(-,root,root)
+%doc @docdir@
+
+@clientdir@/*.ycp
+@moduledir@/*.ycp
+@moduledir@/*.ybc
+@desktopdir@/*.desktop
+/usr/share/YaST2/yastbrowser
+
+# agents
+@scrconfdir@/cfg_suse_register.scr
+
+

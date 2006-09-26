@@ -1,0 +1,7 @@
+-------------------------------------------------------------------
+Sat Aug 26 20:20:49 2006 - jdsn@suse.de
+
+- initial version
+- split off registration from installation (#203551)
+- fixed desktop files (#165891)
+- fixed proxy bug under Gnome (#207332)

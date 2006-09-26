@@ -1,0 +1,13 @@
+{
+
+// testedfiles: Registration.ycp
+
+include "testsuite.ycp";
+TESTSUITE_INIT([], nil);
+
+import "Registration";
+
+DUMP("Registration::Modified");
+TEST(``(Registration::Modified()), [], nil);
+
+}
