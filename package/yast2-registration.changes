@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct  2 11:07:40 CEST 2006 - locilka@suse.cz
+
+- Added missing yast2-packager into BuildRequires
+- 2.13.1
+
+-------------------------------------------------------------------
 Sat Aug 26 20:20:49 2006 - jdsn@suse.de
 
 - initial version
