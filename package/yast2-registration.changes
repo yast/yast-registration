@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct  4 09:14:50 CEST 2006 - jsrain@suse.cz
+
+- added missing inst_suse_register.ycp
+- 2.13.2
+
+-------------------------------------------------------------------
 Mon Oct  2 11:07:40 CEST 2006 - locilka@suse.cz
 
 - Added missing yast2-packager into BuildRequires
