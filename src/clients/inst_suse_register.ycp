@@ -418,6 +418,7 @@ EOJAIL
 
     // create a script to run a system call as different user
     // thanks to werner (script) and jw (.screenrc.jail) for their help
+    // unset DESKTOP_SESSION : (#207332)
     if (!textmode)
     {    exec = exec +
 "
@@ -427,6 +428,7 @@ else
     disp=\"${DISPLAY}\"
 fi
 
+unset DESKTOP_SESSION
 
 : ${XAUTHORITY:=$HOME/.Xauthority}
 if test ! -e $XAUTHORITY ; then
