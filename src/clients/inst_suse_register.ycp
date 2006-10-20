@@ -70,7 +70,7 @@
     // Translators: Module Title for the Box
     string title_box  = _("Online Update Configuration");  // (#165509)
 
-    // for SLES/SLED and SL (2 months after release) use title_nccc
+    // select title to use
     string title = title_nccc;
 
     // Translators: limit to 2x 50 charachters - if more needed take 3x 50 chars but NOTHING more
@@ -132,6 +132,11 @@ so the sources are available to all tools."
     string no_browser_msg = _(
 "No Web browser available.
 Run the suse_register command manually."
+);
+    string no_product_msg = _(
+"No product found to be registered.
+You do not need to register this installation.
+Please add update sources yourself."
 );
     string no_w3m_msg = _(
 "Your registration requires interactive input that is not
@@ -776,6 +781,17 @@ boolean launchBrowser(string url)
                 }
 
 
+
+
+                //  show a message when there are no products to register
+                if (information_data["exit"]:"99" == "101")
+                {
+                    Popup::Message(no_product_msg);
+                    loopend = true;
+                }
+
+
+
                 // error handling - no browser available for interactive mode
                 if (information_data["exit"]:"99" == "198")
                 {
@@ -790,6 +806,7 @@ boolean launchBrowser(string url)
                        information_data["exit"]:"" != "0" &&
                        information_data["exit"]:"" != "1" &&
                        information_data["exit"]:"" != "3" &&
+                       information_data["exit"]:"" != "101" &&
                        information_data["exit"]:"" != "198"
                      ) &&
                     !(
