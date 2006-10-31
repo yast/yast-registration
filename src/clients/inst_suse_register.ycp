@@ -548,6 +548,7 @@ boolean launchBrowser(string url)
     boolean enable_back = GetInstArgs::enable_back();
     // we always need the next button
     Wizard::SetContents (title, contents, help, enable_back, true);
+    Wizard::SetTitleIcon ("yast-product-registration");  // (#211552)
 
     //y2debug ("%1", UI::DumpWidgetTree());
 
