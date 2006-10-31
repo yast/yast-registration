@@ -151,6 +151,8 @@ void write_config()
 {
     if (iamroot)
     {
+        // avoid missing file error message in log (#211899)
+        SCR::Execute(.target.bash, "touch /etc/sysconfig/suse_register");
         SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
         SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
     }
@@ -251,16 +253,6 @@ global map<string, string> suseRegister(symbol parameter)
         pre_sr = pre_sr + " https_proxy='" + Register::https_proxy + "' ";
     }
 
-    if (parameter == `autoyast)
-    {
-        // append values from map to the suse_register call
-        foreach (string key, string val, registration_data,  {
-            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
-            params = params + sformat("  -a %1='%2'  ", key, String::Quote(val) );
-        });
-        y2milestone ("called from autoyast - added registration data to suse_register call");
-    }
-
     if ( force_registration ) params = params + " --force-registration ";
     if ( !submit_hwdata   )   params = params + " --no-hw-data ";
     if ( !submit_optional )   params = params + " --no-optional ";
@@ -273,6 +265,16 @@ global map<string, string> suseRegister(symbol parameter)
 
     if (parameter == `autoyast)
     {
+        // do not log sensitive data to the log (#195624)
+        // append values from map to the suse_register call
+        string params_sensitive = " ";
+        foreach (string key, string val, registration_data,  {
+            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
+            params_sensitive = params_sensitive + sformat("  -a %1='%2'  ", key, String::Quote(val) );
+        });
+        sr_bash_cmd = sformat("  %1   %2  ",  sr_bash_cmd + params_sensitive);
+        y2milestone ("called from autoyast - added sensitive registration data to suse_register call");
+
         map<string, any> info = (map<string, any>) SCR::Execute(.target.bash_output, sr_bash_cmd );
         string exitcode = sformat("%1", info["exit"]:99);
         y2milestone ("/usr/bin/suse_register returned %1", exitcode);
@@ -291,7 +293,7 @@ global map<string, string> suseRegister(symbol parameter)
 
 	// translators: busy popup while registering the system
 	string fixme_get_this_out_of_here_ASAP = _("This may take a while");
-	
+
         UI::OpenDialog(`VBox( `Left( `Label( _("Contacting server...")) ),
                               `Left( `Label( fixme_get_this_out_of_here_ASAP )),  // (hmuelle, shorn)
                               `PushButton(`id(`abort), Label::AbortButton() )
