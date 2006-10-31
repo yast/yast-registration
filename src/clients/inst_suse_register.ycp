@@ -602,6 +602,7 @@ boolean launchBrowser(string url)
         }
         else if (ret == `showinfo)
         {
+            Package::InstallAllMsg(["rug","zmd"], nil);  // (#191135)
             information_data = Register::suseRegister(`p);
 
             if ( information_data["exit"]:"99" == "0" )
@@ -633,6 +634,7 @@ boolean launchBrowser(string url)
         {
             if ( configure_status == true )
             {
+                Package::InstallAllMsg(["rug","zmd"], nil);  // (#191135)
                 // remove the zmd flag file (requested by mvidner)
                 SCR::Execute(.target.bash, " rm -f /var/lib/zypp/zmd_updated_the_sources " );
 
