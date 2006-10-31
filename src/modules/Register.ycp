@@ -272,7 +272,7 @@ global map<string, string> suseRegister(symbol parameter)
             key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
             params_sensitive = params_sensitive + sformat("  -a %1='%2'  ", key, String::Quote(val) );
         });
-        sr_bash_cmd = sformat("  %1   %2  ",  sr_bash_cmd + params_sensitive);
+        sr_bash_cmd = sformat("  %1   %2  ",  sr_bash_cmd, params_sensitive);
         y2milestone ("called from autoyast - added sensitive registration data to suse_register call");
 
         map<string, any> info = (map<string, any>) SCR::Execute(.target.bash_output, sr_bash_cmd );
