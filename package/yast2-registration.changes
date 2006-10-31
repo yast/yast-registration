@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Oct 31 21:57:57 CET 2006 - jdsn@suse.de
+
+- using own icon in installation workflow (#211552)
+- check for rug and zmd to be installed (#191135)
+- show message if no product to be registered (#191258)
+- avoid missing file error in log (#211899)
+- do not log sensitive data from autoyast (#195624)
+- renamed the _not_ missing file (inst_)suse_register.ycp
+- 2.13.3
+
+-------------------------------------------------------------------
 Wed Oct  4 09:14:50 CEST 2006 - jsrain@suse.cz
 
 - added missing inst_suse_register.ycp
