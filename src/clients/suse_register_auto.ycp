@@ -12,7 +12,7 @@
 
 {
 
-textdomain "installation";
+textdomain "registration";
 
 import "Register";
 import "Wizard";

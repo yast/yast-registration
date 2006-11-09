@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov  9 14:43:24 CET 2006 - jsrain@suse.cz
+
+- fixed textdomain (#219378)
+
+-------------------------------------------------------------------
 Tue Oct 31 21:57:57 CET 2006 - jdsn@suse.de
 
 - using own icon in installation workflow (#211552)

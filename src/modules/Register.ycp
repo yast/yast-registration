@@ -10,7 +10,7 @@
 {
 
 module "Register";
-textdomain "installation";
+textdomain "registration";
 
 import "FileUtils";
 import "Mode";
