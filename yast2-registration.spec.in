@@ -6,6 +6,10 @@ Requires:	suseRegister
 # because of SourceManager
 Requires:	yast2-packager >= 2.13.152
 
+%if %sles_version
+Requires:   zmd rug
+%endif
+
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager
 BuildRequires:  docbook-xsl-stylesheets doxygen libxslt sgml-skel yast2-core-devel yast2-country
 

@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Nov 17 18:00:55 CET 2006 - jdsn@suse.de
+
+- yastbrowser update, support for mozilla-xulrunner181 (#219354)
+- removed dependencies to rug and zmd for openSUSE (#220807)
+- hard dependencies to rug and zmd for SLE (#220807)
+- check for wrong proxy settings (#208651)
+- removed SuSEregister.pango call (FATE #300947)
+- 2.14.1
+
+-------------------------------------------------------------------
 Mon Nov 13 16:45:50 CET 2006 - jsrain@suse.cz
 
 - 2.14.0
