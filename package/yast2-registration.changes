@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 21 21:49:45 CET 2006 - jdsn@suse.de
+
+- added autoyast schema file (#219408)
+- 2.14.2
+
+-------------------------------------------------------------------
 Fri Nov 17 18:00:55 CET 2006 - jdsn@suse.de
 
 - yastbrowser update, support for mozilla-xulrunner181 (#219354)
