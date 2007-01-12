@@ -104,6 +104,9 @@ the configuration on the opened Web site."
 );
 
 
+    string title_monthly_run = _("Monthly check for new update sources");
+    string title_sync_zmd_to_zypp = _("Sync ZMD sources to ZYPP");
+
     /* string for show information popup */
     string transmit_info = _("Registration and Privacy Information");
 
@@ -182,8 +185,14 @@ the transmitted information in the log file <tt>~/.suse_register.log</tt>.
 </p>"
 );
 
-string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
+string help_para5 = _(
+"<p>
+To activate a monthly check for new update sources please check <b>Monthly check for new update sources</b>.
+If you want ZMD sources to be synced to ZYPP to make them available to YaST as well check <b>Sync ZMD sources to ZYPP</b>.
+</p>"
+);
 
+string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para5 + help_para4;
 
 
     /*  further strings   */
@@ -221,6 +230,9 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
                                              `VSpacing(0.5),
                                              `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
                                    ) ) ) ,
+                             `VSpacing(0.5),
+                             `Left( `CheckBox(`id(`monthly_run), `opt(`notify), title_monthly_run, Register::register_monthly ) ),
+                             `Left( `CheckBox(`id(`sync_zmd_to_zypp), `opt(`notify), title_sync_zmd_to_zypp, Register::sync_zmd_to_zypp) ),
                              `VSpacing(0.5)
                            )))
     ));
@@ -595,11 +607,13 @@ boolean launchBrowser(string url)
         {
             configure_status = (boolean) UI::QueryWidget(`id(`configure),  `Value);
         }
-        else if (ret == `hwinfo || ret == `optional || ret == `forcereg)
+        else if (ret == `hwinfo || ret == `optional || ret == `forcereg || ret == `monthly_run || ret == `sync_zmd_to_zypp )
         {
             Register::submit_hwdata  = (boolean) UI::QueryWidget(`id(`hwinfo),  `Value);
             Register::submit_optional= (boolean) UI::QueryWidget(`id(`optional), `Value);
             Register::force_registration = (boolean) UI::QueryWidget(`id(`forcereg), `Value);
+            Register::register_monthly = (boolean) UI::QueryWidget(`id(`monthly_run), `Value);
+            Register::sync_zmd_to_zypp = (boolean) UI::QueryWidget(`id(`sync_zmd_to_zypp), `Value);
         }
         else if (ret == `showinfo)
         {

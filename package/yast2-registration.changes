@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 12 17:27:32 CET 2007 - jdsn@suse.de
+
+- GUI support for monthly run of suse_register (F#301822)
+- 2.13.5 
+
+-------------------------------------------------------------------
 Thu Nov  9 14:43:24 CET 2006 - jsrain@suse.cz
 
 - fixed textdomain (#219378)
