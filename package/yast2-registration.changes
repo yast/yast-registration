@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Jan 15 17:41:04 CET 2007 - jdsn@suse.de
+
+- removed the syncronize checkbox from (F#301822)
+- applied text changes from shorn
+- fixed cron job configuration (#235101) (F#301822)
+- 2.13.6 
+
+-------------------------------------------------------------------
 Fri Jan 12 17:27:32 CET 2007 - jdsn@suse.de
 
 - GUI support for monthly run of suse_register (F#301822)

@@ -104,8 +104,7 @@ the configuration on the opened Web site."
 );
 
 
-    string title_monthly_run = _("Monthly check for new update sources");
-    string title_sync_zmd_to_zypp = _("Sync ZMD sources to ZYPP");
+    string title_regularly_run = _("Regularly Synchronize with the Customer Center");
 
     /* string for show information popup */
     string transmit_info = _("Registration and Privacy Information");
@@ -187,8 +186,11 @@ the transmitted information in the log file <tt>~/.suse_register.log</tt>.
 
 string help_para5 = _(
 "<p>
-To activate a monthly check for new update sources please check <b>Monthly check for new update sources</b>.
-If you want ZMD sources to be synced to ZYPP to make them available to YaST as well check <b>Sync ZMD sources to ZYPP</b>.
+<b>Regularly Synchronize with the Customer Center</b> checks that your update 
+sources are still valid and adds any new ones that may be available.
+It additionally sends any modifications to your included data to Novell, such 
+as hardware information if <b>Hardware Information</b> is activated.
+This option does not remove any sources added manually.
 </p>"
 );
 
@@ -231,8 +233,7 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
                                              `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
                                    ) ) ) ,
                              `VSpacing(0.5),
-                             `Left( `CheckBox(`id(`monthly_run), `opt(`notify), title_monthly_run, Register::register_monthly ) ),
-                             `Left( `CheckBox(`id(`sync_zmd_to_zypp), `opt(`notify), title_sync_zmd_to_zypp, Register::sync_zmd_to_zypp) ),
+                             `Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ),
                              `VSpacing(0.5)
                            )))
     ));
@@ -607,13 +608,12 @@ boolean launchBrowser(string url)
         {
             configure_status = (boolean) UI::QueryWidget(`id(`configure),  `Value);
         }
-        else if (ret == `hwinfo || ret == `optional || ret == `forcereg || ret == `monthly_run || ret == `sync_zmd_to_zypp )
+        else if (ret == `hwinfo || ret == `optional || ret == `forcereg || ret == `regularly_run )
         {
             Register::submit_hwdata  = (boolean) UI::QueryWidget(`id(`hwinfo),  `Value);
             Register::submit_optional= (boolean) UI::QueryWidget(`id(`optional), `Value);
             Register::force_registration = (boolean) UI::QueryWidget(`id(`forcereg), `Value);
-            Register::register_monthly = (boolean) UI::QueryWidget(`id(`monthly_run), `Value);
-            Register::sync_zmd_to_zypp = (boolean) UI::QueryWidget(`id(`sync_zmd_to_zypp), `Value);
+            Register::register_regularly = (boolean) UI::QueryWidget(`id(`regularly_run), `Value);
         }
         else if (ret == `showinfo)
         {

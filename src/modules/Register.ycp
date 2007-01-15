@@ -45,8 +45,7 @@ global boolean submit_optional = false;
 global boolean submit_hwdata   = false;
 global boolean force_registration = false;
 global boolean display_forcereg = false;
-global boolean register_monthly = false;  // (FATE #301822)
-global boolean sync_zmd_to_zypp = false;
+global boolean register_regularly = false;  // (FATE #301822)
 global boolean disable_w3m = false;
 global boolean use_proxy   = false;
 global string  http_proxy  = "";
@@ -111,12 +110,9 @@ void read_config()
     display_forcereg = ProductFeatures::GetBooleanFeature("globals", "display_register_forcereg");
     disable_w3m = ProductFeatures::GetBooleanFeature("globals", "disable_register_w3m");
 
-    register_monthly = ProductFeatures::GetBooleanFeature("globals", "register_monthly");
-    register_monthly = register_monthly  != nil ? register_monthly:false;
-
-    sync_zmd_to_zypp = (string) SCR::Read(.sysconfig.sw_management.SYNC_ZMD_TO_ZYPP) == "always" ? true:false;
-    sync_zmd_to_zypp = sync_zmd_to_zypp != nil ? sync_zmd_to_zypp:false;
-
+    register_regularly = ((integer) SCR::Execute(.target.bash, "[ -f /usr/lib/suseRegister/neverRegisterOnBoot ]") ) == 0 ? false:true;
+    // register_regularly = ProductFeatures::GetBooleanFeature("globals", "register_monthly");  // read default value - deactivated
+    register_regularly = register_regularly  != nil ? register_regularly:false;
 
     // read proxy settings
     use_proxy   = (string) SCR::Read(.sysconfig.proxy.PROXY_ENABLED) == "yes" ? true:false;
@@ -168,8 +164,7 @@ void write_config()
         SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
         SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
 
-        SCR::Write(.sysconfig.sw_management.SYNC_ZMD_TO_ZYPP, sformat("%1", sync_zmd_to_zypp ? "always":"no"));
-        SCR::Execute(.target.bash, sformat("%1 /usr/lib/suseRegister/neverRegisterOnBoot", register_monthly ? "touch ":"rm -f " ));
+        SCR::Execute(.target.bash, sformat("%1 /usr/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
     }
     else
     {
@@ -384,8 +379,7 @@ global boolean Import(map settings)
     submit_optional     = (boolean) settings["submit_optional"]:submit_optional;
     submit_hwdata       = (boolean) settings["submit_hwdata"]:submit_hwdata;
     do_registration     = (boolean) settings["do_registration"]:do_registration;
-    register_monthly    = (boolean) settings["register_monthly"]:register_monthly;
-    sync_zmd_to_zypp    = (boolean) settings["sync_zmd_to_zypp"]:sync_zmd_to_zypp;
+    register_regularly  = (boolean) settings["register_regularly"]:register_regularly;
     registration_data   = (map<string, string>) settings["registration_data"]:$[];
 
     return true;
@@ -416,8 +410,7 @@ global map Export()
                "submit_optional":submit_optional,
                "submit_hwdata":submit_hwdata,
                "do_registration":do_registration,
-               "register_monthly":register_monthly,
-               "sync_zmd_to_zypp":sync_zmd_to_zypp,
+               "register_regularly":register_regularly,
                "registration_data":registration_data
     ];
 }
