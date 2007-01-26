@@ -110,7 +110,7 @@ void read_config()
     display_forcereg = ProductFeatures::GetBooleanFeature("globals", "display_register_forcereg");
     disable_w3m = ProductFeatures::GetBooleanFeature("globals", "disable_register_w3m");
 
-    register_regularly = ((integer) SCR::Execute(.target.bash, "[ -f /usr/lib/suseRegister/neverRegisterOnBoot ]") ) == 0 ? false:true;
+    register_regularly = ((integer) SCR::Execute(.target.bash, "[ -f /var/lib/suseRegister/neverRegisterOnBoot ]") ) == 0 ? false:true;
     // register_regularly = ProductFeatures::GetBooleanFeature("globals", "register_monthly");  // read default value - deactivated
     register_regularly = register_regularly  != nil ? register_regularly:false;
 

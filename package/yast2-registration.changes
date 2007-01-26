@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 24 18:01:02 CET 2007 - jdsn@suse.de
+
+- changed path for suseRegister on-boot flag file
+- 2.13.7 
+
+-------------------------------------------------------------------
 Mon Jan 15 17:41:04 CET 2007 - jdsn@suse.de
 
 - removed the syncronize checkbox from (F#301822)
