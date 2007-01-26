@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 26 17:49:50 CET 2007 - jdsn@suse.de
+
+- fixed path for suseRegister on-boot flag file
+- 2.13.8
+
+-------------------------------------------------------------------
 Wed Jan 24 18:01:02 CET 2007 - jdsn@suse.de
 
 - changed path for suseRegister on-boot flag file

@@ -164,7 +164,7 @@ void write_config()
         SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
         SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
 
-        SCR::Execute(.target.bash, sformat("%1 /usr/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
+        SCR::Execute(.target.bash, sformat("%1 /var/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
     }
     else
     {
