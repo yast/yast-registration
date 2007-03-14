@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 14 19:38:22 CET 2007 - jdsn@suse.de
+
+- added registration autoyast rnc schema file (#219408)
+- 2.13.9
+
+-------------------------------------------------------------------
 Fri Jan 26 17:49:50 CET 2007 - jdsn@suse.de
 
 - fixed path for suseRegister on-boot flag file
