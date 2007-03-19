@@ -24,7 +24,6 @@
     import "GetInstArgs";
     import "CustomDialogs";
     import "Directory";
-    import "Language";
     import "Mode";
     import "String";
     import "Label";
