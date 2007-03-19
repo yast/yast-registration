@@ -24,7 +24,6 @@
     import "GetInstArgs";
     import "CustomDialogs";
     import "Directory";
-    import "Language";
     import "Mode";
     import "String";
     import "Label";
@@ -519,9 +518,16 @@ string browser_command(string url)
     bcmd =  bcmd + "'" + url + "'";
 
     if (Register::use_proxy)
-    {   // (#165891)
-        bcmd = " http_proxy='"  + Register::http_proxy  + "' " + bcmd;
-        bcmd = " https_proxy='" + Register::https_proxy + "' " + bcmd;
+    {
+        // check if proxy setting is correct (#208651)
+        string proxy_http  = Register::http_proxy;
+        string proxy_https = Register::https_proxy;
+        if (proxy_http  == nil) proxy_http  = "";
+        if (proxy_https == nil) proxy_https = "";
+
+        // (#165891)
+        bcmd = " http_proxy='"  + proxy_http  + "' " + bcmd;
+        bcmd = " https_proxy='" + proxy_https + "' " + bcmd;
     }
 
     // in case of root add su call to not run a browser as root during installation
@@ -617,7 +623,6 @@ boolean launchBrowser(string url)
         }
         else if (ret == `showinfo)
         {
-            Package::InstallAllMsg(["rug","zmd"], nil);  // (#191135)
             information_data = Register::suseRegister(`p);
 
             if ( information_data["exit"]:"99" == "0" )
@@ -649,7 +654,6 @@ boolean launchBrowser(string url)
         {
             if ( configure_status == true )
             {
-                Package::InstallAllMsg(["rug","zmd"], nil);  // (#191135)
                 // remove the zmd flag file (requested by mvidner)
                 SCR::Execute(.target.bash, " rm -f /var/lib/zypp/zmd_updated_the_sources " );
 
