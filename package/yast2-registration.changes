@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 27 12:07:28 CEST 2007 - ug@suse.de
+
+- autoyast schema check fixed (#211014)
+- 2.13.11
+
+-------------------------------------------------------------------
 Mon Mar 19 17:45:50 CET 2007 - jdsn@suse.de
 
 - inserted rnc schema file reference into desktop files (#219408)
