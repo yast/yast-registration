@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr  2 17:09:52 CEST 2007 - jdsn@suse.de
+
+- fixed category in desktop files (#259914)
+- 2.14.4 
+
+-------------------------------------------------------------------
 Mon Mar 19 17:53:01 CET 2007 - jdsn@suse.de
 
 - improved dependecies in spec file (#253975)

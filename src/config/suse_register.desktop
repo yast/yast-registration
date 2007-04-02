@@ -1,7 +1,7 @@
 [Desktop Entry]
 X-SuSE-translate=true
 Type=Application
-Categories=Qt;X-SuSE-YaST;X-SuSE-YaST-Misc;
+Categories=Qt;X-SuSE-YaST;X-SuSE-YaST-Software;
 
 X-SuSE-YaST-Call=inst_suse_register
 X-SuSE-YaST-RootOnly=false
