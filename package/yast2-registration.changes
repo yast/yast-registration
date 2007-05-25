@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 25 12:51:16 CEST 2007 - jsrain@suse.cz
+
+- removed X-SuSE-translate in order to build
+
+-------------------------------------------------------------------
 Mon Apr  2 17:09:52 CEST 2007 - jdsn@suse.de
 
 - fixed category in desktop files (#259914)
