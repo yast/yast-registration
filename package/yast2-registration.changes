@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jul 17 20:44:16 CEST 2007 - jdsn@suse.de
+
+- made multiline texts gettext compatible (#230388)
+- reactivated skip button in case of error (#240174)
+- ensure that Sources are initialized on startup (#270899)
+- 2.14.6 
+
+-------------------------------------------------------------------
 Fri May 25 12:51:16 CEST 2007 - jsrain@suse.cz
 
 - removed X-SuSE-translate in order to build

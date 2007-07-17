@@ -175,15 +175,9 @@ symbol suse_register_configuration()
 {
     string caption = _("Product Registration");
     string help_text_caption = sformat("<p><b>%1</b></p>", caption);
-    string help_text_para1   = _(
-"<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>"
-);
-    string help_text_para2   = _(
-"<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>"
-);
-    string help_text_para3   = _(
-"<p>Other information used for registration is shown in <b>Registration Data</b>. Add a new key and value pair by pressing <b>Add</b> then entering the appropriate values. These parameters are those that can be passed with <tt>suse_register -a</tt>. Get more information about them with <tt>suse_register -p</tt>.   Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>"
-);
+    string help_text_para1   = _("<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>");
+    string help_text_para2   = _("<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>");
+    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration Data</b>. Add a new key and value pair by pressing <b>Add</b> then entering the appropriate values. These parameters are those that can be passed with <tt>suse_register -a</tt>. Get more information about them with <tt>suse_register -p</tt>.   Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
 
     string help_text = help_text_caption + help_text_para1 + help_text_para2 + help_text_para3;
 
