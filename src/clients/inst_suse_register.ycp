@@ -69,8 +69,17 @@
     // Translators: Module Title for the Box
     string title_box  = _("Online Update Configuration");  // (#165509)
 
+    // alternative short title text
+    string title_short = _("Registration");
+
     // select title to use
+    //    set default title
     string title = title_nccc;
+
+    // lets see if the control center uses the box text and no customer center desktop file is there (#294454)
+    if ( (integer) SCR::Execute(.target.bash, " grep -isq \"^Name=Online Update Configuration\" /usr/share/applications/YaST2/suse_register.desktop && ! [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false )
+        title = title_box;
+
 
     // Translators: limit to 2x 50 charachters - if more needed take 3x 50 chars but NOTHING more
     string nccc_top = _("Get technical support and product updates and
