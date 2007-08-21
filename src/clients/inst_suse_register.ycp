@@ -462,31 +462,15 @@ string browser_command(string url)
     if ( textmode )
     {
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
-
-        if ( Register::iamroot )
-            bcmd = " w3m ";
-        else
-        {
-            cmd_ok = cmd_ok && (integer) SCR::Execute(.target.bash, "test -x /usr/bin/screen") == 0 ? true:false;
-            bcmd = " screen w3m ";
-        }
+        cmd_ok = cmd_ok && (integer) SCR::Execute(.target.bash, "test -x /usr/bin/screen") == 0 ? true:false;
+        bcmd = " screen w3m ";
     }
     else
     {
-
-        if ( Register::iamroot )
-        {
-            // check for and install mozilla-xulrunner if needed (#175166)
-            Package::InstallAllMsg(["mozilla-xulrunner181"], nil);
-            cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
-            bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
-        }
-        else
-        {   // this case will never happen because we will not run as non-root (#170736)
-            Package::InstallAllMsg(["MozillaFirefox"], nil);  // (#175166)
-            cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/firefox") == 0 ? true:false;
-            bcmd = " firefox -new-window ";
-        }
+        // check for and install mozilla-xulrunner if needed (#175166)
+        Package::InstallAllMsg(["mozilla-xulrunner181"], nil);
+        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
+        bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
     }
 
     if (! cmd_ok) return "nobrowser";
@@ -496,19 +480,13 @@ string browser_command(string url)
 
     if (Register::use_proxy)
     {
-        // check if proxy setting is correct (#208651)
-        string proxy_http  = Register::http_proxy;
-        string proxy_https = Register::https_proxy;
-        if (proxy_http  == nil) proxy_http  = "";
-        if (proxy_https == nil) proxy_https = "";
-
         // (#165891)
-        bcmd = " http_proxy='"  + proxy_http  + "' " + bcmd;
-        bcmd = " https_proxy='" + proxy_https + "' " + bcmd;
+        bcmd = " http_proxy='"  + Register::http_proxy  + "' " + bcmd;
+        bcmd = " https_proxy='" + Register::https_proxy + "' " + bcmd;
     }
 
-    // in case of root add su call to not run a browser as root during installation
-    if ( Register::iamroot ) bcmd = su_exec("suse-ncc", "suse-ncc", bcmd );
+    // add su call to not run a browser as root during installation
+    bcmd = su_exec("suse-ncc", "suse-ncc", bcmd );
 
     return bcmd;
 }

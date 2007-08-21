@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 21 21:42:33 CEST 2007 - jdsn@suse.de
+
+- handling sysconfig file with fillup (#300064)
+- code cleanup - nonroot user not supported
+- 2.15.1
+
+-------------------------------------------------------------------
 Fri Aug  3 20:13:19 CEST 2007 - jdsn@suse.de
 
 - new version

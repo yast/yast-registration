@@ -11,6 +11,8 @@ Requires:	yast2-packager >= 2.13.152
 Requires:   zmd rug
 %endif
 
+PreReq:     %fillup_prereq
+
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager
 
 BuildArchitectures:	noarch
@@ -39,6 +41,10 @@ Performs the Registration
 /usr/sbin/useradd -r -s /bin/bash -c "Novell Customer Center User" -d /var/lib/YaST2/suse-ncc-fakehome -g suse-ncc suse-ncc 2> /dev/null || :
 
 
+%post
+%{fillup_only -ns suse_register yast2-registration}
+
+
 %files
 %defattr(-,root,root)
 %doc @docdir@
@@ -53,4 +59,6 @@ Performs the Registration
 # agents
 @scrconfdir@/cfg_suse_register.scr
 
+#fillup
+@fillupdir@/sysconfig.suse_register-yast2-registration
 
