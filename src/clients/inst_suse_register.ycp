@@ -30,7 +30,6 @@
     import "Internet";
     import "Register";
     import "SourceManager";
-    import "PackageSystem";
     import "Package";
 
     // no network - no suse_register
@@ -282,13 +281,24 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 
     /* vv      CCC ERROR POPUP      vv  */
     term error_message_details=
-    `MinSize( 50, 15,  `VBox(
+    `MinSize( 60, 20,  `VBox(
            `Left( `Label( `opt(`boldFont), error_msg ) ),
            `VSpacing( 0.5 ),
-           `RichText(`id(`errordetail), `opt(`plainText) , "" ),
+           `RichText(`id(`errordetail), "" ),
            `PushButton(`id(`ok), Label::OKButton())
     ));
     /* ^^      END CCC ERROR        ^^  */
+
+
+     /* vv      CCC ERROR POPUP PLAINTEXT     vv  */
+    term error_message_details_pt=
+    `MinSize( 50, 15,  `VBox(
+           `Left( `Label( `opt(`boldFont), error_msg ) ),
+           `VSpacing( 0.5 ),
+           `RichText(`id(`errordetail), `opt(`plainText), "" ),
+           `PushButton(`id(`ok), Label::OKButton())
+    ));
+     /* ^^      END CCC ERROR PLAINTEXT       ^^  */
 
 
 
@@ -339,8 +349,13 @@ boolean report_error()
         if ( retry == `skip ) configure_status = false;
         else if (retry == `err_detail)
         {
-            UI::OpenDialog(error_message_details);
-            UI::ChangeWidget( `id(`errordetail), `Value, (string)information_data["stderr"]:"no error message available");
+            // switch to plaintext if error output is one or two lines (#239570)
+            string error_msg_details = (string)information_data["stderr"]:"no error message available";
+            if ( contains( [0,1], size(splitstring(error_msg_details,"\n")) ) )
+               UI::OpenDialog(error_message_details);
+            else
+               UI::OpenDialog(error_message_details_pt);
+            UI::ChangeWidget( `id(`errordetail), `Value, error_msg_details);
             UI::UserInput();
             UI::CloseDialog();
         }
@@ -467,8 +482,12 @@ string browser_command(string url)
     }
     else
     {
-        // check for and install mozilla-xulrunner if needed (#175166)
-        Package::InstallAllMsg(["mozilla-xulrunner181"], nil);
+        // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310)
+        string required_package = "mozilla-xulrunner181";
+        if (!Package::Installed(required_package))
+        {
+            Package::InstallAllMsg([required_package], nil);
+        }
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
     }
@@ -542,11 +561,6 @@ boolean launchBrowser(string url)
 
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
-
-    // #172665, make sure that the added sources have a safe home
-    // It also takes care of target for keys, shows busy popup
-    // (#270899) should be taken care of even during installation
-    PackageSystem::EnsureSourceInit ();
 
     // #170113, the lock is needed around everything that may end up in ZMD
     SourceManager::Lock ();

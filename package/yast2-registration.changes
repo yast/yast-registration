@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sat Sep  1 08:34:49 CEST 2007 - jdsn@suse.de
+
+- adapted source management changes (#304310)
+- wrapping of detailled error messages (#239570)
+- 2.15.2 
+
+-------------------------------------------------------------------
 Tue Aug 21 21:42:33 CEST 2007 - jdsn@suse.de
 
 - handling sysconfig file with fillup (#300064)
