@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  7 16:37:41 CEST 2007 - jdsn@suse.de
+
+- importing PackageCallbacks (#307764)
+- 2.15.3 
+
+-------------------------------------------------------------------
 Sat Sep  1 08:34:49 CEST 2007 - jdsn@suse.de
 
 - adapted source management changes (#304310)
