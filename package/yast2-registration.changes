@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Nov  2 16:53:01 CET 2007 - locilka@suse.cz
+
+- Removed dependency on yast2-network, Internet YCP module has been
+  moved to yast2.rpm.
+- 2.16.0
+
+-------------------------------------------------------------------
 Fri Sep  7 16:37:41 CEST 2007 - jdsn@suse.de
 
 - importing PackageCallbacks (#307764)

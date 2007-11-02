@@ -1,8 +1,7 @@
 @HEADER-COMMENT@
 
 @HEADER@
-Requires:	yast2
-Requires:   yast2-network
+Requires:	yast2 >= 2.16.6
 Requires:	suseRegister
 # because of SourceManager
 Requires:	yast2-packager >= 2.13.152
@@ -13,7 +12,9 @@ Requires:   zmd rug
 
 PreReq:     %fillup_prereq
 
-BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager
+BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
+# Internet YCP module
+BuildRequires:	yast2 >= 2.16.6
 
 BuildArchitectures:	noarch
 
