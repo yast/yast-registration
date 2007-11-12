@@ -99,7 +99,8 @@ manage subscriptions with Novell Customer Center.");
     string nccc_success_msg = _("Your configuration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
     string nccc_error_no_server_added = _("No update server could be added to your configuration.");
-    string success_detail_label =("New Update Server");
+    /* caption for details view  */
+    string success_detail_label =_("New Update Server");
 
    /* strings for manual interaction popup */
     string mi_required = _("Manual Interaction Required");
