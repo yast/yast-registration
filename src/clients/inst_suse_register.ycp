@@ -123,7 +123,7 @@ submission of the hardware profile automatically.");
 in the Online Update YaST module. If you continue and later want 
 to update with Online Update, the source must be added manually.
 Other tools, such as Software Updater in the panel, can still be 
-used.  Alternatively, cancel then register through YaST as root 
+used. Alternatively, cancel then register through YaST as root 
 so the sources are available to all tools.");
 
 
