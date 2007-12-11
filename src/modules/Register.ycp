@@ -250,9 +250,10 @@ global map<string, string> suseRegister(symbol parameter)
     //  -L log file
     //  --nozypp do not add zypp and yum sources to zmd, #180820
     //  -p list parameters (no dumpfile with -p)
+    //  --restore-repos  brings back repos that have been deleted by accident (#309231)
 
-    // always log and beautify!
-    string params = " -y -L ~/.suse_register.log --nozypp ";
+    // always log, beautify and restore repos! (#309231)
+    string params = " -y -L ~/.suse_register.log --nozypp --restore-repos ";
     if (parameter == `p) params = params + " -p ";
     else params = params + sformat(" --dumpfile=%1 ", services_file);
 
