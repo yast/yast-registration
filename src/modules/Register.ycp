@@ -542,16 +542,7 @@ The YEP server URL that was configured was
 
     if ((symbol)uret == `trust)
     {
-        string installCert = "";
-        installCert = sformat("
-[ -f /etc/ssl/certs/yep-5.crt ]  && YEPDST=/etc/ssl/certs/yep-5.crt
-[ -f /etc/ssl/certs/yep-4.crt ]  && YEPDST=/etc/ssl/certs/yep-4.crt
-[ -f /etc/ssl/certs/yep-3.crt ]  && YEPDST=/etc/ssl/certs/yep-3.crt
-[ -f /etc/ssl/certs/yep-2.crt ]  && YEPDST=/etc/ssl/certs/yep-2.crt
-[ -f /etc/ssl/certs/yep-1.crt ]  && YEPDST=/etc/ssl/certs/yep-1.crt
-[ -f /etc/ssl/certs/yep.crt ]    && YEPDST=/etc/ssl/certs/yep.crt
-cp -a  %1  $YEPDST  &&  c_rehash
-", certTmpFile);
+        string installCert = sformat("cp -a  %1  /etc/ssl/certs/yep.crt  &&  c_rehash", certTmpFile);
 
         integer instret = (integer) SCR::Execute(.target.bash, installCert);
 
@@ -590,11 +581,13 @@ cp -a  %1  $YEPDST  &&  c_rehash
  * read YEP server settings from install.inf and set them up (FATE #302966)
  *
  */
-symbol configureRegistrationServer()
+global symbol configureRegistrationServer()
 {
     yep_server = Linuxrc::InstallInf("yepurl");
     yep_server_cert = Linuxrc::InstallInf("yepcert");
 
+    y2debug("YEP config - yepurl:  %1", yep_server);
+    y2debug("YEP config - yepcert: %1", yep_server_cert);
 
 /*  yepurl=https:/yep.mybigcompany.com/yep/regsvc   
     yepcert=ask      open FileDialog

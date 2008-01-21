@@ -4,6 +4,7 @@
 Requires:	yast2
 Requires:   yast2-network
 Requires:	suseRegister
+Requires:   perl-TimeDate yast2-ca-management limal limal-perl limal-ca-mgm-perl
 # because of SourceManager
 Requires:	yast2-packager >= 2.13.152
 
@@ -11,7 +12,8 @@ Requires:	yast2-packager >= 2.13.152
 Requires:   zmd rug
 %endif
 
-BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager
+BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager 
+BuildRequires:  perl-TimeDate yast2-ca-management limal limal-perl limal-ca-mgm-perl
 
 BuildArchitectures:	noarch
 
@@ -44,6 +46,7 @@ Performs the Registration
 %doc @docdir@
 
 @clientdir@/*.ycp
+@moduledir@/*.pm
 @moduledir@/*.ycp
 @moduledir@/*.ybc
 @desktopdir@/*.desktop

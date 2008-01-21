@@ -36,9 +36,10 @@
 
     // this operation MUST be first and run in any case, even if registration should be skipped (FATE #302966)
     symbol confRegSrv = Register::configureRegistrationServer();
-    if (confRegSrv == `conferror  || confRegSrv == `notrust)
+    if (confRegSrv == `conferror  || confRegSrv == `notrust  || confRegSrv == `silentskip)
     {
         y2debug("Registration can not be run due to YEP configuration error.");
+        return `auto;
     }
 
 
