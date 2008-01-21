@@ -200,7 +200,8 @@ string suseRegisterURL(string url)
     )));
 
     // in case the yep server was already changed do not change it again (to support mobile PCs in different environments)
-    if ( (string)SCR::Read(.temporary_suseregister_agent.yepurlmodified) == "true" )
+    string mod = (string) SCR::Read(.temporary_suseregister_agent.yepurlmodified);
+    if ( mod == "true" )
     {
         url = nil;
         y2debug("YEP server has already been modified. I will not change it again.");
@@ -209,7 +210,7 @@ string suseRegisterURL(string url)
     cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
     urlmap = URL::Parse(url);
 
-    if ( url != nil  &&  url != ""  &&  urlmap != $[]  &&  urlmap["schema"]:"" == "https" )
+    if ( url != nil  &&  url != ""  &&  urlmap != $[]  &&  urlmap["scheme"]:"" == "https" )
     {
         SCR::Write(.temporary_suseregister_agent.url, url);
         cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
