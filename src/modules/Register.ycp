@@ -19,6 +19,8 @@ import "Misc";
 import "Stage";
 import "Label";
 import "Popup";
+import "URL";
+import "Linuxrc";
 import "ProductFeatures";
 import "SourceManager";
 import "RegisterCert";
@@ -108,7 +110,7 @@ map mountFloppy()
     // create mount point directory
     SCR::Execute(.target.mkdir, mpoint);
 
-    y2debug("Trying to mount %1 as floppy drive to load the YEP server certificate from.");
+    y2debug("Trying to mount %1 as floppy drive to load the YEP server certificate from.", fddevice);
 
     boolean result = (boolean) SCR::Execute(.target.mount, [fddevice, mpoint], "-o ro" );
 
@@ -144,10 +146,10 @@ symbol certificateError(string heading, symbol type)
 
     string errorrMessage = "";
     string question = _("Do you want to skip Registration?");
-    string otherwise = sprintf( _("If you select %1 the Registration will most likely fail.
+    string otherwise = sformat( _("If you select %1 the Registration will most likely fail.
 Otherwise you may copy the certificate file to the system manually
 and then specify its path by choosing %2."), deletechars(Label::FileName(), "&"), deletechars(Label::ContinueButton(), "&")); 
-
+    string errorMessage = "";
 
     if (type == `floppy)
     {
@@ -237,7 +239,7 @@ symbol setupRegistrationServer(symbol mode)
     if (mode == `autoyast)
     {
         trust = true;
-        ay = true
+        ay = true;
     }
 
     // check if yep_server is a valid url
@@ -247,11 +249,11 @@ symbol setupRegistrationServer(symbol mode)
         y2debug("The string '%1' could not be parsed and validated as URL to be used as YEP server.", yep_server);
         if (ay) return `conferror;
 
-        string no_yep_server = _("The YEP server URL could not be validated as URL.
+        string no_yep_server = sformat( _("The YEP server URL could not be validated as URL.
 Registration can not be performed. Please modify /etc/suseRegister.conf and run Registration manually.
 The YEP server URL that was configured was
-%1");
-        Popup::Message(sformat(no_yep_server, yep_server));
+%1"), yep_server);
+        Popup::Message(no_yep_server);
         return `conferror;
     }
 
@@ -269,14 +271,14 @@ The YEP server URL that was configured was
     symbol certmode = nil;
 
     // never ever load a certificate file for a *.novell.com yep server
-    if      ( regexpmatch(yep_server_parsed["host"], ".+\.novell\.com$")  { certmode = `none    }
-    else if (yep_server_cert == nil  || yep_server_cert == "")            { certmode = `url     }
-    else if ( regexpmatch(yep_server_cert, "^(https?|ftp)://.+") )        { certmode = `url;    }
-    else if ( regexpmatch(yep_server_cert, "^floppy/.+") )                { certmode = `floppy; }
-    else if ( regexpmatch(yep_server_cert, "^/.+") )                      { certmode = `path;   }
-    else if ( regexpmatch(yep_server_cert, "^ask$") )                     { certmode = `ask;    }
-    else if ( regexpmatch(yep_server_cert, "^done$") )                    { certmode = `done;   }
-    else                                                                  { certmode = `none;   }
+    if      ( regexpmatch(yep_server_parsed["host"]:"", ".+\.novell\.com$")) { certmode = `none;   }
+    else if (yep_server_cert == nil  || yep_server_cert == "")               { certmode = `url;    }
+    else if ( regexpmatch(yep_server_cert, "^(https?|ftp)://.+") )           { certmode = `url;    }
+    else if ( regexpmatch(yep_server_cert, "^floppy/.+") )                   { certmode = `floppy; }
+    else if ( regexpmatch(yep_server_cert, "^/.+") )                         { certmode = `path;   }
+    else if ( regexpmatch(yep_server_cert, "^ask$") )                        { certmode = `ask;    }
+    else if ( regexpmatch(yep_server_cert, "^done$") )                       { certmode = `done;   }
+    else                                                                     { certmode = `none;   }
 
 
     if (! contains([`none, `done, `url, `floppy, `ask, `path], certmode) )
@@ -306,7 +308,7 @@ The YEP server URL that was configured was
         y2debug("Using %1 as URL to download the YEP server certificate.", yep_server_cert);
 
         // download cert
-        string curlcmd = sprintf("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", yep_server_cert, certTmpFile);
+        string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", yep_server_cert, certTmpFile);
         if ( SCR::Execute (.target.bash, curlcmd) != 0)
         {
             y2error("Could not download the YEP server certificate from specified URL %1", yep_server_cert);
@@ -326,8 +328,8 @@ The YEP server URL that was configured was
         map mf = mountFloppy();
         if (!mf["mounted"]:false)
         {
-           umountFloppy(mf["mpoint"]);
-           y2error("Could not mount floppy disk to copy the YEP server certificte from. The device that was used was %1", mf["device"]);
+           umountFloppy(mf["mpoint"]:"/dev/fd0");
+           y2error("Could not mount floppy disk to copy the YEP server certificte from. The device that was used was %1", mf["device"]:"");
            if (ay) 
            {
                y2error("No YEP server certificate available. As we are in autoYaST mode Registration will be skipped. Please run it manually.");
@@ -336,7 +338,7 @@ The YEP server URL that was configured was
            else
            {
                // translators: this is a heading for an error message - so no punctuation
-               fdMountError = _("Could not mount floppy disk");
+               string fdMountError = _("Could not mount floppy disk");
                symbol errret = certificateError( fdMountError, `floppy);
 
                if ( errret == `yes )
@@ -344,7 +346,7 @@ The YEP server URL that was configured was
                    y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to skip Registration.");
                    return `silentskip;
                }
-               else ( errret = `no )
+               else if ( errret == `no )
                {
                    y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to NOT skip Registration. Most likely Registration will fail now.");
                    return `ok;
@@ -370,7 +372,7 @@ The YEP server URL that was configured was
                     y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to skip Registration.");
                     return `silentskip;
                 }
-                else ( errret = `no )
+                else if ( errret == `no )
                 {
                     y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to NOT skip Registration. Most likely Registration will fail now.");
                     return `ok;
@@ -379,7 +381,7 @@ The YEP server URL that was configured was
 
             }
 
-            umountFloppy(mf["mpoint"]);
+            umountFloppy(mf["mpoint"]:"/dev/fd0");
         }
 
     }
@@ -388,7 +390,7 @@ The YEP server URL that was configured was
     {
         // try to copy cert if valid path,  else ask   // copy
 
-        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", yep_server_cert:"/thisfiledoesnotexist/noitdoesnot" , certTmpFile  );
+        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", yep_server_cert, certTmpFile );
         if ( SCR::Execute(.target.bash, cp2tmp )  !=  0 )
         {
             y2error("Could not copy local YEP server certificate file");
@@ -402,7 +404,7 @@ The YEP server URL that was configured was
                 y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to skip Registration.");
                 return `silentskip;
             }
-            else ( errret = `no )
+            else if ( errret == `no )
             {
                 y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to NOT skip Registration. Most likely Registration will fail now.");
                 return `ok;
@@ -429,7 +431,7 @@ The YEP server URL that was configured was
             do
             {
                 certFile = UI::AskForExistingFile(basepath, "*.crt", selectCertLabel);
-            } while (certFile == "")
+            } while (certFile == "");
 
             if (certFile == nil)
             {
@@ -442,7 +444,7 @@ The YEP server URL that was configured was
             }
 
             string cp2tmp = sformat("/bin/cp -a  %1  %2 ", certFile , certTmpFile  );
-            if (SCR::Execute(cp2tmp) == 0)
+            if (SCR::Execute(.target.bash, cp2tmp) == 0)
             {
                 y2debug("Found user specified YEP server certificate file");
                 exitloop = true;
@@ -481,14 +483,14 @@ The YEP server URL that was configured was
 
 
     // in autoYaST mode we automatically trust - we are done here
-    if (trust || ay) { retrun `ok; }
+    if ( trust || ay ) { return `ok; }
 
     // ask user if he trusts the certificate
-    map certParsed = RegisterCert::parseCertificate(certTmpFile);
-    y2milestone("YEP server certificate file information: %1", certParsed);
+    map cP = RegisterCert::parseCertificate(certTmpFile);
+    y2milestone("YEP server certificate file information: %1", cP);
 
     string trustQuestion = _("Do you want to trust this certificate?");
-    string trustMessage  = _("This certificate will be used to connect to the YEP server.\nYou have to trust this certificate in order to continue with the Registration.")
+    string trustMessage  = _("This certificate will be used to connect to the YEP server.\nYou have to trust this certificate in order to continue with the Registration.");
 
     string certInfo = "";
     list issueList = (list) cP["ISSUER"]:[];
@@ -535,10 +537,10 @@ The YEP server URL that was configured was
         `RichText(sformat("%1",certInfo)),
         `HBox(`PushButton(`id(`trust), _("Trust")), `HSpacing(1.5), `PushButton(`id(`notrust), _("Reject")) )
     )));
-    symbol uret = UI::UserInput();
+    any uret = UI::UserInput();
     UI::CloseDialog();
 
-    if (uret == `trust)
+    if ((symbol)uret == `trust)
     {
         string installCert = "";
         installCert = sformat("
@@ -551,7 +553,7 @@ The YEP server URL that was configured was
 cp -a  %1  $YEPDST  &&  c_rehash
 ", certTmpFile);
 
-        integer instret = SCR::Execute(.target.bash, installCert);
+        integer instret = (integer) SCR::Execute(.target.bash, installCert);
 
         if (instret == 0)
         {
@@ -603,7 +605,7 @@ symbol configureRegistrationServer()
 */
 
     // setup the yep_server settings
-    return setupRegistrationServer();
+    return setupRegistrationServer(nil);
 }
 
 
