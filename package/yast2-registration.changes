@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 21 23:09:52 CET 2008 - jdsn@suse.de
+
+- support for yep servers (Fate #303335)
+- removed obsolete code
+- 2.13.14 
+
+-------------------------------------------------------------------
 Tue Dec 11 21:05:09 CET 2007 - jdsn@suse.de
 
 - always restore repos that have been deleted by accident (#309231)
