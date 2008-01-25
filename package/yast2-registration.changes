@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 25 15:44:13 CET 2008 - jdsn@suse.de
+
+- removed dependency to yast2-ca-management
+- 2.13.15 
+
+-------------------------------------------------------------------
 Mon Jan 21 23:09:52 CET 2008 - jdsn@suse.de
 
 - support for yep servers (Fate #303335)
