@@ -53,8 +53,8 @@ global boolean disable_w3m = false;
 global boolean use_proxy   = false;
 global string  http_proxy  = "";
 global string  https_proxy = "";
-global string  yep_server  = nil;            // (FATE #302966)
-global string  yep_server_cert = nil;        // (FATE #302966)
+global string  yep_server  = "";            // (FATE #302966)
+global string  yep_server_cert = "";        // (FATE #302966)
 
 global map<string, string> registration_data = $[];
 
@@ -543,18 +543,23 @@ The YEP server URL that was configured was
 
     if ((symbol)uret == `trust)
     {
-        string installCert = sformat("cp -a  %1  /etc/ssl/certs/yep.crt  &&  c_rehash", certTmpFile);
+        string installCert    = sformat("cp -a  %1  /etc/ssl/certs/yep.pem  &&  c_rehash /etc/ssl/certs", certTmpFile);
+        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/yep.cer", certTmpFile);
 
-        integer instret = (integer) SCR::Execute(.target.bash, installCert);
+        integer instret    = (integer) SCR::Execute(.target.bash, installCert);
+        integer instretZMD = (integer) SCR::Execute(.target.bash, installCertZMD);
 
-        if (instret == 0)
+        if ( instret == 0 && instretZMD == 0)
         {
             y2debug("Successfully installed YEP server certificate. Registration will now proceed.");
             return `ok;
         }
         else
         {
-            y2error("Failed to install YEP server certificate. Registration would fail and thus will be skipped.");
+            if (instret == 0 )
+                y2error("Failed to install YEP server certificate to common cert storage. Registration would fail and thus will be skipped.");
+            if (instretZMD == 0)
+                y2error("Failed to install YEP server certificate for ZMD. Registration would fail and thus will be skipped.");
             return `silentskip;
         }
     }
@@ -865,8 +870,8 @@ global boolean Import(map settings)
     do_registration     = (boolean) settings["do_registration"]:do_registration;
     register_regularly  = (boolean) settings["register_regularly"]:register_regularly;
     registration_data   = (map<string, string>) settings["registration_data"]:$[];
-    yep_server          = (string) settings["yep_server"]:yep_server;
-    yep_server_cert     = (string) settings["yep_server_cert"]:yep_server_cert;
+    yep_server          = (string) settings["yep_server"]:"";
+    yep_server_cert     = (string) settings["yep_server_cert"]:"";
 
     return true;
 }

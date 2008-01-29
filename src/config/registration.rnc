@@ -2,11 +2,14 @@ default namespace = "http://www.suse.com/1.0/yast2ns"
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
 namespace config = "http://www.suse.com/1.0/configns"
 
-customer_center = element customer_center { do_registration? & submit_hwdata? & submit_optional? & registration_data? & register_regularly? }
+customer_center = element customer_center { do_registration? & submit_hwdata? & submit_optional? & registration_data? & register_regularly? & yep_server? & yep_server_cert? }
 do_registration = element do_registration { BOOLEAN }
 submit_hwdata = element submit_hwdata { BOOLEAN }
 submit_optional = element submit_optional { BOOLEAN }
 register_regularly = element register_regularly { BOOLEAN }
+yep_server = element yep_server { text  }
+yep_server_cert = element yep_server_cert { text }
+
 
 registration_data =
   element registration_data {
