@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Feb  4 17:55:20 CET 2008 - jdsn@suse.de
+
+- fixes to autoyast YEP support
+- important logging to y2milestone
+- textual fixes
+- 2.13.16 
+
+-------------------------------------------------------------------
 Fri Jan 25 15:44:13 CET 2008 - jdsn@suse.de
 
 - removed dependency to yast2-ca-management
