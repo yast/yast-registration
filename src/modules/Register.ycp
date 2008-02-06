@@ -148,7 +148,7 @@ symbol certificateError(string heading, symbol type)
     string question = _("Do you want to skip Registration?");
     string otherwise = sformat( _("If you select %1 the Registration will most likely fail.
 Otherwise you may copy the certificate file to the system manually
-and then specify its path by choosing %2."), deletechars(Label::FileName(), "&"), deletechars(Label::ContinueButton(), "&")); 
+and then specify its path by choosing %2."), deletechars(Label::ContinueButton(), "&"), deletechars(Label::FileName(), "&") ); 
     string errorMessage = "";
 
     if (type == `floppy)
@@ -452,12 +452,13 @@ The YEP server URL that was configured was
             }
             else
             {
-                string fileErrorHeader = _("Could not copy local file");
+                y2milestone("Could not copy local file as YEP certificate");
+                string fileErrorHeader = _("Could not copy certificate file");
                 string fileErrorMsg    = _("Do you want to retry?");
                 if (!Popup::YesNoHeadline(fileErrorHeader, fileErrorMsg))
                 {
-                    y2milestone("Could not copy local file as YEP certificate");
-                    exitloop = true;
+                    y2milestone("User selected to skip the setup of a YEP certificate");
+                    return `conferror;
                 }
             }
 
@@ -560,6 +561,8 @@ The YEP server URL that was configured was
                 y2error("Failed to install YEP certificate to common cert storage. Registration would fail and thus will be skipped.");
             if (instretZMD == 0)
                 y2error("Failed to install YEP certificate for ZMD. Registration would fail and thus will be skipped.");
+
+            if (!ay) Popup::Message(_("Installation of the YEP certificates failed.\nPlease see the logs for further information."));
             return `silentskip;
         }
     }
