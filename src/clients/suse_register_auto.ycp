@@ -81,6 +81,16 @@ string Summary()
         summary = Summary::CloseList(summary);
     }
 
+    if ( Register::yep_server != "")
+    {
+        summary = Summary::AddHeader (summary, _("YEP Server Settings") );
+        summary = Summary::OpenList(summary);
+        summary = Summary::AddListItem (summary, sformat(_("YEP Server: %1"), Register::yep_server)  );
+        if ( Register::yep_server_cert != "")
+            summary = Summary::AddListItem (summary, sformat(_("YEP Certificate: %1"), Register::yep_server_cert)  );
+        summary = Summary::CloseList(summary);
+    }
+
     return summary;
 }
 
@@ -177,14 +187,24 @@ symbol suse_register_configuration()
     string help_text_caption = sformat("<p><b>%1</b></p>", caption);
     string help_text_para1   = _("<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>");
     string help_text_para2   = _("<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>");
-    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration Data</b>. Add a new key and value pair by pressing <b>Add</b> then entering the appropriate values. These parameters are those that can be passed with <tt>suse_register -a</tt>. Get more information about them with <tt>suse_register -p</tt>. Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
+    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration Data</b>.<br>Add a new key and value pair by pressing <b>Add</b> and then entering the appropriate values. These parameters are the ones that can be passed with <tt>suse_register -a</tt>.<br>Get more information about them with <tt>suse_register -p</tt>. Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
 
-    string help_text = help_text_caption + help_text_para1 + help_text_para2 + help_text_para3;
+    string help_text_para4 = _("<p>If your network deploys a custom YEP server, please set the URL of the YEP Server and the location of the YEP Certificate in <b>YEP Server Settings</b>. Please see your YEP manual for further assistance.</p>");
 
-    term contents =  `VBox(
-    `VBox (
-           // Translators: Text for UI Label - capitalized
-          `Left( `CheckBox(`id(`run), `opt(`notify), _("Run Product Registration"),    false )),
+
+    string help_text = help_text_caption + help_text_para1 + help_text_para2 + help_text_para3 + help_text_para4;
+
+    term yepsettings = `VBox(
+                           // Translators: Text for UI Label - capitalized
+                           `Left( `Label(_("YEP Server Settings"))),
+                           // Translators: Text for UI Label - capitalized
+                           `TextEntry(`id(`yepurl),  `opt(`hstretch, `notify), _("YEP Server"), ""),
+                           // Translators: Text for UI Label - capitalized
+                           `TextEntry(`id(`yepcert), `opt(`hstretch, `notify), _("YEP Certificate"), "")
+                          );
+
+    term regsettings = `VBox(
+      `Left( `CheckBox(`id(`run), `opt(`notify), _("Run Product Registration"),    false )),
           `HBox( `HSpacing (3.0) , `VBox(
                // Translators: Text for UI Label - capitalized
               `Left( `Label( _("Include in Registration") ) ),
@@ -192,13 +212,18 @@ symbol suse_register_configuration()
               `Left( `CheckBox(`id(`sub_hw),  `opt(`notify), _("Hardware Profile"),     false )),
                // Translators: Text for UI Label - capitalized
               `Left( `CheckBox(`id(`sub_opt), `opt(`notify), _("Optional Information"), false ))
-           ))
-    ),
+               )
+          ),
+      `VSpacing(1));
+
+
+    term contents = `VBox(
+    `HBox ( regsettings, yepsettings ),
     `VBox ( `VSpacing(0.5),
                    // Translators: Text for UI Label - capitalized
                   `Left( `Label( _("Registration Data to Use"))  ),
                   `MinSize(10,5, `Table( `id(`table), `opt(`notify, `vstretch) , `header( _("Key"), _("Value")), [] )),
-		  `HBox(
+                  `HBox(
                         `PushButton(`id(`add), _("Ad&d")),
                         `PushButton(`id(`edit), `opt(`disabled), _("&Edit")),
                         `PushButton(`id(`delete), `opt(`disabled), _("De&lete"))
@@ -226,6 +251,8 @@ symbol suse_register_configuration()
     UI::ChangeWidget(`id(`run),     `Value, Register::do_registration);
     UI::ChangeWidget(`id(`sub_hw ), `Value, Register::submit_hwdata);
     UI::ChangeWidget(`id(`sub_opt), `Value, Register::submit_optional);
+    UI::ChangeWidget(`id(`yepurl),  `Value, Register::yep_server);
+    UI::ChangeWidget(`id(`yepcert), `Value, Register::yep_server_cert);
     integer items=size(table_items);
     UI::ChangeWidget(`id(`edit),    `Enabled, items > 0);
     UI::ChangeWidget(`id(`delete),  `Enabled, items > 0);
@@ -298,9 +325,35 @@ symbol suse_register_configuration()
         }
         else if ( ret == `abort || ret == `cancel )
         {
-	    if(Popup::ReallyAbort(true)) break;
-	    else continue;
-	}
+            if(Popup::ReallyAbort(true)) break;
+            else continue;
+        }
+        else if ( ret == `next )
+        {
+            string yepServer     = (string) UI::QueryWidget(`id(`yepurl),  `Value);
+            string yepServerCert = (string) UI::QueryWidget(`id(`yepcert), `Value);
+
+            if ( (! regexpmatch(yepServer, "^https://.+")  &&  yepServer != "" ) ||
+                 (  yepServer == ""  &&  yepServerCert != "" )
+               )
+            {
+                 Popup::Message(_("YEP Server URL must start with https://"));
+                 ret = nil;
+            }
+
+            if (! regexpmatch(yepServerCert, "^(https?|ftp)://.+") &&
+                ! regexpmatch(yepServerCert, "^floppy/.+")         &&
+                ! regexpmatch(yepServerCert, "^/.+")               &&
+                ! regexpmatch(yepServerCert, "^(ask|done)$")       &&
+                  yepServerCert != ""
+               )
+            {
+                Popup::Message(_("Location of YEP Certificate invalid.\nPlease see your YEP documentation."));
+                 ret = nil;
+            }
+            Register::yep_server = yepServer;
+            Register::yep_server_cert = yepServerCert;
+        }
 
         // refresh counter and buttons
         items = size(table_items);
@@ -326,6 +379,8 @@ symbol suse_register_configuration()
         y2debug("submit_hwdata: %1",     Register::submit_hwdata);
         y2debug("submit_optional: %1",   Register::submit_optional);
         y2debug("registration_data: %1", Register::registration_data);
+        y2debug("yep_server: %1",        Register::yep_server);
+        y2debug("yep_server_cert: %1",   Register::yep_server_cert);
     }
 
     UI::CloseDialog();

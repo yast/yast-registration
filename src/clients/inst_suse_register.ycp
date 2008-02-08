@@ -33,6 +33,16 @@
     import "Package";
     import "PackageCallbacks";
 
+
+    // this operation MUST be first and run in any case, even if registration should be skipped (FATE #302966)
+    symbol confRegSrv = Register::configureRegistrationServer();
+    if (confRegSrv == `conferror  || confRegSrv == `notrust  || confRegSrv == `silentskip)
+    {
+        y2debug("Registration can not be run due to YEP configuration error.");
+        return `auto;
+    }
+
+
     // no network - no suse_register
     if (!Mode::normal())
     {
@@ -110,6 +120,8 @@ manage subscriptions with Novell Customer Center.");
 the configuration on the opened Web site.");
 
 
+    string title_regularly_run = _("Regularly Synchronize with the Customer Center");
+
     /* string for show information popup */
     string transmit_info = _("Registration and Privacy Information");
 
@@ -170,8 +182,15 @@ and your Web account. Find a detailed privacy policy in <b>Details</b>. View
 the transmitted information in the log file <tt>~/.suse_register.log</tt>.
 </p>");
 
-string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
+string help_para5 = _("<p>
+<b>Regularly Synchronize with the Customer Center</b> checks that your update 
+sources are still valid and adds any new ones that may be available.
+It additionally sends any modifications to your included data to Novell, such 
+as hardware information if <b>Hardware Information</b> is activated.
+This option does not remove any sources added manually.
+</p>");
 
+string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
 
 
     /*  further strings   */
@@ -209,6 +228,9 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
                                              `VSpacing(0.5),
                                              `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
                                    ) ) ) ,
+                             // active in SLE products only - merged here for consistency
+                             //`VSpacing(0.5),
+                             //`Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ),
                              `VSpacing(0.5)
                            )))
     ));
@@ -292,9 +314,9 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
     /* ^^      END CCC ERROR        ^^  */
 
 
-     /* vv      CCC ERROR POPUP PLAINTEXT     vv  */
+    /* vv      CCC ERROR POPUP PLAINTEXT     vv  */
     term error_message_details_pt=
-    `MinSize( 50, 15,  `VBox(
+    `MinSize( 60, 20,  `VBox(
            `Left( `Label( `opt(`boldFont), error_msg ) ),
            `VSpacing( 0.5 ),
            `RichText(`id(`errordetail), `opt(`plainText), "" ),
@@ -501,7 +523,7 @@ string browser_command(string url)
 
     if (Register::use_proxy)
     {
-        // (#165891)
+        // (#165891) - (#208651) fixed in Register.ycp
         bcmd = " http_proxy='"  + Register::http_proxy  + "' " + bcmd;
         bcmd = " https_proxy='" + Register::https_proxy + "' " + bcmd;
     }
@@ -583,11 +605,12 @@ boolean launchBrowser(string url)
         {
             configure_status = (boolean) UI::QueryWidget(`id(`configure),  `Value);
         }
-        else if (ret == `hwinfo || ret == `optional || ret == `forcereg)
+        else if (ret == `hwinfo || ret == `optional || ret == `forcereg || ret == `regularly_run )
         {
             Register::submit_hwdata  = (boolean) UI::QueryWidget(`id(`hwinfo),  `Value);
             Register::submit_optional= (boolean) UI::QueryWidget(`id(`optional), `Value);
             Register::force_registration = (boolean) UI::QueryWidget(`id(`forcereg), `Value);
+            Register::register_regularly = (boolean) UI::QueryWidget(`id(`regularly_run), `Value);
         }
         else if (ret == `showinfo)
         {

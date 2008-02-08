@@ -18,9 +18,12 @@ import "String";
 import "Misc";
 import "Stage";
 import "Label";
+import "Popup";
+import "URL";
+import "Linuxrc";
 import "ProductFeatures";
 import "SourceManager";
-
+import "RegisterCert";
 
 
 // --------------------------------------------------------------
@@ -45,10 +48,13 @@ global boolean submit_optional = false;
 global boolean submit_hwdata   = false;
 global boolean force_registration = false;
 global boolean display_forcereg = false;
+global boolean register_regularly = false;  // (FATE #301822)
 global boolean disable_w3m = false;
 global boolean use_proxy   = false;
 global string  http_proxy  = "";
 global string  https_proxy = "";
+global string  yep_server  = "";            // (FATE #302966)
+global string  yep_server_cert = "";        // (FATE #302966)
 
 global map<string, string> registration_data = $[];
 
@@ -78,6 +84,534 @@ boolean amIroot()
 }
 
 
+
+/*
+ * mountFloppy()
+ *
+ * mount a floppy disk
+ * @return map with status information
+ *
+ */
+map mountFloppy()
+{
+    // floppy mount support (FATE #303335)
+    list drives = (list) SCR::Read(.probe.floppy);
+
+    if ( size(drives) == 0 )
+    {
+        return $[ "mounted" : false ];
+    }
+
+    string fddevice = drives[0, "dev_name"]:"/dev/fd0";
+    string tmpdir = (string) SCR::Read(.target.tmpdir);
+    if (tmpdir == nil) tmpdir = "/tmp";
+    string mpoint = tmpdir + "/fd";
+
+    // create mount point directory
+    SCR::Execute(.target.mkdir, mpoint);
+
+    y2milestone("Trying to mount %1 as floppy drive to load the YEP certificate file from.", fddevice);
+
+    boolean result = (boolean) SCR::Execute(.target.mount, [fddevice, mpoint], "-o ro" );
+
+    return $[ "mounted" : result, "mpoint" : mpoint, "device" : fddevice ];
+}
+
+
+
+/*
+ * umountFloppy()
+ *
+ * umount a floppy disk
+ * @return void
+ *
+ */
+void umountFloppy(string mpoint)
+{
+    if (mpoint == nil  ||  mpoint == "") return;
+    SCR::Execute(.target.umount, mpoint);
+}
+
+
+/*
+ * certificateError()
+ *
+ * report error messages if YEP certificate file is not found
+ * @return symbol yes, no or retry
+ *
+ */
+symbol certificateError(string heading, symbol type)
+{
+    if (heading == nil || heading == "") heading = _("Unknown error");
+
+    string errorrMessage = "";
+    string question = _("Do you want to skip Registration?");
+    string otherwise = sformat( _("If you select %1 the Registration will most likely fail.
+Otherwise you may copy the certificate file to the system manually
+and then specify its path by choosing %2."), deletechars(Label::ContinueButton(), "&"), deletechars(Label::FileName(), "&") );
+    string errorMessage = "";
+
+    if (type == `floppy)
+    {
+        errorMessage = _("Could not load the YEP certificate file from floppy disk.");
+    }
+    else if (type == `url)
+    {
+        errorMessage = _("Could not download the YEP certificate file from specified URL.");
+    }
+    else if (type == `file)
+    {
+        errorMessage = _("Could not find the YEP certificate file in specified path.");
+    }
+    else
+    {
+        errorMessage = _("Unknown error occurred while retrieving YEP certificate file");
+    }
+
+    errorMessage = errorMessage  + "\n\n" + question + "\n\n" + otherwise;
+    return Popup::AnyQuestion3(heading, errorMessage, _("Skip"), Label::ContinueButton(), Label::FileName(), `focus_yes );
+}
+
+
+
+
+
+/*
+ * suseRegisterURL()
+ *
+ * get or set the suseRegisterURL
+ * @return current url
+ */
+string suseRegisterURL(string url)
+{
+    // nil, empty string, unparsable urls and non-https urls as parameter means 'get url' else 'set url'
+
+    string cururl = nil;
+    map urlmap = $[];
+    string suseRegisterConf = "/etc/suseRegister.conf";
+
+    SCR::RegisterAgent (.temporary_suseregister_agent, `ag_ini(
+        `IniAgent( suseRegisterConf,
+        $[
+            "options" : [ "line_can_continue", "global_values", "join_multiline", "comments_last", "flat" ],
+            "comments": [ "^[ \t]*#.*$", "^[ \t]*$" ],
+            "params" :  [ $[ "match" :     [ "([a-zA-Z0-9_-]+)[ \t]*=[ \t]*([^ \t]*)", "%s = %s" ] ] ]
+        ]
+    )));
+
+    // in case the yep server was already changed do not change it again (to support mobile PCs in different environments)
+    string mod = (string) SCR::Read(.temporary_suseregister_agent.yepurlmodified);
+    if ( mod == "true" )
+    {
+        url = nil;
+        y2milestone("YEP server has already been modified. I will not change it again.");
+    }
+
+    cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
+    urlmap = URL::Parse(url);
+
+    if ( url != nil  &&  url != ""  &&  urlmap != $[]  &&  urlmap["scheme"]:"" == "https" )
+    {
+        SCR::Write(.temporary_suseregister_agent.url, url);
+        cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
+        if (url == cururl) SCR::Write(.temporary_suseregister_agent.yepurlmodified, "true");
+    }
+
+    SCR::UnregisterAgent (.temporary_suseregister_agent);
+    return cururl;
+}
+
+
+
+/*
+ * setupRegistrationServer()
+ *
+ * write YEP server settings to  (FATE #302966)
+ * @return symbol that says if we can perform the registration
+ *
+ */
+symbol setupRegistrationServer(symbol mode)
+{
+    // in case yep_server is undefined nothing needs to be done
+    if (yep_server == nil  ||  yep_server == "") return `ok;
+
+    boolean ay = false;    // are we running in autoYaST mode?
+    boolean trust = false;
+    if (mode == `autoyast)
+    {
+        trust = true;
+        ay = true;
+    }
+
+    // check if yep_server is a valid url
+    map yep_server_parsed = URL::Parse(yep_server);
+    if (yep_server_parsed == $[]  ||  yep_server_parsed["host"]:"" == ""  ||  yep_server_parsed["scheme"]:"" != "https" )
+    {
+        y2milestone("The string '%1' could not be parsed and validated as URL to be used as YEP server.", yep_server);
+        if (ay) return `conferror;
+
+        string no_yep_server = sformat( _("The YEP server URL could not be validated as URL.
+Registration can not be performed. Please modify /etc/suseRegister.conf and run Registration manually.
+The YEP server URL that was configured was
+%1"), yep_server);
+        Popup::Message(no_yep_server);
+        return `conferror;
+    }
+
+
+    // write YEP server URL to /etc/suseRegister.conf
+    if (yep_server == suseRegisterURL(yep_server) )
+    { y2milestone("Setup custom YEP server as registration server successful: %1", yep_server); }
+    else
+    { y2error("Failed to setup custom YEP server as registration server: %1", yep_server);  }
+
+
+
+    // ----------===============================================-------------- //
+
+    symbol certmode = nil;
+
+    // never ever load a certificate file for a *.novell.com yep server
+    if      ( regexpmatch(yep_server_parsed["host"]:"", ".+\.novell\.com$")) { certmode = `none;   }
+    else if (yep_server_cert == nil  || yep_server_cert == "")               { certmode = `url;    }
+    else if ( regexpmatch(yep_server_cert, "^(https?|ftp)://.+") )           { certmode = `url;    }
+    else if ( regexpmatch(yep_server_cert, "^floppy/.+") )                   { certmode = `floppy; }
+    else if ( regexpmatch(yep_server_cert, "^/.+") )                         { certmode = `path;   }
+    else if ( regexpmatch(yep_server_cert, "^ask$") )                        { certmode = `ask;    }
+    else if ( regexpmatch(yep_server_cert, "^done$") )                       { certmode = `done;   }
+    else                                                                     { certmode = `none;   }
+
+
+    if (! contains([`none, `done, `url, `floppy, `ask, `path], certmode) )
+    {
+        y2error("No YEP certificate file retrieval-mode found to handle current configuration. This should not happen!");
+        return `conferror;
+    }
+
+    string certTmpFile = sformat("%1/__tmpYEPcert.crt", SCR::Read(.target.tmpdir));
+
+
+    if ( certmode == `url )
+    {
+        map certParse = URL::Parse(yep_server_cert);
+
+        // if no yep_server_cert is passed then we fall back to predefined yep_server_cert
+        if (yep_server_cert == nil  ||  yep_server_cert == ""  ||  certParse == $[])
+        {
+            map certUrl = yep_server_parsed;
+            certUrl["scheme"] = "http";
+            certUrl["port"] = "80";
+            certUrl["path"] = "/yep.crt";
+            yep_server_cert = URL::Build(certUrl);
+            certParse=certUrl;
+
+        }
+        y2milestone("Using %1 as URL to download the YEP certificate file.", yep_server_cert);
+
+        // download cert
+        string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", yep_server_cert, certTmpFile);
+        if ( SCR::Execute (.target.bash, curlcmd) != 0)
+        {
+            y2error("Could not download the YEP certificate file from specified URL %1", yep_server_cert);
+            if (ay) return `conferror;
+
+            // translators: this is a heading for an error message - so no punctuation
+            string urlError = _("Downloading YEP certificate file failed");
+            symbol errret = certificateError( urlError, `url);
+
+            certTmpFile = nil;
+        }
+    }
+
+    if (certmode == `floppy)
+    {
+        // mount and copy
+        map mf = mountFloppy();
+        if (!mf["mounted"]:false)
+        {
+           umountFloppy(mf["mpoint"]:"/dev/fd0");
+           y2error("Could not mount floppy disk to copy the YEP certificte file from. The device that was used was %1", mf["device"]:"");
+           if (ay)
+           {
+               y2error("No YEP certificate file available. As we are in autoYaST mode Registration will be skipped. Please run it manually.");
+               return `silentskip;
+           }
+           else
+           {
+               // translators: this is a heading for an error message - so no punctuation
+               string fdMountError = _("Could not mount floppy disk");
+               symbol errret = certificateError( fdMountError, `floppy);
+
+               if ( errret == `yes )
+               {
+                   y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to skip Registration.");
+                   return `silentskip;
+               }
+               else if ( errret == `no )
+               {
+                   y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                   return `ok;
+               }
+               else  { certmode = `ask; }
+           }
+        }
+        else
+        {
+            string fdpath = regexpsub( yep_server_cert , "^floppy/(.+)$","\\1");
+            string cp2tmp = sformat("/bin/cp -a  %1  %2 ", mf["mpoint"]:"/media/floppy" + "/" + fdpath, certTmpFile  );
+            if ( SCR::Execute (.target.bash, cp2tmp) != 0)
+            {
+                y2error("Could not copy the specified YEP certificate file from floppy disk.");
+                if (ay) return `silentskip;
+
+                // translators: this is a heading for an error message - so no punctuation
+                string fdCopyError = _("Could not read file floppy disk");
+                symbol errret = certificateError( fdCopyError, `floppy);
+
+                if ( errret == `yes )
+                {
+                    y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to skip Registration.");
+                    return `silentskip;
+                }
+                else if ( errret == `no )
+                {
+                    y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                    return `ok;
+                }
+                else  { certmode = `ask; }
+
+            }
+
+            umountFloppy(mf["mpoint"]:"/dev/fd0");
+        }
+
+    }
+
+    if (certmode == `path)
+    {
+        // try to copy cert if valid path,  else ask   // copy
+
+        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", yep_server_cert, certTmpFile );
+        if ( SCR::Execute(.target.bash, cp2tmp )  !=  0 )
+        {
+            y2error("Could not copy local YEP certificate file");
+            if (ay) return `silentskip;
+
+            // translators: this is a heading for an error message - so no punctuation
+            string fileCopyError = _("Could find YEP certificate file in local path");
+            symbol errret = certificateError( fileCopyError, `file);
+            if ( errret == `yes )
+            {
+                y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to skip Registration.");
+                return `silentskip;
+            }
+            else if ( errret == `no )
+            {
+                y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                return `ok;
+            }
+            else  { certmode = `ask; }
+        }
+    }
+
+    if (certmode == `ask)
+    {
+        if (ay)
+        {
+            y2error("YEP certificate was configured to be asked for. AutoYaST does not support interactive dialogs. Registration will be skipped.");
+            return `silentskip;
+        }
+
+        string basepath = "/tmp";
+        string certFile = "";
+        string selectCertLabel = _("Select YEP certificate file");
+        boolean exitloop = false;
+
+        do
+        {
+            do
+            {
+                certFile = UI::AskForExistingFile(basepath, "*.crt", selectCertLabel);
+            } while (certFile == "");
+
+            if (certFile == nil)
+            {
+                string skipReg = _("Do you really want to cancel and thereby skip the Registration?");
+                if (Popup::YesNo(skipReg))
+                {
+                    y2milestone("User selected to cancel manual certificate dialog and thereby skip registration");
+                    return `conferror;
+                }
+            }
+
+            string cp2tmp = sformat("/bin/cp -a  %1  %2 ", certFile , certTmpFile  );
+            if (SCR::Execute(.target.bash, cp2tmp) == 0)
+            {
+                y2milestone("Found user specified YEP certificate file");
+                exitloop = true;
+            }
+            else
+            {
+                y2milestone("Could not copy local file as YEP certificate");
+                string fileErrorHeader = _("Could not copy certificate file");
+                string fileErrorMsg    = _("Do you want to retry?");
+                if (!Popup::YesNoHeadline(fileErrorHeader, fileErrorMsg))
+                {
+                    y2milestone("User selected to skip the setup of a YEP certificate");
+                    return `conferror;
+                }
+            }
+
+        } while ( !exitloop );
+
+
+    }
+
+    if (certmode == `done)
+    {
+        y2milestone("User configured to do nothing to retrieve a YEP certificate file.");
+        y2milestone("I hope you know what you do. Registration will be run but may fail due to missing certificate.");
+        return `ok;
+    }
+
+    if (certmode == `none)
+    {
+        y2warning("The string that was passed to get the YEP certificate file does not match any handler.");
+        y2warning("The string was: %1", yep_server_cert);
+        y2warning("No certificate could be retrieved. Registration process will not be run!");
+        return `conferror;
+    }
+
+
+
+    // in autoYaST mode we automatically trust - we are done here
+    if ( trust || ay ) { return `ok; }
+
+    // ask user if he trusts the certificate
+    map cP = RegisterCert::parseCertificate(certTmpFile);
+    y2milestone("YEP certificate file information: %1", cP);
+
+    string trustQuestion = _("Do you want to trust this certificate?");
+    string trustMessage  = _("This certificate will be used to connect to the YEP server.\nYou have to trust this certificate in order to continue with the Registration.");
+
+    string certInfo = "";
+    list issueList = (list) cP["ISSUER"]:[];
+    //translators: this is certificate context
+    certInfo = certInfo + _("<p><b>Issued For:</b></p>");
+    if (size (issueList) > 0)
+    {
+        certInfo = certInfo + "<pre>";
+        foreach (map<string,string> keyval, (list<map<string,string> >) issueList, {
+            foreach (string key, string val, (map<string, string>) keyval, {
+                certInfo = certInfo + sformat("\n%1:  %2", key, val);
+            });
+        });
+        certInfo = certInfo + "</pre>";
+    }
+
+    //translators: this is certificate context
+    certInfo = certInfo + _("<p><b>Subject:</b></p>");
+    list subjectList=(list) cP["SUBJECT"]:[];
+    if (size (subjectList) > 0)
+    {
+        certInfo = certInfo + "<pre>";
+        foreach (map<string, string> keyval, (list<map<string,string> >) subjectList, {
+            foreach (string key, string val, (map<string,string>)keyval, {
+                certInfo = certInfo + sformat("\n%1:  %2", key, val);
+            });
+        });
+        certInfo = certInfo + "</pre>";
+    }
+    //translators: this is certificate context
+    certInfo = certInfo + _("<p><b>Validity:</b></p>");
+    certInfo = certInfo + "<pre>";
+    //translators: this is certificate context
+    certInfo = certInfo + "\n" + _("Valid from: ")  + " " + cP["STARTDATE"]:"";
+    //translators: this is certificate context
+    certInfo = certInfo + "\n" + _("Valid to: ")  + " " + cP["ENDDATE"]:"";
+    //translators: this is certificate context
+    certInfo = certInfo + "\n" + _("Fingerprint: ") + " " + cP["FINGERPRINT"]:"";
+    certInfo = certInfo + "</pre>";
+
+    UI::OpenDialog( `MinSize(70, 20, `VBox(
+        `Left( `Label(`opt(`boldFont), trustQuestion)),
+        `Left( `Label(trustMessage)),
+        `RichText(sformat("%1",certInfo)),
+        `HBox(`PushButton(`id(`trust), _("Trust")), `HSpacing(1.5), `PushButton(`id(`notrust), _("Reject")) )
+    )));
+    any uret = UI::UserInput();
+    UI::CloseDialog();
+
+    if ((symbol)uret == `trust)
+    {
+        string installCert    = sformat("cp -a  %1  /etc/ssl/certs/yep.pem  &&  c_rehash /etc/ssl/certs", certTmpFile);
+        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/yep.cer", certTmpFile);
+
+        integer instret    = (integer) SCR::Execute(.target.bash, installCert);
+        integer instretZMD = (integer) SCR::Execute(.target.bash, installCertZMD);
+
+        if ( instret == 0 && instretZMD == 0)
+        {
+            y2milestone("Successfully installed YEP certificate. Registration will now proceed.");
+            return `ok;
+        }
+        else
+        {
+            if (instret == 0 )
+                y2error("Failed to install YEP certificate to common cert storage. Registration would fail and thus will be skipped.");
+            if (instretZMD == 0)
+                y2error("Failed to install YEP certificate for ZMD. Registration would fail and thus will be skipped.");
+
+            if (!ay) Popup::Message(_("Installation of the YEP certificates failed.\nPlease see the logs for further information."));
+            return `silentskip;
+        }
+    }
+    else
+    {
+        return `notrust;
+    }
+
+
+    // a return to be safe :)
+    return `conferror;
+
+    // return value `ok           we can perform the registration
+    //              `conferror    configuration error - we have to skip registration
+    //              `notrust      user does not trust certificate - we have to skip registration
+    //              `silentskip   autoyast mode skip registration on error
+    //              `nil          unkown error - report generic error message
+}
+
+
+
+/*
+ * configureRegistrationServer()
+ *
+ * read YEP server settings from install.inf and set them up (FATE #302966)
+ *
+ */
+global symbol configureRegistrationServer()
+{
+    yep_server = Linuxrc::InstallInf("yepurl");
+    yep_server_cert = Linuxrc::InstallInf("yepcert");
+
+    y2milestone("YEP config - yepurl:  %1", yep_server);
+    y2milestone("YEP config - yepcert: %1", yep_server_cert);
+
+/*  yepurl=https:/yep.mybigcompany.com/center/regsvc/
+    yepcert=ask      open FileDialog
+    yepcert=done     Cert already insalled - do nothing
+    yepcert=http:/certpool.mybigcompany.com/yep/yep-ca.crt     download from there
+    yepcert=floppy/path/to/file.crt
+    yepcert=/path/to/local/file.crt   copy from there
+*/
+
+    // setup the yep_server settings
+    return setupRegistrationServer(nil);
+}
+
+
+
 /*
  * read_config()
  *
@@ -92,6 +626,10 @@ void read_config()
     // this boolean comes only from the control file - nowhere to be saved
     display_forcereg = ProductFeatures::GetBooleanFeature("globals", "display_register_forcereg");
     disable_w3m = ProductFeatures::GetBooleanFeature("globals", "disable_register_w3m");
+
+    register_regularly = ((integer) SCR::Execute(.target.bash, "[ -f /var/lib/suseRegister/neverRegisterOnBoot ]") ) == 0 ? false:true;
+    // register_regularly = ProductFeatures::GetBooleanFeature("globals", "register_monthly");  // read default value - deactivated
+    register_regularly = register_regularly  != nil ? register_regularly:false;
 
     // read proxy settings
     use_proxy   = (string) SCR::Read(.sysconfig.proxy.PROXY_ENABLED) == "yes" ? true:false;
@@ -124,6 +662,8 @@ void write_config()
 {
     SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
     SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
+
+    SCR::Execute(.target.bash, sformat("%1 /var/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
 }
 
 // ------------------------------------------------------------------
@@ -195,9 +735,10 @@ global map<string, string> suseRegister(symbol parameter)
     //  -L log file
     //  --nozypp do not add zypp and yum sources to zmd, #180820
     //  -p list parameters (no dumpfile with -p)
+    //  --restore-repos  brings back repos that have been deleted by accident (#309231)
 
-    // always log and beautify!
-    string params = " -y -L ~/.suse_register.log --nozypp ";
+    // always log, beautify and restore repos! (#309231)
+    string params = " -y -L ~/.suse_register.log --nozypp --restore-repos ";
     if (parameter == `p) params = params + " -p ";
     else params = params + sformat(" --dumpfile=%1 ", services_file);
 
@@ -324,7 +865,10 @@ global boolean Import(map settings)
     submit_optional     = (boolean) settings["submit_optional"]:submit_optional;
     submit_hwdata       = (boolean) settings["submit_hwdata"]:submit_hwdata;
     do_registration     = (boolean) settings["do_registration"]:do_registration;
+    register_regularly  = (boolean) settings["register_regularly"]:register_regularly;
     registration_data   = (map<string, string>) settings["registration_data"]:$[];
+    yep_server          = (string) settings["yep_server"]:"";
+    yep_server_cert     = (string) settings["yep_server_cert"]:"";
 
     return true;
 }
@@ -337,6 +881,7 @@ global boolean Import(map settings)
 global boolean Write()
 {
     iamroot = amIroot();
+    setupRegistrationServer(`autoyast);
     if (do_registration) suseRegister(`autoyast);
     finish();
     return true;
@@ -354,6 +899,9 @@ global map Export()
                "submit_optional":submit_optional,
                "submit_hwdata":submit_hwdata,
                "do_registration":do_registration,
+               "register_regularly":register_regularly,
+               "yep_server":yep_server,
+               "yep_server_cert":yep_server_cert,
                "registration_data":registration_data
     ];
 }

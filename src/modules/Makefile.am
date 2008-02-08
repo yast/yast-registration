@@ -2,7 +2,7 @@
 # Makefile.am for registration/modules
 #
 
-module_DATA = Register.ycp
+module_DATA = Register.ycp RegisterCert.pm
 
 EXTRA_DIST = $(module_DATA)
 
