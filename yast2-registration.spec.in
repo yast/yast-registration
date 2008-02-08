@@ -56,4 +56,6 @@ Performs the Registration
 # agents
 @scrconfdir@/cfg_suse_register.scr
 
+#fillup
+@fillupdir@/sysconfig.suse_register-yast2-registration
 

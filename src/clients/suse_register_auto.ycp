@@ -185,15 +185,9 @@ symbol suse_register_configuration()
 {
     string caption = _("Product Registration");
     string help_text_caption = sformat("<p><b>%1</b></p>", caption);
-    string help_text_para1   = _(
-"<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>"
-);
-    string help_text_para2   = _(
-"<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>"
-);
-    string help_text_para3   = _(
-"<p>Other information used for registration is shown in <b>Registration Data</b>.<br>Add a new key and value pair by pressing <b>Add</b> and then entering the appropriate values. These parameters are the ones that can be passed with <tt>suse_register -a</tt>.<br>Get more information about them with <tt>suse_register -p</tt>. Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>"
-);
+    string help_text_para1   = _("<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>");
+    string help_text_para2   = _("<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>");
+    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration Data</b>.<br>Add a new key and value pair by pressing <b>Add</b> and then entering the appropriate values. These parameters are the ones that can be passed with <tt>suse_register -a</tt>.<br>Get more information about them with <tt>suse_register -p</tt>. Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
 
     string help_text_para4 = _("<p>If your network deploys a custom YEP server, please set the URL of the YEP Server and the location of the YEP Certificate in <b>YEP Server Settings</b>. Please see your YEP manual for further assistance.</p>");
 
@@ -229,7 +223,7 @@ symbol suse_register_configuration()
                    // Translators: Text for UI Label - capitalized
                   `Left( `Label( _("Registration Data to Use"))  ),
                   `MinSize(10,5, `Table( `id(`table), `opt(`notify, `vstretch) , `header( _("Key"), _("Value")), [] )),
-		  `HBox(
+                  `HBox(
                         `PushButton(`id(`add), _("Ad&d")),
                         `PushButton(`id(`edit), `opt(`disabled), _("&Edit")),
                         `PushButton(`id(`delete), `opt(`disabled), _("De&lete"))

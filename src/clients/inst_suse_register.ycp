@@ -43,7 +43,6 @@
     }
 
 
-
     // no network - no suse_register
     if (!Mode::normal())
     {
@@ -84,10 +83,8 @@
     string title = title_nccc;
 
     // Translators: limit to 2x 50 charachters - if more needed take 3x 50 chars but NOTHING more
-    string nccc_top = _(
-"Get technical support and product updates and
-manage subscriptions with Novell Customer Center."
-);
+    string nccc_top = _("Get technical support and product updates and
+manage subscriptions with Novell Customer Center.");
 
     string nccc_configure   = _("Configure Now (Recommended)");
     string nccc_noconfigure = _("Configure Later");
@@ -102,16 +99,16 @@ manage subscriptions with Novell Customer Center."
     /*  strings for success popup   */
     string nccc_success_msg = _("Your configuration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
-    string success_detail_label =("New Update Server");
+    string nccc_error_no_server_added = _("No update server could be added to your configuration.");
+    /* caption for details view  */
+    string success_detail_label =_("New Update Server");
 
    /* strings for manual interaction popup */
     string mi_required = _("Manual Interaction Required");
     string mi_needinfo = _("Needed Information");
     string mi_browser_btn = _("Continue");
-    string mi_start_browser = _(
-"A Web browser will start in which to complete
-the configuration on the opened Web site."
-);
+    string mi_start_browser = _("A Web browser will start in which to complete
+the configuration on the opened Web site.");
 
 
     string title_regularly_run = _("Regularly Synchronize with the Customer Center");
@@ -120,89 +117,69 @@ the configuration on the opened Web site."
     string transmit_info = _("Registration and Privacy Information");
 
     /*  strings for conflict popup */
-    string conflict_need_info = _(
-"The server requires additional system information. Activating 
-submission of the hardware profile automatically."
-);
+    string conflict_need_info = _("The server requires additional system information. Activating 
+submission of the hardware profile automatically.");
 
      /*  nonroot-message strings */
      string nonroot_title = _("Update Source Issues");
-     string nonroot_message = _(
-"Registering as a regular user does not include the update source
+     string nonroot_message = _("Registering as a regular user does not include the update source
 in the Online Update YaST module. If you continue and later want 
 to update with Online Update, the source must be added manually.
 Other tools, such as Software Updater in the panel, can still be 
-used.  Alternatively, cancel and then register through YaST as root 
-so the sources are available to all tools."
-);
+used. Alternatively, cancel then register through YaST as root 
+so the sources are available to all tools.");
 
 
 
     /* error messages  */
     string data_invalid = _("Error: Data received is invalid.");
     string retrieve_error = _("Error: Could not retrieve data.");
-    string no_browser_msg = _(
-"No Web browser available.
-Run the suse_register command manually."
-);
-    string no_product_msg = _(
-"No product found to be registered.
+    string no_browser_msg = _("No Web browser available.
+Run the suse_register command manually.");
+    string no_product_msg = _("No product found to be registered.
 You do not need to register this installation.
-Please add update sources yourself."
-);
-    string no_w3m_msg = _(
-"Your registration requires interactive input that is not
+Please add update sources yourself.");
+    string no_w3m_msg = _("Your registration requires interactive input that is not
 supported in text mode. Run YaST2 in the graphical mode or
-run the suse_register command manually."
-);
+run the suse_register command manually.");
 
     /* help text for dialog "Novell Customer Center Configuration" */
 string help_title = sformat( "<p><b>%1</b></p>", title);
-string help_para1 = _(
-"<p>
+string help_para1 = _("<p>
 Configure your system to enable online updates by registering it with Novell.
 To do this now, select <b>Configure Now</b>. Delay the registration with
 <b>Configure Later</b>.
-</p>"
-);
+</p>");
 
-string help_para2 = _(
-"<p>
+string help_para2 = _("<p>
 To simplify the registration process, include information from your system
 with <b>Optional Information</b> and <b>Hardware Profile</b>. 
 <b>Details</b> shows the maximum amount of information that can be involved
  in your registration. To obtain this information, it contacts the Novell
 server to query what information is needed for your product. Only the identity
 of the installed product is sent in this initial exchange.
-</p>"
-);
+</p>");
 
-string help_para3 = _(
-"<p>
+string help_para3 = _("<p>
 If you purchased your copy of this product, enable <b>Registration Code</b>
 so you are prompted for your product code. 
 This registers you for the installation support included with your product.
-</p>"
-);
+</p>");
 
-string help_para4 = _(
-"<p>
+string help_para4 = _("<p>
 No information is passed to anyone outside Novell. The data is used for
 statistical purposes and to enhance your convenience regarding driver support
 and your Web account. Find a detailed privacy policy in <b>Details</b>. View
 the transmitted information in the log file <tt>~/.suse_register.log</tt>.
-</p>"
-);
+</p>");
 
-string help_para5 = _(
-"<p>
+string help_para5 = _("<p>
 <b>Regularly Synchronize with the Customer Center</b> checks that your update 
 sources are still valid and adds any new ones that may be available.
 It additionally sends any modifications to your included data to Novell, such 
 as hardware information if <b>Hardware Information</b> is activated.
 This option does not remove any sources added manually.
-</p>"
-);
+</p>");
 
 string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para5 + help_para4;
 
@@ -305,7 +282,10 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
            `VSpacing( 0.5 ),
            `Left( `Label( `id(`err_description), server_error ) ),
            `HBox(
-                  `HWeight(1, `PushButton(`id(`ok), Label::OKButton()  ) ),
+                  `HWeight(1, `PushButton(`id(`back), Label::BackButton()  ) ),
+                  `HSpacing( 3 ),
+                   // reactivated skipping the registration (#240174)
+                  `HWeight(1, `PushButton(`id(`skip), Label::SkipButton()  ) ),
                   `HSpacing( 3 ),
                   `HWeight(1, `PushButton(`id(`err_detail), details ) )
                 )
@@ -315,13 +295,24 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 
     /* vv      CCC ERROR POPUP      vv  */
     term error_message_details=
-    `MinSize( 50, 15,  `VBox(
+    `MinSize( 60, 20,  `VBox(
            `Left( `Label( `opt(`boldFont), error_msg ) ),
            `VSpacing( 0.5 ),
-           `RichText(`id(`errordetail), `opt(`plainText) , "" ),
+           `RichText(`id(`errordetail), "" ),
            `PushButton(`id(`ok), Label::OKButton())
     ));
     /* ^^      END CCC ERROR        ^^  */
+
+
+    /* vv      CCC ERROR POPUP PLAINTEXT     vv  */
+    term error_message_details_pt=
+    `MinSize( 60, 20,  `VBox(
+           `Left( `Label( `opt(`boldFont), error_msg ) ),
+           `VSpacing( 0.5 ),
+           `RichText(`id(`errordetail), `opt(`plainText), "" ),
+           `PushButton(`id(`ok), Label::OKButton())
+    ));
+     /* ^^      END CCC ERROR PLAINTEXT       ^^  */
 
 
 
@@ -362,18 +353,23 @@ boolean report_error()
     // and offer a detailled view of the error message
 
     UI::OpenDialog(error_message);
-    UI::SetFocus (`id (`cancel ));
+    UI::SetFocus (`id (`skip ));
     symbol retry = nil;
 
     repeat
     {
         retry = (symbol) UI::UserInput();
 
-        if ( retry == `cancel ) configure_status = false;
+        if ( retry == `skip ) configure_status = false;
         else if (retry == `err_detail)
         {
-            UI::OpenDialog(error_message_details);
-            UI::ChangeWidget( `id(`errordetail), `Value, (string)information_data["stderr"]:"no error message available");
+            // switch to plaintext if error output is one or two lines (#239570)
+            string error_msg_details = (string)information_data["stderr"]:"no error message available";
+            if ( contains( [0,1], size(splitstring(error_msg_details,"\n")) ) )
+               UI::OpenDialog(error_message_details);
+            else
+               UI::OpenDialog(error_message_details_pt);
+            UI::ChangeWidget( `id(`errordetail), `Value, error_msg_details);
             UI::UserInput();
             UI::CloseDialog();
         }
@@ -495,32 +491,19 @@ string browser_command(string url)
     if ( textmode )
     {
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
-
-        if ( Register::iamroot )
-            bcmd = " w3m ";
-        else
-        {
-            cmd_ok = cmd_ok && (integer) SCR::Execute(.target.bash, "test -x /usr/bin/screen") == 0 ? true:false;
-            bcmd = " screen w3m ";
-        }
+        cmd_ok = cmd_ok && (integer) SCR::Execute(.target.bash, "test -x /usr/bin/screen") == 0 ? true:false;
+        bcmd = " screen w3m ";
     }
     else
     {
-
-        if ( Register::iamroot )
+        // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310)
+        string required_package = "mozilla-xulrunner181";
+        if (!Package::Installed(required_package))
         {
-            // check for and install mozilla-xulrunner if needed (#175166)
-            Package::InstallAllMsg(["mozilla-xulrunner"], nil);
-            cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
-            SCR::Execute(.target.bash, "touch /var/adm/SuSEconfig/run-pango ; /sbin/conf.d/SuSEconfig.pango");  //(#165891)
-            bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
+            Package::InstallAllMsg([required_package], nil);
         }
-        else
-        {   // this case will never happen because we will not run as non-root (#170736)
-            Package::InstallAllMsg(["MozillaFirefox"], nil);  // (#175166)
-            cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/firefox") == 0 ? true:false;
-            bcmd = " firefox -new-window ";
-        }
+        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
+        bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
     }
 
     if (! cmd_ok) return "nobrowser";
@@ -530,19 +513,13 @@ string browser_command(string url)
 
     if (Register::use_proxy)
     {
-        // check if proxy setting is correct (#208651)
-        string proxy_http  = Register::http_proxy;
-        string proxy_https = Register::https_proxy;
-        if (proxy_http  == nil) proxy_http  = "";
-        if (proxy_https == nil) proxy_https = "";
-
-        // (#165891)
-        bcmd = " http_proxy='"  + proxy_http  + "' " + bcmd;
-        bcmd = " https_proxy='" + proxy_https + "' " + bcmd;
+        // (#165891) - (#208651) fixed in Register.ycp
+        bcmd = " http_proxy='"  + Register::http_proxy  + "' " + bcmd;
+        bcmd = " https_proxy='" + Register::https_proxy + "' " + bcmd;
     }
 
-    // in case of root add su call to not run a browser as root during installation
-    if ( Register::iamroot ) bcmd = su_exec("suse-ncc", "suse-ncc", bcmd );
+    // add su call to not run a browser as root during installation
+    bcmd = su_exec("suse-ncc", "suse-ncc", bcmd );
 
     return bcmd;
 }
@@ -789,24 +766,33 @@ boolean launchBrowser(string url)
 
                     // and then show success message
                     symbol sret=nil;
-                    UI::OpenDialog( nccc_success );
-                    repeat
+
+                    // (#261239) show success popup only on success else error message
+                    if (added != nil && size(added) != 0)
                     {
-                        sret = (symbol) UI::UserInput();
-                        if (sret == `success_detail)
+                        UI::OpenDialog( nccc_success );
+                        repeat
                         {
-			    string text = mergestring (added, "\n");
-                            // Show the URLs that were added as update sources.
-			    // Not STDERR of suse_register output, we may have
-			    // declined some unsigned ones, #180820#c26.
-                            UI::OpenDialog( nccc_success_detail );
-                            UI::SetFocus(`id(`ok));
-                            UI::ChangeWidget(`id(`success_detail_richtext), `Value, text );
-                            UI::UserInput();
-                            UI::CloseDialog();
-                        }
-                    } until (sret == `ok );
-                    UI::CloseDialog();
+                            sret = (symbol) UI::UserInput();
+                            if (sret == `success_detail)
+                            {
+                    string text = mergestring (added, "\n");
+                                // Show the URLs that were added as update sources.
+                    // Not STDERR of suse_register output, we may have
+                    // declined some unsigned ones, #180820#c26.
+                                UI::OpenDialog( nccc_success_detail );
+                                UI::SetFocus(`id(`ok));
+                                UI::ChangeWidget(`id(`success_detail_richtext), `Value, text );
+                                UI::UserInput();
+                                UI::CloseDialog();
+                            }
+                        } until (sret == `ok );
+                        UI::CloseDialog();
+                    }
+                    else
+                    {
+                        Popup::Error(nccc_error_no_server_added);
+                    }
 
                     // we are done, end of loop
                     loopend = true;
