@@ -81,13 +81,13 @@ string Summary()
         summary = Summary::CloseList(summary);
     }
 
-    if ( Register::yep_server != "")
+    if ( Register::smt_server != "")
     {
-        summary = Summary::AddHeader (summary, _("YEP Server Settings") );
+        summary = Summary::AddHeader (summary, _("SMT Server Settings") );
         summary = Summary::OpenList(summary);
-        summary = Summary::AddListItem (summary, sformat(_("YEP Server: %1"), Register::yep_server)  );
-        if ( Register::yep_server_cert != "")
-            summary = Summary::AddListItem (summary, sformat(_("YEP Certificate: %1"), Register::yep_server_cert)  );
+        summary = Summary::AddListItem (summary, sformat(_("SMT Server: %1"), Register::smt_server)  );
+        if ( Register::smt_server_cert != "")
+            summary = Summary::AddListItem (summary, sformat(_("SMT Certificate: %1"), Register::smt_server_cert)  );
         summary = Summary::CloseList(summary);
     }
 
@@ -189,18 +189,18 @@ symbol suse_register_configuration()
     string help_text_para2   = _("<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>");
     string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration Data</b>.<br>Add a new key and value pair by pressing <b>Add</b> and then entering the appropriate values. These parameters are the ones that can be passed with <tt>suse_register -a</tt>.<br>Get more information about them with <tt>suse_register -p</tt>. Remove a pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
 
-    string help_text_para4 = _("<p>If your network deploys a custom YEP server, please set the URL of the YEP Server and the location of the YEP Certificate in <b>YEP Server Settings</b>. Please see your YEP manual for further assistance.</p>");
+    string help_text_para4 = _("<p>If your network deploys a custom SMT server, please set the URL of the SMT Server and the location of the SMT Certificate in <b>SMT Server Settings</b>. Please see your SMT manual for further assistance.</p>");
 
 
     string help_text = help_text_caption + help_text_para1 + help_text_para2 + help_text_para3 + help_text_para4;
 
-    term yepsettings = `VBox(
+    term smtsettings = `VBox(
                            // Translators: Text for UI Label - capitalized
-                           `Left( `Label(_("YEP Server Settings"))),
+                           `Left( `Label(_("SMT Server Settings"))),
                            // Translators: Text for UI Label - capitalized
-                           `TextEntry(`id(`yepurl),  `opt(`hstretch, `notify), _("YEP Server"), ""),
+                           `TextEntry(`id(`smturl),  `opt(`hstretch, `notify), _("SMT Server"), ""),
                            // Translators: Text for UI Label - capitalized
-                           `TextEntry(`id(`yepcert), `opt(`hstretch, `notify), _("YEP Certificate"), "")
+                           `TextEntry(`id(`smtcert), `opt(`hstretch, `notify), _("SMT Certificate"), "")
                           );
 
     term regsettings = `VBox(
@@ -218,7 +218,7 @@ symbol suse_register_configuration()
 
 
     term contents = `VBox(
-    `HBox ( regsettings, yepsettings ),
+    `HBox ( regsettings, smtsettings ),
     `VBox ( `VSpacing(0.5),
                    // Translators: Text for UI Label - capitalized
                   `Left( `Label( _("Registration Data to Use"))  ),
@@ -251,8 +251,8 @@ symbol suse_register_configuration()
     UI::ChangeWidget(`id(`run),     `Value, Register::do_registration);
     UI::ChangeWidget(`id(`sub_hw ), `Value, Register::submit_hwdata);
     UI::ChangeWidget(`id(`sub_opt), `Value, Register::submit_optional);
-    UI::ChangeWidget(`id(`yepurl),  `Value, Register::yep_server);
-    UI::ChangeWidget(`id(`yepcert), `Value, Register::yep_server_cert);
+    UI::ChangeWidget(`id(`smturl),  `Value, Register::smt_server);
+    UI::ChangeWidget(`id(`smtcert), `Value, Register::smt_server_cert);
     integer items=size(table_items);
     UI::ChangeWidget(`id(`edit),    `Enabled, items > 0);
     UI::ChangeWidget(`id(`delete),  `Enabled, items > 0);
@@ -330,29 +330,29 @@ symbol suse_register_configuration()
         }
         else if ( ret == `next )
         {
-            string yepServer     = (string) UI::QueryWidget(`id(`yepurl),  `Value);
-            string yepServerCert = (string) UI::QueryWidget(`id(`yepcert), `Value);
+            string smtServer     = (string) UI::QueryWidget(`id(`smturl),  `Value);
+            string smtServerCert = (string) UI::QueryWidget(`id(`smtcert), `Value);
 
-            if ( (! regexpmatch(yepServer, "^https://.+")  &&  yepServer != "" ) ||
-                 (  yepServer == ""  &&  yepServerCert != "" )
+            if ( (! regexpmatch(smtServer, "^https://.+")  &&  smtServer != "" ) ||
+                 (  smtServer == ""  &&  smtServerCert != "" )
                )
             {
-                 Popup::Message(_("YEP Server URL must start with https://"));
+                 Popup::Message(_("SMT Server URL must start with https://"));
                  ret = nil;
             }
 
-            if (! regexpmatch(yepServerCert, "^(https?|ftp)://.+") &&
-                ! regexpmatch(yepServerCert, "^floppy/.+")         &&
-                ! regexpmatch(yepServerCert, "^/.+")               &&
-                ! regexpmatch(yepServerCert, "^(ask|done)$")       &&
-                  yepServerCert != ""
+            if (! regexpmatch(smtServerCert, "^(https?|ftp)://.+") &&
+                ! regexpmatch(smtServerCert, "^floppy/.+")         &&
+                ! regexpmatch(smtServerCert, "^/.+")               &&
+                ! regexpmatch(smtServerCert, "^(ask|done)$")       &&
+                  smtServerCert != ""
                )
             {
-                Popup::Message(_("Location of YEP Certificate invalid.\nPlease see your YEP documentation."));
+                Popup::Message(_("Location of SMT Certificate invalid.\nPlease see your SMT documentation."));
                  ret = nil;
             }
-            Register::yep_server = yepServer;
-            Register::yep_server_cert = yepServerCert;
+            Register::smt_server = smtServer;
+            Register::smt_server_cert = smtServerCert;
         }
 
         // refresh counter and buttons
@@ -379,8 +379,8 @@ symbol suse_register_configuration()
         y2debug("submit_hwdata: %1",     Register::submit_hwdata);
         y2debug("submit_optional: %1",   Register::submit_optional);
         y2debug("registration_data: %1", Register::registration_data);
-        y2debug("yep_server: %1",        Register::yep_server);
-        y2debug("yep_server_cert: %1",   Register::yep_server_cert);
+        y2debug("smt_server: %1",        Register::smt_server);
+        y2debug("smt_server_cert: %1",   Register::smt_server_cert);
     }
 
     UI::CloseDialog();

@@ -38,7 +38,7 @@
     symbol confRegSrv = Register::configureRegistrationServer();
     if (confRegSrv == `conferror  || confRegSrv == `notrust  || confRegSrv == `silentskip)
     {
-        y2debug("Registration can not be run due to YEP configuration error.");
+        y2debug("Registration can not be run due to SMT configuration error.");
         return `auto;
     }
 
