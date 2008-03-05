@@ -284,8 +284,8 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
            `HBox(
                   `HWeight(1, `PushButton(`id(`back), Label::BackButton()  ) ),
                   `HSpacing( 3 ),
-                   // reactivated skipping the registration (#240174)
-                  `HWeight(1, `PushButton(`id(`skip), Label::SkipButton()  ) ),
+                   // reactivated skipping the registration (#240174) - fixed for (#367184)
+                  `HWeight(1, `PushButton(`id(`skip), _("&Skip") ) ),
                   `HSpacing( 3 ),
                   `HWeight(1, `PushButton(`id(`err_detail), details ) )
                 )
@@ -497,7 +497,8 @@ string browser_command(string url)
     else
     {
         // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310)
-        string required_package = "mozilla-xulrunner181";
+        // SLE10 does not have mozilla-xulrunner181 but mozilla-xulrunner (#367184)
+        string required_package = "mozilla-xulrunner";
         if (!Package::Installed(required_package))
         {
             Package::InstallAllMsg([required_package], nil);

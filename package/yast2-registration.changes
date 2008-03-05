@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  5 12:06:05 CET 2008 - jdsn@suse.de
+
+- fix for issues coming from merge with trunk (#367184)
+- 2.13.28 
+
+-------------------------------------------------------------------
 Wed Feb 27 18:13:45 CET 2008 - jdsn@suse.de
 
 - renaming YEP to SMT
