@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  5 20:56:16 CET 2008 - jdsn@suse.de
+
+- added support for SMT (registration proxy)
+- 2.16.1 
+
+-------------------------------------------------------------------
 Fri Nov  2 16:53:01 CET 2007 - locilka@suse.cz
 
 - Removed dependency on yast2-network, Internet YCP module has been

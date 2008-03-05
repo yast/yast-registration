@@ -53,8 +53,8 @@ global boolean disable_w3m = false;
 global boolean use_proxy   = false;
 global string  http_proxy  = "";
 global string  https_proxy = "";
-global string  yep_server  = "";            // (FATE #302966)
-global string  yep_server_cert = "";        // (FATE #302966)
+global string  smt_server  = "";            // (FATE #302966)
+global string  smt_server_cert = "";        // (FATE #302966)
 
 global map<string, string> registration_data = $[];
 
@@ -110,7 +110,7 @@ map mountFloppy()
     // create mount point directory
     SCR::Execute(.target.mkdir, mpoint);
 
-    y2milestone("Trying to mount %1 as floppy drive to load the YEP certificate file from.", fddevice);
+    y2milestone("Trying to mount %1 as floppy drive to load the SMT certificate file from.", fddevice);
 
     boolean result = (boolean) SCR::Execute(.target.mount, [fddevice, mpoint], "-o ro" );
 
@@ -136,7 +136,7 @@ void umountFloppy(string mpoint)
 /*
  * certificateError()
  *
- * report error messages if YEP certificate file is not found
+ * report error messages if SMT certificate file is not found
  * @return symbol yes, no or retry
  *
  */
@@ -153,19 +153,19 @@ and then specify its path by choosing %2."), deletechars(Label::ContinueButton()
 
     if (type == `floppy)
     {
-        errorMessage = _("Could not load the YEP certificate file from floppy disk.");
+        errorMessage = _("Could not load the SMT certificate file from floppy disk.");
     }
     else if (type == `url)
     {
-        errorMessage = _("Could not download the YEP certificate file from specified URL.");
+        errorMessage = _("Could not download the SMT certificate file from specified URL.");
     }
     else if (type == `file)
     {
-        errorMessage = _("Could not find the YEP certificate file in specified path.");
+        errorMessage = _("Could not find the SMT certificate file in specified path.");
     }
     else
     {
-        errorMessage = _("Unknown error occurred while retrieving YEP certificate file");
+        errorMessage = _("Unknown error occurred while retrieving SMT certificate file");
     }
 
     errorMessage = errorMessage  + "\n\n" + question + "\n\n" + otherwise;
@@ -199,12 +199,12 @@ string suseRegisterURL(string url)
         ]
     )));
 
-    // in case the yep server was already changed do not change it again (to support mobile PCs in different environments)
-    string mod = (string) SCR::Read(.temporary_suseregister_agent.yepurlmodified);
+    // in case the smt server was already changed do not change it again (to support mobile PCs in different environments)
+    string mod = (string) SCR::Read(.temporary_suseregister_agent.smturlmodified);
     if ( mod == "true" )
     {
         url = nil;
-        y2milestone("YEP server has already been modified. I will not change it again.");
+        y2milestone("SMT server has already been modified. I will not change it again.");
     }
 
     cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
@@ -214,7 +214,7 @@ string suseRegisterURL(string url)
     {
         SCR::Write(.temporary_suseregister_agent.url, url);
         cururl = (string) SCR::Read(.temporary_suseregister_agent.url);
-        if (url == cururl) SCR::Write(.temporary_suseregister_agent.yepurlmodified, "true");
+        if (url == cururl) SCR::Write(.temporary_suseregister_agent.smturlmodified, "true");
     }
 
     SCR::UnregisterAgent (.temporary_suseregister_agent);
@@ -226,14 +226,14 @@ string suseRegisterURL(string url)
 /*
  * setupRegistrationServer()
  *
- * write YEP server settings to  (FATE #302966)
+ * write SMT server settings to  (FATE #302966)
  * @return symbol that says if we can perform the registration
  *
  */
 symbol setupRegistrationServer(symbol mode)
 {
-    // in case yep_server is undefined nothing needs to be done
-    if (yep_server == nil  ||  yep_server == "") return `ok;
+    // in case smt_server is undefined nothing needs to be done
+    if (smt_server == nil  ||  smt_server == "") return `ok;
 
     boolean ay = false;    // are we running in autoYaST mode?
     boolean trust = false;
@@ -243,27 +243,27 @@ symbol setupRegistrationServer(symbol mode)
         ay = true;
     }
 
-    // check if yep_server is a valid url
-    map yep_server_parsed = URL::Parse(yep_server);
-    if (yep_server_parsed == $[]  ||  yep_server_parsed["host"]:"" == ""  ||  yep_server_parsed["scheme"]:"" != "https" )
+    // check if smt_server is a valid url
+    map smt_server_parsed = URL::Parse(smt_server);
+    if (smt_server_parsed == $[]  ||  smt_server_parsed["host"]:"" == ""  ||  smt_server_parsed["scheme"]:"" != "https" )
     {
-        y2milestone("The string '%1' could not be parsed and validated as URL to be used as YEP server.", yep_server);
+        y2milestone("The string '%1' could not be parsed and validated as URL to be used as SMT server.", smt_server);
         if (ay) return `conferror;
 
-        string no_yep_server = sformat( _("The YEP server URL could not be validated as URL.
+        string no_smt_server = sformat( _("The SMT server URL could not be validated as URL.
 Registration can not be performed. Please modify /etc/suseRegister.conf and run Registration manually.
-The YEP server URL that was configured was
-%1"), yep_server);
-        Popup::Message(no_yep_server);
+The SMT server URL that was configured was
+%1"), smt_server);
+        Popup::Message(no_smt_server);
         return `conferror;
     }
 
 
-    // write YEP server URL to /etc/suseRegister.conf
-    if (yep_server == suseRegisterURL(yep_server) )
-    { y2milestone("Setup custom YEP server as registration server successful: %1", yep_server); }
+    // write SMT server URL to /etc/suseRegister.conf
+    if (smt_server == suseRegisterURL(smt_server) )
+    { y2milestone("Setup custom SMT server as registration server successful: %1", smt_server); }
     else
-    { y2error("Failed to setup custom YEP server as registration server: %1", yep_server);  }
+    { y2error("Failed to setup custom SMT server as registration server: %1", smt_server);  }
 
 
 
@@ -271,52 +271,52 @@ The YEP server URL that was configured was
 
     symbol certmode = nil;
 
-    // never ever load a certificate file for a *.novell.com yep server
-    if      ( regexpmatch(yep_server_parsed["host"]:"", ".+\.novell\.com$")) { certmode = `none;   }
-    else if (yep_server_cert == nil  || yep_server_cert == "")               { certmode = `url;    }
-    else if ( regexpmatch(yep_server_cert, "^(https?|ftp)://.+") )           { certmode = `url;    }
-    else if ( regexpmatch(yep_server_cert, "^floppy/.+") )                   { certmode = `floppy; }
-    else if ( regexpmatch(yep_server_cert, "^/.+") )                         { certmode = `path;   }
-    else if ( regexpmatch(yep_server_cert, "^ask$") )                        { certmode = `ask;    }
-    else if ( regexpmatch(yep_server_cert, "^done$") )                       { certmode = `done;   }
+    // never ever load a certificate file for a *.novell.com smt server
+    if      ( regexpmatch(smt_server_parsed["host"]:"", ".+\.novell\.com$")) { certmode = `none;   }
+    else if (smt_server_cert == nil  || smt_server_cert == "")               { certmode = `url;    }
+    else if ( regexpmatch(smt_server_cert, "^(https?|ftp)://.+") )           { certmode = `url;    }
+    else if ( regexpmatch(smt_server_cert, "^floppy/.+") )                   { certmode = `floppy; }
+    else if ( regexpmatch(smt_server_cert, "^/.+") )                         { certmode = `path;   }
+    else if ( regexpmatch(smt_server_cert, "^ask$") )                        { certmode = `ask;    }
+    else if ( regexpmatch(smt_server_cert, "^done$") )                       { certmode = `done;   }
     else                                                                     { certmode = `none;   }
 
 
     if (! contains([`none, `done, `url, `floppy, `ask, `path], certmode) )
     {
-        y2error("No YEP certificate file retrieval-mode found to handle current configuration. This should not happen!");
+        y2error("No SMT certificate file retrieval-mode found to handle current configuration. This should not happen!");
         return `conferror;
     }
 
-    string certTmpFile = sformat("%1/__tmpYEPcert.crt", SCR::Read(.target.tmpdir));
+    string certTmpFile = sformat("%1/__tmpSMTcert.crt", SCR::Read(.target.tmpdir));
 
 
     if ( certmode == `url )
     {
-        map certParse = URL::Parse(yep_server_cert);
+        map certParse = URL::Parse(smt_server_cert);
 
-        // if no yep_server_cert is passed then we fall back to predefined yep_server_cert
-        if (yep_server_cert == nil  ||  yep_server_cert == ""  ||  certParse == $[])
+        // if no smt_server_cert is passed then we fall back to predefined smt_server_cert
+        if (smt_server_cert == nil  ||  smt_server_cert == ""  ||  certParse == $[])
         {
-            map certUrl = yep_server_parsed;
+            map certUrl = smt_server_parsed;
             certUrl["scheme"] = "http";
             certUrl["port"] = "80";
-            certUrl["path"] = "/yep.crt";
-            yep_server_cert = URL::Build(certUrl);
+            certUrl["path"] = "/smt.crt";
+            smt_server_cert = URL::Build(certUrl);
             certParse=certUrl;
 
         }
-        y2milestone("Using %1 as URL to download the YEP certificate file.", yep_server_cert);
+        y2milestone("Using %1 as URL to download the SMT certificate file.", smt_server_cert);
 
         // download cert
-        string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", yep_server_cert, certTmpFile);
+        string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", smt_server_cert, certTmpFile);
         if ( SCR::Execute (.target.bash, curlcmd) != 0)
         {
-            y2error("Could not download the YEP certificate file from specified URL %1", yep_server_cert);
+            y2error("Could not download the SMT certificate file from specified URL %1", smt_server_cert);
             if (ay) return `conferror;
 
             // translators: this is a heading for an error message - so no punctuation
-            string urlError = _("Downloading YEP certificate file failed");
+            string urlError = _("Downloading SMT certificate file failed");
             symbol errret = certificateError( urlError, `url);
 
             certTmpFile = nil;
@@ -330,10 +330,10 @@ The YEP server URL that was configured was
         if (!mf["mounted"]:false)
         {
            umountFloppy(mf["mpoint"]:"/dev/fd0");
-           y2error("Could not mount floppy disk to copy the YEP certificte file from. The device that was used was %1", mf["device"]:"");
+           y2error("Could not mount floppy disk to copy the SMT certificte file from. The device that was used was %1", mf["device"]:"");
            if (ay)
            {
-               y2error("No YEP certificate file available. As we are in autoYaST mode Registration will be skipped. Please run it manually.");
+               y2error("No SMT certificate file available. As we are in autoYaST mode Registration will be skipped. Please run it manually.");
                return `silentskip;
            }
            else
@@ -344,12 +344,12 @@ The YEP server URL that was configured was
 
                if ( errret == `yes )
                {
-                   y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to skip Registration.");
+                   y2warning("No SMT certificate could be retrieved (floppy mount error). User selected to skip Registration.");
                    return `silentskip;
                }
                else if ( errret == `no )
                {
-                   y2warning("No YEP certificate could be retrieved (floppy mount error). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                   y2warning("No SMT certificate could be retrieved (floppy mount error). User selected to NOT skip Registration. Most likely Registration will fail now.");
                    return `ok;
                }
                else  { certmode = `ask; }
@@ -357,11 +357,11 @@ The YEP server URL that was configured was
         }
         else
         {
-            string fdpath = regexpsub( yep_server_cert , "^floppy/(.+)$","\\1");
+            string fdpath = regexpsub( smt_server_cert , "^floppy/(.+)$","\\1");
             string cp2tmp = sformat("/bin/cp -a  %1  %2 ", mf["mpoint"]:"/media/floppy" + "/" + fdpath, certTmpFile  );
             if ( SCR::Execute (.target.bash, cp2tmp) != 0)
             {
-                y2error("Could not copy the specified YEP certificate file from floppy disk.");
+                y2error("Could not copy the specified SMT certificate file from floppy disk.");
                 if (ay) return `silentskip;
 
                 // translators: this is a heading for an error message - so no punctuation
@@ -370,12 +370,12 @@ The YEP server URL that was configured was
 
                 if ( errret == `yes )
                 {
-                    y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to skip Registration.");
+                    y2warning("No SMT certificate could be retrieved (could not copy from floppy). User selected to skip Registration.");
                     return `silentskip;
                 }
                 else if ( errret == `no )
                 {
-                    y2warning("No YEP certificate could be retrieved (could not copy from floppy). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                    y2warning("No SMT certificate could be retrieved (could not copy from floppy). User selected to NOT skip Registration. Most likely Registration will fail now.");
                     return `ok;
                 }
                 else  { certmode = `ask; }
@@ -391,23 +391,23 @@ The YEP server URL that was configured was
     {
         // try to copy cert if valid path,  else ask   // copy
 
-        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", yep_server_cert, certTmpFile );
+        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", smt_server_cert, certTmpFile );
         if ( SCR::Execute(.target.bash, cp2tmp )  !=  0 )
         {
-            y2error("Could not copy local YEP certificate file");
+            y2error("Could not copy local SMT certificate file");
             if (ay) return `silentskip;
 
             // translators: this is a heading for an error message - so no punctuation
-            string fileCopyError = _("Could find YEP certificate file in local path");
+            string fileCopyError = _("Could find SMT certificate file in local path");
             symbol errret = certificateError( fileCopyError, `file);
             if ( errret == `yes )
             {
-                y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to skip Registration.");
+                y2warning("No SMT certificate could be retrieved (could not copy local file). User selected to skip Registration.");
                 return `silentskip;
             }
             else if ( errret == `no )
             {
-                y2warning("No YEP certificate could be retrieved (could not copy local file). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                y2warning("No SMT certificate could be retrieved (could not copy local file). User selected to NOT skip Registration. Most likely Registration will fail now.");
                 return `ok;
             }
             else  { certmode = `ask; }
@@ -418,13 +418,13 @@ The YEP server URL that was configured was
     {
         if (ay)
         {
-            y2error("YEP certificate was configured to be asked for. AutoYaST does not support interactive dialogs. Registration will be skipped.");
+            y2error("SMT certificate was configured to be asked for. AutoYaST does not support interactive dialogs. Registration will be skipped.");
             return `silentskip;
         }
 
         string basepath = "/tmp";
         string certFile = "";
-        string selectCertLabel = _("Select YEP certificate file");
+        string selectCertLabel = _("Select SMT certificate file");
         boolean exitloop = false;
 
         do
@@ -447,17 +447,17 @@ The YEP server URL that was configured was
             string cp2tmp = sformat("/bin/cp -a  %1  %2 ", certFile , certTmpFile  );
             if (SCR::Execute(.target.bash, cp2tmp) == 0)
             {
-                y2milestone("Found user specified YEP certificate file");
+                y2milestone("Found user specified SMT certificate file");
                 exitloop = true;
             }
             else
             {
-                y2milestone("Could not copy local file as YEP certificate");
+                y2milestone("Could not copy local file as SMT certificate");
                 string fileErrorHeader = _("Could not copy certificate file");
                 string fileErrorMsg    = _("Do you want to retry?");
                 if (!Popup::YesNoHeadline(fileErrorHeader, fileErrorMsg))
                 {
-                    y2milestone("User selected to skip the setup of a YEP certificate");
+                    y2milestone("User selected to skip the setup of a SMT certificate");
                     return `conferror;
                 }
             }
@@ -469,15 +469,15 @@ The YEP server URL that was configured was
 
     if (certmode == `done)
     {
-        y2milestone("User configured to do nothing to retrieve a YEP certificate file.");
+        y2milestone("User configured to do nothing to retrieve a SMT certificate file.");
         y2milestone("I hope you know what you do. Registration will be run but may fail due to missing certificate.");
         return `ok;
     }
 
     if (certmode == `none)
     {
-        y2warning("The string that was passed to get the YEP certificate file does not match any handler.");
-        y2warning("The string was: %1", yep_server_cert);
+        y2warning("The string that was passed to get the SMT certificate file does not match any handler.");
+        y2warning("The string was: %1", smt_server_cert);
         y2warning("No certificate could be retrieved. Registration process will not be run!");
         return `conferror;
     }
@@ -489,10 +489,10 @@ The YEP server URL that was configured was
 
     // ask user if he trusts the certificate
     map cP = RegisterCert::parseCertificate(certTmpFile);
-    y2milestone("YEP certificate file information: %1", cP);
+    y2milestone("SMT certificate file information: %1", cP);
 
     string trustQuestion = _("Do you want to trust this certificate?");
-    string trustMessage  = _("This certificate will be used to connect to the YEP server.\nYou have to trust this certificate in order to continue with the Registration.");
+    string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
 
     string certInfo = "";
     list issueList = (list) cP["ISSUER"]:[];
@@ -544,25 +544,25 @@ The YEP server URL that was configured was
 
     if ((symbol)uret == `trust)
     {
-        string installCert    = sformat("cp -a  %1  /etc/ssl/certs/yep.pem  &&  c_rehash /etc/ssl/certs", certTmpFile);
-        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/yep.cer", certTmpFile);
+        string installCert    = sformat("cp -a  %1  /etc/ssl/certs/smt.pem  &&  c_rehash /etc/ssl/certs", certTmpFile);
+        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/smt.cer", certTmpFile);
 
         integer instret    = (integer) SCR::Execute(.target.bash, installCert);
         integer instretZMD = (integer) SCR::Execute(.target.bash, installCertZMD);
 
         if ( instret == 0 && instretZMD == 0)
         {
-            y2milestone("Successfully installed YEP certificate. Registration will now proceed.");
+            y2milestone("Successfully installed SMT certificate. Registration will now proceed.");
             return `ok;
         }
         else
         {
             if (instret == 0 )
-                y2error("Failed to install YEP certificate to common cert storage. Registration would fail and thus will be skipped.");
+                y2error("Failed to install SMT certificate to common cert storage. Registration would fail and thus will be skipped.");
             if (instretZMD == 0)
-                y2error("Failed to install YEP certificate for ZMD. Registration would fail and thus will be skipped.");
+                y2error("Failed to install SMT certificate for ZMD. Registration would fail and thus will be skipped.");
 
-            if (!ay) Popup::Message(_("Installation of the YEP certificates failed.\nPlease see the logs for further information."));
+            if (!ay) Popup::Message(_("Installation of the SMT certificates failed.\nPlease see the logs for further information."));
             return `silentskip;
         }
     }
@@ -587,26 +587,26 @@ The YEP server URL that was configured was
 /*
  * configureRegistrationServer()
  *
- * read YEP server settings from install.inf and set them up (FATE #302966)
+ * read SMT server settings from install.inf and set them up (FATE #302966)
  *
  */
 global symbol configureRegistrationServer()
 {
-    yep_server = Linuxrc::InstallInf("yepurl");
-    yep_server_cert = Linuxrc::InstallInf("yepcert");
+    smt_server = Linuxrc::InstallInf("smturl");
+    smt_server_cert = Linuxrc::InstallInf("smtcert");
 
-    y2milestone("YEP config - yepurl:  %1", yep_server);
-    y2milestone("YEP config - yepcert: %1", yep_server_cert);
+    y2milestone("SMT config - smturl:  %1", smt_server);
+    y2milestone("SMT config - smtcert: %1", smt_server_cert);
 
-/*  yepurl=https:/yep.mybigcompany.com/center/regsvc/
-    yepcert=ask      open FileDialog
-    yepcert=done     Cert already insalled - do nothing
-    yepcert=http:/certpool.mybigcompany.com/yep/yep-ca.crt     download from there
-    yepcert=floppy/path/to/file.crt
-    yepcert=/path/to/local/file.crt   copy from there
+/*  smturl=https:/smt.mybigcompany.com/center/regsvc/
+    smtcert=ask      open FileDialog
+    smtcert=done     Cert already insalled - do nothing
+    smtcert=http:/certpool.mybigcompany.com/smt/smt-ca.crt     download from there
+    smtcert=floppy/path/to/file.crt
+    smtcert=/path/to/local/file.crt   copy from there
 */
 
-    // setup the yep_server settings
+    // setup the smt_server settings
     return setupRegistrationServer(nil);
 }
 
@@ -867,8 +867,8 @@ global boolean Import(map settings)
     do_registration     = (boolean) settings["do_registration"]:do_registration;
     register_regularly  = (boolean) settings["register_regularly"]:register_regularly;
     registration_data   = (map<string, string>) settings["registration_data"]:$[];
-    yep_server          = (string) settings["yep_server"]:"";
-    yep_server_cert     = (string) settings["yep_server_cert"]:"";
+    smt_server          = (string) settings["smt_server"]:"";
+    smt_server_cert     = (string) settings["smt_server_cert"]:"";
 
     return true;
 }
@@ -900,8 +900,8 @@ global map Export()
                "submit_hwdata":submit_hwdata,
                "do_registration":do_registration,
                "register_regularly":register_regularly,
-               "yep_server":yep_server,
-               "yep_server_cert":yep_server_cert,
+               "smt_server":smt_server,
+               "smt_server_cert":smt_server_cert,
                "registration_data":registration_data
     ];
 }
