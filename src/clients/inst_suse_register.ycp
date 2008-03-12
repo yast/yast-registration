@@ -408,44 +408,8 @@ grep ^$user$ $XA/export >/dev/null 2>&1  || echo $user >> $XA/export
 mkdir -p $fakehome
 chmod 700 $fakehome
 tmp=$(mktemp $fakehome/.Xauthority.XXXXXX) || exit 1
-tmpjail=$(mktemp $fakehome/.screenrc.jail.XXXXXX) || exit 1
-chmod 600 $tmp $tmpjail
-chown $user:$group $tmp $tmpjail $fakehome
+chmod 600 $tmp
 trap \"rm -rf $fakehome\" EXIT INT HUP TERM
-
-cat > $tmpjail <<EOJAIL
-# screenrc.jail
-#
-# use in environments, where a screen session must not spawn any new processes.
-# 2006-04-03, jw
-
-escape \\377\\377
-shell /bin/true
-# stuff is needed for cursor keys. (bugzilla #167255)
-# We can neiter exclude one command from the list nor add it back later.
-# Resort to enumerate all except one. yacc.
-
-chacl * -x acladd,aclchg,acldel,aclgrp,aclumask,activity,addacl,allpartial,altscreen,at,autodetach
-chacl * -x autonuke,backtick,bell,bell_msg,bind,bindkey,blanker,blankerprg,break,breaktype,bufferfile
-chacl * -x c1,caption,charset,chdir,clear,colon,command,compacthist,console,copy,crlf,debug
-chacl * -x defautonuke,defbce,defbreaktype,defc1,defcharset,defencoding,defescape,defflow,defgr
-chacl * -x defhstatus,defkanji,deflog,deflogin,defmode,defmonitor,defnonblock,defobuflimit
-chacl * -x defscrollback,defshell,defsilence,defslowpaste,defutf8,defwrap,defwritelock,detach,digraph
-chacl * -x dinfo,displays,dumptermcap,echo,encoding,escape,eval,exec,fit,flow,focus,gr,hardcopy
-chacl * -x hardcopy_append,hardcopydir,hardstatus,height,help,history,hstatus,idle,ignorecase,info
-chacl * -x kanji,kill,lastmsg,license,lockscreen,log,logfile,login,logtstamp,mapdefault,mapnotnext
-chacl * -x maptimeout,markkeys,maxwin,meta,monitor,msgminwait,msgwait,multiuser,nethack,next,nonblock
-chacl * -x number,obuflimit,only,other,partial,password,paste,pastefont,pow_break,pow_detach
-chacl * -x pow_detach_msg,prev,printcmd,process,quit,readbuf,readreg,redisplay,register,remove
-chacl * -x removebuf,reset,resize,screen,scrollback,select,sessionname,setenv,setsid,shell
-chacl * -x shelltitle,silence,silencewait,sleep,slowpaste,sorendition,source,split,startup_message
-chacl * -x su,suspend,term,termcap,termcapinfo,terminfo,time,title,umask,unsetenv,utf8,vbell
-chacl * -x vbell_msg,vbellwait,verbose,version,wall,width,windowlist,windows,wrap,writebuf,writelock
-chacl * -x xoff,xon,zmodem,zombie
-#chacl * -x stuff
-chacl * -x chacl        # must be last.
-
-EOJAIL
 
 ", user, group, command );
 
@@ -479,10 +443,7 @@ exit 0";
     }
     else
     {
-        exec = exec +
-"
-screen -c $tmpjail su -s /bin/bash -- $user -c \"cd; $cmd\"
-exit 0";
+        exec = exec + "su -s /bin/bash -- $user -c \"cd; $cmd\"";
     }
 
     y2milestone("using su_exec to launch browser");
@@ -501,8 +462,7 @@ string browser_command(string url)
     if ( textmode )
     {
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
-        cmd_ok = cmd_ok && (integer) SCR::Execute(.target.bash, "test -x /usr/bin/screen") == 0 ? true:false;
-        bcmd = " screen w3m ";
+        bcmd = " w3m ";
     }
     else
     {
@@ -549,7 +509,15 @@ boolean launchBrowser(string url)
 
     y2milestone("launching browser: %1", command);
 
-    SCR::Execute(.target.bash, command );
+    if (textmode)
+    {
+        UI::RunInTerminal(command);
+    }
+    else
+    {
+        SCR::Execute(.target.bash, command );
+    }
+
     UI::RedrawScreen();
 
     return true;
@@ -866,9 +834,6 @@ boolean launchBrowser(string url)
 
     SourceManager::Unlock ();
 
-    // Register::finish mandatory as well - do not remove
-    Register::finish();
-
     if (Mode::normal())
     {
 	// #172665
@@ -882,6 +847,8 @@ boolean launchBrowser(string url)
         {
             // skipping suse register - no online update
             Internet::do_you = false;
+            // disable regular registrations when registration was skipped initially (#366687)
+            Register::register_regularly = false;
             ret = `next;
         }
         else
@@ -890,6 +857,9 @@ boolean launchBrowser(string url)
             Internet::do_you = true;
         }
     }
+
+    // Register::finish mandatory as well - do not remove
+    Register::finish();
 
     return (symbol)ret;
 }
