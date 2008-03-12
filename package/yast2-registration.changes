@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 12 16:22:54 CET 2008 - jdsn@suse.de
+
+- fix for textmode registration with w3m (#367719)
+- show curser in w3m registration (#175669)
+- 2.13.19 
+
+-------------------------------------------------------------------
 Wed Mar  5 12:06:05 CET 2008 - jdsn@suse.de
 
 - fix for issues coming from merge with trunk (#367184)
