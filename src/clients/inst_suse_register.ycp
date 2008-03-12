@@ -834,9 +834,6 @@ boolean launchBrowser(string url)
 
     SourceManager::Unlock ();
 
-    // Register::finish mandatory as well - do not remove
-    Register::finish();
-
     if (Mode::normal())
     {
 	// #172665
@@ -850,6 +847,8 @@ boolean launchBrowser(string url)
         {
             // skipping suse register - no online update
             Internet::do_you = false;
+            // disable regular registrations when registration was skipped initially
+            Register::register_regularly = false;
             ret = `next;
         }
         else
@@ -858,6 +857,9 @@ boolean launchBrowser(string url)
             Internet::do_you = true;
         }
     }
+
+    // Register::finish mandatory as well - do not remove (#366687)
+    Register::finish();
 
     return (symbol)ret;
 }
