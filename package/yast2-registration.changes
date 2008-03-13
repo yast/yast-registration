@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Wed Mar 12 16:22:54 CET 2008 - jdsn@suse.de
 
-- fix for textmode registration with w3m (#367719)
-- show curser in w3m registration (#175669)
+- fix for textmode registration with w3m (bnc#367719)
+- show curser in w3m registration (bnc#175669)
 - 2.13.19 
 
 -------------------------------------------------------------------
