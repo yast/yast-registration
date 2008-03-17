@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
+
+- added 'StartupNotify=true' to the desktop file (bnc #304964)
+
+-------------------------------------------------------------------
 Wed Mar  5 20:56:16 CET 2008 - jdsn@suse.de
 
 - added support for SMT (registration proxy)

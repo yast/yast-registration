@@ -16,3 +16,4 @@ Exec=/sbin/yast2 inst_suse_register
 
 Name=Novell Customer Center Configuration
 GenericName=Novell Customer Center Configuration
+StartupNotify=true

@@ -15,3 +15,4 @@ Exec=/sbin/yast2 inst_suse_register
 
 Name=Online Update Configuration
 GenericName=Online Update Configuration
+StartupNotify=true
