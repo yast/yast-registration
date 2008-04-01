@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Apr  1 20:03:12 CEST 2008 - jdsn@suse.de
+
+- rename bootparameters for custom registration server (bnc#376000)
+- do not prompt for SMT certificate in running system (bnc#375993)
+- proper pluralization in AutYaST summary (bnc#184893)
+- 2.13.20 
+
+-------------------------------------------------------------------
 Wed Mar 12 16:22:54 CET 2008 - jdsn@suse.de
 
 - fix for textmode registration with w3m (bnc#367719)

@@ -243,6 +243,9 @@ symbol setupRegistrationServer(symbol mode)
         ay = true;
     }
 
+    string smtpemPath = "/etc/ssl/certs";
+    string smtpemFile = smtpemPath + "/smt.pem";
+
     // check if smt_server is a valid url
     map smt_server_parsed = URL::Parse(smt_server);
     if (smt_server_parsed == $[]  ||  smt_server_parsed["host"]:"" == ""  ||  smt_server_parsed["scheme"]:"" != "https" )
@@ -290,6 +293,15 @@ The SMT server URL that was configured was
 
     string certTmpFile = sformat("%1/__tmpSMTcert.crt", SCR::Read(.target.tmpdir));
 
+    // check for existing certificate (bnc#376000)
+    integer certExists = nil;
+    certExists = (integer) SCR::Execute(.target.bash, sformat("[ -f  %1 ]", smtpemFile));
+    if (certmode != `url  &&  certExists == 0)
+    {
+        // do nothing to refetch the certificate if manual interaction is necessary
+        y2milestone("Existing SMT certificate found and keeping it. To renew the SMT certificate please assign a URL as value to the key 'regcert' in /var/lib/YaST2/install.inf");
+        return `ok;
+    }
 
     if ( certmode == `url )
     {
@@ -310,8 +322,15 @@ The SMT server URL that was configured was
 
         // download cert
         string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", smt_server_cert, certTmpFile);
-        if ( SCR::Execute (.target.bash, curlcmd) != 0)
+        if ( SCR::Execute(.target.bash, curlcmd) != 0)
         {
+            if (certExists == 0)
+            {
+                // do nothing to refetch the certificate if manual interaction is necessary
+                y2milestone("Could not download the current SMT certificate but existing certificate found and keeping it. To renew the SMT certificate please make sure it is available on the registration server.");
+                return `ok;
+            }
+
             y2error("Could not download the SMT certificate file from specified URL %1", smt_server_cert);
             if (ay) return `conferror;
 
@@ -359,7 +378,7 @@ The SMT server URL that was configured was
         {
             string fdpath = regexpsub( smt_server_cert , "^floppy/(.+)$","\\1");
             string cp2tmp = sformat("/bin/cp -a  %1  %2 ", mf["mpoint"]:"/media/floppy" + "/" + fdpath, certTmpFile  );
-            if ( SCR::Execute (.target.bash, cp2tmp) != 0)
+            if ( SCR::Execute(.target.bash, cp2tmp) != 0)
             {
                 y2error("Could not copy the specified SMT certificate file from floppy disk.");
                 if (ay) return `silentskip;
@@ -491,6 +510,18 @@ The SMT server URL that was configured was
     map cP = RegisterCert::parseCertificate(certTmpFile);
     y2milestone("SMT certificate file information: %1", cP);
 
+    // compare with existing certificate (bnc#376000)
+    if (certExists == 0)
+    {
+        map orig_cP = RegisterCert::parseCertificate(smtpemFile);
+        if (orig_cP["FINGERPRINT"]:"foo" == cP["FINGERPRINT"]:"bar" )
+        {
+            // return `ok if fingerprints match - no need to ask again
+            y2milestone("Current SMT certificate is up to date and will be kept.");
+            return `ok;
+        }
+    }
+
     string trustQuestion = _("Do you want to trust this certificate?");
     string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
 
@@ -544,7 +575,7 @@ The SMT server URL that was configured was
 
     if ((symbol)uret == `trust)
     {
-        string installCert    = sformat("cp -a  %1  /etc/ssl/certs/smt.pem  &&  c_rehash /etc/ssl/certs", certTmpFile);
+        string installCert    = sformat("cp -a  %1  %2  &&  c_rehash %3", certTmpFile, smtpemFile, smtpemPath);
         string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/smt.cer", certTmpFile);
 
         integer instret    = (integer) SCR::Execute(.target.bash, installCert);
@@ -592,18 +623,22 @@ The SMT server URL that was configured was
  */
 global symbol configureRegistrationServer()
 {
-    smt_server = Linuxrc::InstallInf("smturl");
-    smt_server_cert = Linuxrc::InstallInf("smtcert");
+    // boot parameters have a generic naming (regurl) - internally keeping smt for variable names
+    smt_server = Linuxrc::InstallInf("regurl");
+    smt_server_cert = Linuxrc::InstallInf("regcert");
 
-    y2milestone("SMT config - smturl:  %1", smt_server);
-    y2milestone("SMT config - smtcert: %1", smt_server_cert);
+    y2milestone("SMT config - regurl:  %1", smt_server);
+    y2milestone("SMT config - regcert: %1", smt_server_cert);
 
-/*  smturl=https:/smt.mybigcompany.com/center/regsvc/
-    smtcert=ask      open FileDialog
-    smtcert=done     Cert already insalled - do nothing
-    smtcert=http:/certpool.mybigcompany.com/smt/smt.crt     download from there
-    smtcert=floppy/path/to/file.crt
-    smtcert=/path/to/local/file.crt   copy from there
+/*  regurl=https:/smt.mybigcompany.com/center/regsvc/
+    regcert=ask      open FileDialog
+    regcert=done     Cert already insalled - do nothing
+    regcert=http:/certpool.mybigcompany.com/smt/smt.crt     download from there
+    regcert=floppy/path/to/file.crt
+    regcert=/path/to/local/file.crt   copy from there
+
+    the old parameters 'smturl' and 'smtcert' are supported as well
+      but their values will be written to 'regurl' and 'regcert'
 */
 
     // setup the smt_server settings

@@ -66,8 +66,10 @@ string Summary()
     summary = Summary::AddLine   (summary, Register::do_registration ? _("Run during autoinstallation"):_("Do not run during autoinstallation"));
 
     integer items_count = size (Register::registration_data);
+    // (bnc#184893) - fix is not 100% correct for every language, but will not break the translation
     // Translators: Sentence-like text for singular and plural (incl. zero) of items
-    string  items_msg   = items_count == 1  ? _("1 item of registration data"):sformat(_("%1 items of registration data"), items_count);
+    string  items_msg   = _("1 item of registration data", "%1 items of registration data", items_count);
+    items_msg = sformat(items_msg, items_count);
 
     if ( Register::do_registration )
     {
