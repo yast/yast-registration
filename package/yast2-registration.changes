@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  1 21:09:48 CEST 2008 - jdsn@suse.de
+
+- proper pluralization in autoYaST (bnc#184893) 
+
+-------------------------------------------------------------------
 Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
 
 - added 'StartupNotify=true' to the desktop file (bnc #304964)

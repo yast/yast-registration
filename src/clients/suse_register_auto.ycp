@@ -67,7 +67,8 @@ string Summary()
 
     integer items_count = size (Register::registration_data);
     // Translators: Sentence-like text for singular and plural (incl. zero) of items
-    string  items_msg   = items_count == 1  ? _("1 item of registration data"):sformat(_("%1 items of registration data"), items_count);
+    string  items_msg   = _("%1 item of registration data", "%1 items of registration data", items_count);
+    items_msg = sformat(items_msg, items_count);  // (bnc#184893)
 
     if ( Register::do_registration )
     {
