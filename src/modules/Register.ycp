@@ -244,7 +244,7 @@ symbol setupRegistrationServer(symbol mode)
     }
 
     string smtpemPath = "/etc/ssl/certs";
-    string smtpemFile = smtpemPath + "/smt.pem";
+    string smtpemFile = smtpemPath + "/registration-server.pem";
 
     // check if smt_server is a valid url
     map smt_server_parsed = URL::Parse(smt_server);
@@ -576,7 +576,7 @@ The SMT server URL that was configured was
     if ((symbol)uret == `trust)
     {
         string installCert    = sformat("cp -a  %1  %2  &&  c_rehash %3", certTmpFile, smtpemFile, smtpemPath);
-        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/smt.cer", certTmpFile);
+        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/registration-server.cer", certTmpFile);
 
         integer instret    = (integer) SCR::Execute(.target.bash, installCert);
         integer instretZMD = (integer) SCR::Execute(.target.bash, installCertZMD);
@@ -902,8 +902,8 @@ global boolean Import(map settings)
     do_registration     = (boolean) settings["do_registration"]:do_registration;
     register_regularly  = (boolean) settings["register_regularly"]:register_regularly;
     registration_data   = (map<string, string>) settings["registration_data"]:$[];
-    smt_server          = (string) settings["smt_server"]:"";
-    smt_server_cert     = (string) settings["smt_server_cert"]:"";
+    smt_server          = (string) settings["reg_server"]:"";
+    smt_server_cert     = (string) settings["reg_server_cert"]:"";
 
     return true;
 }
@@ -935,8 +935,8 @@ global map Export()
                "submit_hwdata":submit_hwdata,
                "do_registration":do_registration,
                "register_regularly":register_regularly,
-               "smt_server":smt_server,
-               "smt_server_cert":smt_server_cert,
+               "reg_server":smt_server,
+               "reg_server_cert":smt_server_cert,
                "registration_data":registration_data
     ];
 }

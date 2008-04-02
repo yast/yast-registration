@@ -381,8 +381,8 @@ symbol suse_register_configuration()
         y2debug("submit_hwdata: %1",     Register::submit_hwdata);
         y2debug("submit_optional: %1",   Register::submit_optional);
         y2debug("registration_data: %1", Register::registration_data);
-        y2debug("smt_server: %1",        Register::smt_server);
-        y2debug("smt_server_cert: %1",   Register::smt_server_cert);
+        y2debug("reg_server: %1",        Register::smt_server);
+        y2debug("reg_server_cert: %1",   Register::smt_server_cert);
     }
 
     UI::CloseDialog();

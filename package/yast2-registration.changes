@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr  2 14:57:00 CEST 2008 - jdsn@suse.de
+
+- renaming all registration cofiguration parameters (bnc#376000)
+- 2.13.21
+
+-------------------------------------------------------------------
 Tue Apr  1 20:03:12 CEST 2008 - jdsn@suse.de
 
 - rename bootparameters for custom registration server (bnc#376000)
