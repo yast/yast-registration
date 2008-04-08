@@ -502,78 +502,83 @@ The SMT server URL that was configured was
     }
 
 
-
-    // in autoYaST mode we automatically trust - we are done here
-    if ( trust || ay ) { return `ok; }
-
-    // ask user if he trusts the certificate
+    // log certificate details
     map cP = RegisterCert::parseCertificate(certTmpFile);
     y2milestone("SMT certificate file information: %1", cP);
 
-    // compare with existing certificate (bnc#376000)
-    if (certExists == 0)
+
+    // in autoYaST mode we automatically trust
+    if ( !ay )  // (bnc#377929)
     {
-        map orig_cP = RegisterCert::parseCertificate(smtpemFile);
-        if (orig_cP["FINGERPRINT"]:"foo" == cP["FINGERPRINT"]:"bar" )
+        // ask user if he trusts the certificate
+
+        // compare with existing certificate (bnc#376000)
+        if (certExists == 0)
         {
-            // return `ok if fingerprints match - no need to ask again
-            y2milestone("Current SMT certificate is up to date and will be kept.");
-            return `ok;
+            map orig_cP = RegisterCert::parseCertificate(smtpemFile);
+            if (orig_cP["FINGERPRINT"]:"foo" == cP["FINGERPRINT"]:"bar" )
+            {
+                // return `ok if fingerprints match - no need to ask again
+                y2milestone("Current SMT certificate is up to date and will be kept.");
+                return `ok;
+            }
         }
-    }
 
-    string trustQuestion = _("Do you want to trust this certificate?");
-    string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
+        string trustQuestion = _("Do you want to trust this certificate?");
+        string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
 
-    string certInfo = "";
-    list issueList = (list) cP["ISSUER"]:[];
-    //translators: this is certificate context
-    certInfo = certInfo + _("<p><b>Issued For:</b></p>");
-    if (size (issueList) > 0)
-    {
-        certInfo = certInfo + "<pre>";
-        foreach (map<string,string> keyval, (list<map<string,string> >) issueList, {
-            foreach (string key, string val, (map<string, string>) keyval, {
-                certInfo = certInfo + sformat("\n%1:  %2", key, val);
+        string certInfo = "";
+        list issueList = (list) cP["ISSUER"]:[];
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Issued For:</b></p>");
+        if (size (issueList) > 0)
+        {
+            certInfo = certInfo + "<pre>";
+            foreach (map<string,string> keyval, (list<map<string,string> >) issueList, {
+                foreach (string key, string val, (map<string, string>) keyval, {
+                    certInfo = certInfo + sformat("\n%1:  %2", key, val);
+                });
             });
-        });
-        certInfo = certInfo + "</pre>";
-    }
+            certInfo = certInfo + "</pre>";
+        }
 
-    //translators: this is certificate context
-    certInfo = certInfo + _("<p><b>Subject:</b></p>");
-    list subjectList=(list) cP["SUBJECT"]:[];
-    if (size (subjectList) > 0)
-    {
-        certInfo = certInfo + "<pre>";
-        foreach (map<string, string> keyval, (list<map<string,string> >) subjectList, {
-            foreach (string key, string val, (map<string,string>)keyval, {
-                certInfo = certInfo + sformat("\n%1:  %2", key, val);
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Subject:</b></p>");
+        list subjectList=(list) cP["SUBJECT"]:[];
+        if (size (subjectList) > 0)
+        {
+            certInfo = certInfo + "<pre>";
+            foreach (map<string, string> keyval, (list<map<string,string> >) subjectList, {
+                foreach (string key, string val, (map<string,string>)keyval, {
+                    certInfo = certInfo + sformat("\n%1:  %2", key, val);
+                });
             });
-        });
+            certInfo = certInfo + "</pre>";
+        }
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Validity:</b></p>");
+        certInfo = certInfo + "<pre>";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Valid from: ")  + " " + cP["STARTDATE"]:"";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Valid to: ")  + " " + cP["ENDDATE"]:"";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Fingerprint: ") + " " + cP["FINGERPRINT"]:"";
         certInfo = certInfo + "</pre>";
+
+        UI::OpenDialog( `MinSize(70, 20, `VBox(
+            `Left( `Label(`opt(`boldFont), trustQuestion)),
+            `Left( `Label(trustMessage)),
+            `RichText(sformat("%1",certInfo)),
+            `HBox(`PushButton(`id(`trust), _("Trust")), `HSpacing(1.5), `PushButton(`id(`notrust), _("Reject")) )
+        )));
+        any uret = UI::UserInput();
+        UI::CloseDialog();
+        if ((symbol)uret == `trust) { trust = true; }
     }
-    //translators: this is certificate context
-    certInfo = certInfo + _("<p><b>Validity:</b></p>");
-    certInfo = certInfo + "<pre>";
-    //translators: this is certificate context
-    certInfo = certInfo + "\n" + _("Valid from: ")  + " " + cP["STARTDATE"]:"";
-    //translators: this is certificate context
-    certInfo = certInfo + "\n" + _("Valid to: ")  + " " + cP["ENDDATE"]:"";
-    //translators: this is certificate context
-    certInfo = certInfo + "\n" + _("Fingerprint: ") + " " + cP["FINGERPRINT"]:"";
-    certInfo = certInfo + "</pre>";
 
-    UI::OpenDialog( `MinSize(70, 20, `VBox(
-        `Left( `Label(`opt(`boldFont), trustQuestion)),
-        `Left( `Label(trustMessage)),
-        `RichText(sformat("%1",certInfo)),
-        `HBox(`PushButton(`id(`trust), _("Trust")), `HSpacing(1.5), `PushButton(`id(`notrust), _("Reject")) )
-    )));
-    any uret = UI::UserInput();
-    UI::CloseDialog();
-
-    if ((symbol)uret == `trust)
+    // (bnc#377929)
+    if ( trust )
     {
         string installCert    = sformat("cp -a  %1  %2  &&  c_rehash %3", certTmpFile, smtpemFile, smtpemPath);
         string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/registration-server.cer", certTmpFile);
@@ -599,6 +604,7 @@ The SMT server URL that was configured was
     }
     else
     {
+        y2milestone("User decided not to trust the SMT registration server certificate. Registration will be skipped.");
         return `notrust;
     }
 

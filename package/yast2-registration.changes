@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  8 16:06:58 CEST 2008 - jdsn@suse.de
+
+- fix SMT certificate installation in autoyast mode (bnc#377929)
+- 2.13.22 
+
+-------------------------------------------------------------------
 Wed Apr  2 14:57:00 CEST 2008 - jdsn@suse.de
 
 - renaming all registration cofiguration parameters (bnc#376000)
