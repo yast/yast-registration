@@ -211,29 +211,38 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 
     /* vv   MAIN (WIZARD) LAYOUT  vv  */
     term sr_layout=nil;
-    sr_layout=`HVCenter( `VBox(
-                     `Left (
-                             `RadioButtonGroup( `id(`sr_perform), `VBox(
-                             `Left ( `Label( nccc_top ) ),
-                             `VSpacing(1),
-                             `Left ( `RadioButton(`id(`noconfigure), `opt(`notify), nccc_noconfigure )),
-                             `Left ( `RadioButton(`id(`configure),   `opt(`notify), nccc_configure, true )),
-                             `Left ( `id(`includeinfo), `HBox( `HSpacing( 3.0 ),
-                                      `VBox (
-                                             `VSpacing(0.5),
-                                             `Left( `Label( nccc_sub_comment ) ),
-                                             `Left( `CheckBox(`id(`hwinfo),  `opt(`notify), nccc_sub_hwinfo,  Register::submit_hwdata ) ),
-                                             `Left( `CheckBox(`id(`optional), `opt(`notify), nccc_sub_optional, Register::submit_optional ) ),
-                                              Register::display_forcereg ? `Left( `CheckBox(`id(`forcereg), `opt(`notify), nccc_forcereg, false ) ):`Empty() ,
-                                             `VSpacing(0.5),
-                                             `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
-                                   ) ) ) ,
-                             // active in SLE products only - merged here for consistency
-                             //`VSpacing(0.5),
-                             //`Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ),
-                             `VSpacing(0.5)
-                           )))
+
+    sr_layout = `HVSquash(
+    `VBox(
+        `Label( nccc_top ),
+        `VSpacing(0.5),
+        `Frame( title,
+            `RadioButtonGroup( `id(`sr_perform),
+            `MarginBox( 2, 0.5,
+            `VBox(
+                `Left ( `RadioButton(`id(`noconfigure), `opt(`notify), nccc_noconfigure )),
+                `Left ( `RadioButton(`id(`configure),   `opt(`notify), nccc_configure, true )),
+                `Left ( `id(`includeinfo),
+                `HBox( `HSpacing( 3.0 ),
+                       `VBox (
+                           `VSpacing(0.5),
+                           `Left( `Label( nccc_sub_comment ) ),
+                           `Left( `CheckBox(`id(`hwinfo),  `opt(`notify), nccc_sub_hwinfo,  Register::submit_hwdata ) ),
+                           `Left( `CheckBox(`id(`optional), `opt(`notify), nccc_sub_optional, Register::submit_optional ) ),
+                            Register::display_forcereg ? `Left( `CheckBox(`id(`forcereg), `opt(`notify), nccc_forcereg, false ) ):`Empty(),
+                           `VSpacing(0.5),
+                            // active in SLE products only - merged here for consistency
+                            //`VSpacing(0.5),
+                            //`Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ),
+                           `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
+                        )
+                    )
+                )
+            ))
+        ))
     ));
+
+
 
     term contents = `VBox ( `VSpacing (0.5), sr_layout, `VSpacing (0.5));
     /* ^^       END MAIN LAYOUT     ^^  */
@@ -409,13 +418,15 @@ mkdir -p $fakehome
 chmod 700 $fakehome
 tmp=$(mktemp $fakehome/.Xauthority.XXXXXX) || exit 1
 chmod 600 $tmp
+chown $user:$group $tmp $fakehome
 trap \"rm -rf $fakehome\" EXIT INT HUP TERM
 
 ", user, group, command );
 
 
+    // screen jail can be removed - no longer used (#367719)
     // create a script to run a system call as different user
-    // thanks to werner (script) and jw (.screenrc.jail) for their help
+    // thanks to werner (script)
     // unset DESKTOP_SESSION : (#207332)
     if (!textmode)
     {    exec = exec +
@@ -443,6 +454,7 @@ exit 0";
     }
     else
     {
+        // screen jail can be removed - no longer used (#367719)
         exec = exec + "su -s /bin/bash -- $user -c \"cd; $cmd\"";
     }
 
@@ -462,6 +474,7 @@ string browser_command(string url)
     if ( textmode )
     {
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
+        // screen is no longer needed as there is UI::RunInTerminal for textmode programs now (#367719)
         bcmd = " w3m ";
     }
     else
@@ -858,7 +871,11 @@ boolean launchBrowser(string url)
         }
     }
 
-    // Register::finish mandatory as well - do not remove
+    // always return a proper return value
+    if (! contains([`next, `abort, `back], (symbol)ret ))
+    { ret = `next; }
+
+    // Register::finish mandatory as well - do not remove (#366687)
     Register::finish();
 
     return (symbol)ret;

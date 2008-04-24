@@ -3,7 +3,6 @@
 @HEADER@
 Requires:	yast2 >= 2.16.6
 Requires:	suseRegister
-Requires:  perl-TimeDate limal limal-perl limal-ca-mgm-perl
 # because of SourceManager
 Requires:	yast2-packager >= 2.13.152
 
@@ -14,7 +13,6 @@ Requires:   zmd rug
 PreReq:     %fillup_prereq
 
 BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
-BuildRequires:  perl-TimeDate limal limal-perl limal-ca-mgm-perl
 # Internet YCP module
 BuildRequires:	yast2 >= 2.16.6
 
@@ -59,6 +57,8 @@ Performs the Registration
 @desktopdir@/*.desktop
 @schemadir@/autoyast/rnc/registration.rnc
 /usr/share/YaST2/yastbrowser
+%dir /usr/share/YaST2/control
+/usr/share/YaST2/control/*.xml
 
 # agents
 @scrconfdir@/cfg_suse_register.scr

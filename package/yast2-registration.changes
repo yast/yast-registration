@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Apr 24 17:15:09 CEST 2008 - jdsn@suse.de
+
+- fixed SMT autoyast bug (bnc#377929)
+- integrated SMT renaming (bnc#376000)
+- removed dependencies to limal for SMT support (bnc#380060)
+- cleaned gui layout
+- initial release of postinstallation workflow (piwo) (fate#303359)
+- 2.16.2 
+
+-------------------------------------------------------------------
 Tue Apr  1 21:09:48 CEST 2008 - jdsn@suse.de
 
 - proper pluralization in autoYaST (bnc#184893) 
