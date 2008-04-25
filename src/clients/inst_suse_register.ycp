@@ -381,12 +381,19 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 /* ---------------------------------- LOCAL FUNCTIONS ------------------------------------------------------------  */
 
 
-boolean report_error()
+boolean report_error(string errMsg, string errMsgDetail)
 {
     // function to display an error message
     // and offer a detailled view of the error message
 
     UI::OpenDialog(error_message);
+    if (errMsg != nil)
+    {
+        // use this function for custom error messages as well (bnc#308117)
+        UI::ChangeWidget(`id(`err_description), `Value, errMsg);
+        UI::RecalcLayout();
+        UI::ChangeWidget(`id(`back), `Enabled, false );
+    }
     UI::SetFocus (`id (`skip ));
     symbol retry = nil;
 
@@ -399,6 +406,10 @@ boolean report_error()
         {
             // switch to plaintext if error output is one or two lines (#239570)
             string error_msg_details = (string)information_data["stderr"]:"no error message available";
+            if (errMsgDetail != nil)
+            {
+                error_msg_details = errMsgDetail;
+            }
             if ( contains( [0,1], size(splitstring(error_msg_details,"\n")) ) )
                UI::OpenDialog(error_message_details);
             else
@@ -633,7 +644,7 @@ boolean launchBrowser(string url)
                 if (! ( information_data["exit"]:"99"        == "199"     &&
                         information_data["stdout"]:"aborted" == "aborted" &&
                         information_data["stderr"]:"aborted" == "aborted"    ) )
-                report_error();
+                report_error(nil, nil);
             }
 
         }
@@ -803,7 +814,8 @@ boolean launchBrowser(string url)
                 //  show a message when there are no products to register
                 if (information_data["exit"]:"99" == "101")
                 {
-                    Popup::Message(no_product_msg);
+                    //Popup::Message(no_product_msg);
+                    report_error(no_product_msg, information_data["stderr"]:"");
                     loopend = true;
                 }
 
@@ -835,7 +847,7 @@ boolean launchBrowser(string url)
                    )
                 {
                     // display error message
-                    report_error();
+                    report_error(nil, nil);
                 }
 
             }

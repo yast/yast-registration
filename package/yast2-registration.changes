@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr 25 15:59:18 CEST 2008 - jdsn@suse.de
+
+- show error output behind details button on error 101 (bnc#308117) 
+
+-------------------------------------------------------------------
 Fri Apr 25 14:21:22 CEST 2008 - jdsn@suse.de
 
 - adding alternative strings using repository instead of source 
