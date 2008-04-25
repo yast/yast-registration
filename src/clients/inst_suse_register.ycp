@@ -137,6 +137,13 @@ to update with Online Update, the source must be added manually.
 Other tools, such as Software Updater in the panel, can still be 
 used. Alternatively, cancel then register through YaST as root 
 so the sources are available to all tools.");
+     /* nonroot-message using repository instead of source*/
+     string nonroot_message_repo = _("Registering as a regular user does not include the update repository
+in the Online Update YaST module. If you continue and later want 
+to update with Online Update, the repository must be added manually.
+Other tools, such as Software Updater in the panel, can still be 
+used. Alternatively, cancel then register through YaST as root 
+so the repositories are available to all tools.");
 
 
 
@@ -188,6 +195,14 @@ sources are still valid and adds any new ones that may be available.
 It additionally sends any modifications to your included data to Novell, such 
 as hardware information if <b>Hardware Information</b> is activated.
 This option does not remove any sources added manually.
+</p>");
+
+string help_para5_repo = _("<p>
+<b>Regularly Synchronize with the Customer Center</b> checks that your update 
+repositories are still valid and adds any new ones that may be available.
+It additionally sends any modifications to your included data to Novell, such 
+as hardware information if <b>Hardware Information</b> is activated.
+This option does not remove any repositories added manually.
 </p>");
 
 string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
