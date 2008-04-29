@@ -2,4 +2,4 @@
 # Makefile.am for installation/src
 #
 
-SUBDIRS = modules clients config control yastbrowser
+SUBDIRS = modules clients config yastbrowser
