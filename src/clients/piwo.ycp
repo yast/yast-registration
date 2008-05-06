@@ -1,0 +1,35 @@
+/**
+ * File:        clients/piwo.ycp
+ * Summary:     Run PostInstallWOrkflow
+ * Authors:     J. Daniel Schmidt <jdsn@suse.de>
+ *
+ * $Id: piwo.ycp 41800 2008-04-24 17:00:00Z jdsn $
+ *
+ */
+
+{
+
+import "Mode";
+import "Wizard";
+import "ProductControl";
+textdomain "piwo";
+
+string piwoControlFile = "/usr/share/YaST2/control/piwo.xml";
+
+
+Wizard::CreateDialog();
+
+
+ProductControl::custom_control_file = piwoControlFile;
+
+if (!ProductControl::Init())
+{
+    y2error("control file %1 not found", ProductControl::custom_control_file );
+}
+
+
+symbol ret = ProductControl::Run();
+
+return ret;
+
+}
