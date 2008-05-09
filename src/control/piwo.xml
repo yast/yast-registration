@@ -32,12 +32,6 @@
                     <enable_back>yes</enable_back>
                     <enable_next>yes</enable_next>
                 </module>
-                <module>
-                    <label>Online Update</label>
-                    <name>online_update</name>
-                    <enable_back>yes</enable_back>
-                    <enable_next>yes</enable_next>
-                </module>
             </modules>
         </workflow>
     </workflows>

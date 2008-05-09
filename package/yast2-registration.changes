@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri May  9 14:35:19 CEST 2008 - jdsn@suse.de
+
+- removed online update from piwo (bnc#386633)
+- adapted version compatibility flag of yastbrowser (bnc#383660)
+- 2.16.3 
+
+-------------------------------------------------------------------
 Fri Apr 25 15:59:18 CEST 2008 - jdsn@suse.de
 
 - show error output behind details button on error 101 (bnc#308117) 
