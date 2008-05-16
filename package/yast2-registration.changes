@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 16 16:40:22 CEST 2008 - jsrain@suse.cz
+
+- added categories Settings and System into desktop file
+  (bnc #382778)
+
+-------------------------------------------------------------------
 Fri May  9 14:35:19 CEST 2008 - jdsn@suse.de
 
 - removed online update from piwo (bnc#386633)
