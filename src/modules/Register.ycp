@@ -643,9 +643,17 @@ void read_config()
 
     // then read from sysconfig - but not during installation
     if (Mode::normal())
-    {
-        submit_optional = (string) SCR::Read( .sysconfig.suse_register.SUBMIT_OPTIONAL ) == "true" ? true:false;
-        submit_hwdata   = (string) SCR::Read( .sysconfig.suse_register.SUBMIT_HWDATA )   == "true" ? true:false;
+    {   // (bnc#390367)
+        string sysc_submit_optional = (string) SCR::Read( .sysconfig.suse_register.SUBMIT_OPTIONAL );
+        string sysc_submit_hwdata   = (string) SCR::Read( .sysconfig.suse_register.SUBMIT_HWDATA );
+        if (sysc_submit_optional != "")
+        {
+            submit_optional = sysc_submit_optional == "true" ? true:false;
+        }
+        if (sysc_submit_hwdata != "")
+        {
+            submit_hwdata   = sysc_submit_hwdata == "true" ? true:false;
+        }
     }
 }
 
@@ -744,7 +752,8 @@ global map<string, string> suseRegister(symbol parameter)
     if (parameter == `p) params = params + " -p ";
     else params = params + sformat(" --dumpfile=%1 ", services_file);
 
-    string pre_sr = " umask 0077; ";
+    // (bnc#392072)
+    string pre_sr = " umask 0022; ";
     if (Register::use_proxy)
     {   // (#165891)
         pre_sr = pre_sr + " http_proxy='"  + Register::http_proxy  + "' ";

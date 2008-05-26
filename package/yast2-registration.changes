@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon May 26 17:05:32 CEST 2008 - jdsn@suse.de
+
+- fix preselected checkboxes (bnc#390367)
+- create repositories with proper umask (bnc#392072)
+- 2.16.4
+
+-------------------------------------------------------------------
 Fri May 16 16:40:22 CEST 2008 - jsrain@suse.cz
 
 - added categories Settings and System into desktop file
