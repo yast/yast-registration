@@ -609,7 +609,7 @@ boolean launchBrowser(string url)
                     info_ret = UI::UserInput();
                     if ( is(info_ret, string) ) launchBrowser( (string) info_ret);
 
-                } until ( info_ret == `info_close );
+                } until ( info_ret == `info_close  ||  info_ret == `cancel );
 
                 UI::CloseDialog();
             }
