@@ -626,6 +626,11 @@ boolean launchBrowser(string url)
         {
             if ( configure_status == true )
             {
+                if (Mode::normal())
+                {   // (bnc#395333)
+                    Pkg::SourceRestore();
+                    y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
+                }
                 // remove the zmd flag file (requested by mvidner)
                 SCR::Execute(.target.bash, " rm -f /var/lib/zypp/zmd_updated_the_sources " );
 
@@ -848,11 +853,12 @@ boolean launchBrowser(string url)
     SourceManager::Unlock ();
 
     if (Mode::normal())
-    {
-	// #172665
-	Pkg::SourceFinishAll ();
-	Pkg::TargetFinish ();
-	Wizard::CloseDialog();
+    {   // (bnc#395333)
+        y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
+        // #172665
+        Pkg::SourceFinishAll ();
+        Pkg::TargetFinish ();
+        Wizard::CloseDialog();
     }
     else
     {

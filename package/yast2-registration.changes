@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 29 14:26:25 CEST 2008 - jdsn@suse.de
+
+- call Pkg::SourceRestore before adding new source (bnc#395333)
+- 2.16.5
+
+-------------------------------------------------------------------
 Tue May 27 18:10:13 CEST 2008 - jdsn@suse.de
 
 - handling cancel event in info window (bnc#217249)
