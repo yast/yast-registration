@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 29 17:33:18 CEST 2008 - locilka@suse.cz
+
+- Lslezak's patch for inst_suse_register to save all sources but
+  not to disable them (bnc #395333).
+- 2.16.6
+
+-------------------------------------------------------------------
 Thu May 29 14:26:25 CEST 2008 - jdsn@suse.de
 
 - call Pkg::SourceRestore before adding new source (bnc#395333)

@@ -856,7 +856,7 @@ boolean launchBrowser(string url)
     {   // (bnc#395333)
         y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
         // #172665
-        Pkg::SourceFinishAll ();
+        Pkg::SourceSaveAll();
         Pkg::TargetFinish ();
         Wizard::CloseDialog();
     }
