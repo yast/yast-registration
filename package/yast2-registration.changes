@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 30 08:02:51 CEST 2008 - lslezak@suse.cz
+
+- initialize the target to read the GPG keys (bnc#394662)
+- 2.16.7
+
+-------------------------------------------------------------------
 Thu May 29 17:33:18 CEST 2008 - locilka@suse.cz
 
 - Lslezak's patch for inst_suse_register to save all sources but

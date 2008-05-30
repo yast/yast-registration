@@ -19,6 +19,12 @@ string piwoControlFile = "/usr/share/YaST2/control/piwo.xml";
 
 Wizard::CreateDialog();
 
+// initialize the target - read GPG keys (bnc#394662)
+// (only in running system)
+if (Mode::normal())
+{
+    Pkg::TargetInit("/", true);
+}
 
 ProductControl::custom_control_file = piwoControlFile;
 
