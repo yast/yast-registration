@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  1 16:02:14 CEST 2008 - jdsn@suse.de
+
+- removed unused GetInstArgs call
+
+-------------------------------------------------------------------
 Fri May 30 08:02:51 CEST 2008 - lslezak@suse.cz
 
 - initialize the target to read the GPG keys (bnc#394662)

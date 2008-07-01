@@ -69,8 +69,6 @@
     boolean textmode = (boolean) ui["TextMode"]:nil;
     boolean interactive = ! (textmode && Register::disable_w3m);
 
-    map argmap = GetInstArgs::argmap();
-
     /* strings for main (wizard) layout  */
 
     // Translators: This is title/brand - verify how to translate it correctly
