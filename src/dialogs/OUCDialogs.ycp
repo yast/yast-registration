@@ -1,0 +1,128 @@
+/**
+ * File:        OUCDialogs.ycp
+ * Module:      Registration
+ * Summary:     Configure Online Update
+ * Authors:     J. Daniel Schmidt <jdsn@suse.de>
+ *
+ * Configure Online Update Configuration Dialogs
+ *
+ * $Id: OUCDialogs.ycp 1 2008-09-10 13:20:02Z jdsn $
+ */
+
+{
+
+textdomain "registration";
+
+
+// module title
+string moduleTitle = _("Online Update Configuration");
+// translators: (default), meaning: "Current Update Repository: http://xyz/  (default)"
+string defaultMark  = _("(default)");
+// translators: (none), meaning "Current Update Repository: (none)"
+string noRepo = _("(none)");
+
+// frame title
+string updateRepository = _("Update Repository");
+// frame title
+string automaticOnlineUpdate = _("Automatic Online Update");
+
+// translators: "Set Default" meaning:  Set the Update Repository to the default one
+string setDefaultButtonLabel = _("Set Default");
+// translators: a short button label called "Advanced"
+string advancedMenuButtonLabel = _("Advanced");
+
+string help_title = sformat( "<p><b>%1</b></p>", moduleTitle);
+string help_para1 = sformat(_("<p>In <b>%1</b> the current update repository is shown.</p>"), updateRepository );
+string help_para2 = sformat(_("<p>Press <b>%1</b> to use the default update repository.</p>"), setDefaultButtonLabel );
+string help_para3 = sformat(_("<p>Find related actions in the <b>%1</b> menu.</p>"), advancedMenuButtonLabel );
+string help_para4 = sformat(_("<p>In <b>%1</b> set up the automatic online update. Choose the interval to use and if interactive patches should be ignored, otherwise the updater will use the default answers.</p>"), automaticOnlineUpdate   );
+
+
+string editSoftwareRepositories = _("Edit Software Repositories");
+string registerForSupport       = _("Register for support and get update repository");
+string sendDataToSmolt          = _("Send hardware information to the smolt project");
+string interval                 = _("Interval");
+string skipInteractivePatches   = _("Skip Interactive Patches");
+string currentUpdateRepo        = _("Current Update Repository:");
+
+string enabledMsg  = _("enabled");
+string disabledMsg = _("disabled");
+
+
+
+string getOUCHelp(symbol type)
+{
+    if (type == `autoyast)
+    {
+        return help_title + help_para1 + help_para2 + help_para3 + help_para4;
+    }
+    else
+    {
+        return help_title + help_para4;
+    }
+    return "";
+}
+
+
+
+
+term getOUCDialog(symbol type)
+{
+
+    list<term> expertMenu = [ `item(`id(`repoManager), editSoftwareRepositories ),
+                              `item(`id(`register),    registerForSupport )
+                            //  , `item(`id(`smolt),       sendDataToSmolt )
+                        ];
+
+    list<term> updateIntervals = [ `item(`id(`daily)  ,  _("daily"))  ,
+                                   `item(`id(`weekly) ,  _("weekly")) ,
+                                   `item(`id(`monthly),  _("monthly"))   ];
+
+    term upRepo = `Frame(updateRepository,
+                        `HBox(
+                            `HStretch(),
+                            `VBox(
+                                `Left( `Label( currentUpdateRepo )),
+                                `Left( `Label(`id(`currentRepoURL), "" )),
+                                `HBox(
+                                    `PushButton(`id(`restoreDefault), `opt(`disabled), setDefaultButtonLabel),
+                                    `MenuButton( advancedMenuButtonLabel, expertMenu)
+                                )
+                            ),
+                            `HStretch()
+                        )
+                    );
+
+    term autoOnlineUp = `VBox(
+                        `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, true,
+                            `HBox(
+                                `HStretch(),
+                                `ComboBox(`id(`updateInterval), interval, updateIntervals ),
+                                `HSpacing(3),
+                                `VBox( //align bottom
+                                    `VSpacing(1),
+                                    `CheckBox(`id(`skipInteractivePatches), skipInteractivePatches )
+                                ),
+                                `HStretch()
+                            )
+                       ));
+
+    term contents = nil;
+
+    if (type == `autoyast)
+    {
+        contents = `VBox(  `VSpacing(1.5),  autoOnlineUp,  `VStretch(), `VSpacing(1.5) );
+    }
+    else
+    {
+         contents = `VBox( `VSpacing(1.5),  upRepo,
+                           `VSpacing(1.5),  autoOnlineUp, `VStretch(),  `VSpacing(1.5) );
+    }
+
+    return contents;
+
+}
+
+
+
+}

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 12 14:57:48 CEST 2008 - jdsn@suse.de
+
+- new module for online update configuration (fate#303458)
+- simplifying/cleaning up sw management (fate#303458) 
+- 2.17.0
+
+-------------------------------------------------------------------
 Tue Jul  1 16:02:14 CEST 2008 - jdsn@suse.de
 
 - removed unused GetInstArgs call

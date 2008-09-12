@@ -54,15 +54,21 @@ Performs the Registration
 @moduledir@/*.pm
 @moduledir@/*.ycp
 @moduledir@/*.ybc
+%dir @yncludedir@/registration
+@yncludedir@/registration/*.ycp
 @desktopdir@/*.desktop
 @schemadir@/autoyast/rnc/registration.rnc
+@schemadir@/autoyast/rnc/automatic_online_update.rnc
+/usr/lib/YaST2/bin/online_update
 /usr/share/YaST2/yastbrowser
 %dir /usr/share/YaST2/control
 /usr/share/YaST2/control/*.xml
 
 # agents
 @scrconfdir@/cfg_suse_register.scr
+@scrconfdir@/cfg_automatic_online_update.scr
 
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
+@fillupdir@/sysconfig.automatic_online_update-yast2-registration
 

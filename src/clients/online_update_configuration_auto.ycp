@@ -1,0 +1,229 @@
+/**
+ * File:        online_update_configuration
+ * Module:      Registration
+ * Summary:     Configure Online Update
+ * Authors:     J. Daniel Schmidt <jdsn@suse.de>
+ *
+ * Configure Online Update Settings
+ *
+ * $Id: online_update_configuration.ycp 1 2008-09-10 13:20:02Z jdsn $
+ */
+
+{
+    textdomain "registration";
+
+    import "OnlineUpdateConfiguration";
+    import "Wizard";
+    import "Popup";
+    import "Label";
+    import "URL";
+    import "Mode";
+    import "Summary";
+/*
+    import "FileUtils";
+    import "SourceManager";
+    import "Package";
+    import "PackageCallbacks";
+*/
+
+    include "registration/OUCDialogs.ycp";
+
+
+/**
+ * Get all setting
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+boolean Import (map settings)
+{
+    y2debug("Import called, settings: %1", settings);
+    return OnlineUpdateConfiguration::Import(settings);
+}
+
+
+/**
+ * Export the settings to a single map
+ * (For use by autoinstallation.)
+ */
+map Export ()
+{
+    y2debug("Export called");
+    return OnlineUpdateConfiguration::Export();
+}
+
+
+/**
+ * Write all settings
+ * @return true on success
+ */
+boolean Write()
+{
+    return OnlineUpdateConfiguration::Write();
+}
+
+
+void Read()
+{
+    OnlineUpdateConfiguration::Read();
+}
+
+map AutoPackages()
+{
+    return $[ "install":[], "remove":[] ];
+}
+
+
+
+
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @return summary of the current configuration
+ */
+string Summary()
+{
+    string summary = "";
+
+    summary = Summary::AddHeader (summary, automaticOnlineUpdate);
+    summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::enableAOU ? enabledMsg:disabledMsg );
+
+    if (OnlineUpdateConfiguration::enableAOU)
+    {
+        summary = Summary::AddHeader (summary, interval);
+        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::intervalSymbolToString(OnlineUpdateConfiguration::updateInterval) );
+
+        summary = Summary::AddHeader (summary, skipInteractivePatches);
+        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::skipInteractivePatches ? enabledMsg:disabledMsg  );
+    }
+
+    return summary;
+}
+
+
+
+
+/* ---------------------------------------------------------------------------------------------------------------  */
+
+symbol OUC_configure()
+{
+    string help = getOUCHelp(`autoyast);
+    term contents = getOUCDialog(`autoyast);
+
+
+    Wizard::CreateDialog();
+
+    // we always need the next button and never the back button
+    Wizard::SetContents (moduleTitle, contents, help, false, true);
+    Wizard::SetTitleIcon ("yast-online_update");
+    Wizard::SetNextButton(`next, Label::FinishButton() );
+
+    //OnlineUpdateConfiguration::Read();
+
+    // write settings to the UI
+    UI::ChangeWidget(`id(`automaticOnlineUpdate),  `Value, OnlineUpdateConfiguration::enableAOU);
+    UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
+    UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
+
+    UI::RecalcLayout();
+
+    any ret=`auto;
+
+    repeat
+    {
+        ret = Wizard::UserInput();
+
+        if (ret == `next)
+        {
+            OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
+            OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
+            OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
+            break;
+        }
+
+    } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
+
+    if (! is(ret, symbol))  ret = `next;
+
+    Wizard::CloseDialog();
+    return (symbol)ret;
+
+}
+
+
+
+
+
+//---------------------------------------------------------------------------
+// MAIN
+//---------------------------------------------------------------------------
+y2milestone("----------------------------------------");
+y2milestone("online_update_configuration_auto started");
+
+
+any ret = nil;
+string func = "";
+map param = $[];
+
+/* Check arguments */
+if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
+    func = (string)WFM::Args(0);
+    if(size(WFM::Args()) > 1 && is(WFM::Args(1), map))
+    param = (map) WFM::Args(1);
+}
+
+y2milestone("func=%1", func);
+y2milestone("param=%1", param);
+
+/* Create a summary*/
+if(func == "Summary") {
+    ret = Summary();
+}
+/* Reset configuration */
+else if (func == "Reset") {
+    Import($[]);
+    ret = $[];
+}
+/* Change configuration (run AutoSequence) */
+else if (func == "Change") {
+    ret = OUC_configure();
+}
+/* Import configuration */
+else if (func == "Import") {
+    ret = Import(param);
+}
+/* Return actual state */
+else if (func == "Export") {
+    ret = Export();
+}
+/* Return needed packages */
+else if (func == "Packages") {
+    ret = AutoPackages();
+}
+/* Write given settings */
+else if (func == "Write") {
+    import "Progress";
+    Progress::off();
+    ret = Write();
+    Progress::on();
+}
+else if (func == "GetModified") {
+    ret =  OnlineUpdateConfiguration::OUCmodified;
+}
+else if (func == "SetModified") {
+    OnlineUpdateConfiguration::OUCmodified = true;
+}
+/* Unknown function */
+else {
+    y2error("Unknown function: %1", func);
+    ret = false;
+}
+
+y2milestone("ret=%1", ret);
+y2milestone("online_update_configuration_auto finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+
+
+}

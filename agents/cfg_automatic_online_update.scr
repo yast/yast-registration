@@ -1,0 +1,19 @@
+/**
+ * File:
+ *   cfg_automatic_online_update.scr
+ * Summary:
+ *   Agent to read and write /etc/sysconfig/automatic_online_update
+ *   using ini agent
+ * Authors:
+ *   Jens Daniel Schmidt <jdsn@suse.de>
+ *
+ * $Id: cfg_automatic_online_update.scr 1 2008-09-10 09:48:10Z jdsn $
+ *
+ * Read and write the settings in /etc/sysconfig/automatic_online_update
+ * needed by installation/inst_suse_register
+ */
+.sysconfig.automatic_online_update
+
+`ag_ini(
+  `SysConfigFile("/etc/sysconfig/automatic_online_update")
+)

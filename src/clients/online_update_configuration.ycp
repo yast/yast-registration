@@ -1,0 +1,130 @@
+/**
+ * File:        online_update_configuration
+ * Module:      Registration
+ * Summary:     Configure Online Update
+ * Authors:     J. Daniel Schmidt <jdsn@suse.de>
+ *
+ * Configure Online Update Settings
+ *
+ * $Id: online_update_configuration.ycp 1 2008-09-10 13:20:02Z jdsn $
+ */
+
+{
+    textdomain "registration";
+
+    import "OnlineUpdateConfiguration";
+    import "Wizard";
+    import "Popup";
+    import "Label";
+    import "URL";
+    import "Mode";
+    import "SourceManager";
+    import "PackageCallbacks";
+/*  import "FileUtils";
+    import "Package"; */
+
+
+    include "registration/OUCDialogs.ycp";
+
+
+    string help = getOUCHelp(`default);
+    term contents = getOUCDialog(`default);
+
+/* ---------------------------------------------------------------------------------------------------------------  */
+
+    // check if we are in installation workflow or running independently
+    if (Mode::normal()) Wizard::CreateDialog();
+
+    // we always need the next button and never the back button
+    Wizard::SetContents (moduleTitle, contents, help, false, true);
+    Wizard::SetTitleIcon ("yast-online_update");
+    Wizard::SetNextButton(`next, Label::FinishButton() );
+
+/* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
+
+    OnlineUpdateConfiguration::Read();
+
+
+
+    // FIXME: the display of the current and default URL has to be adapted once we can read the data from the products file
+    //        this function was missing in libzypp and packagebindings will be available soon, then we can complete this
+
+    if (false) // for testing only
+    {
+        OnlineUpdateConfiguration::currentUpdateRepo = "";
+    }
+
+    string replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo;
+
+    if ( OnlineUpdateConfiguration::currentUpdateRepo == OnlineUpdateConfiguration::defaultUpdateRepo  &&
+         OnlineUpdateConfiguration::currentUpdateRepo != ""                                                )
+    {// in this case - we have default update repo installed
+        replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo + "   " + defaultMark;
+        UI::ChangeWidget(`id(`restoreDefault), `Enabled, false);
+    }
+    else
+    { // in this case - custom or no update repo
+        if ( replaceUpdateRepoString == ""  ) replaceUpdateRepoString = noRepo;
+        UI::ChangeWidget(`id(`restoreDefault), `Enabled, true);
+    }
+
+    // write data to the UI
+    UI::ChangeWidget(`id(`currentRepoURL),         `Value, replaceUpdateRepoString);
+    UI::ChangeWidget(`id(`automaticOnlineUpdate),  `Value, OnlineUpdateConfiguration::enableAOU);
+    UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
+    UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
+
+
+    UI::RecalcLayout();
+    //UI::RedrawScreen();
+
+    any ret=`auto;
+
+    repeat
+    {
+        ret = Wizard::UserInput();
+
+        if (ret == `restoreDefault)
+        {
+            Popup::Message("FIXME: function call to package bindings missing");
+
+            // FIXME: after setting the default update source query it again and update the UI
+            // replaceUpdateRepoString = someQueryCommand();
+
+            UI::ChangeWidget(`id(`currentRepoURL), `Value,  replaceUpdateRepoString);
+            UI::RecalcLayout();
+        }
+
+        if (ret == `next)
+        {
+            OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
+            OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
+            OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
+
+            OnlineUpdateConfiguration::Write();
+            break;
+        }
+
+        if (ret == `repoManager)
+        {
+            SCR::Execute(.background.run_output, "yast2 inst_source");
+        }
+
+        if (ret == `smolt)
+        {
+            SCR::Execute(.background.run_output, "yast2 smolt");
+        }
+
+        if (ret == `register)
+        {
+            SCR::Execute(.background.run_output, "yast2 inst_suse_register");
+        }
+
+    } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
+
+    if (! is(ret, symbol))  ret = `next;
+
+    Wizard::CloseDialog();
+    return (symbol)ret;
+
+}

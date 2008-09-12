@@ -1,0 +1,202 @@
+/**
+ * File:    modules/OnlineUpdateConfiguration.ycp
+ * Package: Installation
+ * Summary: Registration related stuff
+ * Authors: J. Daniel Schmidt <jdsn@suse.de>
+ *
+ * $Id: OnlineUpdateConfiguration.ycp 1 2008-09-10 09:45:05Z jdsn $
+ */
+
+{
+
+module "OnlineUpdateConfiguration";
+
+textdomain "registration";
+
+
+
+global boolean enableAOU = false;
+global boolean skipInteractivePatches = true;
+global symbol  updateInterval = `weekly;
+global boolean OUCmodified = false;
+
+
+string onlineUpdateScript = "/usr/lib/YaST2/bin/online_update";
+
+string cronFileName    = "opensuse.org-online_update";
+string cronMonthlyFile = "/etc/cron.monthly/" + cronFileName;
+string cronWeeklyFile  = "/etc/cron.weekly/"  + cronFileName;
+string cronDailyFile   = "/etc/cron.daily/"   + cronFileName;
+
+global string currentUpdateRepo = "";
+global string defaultUpdateRepo = "";
+
+
+map<symbol, string> Intervals = $[  `daily  : "daily",
+                                    `weekly : "weekly",
+                                    `monthly: "monthly" ];
+
+
+global string intervalSymbolToString(symbol intervalSym)
+{
+    return Intervals[intervalSym]:"none";
+}
+
+global symbol intervalStringToSymbol(string intervalStr)
+{
+    symbol result = `none;
+    foreach(symbol sym, string str, Intervals, {
+        if ( str == intervalStr ) result = sym;
+        return;
+    } );
+    return result;
+}
+
+/*
+ * remove all online update cronjobs
+ *
+ */
+void removeOnlineUpdateCronjobs()
+{
+    SCR::Execute(.target.remove, cronMonthlyFile);
+    SCR::Execute(.target.remove, cronWeeklyFile);
+    SCR::Execute(.target.remove, cronDailyFile);
+}
+
+/*
+ * setup cronjob for an automatic online update
+ * @return true if successful
+ * @para smybol for the interval `daily, `weekly, `monthly
+ */
+global boolean setOnlineUpdateCronjob(symbol interval)
+{
+    string cronSel = "";
+    if      (interval == `monthly)
+        cronSel = cronMonthlyFile;
+    else if (interval == `weekly)
+        cronSel = cronWeeklyFile;
+    else if (interval == `daily)
+        cronSel = cronDailyFile;
+
+    removeOnlineUpdateCronjobs();
+
+    if ( (boolean)SCR::Execute(.target.symlink, onlineUpdateScript, cronSel) )
+    {
+        y2milestone("Setting up online update cron job at %1", cronSel);
+        return true;
+    }
+    else
+    {
+        y2milestone("Could not create online update cron job at %1", cronSel);
+        return false;
+    }
+
+    return true;
+}
+
+
+
+
+/*
+ * Read()
+ */
+global void Read()
+{
+    // TODO: read baseproduct and its default update source and registration url
+    // TODO: read current installed update repos  ->  duncan? -> packagebindings?
+
+    // FIXME: until we can read this information from the products file, we fake it
+    currentUpdateRepo = "http://download.opensuse.org/update/11.1/";
+    defaultUpdateRepo = "http://download.opensuse.org/update/11.1/";
+
+
+    integer interM = (integer) SCR::Read(.target.size, cronMonthlyFile);
+    integer interW = (integer) SCR::Read(.target.size, cronWeeklyFile);
+    integer interD = (integer) SCR::Read(.target.size, cronDailyFile);
+
+    if (interD >= 0)
+        updateInterval = `daily;
+    else if (interW >= 0)
+        updateInterval = `weekly;
+    else if (interM >= 0)
+        updateInterval = `monthly;
+    else
+        updateInterval = `weekly;
+
+    // enableAOU is not read from sysconfig! this is only to deactivate it temporarily
+    // only the fact that a cronjob exists makes this setting true
+    enableAOU = ( interD >= 0 || interW >= 0 || interM >= 0  );
+    skipInteractivePatches = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES) == "true" ) ? true:false;
+
+}
+
+
+/*
+ * Import()
+ */
+global boolean Import(map settings)
+{
+    enableAOU = false;
+    skipInteractivePatches = true;
+    updateInterval = `weekly;
+
+    enableAOU              = (boolean) settings["enable_automatic_online_update"]:enableAOU;
+    skipInteractivePatches = (boolean) settings["skip_interactive_patches"]:skipInteractivePatches;
+
+    string getInterval     = (string) settings["update_interval"]:"";
+
+    updateInterval = intervalStringToSymbol(getInterval);
+    // fall back to weekly in error case
+    if (updateInterval == `none) updateInterval = `weekly;
+
+    return true;
+}
+
+
+/*
+ * Write()
+ */
+global boolean Write()
+{
+    SCR::Write(.sysconfig.automatic_online_update.AOU_ENABLE_CRONJOB          , (enableAOU              ? "true":"false") );
+    SCR::Write(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES, (skipInteractivePatches ? "true":"false") );
+
+    if (enableAOU)
+    {
+        y2milestone("Enabling automatic online update with interval: %1", updateInterval);
+        return setOnlineUpdateCronjob(updateInterval);
+    }
+    else
+    {
+        removeOnlineUpdateCronjobs();
+        return true;
+    }
+
+    return true;
+}
+
+
+
+/**
+ * AutoYaST interface function: Export()
+ * @return map with the settings
+ */
+global map Export()
+{
+    if (!enableAOU)
+    {
+        return $[];
+    }
+
+    return $[
+             "enable_automatic_online_update":enableAOU,
+             "skip_interactive_patches":skipInteractivePatches,
+             "update_interval":intervalSymbolToString(updateInterval)
+    ];
+}
+
+
+
+
+
+}

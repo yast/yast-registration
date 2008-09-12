@@ -79,19 +79,34 @@
 
     // alternative short title text
     string title_short = _("Registration");
+    string title_long = _("Support Registration");
 
     // select title to use
-    //    set default title
-    string title = title_nccc;
-
-    // lets see if the control center uses the box text and no customer center desktop file is there (#294454)
-    if ( (integer) SCR::Execute(.target.bash, " grep -isq \"^Name=Online Update Configuration\" /usr/share/applications/YaST2/suse_register.desktop && ! [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false )
-        title = title_box;
+    // use new default title
+    string title = title_short;
 
 
     // Translators: limit to 2x 50 charachters - if more needed take 3x 50 chars but NOTHING more
     string nccc_top = _("Get technical support and product updates and
 manage subscriptions with Novell Customer Center.");
+    // Translators: limit to 2x 50 charachters - if more needed take 3x 50 chars but NOTHING more
+    string opensuse_top = _("Get technical support and product updates
+by registering this installation.");
+
+
+    string nccc_heading = "";
+    // if we are SLES then switch to NCCC title  (#294454)
+    if ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false )
+    {
+        title = title_nccc;
+        nccc_heading = nccc_top;
+    }
+    else
+    {
+        title = title_short;
+        nccc_heading = opensuse_top;
+    }
+
 
     string nccc_configure   = _("Configure Now (Recommended)");
     string nccc_noconfigure = _("Configure Later");
@@ -212,7 +227,7 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 
     sr_layout = `HVSquash(
     `VBox(
-        `Label( nccc_top ),
+        `Label( nccc_heading ),
         `VSpacing(0.5),
         `Frame( title,
             `RadioButtonGroup( `id(`sr_perform),

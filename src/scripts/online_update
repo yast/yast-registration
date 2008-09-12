@@ -1,0 +1,47 @@
+#!/bin/bash
+
+zyppercmd="/usr/bin/zypper"
+upcmd="/bin/false"
+syscfgfile="/etc/sysconfig/automatic_online_update"
+skipInteractive="--skip-interactive"
+
+if [ -x ${zyppercmd}  ]
+then
+    upcmd=${zyppercmd}
+else
+    echo "zypper is not installed. Can not run online update."
+    exit 1
+fi
+
+
+if [ -f ${syscfgfile} ]
+then
+    . ${syscfgfile}
+fi
+
+
+if [ ! -z $AOU_ENABLE_CRONJOB ]
+then
+    if [ ! $AOU_ENABLE_CRONJOB = "true" ]
+    then
+        echo "Online Update is disabled in ${syscfgfile}. Will not run update."
+        exit 0
+    fi
+fi
+
+
+
+if [ ! -z ${AOU_SKIP_INTERACTIVE_PATCHES} ]
+then
+    if [ ${AOU_SKIP_INTERACTIVE_PATCHES} = "true"  ]
+    then
+        skipInteractive="--skip-interactive"
+    else
+        skipInteractive=
+    fi
+fi
+
+
+# run the update
+${upcmd} --quiet up -y -t patch ${skipInteractive}
+
