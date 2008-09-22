@@ -203,7 +203,15 @@ as hardware information if <b>Hardware Information</b> is activated.
 This option does not remove any sources added manually.
 </p>");
 
+string help_para6 = _("<p>
+The registration process will contact a Novell server (or a local registration server if your company provides one).
+Please make sure that the network and proxy settings are correct.
+You can step back to the network setup to check or change the settings.
+</p>");
+
 string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
+
+if (! Mode::normal()) help = help + help_para6;
 
 
     /*  further strings   */
