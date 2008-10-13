@@ -21,6 +21,7 @@ import "Label";
 import "Popup";
 import "URL";
 import "Linuxrc";
+import "YSR";
 import "ProductFeatures";
 import "SourceManager";
 
@@ -30,7 +31,10 @@ import "SourceManager";
 // --------------------------------------------------------------
 
 string services_file = sformat ("%1/update_services", SCR::Read (.target.tmpdir));
-
+boolean isInitializedSR = false;
+map<string, any> contextDataSR = nil;
+map<string, map<string, string> > argsDataSR = nil;
+integer initialSRstatus = nil;
 // ------------------------------------------------------------------
 // END:   Locally defined data
 // ------------------------------------------------------------------
@@ -54,6 +58,7 @@ global string  http_proxy  = "";
 global string  https_proxy = "";
 global string  smt_server  = "";            // (FATE #302966)
 global string  smt_server_cert = "";        // (FATE #302966)
+global boolean force_new_reg_url = false;
 
 global map<string, string> registration_data = $[];
 
@@ -200,6 +205,8 @@ string suseRegisterURL(string url)
 
     // in case the smt server was already changed do not change it again (to support mobile PCs in different environments)
     string mod = (string) SCR::Read(.temporary_suseregister_agent.smturlmodified);
+    if (force_new_reg_url) mod = "false";
+
     if ( mod == "true" )
     {
         url = nil;
@@ -229,7 +236,7 @@ string suseRegisterURL(string url)
  * @return symbol that says if we can perform the registration
  *
  */
-symbol setupRegistrationServer(symbol mode)
+global symbol setupRegistrationServer(symbol mode)
 {
     // in case smt_server is undefined nothing needs to be done
     if (smt_server == nil  ||  smt_server == "") return `ok;
@@ -252,11 +259,14 @@ symbol setupRegistrationServer(symbol mode)
         y2milestone("The string '%1' could not be parsed and validated as URL to be used as SMT server.", smt_server);
         if (ay) return `conferror;
 
-        string no_smt_server = sformat( _("The SMT server URL could not be validated as URL.
-Registration can not be performed. Please modify /etc/suseRegister.conf and run Registration manually.
-The SMT server URL that was configured was
-%1"), smt_server);
-        Popup::Message(no_smt_server);
+        string no_smt1 = _("The registration server URL could not be validated as URL.");
+        string no_smt2 = _("Registration can not be performed.");
+        string no_smt3 = _("Please change the URL and retry.");
+        string no_smt_current = sformat( _("The current registration server URL is\n%1"), smt_server);
+
+        string no_smt_server = sformat("%1\n%2\n%3\n\n%4", no_smt1, no_smt2, no_smt3, no_smt_current);
+
+        Popup::Error(no_smt_server);
         return `conferror;
     }
 
@@ -277,7 +287,7 @@ The SMT server URL that was configured was
     if      ( regexpmatch(smt_server_parsed["host"]:"", ".+\.novell\.com$"))
     {
         y2milestone("Registration detected a *.novell.com domain. For security reasons, there will be no certificate handling in this case.");
-        y2milestone("In order to register against a *.novell.com domain, please make sure your registration server uses a trusted certificate and set regcert=done.");
+        y2milestone("In order to register at a *.novell.com domain, please make sure your registration server uses a trusted certificate and set regcert=done.");
         // allow override with  regcert="done" (bnc#413231)
         if   (smt_server_cert == "done")                            { certmode = `done;   }
         else                                                        { certmode = `none;   }
@@ -416,7 +426,7 @@ The SMT server URL that was configured was
     {
         // try to copy cert if valid path,  else ask   // copy
 
-        string cp2tmp = sformat("/bin/cp -a  %1  %2 ", smt_server_cert, certTmpFile );
+        string cp2tmp = sformat(" [ -f  %1 ]  &&  /bin/cp -a  %1  %2 ", smt_server_cert, certTmpFile );
         if ( SCR::Execute(.target.bash, cp2tmp )  !=  0 )
         {
             y2error("Could not copy local SMT certificate file");
@@ -466,6 +476,10 @@ The SMT server URL that was configured was
                 {
                     y2milestone("User selected to cancel manual certificate dialog and thereby skip registration");
                     return `conferror;
+                }
+                else
+                {
+                    continue;
                 }
             }
 
@@ -688,6 +702,81 @@ void write_config()
 // ------------------------------------------------------------------
 
 
+/*
+ * initialize
+ *
+ * Initialize booleans: submit_optional, submit_hwdata and iamroot
+ *
+ */
+integer suseRegisterOnce()
+{
+    // (#164794)
+    // on behalf of hmuelle and shorn
+    UI::OpenDialog(`VBox(
+            // translators: busy popup while registering the system
+            `Left( `Heading( _("Contacting server...")) ),
+            // translators: Text for a busy-process-indicator while registering the system
+            `BusyIndicator(`id(`busyContactingServer), _("This may take a while"), 300000 )
+        ) );
+    // Bug #171061 - Busy cursor during "Contacting server..."
+    UI::BusyCursor();
+
+    integer ret = YSR::register();
+
+    // Bug #171061 - Changing back to normal cursor
+    UI::NormalCursor();
+    UI::CloseDialog();
+
+    if(YSR::get_errorcode() != 0)
+    {
+        // error
+        y2error("Register call failed (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
+        return 111;
+    }
+
+    return ret;
+}
+
+
+
+/*
+ * getSrcIdFromSrcMap
+ *
+ * get a SrcID from a sources list
+ * takes a name of a source and the sources list<map> from Pkg::SourceEditGet()
+ * @return: id of the found source, else nil
+ */
+
+integer getSrcIdFromSrcList(string name, list<map> allSrc)
+{
+    if ( name == nil  ||  name == "" )
+    {
+        y2error("Can not find a source with an empty or invalid name.");
+        return nil;
+    }
+    else if ( allSrc == nil  ||  allSrc == [] )
+    {
+        y2error("Can not find a source in an empty sources list.");
+        return nil;
+    }
+
+    integer foundSrc = nil;
+
+    foreach(map srcMap, allSrc, {
+        if ( is(srcMap["name"]:"", string) )
+            if ( (string) srcMap["name"]:"" == name )
+                if ( is(srcMap["SrcId"]:nil, integer) )
+                    foundSrc = (integer) srcMap["SrcId"]:nil;
+    });
+
+    if ( foundSrc == nil )
+        y2error("Could not find a source ID for the source with the name: %1", name);
+    else
+        y2milestone("Found a source id for a source: %1 (%2)", name, foundSrc);
+
+    return foundSrc;
+}
+
 // ---------------------------------------------------------------------------------------
 // START: Globally defined functions
 // ---------------------------------------------------------------------------------------
@@ -742,117 +831,349 @@ global list<string> add_update_sources ()
 
 
 /*
- * suseRegister()
- * the returned map is transformed to map<string, string>
-*/
-global map<string, string> suseRegister(symbol parameter)
+ * updateSoftwareRepositories
+ *
+ * takes a "taskList"-map from SuseRegister and updates the repositories
+ * @return a list with a small summary (added/deleted/enabled/disabled repos)
+ */
+global list<string> updateSoftwareRepositories(map<string, any> taskList)
 {
-    // handle parameters
-    //  -y beautifies the output for usage in yast
-    //  -L log file
-    //  --nozypp do not add zypp and yum sources to zmd, #180820
-    //  -p list parameters (no dumpfile with -p)
-    //  --restore-repos  brings back repos that have been deleted by accident (#309231)
-
-    // always log, beautify and restore repos! (#309231)
-    string params = " -y -L ~/.suse_register.log --nozypp --restore-repos ";
-    if (parameter == `p) params = params + " -p ";
-    else params = params + sformat(" --dumpfile=%1 ", services_file);
-
-    // (bnc#392072)
-    string pre_sr = " umask 0022; ";
-    if (Register::use_proxy)
-    {   // (#165891)
-        pre_sr = pre_sr + " http_proxy='"  + Register::http_proxy  + "' ";
-        pre_sr = pre_sr + " https_proxy='" + Register::https_proxy + "' ";
-    }
-
-    if ( force_registration ) params = params + " --force-registration ";
-    if ( !submit_hwdata   )   params = params + " --no-hw-data ";
-    if ( !submit_optional )   params = params + " --no-optional ";
-
-    // run suse_register
-    string sr_bash_cmd = sformat(" %1 /usr/bin/suse_register %2", pre_sr, params);
-    y2milestone ("Calling suse_register with command: %1", sr_bash_cmd);
-
-    map<string, string> response = $[];
-
-    if (parameter == `autoyast)
+    // see if there are actions to perform
+    if (taskList == $[])
     {
-        // do not log sensitive data to the log (#195624)
-        // append values from map to the suse_register call
-        string params_sensitive = " ";
-        foreach (string key, string val, registration_data,  {
-            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
-            params_sensitive = params_sensitive + sformat("  -a %1='%2'  ", key, String::Quote(val) );
-        });
-        sr_bash_cmd = sformat("  %1   %2  ",  sr_bash_cmd, params_sensitive);
-        y2milestone ("called from autoyast - added sensitive registration data to suse_register call");
-
-        map<string, any> info = (map<string, any>) SCR::Execute(.target.bash_output, sr_bash_cmd );
-        string exitcode = sformat("%1", info["exit"]:99);
-        y2milestone ("/usr/bin/suse_register returned %1", exitcode);
-
-        // add update sources in autoyast mode as well, no matter what exit code suse_register returned (#181183)
-        Register::add_update_sources();
-
-        // transform to map<string, string>
-        response = $[  "exit"  :exitcode ,
-                       "stdout":info["stdout"]:"",
-                       "stderr":info["stderr"]:""  ];
+        return [];
     }
-    else
-    {   // (#164794)
-        boolean started = (boolean) SCR::Execute(.background.run_output_err, sr_bash_cmd );
 
-	// translators: busy popup while registering the system
-	string fixme_get_this_out_of_here_ASAP = _("This may take a while");
+    list<string> summary = [];
 
-        UI::OpenDialog(`VBox( `Left( `Label( _("Contacting server...")) ),
-                              `Left( `Label( fixme_get_this_out_of_here_ASAP )),  // (hmuelle, shorn)
-                              `PushButton(`id(`abort), Label::AbortButton() )
-        ) );
+    list<map> currentSources = Pkg::SourceEditGet();
+    // log the sources for debugging purposes - FIXME - to be removed soon
+    y2milestone("The current sources are: %1", currentSources);
 
-	// Bug #171061 - Busy cursor during "Contacting server..."
-	UI::BusyCursor();
 
-        symbol poll_ret = nil;
-        repeat
+    // outer foreach loop - loop over service names/aliases
+    foreach( string pService, any pAny, taskList, {
+
+        if ( ! is(pAny, map) )
         {
-            poll_ret = (symbol) UI::TimeoutUserInput(200);
-
-            // check if  process still running ... and check status
-            if (! (boolean) SCR::Read(.background.isrunning))
-                poll_ret = `finish;
-
-        } until (poll_ret == `abort || poll_ret == `finish);
-
-	// Bug #171061 - Changing back to normal cursor
-	UI::NormalCursor();
-
-        if (poll_ret == `finish)
+            y2error("A service returned by SuseRegister did not contain any details: %1", pService);
+        }
+        else if ( pService == nil || pService == "" )
         {
-            // create return hash
-            response = $[ "exit":   sformat("%1", SCR::Read(.background.status)) ,
-                          "stdout": mergestring( (list<string>) SCR::Read(.background.newout), "\n") ,
-                          "stderr": mergestring( (list<string>) SCR::Read(.background.newerr), "\n")  ];
+            y2error("A service returned by SuseRegister has no or an invalid name.");
         }
         else
         {
-            // kill background process
-            if (! (boolean)SCR::Execute(.background.kill))
+            if ( ! is( ((map) pAny)["TYPE"]:"", string) )
             {
-                sleep(300);
-                SCR::Execute(.background.kill);
+                y2error("A service returned by SuseRegister has an invalid type: %1 (%2)", pService, ((map) pAny)["TYPE"]:"");
             }
-            response = $["exit":"199", "stdout":"aborted", "stderr":"aborted"];
+            if ( ((map) pAny)["TYPE"]:"" == "zypp" )
+            {
+                y2milestone("Handling a service of the type zypp");
+                if ( ! is( ((map) pAny)["TASK"]:"", string) )
+                {
+                    y2error("A service returned by SuseRegister has an invalid task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "le"  ||  ((map) pAny)["TASK"]:"" == "ld" )
+                {
+                    y2milestone("According to SuseRegister a service does not need to be changed: %1", pService);
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "a" )
+                {
+                    // SourceAdd
+                    y2milestone("According to SuseRegister a service has to be added: %1", pService);
+
+                    // create map for new source
+                    map<string, any> newSrcMap = $[  "enabled"       : true,
+                                                     "autorefresh"   : true,
+                                                     "name"          : (string) ((map) pAny)["NAME"]:"",
+                                                     "alias"         : (string) ((map) pAny)["ALIAS"]:"",
+                                                     "base_urls"     : [ (string) ((map) pAny)["URL"]:"" ],
+                                                     "priority"      : ((map) pAny)["PRIORITY"]:99,
+                                                   // ??  "prod_dir"      : ((map) pAny)["PROD_DIR"]:"",
+                                                     "type"          : (string) ((map) pAny)["TYPE"]:""
+                                                 ];
+
+                    integer newSrcID = Pkg::RepositoryAdd( newSrcMap );
+
+                    if ( newSrcID == nil )
+                    {
+                        y2error("Adding a new service failed: %1", pService );
+                    }
+                    else
+                    {
+                        y2milestone("Successfully added a new service: %1 (%2)", pService, newSrcID);
+                        summary = add(summary, sformat(_("Added Source: %1"), pService ));
+                    }
+
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "d" )
+                {
+                    // SourceDelete
+                    y2milestone("According to SuseRegister a service has to be deleted: %1", pService);
+
+                    integer srcID = getSrcIdFromSrcList(pService, currentSources);
+                    if ( srcID == nil )
+                    {
+                        y2error("A service that should be deleted can not be found: %1", pService);
+                    }
+                    else
+                    {
+                        if ( Pkg::SourceDelete(srcID) )
+                        {
+                            y2milestone("Successfully deleted a service: %1 (%2)", pService, srcID);
+                            summary = add(summary, sformat(_("Deleted Source: %1"), pService));
+                        }
+                        else
+                        {
+                            y2error("Could not delete a service: %1 (%2)", pService, srcID);
+                        }
+                    }
+                }
+                else
+                {
+                    y2error("A service returned by SuseRegister has an unsupported task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                }
+
+            }
+            else if ( ((map) pAny)["TYPE"]:"" == "nu" )
+            {
+                y2milestone("Handling a service of the type nu");
+
+                if ( ! is( ((map) pAny)["TASK"]:"", string) )
+                {
+                    y2error("A service returned by SuseRegister has an invalid task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "ld" )
+                {
+                    y2milestone("According to SuseRegister a service should be left disabled: %1", pService);
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "le" )
+                {
+                    y2milestone("According to SuseRegister a service should be left enabled: %1", pService);
+                    y2milestone("Now checking the catalogs of the service: %1", pService );
+
+// ------------------->>>>> FIXME check catalogs!!!!!!!!
+    // --> just iterate over catalogs
+    // TODO
+
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "a" )
+                {
+                    // ServiceAdd
+                    y2milestone("According to SuseRegister a service has to be added: %1", pService);
+
+                    if ( Pkg::ServiceAdd( ((map) pAny)["ALIAS"]:"",  ((map) pAny)["URL"]:"" ) )
+                    {
+                        y2milestone("Successfully added a new service: %1", pService);
+                        y2milestone("Now checking the catalogs of the service: %1", pService);
+			summary = add(summary, sformat(_("Added Service: %1"), pService ));
+
+// ------------------->>>>> FIXME check catalogs!!!!!!!!
+    // need to save service to the system first -- is this be done with  Pkg::SourceSaveAll()  ??  service != source  ??
+
+                        if ( Pkg::SourceSaveAll() )
+                        {
+                            y2milestone("Successfully saved all sources.");
+                        }
+                        else
+                        {
+                            y2error("Could not save all sources.");
+                        }
+
+    // then need to call  Pkg::ServiceRefresh()
+/*
+                        if ( Pkg::ServiceRefresh(pService) )
+                        {
+                            y2milestone("Successfully refreshed service: %1", pService);
+                        }
+                        else
+                        {
+                            y2error("Could not refresh service: %1", pService);
+                        }
+*/
+    // then iterate over catalogs
+    // TODO
+
+                    }
+                    else
+                    {
+                        y2error("Adding a new service failed: %1", pService);
+                    }
+
+                }
+                else if ( ((map) pAny)["TASK"]:"" == "d" )
+                {
+                    // ServiceDelete
+                    y2milestone("According to SuseRegister a service has to be deleted: %1", pService);
+
+                    if ( Pkg::ServiceDelete(pService) )
+                    {
+                        y2milestone("Successfully deleted a service: %1", pService);
+			summary = add(summary, sformat(_("Deleted Service: %1"), pService ));
+                    }
+                    else
+                    {
+                        y2error("Could not delete a service: %1", pService);
+                    }
+                }
+                else
+                {
+                    y2error("A service returned by SuseRegister has an unsupported task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                }
+            }
+            else
+            {
+                y2error("A service returned by SuseRegister has an unsupported type: %1 (%2)", pService, ((map) pAny)["TYPE"]:"" );
+            }
+
         }
-        UI::CloseDialog();
+    });
+
+
+    return summary;
+}
+
+
+/*
+ * suseRegister()
+ * return the error code of SuseRegister (via YSR.pm) as integer
+*/
+global integer suseRegister(symbol parameter)
+{
+    // FIXME -- THERE __MUST__ BE A SOURCE REFREH BEFORE INITIALIZING SUSEREGISTER
+
+    map<string, any> contextData = $[
+                                        "debug"             :  0,
+                                        "nooptional"        :  (submit_optional    ? 0:1),
+                                        "nohwdata"          :  (submit_hwdata      ? 0:1),
+                                        "forceregistration" :  (force_registration ? 1:0),
+                                        "yastcall"          :  1,
+                                        "logfile"           :  "/root/.suse_register.log"
+                                    ];
+    y2milestone("Basic initialization data for SuseRegister (custom registration data is suppressed for security reasons): %1", contextData);
+
+    // add data to the context from autoyast profile or from manual input
+    if ( registration_data != $[] )
+    {
+        // append sensitive data to the context map
+        foreach (string key, string val, registration_data,  {
+            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
+            contextData[key] =  sformat("%1", String::Quote(val));
+        });
+        // do not log sensitive data to the log (#195624)
+        y2milestone ("Added sensitive registration data to suse_register call - this data is not logged");
     }
 
-    y2milestone ("Server response: %1", response);
-    return response;
+
+    if (! isInitializedSR  || contextData != contextDataSR )
+    {
+        // initialize SuseRegister
+        contextDataSR = contextData;
+        y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
+        YSR::init_ctx(contextDataSR);
+        isInitializedSR = true;
+
+        // setting up proxy for SuseRegister
+        if (Register::use_proxy)
+        {
+            if (Register::http_proxy  != nil &&  Register::https_proxy != nil)
+            {
+                y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
+                YSR::set_proxy(Register::http_proxy, Register::https_proxy);
+            }
+            else
+            {
+                y2error("Proxy settings are broken and could not be applied to SuseRegister.");
+            }
+        }
+    }
+
+
+    // ----====  handle modes for suseRegister  ====----
+
+
+    // special mode for list-params
+    // only makes sure registration is initialized
+    if (parameter == `listparams)
+    {
+        y2milestone("Making sure suseregister is initialized for listparams");
+        return 0;
+    }
+
+
+    // do the initial registration call if not done yet
+    if ( initialSRstatus == nil )
+    {
+        integer retval = suseRegisterOnce();
+        initialSRstatus = retval;
+        if ( retval == 111 )
+        {
+            y2error("Initial register call failed (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
+            y2error("Registration is not complete!");
+            return 111;
+        }
+    }
+
+
+    // we are in needinfo mode
+    if ( initialSRstatus == 1 )
+    {
+        // send all data that can be gathered automatically by calling suseRegisterOnce again
+        integer retval = suseRegisterOnce();
+        if (retval == 111)
+        {
+            y2error("Register call failed in first needinfo state (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
+            return 111;
+        }
+
+        // we are done - update the initial status variable
+        y2milestone("After fist needinfo suseRegister returned with status: %1", retval);
+        initialSRstatus = retval;
+    }
+
+    // everything fine - nothing to be done
+    if ( initialSRstatus == 0 )
+    {
+        y2milestone("SuseRegister returned with status: %1", initialSRstatus);
+    }
+
+
+    if ( parameter == `autoyast )
+    {
+        string foo="bar";
+        // TODO
+        // call the function to sync the sources from here or from the Write function
+    }
+
+    y2milestone("SuseRegister status: %1", initialSRstatus);
+    return initialSRstatus;
 }
+
+
+/*
+ * suseRegisterListParams()
+ * returns the text to display as details in the registration module
+*/
+global string suseRegisterListParams()
+{
+    y2milestone("User requested the args map. Collecting registration data details.");
+
+    // make sure the suseRegister is initialized and the args map contains information
+    integer retval = suseRegister(`listparams);
+    if (retval == 0)
+    {
+        y2milestone("Registration data details map: %1", argsDataSR);
+        return YSR::listParams();
+    }
+
+    y2error("Error occurred when collecting registration data details. The exit code was: %1", retval);
+    return _("Error: Could not retrieve data.");
+}
+
+
+
 // ------------------------------------------------------------------
 // END: Globally defined functions
 // ------------------------------------------------------------------

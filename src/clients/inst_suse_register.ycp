@@ -29,10 +29,28 @@
     import "Label";
     import "Internet";
     import "Register";
+    import "YSR";
     import "SourceManager";
     import "Package";
     import "PackageCallbacks";
+    import "CommandLine";
+    include "registration/texts.ycp";
 
+
+    // support basic command-line output (bnc#430859)
+    list wfm_args = WFM::Args();
+    y2milestone ("ARGS: %1", wfm_args);
+    if ( (size (wfm_args) > 0)  &&
+         (contains (wfm_args, "help") || contains (wfm_args, "longhelp") || contains (wfm_args, "xmlhelp") ) )
+    {
+        string cmdhelp = _("Registration Module Help");
+        Mode::SetUI ("commandline");
+        // TRANSLATORS: commandline help
+        CommandLine::Run($["id"      : "registration",
+                           "help"    : cmdhelp
+                        ]);
+        return `auto;
+    }
 
     // this operation MUST be first and run in any case, even if registration should be skipped (FATE #302966)
     symbol confRegSrv = Register::configureRegistrationServer();
@@ -41,7 +59,6 @@
         y2debug("Registration can not be run due to SMT configuration error.");
         return `auto;
     }
-
 
     // no network - no suse_register
     if (!Mode::normal())
@@ -52,6 +69,9 @@
             return `auto;
         }
     }
+
+
+    boolean IAMSLE = ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false );
 
     // error handling - skip if suseRegister is missing
     integer sr_exist = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/suse_register");
@@ -67,7 +87,6 @@
 
     map ui = UI::GetDisplayInfo();
     boolean textmode = (boolean) ui["TextMode"]:nil;
-    boolean interactive = ! (textmode && Register::disable_w3m);
 
     /* strings for main (wizard) layout  */
 
@@ -96,7 +115,7 @@ by registering this installation.");
 
     string nccc_heading = "";
     // if we are SLES then switch to NCCC title  (#294454)
-    if ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false )
+    if ( IAMSLE )
     {
         title = title_nccc;
         nccc_heading = nccc_top;
@@ -213,6 +232,7 @@ string help = help_title + help_para1 + help_para2 + (Register::display_forcereg
 
 if (! Mode::normal()) help = help + help_para6;
 
+help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChapter2"]:"";
 
     /*  further strings   */
     string checking         = _("Checking...");
@@ -223,15 +243,20 @@ if (! Mode::normal()) help = help + help_para6;
     string starting_browser = _("Starting browser...");
 
     /* other string variables */
-    map<string, string> information_data = nil;
     string information_text = "";
-
+    string error_msg_details = "";
 
     // default is true, see statement in layout term
     boolean configure_status = true;
 
-    /* vv   MAIN (WIZARD) LAYOUT  vv  */
+
+
+    /* --   MAIN (WIZARD) LAYOUT  --  */
     term sr_layout=nil;
+
+    list<term> expertMenu = [ `item(`id(`localRegistrationServer), TXT["localRegistrationServer"]:"" )
+                            ];
+
 
     sr_layout = `HVSquash(
     `VBox(
@@ -252,10 +277,13 @@ if (! Mode::normal()) help = help + help_para6;
                            `Left( `CheckBox(`id(`optional), `opt(`notify), nccc_sub_optional, Register::submit_optional ) ),
                             Register::display_forcereg ? `Left( `CheckBox(`id(`forcereg), `opt(`notify), nccc_forcereg, false ) ):`Empty(),
                            `VSpacing(0.5),
-                            // active in SLE products only - merged here for consistency
-                            //`VSpacing(0.5),
-                            //`Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ),
-                           `Right( `PushButton(`id(`showinfo), nccc_sub_showbtn ) )
+                            // active in SLE products only
+                            IAMSLE ? `Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ):`Empty(),
+                           `Right(
+                                   `HBox( `PushButton(`id(`showinfo), nccc_sub_showbtn ),
+                                           IAMSLE ? `MenuButton( _("Advanced"), expertMenu ):`Empty()
+                                   )
+                           )
                         )
                     )
                 )
@@ -264,13 +292,12 @@ if (! Mode::normal()) help = help + help_para6;
     ));
 
 
-
     term contents = `VBox ( `VSpacing (0.5), sr_layout, `VSpacing (0.5));
-    /* ^^       END MAIN LAYOUT     ^^  */
 
 
 
-    /* vv      SHOW INFO POPUP     vv  */
+
+    /* --      SHOW INFO POPUP     --  */
     term showinformation = `HBox( `HSpacing(0.5),
                                   `MinSize(  75, 22 ,`VBox(
                                      `Label( transmit_info ),
@@ -279,13 +306,13 @@ if (! Mode::normal()) help = help + help_para6;
                                    ),
                                   `HSpacing(0.5)
     );
-    /* ^^      END  SHOW INFO       ^^  */
 
 
 
 
 
-    /* vv  MANUAL INTERACTION POPUP vv  */
+
+    /* --  MANUAL INTERACTION POPUP  --  */
     term manual_interaction = //`HBox(
                                    `MinSize( 70, 25, `HBox( `VBox(
                                            `Left( `Label( `opt(`boldFont), mi_required ) )  ,
@@ -300,11 +327,11 @@ if (! Mode::normal()) help = help + help_para6;
                                            )
                                    ))
     );
-    /* ^^  END MANUAL INTERACTION  ^^  */
 
 
 
-    /* vv      CCC CONFLICT POPUP      vv  */
+
+    /* --      CCC CONFLICT POPUP      --  */
     term ccc_conflict=
     `VBox(
           `Left( `Label( `opt(`boldFont), title ) ),
@@ -312,10 +339,10 @@ if (! Mode::normal()) help = help + help_para6;
           `Left( `Label( conflict_need_info ) ),
           `PushButton(`id(`ok), Label::OKButton())
     );
-    /* ^^       END CCC CONFLICT       ^^  */
 
 
-    /* vv      CCC ERROR POPUP      vv  */
+
+    /* --      CCC ERROR POPUP      --  */
     term error_message=
     `VBox(
            `Left( `Label( `opt(`boldFont), error ) ),
@@ -330,10 +357,10 @@ if (! Mode::normal()) help = help + help_para6;
                   `HWeight(1, `PushButton(`id(`err_detail), details ) )
                 )
     );
-    /* ^^      END CCC ERROR        ^^  */
 
 
-    /* vv      CCC ERROR POPUP      vv  */
+
+    /* --      CCC ERROR POPUP      --  */
     term error_message_details=
     `MinSize( 60, 20,  `VBox(
            `Left( `Label( `opt(`boldFont), error_msg ) ),
@@ -341,10 +368,10 @@ if (! Mode::normal()) help = help + help_para6;
            `RichText(`id(`errordetail), "" ),
            `PushButton(`id(`ok), Label::OKButton())
     ));
-    /* ^^      END CCC ERROR        ^^  */
 
 
-    /* vv      CCC ERROR POPUP PLAINTEXT     vv  */
+
+    /* --      CCC ERROR POPUP PLAINTEXT     --  */
     term error_message_details_pt=
     `MinSize( 60, 20,  `VBox(
            `Left( `Label( `opt(`boldFont), error_msg ) ),
@@ -352,11 +379,11 @@ if (! Mode::normal()) help = help + help_para6;
            `RichText(`id(`errordetail), `opt(`plainText), "" ),
            `PushButton(`id(`ok), Label::OKButton())
     ));
-     /* ^^      END CCC ERROR PLAINTEXT       ^^  */
 
 
 
-    /* vv       SUCCESS MESSAGE    vv  */
+
+    /* --       SUCCESS MESSAGE    --  */
     term nccc_success=
     `VBox(
            `Left( `Label( `opt(`boldFont), title ) ),
@@ -369,11 +396,11 @@ if (! Mode::normal()) help = help + help_para6;
                   `HWeight(1, `PushButton(`id(`success_detail), details ) )
            )
     );
-    /* ^^   SUCCESS MESSAGE END     ^^  */
 
 
 
-    /* vv    SUCCESS DETAILS     vv  */
+
+    /* --    SUCCESS DETAILS     --  */
     term nccc_success_detail=
     `MinSize( 60, 7,  `VBox(
            `Left( `Label( `opt(`boldFont), success_detail_label ) ),
@@ -381,7 +408,7 @@ if (! Mode::normal()) help = help + help_para6;
            `RichText(`id(`success_detail_richtext), `opt(`plainText) , "" ),
            `PushButton(`id(`ok), Label::OKButton())
     ));
-    /* ^^    SUCCESS DETAILS END    ^^  */
+
 
 
 /* ---------------------------------- LOCAL FUNCTIONS ------------------------------------------------------------  */
@@ -404,7 +431,6 @@ boolean report_error()
         else if (retry == `err_detail)
         {
             // switch to plaintext if error output is one or two lines (#239570)
-            string error_msg_details = (string)information_data["stderr"]:"no error message available";
             if ( contains( [0,1], size(splitstring(error_msg_details,"\n")) ) )
                UI::OpenDialog(error_message_details);
             else
@@ -413,9 +439,10 @@ boolean report_error()
             UI::UserInput();
             UI::CloseDialog();
         }
-    } until ( retry != `err_detail );
+    } until ( contains([`skip, `back, `abort, `cancel], retry) );
 
     UI::CloseDialog();
+    return true;
 }
 
 
@@ -553,9 +580,76 @@ boolean launchBrowser(string url)
     }
 
     UI::RedrawScreen();
-
     return true;
 }
+
+
+
+boolean registrationServerSettings()
+{
+    string curRegURL  = Register::smt_server;
+    if (curRegURL  == nil) curRegURL = "https://";
+    string curRegCert = Register::smt_server_cert;
+    if (curRegCert == nil) curRegCert = "";
+
+    term askForRegSettings = `VBox(
+        `VSpacing(0.5),
+        `Label( TXT["localRegistrationServer"]:"" ),
+        `VSpacing(1.5),
+        `InputField(`id(`newRegistrationServer),     TXT["registrationServer"]:"", curRegURL  ),
+        `VSpacing(0.5),
+        `InputField(`id(`newRegistrationServerCert), TXT["serverCACertificateLocation"]:"", curRegCert ),
+        `VSpacing(1),
+        `HBox(
+            `PushButton(`id(`okButton), Label::OKButton() ),
+            `PushButton(`id(`cancel), Label::CancelButton() )
+        )
+
+    );
+
+    UI::OpenDialog(askForRegSettings);
+
+    any ret = nil;
+    boolean status=false;
+
+    while (true)
+    {
+        ret = UI::UserInput();
+
+        if      (ret == `cancel || ret == `abort)
+        {
+            status=false;
+            break;
+        }
+        else if (ret ==  `okButton)
+        {
+            curRegURL  = (string) UI::QueryWidget(`id(`newRegistrationServer),     `Value);
+            curRegCert = (string) UI::QueryWidget(`id(`newRegistrationServerCert), `Value);
+
+            // FIXME TODO
+            // check urls for sanity
+            map parsed = URL::Parse(curRegURL);
+            if (parsed == nil || parsed == $[] || parsed["scheme"]:"" != "https" )
+            {
+                Popup::Message(TXT["urlHasToBeHttps"]:"");
+                continue;
+            }
+            else
+            {
+                Register::smt_server = curRegURL;
+                Register::smt_server_cert = curRegCert;
+                status=true;
+                break;
+            }
+
+        }
+
+    }
+
+    UI::CloseDialog();
+    return status;
+}
+
 
 
 /* ----------------------------------- END FUNCTIONS -------------------------------------------------------------  */
@@ -572,24 +666,22 @@ boolean launchBrowser(string url)
     //y2debug ("%1", UI::DumpWidgetTree());
 
 
-    // check if we are running as nonroot
     if ( !Register::iamroot )
     {    // do not run as non-root: #170736
         return `auto;
-        // SL (box) has the following warning
-        //if ( !Popup::ContinueCancelHeadline( nonroot_title, nonroot_message ) )
-        //    return `cancel;
     }
 
 
     boolean loopend = false;
     any ret = nil;
+    integer SRstatus = nil;
+    string manual_interaction_overview = "";
 
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
 
     // #170113, the lock is needed around everything that may end up in ZMD
-    SourceManager::Lock ();
+//    SourceManager::Lock ();
 
     repeat {
         ret = Wizard::UserInput();
@@ -614,13 +706,25 @@ boolean launchBrowser(string url)
             Register::force_registration = (boolean) UI::QueryWidget(`id(`forcereg), `Value);
             Register::register_regularly = (boolean) UI::QueryWidget(`id(`regularly_run), `Value);
         }
+        else if (ret == `localRegistrationServer)
+        {
+            if (registrationServerSettings() )
+            {   // overwrite smt settings if it returns true
+                Register::force_new_reg_url = true;
+                if ( Register::setupRegistrationServer(nil) != `ok )
+                {
+                    configure_status = false;
+                }
+                Register::force_new_reg_url = false;
+            }
+
+        }
         else if (ret == `showinfo)
         {
-            information_data = Register::suseRegister(`p);
+            information_text = Register::suseRegisterListParams();
 
-            if ( information_data["exit"]:"99" == "0" )
+            if ( information_text != "" )
             {
-                information_text = information_data["stdout"]:"";
                 UI::OpenDialog( showinformation );
                 UI::ChangeWidget(`id(`information_text), `Value, information_text );
                 any info_ret = nil;
@@ -634,12 +738,12 @@ boolean launchBrowser(string url)
 
                 UI::CloseDialog();
             }
+
             else
             {
-                if (! ( information_data["exit"]:"99"        == "199"     &&
-                        information_data["stdout"]:"aborted" == "aborted" &&
-                        information_data["stderr"]:"aborted" == "aborted"    ) )
+                error_msg_details = YSR::get_errormsg();
                 report_error();
+                error_msg_details = "";
             }
 
         }
@@ -647,26 +751,18 @@ boolean launchBrowser(string url)
         {
             if ( configure_status == true )
             {
-                if (Mode::normal())
-                {   // (bnc#395333)
-                    Pkg::SourceRestore();
-                    y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
-                }
-                // remove the zmd flag file (requested by mvidner)
-                SCR::Execute(.target.bash, " rm -f /var/lib/zypp/zmd_updated_the_sources " );
 
-                /* run suse_register to see if we need manual interaction */
-                information_data = Register::suseRegister(nil);
+                // call suseRegister
+                SRstatus = Register::suseRegister(nil);
 
-                // error code 1: needinfo
-                // manual interaction is requiered
-                // this case MUST be first
-                //  ... because during manual interaction further suse_register calls change the error code
-                if (information_data["exit"]:"99" == "1" && interactive)
+                // error code 1: needinfo - manual interaction
+                if ( SRstatus == 1 )
                 {
+                    // get the details overview
+                    manual_interaction_overview = Register::suseRegisterListParams();
                     UI::OpenDialog( manual_interaction );
                     UI::SetFocus (`id (`start_browser ));
-                    UI::ChangeWidget( `id(`needinfo), `Value, information_data["stderr"]:data_invalid );
+                    UI::ChangeWidget( `id(`needinfo), `Value, manual_interaction_overview );
                     any mi_ret =nil;
                     boolean mi_loopend = false;
                     boolean recheck = true;
@@ -680,10 +776,10 @@ boolean launchBrowser(string url)
                         {
                             // now we launch the browser
                             UI::ChangeWidget( `id(`needinfo), `Value, starting_browser );
-                            browserrun = launchBrowser(information_data["stdout"]:"http://www.opensuse.org");
+                            string browserURL = YSR::get_manualURL();
+                            browserrun = launchBrowser( browserURL );
                             // deactivate force_registration after each suse_register call (#bugNo.)
                             Register::force_registration = false;
-
                         }
                         else if ( mi_ret == `cancel  )
                         {
@@ -703,18 +799,19 @@ boolean launchBrowser(string url)
                             // show the user, that we are doing something
                             UI::ChangeWidget( `id(`needinfo), `Value, checking );
 
-                            information_data = Register::suseRegister(nil);
+                            SRstatus = Register::suseRegister(nil);
 
-                            if (information_data["exit"]:"99" == "0" || information_data["exit"]:"99" == "3" )
+                            if ( SRstatus == 0  ||  SRstatus == 3 )
                             {
                                 // error 0: everything is done, quit
                                 // error 3: madatory data conflict - handle outside of manual interaction
                                 mi_loopend = true;
                             }
-                            else if (information_data["exit"]:"99" == "1")
+                            else if ( SRstatus == 1 )
                             {
                                 // still needinfo, change displayed information and stay in manual interaction
-                                UI::ChangeWidget( `id(`needinfo), `Value, information_data["stderr"]:retrieve_error );
+                                manual_interaction_overview = Register::suseRegisterListParams();
+                                UI::ChangeWidget( `id(`needinfo), `Value, manual_interaction_overview );
                             }
                             else
                             {
@@ -726,7 +823,8 @@ boolean launchBrowser(string url)
 
                         if (! browserrun )
                         {
-                            information_data = $["exit":"198", "stdout":"", "stderr":""  ];
+                            // information_data = $["exit":"198", "stdout":"", "stderr":""  ];
+                            // FIXME - can this if clause be removed ??
                             mi_loopend = true;
                         }
 
@@ -737,20 +835,15 @@ boolean launchBrowser(string url)
 
                     if (mi_ret == `cancel) configure_status = false;
                 }
-                else if (information_data["exit"]:"99" == "1" && ! interactive)
-                {
-                    // w3m disabled - show message
-                    Popup::Message(no_w3m_msg);
-                    loopend = true;
-                    ret = `skip;
-                }
 
-                // during error code 1 information_data may be changed by a suse_register call
+
+
                 // no NO MORE suse_register calls below this line !!
+                // ---------------------------------------------------------------------------------
 
 
                 /*  handle error codes from FIRST suse_register call AND from manual interaction  */
-                if (information_data["exit"]:"99" == "3")
+                if ( SRstatus == 3)
                 {
                     // error code 3 means:
                     // conflict between transmitted data and data to be transmit according to customer contract
@@ -762,66 +855,76 @@ boolean launchBrowser(string url)
                     Register::submit_hwdata = true;
                 }
 
+
                 // error code 0 means: everything is OK
-                // no more interaction requiered - ZMD is configuered by suse_register
-                if (information_data["exit"]:"99" == "0")
+                if ( SRstatus == 0 )
                 {
-                    // add update source
-                    UI::OpenDialog(`VBox(`Label(_("Setting up online update source..."))));
-                    list<string> added = Register::add_update_sources();
-		    // #186978
-		    added = maplist (string u, added, ``(
-					 InstURL::HidePassword (u) ));
-                    UI::CloseDialog();
+                    // get the taskList
+                    map<string, any> taskList = YSR::getTaskList();
+                    list<string> repoSummary = [];
 
-                    // and then show success message
-                    symbol sret=nil;
-
-                    // (#261239) show success popup only on success else error message
-                    if (added != nil && size(added) != 0)
+                    if ( taskList != $[] )
                     {
-                        UI::OpenDialog( nccc_success );
-                        repeat
-                        {
-                            sret = (symbol) UI::UserInput();
-                            if (sret == `success_detail)
-                            {
-			        string text = mergestring (added, "\n");
-                                // Show the URLs that were added as update sources.
-			        // Not STDERR of suse_register output, we may have
-			        // declined some unsigned ones, #180820#c26.
-                                UI::OpenDialog( nccc_success_detail );
-                                UI::SetFocus(`id(`ok));
-                                UI::ChangeWidget(`id(`success_detail_richtext), `Value, text );
-                                UI::UserInput();
-                                UI::CloseDialog();
-                            }
-                        } until (sret == `ok );
+                        // add/delete/change repositories
+
+                        string oldMessage = _("Setting up online update source...");
+                        string newMessage = _("Updating software repositories...");
+                        UI::OpenDialog(`VBox(`Label( oldMessage )));
+
+                        repoSummary = Register::updateSoftwareRepositories(taskList);
+
+                        // #186978  -  hide the passwords of the urls in the status window
+                        // now obsolete - the summary created by "updateSoftwareRepositories" will not contain passwords of URLs
+
                         UI::CloseDialog();
-                    }
-                    else
-                    {
-                        Popup::Error(nccc_error_no_server_added);
+
+                        // and then show success message
+                        symbol sret=nil;
+
+                        // (#261239) show success popup only on success else error message
+                        if (repoSummary != nil && size(repoSummary) != 0)
+                        {
+                            UI::OpenDialog( nccc_success );
+                            repeat
+                            {
+                                sret = (symbol) UI::UserInput();
+                                if (sret == `success_detail)
+                                {
+                                    string text = mergestring (repoSummary, "\n");
+                                    // Show the URLs that were added as update sources.
+                                    // Not STDERR of suse_register output, we may have
+                                    // declined some unsigned ones, #180820#c26.
+                                    UI::OpenDialog( nccc_success_detail );
+                                    UI::SetFocus(`id(`ok));
+                                    UI::ChangeWidget(`id(`success_detail_richtext), `Value, text );
+                                    UI::UserInput();
+                                    UI::CloseDialog();
+                                }
+                            } until (sret == `ok );
+                            UI::CloseDialog();
+                        }
+                        else
+                        {
+                            Popup::Error(nccc_error_no_server_added);
+                        }
                     }
 
-                    // we are done, end of loop
+                    // we are done - finally
                     loopend = true;
                 }
 
 
 
-
                 //  show a message when there are no products to register
-                if (information_data["exit"]:"99" == "101")
+                if ( SRstatus == 101 )
                 {
                     Popup::Message(no_product_msg);
                     loopend = true;
                 }
 
 
-
                 // error handling - no browser available for interactive mode
-                if (information_data["exit"]:"99" == "198")
+                if ( SRstatus == 198 )
                 {
                     Popup::Message(no_browser_msg);
                     loopend = true;
@@ -829,24 +932,12 @@ boolean launchBrowser(string url)
 
 
                 // handle any other error codes
-                if (
-                     (
-                       information_data["exit"]:"" != "0" &&
-                       information_data["exit"]:"" != "1" &&
-                       information_data["exit"]:"" != "3" &&
-                       information_data["exit"]:"" != "101" &&
-                       information_data["exit"]:"" != "198"
-                     ) &&
-                    !(
-                       // if return value says that suse_register was aborted by user
-                       information_data["exit"]:"99"        == "199"     &&
-                       information_data["stdout"]:"aborted" == "aborted" &&
-                       information_data["stderr"]:"aborted" == "aborted"
-                     )
-                   )
+                if ( contains([0, 1, 3, 101, 198, 199], SRstatus)  == false )
                 {
                     // display error message
+                    error_msg_details = YSR::get_errormsg();
                     report_error();
+                    error_msg_details = "";
                 }
 
             }
@@ -871,14 +962,15 @@ boolean launchBrowser(string url)
 
     } until ( loopend || ret == `back );
 
-    SourceManager::Unlock ();
+
 
     if (Mode::normal())
-    {   // (bnc#395333)
-        y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
+    {
+        // (bnc#395333)
+//        y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
         // #172665
-        Pkg::SourceSaveAll();
-        Pkg::TargetFinish ();
+//        Pkg::SourceSaveAll();
+//        Pkg::TargetFinish ();
         Wizard::CloseDialog();
     }
     else

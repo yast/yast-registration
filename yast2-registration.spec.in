@@ -15,6 +15,7 @@ PreReq:     %fillup_prereq
 BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
 # Internet YCP module
 BuildRequires:	yast2 >= 2.16.6
+BuildRequires:  suseRegister sles-release perl-libwww-perl perl-URI perl-Crypt-SSLeay
 
 BuildArchitectures:	noarch
 
@@ -61,8 +62,6 @@ Performs the Registration
 @schemadir@/autoyast/rnc/automatic_online_update.rnc
 /usr/lib/YaST2/bin/online_update
 /usr/share/YaST2/yastbrowser
-%dir /usr/share/YaST2/control
-/usr/share/YaST2/control/*.xml
 
 # agents
 @scrconfdir@/cfg_suse_register.scr
