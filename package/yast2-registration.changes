@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 13 18:38:31 CEST 2008 - jdsn@suse.de
+
+- support repository changes in catalogs (bnc#430896)
+- added mandatory source refreshes
+- 2.17.2
+
+-------------------------------------------------------------------
 Wed Oct  8 23:39:11 CEST 2008 - jdsn@suse.de
 
 - use new suse_register backend (bnc#430896)

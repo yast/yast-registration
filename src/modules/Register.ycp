@@ -793,6 +793,8 @@ global void initialize()
 {
     read_config();
     iamroot = amIroot();
+
+    // FIXME: need to test for xen-hypervisor status and install xen-packages
 }
 
 
@@ -828,6 +830,107 @@ global list<string> add_update_sources ()
 
     return SourceManager::AddUpdateSources (urls);
 }
+
+
+
+/*
+ * checkCatalogs
+ *
+ * takes a sub-"taskList"-map (catalogs-map) from SuseRegister and updates listed repositories
+ * @return a list with a small summary (added/deleted/enabled/disabled repos)
+ */
+global list<string> checkCatalogs(map<string, any> taskList, string service)
+{
+    list<string> cSummary = [];
+    map<string, list<string> > catalogToEnable = $[];
+    map<string, list<string> > catalogToDisable = $[];
+
+    foreach (string catalog, any pAny, taskList, {
+        if ( ! is(pAny, map) )
+        {
+            y2error("A catalog returned by SuseRegister did not contain any details: %1", catalog);
+        }
+        else if ( catalog == nil  || catalog == "" )
+        {
+            y2error("A catalog returned by SuseRegister has no or an invalid name.");
+        }
+        else
+        {
+            map catDetail = (map) pAny;
+
+            if ( catDetail["ALIAS"]:"" == nil  ||  catDetail["ALIAS"]:"" == "" )
+            {
+                y2error("A catalog returned by SuseRegister has no or an invalid alias name.");
+            }
+            else
+            {
+                if ( catDetail["TASK"]:"" == nil  ||  catDetail["TASK"]:"" == "" )
+                {
+                    y2error("A catalog returned by SuseRegister has an invalid task: %1", catalog);
+                }
+                else if ( catDetail["TASK"]:"" == "le"  ||  catDetail["TASK"]:"" == "le" )
+                {
+                    y2milestone("According to SuseRegister a catalog does not need to be changed: %1 (%2)", catalog, service);
+                }
+                else if ( catDetail["TASK"]:"" ==  "a" )
+                {
+                    y2milestone("According to SuseRegister a catalog has to be enabled: %1 (%2)", catalog, service);
+                    catalogToEnable[service] = add(catalogToEnable[service]:[], catalog);
+                    cSummary = add(cSummary, sformat(_("Enabled catalog: %1 (%2)"), catalog, service) );
+                }
+                else if ( catDetail["TASK"]:"" ==  "d" )
+                {
+                    y2milestone("According to SuseRegister a service has to be disabled: %1 (%2)", catalog, service);
+                    catalogToDisable[service] = add(catalogToDisable[service]:[], catalog);
+                    cSummary = add(cSummary, sformat(_("Disabled catalog: %1 (%2)"), catalog, service) );
+                }
+                else
+                {
+                    y2error("A catalog returned by SuseRegister has an unsupported task: %1 (%2)", catalog, service);
+                }
+            }
+        }
+    });
+
+
+    foreach (string fService, list<string> fCatalogs, catalogToDisable, {
+        string toDisableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
+        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%2.service <<THISISTHEENDOFTHEFILE
+repostodisable = %3
+THISISTHEENDOFTHEFILE", service, service, toDisableString ));
+
+        if ( retval == 0 )
+        {
+            y2milestone("According to SuseRegister these catalogs were disabled: %1 (%2)", toDisableString, service);
+        }
+        else
+        {
+            y2error("Catalogs returned by SuseRegister could not be disabled: %1 (%2)", toDisableString, service);
+        }
+    });
+
+
+    foreach (string fService, list<string> fCatalogs, catalogToEnable, {
+        string toEnableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
+        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%1.service <<THISISTHEENDOFTHEFILE
+repostoenable = %2
+THISISTHEENDOFTHEFILE", service, toEnableString ));
+
+        if ( retval == 0 )
+        {
+            y2milestone("According to SuseRegister these catalogs were enabled: %1 (%2)", toEnableString, service);
+        }
+        else
+        {
+            y2error("Catalogs returned by SuseRegister could not be enabled: %1 (%2)", toEnableString, service);
+        }
+    });
+
+    return cSummary;
+}
+
+
+
 
 
 /*
@@ -954,10 +1057,17 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                     y2milestone("According to SuseRegister a service should be left enabled: %1", pService);
                     y2milestone("Now checking the catalogs of the service: %1", pService );
 
-// ------------------->>>>> FIXME check catalogs!!!!!!!!
-    // --> just iterate over catalogs
-    // TODO
-
+                    any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
+                    if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
+                    {
+                        y2milestone("A service returned by SuseRegister has catalogs that will be checked now.");
+                        list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
+                        summary = (list<string>) merge(summary, cSummary);
+                    }
+                    else
+                    {
+                        y2error("A service returned by SuseRegister did not contain any catalogs.");
+                    }
                 }
                 else if ( ((map) pAny)["TASK"]:"" == "a" )
                 {
@@ -968,11 +1078,15 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                     {
                         y2milestone("Successfully added a new service: %1", pService);
                         y2milestone("Now checking the catalogs of the service: %1", pService);
-			summary = add(summary, sformat(_("Added Service: %1"), pService ));
+                        summary = add(summary, sformat(_("Added Service: %1"), pService ));
 
-// ------------------->>>>> FIXME check catalogs!!!!!!!!
-    // need to save service to the system first -- is this be done with  Pkg::SourceSaveAll()  ??  service != source  ??
+// ------------------->>>>> FIXME
+                        // need to save service to the system first??
+                        // documentation of Pkg::ServiceRefresh says : "Refresh the service, the service must already be saved on the system!"
 
+                        // is this done with  Pkg::SourceSaveAll()  ??
+                        //  service != source  ??
+/*
                         if ( Pkg::SourceSaveAll() )
                         {
                             y2milestone("Successfully saved all sources.");
@@ -981,10 +1095,11 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                         {
                             y2error("Could not save all sources.");
                         }
+*/
 
-    // then need to call  Pkg::ServiceRefresh()
-/*
-                        if ( Pkg::ServiceRefresh(pService) )
+                        // then need to call  Pkg::ServiceRefresh()
+                        //if ( Pkg::ServiceRefresh(pService) )
+                        if (true)
                         {
                             y2milestone("Successfully refreshed service: %1", pService);
                         }
@@ -992,9 +1107,19 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                         {
                             y2error("Could not refresh service: %1", pService);
                         }
-*/
-    // then iterate over catalogs
-    // TODO
+
+                        // then iterate over catalogs
+                        any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
+                        if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
+                        {
+                            y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
+                            list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
+                            summary = (list<string>) merge(summary, cSummary);
+                        }
+                        else
+                        {
+                            y2error("A new service returned by SuseRegister did not contain any catalogs.");
+                        }
 
                     }
                     else
@@ -1011,7 +1136,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                     if ( Pkg::ServiceDelete(pService) )
                     {
                         y2milestone("Successfully deleted a service: %1", pService);
-			summary = add(summary, sformat(_("Deleted Service: %1"), pService ));
+                        summary = add(summary, sformat(_("Deleted Service: %1"), pService ));
                     }
                     else
                     {
@@ -1042,13 +1167,13 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
 */
 global integer suseRegister(symbol parameter)
 {
-    // FIXME -- THERE __MUST__ BE A SOURCE REFREH BEFORE INITIALIZING SUSEREGISTER
-
+    list<integer> allCurrentSources = [];
     map<string, any> contextData = $[
                                         "debug"             :  0,
                                         "nooptional"        :  (submit_optional    ? 0:1),
                                         "nohwdata"          :  (submit_hwdata      ? 0:1),
                                         "forceregistration" :  (force_registration ? 1:0),
+                                        "norefresh"         :  1,
                                         "yastcall"          :  1,
                                         "logfile"           :  "/root/.suse_register.log"
                                     ];
@@ -1069,6 +1194,16 @@ global integer suseRegister(symbol parameter)
 
     if (! isInitializedSR  || contextData != contextDataSR )
     {
+        if ( ! isInitializedSR )
+        {
+            // refresh all sources/services _once_ before interacting with SuseRegister
+            allCurrentSources = Pkg::SourceStartCache(true);
+            foreach ( integer srcID, allCurrentSources, {
+                y2milestone("Refreshing source with ID: %1", srcID);
+                Pkg::SourceForceRefreshNow(srcID);
+            });
+        }
+
         // initialize SuseRegister
         contextDataSR = contextData;
         y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
@@ -1090,9 +1225,7 @@ global integer suseRegister(symbol parameter)
         }
     }
 
-
     // ----====  handle modes for suseRegister  ====----
-
 
     // special mode for list-params
     // only makes sure registration is initialized
@@ -1142,9 +1275,19 @@ global integer suseRegister(symbol parameter)
 
     if ( parameter == `autoyast )
     {
-        string foo="bar";
-        // TODO
-        // call the function to sync the sources from here or from the Write function
+        y2milestone("SuseRegister was called in autoYaST mode. The overall registration satus is: %1", initialSRstatus);
+        if ( initialSRstatus == 1 )
+        {
+            y2error("Manual interaction is required for proper registration which is not possible during autoYaST. Please register manually.");
+        }
+        y2milestone("All sources will be refreshed now.");
+
+        // refresh all sources/services
+        allCurrentSources = Pkg::SourceStartCache(true);
+        foreach ( integer srcID, allCurrentSources, {
+            y2milestone("Refreshing source with ID: %1", srcID);
+            Pkg::SourceForceRefreshNow(srcID);
+        });
     }
 
     y2milestone("SuseRegister status: %1", initialSRstatus);

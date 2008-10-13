@@ -141,6 +141,8 @@ by registering this installation.");
     string nccc_success_msg = _("Your configuration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
     string nccc_error_no_server_added = _("No update server could be added to your configuration.");
+    string nccc_no_source_changes0 = _("No software repository needed to be changed.");
+    string nccc_no_source_changes = _("Software repositories did not need to be changed.");
     /* caption for details view  */
     string success_detail_label =_("New Update Server");
 
@@ -884,6 +886,13 @@ boolean registrationServerSettings()
                         // (#261239) show success popup only on success else error message
                         if (repoSummary != nil && size(repoSummary) != 0)
                         {
+                            // on successful registration and only if there were changes, we need to refresh all sources
+                            list<integer> currentSources = Pkg::SourceGetCurrent( true );
+                            foreach (integer srcID, currentSources, {
+                                y2milestone("Refreshing source with ID: %1", srcID);
+                                Pkg::SourceForceRefreshNow(srcID);
+                            });
+
                             UI::OpenDialog( nccc_success );
                             repeat
                             {
@@ -905,7 +914,8 @@ boolean registrationServerSettings()
                         }
                         else
                         {
-                            Popup::Error(nccc_error_no_server_added);
+                            //Popup::Error(nccc_error_no_server_added);
+                            Popup::Notify(nccc_no_source_changes);
                         }
                     }
 
