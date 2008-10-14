@@ -24,7 +24,7 @@ import "Linuxrc";
 import "YSR";
 import "ProductFeatures";
 import "SourceManager";
-
+import "Installation";
 
 // --------------------------------------------------------------
 // START: Locally defined data
@@ -32,9 +32,11 @@ import "SourceManager";
 
 string services_file = sformat ("%1/update_services", SCR::Read (.target.tmpdir));
 boolean isInitializedSR = false;
+boolean isInitializedTarget = false;
 map<string, any> contextDataSR = nil;
 map<string, map<string, string> > argsDataSR = nil;
 integer initialSRstatus = nil;
+
 // ------------------------------------------------------------------
 // END:   Locally defined data
 // ------------------------------------------------------------------
@@ -692,6 +694,7 @@ void write_config()
     SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
     SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
 
+    if ( register_regularly == nil ) register_regularly = false;
     SCR::Execute(.target.bash, sformat("%1 /var/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
     // touch a flag file for opensuseupdater
     SCR::Execute(.target.bash, sformat("touch /var/lib/YaST2/registrationDidRun"));
@@ -939,7 +942,7 @@ THISISTHEENDOFTHEFILE", service, toEnableString ));
  * takes a "taskList"-map from SuseRegister and updates the repositories
  * @return a list with a small summary (added/deleted/enabled/disabled repos)
  */
-global list<string> updateSoftwareRepositories(map<string, any> taskList)
+global list<string> updateSoftwareRepositories(map<string, any> taskList, boolean doRefresh)
 {
     // see if there are actions to perform
     if (taskList == $[])
@@ -1083,9 +1086,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
 // ------------------->>>>> FIXME
                         // need to save service to the system first??
                         // documentation of Pkg::ServiceRefresh says : "Refresh the service, the service must already be saved on the system!"
-
                         // is this done with  Pkg::SourceSaveAll()  ??
-                        //  service != source  ??
+                        // service != source  ??
 /*
                         if ( Pkg::SourceSaveAll() )
                         {
@@ -1097,9 +1099,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
                         }
 */
 
-                        // then need to call  Pkg::ServiceRefresh()
-                        //if ( Pkg::ServiceRefresh(pService) )
-                        if (true)
+                        // need to call  Pkg::ServiceRefresh() before checking the catalogs
+                        if ( Pkg::ServiceRefresh(pService) )
                         {
                             y2milestone("Successfully refreshed service: %1", pService);
                         }
@@ -1157,6 +1158,23 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList)
     });
 
 
+    // on successful registration and only if there were changes, we need to refresh all sources
+    if ( size(summary) > 0 )
+    {
+        // save all changes to the sources that we have done
+        Pkg::SourceSaveAll();
+
+        // we can not refresh in autoYaST mode as it may require manual interaction to import keys
+        if ( doRefresh )
+        {
+            list<integer> currentSources = Pkg::SourceGetCurrent( true );
+            foreach (integer srcID, currentSources, {
+                y2milestone("Refreshing source with ID: %1", srcID);
+                Pkg::SourceForceRefreshNow(srcID);
+            });
+        }
+    }
+
     return summary;
 }
 
@@ -1192,10 +1210,20 @@ global integer suseRegister(symbol parameter)
     }
 
 
-    if (! isInitializedSR  || contextData != contextDataSR )
+    if ( ! isInitializedSR  ||  ! isInitializedTarget  || contextData != contextDataSR )
     {
-        if ( ! isInitializedSR )
+        // initialize target
+        if ( ! isInitializedTarget )
         {
+            string targetRootDir = Mode::normal() ? "/":Installation::destdir;
+            if ( ! Pkg::TargetInitialize(targetRootDir) )
+            {
+                y2error("Initializing the target failed via Pkg::TargetInitialize. No interaction with the package system is possible.");
+                return 113;
+            }
+            y2milestone("Successfully initialized the target.");
+            isInitializedTarget = true;
+
             // refresh all sources/services _once_ before interacting with SuseRegister
             allCurrentSources = Pkg::SourceStartCache(true);
             foreach ( integer srcID, allCurrentSources, {
@@ -1208,7 +1236,16 @@ global integer suseRegister(symbol parameter)
         contextDataSR = contextData;
         y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
         YSR::init_ctx(contextDataSR);
-        isInitializedSR = true;
+
+        if ( YSR::get_errorcode() == 0 )
+        {
+            isInitializedSR = true;
+        }
+        else
+        {
+            y2error("Initializing SuseRegister failed with error code (%1) and error message: %2", YSR::get_errorcode(), YSR::get_errormsg());
+            return 112;
+        }
 
         // setting up proxy for SuseRegister
         if (Register::use_proxy)
@@ -1276,18 +1313,25 @@ global integer suseRegister(symbol parameter)
     if ( parameter == `autoyast )
     {
         y2milestone("SuseRegister was called in autoYaST mode. The overall registration satus is: %1", initialSRstatus);
-        if ( initialSRstatus == 1 )
+        if ( initialSRstatus == 0 )
+        {
+            y2milestone("Registeration in autoYaST mode succeeded. Now checking the repositories.");
+            // in autoyast mode this must be called from here
+            map<string, any> taskList = YSR::getTaskList();
+            if ( taskList == $[] )
+            {
+                y2milestone("According to SuseRegister no repositories need to be changed.");
+            }
+            else
+            {
+                updateSoftwareRepositories(taskList, false);
+            }
+        }
+        else if ( initialSRstatus == 1 )
         {
             y2error("Manual interaction is required for proper registration which is not possible during autoYaST. Please register manually.");
         }
-        y2milestone("All sources will be refreshed now.");
 
-        // refresh all sources/services
-        allCurrentSources = Pkg::SourceStartCache(true);
-        foreach ( integer srcID, allCurrentSources, {
-            y2milestone("Refreshing source with ID: %1", srcID);
-            Pkg::SourceForceRefreshNow(srcID);
-        });
     }
 
     y2milestone("SuseRegister status: %1", initialSRstatus);

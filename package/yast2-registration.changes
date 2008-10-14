@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Oct 14 18:06:33 CEST 2008 - jdsn@suse.de
+
+- check if initialization of SuseRegister succeeds (bnc#435188)
+- initialize the target to prevent repeated key import (bnc#435192)
+- adapting repo changes as well in autoYaST mode
+- 2.17.3 
+
+-------------------------------------------------------------------
 Mon Oct 13 18:38:31 CEST 2008 - jdsn@suse.de
 
 - support repository changes in catalogs (bnc#430896)

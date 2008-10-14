@@ -243,6 +243,9 @@ help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChap
     string details          = _("Details...");
     string error_msg        = _("Error");
     string starting_browser = _("Starting browser...");
+    string error_target_init_failed = _("Initialization failed.\nCan not interact with the package system.");
+    string message_install_missing_packages = _("In order to registrer properly the system
+needs to install the following packages.");
 
     /* other string variables */
     string information_text = "";
@@ -867,13 +870,12 @@ boolean registrationServerSettings()
 
                     if ( taskList != $[] )
                     {
-                        // add/delete/change repositories
-
                         string oldMessage = _("Setting up online update source...");
                         string newMessage = _("Updating software repositories...");
                         UI::OpenDialog(`VBox(`Label( oldMessage )));
 
-                        repoSummary = Register::updateSoftwareRepositories(taskList);
+                        // add/delete/change repositories
+                        repoSummary = Register::updateSoftwareRepositories(taskList, true);
 
                         // #186978  -  hide the passwords of the urls in the status window
                         // now obsolete - the summary created by "updateSoftwareRepositories" will not contain passwords of URLs
@@ -886,13 +888,6 @@ boolean registrationServerSettings()
                         // (#261239) show success popup only on success else error message
                         if (repoSummary != nil && size(repoSummary) != 0)
                         {
-                            // on successful registration and only if there were changes, we need to refresh all sources
-                            list<integer> currentSources = Pkg::SourceGetCurrent( true );
-                            foreach (integer srcID, currentSources, {
-                                y2milestone("Refreshing source with ID: %1", srcID);
-                                Pkg::SourceForceRefreshNow(srcID);
-                            });
-
                             UI::OpenDialog( nccc_success );
                             repeat
                             {
@@ -941,14 +936,31 @@ boolean registrationServerSettings()
                 }
 
 
+                // error handling - initialization of target failed
+                if ( SRstatus == 113 )
+                {
+                    Popup::Message(error_target_init_failed);
+                    loopend = true;
+                }
+
+
                 // handle any other error codes
-                if ( contains([0, 1, 3, 101, 198, 199], SRstatus)  == false )
+                if ( contains([0, 1, 3, 101, 113, 198, 199], SRstatus)  == false )
                 {
                     // display error message
                     error_msg_details = YSR::get_errormsg();
                     report_error();
                     error_msg_details = "";
                 }
+
+/*
+                DOCUMENTATION OF ERROR CODES
+                * 111: a generic unknown error uccurred during a SuseRegister call
+                * 112: the initialization of SuseRegister failed; no special message is used for that though
+                * 113: the initialization if the target failed - no interaction with the package system possible
+                * 198: the system did not find any browser to let the user perform the manual interaction part of the registration
+                * 199: unknown error uccurred (no longer used)
+*/
 
             }
             else
