@@ -36,6 +36,7 @@ boolean isInitializedTarget = false;
 map<string, any> contextDataSR = nil;
 map<string, map<string, string> > argsDataSR = nil;
 integer initialSRstatus = nil;
+boolean repoUpdateSuccessful = true;  // flag success of repo changes for saveLastZmdConfig (bnc#435696)
 
 // ------------------------------------------------------------------
 // END:   Locally defined data
@@ -563,22 +564,16 @@ global symbol setupRegistrationServer(symbol mode)
     if ( trust )
     {
         string installCert    = sformat("cp -a  %1  %2  &&  c_rehash %3", certTmpFile, smtpemFile, smtpemPath);
-        string installCertZMD = sformat("[ -d /etc/zmd/trusted-certs ] &&  cp -a  %1  /etc/zmd/trusted-certs/registration-server.cer", certTmpFile);
+        // removed installing the certificate as well to zmd (bnc#435631)
 
-        integer instret    = (integer) SCR::Execute(.target.bash, installCert);
-        integer instretZMD = (integer) SCR::Execute(.target.bash, installCertZMD);
-
-        if ( instret == 0 && instretZMD == 0)
+        if ( (integer) SCR::Execute(.target.bash, installCert) == 0 )
         {
             y2milestone("Successfully installed SMT certificate. Registration will now proceed.");
             return `ok;
         }
         else
         {
-            if (instret == 0 )
-                y2error("Failed to install SMT certificate to common cert storage. Registration would fail and thus will be skipped.");
-            if (instretZMD == 0)
-                y2error("Failed to install SMT certificate for ZMD. Registration would fail and thus will be skipped.");
+            y2error("Failed to install SMT certificate to common cert storage. Registration would fail and thus will be skipped.");
 
             if (!ay) Popup::Message(_("Installation of the SMT certificates failed.\nPlease see the logs for further information."));
             return `silentskip;
@@ -852,10 +847,12 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
         if ( ! is(pAny, map) )
         {
             y2error("A catalog returned by SuseRegister did not contain any details: %1", catalog);
+            repoUpdateSuccessful = false;
         }
         else if ( catalog == nil  || catalog == "" )
         {
             y2error("A catalog returned by SuseRegister has no or an invalid name.");
+            repoUpdateSuccessful = false;
         }
         else
         {
@@ -864,12 +861,14 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
             if ( catDetail["ALIAS"]:"" == nil  ||  catDetail["ALIAS"]:"" == "" )
             {
                 y2error("A catalog returned by SuseRegister has no or an invalid alias name.");
+                repoUpdateSuccessful = false;
             }
             else
             {
                 if ( catDetail["TASK"]:"" == nil  ||  catDetail["TASK"]:"" == "" )
                 {
                     y2error("A catalog returned by SuseRegister has an invalid task: %1", catalog);
+                    repoUpdateSuccessful = false;
                 }
                 else if ( catDetail["TASK"]:"" == "le"  ||  catDetail["TASK"]:"" == "le" )
                 {
@@ -890,12 +889,13 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
                 else
                 {
                     y2error("A catalog returned by SuseRegister has an unsupported task: %1 (%2)", catalog, service);
+                    repoUpdateSuccessful = false;
                 }
             }
         }
     });
 
-
+    // FIXME: this should be done via the Pkg API - but these function is not available yet - so do it manually for now
     foreach (string fService, list<string> fCatalogs, catalogToDisable, {
         string toDisableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
         integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%2.service <<THISISTHEENDOFTHEFILE
@@ -909,15 +909,16 @@ THISISTHEENDOFTHEFILE", service, service, toDisableString ));
         else
         {
             y2error("Catalogs returned by SuseRegister could not be disabled: %1 (%2)", toDisableString, service);
+            repoUpdateSuccessful = false;
         }
     });
 
-
+    // FIXME: this should be done via the Pkg API - but these function is not available yet - so do it manually for now
     foreach (string fService, list<string> fCatalogs, catalogToEnable, {
         string toEnableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
-        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%1.service <<THISISTHEENDOFTHEFILE
-repostoenable = %2
-THISISTHEENDOFTHEFILE", service, toEnableString ));
+        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%2.service <<THISISTHEENDOFTHEFILE
+repostoenable = %3
+THISISTHEENDOFTHEFILE", service, service, toEnableString ));
 
         if ( retval == 0 )
         {
@@ -926,6 +927,7 @@ THISISTHEENDOFTHEFILE", service, toEnableString ));
         else
         {
             y2error("Catalogs returned by SuseRegister could not be enabled: %1 (%2)", toEnableString, service);
+            repoUpdateSuccessful = false;
         }
     });
 
@@ -963,16 +965,19 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
         if ( ! is(pAny, map) )
         {
             y2error("A service returned by SuseRegister did not contain any details: %1", pService);
+            repoUpdateSuccessful = false;
         }
         else if ( pService == nil || pService == "" )
         {
             y2error("A service returned by SuseRegister has no or an invalid name.");
+            repoUpdateSuccessful = false;
         }
         else
         {
             if ( ! is( ((map) pAny)["TYPE"]:"", string) )
             {
                 y2error("A service returned by SuseRegister has an invalid type: %1 (%2)", pService, ((map) pAny)["TYPE"]:"");
+                repoUpdateSuccessful = false;
             }
             if ( ((map) pAny)["TYPE"]:"" == "zypp" )
             {
@@ -980,6 +985,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                 if ( ! is( ((map) pAny)["TASK"]:"", string) )
                 {
                     y2error("A service returned by SuseRegister has an invalid task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                    repoUpdateSuccessful = false;
                 }
                 else if ( ((map) pAny)["TASK"]:"" == "le"  ||  ((map) pAny)["TASK"]:"" == "ld" )
                 {
@@ -1006,6 +1012,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     if ( newSrcID == nil )
                     {
                         y2error("Adding a new service failed: %1", pService );
+                        repoUpdateSuccessful = false;
                     }
                     else
                     {
@@ -1023,6 +1030,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     if ( srcID == nil )
                     {
                         y2error("A service that should be deleted can not be found: %1", pService);
+                        repoUpdateSuccessful = false;
                     }
                     else
                     {
@@ -1034,12 +1042,14 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         else
                         {
                             y2error("Could not delete a service: %1 (%2)", pService, srcID);
+                            repoUpdateSuccessful = false;
                         }
                     }
                 }
                 else
                 {
                     y2error("A service returned by SuseRegister has an unsupported task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                    repoUpdateSuccessful = false;
                 }
 
             }
@@ -1050,6 +1060,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                 if ( ! is( ((map) pAny)["TASK"]:"", string) )
                 {
                     y2error("A service returned by SuseRegister has an invalid task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                    repoUpdateSuccessful = false;
                 }
                 else if ( ((map) pAny)["TASK"]:"" == "ld" )
                 {
@@ -1070,6 +1081,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     else
                     {
                         y2error("A service returned by SuseRegister did not contain any catalogs.");
+                        repoUpdateSuccessful = false;
                     }
                 }
                 else if ( ((map) pAny)["TASK"]:"" == "a" )
@@ -1077,55 +1089,60 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     // ServiceAdd
                     y2milestone("According to SuseRegister a service has to be added: %1", pService);
 
-                    if ( Pkg::ServiceAdd( ((map) pAny)["ALIAS"]:"",  ((map) pAny)["URL"]:"" ) )
+                    // add credetials information (bnc#435645)
+                    map serviceAddUrl = URL::Parse( ((map) pAny)["URL"]:"" );
+                    string queryJoinChar = "";
+                    if ( size( (string)serviceAddUrl["query"]:"" ) > 0 )
+                    {
+                        queryJoinChar = "&";
+                    }
+                    serviceAddUrl["query"] = (string) serviceAddUrl["query"]:"" + queryJoinChar + "credentials=NCCcredentials";
+
+                    if ( Pkg::ServiceAdd( ((map) pAny)["ALIAS"]:"", URL::Build(serviceAddUrl) ) )
                     {
                         y2milestone("Successfully added a new service: %1", pService);
                         y2milestone("Now checking the catalogs of the service: %1", pService);
                         summary = add(summary, sformat(_("Added Service: %1"), pService ));
 
-// ------------------->>>>> FIXME
-                        // need to save service to the system first??
-                        // documentation of Pkg::ServiceRefresh says : "Refresh the service, the service must already be saved on the system!"
-                        // is this done with  Pkg::SourceSaveAll()  ??
-                        // service != source  ??
-/*
-                        if ( Pkg::SourceSaveAll() )
+                        // because the Pkg bindings do not operate on the system directly we need to save them before we can continue
+                        if ( Pkg::ServiceSave )
                         {
-                            y2milestone("Successfully saved all sources.");
+                            y2milestone("Successfully saved services.");
+
+                            if ( Pkg::ServiceRefresh(pService) )
+                            {
+                                y2milestone("Successfully refreshed service: %1", pService);
+
+                                // then iterate over catalogs
+                                any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
+                                if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
+                                {
+                                    y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
+                                    list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
+                                    summary = (list<string>) merge(summary, cSummary);
+                                }
+                                else
+                                {
+                                    y2error("A new service returned by SuseRegister did not contain any catalogs.");
+                                    repoUpdateSuccessful = false;
+                                }
+                            }
+                            else
+                            {
+                                y2error("Could not refresh service: %1", pService);
+                                repoUpdateSuccessful = false;
+                            }
                         }
                         else
                         {
-                            y2error("Could not save all sources.");
+                            y2error("Could not save services to the system.");
+                            repoUpdateSuccessful = false;
                         }
-*/
-
-                        // need to call  Pkg::ServiceRefresh() before checking the catalogs
-                        if ( Pkg::ServiceRefresh(pService) )
-                        {
-                            y2milestone("Successfully refreshed service: %1", pService);
-                        }
-                        else
-                        {
-                            y2error("Could not refresh service: %1", pService);
-                        }
-
-                        // then iterate over catalogs
-                        any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
-                        if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
-                        {
-                            y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
-                            list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
-                            summary = (list<string>) merge(summary, cSummary);
-                        }
-                        else
-                        {
-                            y2error("A new service returned by SuseRegister did not contain any catalogs.");
-                        }
-
                     }
                     else
                     {
                         y2error("Adding a new service failed: %1", pService);
+                        repoUpdateSuccessful = false;
                     }
 
                 }
@@ -1142,16 +1159,19 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     else
                     {
                         y2error("Could not delete a service: %1", pService);
+                        repoUpdateSuccessful = false;
                     }
                 }
                 else
                 {
                     y2error("A service returned by SuseRegister has an unsupported task: %1 (%2)", pService, ((map) pAny)["TASK"]:"" );
+                    repoUpdateSuccessful = false;
                 }
             }
             else
             {
                 y2error("A service returned by SuseRegister has an unsupported type: %1 (%2)", pService, ((map) pAny)["TYPE"]:"" );
+                repoUpdateSuccessful = false;
             }
 
         }
@@ -1174,6 +1194,17 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
             });
         }
     }
+
+    if ( repoUpdateSuccessful )
+    {
+        y2error("SuseRegister will now save the lastZmdConfig.");
+        YSR::saveLastZmdConfig();
+    }
+    else
+    {
+        y2error("Error occurred while changing the systems repositories according to the instructions of SuseRegister. SuseRegister will not save this status as lastZmdConfig.");
+    }
+
 
     return summary;
 }
