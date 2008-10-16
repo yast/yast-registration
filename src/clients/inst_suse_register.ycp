@@ -532,11 +532,17 @@ string browser_command(string url)
     }
     else
     {
-        // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310)
-        string required_package = "mozilla-xulrunner181";
-        if (!Package::Installed(required_package))
+        // see if xulrunner is already there (bnc#435872)
+        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
+
+        if ( ! cmd_ok )
         {
-            Package::InstallAllMsg([required_package], nil);
+            // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310), modified due to (bnc#435872)
+            string required_package = "mozilla-xulrunner190";
+            if (!Package::Installed(required_package))
+            {
+                Package::InstallAllMsg([required_package], nil);
+            }
         }
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";

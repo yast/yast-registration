@@ -6,9 +6,7 @@ Requires:	suseRegister
 # because of SourceManager
 Requires:	yast2-packager >= 2.13.152
 
-%if %sles_version
-Requires:   zmd rug
-%endif
+Requires:   mozilla-xulrunner190
 
 PreReq:     %fillup_prereq
 

@@ -1105,7 +1105,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         summary = add(summary, sformat(_("Added Service: %1"), pService ));
 
                         // because the Pkg bindings do not operate on the system directly we need to save them before we can continue
-                        if ( Pkg::ServiceSave )
+//                        if ( Pkg::ServiceSave )  // function not yet available
+                        if ( true )
                         {
                             y2milestone("Successfully saved services.");
 
