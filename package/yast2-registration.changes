@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 17 18:03:34 CEST 2008 - jdsn@suse.de
+
+- fix to display correct text in manual interaction (bnc#435869)
+- refresh services after creating them
+- 2.17.6
+
+-------------------------------------------------------------------
 Fri Oct 17 17:17:50 CEST 2008 - jdsn@suse.de
 
 - display correct text during manual interaction (bnc#435869)

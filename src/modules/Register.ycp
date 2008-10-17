@@ -358,6 +358,18 @@ global symbol setupRegistrationServer(symbol mode)
             string urlError = _("Downloading SMT certificate file failed");
             symbol errret = certificateError( urlError, `url);
 
+            if ( errret == `yes )
+            {
+                y2warning("No SMT certificate could be retrieved (floppy mount error). User selected to skip Registration.");
+                return `silentskip;
+            }
+            else if ( errret == `no )
+            {
+                y2warning("No SMT certificate could be retrieved (floppy mount error). User selected to NOT skip Registration. Most likely Registration will fail now.");
+                return `ok;
+            }
+            else  { certmode = `ask; }
+
             certTmpFile = nil;
         }
     }
@@ -527,6 +539,12 @@ global symbol setupRegistrationServer(symbol mode)
 
 
     // log certificate details
+    if ( certTmpFile == nil  ||  certTmpFile == "" )
+    {
+        y2error("Copying the CA certificate file failed");
+        return `conferror;
+    }
+
     map cP = RegisterCert::parseCertificate(certTmpFile);
     y2milestone("SMT certificate file information: %1", cP);
 
@@ -1125,6 +1143,17 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         y2error("A service returned by SuseRegister did not contain any catalogs.");
                         repoUpdateSuccessful = false;
                     }
+
+                    // we may have changed something - so lets refresh now
+                    if ( Pkg::ServiceRefresh(pService) )
+                    {
+                        y2milestone("Successfully refreshed service: %1", pService);
+                    }
+                    else
+                    {
+                        y2error("Could not refresh service: %1", pService);
+                    }
+
                 }
                 else if ( ((map) pAny)["TASK"]:"" == "a" )
                 {
@@ -1150,30 +1179,30 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
 //                        if ( Pkg::ServiceSave(pService) )  // function not yet available
                         if ( Pkg::SourceSaveAll() )
                         {
-                            y2milestone("Successfully saved services.");
+                            y2milestone("Successfully saved service: %1.", pService);
 
+                            // then iterate over catalogs
+                            any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
+                            if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
+                            {
+                                y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
+                                list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
+                                summary = (list<string>) merge(summary, cSummary);
+                            }
+                            else
+                            {
+                                y2error("A new service returned by SuseRegister did not contain any catalogs.");
+                                repoUpdateSuccessful = false;
+                            }
+
+                            // we may have changed something - so lets refresh now
                             if ( Pkg::ServiceRefresh(pService) )
                             {
                                 y2milestone("Successfully refreshed service: %1", pService);
-
-                                // then iterate over catalogs
-                                any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
-                                if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
-                                {
-                                    y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
-                                    list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
-                                    summary = (list<string>) merge(summary, cSummary);
-                                }
-                                else
-                                {
-                                    y2error("A new service returned by SuseRegister did not contain any catalogs.");
-                                    repoUpdateSuccessful = false;
-                                }
                             }
                             else
                             {
                                 y2error("Could not refresh service: %1", pService);
-                                repoUpdateSuccessful = false;
                             }
                         }
                         else

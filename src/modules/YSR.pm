@@ -137,7 +137,7 @@ sub get_registerReadableText
 {
    my $self = shift;
 
-   return $global_ctx->{registerReadableText};
+   return join('', @{$global_ctx->{registerReadableText}});
 }
 
 BEGIN { $TYPEINFO{get_registerPrivPol} = [ "function", "string"]; }
