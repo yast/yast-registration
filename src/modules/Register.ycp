@@ -900,8 +900,8 @@ global list<string> add_update_sources ()
 global list<string> checkCatalogs(map<string, any> taskList, string service)
 {
     list<string> cSummary = [];
-    map<string, list<string> > catalogToEnable = $[];
-    map<string, list<string> > catalogToDisable = $[];
+    list<string> catalogToEnable = [];
+    list<string> catalogToDisable = [];
 
     foreach (string catalog, any pAny, taskList, {
         if ( ! is(pAny, map) )
@@ -937,13 +937,13 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
                 else if ( catDetail["TASK"]:"" ==  "a" )
                 {
                     y2milestone("According to SuseRegister a catalog has to be enabled: %1 (%2)", catalog, service);
-                    catalogToEnable[service] = add(catalogToEnable[service]:[], catalog);
+                    catalogToEnable = add(catalogToEnable, catalog);
                     cSummary = add(cSummary, sformat(_("Enabled catalog: %1 (%2)"), catalog, service) );
                 }
                 else if ( catDetail["TASK"]:"" ==  "d" )
                 {
                     y2milestone("According to SuseRegister a service has to be disabled: %1 (%2)", catalog, service);
-                    catalogToDisable[service] = add(catalogToDisable[service]:[], catalog);
+                    catalogToDisable = add(catalogToDisable, catalog);
                     cSummary = add(cSummary, sformat(_("Disabled catalog: %1 (%2)"), catalog, service) );
                 }
                 else
@@ -955,41 +955,23 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
         }
     });
 
-    // FIXME: this should be done via the Pkg API - but these function is not available yet - so do it manually for now
-    foreach (string fService, list<string> fCatalogs, catalogToDisable, {
-        string toDisableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
-        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%2.service <<THISISTHEENDOFTHEFILE
-repostodisable = %3
-THISISTHEENDOFTHEFILE", service, service, toDisableString ));
+    map<string, any> serviceDetails = $[];
+    serviceDetails = (map<string, any>) Pkg::ServiceGet(service);
+    serviceDetails["repos_to_enable"] = catalogToEnable;
+    serviceDetails["repos_to_disable"] = catalogToDisable;
 
-        if ( retval == 0 )
-        {
-            y2milestone("According to SuseRegister these catalogs were disabled: %1 (%2)", toDisableString, service);
-        }
-        else
-        {
-            y2error("Catalogs returned by SuseRegister could not be disabled: %1 (%2)", toDisableString, service);
-            repoUpdateSuccessful = false;
-        }
-    });
-
-    // FIXME: this should be done via the Pkg API - but these function is not available yet - so do it manually for now
-    foreach (string fService, list<string> fCatalogs, catalogToEnable, {
-        string toEnableString = "\"" + mergestring(fCatalogs, "\" \"") + "\"";
-        integer retval = (integer) SCR::Execute(.target.bash, sformat(" [ -f /etc/zypp/services.d/%1.service ]  &&  cat >> /etc/zypp/services.d/%2.service <<THISISTHEENDOFTHEFILE
-repostoenable = %3
-THISISTHEENDOFTHEFILE", service, service, toEnableString ));
-
-        if ( retval == 0 )
-        {
-            y2milestone("According to SuseRegister these catalogs were enabled: %1 (%2)", toEnableString, service);
-        }
-        else
-        {
-            y2error("Catalogs returned by SuseRegister could not be enabled: %1 (%2)", toEnableString, service);
-            repoUpdateSuccessful = false;
-        }
-    });
+    if ( Pkg::ServiceSet(service, serviceDetails) )
+    {
+        y2milestone("Successfully updated the catalog settings of service: %1", service);
+        y2milestone("Set repostoenable: %1 (%2)", catalogToEnable, service);
+        y2milestone("Set repostodisable: %1 (%2)", catalogToDisable, service);
+        // saving the service is (resp. has to be) done after calling checkCatalogs()
+    }
+    else
+    {
+        y2error("Could not update the catalog settings of service: %1", service);
+        repoUpdateSuccessful = false;
+    }
 
     return cSummary;
 }
@@ -1144,14 +1126,25 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         repoUpdateSuccessful = false;
                     }
 
-                    // we may have changed something - so lets refresh now
-                    if ( Pkg::ServiceRefresh(pService) )
+                    // we may have changed something - so lets save and refresh now
+                    // because the Pkg bindings do not operate on the system directly we need to save them before we can continue
+                    if ( Pkg::ServiceSave(pService) )
                     {
-                        y2milestone("Successfully refreshed service: %1", pService);
+                        y2milestone("Successfully saved service: %1.", pService);
+
+                        if ( Pkg::ServiceRefresh(pService) )
+                        {
+                            y2milestone("Successfully refreshed service: %1", pService);
+                        }
+                        else
+                        {
+                            y2error("Could not refresh service: %1", pService);
+                        }
                     }
                     else
                     {
-                        y2error("Could not refresh service: %1", pService);
+                        y2error("Could not save a service to the system: %1", pService);
+                        repoUpdateSuccessful = false;
                     }
 
                 }
@@ -1175,27 +1168,26 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         y2milestone("Now checking the catalogs of the service: %1", pService);
                         summary = add(summary, sformat(_("Added Service: %1"), pService ));
 
+                        // then iterate over catalogs
+                        any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
+                        if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
+                        {
+                            y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
+                            list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
+                            summary = (list<string>) merge(summary, cSummary);
+                        }
+                        else
+                        {
+                            y2error("A new service returned by SuseRegister did not contain any catalogs.");
+                            repoUpdateSuccessful = false;
+                        }
+
+                        // we may have changed something - so lets save and refresh now
                         // because the Pkg bindings do not operate on the system directly we need to save them before we can continue
-//                        if ( Pkg::ServiceSave(pService) )  // function not yet available
-                        if ( Pkg::SourceSaveAll() )
+                        if ( Pkg::ServiceSave(pService) )
                         {
                             y2milestone("Successfully saved service: %1.", pService);
 
-                            // then iterate over catalogs
-                            any catalogsMap = ((map) pAny)["CATALOGS"]:$[];
-                            if ( is( catalogsMap , map)  &&  catalogsMap != $[] )
-                            {
-                                y2milestone("A new service returned by SuseRegister has catalogs that will be checked now.");
-                                list<string> cSummary = checkCatalogs( (map<string, any>) catalogsMap, pService );
-                                summary = (list<string>) merge(summary, cSummary);
-                            }
-                            else
-                            {
-                                y2error("A new service returned by SuseRegister did not contain any catalogs.");
-                                repoUpdateSuccessful = false;
-                            }
-
-                            // we may have changed something - so lets refresh now
                             if ( Pkg::ServiceRefresh(pService) )
                             {
                                 y2milestone("Successfully refreshed service: %1", pService);
@@ -1207,7 +1199,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         }
                         else
                         {
-                            y2error("Could not save services to the system.");
+                            y2error("Could not save a service to the system: %1", pService);
                             repoUpdateSuccessful = false;
                         }
                     }
@@ -1259,10 +1251,18 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
         // we can not refresh in autoYaST mode as it may require manual interaction to import keys
         if ( doRefresh )
         {
-            list<integer> currentSources = Pkg::SourceGetCurrent( true );
-            foreach (integer srcID, currentSources, {
+            y2milestone("Changes to the repositories and services were successful. Now refreshing all of them.");
+
+            list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
+            foreach (integer srcID, currentNewSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
                 Pkg::SourceForceRefreshNow(srcID);
+            });
+
+            list<string> currentNewServices = Pkg::ServiceAliases();
+            foreach ( string serviceAlias, currentNewServices, {
+                y2milestone("Refreshing service with Alias: %1", serviceAlias);
+                Pkg::ServiceRefresh(serviceAlias);
             });
         }
     }
@@ -1289,6 +1289,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
 global integer suseRegister(symbol parameter)
 {
     list<integer> allCurrentSources = [];
+    list<string> allCurrentServices = [];
+
     map<string, any> contextData = $[
                                         "debug"             :  0,
                                         "nooptional"        :  (submit_optional    ? 0:1),
@@ -1296,6 +1298,7 @@ global integer suseRegister(symbol parameter)
                                         "forceregistration" :  (force_registration ? 1:0),
                                         "norefresh"         :  1,
                                         "yastcall"          :  1,
+                                        "restoreRepos"      :  1,                          // (#309231)
                                         "logfile"           :  "/root/.suse_register.log"
                                     ];
     y2milestone("Basic initialization data for SuseRegister (custom registration data is suppressed for security reasons): %1", contextData);
@@ -1327,11 +1330,18 @@ global integer suseRegister(symbol parameter)
             y2milestone("Successfully initialized the target.");
             isInitializedTarget = true;
 
-            // refresh all sources/services _once_ before interacting with SuseRegister
+            // refresh all sources _once_ before interacting with SuseRegister
             allCurrentSources = Pkg::SourceStartCache(true);
             foreach ( integer srcID, allCurrentSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
                 Pkg::SourceForceRefreshNow(srcID);
+            });
+
+            // refresh all services _once_ before interacting with SuseRegister
+            allCurrentServices = Pkg::ServiceAliases();
+            foreach ( string serviceAlias, allCurrentServices, {
+                y2milestone("Refreshing service with Alias: %1", serviceAlias);
+                Pkg::ServiceRefresh(serviceAlias);
             });
         }
 
