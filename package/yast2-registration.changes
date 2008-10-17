@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Oct 17 17:17:50 CEST 2008 - jdsn@suse.de
+
+- display correct text during manual interaction (bnc#435869)
+- fix repeated initializations of suseRegister
+- ask to trust CA certificate of registration server (port from SP2)
+- spec file clean up
+- 2.17.5
+
+-------------------------------------------------------------------
 Thu Oct 16 13:12:43 CEST 2008 - jdsn@suse.de
 
 - call to saveLastZmdConfig added (bnc#435696)

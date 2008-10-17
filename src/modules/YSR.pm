@@ -24,6 +24,12 @@ sub init_ctx
     my $self = shift;
     my $data = shift;
 
+    if(defined $global_ctx && ref($global_ctx) eq "HASH" && exists $global_ctx->{debug})
+    {
+        # ctx is initialized; clean it before we re-init it
+        $self->del_ctx();
+    }
+
     $global_ctx = SUSE::SuseRegister::init_ctx($data);
 }
 

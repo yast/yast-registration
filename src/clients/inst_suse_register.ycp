@@ -770,7 +770,9 @@ boolean registrationServerSettings()
                 if ( SRstatus == 1 )
                 {
                     // get the details overview
-                    manual_interaction_overview = Register::suseRegisterListParams();
+                    manual_interaction_overview = YSR::get_registerReadableText();   // (bnc#435869)
+                    if ( manual_interaction_overview == nil )   manual_interaction_overview = "";
+
                     UI::OpenDialog( manual_interaction );
                     UI::SetFocus (`id (`start_browser ));
                     UI::ChangeWidget( `id(`needinfo), `Value, manual_interaction_overview );

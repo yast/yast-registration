@@ -25,6 +25,7 @@ import "YSR";
 import "ProductFeatures";
 import "SourceManager";
 import "Installation";
+import "RegisterCert";
 
 // --------------------------------------------------------------
 // START: Locally defined data
@@ -313,9 +314,9 @@ global symbol setupRegistrationServer(symbol mode)
     string certTmpFile = sformat("%1/__tmpSMTcert.crt", SCR::Read(.target.tmpdir));
 
     // check for existing certificate (bnc#376000)
-    integer certExists = nil;
-    certExists = (integer) SCR::Execute(.target.bash, sformat("[ -f  %1 ]", smtpemFile));
-    if (certmode != `url  &&  certExists == 0)
+    boolean certExists = false;
+    certExists = ( (integer) SCR::Execute(.target.bash, sformat("[ -f  %1 ]", smtpemFile))  ==  0 )  ?  true:false;
+    if (certmode != `url  &&  certExists )
     {
         // do nothing to refetch the certificate if manual interaction is necessary
         y2milestone("Existing SMT certificate found and keeping it. To renew the SMT certificate please assign a URL as value to the key 'regcert' in /var/lib/YaST2/install.inf");
@@ -343,7 +344,7 @@ global symbol setupRegistrationServer(symbol mode)
         string curlcmd = sformat("curl -f --connect-timeout 60  --max-time 120  '%1'   -o  %2", smt_server_cert, certTmpFile);
         if ( SCR::Execute(.target.bash, curlcmd) != 0)
         {
-            if (certExists == 0)
+            if ( certExists )
             {
                 // do nothing to refetch the certificate if manual interaction is necessary
                 y2milestone("Could not download the current SMT certificate but existing certificate found and keeping it. To renew the SMT certificate please make sure it is available on the registration server.");
@@ -525,17 +526,19 @@ global symbol setupRegistrationServer(symbol mode)
     }
 
 
+    // log certificate details
+    map cP = RegisterCert::parseCertificate(certTmpFile);
+    y2milestone("SMT certificate file information: %1", cP);
 
+    // now ask user if he trusts the certificate
     // in autoYaST mode we automatically trust
     if ( !ay )  // (bnc#377929)
     {
-        // ask user if he trusts the certificate
-
         // compare with existing certificate (bnc#376000)
-        if (certExists == 0)
+        if ( certExists )
         {
-            // we can only test if the files match - no parsing possible
-            if ( ((integer)SCR::Execute(.target.bash, sformat("diff  %1  %2", certTmpFile, smtpemFile)) == 0 ))
+            map orig_cP = RegisterCert::parseCertificate(smtpemFile);
+            if (orig_cP["FINGERPRINT"]:"foo" == cP["FINGERPRINT"]:"bar" )
             {
                 // return `ok if fingerprints match - no need to ask again
                 y2milestone("Current SMT certificate is up to date and will be kept.");
@@ -547,7 +550,46 @@ global symbol setupRegistrationServer(symbol mode)
         string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
 
         string certInfo = "";
-        certInfo = (string) SCR::Read(.target.string, certTmpFile );
+
+        list issueList = (list) cP["ISSUER"]:[];
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Issued For:</b></p>");
+        if (size (issueList) > 0)
+        {
+            certInfo = certInfo + "<pre>";
+            foreach (map<string,string> keyval, (list<map<string,string> >) issueList, {
+                foreach (string key, string val, (map<string, string>) keyval, {
+                    certInfo = certInfo + sformat("\n%1:  %2", key, val);
+                });
+            });
+            certInfo = certInfo + "</pre>";
+        }
+
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Subject:</b></p>");
+        list subjectList=(list) cP["SUBJECT"]:[];
+        if (size (subjectList) > 0)
+        {
+            certInfo = certInfo + "<pre>";
+            foreach (map<string, string> keyval, (list<map<string,string> >) subjectList, {
+                foreach (string key, string val, (map<string,string>)keyval, {
+                    certInfo = certInfo + sformat("\n%1:  %2", key, val);
+                });
+            });
+            certInfo = certInfo + "</pre>";
+        }
+        //translators: this is certificate context
+        certInfo = certInfo + _("<p><b>Validity:</b></p>");
+        certInfo = certInfo + "<pre>";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Valid from: ")  + " " + cP["STARTDATE"]:"";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Valid to: ")  + " " + cP["ENDDATE"]:"";
+        //translators: this is certificate context
+        certInfo = certInfo + "\n" + _("Fingerprint: ") + " " + cP["FINGERPRINT"]:"";
+        certInfo = certInfo + "</pre>";
+
+        // certInfo = (string) SCR::Read(.target.string, certTmpFile );  // show the certificate file content -- for debugging only
 
         UI::OpenDialog( `MinSize(70, 20, `VBox(
             `Left( `Label(`opt(`boldFont), trustQuestion)),
@@ -1105,8 +1147,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         summary = add(summary, sformat(_("Added Service: %1"), pService ));
 
                         // because the Pkg bindings do not operate on the system directly we need to save them before we can continue
-//                        if ( Pkg::ServiceSave )  // function not yet available
-                        if ( true )
+//                        if ( Pkg::ServiceSave(pService) )  // function not yet available
+                        if ( Pkg::SourceSaveAll() )
                         {
                             y2milestone("Successfully saved services.");
 

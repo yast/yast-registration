@@ -1,19 +1,19 @@
 @HEADER-COMMENT@
 
 @HEADER@
-Requires:	yast2 >= 2.16.6
+Requires:	yast2 >= 2.17.0
+Requires:	yast2-packager >= 2.17.0
 Requires:	suseRegister
-# because of SourceManager
-Requires:	yast2-packager >= 2.13.152
+Requires:	mozilla-xulrunner190
+Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
+Requires:	yast2-pkg-bindings
 
-Requires:   mozilla-xulrunner190
+PreReq:		%fillup_prereq
 
-PreReq:     %fillup_prereq
-
+BuildRequires:	yast2 >= 2.17.0
 BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
-# Internet YCP module
-BuildRequires:	yast2 >= 2.16.6
-BuildRequires:  suseRegister sles-release perl-libwww-perl perl-URI perl-Crypt-SSLeay
+BuildRequires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
+BuildRequires:	suseRegister sles-release
 
 BuildArchitectures:	noarch
 
@@ -27,11 +27,11 @@ Performs the Registration
 @BUILD@
 
 @INSTALL@
-%if %sles_version
-    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
-%else
-    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
-%endif
+#%if %sles_version
+#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
+#%else
+#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
+#%endif
 
 @CLEAN@
 
