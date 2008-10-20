@@ -1162,11 +1162,23 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     }
                     serviceAddUrl["query"] = (string) serviceAddUrl["query"]:"" + queryJoinChar + "credentials=NCCcredentials";
 
-                    if ( Pkg::ServiceAdd( ((map) pAny)["ALIAS"]:"", URL::Build(serviceAddUrl) ) )
+                    if ( Pkg::ServiceAdd( pService, URL::Build(serviceAddUrl) ) )
                     {
                         y2milestone("Successfully added a new service: %1", pService);
                         y2milestone("Now checking the catalogs of the service: %1", pService);
                         summary = add(summary, sformat(_("Added Service: %1"), pService ));
+
+                        // activate autorefresh - only for services that get added!
+                        map<string, any> newServiceDetails = Pkg::ServiceGet(pService);
+                        newServiceDetails["autorefresh"] = true;
+                        if ( Pkg::ServiceSet(pService, newServiceDetails) )
+                        {
+                            y2milestone("Successfully activated autofresh mode for service: %1", pService);
+                        }
+                        else
+                        {
+                            y2error("Could not activate autofresh mode for service: %1", pService);
+                        }
 
                         // then iterate over catalogs
                         any catalogsMap = ((map) pAny)["CATALOGS"]:$[];

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 20 19:15:42 CEST 2008 - jdsn@suse.de
+
+- activate autorefresh for new services
+- remove requires to mozilla-xulrunner (bnc#436900) 
+- 2.17.8
+
+-------------------------------------------------------------------
 Fri Oct 17 19:22:24 CEST 2008 - jdsn@suse.de
 
 - changing repos and services only via pkg-bindings (bnc#435669)
