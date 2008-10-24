@@ -49,6 +49,7 @@
         CommandLine::Run($["id"      : "registration",
                            "help"    : cmdhelp
                         ]);
+        y2milestone("Registration was called with help parameter.");
         return `auto;
     }
 
@@ -56,31 +57,19 @@
     symbol confRegSrv = Register::configureRegistrationServer();
     if (confRegSrv == `conferror  || confRegSrv == `notrust  || confRegSrv == `silentskip)
     {
-        y2debug("Registration can not be run due to SMT configuration error.");
+        y2error("Registration can not be run due to SMT configuration error.");
         return `auto;
     }
 
     // no network - no suse_register
-    if (!Mode::normal())
+    if (!Mode::normal()  &&  !Internet::suse_register)
     {
-        if (!Internet::suse_register)
-        {
-            Internet::do_you = false;
-            return `auto;
-        }
-    }
-
-
-    boolean IAMSLE = ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false );
-
-    // error handling - skip if suseRegister is missing
-    integer sr_exist = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/suse_register");
-    if (sr_exist != 0)
-    {
-        y2milestone("/usr/bin/suse_register does not exist - skipping registration");
+        y2error("The internet test failed or was skipped. So registration will not run.");
         Internet::do_you = false;
         return `auto;
     }
+
+    boolean IAMSLE = ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false );
 
     // Register::initialize() is mandatory - never remove it
     Register::initialize();
@@ -140,11 +129,14 @@ by registering this installation.");
     /*  strings for success popup   */
     string nccc_success_msg = _("Your configuration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
+    nccc_success_server_added = TXT["reposUpdated_old"]:"";
     string nccc_error_no_server_added = _("No update server could be added to your configuration.");
     string nccc_no_source_changes0 = _("No software repository needed to be changed.");
     string nccc_no_source_changes = _("Software repositories did not need to be changed.");
     /* caption for details view  */
-    string success_detail_label =_("New Update Server");
+    string success_detail_label_old = _("New Update Server");
+    string success_detail_label_new = _("Updated software repositories");
+    string success_detail_label = success_detail_label_new;
 
    /* strings for manual interaction popup */
     string mi_required = _("Manual Interaction Required");
@@ -424,6 +416,8 @@ boolean report_error()
     // function to display an error message
     // and offer a detailled view of the error message
 
+    y2error("Registration is reporting an error to the user: %1", error_msg_details);
+
     UI::OpenDialog(error_message);
     UI::SetFocus (`id (`skip ));
     symbol retry = nil;
@@ -527,7 +521,10 @@ string browser_command(string url)
     if ( textmode )
     {
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
-        // screen is no longer needed as there is UI::RunInTerminal for textmode programs now (#367719)
+        if ( ! cmd_ok )
+        {
+            y2error("Textmode installation requires w3m for interactive registration. w3m is missing.");
+        }
         bcmd = " w3m ";
     }
     else
@@ -545,10 +542,21 @@ string browser_command(string url)
             }
         }
         cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
+
+        if ( ! cmd_ok )
+        {
+            y2error("Graphical installation requires Mozilla-xulrunner for interactive registration. Mozilla-xulrunner is missing.");
+        }
+
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
     }
 
-    if (! cmd_ok) return "nobrowser";
+    if (! cmd_ok)
+    {
+        y2error("No browser found for interactive registration.");
+        return "nobrowser";
+    }
+
 
     // add url to browser command
     bcmd =  bcmd + "'" + url + "'";
@@ -569,24 +577,34 @@ string browser_command(string url)
 
 boolean launchBrowser(string url)
 {
+    y2milestone("Just about to start a browser for manual interaction in registration.");
     // check for valid url
     map parsed = URL::Parse(url);
-    if ( parsed == $[]) return false;
+    if ( parsed == $[])
+    {
+        y2error("The URL to open in the registration browser has an invalid format: %1", parsed);
+        return false;
+    }
     // no rebuild of the url - parser seems to only parse one parameter in URL
 
     string uri = String::FirstChunk(url, "\n");  // (#167225)
     // get command to run correct browser and execute it
     string command = browser_command(uri);
-    if (command == "nobrowser") return false;
+    if (command == "nobrowser")
+    {
+        y2error("Could not find a browser to display the registration website.");
+        return false;
+    }
 
-    y2milestone("launching browser: %1", command);
 
     if (textmode)
     {
+        y2milestone("Launching textmode browser with: %1", command);
         UI::RunInTerminal(command);
     }
     else
     {
+        y2milestone("Launching graphical borwser with: %1", command);
         SCR::Execute(.target.bash, command );
     }
 
@@ -598,6 +616,7 @@ boolean launchBrowser(string url)
 
 boolean registrationServerSettings()
 {
+    y2milestone("Asking the user for custom registration server settings.");
     string curRegURL  = Register::smt_server;
     if (curRegURL  == nil) curRegURL = "https://";
     string curRegCert = Register::smt_server_cert;
@@ -637,11 +656,11 @@ boolean registrationServerSettings()
             curRegURL  = (string) UI::QueryWidget(`id(`newRegistrationServer),     `Value);
             curRegCert = (string) UI::QueryWidget(`id(`newRegistrationServerCert), `Value);
 
-            // FIXME TODO
             // check urls for sanity
             map parsed = URL::Parse(curRegURL);
             if (parsed == nil || parsed == $[] || parsed["scheme"]:"" != "https" )
             {
+                y2error("The selected registration URL has an invalid format: %1", parsed);
                 Popup::Message(TXT["urlHasToBeHttps"]:"");
                 continue;
             }
@@ -649,12 +668,12 @@ boolean registrationServerSettings()
             {
                 Register::smt_server = curRegURL;
                 Register::smt_server_cert = curRegCert;
+                y2milestone("New registration server: %1", curRegURL);
+                y2milestone("New registration server CA certificate location: %1", curRegCert);
                 status=true;
                 break;
             }
-
         }
-
     }
 
     UI::CloseDialog();
@@ -687,7 +706,7 @@ boolean registrationServerSettings()
     any ret = nil;
     integer SRstatus = nil;
     string manual_interaction_overview = "";
-
+    symbol xenType = nil;
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
 
@@ -715,7 +734,8 @@ boolean registrationServerSettings()
             Register::submit_hwdata  = (boolean) UI::QueryWidget(`id(`hwinfo),  `Value);
             Register::submit_optional= (boolean) UI::QueryWidget(`id(`optional), `Value);
             Register::force_registration = (boolean) UI::QueryWidget(`id(`forcereg), `Value);
-            Register::register_regularly = (boolean) UI::QueryWidget(`id(`regularly_run), `Value);
+            if ( IAMSLE )
+                Register::register_regularly = (boolean) UI::QueryWidget(`id(`regularly_run), `Value);
         }
         else if (ret == `localRegistrationServer)
         {
@@ -762,6 +782,60 @@ boolean registrationServerSettings()
         {
             if ( configure_status == true )
             {
+                if ( IAMSLE && xenType == nil )
+                {
+                    // once checking for XEN    (bnc#418287)
+                    xenType = Register::xenType();
+
+                    if ( xenType == `xen0 )
+                    {
+                        string installPackage = "xen-tools";
+                        if ( ! Package::Installed(installPackage))
+                        {
+                            y2milestone("Xen dom0 detected. Asking the user if the following packages should be installed: %1", installPackage);
+                            Package::InstallMsg(installPackage, _("Xen Dom0 detected. The following package needs to be installed."));
+                        }
+                        else
+                        {
+                            y2milestone("All needed packages are already installed: %1", installPackage);
+                        }
+                    }
+                    else if ( xenType == `xenU )
+                    {
+                        string installPackage = "xen-tools-domU";
+                        string removePackage  = "xen-tools";
+
+                        string xenDomU    = _("Xen DomU detected.");
+                        string installMsg = xenDomU + "\n" + _("The following package needs to be installed.");
+                        string removeMsg  = xenDomU + "\n" +
+                           sformat(_("To count this installation correctly the package %1 needs to be installed."), installPackage ) +
+                           "\n" + _("Therefore the following package needs to be removed first.");
+
+
+                        Package::RemoveMsg(removePackage, removeMsg);
+
+                        if ( ! Package::Installed(removePackage) )
+                        {
+                            if ( Package::InstallMsg(installPackage, installMsg ) )
+                            {    y2milestone("Sucessfully installed: %1", installPackage); }
+                            else
+                            {    y2error("Could not install: %1", installPackage); }
+                        }
+                        else
+                        {
+                            y2error("In a Xen DomU package %1 is installed rather than %2. Registration will continue nevertheless.", removePackage, installPackage);
+                            Popup::Notify( xenDomU + "\n" +
+                                sformat(_("The package %1 should have been installed and %2 removed."), installPackage, removePackage ) +
+                                "\n" +  _("Registration will continue now although the registration server may miscount this installation.")
+                            );
+                        }
+                    }
+                    else if ( xenType == nil )
+                    {
+                        y2error("Detecting XEN failed. Assuming XEN is disabled. Maybe the registration will not count this machine correctly.");
+                        xenType = `unknown;
+                    }
+                }
 
                 // call suseRegister
                 SRstatus = Register::suseRegister(nil);
@@ -836,8 +910,8 @@ boolean registrationServerSettings()
 
                         if (! browserrun )
                         {
-                            // information_data = $["exit":"198", "stdout":"", "stderr":""  ];
-                            // FIXME - can this if clause be removed ??
+                            y2error("Registration can not finish with manual interaction because no webbrowser was found.");
+                            Popup::Message(no_browser_msg);
                             mi_loopend = true;
                         }
 
@@ -880,7 +954,7 @@ boolean registrationServerSettings()
                     {
                         string oldMessage = _("Setting up online update source...");
                         string newMessage = _("Updating software repositories...");
-                        UI::OpenDialog(`VBox(`Label( oldMessage )));
+                        UI::OpenDialog(`VBox(`Label( newMessage )));
 
                         // add/delete/change repositories
                         repoSummary = Register::updateSoftwareRepositories(taskList, true);

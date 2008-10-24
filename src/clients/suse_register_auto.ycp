@@ -112,7 +112,27 @@ void Read()
 
 map AutoPackages()
 {
-    return $[ "install":[], "remove":[] ];
+    map retmap = $["install":[], "remove":[]];
+
+    symbol xenType = nil;
+    xenType = Register::xenType();
+
+    if ( xenType == `xen0 )
+    {
+        retmap["install"] = add( retmap["install"]:[], "xen-tools" );
+    }
+    else if ( xenType == `xenU )
+    {
+        retmap["remove"]  = add( retmap["remove"]:[],  "xen-tools" );
+        retmap["install"] = add( retmap["install"]:[], "xen-tools-domU" );
+    }
+    else
+    {
+        y2milestone("XEN is disabled or could not be detected. No package changes will be applied.");
+    }
+
+    y2milestone("Registration suggests the following package changes: %1", retmap);
+    return retmap;
 }
 
 

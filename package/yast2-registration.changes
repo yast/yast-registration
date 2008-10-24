@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 24 23:06:02 CEST 2008 - jdsn@suse.de
+
+- checking if registration runs on xen (bnc#418287)
+- more verbose logging
+- 2.17.9
+
+-------------------------------------------------------------------
 Mon Oct 20 19:15:42 CEST 2008 - jdsn@suse.de
 
 - activate autorefresh for new services
