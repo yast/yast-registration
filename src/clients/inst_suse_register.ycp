@@ -577,6 +577,7 @@ string browser_command(string url)
 
 boolean launchBrowser(string url)
 {
+    boolean retval=false;
     y2milestone("Just about to start a browser for manual interaction in registration.");
     // check for valid url
     map parsed = URL::Parse(url);
@@ -600,16 +601,18 @@ boolean launchBrowser(string url)
     if (textmode)
     {
         y2milestone("Launching textmode browser with: %1", command);
-        UI::RunInTerminal(command);
+        retval = ( (integer)UI::RunInTerminal(command) == 0 ) ? true:false;
     }
     else
     {
         y2milestone("Launching graphical borwser with: %1", command);
-        SCR::Execute(.target.bash, command );
+        retval = ( (integer)SCR::Execute(.target.bash, command ) == 0 ) ? true:false;
     }
 
+    y2milestone("The registration browser returned with error code: %1", retval);
+
     UI::RedrawScreen();
-    return true;
+    return retval;
 }
 
 
@@ -897,7 +900,7 @@ boolean registrationServerSettings()
                             else if ( SRstatus == 1 )
                             {
                                 // still needinfo, change displayed information and stay in manual interaction
-                                manual_interaction_overview = Register::suseRegisterListParams();
+                                manual_interaction_overview = YSR::get_registerReadableText();   // (bnc#435869)
                                 UI::ChangeWidget( `id(`needinfo), `Value, manual_interaction_overview );
                             }
                             else
