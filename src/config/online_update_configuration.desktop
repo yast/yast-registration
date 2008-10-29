@@ -8,7 +8,7 @@ X-SuSE-YaST-Group=Software
 X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-AutoInstClonable=true
 X-SuSE-YaST-AutoInstRequires=lan,proxy
-X-SuSE-YaST-AutoInstSchema=automatic_online_update.rnc
+X-SuSE-YaST-AutoInstSchema=online_update_configuration.rnc
 
 Icon=yast-online_update
 Exec=/sbin/yast2 online_update_configuration

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct 29 15:31:04 CET 2008 - jdsn@suse.de
+
+- consistent naming in autoYaST profile
+
+-------------------------------------------------------------------
 Fri Oct 24 23:06:02 CEST 2008 - jdsn@suse.de
 
 - checking if registration runs on xen (bnc#418287)
