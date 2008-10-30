@@ -38,7 +38,12 @@ sub del_ctx
 {
     my $self = shift;
 
-    SUSE::SuseRegister::del_ctx($global_ctx);
+    if(defined $global_ctx && ref($global_ctx) eq "HASH" && exists $global_ctx->{debug})
+    {
+        # only call del_ctx if it is initialized
+        SUSE::SuseRegister::del_ctx($global_ctx);
+    }
+
     $global_ctx = {};
 }
 

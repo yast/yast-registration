@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 30 21:09:12 CET 2008 - jdsn@suse.de
+
+- check for w3m in textmode registration (bnc#440289)
+- reset registration backend before exiting
+
+-------------------------------------------------------------------
 Wed Oct 29 16:32:31 CET 2008 - jdsn@suse.de
 
 - remove requires to sles-release

@@ -517,44 +517,40 @@ string browser_command(string url)
     // create the command string to launch a browser
     string bcmd="/bin/false";
     boolean cmd_ok = false;
+    string required_package = "";
+    string checkBinary = "";
 
     if ( textmode )
     {
-        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/w3m") == 0 ? true:false;
-        if ( ! cmd_ok )
-        {
-            y2error("Textmode installation requires w3m for interactive registration. w3m is missing.");
-        }
         bcmd = " w3m ";
+        required_package = "w3m";
+        checkBinary = "/usr/bin/w3m";
     }
     else
     {
-        // see if xulrunner is already there (bnc#435872)
-        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
-
-        if ( ! cmd_ok )
-        {
-            // check for and install mozilla-xulrunner if needed (#175166), modified due to (#304310), modified due to (bnc#435872)
-            string required_package = "mozilla-xulrunner190";
-            if (!Package::Installed(required_package))
-            {
-                Package::InstallAllMsg([required_package], nil);
-            }
-        }
-        cmd_ok = (integer) SCR::Execute(.target.bash, "test -x /usr/bin/xulrunner") == 0 ? true:false;
-
-        if ( ! cmd_ok )
-        {
-            y2error("Graphical installation requires Mozilla-xulrunner for interactive registration. Mozilla-xulrunner is missing.");
-        }
-
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
+        required_package = "mozilla-xulrunner190";
+        checkBinary = "/usr/bin/xulrunner";
     }
 
-    if (! cmd_ok)
+    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1"), checkBinary) == 0 ? true:false;
+    if ( ! cmd_ok )
     {
-        y2error("No browser found for interactive registration.");
+        if (!Package::Installed(required_package))
+        {
+            Package::InstallAllMsg([required_package], nil);
+        }
+        cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1", checkBinary)) == 0 ? true:false;
+    }
+
+    if ( ! cmd_ok )
+    {
+        y2error("No browser found for interactive registration. A needed package was not installed: %1", required_package);
         return "nobrowser";
+    }
+    else
+    {
+        y2milestone("A browser was found to show the interactive registration: %1", required_package);
     }
 
 
@@ -1073,11 +1069,6 @@ boolean registrationServerSettings()
 
     if (Mode::normal())
     {
-        // (bnc#395333)
-//        y2milestone ("Current sources: %1",  Pkg::SourceGetCurrent (true));
-        // #172665
-//        Pkg::SourceSaveAll();
-//        Pkg::TargetFinish ();
         Wizard::CloseDialog();
     }
     else

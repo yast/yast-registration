@@ -903,6 +903,22 @@ global void finish()
 {
     iamroot = amIroot();
     write_config();
+    // reset YSRs context
+    YSR::del_ctx();
+    isInitializedSR = false;
+    if ( isInitializedTarget )
+    {
+        y2milestone("Package target was initialized. Now finishing target usage.");
+        if ( Pkg::TargetFinish() )
+        {
+            y2milestone("Successfully finished the target usage of the package system.");
+            isInitializedTarget = false;
+        }
+        else
+        {
+            y2error("Could not finish the target usage of the package system.");
+        }
+    }
 }
 
 
