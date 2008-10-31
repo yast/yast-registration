@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 31 10:38:49 CET 2008 - mc@suse.de
+
+- YSR module should return true 
+
+-------------------------------------------------------------------
 Thu Oct 30 21:09:12 CET 2008 - jdsn@suse.de
 
 - check for w3m in textmode registration (bnc#440289)
