@@ -3,7 +3,7 @@ Thu Nov  6 15:21:49 CET 2008 - jdsn@suse.de
 
 - split off branding packages (bnc#436644)
 - fix error code handling of SuseRegister
-- updated yastbrowser for xulrunner191
+- updated yastbrowser for xulrunner191 (bnc#383660)
 
 -------------------------------------------------------------------
 Wed Nov  5 14:37:32 CET 2008 - ug@suse.de
