@@ -1002,9 +1002,10 @@ boolean registrationServerSettings()
 
 
                 //  show a message when there are no products to register
-                if ( SRstatus == 101 )
+                if ( SRstatus == 100  || SRstatus == 101 )
                 {
                     Popup::Message(no_product_msg);
+                    y2error("No products to be registered. SuseRegister returned with exit code: %1", SRstatus);
                     loopend = true;
                 }
 
@@ -1013,6 +1014,7 @@ boolean registrationServerSettings()
                 if ( SRstatus == 198 )
                 {
                     Popup::Message(no_browser_msg);
+                    y2error("No browser found to display registration website. SuseRegister returned with exit code: %1", SRstatus);
                     loopend = true;
                 }
 
@@ -1021,13 +1023,15 @@ boolean registrationServerSettings()
                 if ( SRstatus == 113 )
                 {
                     Popup::Message(error_target_init_failed);
+                    y2error("Initialization of target failed.");
                     loopend = true;
                 }
 
 
                 // handle any other error codes
-                if ( contains([0, 1, 3, 101, 113, 198, 199], SRstatus)  == false )
+                if ( contains([0, 1, 3, 100, 101, 113, 198, 199], SRstatus)  == false )
                 {
+                    y2error("An error occurred. SuseRegister exit code (or internal error status) is: %1", SRstatus);
                     // display error message
                     error_msg_details = YSR::get_errormsg();
                     report_error();

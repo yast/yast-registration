@@ -6,6 +6,7 @@ Requires:	yast2-packager >= 2.17.0
 Requires:	suseRegister
 Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
 Requires:	yast2-pkg-bindings >= 2.17.20
+Requires:	yast2-registration-branding
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 
 PreReq:		%fillup_prereq
@@ -36,6 +37,24 @@ Performs the Registration
 
 @CLEAN@
 
+%package branding-SLE
+Requires:	yast2-registration
+Provides:	yast2-registration-branding
+Conflicts:	otherproviders(yast2-registration-branding)
+Summary:	Branding for yast2-registration for SLE products
+Group:      System/YaST
+%description branding-SLE
+Branding for yast2-registration for SLE products
+
+%package branding-openSUSE
+Requires:	yast2-registration
+Provides:	yast2-registration-branding
+Conflicts:	otherproviders(yast2-registration-branding)
+Summary:	Branding for yast2-registration for openSUSE
+Group:      System/YaST
+%description branding-openSUSE
+Branding for yast2-registration for openSUSE
+
 
 %pre
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
@@ -56,7 +75,7 @@ Performs the Registration
 @moduledir@/*.ybc
 %dir @yncludedir@/registration
 @yncludedir@/registration/*.ycp
-@desktopdir@/*.desktop
+@desktopdir@/online_update_configuration.desktop
 @schemadir@/autoyast/rnc/*.rnc
 /usr/lib/YaST2/bin/online_update
 /usr/share/YaST2/yastbrowser
@@ -69,3 +88,11 @@ Performs the Registration
 @fillupdir@/sysconfig.suse_register-yast2-registration
 @fillupdir@/sysconfig.automatic_online_update-yast2-registration
 
+
+%files branding-SLE
+%defattr(-,root,root)
+@desktopdir@/customer_center.desktop
+
+%files branding-openSUSE
+%defattr(-,root,root)
+@desktopdir@/suse_register.desktop
