@@ -11,6 +11,9 @@
 
 module "OnlineUpdateConfiguration";
 
+import "Package";
+import "URL";
+
 textdomain "registration";
 
 
@@ -30,12 +33,291 @@ string cronDailyFile   = "/etc/cron.daily/"   + cronFileName;
 
 global string currentUpdateRepo = "";
 global string defaultUpdateRepo = "";
+global list<string> allUpdateRepos  = [];
+global string defaultRegistrationURL = "";
 
-
+// cache the base product details
+map<string, any> baseProductDetail = $[];
 map<symbol, string> Intervals = $[  `daily  : "daily",
                                     `weekly : "weekly",
                                     `monthly: "monthly" ];
 
+/*
+ * fetchBaseProductDetails
+ * get the details of the base product to find its default update Source or registration server
+ * the found base product will be saved in the cache variable  baseProductDetail
+ *
+ * @return true if a base product is found, else false
+ */
+boolean fetchBaseProductDetails()
+{
+    y2milestone("Searching base product details.");
+
+    // fetch product details about installed products
+    list<map <string, any> > productDetail = (list<map <string, any> >) Pkg::ResolvableProperties( "", `product, "" );
+    map<string, any> baseProductDetail = $[];
+
+    y2debug("All installed products are: %1", productDetail);
+    y2debug("Now looking for the base product");
+
+    // filter the map to find the one any only base product
+    productDetail = filter( map<string, any> oneProduct, productDetail, {
+        return  oneProduct["category"]:"unknown" == "base";
+    });
+
+    y2debug("All installed base products are: %1", productDetail);
+    if ( size(productDetail) < 1 )
+    {
+        y2error("Could not find any base product.");
+        baseProductDetail = $[];
+        return false;
+    }
+    else if ( size(productDetail) > 1 )
+    {
+        y2error("Found more than one base product. This is a severe problem as there may only be one base product.");
+        y2error("This system seems to be broken. However the first found product will be used.");
+    }
+    else
+        y2milestone("Found exactly one base product.");
+
+    baseProductDetail = productDetail[0]:$[];
+    y2milestone("Found a base product: %1", baseProductDetail);
+
+    return true;
+}
+
+
+/*
+ * fetchBaseProductURLs
+ * fetches the default update repo URL and the registration server URL and saves them in the global variables
+ *
+ * @return true if successfull
+ */
+global boolean fetchBaseProductURLs()
+{
+    string defUp = "";
+    string defReg = "";
+
+    // FIXME - fetch the repo from the package bindings
+    if ( defaultUpdateRepo == nil ||
+         defaultUpdateRepo == ""     )
+    {
+        y2milestone("Looking for default update repo.");
+        fetchBaseProductDetails();
+    }
+
+    if ( baseProductDetail == nil ||
+         baseProductDetail == $[]    )
+    {
+        y2error("Could not find any details about the base product and thus no default update repo.");
+        return false;
+    }
+    else
+    { // base product details available
+
+        // handle default update repository
+        list<string> updateURLs = (list<string>) baseProductDetail["update_urls"]:[];
+        allUpdateRepos = updateURLs;
+
+        if ( size(updateURLs) < 1 )
+        {
+            y2error("Base product does not provide a default update repository.");
+            defUp = "";
+        }
+        else if ( size(updateURLs) == 1  )
+        {
+            y2milestone("Found exactly one default update URL.");
+            defUp = updateURLs[0]:"";
+        }
+        else
+        {
+            y2milestone("Found multiple default update repositories. Will pick one as default.");
+            // first looking for opensuse.org update repos
+            list<string> filteredUpdateURLs = filter( string oneURL,  updateURLs, {
+                return regexpmatch( oneURL, "\.opensuse\.org");
+            });
+
+            if ( size(filteredUpdateURLs) < 1 )
+            { // no opensuse.org update repo found - looking for novell.com repos
+                filteredUpdateURLs = filter( string oneURL,  updateURLs, {
+                    return regexpmatch( oneURL, "\.novell\.com");
+                });
+            }
+
+            if ( size(filteredUpdateURLs) < 1 )
+            {
+                // no opensuse.org or novell.com update repo found
+                y2milestone("Will use the first found update repository.");
+                defUp = updateURLs[0]:"";
+            }
+            else if ( size(filteredUpdateURLs) == 1 )
+            {
+                y2milestone("Will use default opensuse.org resp. novell.com update repository.");
+                defUp = filteredUpdateURLs[0]:"";
+            }
+            else
+            {
+                y2milestone("After filtering still multiple cadidates remain as default update repository.");
+                y2milestone("Will now use the first found update repository.");
+                defUp = filteredUpdateURLs[0]:"";
+            }
+        }
+
+        // handle default registration server
+        list<string> registerURLs = (list<string>) baseProductDetail["register_urls"]:[];
+        if ( size(registerURLs) < 1 )
+        {
+            y2error("No default registration URL found.");
+            defReg = "";
+        }
+        else if ( size(registerURLs) == 1  )
+        {
+            y2milestone("Found exactly one registration URL.");
+            defReg = registerURLs[0]:"";
+        }
+        else
+        {
+            y2milestone("Found multiple registration URLs. Will pick one as default.");
+            // first looking for novell.com registration URLs
+            list<string> filteredRegisterURLs = filter( string oneURL,  registerURLs, {
+                return regexpmatch( oneURL, "\.novell\.com");
+            });
+
+            if ( size(filteredRegisterURLs) < 1 )
+            { // no novell.com registration URL found - looking for opensuse.org URL
+                filteredRegisterURLs = filter( string oneURL,  registerURLs, {
+                    return regexpmatch( oneURL, "\.opensuse\.org");
+                });
+            }
+
+            if ( size(filteredRegisterURLs) < 1 )
+            {
+                // no opensuse.org or novell.com update repo found
+                y2milestone("Will use the first found registration URL.");
+                defReg = registerURLs[0]:"";
+            }
+            else if ( size(filteredRegisterURLs) == 1 )
+            {
+                y2milestone("Will use default novell.com resp. opensuse.org registration URL.");
+                defReg = filteredRegisterURLs[0]:"";
+            }
+            else
+            {
+                y2milestone("After filtering still multiple cadidates remain as default registration URL.");
+                y2milestone("Will now use the first found registration URL.");
+                defReg = filteredRegisterURLs[0]:"";
+            }
+        }
+    }
+
+    defaultUpdateRepo = defUp;
+    defaultRegistrationURL = defReg;
+    map logUpdateRepoMap = URL::Parse(defaultUpdateRepo);
+    if ( logUpdateRepoMap["pass"]:""  != nil  && 
+         logUpdateRepoMap["pass"]:""  != ""     )
+    { logUpdateRepoMap["pass"] = "--a-password-is-set--"; }
+    string logUpdateRepo = URL::Build(logUpdateRepoMap);
+
+    y2milestone("Found default update repository is: %1", logUpdateRepo);
+    y2milestone("Using this default registration URL: %1", defaultRegistrationURL);
+    y2milestone("This registration URL will not be written to the system. The registration module itself will offer to change the default registration URL. Here the URL is used just to find out if this product can be registered.");
+
+    return true;
+}
+
+/*
+ * fetchCurrentUpdateRepoURL
+ * returns the currentUpdateRepoURL or and updates the global variable that caches this value
+ */
+global string fetchCurrentUpdateRepoURL()
+{
+    string curUp = "";
+
+    if ( size(allUpdateRepos) < 1 )
+    {
+        y2error("No current update repos found to compare the default update repo with.");
+        curUp = "";
+    }
+    else
+    {
+        map<string, map> allUpdateReposMap = $[];
+        allUpdateReposMap = listmap(string oneRepo, allUpdateRepos, {
+            return $[ oneRepo : URL::Parse(oneRepo) ];
+        });
+
+        list<integer> allCurrentRepos = Pkg::SourceGetCurrent(true);
+        if ( size(allCurrentRepos) < 1 )
+        {
+            y2milestone("No current sources found.");
+            curUp = "";
+        }
+        else
+        {
+            list<string> foundUpdateRepo = [];
+
+            foreach(integer repoID, allCurrentRepos, {
+                string repoURL = Pkg::SourceURL(repoID);
+                map repoURLmap = URL::Parse(repoURL);
+
+                foreach(string upRepo, map upRepoMap, allUpdateReposMap, {
+                    if ( repoURLmap["scheme"]:"X" ==  upRepoMap["scheme"]:"Y" &&
+                         repoURLmap["host"]:"X"   ==  upRepoMap["host"]:"Y" &&
+                         repoURLmap["path"]:"X"   ==  upRepoMap["path"]:"Y"
+                       )
+                    {
+                        foundUpdateRepo = add( foundUpdateRepo, repoURL );
+                    }
+                });
+            });
+
+            if ( size(foundUpdateRepo) < 1 )
+            {
+                y2milestone("Could not find any update repo in the system");
+            }
+            else if ( size(foundUpdateRepo) == 1 )
+            {
+                y2milestone("Found exactly one update repo.");
+                curUp = foundUpdateRepo[0]:"";
+                // found an update repo in the system that is provided by the product as well - so it is the default
+                defaultUpdateRepo = curUp;
+            }
+            else
+            {
+                y2milestone("Found multiple update repos. Will only use the first one.");
+                curUp = foundUpdateRepo[0]:"";
+                // found an update repo in the system that is provided by the product as well - so it is the default
+                defaultUpdateRepo = curUp;
+            }
+        }
+    }
+
+    currentUpdateRepo = curUp;
+    y2milestone("Current update repo is: %1", currentUpdateRepo);
+    return curUp;
+}
+
+
+
+global boolean setUpdateRepo(string updateRepo)
+{
+    y2milestone("User wants to set the default update repo to: %1", updateRepo);
+
+    // create map for new source
+    map<string, any> newSrcMap = $[  "enabled"       : true,
+                                     "autorefresh"   : true,
+                                     "name"          : "Default-Update-Repository",
+                                     "alias"         : "Default-Update-Repository",
+                                     "base_urls"     : [ updateRepo ],
+                                     "priority"      : 10
+                                 ];
+
+    y2milestone("Adding new update repository.");
+    integer newSrcID = Pkg::RepositoryAdd( newSrcMap );
+    y2milestone("Saving all source changes to the system.");
+    Pkg::SourceSaveAll();
+
+    return true;
+}
 
 global string intervalSymbolToString(symbol intervalSym)
 {
@@ -102,13 +384,15 @@ global boolean setOnlineUpdateCronjob(symbol interval)
  */
 global void Read()
 {
-    // TODO: read baseproduct and its default update source and registration url
-    // TODO: read current installed update repos  ->  duncan? -> packagebindings?
+    // just for documentation: defaultUpdateRepo for 11.1 should be "http://download.opensuse.org/update/11.1/"
 
-    // FIXME: until we can read this information from the products file, we fake it
-    currentUpdateRepo = "http://download.opensuse.org/update/11.1/";
-    defaultUpdateRepo = "http://download.opensuse.org/update/11.1/";
+    if (fetchBaseProductDetails() )
+        y2milestone("Fetched base product detail information");
+    else
+        y2error("Could not fetch base product details information.");
 
+    // this will update the default update repo as well - so do it once here
+    string foo = fetchCurrentUpdateRepoURL();
 
     integer interM = (integer) SCR::Read(.target.size, cronMonthlyFile);
     integer interW = (integer) SCR::Read(.target.size, cronWeeklyFile);
@@ -145,6 +429,7 @@ global boolean Import(map settings)
 
     string getInterval     = (string) settings["update_interval"]:"";
 
+    if ( enableAOU == nil ) enableAOU = false;
     updateInterval = intervalStringToSymbol(getInterval);
     // fall back to weekly in error case
     if (updateInterval == `none) updateInterval = `weekly;
@@ -168,6 +453,7 @@ global boolean Write()
     }
     else
     {
+        y2milestone("Automatic online update is disabled.");
         removeOnlineUpdateCronjobs();
         return true;
     }

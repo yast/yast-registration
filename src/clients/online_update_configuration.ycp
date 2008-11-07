@@ -20,12 +20,29 @@
     import "Mode";
     import "SourceManager";
     import "PackageCallbacks";
-/*  import "FileUtils";
-    import "Package"; */
-
+    import "CommandLine";
 
     include "registration/OUCDialogs.ycp";
+    include "registration/texts.ycp";
 
+    // support basic command-line output (bnc#439050)
+    list wfm_args = WFM::Args();
+    y2milestone ("ARGS: %1", wfm_args);
+    if ( (size (wfm_args) > 0)  &&
+         (contains (wfm_args, "help") || contains (wfm_args, "longhelp") || contains (wfm_args, "xmlhelp") ) )
+    {
+        string cmdhelp = _("Online Update Configuration Module Help");
+        Mode::SetUI ("commandline");
+        // TRANSLATORS: commandline help
+        CommandLine::Run($["id"      : "online_update_configuration",
+                           "help"    : cmdhelp
+                        ]);
+        y2milestone("Online Update Configuration was called with help parameter.");
+        return `auto;
+    }
+
+    map ui = UI::GetDisplayInfo();
+    boolean textmode = (boolean) ui["TextMode"]:false;
 
     string help = getOUCHelp(`default);
     term contents = getOUCDialog(`default);
@@ -43,11 +60,6 @@
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
 
     OnlineUpdateConfiguration::Read();
-
-
-
-    // FIXME: the display of the current and default URL has to be adapted once we can read the data from the products file
-    //        this function was missing in libzypp and packagebindings will be available soon, then we can complete this
 
     if (false) // for testing only
     {
@@ -84,41 +96,89 @@
     {
         ret = Wizard::UserInput();
 
-        if (ret == `restoreDefault)
-        {
-            Popup::Message("FIXME: function call to package bindings missing");
-
-            // FIXME: after setting the default update source query it again and update the UI
-            // replaceUpdateRepoString = someQueryCommand();
-
-            UI::ChangeWidget(`id(`currentRepoURL), `Value,  replaceUpdateRepoString);
-            UI::RecalcLayout();
-        }
-
         if (ret == `next)
         {
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
 
+            y2milestone("Writing online update configuration settings.");
             OnlineUpdateConfiguration::Write();
-            break;
+            //break;
+        }
+
+        if ( ret == `restoreDefault )
+        {
+            if ( OnlineUpdateConfiguration::defaultUpdateRepo == nil  ||
+                 OnlineUpdateConfiguration::defaultUpdateRepo == ""      )
+            {
+                y2milestone("No default update repo could be found in the products metadata.");
+
+                if ( OnlineUpdateConfiguration::defaultRegistrationURL == nil ||
+                     OnlineUpdateConfiguration::defaultRegistrationURL == ""    )
+                {
+                    y2error("No registration server set in product metadata. No update server can be setup automatically.");
+                }
+                else
+                {
+                    y2milestone("Registration is needed to get an update source.");
+
+                    if ( Popup::YesNo( TXT["needToRegister"]:"" + "\n\n" + TXT["runRegistrationNow"]:"" ) )
+                    {
+                        y2milestone("User wants to run the registration in order to setup the default update repository.");
+                        // trigger registration
+                        ret = `register;
+                    }
+                    else
+                    {
+                        y2log("User selected not to run the registration in order to setup the default update repository.");
+                    }
+                }
+
+            }
+            else
+            {
+                y2milestone("User selected to set the default update repository: %1", OnlineUpdateConfiguration::defaultUpdateRepo);
+                OnlineUpdateConfiguration::setUpdateRepo(OnlineUpdateConfiguration::defaultUpdateRepo);
+            }
         }
 
         if (ret == `repoManager)
         {
-            SCR::Execute(.background.run_output, "yast2 inst_source");
+            if ( textmode )
+                WFM::call("inst_source");
+            else
+                SCR::Execute(.background.run_output, "yast2 inst_source");
         }
 
         if (ret == `smolt)
         {
-            SCR::Execute(.background.run_output, "yast2 smolt");
+            if ( textmode )
+                WFM::call("system-profile");
+            else
+                SCR::Execute(.background.run_output, "yast2 system-profile");
         }
 
         if (ret == `register)
         {
-            SCR::Execute(.background.run_output, "yast2 inst_suse_register");
+            if ( textmode )
+                WFM::call("inst_suse_register");
+            else
+                SCR::Execute(.background.run_output, "yast2 inst_suse_register");
         }
+
+
+        // update values in UI
+        // after a registration call refetch the current update repo url
+        if ( ret == `restoreDefault || ret == `register )
+        {
+            y2milestone("Refetching current updateRepoURL.");
+            replaceUpdateRepoString = OnlineUpdateConfiguration::fetchCurrentUpdateRepoURL();
+            y2milestone("Current updateRepoURL is: %1", replaceUpdateRepoString);
+            UI::ChangeWidget(`id(`currentRepoURL), `Value,  replaceUpdateRepoString);
+            UI::RecalcLayout();
+        }
+
 
     } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
 
