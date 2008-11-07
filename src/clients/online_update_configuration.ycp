@@ -131,7 +131,7 @@
                     }
                     else
                     {
-                        y2log("User selected not to run the registration in order to setup the default update repository.");
+                        y2milestone("User selected not to run the registration in order to setup the default update repository.");
                     }
                 }
 
