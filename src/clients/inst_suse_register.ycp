@@ -533,7 +533,8 @@ string browser_command(string url)
         checkBinary = "/usr/bin/xulrunner";
     }
 
-    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1"), checkBinary) == 0 ? true:false;
+    // (bnc#443781)
+    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1", checkBinary)) == 0 ? true:false;
     if ( ! cmd_ok )
     {
         if (!Package::Installed(required_package))

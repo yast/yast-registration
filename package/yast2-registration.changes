@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 11 16:34:24 CET 2008 - jdsn@suse.de
+
+- fix error in sformat statement (bnc#443781)
+- 2.17.12 
+
+-------------------------------------------------------------------
 Tue Nov 11 14:51:44 CET 2008 - jdsn@suse.de
 
 - fix registration code parameter (bnc#443704) 
