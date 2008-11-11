@@ -1359,7 +1359,7 @@ global integer suseRegister(symbol parameter)
                                         "debug"             :  0,
                                         "nooptional"        :  (submit_optional    ? 0:1),
                                         "nohwdata"          :  (submit_hwdata      ? 0:1),
-                                        "forceregistration" :  (force_registration ? 1:0),
+                                        "forcereg"          :  (force_registration ? 1:0),  // (bnc#443704)
                                         "norefresh"         :  1,
                                         "yastcall"          :  1,
                                         "restoreRepos"      :  1,                          // (#309231)

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 11 14:51:44 CET 2008 - jdsn@suse.de
+
+- fix registration code parameter (bnc#443704) 
+
+-------------------------------------------------------------------
 Fri Nov  7 19:14:00 CET 2008 - jdsn@suse.de
 
 - fix reading repo settings (bnc#427698)
