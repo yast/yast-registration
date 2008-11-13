@@ -806,10 +806,12 @@ boolean registrationServerSettings()
                         string removePackage  = "xen-tools";
 
                         string xenDomU    = _("Xen DomU detected.");
-                        string installMsg = xenDomU + "\n" + _("The following package needs to be installed.");
-                        string removeMsg  = xenDomU + "\n" +
+                        string installMsg = xenDomU + "<br>" + _("The following package needs to be installed.") +
+                                                "<br>" + sformat("%1", installPackage);  //  (bnc#444638)
+                        string removeMsg  = xenDomU + "<br>" +
                            sformat(_("To count this installation correctly the package %1 needs to be installed."), installPackage ) +
-                           "\n" + _("Therefore the following package needs to be removed first.");
+                           "<br>" + _("Therefore the following package needs to be removed first.") + 
+                           "<br>" + sformat("%1", removePackage);   //  (bnc#444638)
 
 
                         Package::RemoveMsg(removePackage, removeMsg);
