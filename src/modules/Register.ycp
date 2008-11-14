@@ -923,25 +923,6 @@ global void finish()
 
 
 
-/*
- * add_update_sources
- *
- * read update sources from services file and add them to yast and zmd
- * @return a list of added URLs
- */
-global list<string> add_update_sources ()
-{
-    if (!FileUtils::Exists (services_file))
-	return [];
-
-    // filters out empty items (#165860#c12)
-    list<string> urls = String::NewlineItems (
-	(string)SCR::Read(.target.string, services_file));
-
-    return SourceManager::AddUpdateSources (urls);
-}
-
-
 
 /*
  * checkCatalogs
@@ -951,6 +932,8 @@ global list<string> add_update_sources ()
  */
 global list<string> checkCatalogs(map<string, any> taskList, string service)
 {
+    y2debug("Task list of check catalogs for the service (%1): %2", service, taskList);
+
     list<string> cSummary = [];
     list<string> catalogToEnable = [];
     list<string> catalogToDisable = [];
@@ -982,7 +965,7 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
                     y2error("A catalog returned by SuseRegister has an invalid task: %1", catalog);
                     repoUpdateSuccessful = false;
                 }
-                else if ( catDetail["TASK"]:"" == "le"  ||  catDetail["TASK"]:"" == "le" )
+                else if ( catDetail["TASK"]:"" == "le"  ||  catDetail["TASK"]:"" == "ld" )
                 {
                     y2milestone("According to SuseRegister a catalog does not need to be changed: %1 (%2)", catalog, service);
                 }
@@ -1011,6 +994,11 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
     serviceDetails = (map<string, any>) Pkg::ServiceGet(service);
     serviceDetails["repos_to_enable"] = catalogToEnable;
     serviceDetails["repos_to_disable"] = catalogToDisable;
+
+    // enabled flag must not be present - otherwise all catalogs will be activated
+    serviceDetails = remove(serviceDetails, "enabled");
+
+    y2debug("Setting service properties for service (%1): %2", service, serviceDetails);
 
     if ( Pkg::ServiceSet(service, serviceDetails) )
     {
@@ -1045,6 +1033,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
     {
         return [];
     }
+
+    y2debug("Task list to update software repositories: %1", taskList);
 
     list<string> summary = [];
 
@@ -1096,9 +1086,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                                                      "name"          : (string) ((map) pAny)["NAME"]:"",
                                                      "alias"         : (string) ((map) pAny)["ALIAS"]:"",
                                                      "base_urls"     : [ (string) ((map) pAny)["URL"]:"" ],
-                                                     "priority"      : ((map) pAny)["PRIORITY"]:99,
-                                                   // ??  "prod_dir"      : ((map) pAny)["PROD_DIR"]:"",
-                                                     "type"          : (string) ((map) pAny)["TYPE"]:""
+                                                     "priority"      : ((map) pAny)["PRIORITY"]:99
+                                                     // remove repo type (bnc#444770)
                                                  ];
 
                     integer newSrcID = Pkg::RepositoryAdd( newSrcMap );
@@ -1317,16 +1306,16 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
         {
             y2milestone("Changes to the repositories and services were successful. Now refreshing all of them.");
 
-            list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
-            foreach (integer srcID, currentNewSources, {
-                y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
-            });
-
             list<string> currentNewServices = Pkg::ServiceAliases();
             foreach ( string serviceAlias, currentNewServices, {
                 y2milestone("Refreshing service with Alias: %1", serviceAlias);
                 Pkg::ServiceRefresh(serviceAlias);
+            });
+
+            list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
+            foreach (integer srcID, currentNewSources, {
+                y2milestone("Refreshing source with ID: %1", srcID);
+                Pkg::SourceForceRefreshNow(srcID);
             });
         }
     }
@@ -1355,8 +1344,11 @@ global integer suseRegister(symbol parameter)
     list<integer> allCurrentSources = [];
     list<string> allCurrentServices = [];
 
+    map ui = UI::GetDisplayInfo();
+    boolean debugMode = (boolean) ui["y2debug"]:false;
+
     map<string, any> contextData = $[
-                                        "debug"             :  0,
+                                        "debug"             :  (debugMode          ? 2:0),
                                         "nooptional"        :  (submit_optional    ? 0:1),
                                         "nohwdata"          :  (submit_hwdata      ? 0:1),
                                         "forcereg"          :  (force_registration ? 1:0),  // (bnc#443704)
@@ -1394,19 +1386,34 @@ global integer suseRegister(symbol parameter)
             y2milestone("Successfully initialized the target.");
             isInitializedTarget = true;
 
-            // refresh all sources _once_ before interacting with SuseRegister
-            allCurrentSources = Pkg::SourceStartCache(true);
-            foreach ( integer srcID, allCurrentSources, {
-                y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
-            });
+            if ( Pkg::SourceStartManager(true) )
+            {
+                y2milestone("Successfully started source manager.");
+            }
+            else
+            {
+                y2error("Failed to start source manager");
+                return 199;
+            }
 
+            y2milestone("Initially refreshing services.");
             // refresh all services _once_ before interacting with SuseRegister
             allCurrentServices = Pkg::ServiceAliases();
+
             foreach ( string serviceAlias, allCurrentServices, {
                 y2milestone("Refreshing service with Alias: %1", serviceAlias);
                 Pkg::ServiceRefresh(serviceAlias);
             });
+
+            y2milestone("Initially refreshing sources.");
+            // refresh all sources _once_ before interacting with SuseRegister
+            allCurrentSources = Pkg::SourceGetCurrent(true);
+
+            foreach ( integer srcID, allCurrentSources, {
+                y2milestone("Refreshing source with ID: %1", srcID);
+                Pkg::SourceForceRefreshNow(srcID);
+            });
+            y2milestone("Initial refreshing ended.");
         }
 
         // initialize SuseRegister

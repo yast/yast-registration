@@ -1047,7 +1047,7 @@ boolean registrationServerSettings()
                 * 112: the initialization of SuseRegister failed; no special message is used for that though
                 * 113: the initialization if the target failed - no interaction with the package system possible
                 * 198: the system did not find any browser to let the user perform the manual interaction part of the registration
-                * 199: unknown error uccurred (no longer used)
+                * 199: unknown error uccurred
 */
 
             }

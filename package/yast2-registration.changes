@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Nov 14 17:55:56 CET 2008 - jdsn@suse.de
+
+- fix repo type definition for adding sources (bnc#444770)
+- remove deprecated unused function
+- add more debug logging
+- service changes should not enable all its catalogs
+- refresh services prior to repositories
+- 2.17.13
+
+-------------------------------------------------------------------
 Thu Nov 13 15:33:39 CET 2008 - jdsn@suse.de
 
 - fix empty install message (bnc#444638)
