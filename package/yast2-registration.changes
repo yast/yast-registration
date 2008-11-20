@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 20 17:33:30 CET 2008 - jdsn@suse.de
+
+- finish sources when changed to enforce reload (bnc#447080)
+- merge service repo flags instead overwriting them
+
+-------------------------------------------------------------------
 Fri Nov 14 17:55:56 CET 2008 - jdsn@suse.de
 
 - fix repo type definition for adding sources (bnc#444770)

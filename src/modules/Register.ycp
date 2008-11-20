@@ -922,6 +922,19 @@ global void finish()
 }
 
 
+/*
+ * callbackAuthenticationOnRefresh
+ * dummy callbackfunction to disable the authentication errors
+ */
+global map<string, any> callbackAuthenticationOnRefresh()
+{
+    y2error("Refreshing a service or repository filed because of an authentication error.");
+    y2error("This is a valid scenario though, and only means that registration needs to be run.");
+    y2error("Registration will now continue without a warning to the user.");
+    return (map<string, any>) $[ "continue" : false,
+                                 "username" : "",
+                                 "password" : ""      ];
+}
 
 
 /*
@@ -992,8 +1005,8 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
 
     map<string, any> serviceDetails = $[];
     serviceDetails = (map<string, any>) Pkg::ServiceGet(service);
-    serviceDetails["repos_to_enable"] = catalogToEnable;
-    serviceDetails["repos_to_disable"] = catalogToDisable;
+    serviceDetails["repos_to_enable"]  = union(serviceDetails["repos_to_enable"]:[],  catalogToEnable);
+    serviceDetails["repos_to_disable"] = union(serviceDetails["repos_to_disable"]:[], catalogToDisable);
 
     // enabled flag must not be present - otherwise all catalogs will be activated
     serviceDetails = remove(serviceDetails, "enabled");
@@ -1320,6 +1333,16 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
         }
     }
 
+    // finish sources (bnc#447080)
+    if ( Pkg::SourceFinishAll() )
+    {
+        y2milestone("Successfully finished all sources.")
+    }
+    else
+    {
+        y2error("Failed to finish all sources.");
+    }
+
     if ( repoUpdateSuccessful )
     {
         y2error("SuseRegister will now save the lastZmdConfig.");
@@ -1396,6 +1419,9 @@ global integer suseRegister(symbol parameter)
                 return 199;
             }
 
+//            y2debug("Setting Pkg::CallbackAuthentication to a dummy function");
+//            Pkg::CallbackAuthentication("Register::callbackAuthenticationOnRefresh");
+
             y2milestone("Initially refreshing services.");
             // refresh all services _once_ before interacting with SuseRegister
             allCurrentServices = Pkg::ServiceAliases();
@@ -1414,6 +1440,9 @@ global integer suseRegister(symbol parameter)
                 Pkg::SourceForceRefreshNow(srcID);
             });
             y2milestone("Initial refreshing ended.");
+
+//            y2debug("Resetting Pkg::CallbackAuthentication to default.");
+//            Pkg::CallbackAuthentication(nil);
         }
 
         // initialize SuseRegister
