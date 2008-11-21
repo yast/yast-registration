@@ -823,11 +823,12 @@ integer suseRegisterOnce()
     UI::NormalCursor();
     UI::CloseDialog();
 
-    if(YSR::get_errorcode() != 0)
+    integer errorCode = YSR::get_errorcode();
+    if( errorCode != 0 )
     {
         // error
-        y2error("Register call failed (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
-        return 111;
+        y2warning("Register call returned with an error message (error code: %1): %2", errorCode, YSR::get_errormsg());
+        y2warning("This basically means registration is not finished yet.");
     }
 
     return ret;
@@ -1336,7 +1337,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
     // finish sources (bnc#447080)
     if ( Pkg::SourceFinishAll() )
     {
-        y2milestone("Successfully finished all sources.")
+        y2milestone("Successfully finished all sources.");
     }
     else
     {
@@ -1450,14 +1451,16 @@ global integer suseRegister(symbol parameter)
         y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
         YSR::init_ctx(contextDataSR);
 
-        if ( YSR::get_errorcode() == 0 )
+        integer initErrorCode = YSR::get_errorcode();
+        if ( initErrorCode == 0 )
         {
+            y2milestone("Successfully initialized SuseRegister.");
             isInitializedSR = true;
         }
         else
         {
-            y2error("Initializing SuseRegister failed with error code (%1) and error message: %2", YSR::get_errorcode(), YSR::get_errormsg());
-            return 112;
+            y2error("Initializing SuseRegister failed with error code (%1) and error message: %2", initErrorCode, YSR::get_errormsg());
+            return initErrorCode;
         }
 
         // setting up proxy for SuseRegister
@@ -1486,35 +1489,13 @@ global integer suseRegister(symbol parameter)
     }
 
 
-    // do the initial registration call if not done yet
-    if ( initialSRstatus == nil )
+    // registration loop - has to loop until return code gets != 1
+    do
     {
-        integer retval = suseRegisterOnce();
-        initialSRstatus = retval;
-        if ( retval == 111 )
-        {
-            y2error("Initial register call failed (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
-            y2error("Registration is not complete!");
-            return 111;
-        }
-    }
+        initialSRstatus = suseRegisterOnce();
+        y2milestone("SuseRegister loop: SuseRegister returned with error code: %1", initialSRstatus );
+    } while ( initialSRstatus == 1 );
 
-
-    // we are in needinfo mode
-    if ( initialSRstatus == 1 )
-    {
-        // send all data that can be gathered automatically by calling suseRegisterOnce again
-        integer retval = suseRegisterOnce();
-        if (retval == 111)
-        {
-            y2error("Register call failed in first needinfo state (%1): %2", YSR::get_errorcode(), YSR::get_errormsg());
-            return 111;
-        }
-
-        // we are done - update the initial status variable
-        y2milestone("After fist needinfo suseRegister returned with status: %1", retval);
-        initialSRstatus = retval;
-    }
 
     // everything fine - nothing to be done
     if ( initialSRstatus == 0 )
@@ -1540,7 +1521,7 @@ global integer suseRegister(symbol parameter)
                 updateSoftwareRepositories(taskList, false);
             }
         }
-        else if ( initialSRstatus == 1 )
+        else if ( initialSRstatus == 4 )
         {
             y2error("Manual interaction is required for proper registration which is not possible during autoYaST. Please register manually.");
         }

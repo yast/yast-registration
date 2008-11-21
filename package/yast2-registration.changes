@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Nov 21 12:22:33 CET 2008 - jdsn@suse.de
+
+- adapt to new suseRegister states (bnc#446572)
+- 2.17.14
+
+-------------------------------------------------------------------
 Thu Nov 20 17:33:30 CET 2008 - jdsn@suse.de
 
 - finish sources when changed to enforce reload (bnc#447080)
