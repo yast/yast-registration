@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 24 12:27:12 CET 2008 - jdsn@suse.de
+
+- call other modules via WFM (bnc#447043)
+
+-------------------------------------------------------------------
 Fri Nov 21 12:22:33 CET 2008 - jdsn@suse.de
 
 - adapt to new suseRegister states (bnc#446572)

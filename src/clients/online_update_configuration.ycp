@@ -145,26 +145,17 @@
 
         if (ret == `repoManager)
         {
-            if ( textmode )
-                WFM::call("inst_source");
-            else
-                SCR::Execute(.background.run_output, "yast2 inst_source");
+            WFM::call("inst_source");
         }
 
         if (ret == `smolt)
         {
-            if ( textmode )
-                WFM::call("system-profile");
-            else
-                SCR::Execute(.background.run_output, "yast2 system-profile");
+            WFM::call("system-profile");
         }
 
         if (ret == `register)
         {
-            if ( textmode )
-                WFM::call("inst_suse_register");
-            else
-                SCR::Execute(.background.run_output, "yast2 inst_suse_register");
+            WFM::call("inst_suse_register");
         }
 
 
