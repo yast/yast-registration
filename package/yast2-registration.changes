@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 27 21:08:07 CET 2008 - jdsn@suse.de
+
+- fix restoring the default update repository (bnc#444301)
+- 2.17.16 
+
+-------------------------------------------------------------------
 Mon Nov 24 12:27:12 CET 2008 - jdsn@suse.de
 
 - call other modules via WFM (bnc#447043)

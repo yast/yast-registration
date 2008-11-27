@@ -49,6 +49,8 @@
 
 /* ---------------------------------------------------------------------------------------------------------------  */
 
+    Pkg::SourceStartManager(true);
+
     // check if we are in installation workflow or running independently
     if (Mode::normal()) Wizard::CreateDialog();
 
@@ -68,8 +70,9 @@
 
     string replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo;
 
-    if ( OnlineUpdateConfiguration::currentUpdateRepo == OnlineUpdateConfiguration::defaultUpdateRepo  &&
-         OnlineUpdateConfiguration::currentUpdateRepo != ""                                                )
+
+    if ( OnlineUpdateConfiguration::compareUpdateURLs( OnlineUpdateConfiguration::currentUpdateRepo, 
+                                                       OnlineUpdateConfiguration::defaultUpdateRepo, false ) )
     {// in this case - we have default update repo installed
         replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo + "   " + defaultMark;
         UI::ChangeWidget(`id(`restoreDefault), `Enabled, false);
@@ -77,7 +80,9 @@
     else
     { // in this case - custom or no update repo
         if ( replaceUpdateRepoString == ""  ) replaceUpdateRepoString = noRepo;
-        UI::ChangeWidget(`id(`restoreDefault), `Enabled, true);
+
+        boolean hasUpRepo = (OnlineUpdateConfiguration::defaultUpdateRepo != "" && OnlineUpdateConfiguration::defaultUpdateRepo != nil );
+        UI::ChangeWidget(`id(`restoreDefault), `Enabled, hasUpRepo);
     }
 
     // write data to the UI
@@ -165,13 +170,24 @@
         {
             y2milestone("Refetching current updateRepoURL.");
             replaceUpdateRepoString = OnlineUpdateConfiguration::fetchCurrentUpdateRepoURL();
+
+            string mark = "";
+            if ( OnlineUpdateConfiguration::compareUpdateURLs( replaceUpdateRepoString,
+                                                               OnlineUpdateConfiguration::defaultUpdateRepo, false) )
+            {
+                mark = "   " + defaultMark;
+                UI::ChangeWidget(`id(`restoreDefault), `Enabled, false);
+            }
             y2milestone("Current updateRepoURL is: %1", replaceUpdateRepoString);
-            UI::ChangeWidget(`id(`currentRepoURL), `Value,  replaceUpdateRepoString);
+            UI::ChangeWidget(`id(`currentRepoURL), `Value,  replaceUpdateRepoString + mark);
+
             UI::RecalcLayout();
         }
 
 
     } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
+
+    Pkg::SourceFinishAll();
 
     if (! is(ret, symbol))  ret = `next;
 

@@ -55,14 +55,25 @@ boolean fetchBaseProductDetails()
 
     // fetch product details about installed products
     list<map <string, any> > productDetail = (list<map <string, any> >) Pkg::ResolvableProperties( "", `product, "" );
-    map<string, any> baseProductDetail = $[];
+    baseProductDetail = $[];
+
+//FIXME START
+//FIXME: 1) pkg-bindings return only addon products for openSUSE (bnc#449844)
+//FIXME: 2) the product definition does not contain update URLS (bnc#449842)
+//FIXME: If either of these remain unfixed the following two lines need to be uncommented,
+//FIXME: otherwise restoring of the default update repo is only possible via NCC registration
+/*
+productDetail[0, "category"]="base";
+productDetail[0, "update_urls"] = ["http://download.opensuse.org/update/11.1/"];
+*/
+//FIXME END
 
     y2debug("All installed products are: %1", productDetail);
     y2debug("Now looking for the base product");
 
     // filter the map to find the one any only base product
     productDetail = filter( map<string, any> oneProduct, productDetail, {
-        return  oneProduct["category"]:"unknown" == "base";
+        return oneProduct["category"]:"unknown" == "base";
     });
 
     y2debug("All installed base products are: %1", productDetail);
@@ -86,6 +97,38 @@ boolean fetchBaseProductDetails()
     return true;
 }
 
+/*
+ * compareUpdateURLs
+ * compare two URLs - only the scheme, hostname and path will be compared, a trailing slash will be ignored
+ * @return true if urls match
+ */
+global boolean compareUpdateURLs(string url1, string url2, boolean allowEmpty)
+{
+    y2debug("Comparing two urls.");
+    if ( url1 == "" &&  url2 == "" && ! allowEmpty )
+    {
+        return false;
+    }
+
+    map url1map = URL::Parse(url1);
+    map url2map = URL::Parse(url2);
+
+    // removing trailing slash
+    if ( regexpmatch( url1map["path"]:"", "/$" ) )
+        url1map["path"]   = regexpsub(url1map["path"]:"", "(.*)/$", "\\1");
+    if ( regexpmatch( url2map["path"]:"", "/$" ) )
+        url2map["path"]   = regexpsub(url2map["path"]:"", "(.*)/$", "\\1");
+
+    if ( tolower(url1map["scheme"]:"X") ==  tolower(url2map["scheme"]:"Y") &&
+         tolower(url1map["host"]:"X")   ==  tolower(url2map["host"]:"Y")   &&
+         url1map["path"]:"X"   ==  url2map["path"]:"Y"                         )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 /*
  * fetchBaseProductURLs
@@ -98,7 +141,6 @@ global boolean fetchBaseProductURLs()
     string defUp = "";
     string defReg = "";
 
-    // FIXME - fetch the repo from the package bindings
     if ( defaultUpdateRepo == nil ||
          defaultUpdateRepo == ""     )
     {
@@ -240,11 +282,6 @@ global string fetchCurrentUpdateRepoURL()
     }
     else
     {
-        map<string, map> allUpdateReposMap = $[];
-        allUpdateReposMap = listmap(string oneRepo, allUpdateRepos, {
-            return $[ oneRepo : URL::Parse(oneRepo) ];
-        });
-
         list<integer> allCurrentRepos = Pkg::SourceGetCurrent(true);
         if ( size(allCurrentRepos) < 1 )
         {
@@ -257,13 +294,9 @@ global string fetchCurrentUpdateRepoURL()
 
             foreach(integer repoID, allCurrentRepos, {
                 string repoURL = Pkg::SourceURL(repoID);
-                map repoURLmap = URL::Parse(repoURL);
 
-                foreach(string upRepo, map upRepoMap, allUpdateReposMap, {
-                    if ( repoURLmap["scheme"]:"X" ==  upRepoMap["scheme"]:"Y" &&
-                         repoURLmap["host"]:"X"   ==  upRepoMap["host"]:"Y" &&
-                         repoURLmap["path"]:"X"   ==  upRepoMap["path"]:"Y"
-                       )
+                foreach(string upRepo, allUpdateRepos, {
+                    if ( compareUpdateURLs(repoURL, upRepo, false) )
                     {
                         foundUpdateRepo = add( foundUpdateRepo, repoURL );
                     }
@@ -308,11 +341,21 @@ global boolean setUpdateRepo(string updateRepo)
                                      "name"          : "Default-Update-Repository",
                                      "alias"         : "Default-Update-Repository",
                                      "base_urls"     : [ updateRepo ],
-                                     "priority"      : 10
+                                     "priority"      : 20
                                  ];
 
     y2milestone("Adding new update repository.");
     integer newSrcID = Pkg::RepositoryAdd( newSrcMap );
+    if (newSrcID != nil)
+    {
+        y2milestone("Successfully added the default update repository to the system.");
+        currentUpdateRepo = updateRepo;
+    }
+    else
+    {
+        y2error("Could not add the default update repository to the system.");
+    }
+
     y2milestone("Saving all source changes to the system.");
     Pkg::SourceSaveAll();
 
@@ -391,6 +434,8 @@ global void Read()
     else
         y2error("Could not fetch base product details information.");
 
+    // read base URLs from the base product
+    fetchBaseProductURLs();
     // this will update the default update repo as well - so do it once here
     string foo = fetchCurrentUpdateRepoURL();
 
