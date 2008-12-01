@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Dec  1 18:21:35 CET 2008 - jdsn@suse.de
+
+- fix detection of base product (bnc#449844)
+- 2.17.17
+
+-------------------------------------------------------------------
 Thu Nov 27 21:08:07 CET 2008 - jdsn@suse.de
 
 - fix restoring the default update repository (bnc#444301)

@@ -21,6 +21,7 @@
     import "SourceManager";
     import "PackageCallbacks";
     import "CommandLine";
+    import "Installation";
 
     include "registration/OUCDialogs.ycp";
     include "registration/texts.ycp";
@@ -50,6 +51,8 @@
 /* ---------------------------------------------------------------------------------------------------------------  */
 
     Pkg::SourceStartManager(true);
+    string targetRootDir = Mode::normal() ? "/":Installation::destdir;
+    Pkg::TargetInit(targetRootDir, false);  // (bnc#449844)
 
     // check if we are in installation workflow or running independently
     if (Mode::normal()) Wizard::CreateDialog();
