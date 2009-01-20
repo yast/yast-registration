@@ -1346,7 +1346,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
 
     if ( repoUpdateSuccessful )
     {
-        y2error("SuseRegister will now save the lastZmdConfig.");
+        y2milestone("SuseRegister will now save the lastZmdConfig.");
         YSR::saveLastZmdConfig();
     }
     else
