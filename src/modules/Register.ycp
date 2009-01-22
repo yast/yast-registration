@@ -1346,7 +1346,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
 
     if ( repoUpdateSuccessful )
     {
-        y2error("SuseRegister will now save the lastZmdConfig.");
+        y2milestone("SuseRegister will now save the lastZmdConfig.");
         YSR::saveLastZmdConfig();
     }
     else
@@ -1446,6 +1446,21 @@ global integer suseRegister(symbol parameter)
 //            Pkg::CallbackAuthentication(nil);
         }
 
+        // setting the proxy must happen before init_ctx is called (bnc#468480)
+        // setting up proxy for SuseRegister
+        if (Register::use_proxy)
+        {
+            if (Register::http_proxy  != nil &&  Register::https_proxy != nil)
+            {
+                y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
+                YSR::set_proxy(Register::http_proxy, Register::https_proxy);
+            }
+            else
+            {
+                y2error("Proxy settings are broken and could not be applied to SuseRegister.");
+            }
+        }
+
         // initialize SuseRegister
         contextDataSR = contextData;
         y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
@@ -1461,20 +1476,6 @@ global integer suseRegister(symbol parameter)
         {
             y2error("Initializing SuseRegister failed with error code (%1) and error message: %2", initErrorCode, YSR::get_errormsg());
             return initErrorCode;
-        }
-
-        // setting up proxy for SuseRegister
-        if (Register::use_proxy)
-        {
-            if (Register::http_proxy  != nil &&  Register::https_proxy != nil)
-            {
-                y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
-                YSR::set_proxy(Register::http_proxy, Register::https_proxy);
-            }
-            else
-            {
-                y2error("Proxy settings are broken and could not be applied to SuseRegister.");
-            }
         }
     }
 
