@@ -1450,14 +1450,27 @@ global integer suseRegister(symbol parameter)
         // setting up proxy for SuseRegister
         if (Register::use_proxy)
         {
-            if (Register::http_proxy  != nil &&  Register::https_proxy != nil)
+            // setup proxy for http and https individually (bnc#468919)
+            if (Register::http_proxy  == nil)
+            {
+                Register::http_proxy = "";
+                y2error("Setting for http proxy is broken. Resetting http proxy. Registration will not use an http proxy.");
+            }
+
+            if (Register::https_proxy  == nil)
+            {
+                Register::https_proxy = "";
+                y2error("Setting for https proxy is broken. Resetting https proxy. Registration will not use an https proxy.");
+            }
+
+            if (Register::http_proxy  != "" ||  Register::https_proxy != "")
             {
                 y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
                 YSR::set_proxy(Register::http_proxy, Register::https_proxy);
             }
             else
             {
-                y2error("Proxy settings are broken and could not be applied to SuseRegister.");
+                y2milestone("No proxy settings will be used for registration and SuseRegister.");
             }
         }
 

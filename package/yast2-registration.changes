@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan 23 18:15:16 CET 2009 - jdsn@suse.de
+
+- setup proxy before suseRegister initializes (bnc#468480)
+- setup http and https proxy settings individually (bnc#468919)
+- 2.17.18
+
+-------------------------------------------------------------------
 Mon Dec  1 18:21:35 CET 2008 - jdsn@suse.de
 
 - fix detection of base product (bnc#449844)
