@@ -907,19 +907,7 @@ global void finish()
     // reset YSRs context
     YSR::del_ctx();
     isInitializedSR = false;
-    if ( isInitializedTarget )
-    {
-        y2milestone("Package target was initialized. Now finishing target usage.");
-        if ( Pkg::TargetFinish() )
-        {
-            y2milestone("Successfully finished the target usage of the package system.");
-            isInitializedTarget = false;
-        }
-        else
-        {
-            y2error("Could not finish the target usage of the package system.");
-        }
-    }
+    // do no longer call TargetFinish (bnc#468449)
 }
 
 
@@ -1446,6 +1434,34 @@ global integer suseRegister(symbol parameter)
 //            Pkg::CallbackAuthentication(nil);
         }
 
+        // setting the proxy must happen before init_ctx is called (bnc#468480)
+        // setting up proxy for SuseRegister
+        if (Register::use_proxy)
+        {
+            // setup proxy for http and https individually (bnc#468919)
+            if (Register::http_proxy  == nil)
+            {
+                Register::http_proxy = "";
+                y2error("Setting for http proxy is broken. Resetting http proxy. Registration will not use an http proxy.");
+            }
+
+            if (Register::https_proxy  == nil)
+            {
+                Register::https_proxy = "";
+                y2error("Setting for https proxy is broken. Resetting https proxy. Registration will not use an https proxy.");
+            }
+
+            if (Register::http_proxy  != "" ||  Register::https_proxy != "")
+            {
+                y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
+                YSR::set_proxy(Register::http_proxy, Register::https_proxy);
+            }
+            else
+            {
+                y2milestone("No proxy settings will be used for registration and SuseRegister.");
+            }
+        }
+
         // initialize SuseRegister
         contextDataSR = contextData;
         y2milestone("Initializing SuseRegister with this context data: %1", contextDataSR);
@@ -1461,20 +1477,6 @@ global integer suseRegister(symbol parameter)
         {
             y2error("Initializing SuseRegister failed with error code (%1) and error message: %2", initErrorCode, YSR::get_errormsg());
             return initErrorCode;
-        }
-
-        // setting up proxy for SuseRegister
-        if (Register::use_proxy)
-        {
-            if (Register::http_proxy  != nil &&  Register::https_proxy != nil)
-            {
-                y2milestone("Setting up proxy for SuseRegister. http_proxy: %1  -- https_proxy: %2", Register::http_proxy, Register::https_proxy);
-                YSR::set_proxy(Register::http_proxy, Register::https_proxy);
-            }
-            else
-            {
-                y2error("Proxy settings are broken and could not be applied to SuseRegister.");
-            }
         }
     }
 

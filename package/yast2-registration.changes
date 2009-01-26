@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 26 17:48:44 CET 2009 - jdsn@suse.de
+
+- keep target initialized on exit (bnc#468449)
+- setup proxy before suseRegister initializes (bnc#468480)
+- setup http and https proxy settings individually (bnc#468919)
+
+-------------------------------------------------------------------
 Mon Dec  1 18:21:35 CET 2008 - jdsn@suse.de
 
 - fix detection of base product (bnc#449844)
