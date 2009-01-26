@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jan 26 15:53:58 CET 2009 - jdsn@suse.de
+
+- keep target initialized on exit (bnc#468449)
+- 2.17.19
+
+-------------------------------------------------------------------
 Thu Jan 23 18:15:16 CET 2009 - jdsn@suse.de
 
 - setup proxy before suseRegister initializes (bnc#468480)

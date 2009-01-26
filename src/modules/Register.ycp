@@ -909,16 +909,21 @@ global void finish()
     isInitializedSR = false;
     if ( isInitializedTarget )
     {
-        y2milestone("Package target was initialized. Now finishing target usage.");
-        if ( Pkg::TargetFinish() )
-        {
-            y2milestone("Successfully finished the target usage of the package system.");
-            isInitializedTarget = false;
-        }
-        else
-        {
-            y2error("Could not finish the target usage of the package system.");
-        }
+        // do no longer call TargetFinish (bnc#468449)
+        // Note: repeated calls to TargetInitialize with the same rootdir are ok, see libzypp/zypp/zypp_detail/ZYppImpl.cc:95
+        y2debug("The Target currently is initialized - but due to bug bnc#468449 Pkg::TargetFinish will not be called.");
+
+        // Keeping the former code block commented out as a reference
+//        y2milestone("Package target was initialized. Now finishing target usage.");
+//        if ( Pkg::TargetFinish() )
+//        {
+//            y2milestone("Successfully finished the target usage of the package system.");
+//            isInitializedTarget = false;
+//        }
+//        else
+//        {
+//            y2error("Could not finish the target usage of the package system.");
+//        }
     }
 }
 
