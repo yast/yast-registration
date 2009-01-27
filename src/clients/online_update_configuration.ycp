@@ -54,22 +54,21 @@
     string targetRootDir = Mode::normal() ? "/":Installation::destdir;
     Pkg::TargetInit(targetRootDir, false);  // (bnc#449844)
 
-    // check if we are in installation workflow or running independently
-    if (Mode::normal()) Wizard::CreateDialog();
+    // check if we are in installation workflow or running independently -  use OKDialog (bnc#440568)
+    if (Mode::normal()) Wizard::OpenOKDialog();
 
     // we always need the next button and never the back button
     Wizard::SetContents (moduleTitle, contents, help, false, true);
     Wizard::SetTitleIcon ("yast-online_update");
-    Wizard::SetNextButton(`next, Label::FinishButton() );
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
 
     OnlineUpdateConfiguration::Read();
 
-    if (false) // for testing only
-    {
-        OnlineUpdateConfiguration::currentUpdateRepo = "";
-    }
+//    if (false) // for testing only
+//    {
+//        OnlineUpdateConfiguration::currentUpdateRepo = "";
+//    }
 
     string replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo;
 
@@ -104,7 +103,7 @@
     {
         ret = Wizard::UserInput();
 
-        if (ret == `next)
+        if ( ret == `next || ret == `ok )
         {
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
@@ -112,7 +111,7 @@
 
             y2milestone("Writing online update configuration settings.");
             OnlineUpdateConfiguration::Write();
-            //break;
+            ret = `next;
         }
 
         if ( ret == `restoreDefault )
@@ -187,8 +186,19 @@
             UI::RecalcLayout();
         }
 
+        if ( ret == `back || ret == `abort || ret == `cancel )
+        {
+            if ( Popup::ReallyAbort(true) )
+            {
+                break;
+            }
+            else
+            {
+                ret = `continue;
+            }
+        }
 
-    } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
+    } until (ret == `ok || ret == `next || ret == `abort || ret == `cancel || ret == `back);
 
     Pkg::SourceFinishAll();
 

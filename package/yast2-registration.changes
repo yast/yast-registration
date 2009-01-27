@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 27 17:35:44 CET 2009 - jdsn@suse.de
+
+- use OKDialog for online_update_configuration (bnc#440568)
+
+-------------------------------------------------------------------
 Mon Jan 26 17:48:44 CET 2009 - jdsn@suse.de
 
 - keep target initialized on exit (bnc#468449)
