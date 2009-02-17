@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 17 22:05:16 CET 2009 - jdsn@suse.de
+
+- without network connection skip registration (bnc#475795) 
+- 2.17.21
+
+-------------------------------------------------------------------
 Tue Feb 17 17:15:52 CET 2009 - ug@suse.de
 
 - fixed autoyast registration (bnc#476494)
