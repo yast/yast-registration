@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 17 17:15:52 CET 2009 - ug@suse.de
+
+- fixed autoyast registration (bnc#476494)
+- 2.17.20
+
+-------------------------------------------------------------------
 Mon Jan 26 15:53:58 CET 2009 - jdsn@suse.de
 
 - keep target initialized on exit (bnc#468449)
