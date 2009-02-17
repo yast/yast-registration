@@ -1375,12 +1375,17 @@ global integer suseRegister(symbol parameter)
     if ( registration_data != $[] )
     {
         // append sensitive data to the context map
-        foreach (string key, string val, registration_data,  {
-            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
-            contextData[key] =  sformat("%1", String::Quote(val));
-        });
+        // collect data inside of the args keyword (bnc#476494)
+        contextData["args"] = registration_data;
+
         // do not log sensitive data to the log (#195624)
-        y2milestone ("Added sensitive registration data to suse_register call - this data is not logged");
+        y2milestone("Added sensitive registration data to suse_register call - the data will not be logged, only the used keys");
+
+        // list the used keys in the log
+        foreach (string key, string val, registration_data,  {
+            y2milestone("Added sensitive registration data for the key: %1", key);
+        });
+
     }
 
 
