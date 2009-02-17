@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb  9 16:30:37 CET 2009 - jdsn@suse.de
+
+- fix to override certificate handling for *.novell.com domains
+  (bnc#413231)
+- 2.13.23
+
+-------------------------------------------------------------------
 Tue Apr  8 16:06:58 CEST 2008 - jdsn@suse.de
 
 - fix SMT certificate installation in autoyast mode (bnc#377929)
