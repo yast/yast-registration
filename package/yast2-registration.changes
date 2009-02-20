@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 20 17:41:07 CET 2009 - jdsn@suse.de
+
+- reload SourceManager after registration (bnc#468449)
+- 2.17.22
+
+-------------------------------------------------------------------
 Tue Feb 17 22:05:16 CET 2009 - jdsn@suse.de
 
 - without network connection skip registration (bnc#475795) 

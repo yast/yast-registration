@@ -1342,7 +1342,18 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
     // finish sources (bnc#447080)
     if ( Pkg::SourceFinishAll() )
     {
-        y2milestone("Successfully finished all sources.");
+        y2milestone("Successfully finished all sources to enforce a reload.");
+
+        // restart the SourceManager to refill the cache with the current data (bnc#468449)
+        //   an application that called the registration (or that follows it) should be presented an updated pkg system
+        if ( Pkg::SourceStartManager(true) )
+        {
+            y2milestone("Successfully restarted source manager.");
+        }
+        else
+        {
+            y2error("Failed to restart source manager");
+        }
     }
     else
     {
