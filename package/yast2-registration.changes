@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 23 12:50:14 CET 2009 - jdsn@suse.de
+
+- reload SourceManager after registration (bnc#468449)
+- do not force the refreshes during registration (bnc#476429)
+
+-------------------------------------------------------------------
 Tue Feb 17 21:46:59 CET 2009 - jdsn@suse.de
 
 - fix autoyast registration; fix ported from SLE11 (bnc#476494) 

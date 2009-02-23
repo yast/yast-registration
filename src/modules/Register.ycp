@@ -907,7 +907,6 @@ global void finish()
     // reset YSRs context
     YSR::del_ctx();
     isInitializedSR = false;
-    // do no longer call TargetFinish (bnc#468449)
 }
 
 
@@ -1317,7 +1316,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
             list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
             foreach (integer srcID, currentNewSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
+                // no "forced" refresh needed - default is sufficient (bnc#476429)
+                Pkg::SourceRefreshNow(srcID);
             });
         }
     }
@@ -1325,7 +1325,18 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
     // finish sources (bnc#447080)
     if ( Pkg::SourceFinishAll() )
     {
-        y2milestone("Successfully finished all sources.");
+        y2milestone("Successfully finished all sources to enforce a reload.");
+
+        // restart the SourceManager to refill the cache with the current data (bnc#468449)
+        //   an application that called the registration (or that follows it) should be presented an updated pkg system
+        if ( Pkg::SourceStartManager(true) )
+        {
+            y2milestone("Successfully restarted source manager.");
+        }
+        else
+        {
+            y2error("Failed to restart source manager");
+        }
     }
     else
     {
@@ -1431,7 +1442,8 @@ global integer suseRegister(symbol parameter)
 
             foreach ( integer srcID, allCurrentSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
+                // no "forced" refresh needed - default is sufficient (bnc#476429)
+                Pkg::SourceRefreshNow(srcID);
             });
             y2milestone("Initial refreshing ended.");
 
