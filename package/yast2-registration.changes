@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 23 12:38:23 CET 2009 - jdsn@suse.de
+
+- do not force the refreshes during registration (bnc#476429)
+- 2.17.23
+
+-------------------------------------------------------------------
 Fri Feb 20 17:41:07 CET 2009 - jdsn@suse.de
 
 - reload SourceManager after registration (bnc#468449)

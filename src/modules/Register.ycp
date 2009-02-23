@@ -1334,7 +1334,8 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
             list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
             foreach (integer srcID, currentNewSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
+                // no "forced" refresh needed - default is sufficient (bnc#476429)
+                Pkg::SourceRefreshNow(srcID);
             });
         }
     }
@@ -1455,7 +1456,8 @@ global integer suseRegister(symbol parameter)
 
             foreach ( integer srcID, allCurrentSources, {
                 y2milestone("Refreshing source with ID: %1", srcID);
-                Pkg::SourceForceRefreshNow(srcID);
+                // no "forced" refresh needed - default is sufficient (bnc#476429)
+                Pkg::SourceRefreshNow(srcID);
             });
             y2milestone("Initial refreshing ended.");
 
