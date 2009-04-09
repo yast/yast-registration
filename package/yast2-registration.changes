@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr  9 17:43:26 CEST 2009 - jdsn@suse.de
+
+- proper language setting for registration browser (bnc#490811)
+- 2.17.24
+
+-------------------------------------------------------------------
 Mon Feb 23 12:38:23 CET 2009 - jdsn@suse.de
 
 - do not force the refreshes during registration (bnc#476429)

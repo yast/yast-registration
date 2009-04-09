@@ -1398,6 +1398,15 @@ global integer suseRegister(symbol parameter)
                                         "restoreRepos"      :  1,                          // (#309231)
                                         "logfile"           :  "/root/.suse_register.log"
                                     ];
+
+    // workaround for (bnc#490811)
+    string yastLocale = getenv("LANG");
+    y2milestone("Locale before suseRegister run: %1", yastLocale);
+    if ( yastLocale != nil  &&  yastLocale != "" )
+    {
+        contextData["locale"] = yastLocale;
+    }
+
     y2milestone("Basic initialization data for SuseRegister (custom registration data is suppressed for security reasons): %1", contextData);
 
     // add data to the context from autoyast profile or from manual input
