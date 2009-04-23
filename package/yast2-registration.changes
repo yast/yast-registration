@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 23 21:15:50 CEST 2009 - jdsn@suse.de
+
+- check boolean values also for nil to prevent crashes (bnc#463800) 
+
+-------------------------------------------------------------------
 Mon Feb 23 12:50:14 CET 2009 - jdsn@suse.de
 
 - reload SourceManager after registration (bnc#468449)

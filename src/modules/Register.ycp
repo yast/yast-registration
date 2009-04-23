@@ -784,11 +784,11 @@ void read_config()
  */
 void write_config()
 {
-    SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional ? true:false ));
-    SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   ? true:false ));
+    SCR::Write(.sysconfig.suse_register.SUBMIT_OPTIONAL, sformat("%1", submit_optional == true ? true:false ));
+    SCR::Write(.sysconfig.suse_register.SUBMIT_HWDATA,   sformat("%1", submit_hwdata   == true ? true:false ));
 
     if ( register_regularly == nil ) register_regularly = false;
-    SCR::Execute(.target.bash, sformat("%1 /var/lib/suseRegister/neverRegisterOnBoot", register_regularly ? "rm -f ":"touch " ));
+    SCR::Execute(.target.bash, sformat("%1 /var/lib/suseRegister/neverRegisterOnBoot", register_regularly == true ? "rm -f ":"touch " ));
     // touch a flag file for opensuseupdater
     SCR::Execute(.target.bash, sformat("touch /var/lib/YaST2/registrationDidRun"));
 }
@@ -1370,11 +1370,12 @@ global integer suseRegister(symbol parameter)
     map ui = UI::GetDisplayInfo();
     boolean debugMode = (boolean) ui["y2debug"]:false;
 
+    // take care for nil booleans (bnc#463800)
     map<string, any> contextData = $[
-                                        "debug"             :  (debugMode          ? 2:0),
-                                        "nooptional"        :  (submit_optional    ? 0:1),
-                                        "nohwdata"          :  (submit_hwdata      ? 0:1),
-                                        "forcereg"          :  (force_registration ? 1:0),  // (bnc#443704)
+                                        "debug"             :  (debugMode          == true ? 2:0),
+                                        "nooptional"        :  (submit_optional    == true ? 0:1),
+                                        "nohwdata"          :  (submit_hwdata      == true ? 0:1),
+                                        "forcereg"          :  (force_registration == true ? 1:0),  // (bnc#443704)
                                         "norefresh"         :  1,
                                         "yastcall"          :  1,
                                         "restoreRepos"      :  1,                          // (#309231)
@@ -1405,7 +1406,7 @@ global integer suseRegister(symbol parameter)
         // initialize target
         if ( ! isInitializedTarget )
         {
-            string targetRootDir = Mode::normal() ? "/":Installation::destdir;
+            string targetRootDir = Mode::normal() == true ? "/":Installation::destdir;
             if ( ! Pkg::TargetInitialize(targetRootDir) )
             {
                 y2error("Initializing the target failed via Pkg::TargetInitialize. No interaction with the package system is possible.");
