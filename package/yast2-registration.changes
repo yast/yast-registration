@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 23 21:14:23 CEST 2009 - jdsn@suse.de
+
+- check boolean values also for nil to prevent crashes (bnc#463800)
+
+-------------------------------------------------------------------
 Thu Apr  9 17:43:26 CEST 2009 - jdsn@suse.de
 
 - proper language setting for registration browser (bnc#490811)
