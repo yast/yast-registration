@@ -19,7 +19,7 @@ BuildRequires:	suseRegister
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of registration
+Summary:	YaST2 - Registration Module
 
 %description
 Performs the Registration
@@ -41,7 +41,7 @@ Performs the Registration
 Requires:	yast2-registration
 Provides:	yast2-registration-branding
 Conflicts:	otherproviders(yast2-registration-branding)
-Summary:	Branding for yast2-registration for SLE products
+Summary:	YaST2 - Registration Module
 Group:      System/YaST
 %description branding-SLE
 Branding for yast2-registration for SLE products
