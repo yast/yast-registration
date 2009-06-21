@@ -22,7 +22,8 @@ BuildArchitectures:	noarch
 Summary:	YaST2 - Registration Module
 
 %description
-Performs the Registration
+The registration module to register products and/or to fetch an update
+source (mirror) automatically.
 
 @PREP@
 
@@ -44,7 +45,8 @@ Conflicts:	otherproviders(yast2-registration-branding)
 Summary:	YaST2 - Registration Module
 Group:      System/YaST
 %description branding-SLE
-Branding for yast2-registration for SLE products
+The registration module to register products and/or to fetch an update
+source (mirror) automatically.
 
 %package branding-openSUSE
 Requires:	yast2-registration
@@ -53,8 +55,8 @@ Conflicts:	otherproviders(yast2-registration-branding)
 Summary:	YaST2 - Registration Module
 Group:      System/YaST
 %description branding-openSUSE
-Branding for yast2-registration for openSUSE
-
+The registration module to register products and/or to fetch an update
+source (mirror) automatically.
 
 %pre
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
