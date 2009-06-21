@@ -50,7 +50,7 @@ Branding for yast2-registration for SLE products
 Requires:	yast2-registration
 Provides:	yast2-registration-branding
 Conflicts:	otherproviders(yast2-registration-branding)
-Summary:	Branding for yast2-registration for openSUSE
+Summary:	YaST2 - Registration Module
 Group:      System/YaST
 %description branding-openSUSE
 Branding for yast2-registration for openSUSE
