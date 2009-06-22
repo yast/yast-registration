@@ -1,6 +1,7 @@
 @HEADER-COMMENT@
 
 @HEADER@
+Group:	System/YaST
 License: GPL v2 or later
 Requires:	yast2 >= 2.17.0
 Requires:	yast2-packager >= 2.17.0
