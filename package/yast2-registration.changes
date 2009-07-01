@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Jul  1 14:58:37 CEST 2009 - jdsn@suse.de
+
+- backported yastbrowser from code11 to work with xulrunner 1.9
+  (bnc#513884)
+- backported xen detection from code11 (bnc#418287)
+- fixed status message for no added update server (bnc#461654)
+- 2.13.23 
+
+-------------------------------------------------------------------
 Tue Apr  8 16:06:58 CEST 2008 - jdsn@suse.de
 
 - fix SMT certificate installation in autoyast mode (bnc#377929)

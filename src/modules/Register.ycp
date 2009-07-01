@@ -24,6 +24,7 @@ import "Linuxrc";
 import "ProductFeatures";
 import "SourceManager";
 import "RegisterCert";
+import "Arch";
 
 
 // --------------------------------------------------------------
@@ -220,6 +221,44 @@ string suseRegisterURL(string url)
     SCR::UnregisterAgent (.temporary_suseregister_agent);
     return cururl;
 }
+
+
+/*
+ * setupRegistrationServer()
+ *
+ * write SMT server settings to  (FATE #302966)
+ * @return symbol that says if we can perform the registration
+ *
+ */
+global symbol xenType()
+{
+    y2milestone("Checking if this machine is a XEN instance or host.");
+
+    if ( Arch::is_xen() )
+    {
+        y2milestone("XEN enabled. Now detecting type.");
+
+        if ( Arch::is_xen0() )
+        {
+            y2milestone("Detected XEN0.");
+            return `xen0;
+        }
+        else if ( Arch::is_xenU() )
+        {
+            y2milestone("Detected XENU");
+            return `xenU;
+        }
+    }
+    else
+    {
+        y2milestone("XEN is disabled.");
+        return `noXen;
+    }
+
+    y2error("An error occurred while detecting XEN. Assuming: XEN is disabled.");
+    return `unknown;
+}
+
 
 
 

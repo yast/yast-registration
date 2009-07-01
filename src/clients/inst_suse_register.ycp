@@ -62,6 +62,8 @@
         return `auto;
     }
 
+    boolean IAMSLE = ( (integer) SCR::Execute(.target.bash, " [ -e /usr/share/applications/YaST2/customer_center.desktop ] ") == 0 ? true:false );
+
     // Register::initialize() is mandatory - never remove it
     Register::initialize();
 
@@ -100,6 +102,8 @@ manage subscriptions with Novell Customer Center.");
     string nccc_success_msg = _("Your configuration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
     string nccc_error_no_server_added = _("No update server could be added to your configuration.");
+    // no source changes is not an error - adding a new message (bnc#461654)
+    string nccc_no_source_changes = _("Software repositories did not need to be changed.");
     /* caption for details view  */
     string success_detail_label =_("New Update Server");
 
@@ -543,6 +547,7 @@ boolean launchBrowser(string url)
 
     boolean loopend = false;
     any ret = nil;
+    symbol xenType = nil;
 
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
@@ -613,6 +618,65 @@ boolean launchBrowser(string url)
         {
             if ( configure_status == true )
             {
+
+                // backport XEN detection from CODE11 (bnc#418287)
+                if ( IAMSLE && xenType == nil )
+                {
+                    // once checking for XEN    (bnc#418287)
+                    xenType = Register::xenType();
+
+                    if ( xenType == `xen0 )
+                    {
+                        string installPackage = "xen-tools";
+                        if ( ! Package::Installed(installPackage))
+                        {
+                            y2milestone("Xen dom0 detected. Asking the user if the following packages should be installed: %1", installPackage);
+                            Package::InstallMsg(installPackage, _("Xen Dom0 detected. The following package needs to be installed."));
+                        }
+                        else
+                        {
+                            y2milestone("All needed packages are already installed: %1", installPackage);
+                        }
+                    }
+                    else if ( xenType == `xenU )
+                    {
+                        string installPackage = "xen-tools-domU";
+                        string removePackage  = "xen-tools";
+
+                        string xenDomU    = _("Xen DomU detected.");
+                        string installMsg = xenDomU + "<br>" + _("The following package needs to be installed.") +
+                                                "<br>" + sformat("%1", installPackage);  //  (bnc#444638)
+                        string removeMsg  = xenDomU + "<br>" +
+                           sformat(_("To count this installation correctly the package %1 needs to be installed."), installPackage ) +
+                           "<br>" + _("Therefore the following package needs to be removed first.") +
+                           "<br>" + sformat("%1", removePackage);   //  (bnc#444638)
+
+
+                        Package::RemoveMsg(removePackage, removeMsg);
+
+                        if ( ! Package::Installed(removePackage) )
+                        {
+                            if ( Package::InstallMsg(installPackage, installMsg ) )
+                            {    y2milestone("Sucessfully installed: %1", installPackage); }
+                            else
+                            {    y2error("Could not install: %1", installPackage); }
+                        }
+                        else
+                        {
+                            y2error("In a Xen DomU package %1 is installed rather than %2. Registration will continue nevertheless.", removePackage, installPackage);
+                            Popup::Notify( xenDomU + "\n" +
+                                sformat(_("The package %1 should have been installed and %2 removed."), installPackage, removePackage ) +
+                                "\n" +  _("Registration will continue now although the registration server may miscount this installation.")
+                            );
+                        }
+                    }
+                    else if ( xenType == nil )
+                    {
+                        y2error("Detecting XEN failed. Assuming XEN is disabled. Maybe the registration will not count this machine correctly.");
+                        xenType = `unknown;
+                    }
+                }
+
                 // remove the zmd flag file (requested by mvidner)
                 SCR::Execute(.target.bash, " rm -f /var/lib/zypp/zmd_updated_the_sources " );
 
@@ -762,7 +826,7 @@ boolean launchBrowser(string url)
                     }
                     else
                     {
-                        Popup::Error(nccc_error_no_server_added);
+                        Popup::Message(nccc_no_source_changes);
                     }
 
                     // we are done, end of loop
