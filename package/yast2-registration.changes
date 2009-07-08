@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul  8 14:48:32 CEST 2009 - ug@suse.de
+
+- Autoinst Resource in desktop file fixed
+
+-------------------------------------------------------------------
 Thu Apr 23 21:15:50 CEST 2009 - jdsn@suse.de
 
 - check boolean values also for nil to prevent crashes (bnc#463800) 
