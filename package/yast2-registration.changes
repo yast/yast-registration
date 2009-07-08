@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul  8 18:17:37 CEST 2009 - jdsn@suse.de
+
+- port the fix to override certificate handling for *.novell.com
+  domains to SP3 (bnc#413231) 
+- 2.13.24 
+
+-------------------------------------------------------------------
 Wed Jul  1 14:58:37 CEST 2009 - jdsn@suse.de
 
 - backported yastbrowser from code11 to work with xulrunner 1.9

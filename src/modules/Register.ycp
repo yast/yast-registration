@@ -314,14 +314,21 @@ The SMT server URL that was configured was
     symbol certmode = nil;
 
     // never ever load a certificate file for a *.novell.com smt server
-    if      ( regexpmatch(smt_server_parsed["host"]:"", ".+\.novell\.com$")) { certmode = `none;   }
-    else if (smt_server_cert == nil  || smt_server_cert == "")               { certmode = `url;    }
-    else if ( regexpmatch(smt_server_cert, "^(https?|ftp)://.+") )           { certmode = `url;    }
-    else if ( regexpmatch(smt_server_cert, "^floppy/.+") )                   { certmode = `floppy; }
-    else if ( regexpmatch(smt_server_cert, "^/.+") )                         { certmode = `path;   }
-    else if ( regexpmatch(smt_server_cert, "^ask$") )                        { certmode = `ask;    }
-    else if ( regexpmatch(smt_server_cert, "^done$") )                       { certmode = `done;   }
-    else                                                                     { certmode = `none;   }
+    if      ( regexpmatch(smt_server_parsed["host"]:"", ".+\.novell\.com$"))
+    {
+        y2milestone("Registration detected a *.novell.com domain. For security reasons, there will be no certificate handling in this case.");
+        y2milestone("In order to register at a *.novell.com domain, please make sure your registration server uses a trusted certificate and set regcert=done.");
+        // allow override with  regcert="done" (bnc#413231)
+        if   (smt_server_cert == "done")                            { certmode = `done;   }
+        else                                                        { certmode = `none;   }
+    }
+    else if (smt_server_cert == nil  || smt_server_cert == "")      { certmode = `url;    }
+    else if ( regexpmatch(smt_server_cert, "^(https?|ftp)://.+") )  { certmode = `url;    }
+    else if ( regexpmatch(smt_server_cert, "^floppy/.+") )          { certmode = `floppy; }
+    else if ( regexpmatch(smt_server_cert, "^/.+") )                { certmode = `path;   }
+    else if ( smt_server_cert == "ask"  )                           { certmode = `ask;    }
+    else if ( smt_server_cert == "done" )                           { certmode = `done;   }
+    else                                                            { certmode = `none;   }
 
 
     if (! contains([`none, `done, `url, `floppy, `ask, `path], certmode) )
