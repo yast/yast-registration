@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Thu Apr 23 21:14:23 CEST 2009 - jdsn@suse.de
 
-- check boolean values also for nil to prevent crashes (bnc#463800)
+- check boolean values also for nil to prevent crashes (bnc#516330)
+  workaround for (bnc#463800)
 - 2.17.25
 
 -------------------------------------------------------------------
