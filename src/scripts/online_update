@@ -4,6 +4,7 @@ zyppercmd="/usr/bin/zypper"
 upcmd="/bin/false"
 syscfgfile="/etc/sysconfig/automatic_online_update"
 skipInteractive="--skip-interactive"
+autoAgreeWithLicenses=""
 
 if [ -x ${zyppercmd}  ]
 then
@@ -20,28 +21,29 @@ then
 fi
 
 
-if [ ! -z $AOU_ENABLE_CRONJOB ]
+if [ ! $AOU_ENABLE_CRONJOB = "true" ]
 then
-    if [ ! $AOU_ENABLE_CRONJOB = "true" ]
-    then
-        echo "Online Update is disabled in ${syscfgfile}. Will not run update."
-        exit 0
-    fi
+    echo "Online Update is disabled in ${syscfgfile}. Will not run update."
+    exit 0
 fi
 
 
-
-if [ ! -z ${AOU_SKIP_INTERACTIVE_PATCHES} ]
+if [ ${AOU_SKIP_INTERACTIVE_PATCHES} = "true"  ]
 then
-    if [ ${AOU_SKIP_INTERACTIVE_PATCHES} = "true"  ]
-    then
-        skipInteractive="--skip-interactive"
-    else
-        skipInteractive=
-    fi
+    skipInteractive="--skip-interactive"
+else
+    skipInteractive=
+fi
+
+
+if [ ${AOU_AUTO_AGREE_WITH_LICENSES} = "true"  ]
+then
+    autoAgreeWithLicenses="--auto-agree-with-licenses"
+else
+    autoAgreeWithLicenses=
 fi
 
 
 # run the update
-${upcmd} --quiet up -y -t patch ${skipInteractive}
+${upcmd} --quiet up -y -t patch  ${skipInteractive}  ${autoAgreeWithLicenses}
 

@@ -92,6 +92,7 @@
     UI::ChangeWidget(`id(`automaticOnlineUpdate),  `Value, OnlineUpdateConfiguration::enableAOU);
     UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
+    UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
 
 
     UI::RecalcLayout();
@@ -107,6 +108,7 @@
         {
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
+            OnlineUpdateConfiguration::autoAgreeWithLicenses  = (boolean) UI::QueryWidget(`id(`autoAgreeWithLicenses),  `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
 
             y2milestone("Writing online update configuration settings.");

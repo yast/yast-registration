@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 24 18:37:23 CEST 2009 - jdsn@suse.de
+
+- disable update repo restore because of bnc#449842
+- update cronjob support for auto license agreement (bnc#474573)
+- 2.18.0
+
+-------------------------------------------------------------------
 Wed Jul  8 14:48:32 CEST 2009 - ug@suse.de
 
 - Autoinst Resource in desktop file fixed

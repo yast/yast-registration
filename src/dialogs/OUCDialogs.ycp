@@ -13,6 +13,7 @@
 
 textdomain "registration";
 
+import "OnlineUpdateConfiguration";
 
 // module title
 string moduleTitle = _("Online Update Configuration");
@@ -43,6 +44,7 @@ string registerForSupport       = _("Register for support and get update reposit
 string sendDataToSmolt          = _("Send hardware information to the smolt project");
 string interval                 = _("Interval");
 string skipInteractivePatches   = _("Skip Interactive Patches");
+string autoAgreeWithLicenses    = _("Agree with Licenses");
 string currentUpdateRepo        = _("Current Update Repository:");
 
 string enabledMsg  = _("enabled");
@@ -54,7 +56,8 @@ string getOUCHelp(symbol type)
 {
     if (type == `autoyast)
     {
-        return help_title + help_para1 + help_para2 + help_para3 + help_para4;
+        //return help_title + help_para1 + help_para2 + help_para3 + help_para4;
+        return help_title + help_para4 + help_para3;
     }
     else
     {
@@ -94,18 +97,27 @@ term getOUCDialog(symbol type)
                     );
 
     term autoOnlineUp = `VBox(
-                        `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, true,
-                            `HBox(
-                                `HStretch(),
-                                `ComboBox(`id(`updateInterval), interval, updateIntervals ),
-                                `HSpacing(3),
-                                `VBox( //align bottom
-                                    `VSpacing(1),
-                                    `CheckBox(`id(`skipInteractivePatches), skipInteractivePatches )
-                                ),
-                                `HStretch()
-                            )
-                       ));
+        `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, true,
+        `VBox(
+            `VSpacing(0.8),
+            `HBox(
+                `HStretch(),
+                `ComboBox(`id(`updateInterval), interval, updateIntervals ),
+                `HSpacing(3),
+                `VBox(
+                 //   `VSpacing(1.4),
+                    `Left( `CheckBox(`id(`skipInteractivePatches), skipInteractivePatches, OnlineUpdateConfiguration::skipInteractivePatches == true ? true:false ) ),
+                    `Left( `CheckBox(`id(`autoAgreeWithLicenses),  autoAgreeWithLicenses,  OnlineUpdateConfiguration::autoAgreeWithLicenses  == true ? true:false ) )
+                ),
+                `HStretch()
+            ),
+            `VSpacing(0.8)
+        )
+        ),
+        `VSpacing(1),
+        `Right( `MenuButton( advancedMenuButtonLabel, expertMenu) )
+    );
+
 
     term contents = nil;
 
@@ -115,8 +127,13 @@ term getOUCDialog(symbol type)
     }
     else
     {
-         contents = `VBox( `VSpacing(1.5),  upRepo,
-                           `VSpacing(1.5),  autoOnlineUp, `VStretch(),  `VSpacing(1.5) );
+        //contents = `VBox( `VSpacing(1.5),  upRepo,
+        //                  `VSpacing(1.5),  autoOnlineUp, `VStretch(),  `VSpacing(1.5) );
+
+        // do not show the update repo restore section
+        // repos do not identify themselves yet as update repos, and products do not define their update repo ID
+        // can be reactivated when bnc#449842 is fixed and fully supported
+        contents = `VBox(  `VSpacing(1.5),  autoOnlineUp,  `VStretch(), `VSpacing(1.5) );
     }
 
     return contents;
