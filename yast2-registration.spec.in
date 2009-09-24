@@ -1,31 +1,33 @@
 @HEADER-COMMENT@
 
 @HEADER@
-Group:	System/YaST
-License: GPL v2 or later
-Requires:	yast2 >= 2.17.0
-Requires:	yast2-packager >= 2.17.0
-Requires:	suseRegister
-Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
-Requires:	yast2-pkg-bindings >= 2.17.20
-Requires:	yast2-registration-branding
+Group:          System/YaST
+License:        GPL v2 or later
+Requires:       yast2 >= 2.17.0
+Requires:       yast2-packager >= 2.17.0
+Requires:       suseRegister
+Requires:       perl-TimeDate limal limal-perl limal-ca-mgm-perl
+Requires:       yast2-pkg-bindings >= 2.17.20
+Requires:       yast2-registration-branding
 ## do never require "mozilla-xulrunner190" (bnc#436900)
-
-PreReq:		%fillup_prereq
-
-BuildRequires:	yast2 >= 2.17.0
-BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
-BuildRequires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
-BuildRequires:	yast2-pkg-bindings >= 2.17.20
-BuildRequires:	suseRegister
-
-BuildArchitectures:	noarch
-
-Summary:	YaST2 - Registration Module
+PreReq:         %fillup_prereq
+BuildRequires:  yast2 >= 2.17.0
+BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packager yast2-testsuite
+BuildRequires:  limal limal-ca-mgm-perl limal-perl perl-TimeDate
+BuildRequires:  yast2-pkg-bindings >= 2.17.20
+BuildRequires:  suseRegister
+BuildArch:      noarch
+Summary:        YaST2 - Registration Module
 
 %description
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
+
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 @PREP@
 
@@ -41,38 +43,51 @@ source (mirror) automatically.
 @CLEAN@
 
 %package branding-SLE
-Requires:	yast2-registration
-Provides:	yast2-registration-branding
-Conflicts:	otherproviders(yast2-registration-branding)
-Summary:	YaST2 - Registration Module
-Group:      System/YaST
+License:        GPL v2 or later
+Requires:       yast2-registration
+Provides:       yast2-registration-branding
+Conflicts:      otherproviders(yast2-registration-branding)
+Summary:        YaST2 - Registration Module
+Group:          System/YaST
+
 %description branding-SLE
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
 
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
+
 %package branding-openSUSE
-Requires:	yast2-registration
-Provides:	yast2-registration-branding
-Conflicts:	otherproviders(yast2-registration-branding)
-Summary:	YaST2 - Registration Module
-Group:      System/YaST
+License:        GPL v2 or later
+Requires:       yast2-registration
+Provides:       yast2-registration-branding
+Conflicts:      otherproviders(yast2-registration-branding)
+Summary:        YaST2 - Registration Module
+Group:          System/YaST
+
 %description branding-openSUSE
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
+
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 %pre
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
 /usr/sbin/useradd -r -s /bin/bash -c "Novell Customer Center User" -d /var/lib/YaST2/suse-ncc-fakehome -g suse-ncc suse-ncc 2> /dev/null || :
 
-
 %post
 %{fillup_only -ns suse_register yast2-registration}
-
 
 %files
 %defattr(-,root,root)
 %doc @docdir@
-
 @clientdir@/*.ycp
 @moduledir@/*.pm
 @moduledir@/*.ycp
@@ -83,15 +98,12 @@ source (mirror) automatically.
 @schemadir@/autoyast/rnc/*.rnc
 /usr/lib/YaST2/bin/online_update
 /usr/share/YaST2/yastbrowser
-
 # agents
 @scrconfdir@/cfg_suse_register.scr
 @scrconfdir@/cfg_automatic_online_update.scr
-
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
 @fillupdir@/sysconfig.automatic_online_update-yast2-registration
-
 
 %files branding-SLE
 %defattr(-,root,root)
