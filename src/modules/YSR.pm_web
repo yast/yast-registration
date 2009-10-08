@@ -239,7 +239,7 @@ sub stateless_register
 
 
 BEGIN { $TYPEINFO{get_registrationConfig} = ["function", [ "map", "string", "any"] ]; }
-sub getRegistrationDetails
+sub get_RegistrationDetails
 {
     my $self = shift;
     my $SRconf = '/etc/suseRegister.conf'
@@ -277,7 +277,7 @@ sub getRegistrationDetails
 
 
 BEGIN { $TYPEINFO{set_registrationConfig} = ["function", "void", [ "map", "string", "any"] ]; }
-sub setRegistrationConfig
+sub set_RegistrationConfig
 {
     my $self = shift;
     # TODO: write the config and write the certificate file
