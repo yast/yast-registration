@@ -239,7 +239,7 @@ sub stateless_register
 
 
 BEGIN { $TYPEINFO{get_registrationConfig} = ["function", [ "map", "string", "any"] ]; }
-sub get_registrationDetails
+sub get_registrationConfig
 {
     my $self = shift;
     my $SRconf = '/etc/suseRegister.conf'
