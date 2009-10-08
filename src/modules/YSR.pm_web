@@ -187,7 +187,7 @@ sub stateless_register
 {
     my $self  = shift;
     my $args  = shift;
-
+printf "FOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBAR\n";
 #return { 'msg' => '4711' };
 
     unless ( defined $args && ref($args) eq "HASH" )
@@ -242,32 +242,36 @@ BEGIN { $TYPEINFO{get_registrationConfig} = ["function", [ "map", "string", "any
 sub get_registrationConfig
 {
     my $self = shift;
-    my $SRconf = '/etc/suseRegister.conf'
-    my $SRcert = '/etc/ssl/certs/registration-server.pem'
+    my $SRconf = '/etc/suseRegister.conf';
+    my $SRcert = '/etc/ssl/certs/registration-server.pem';
 
     my $url = undef;
     my $cert = undef;
 
     if ( -e $SRconf )
     {
-        open(CNF, "< $SRconf") || $url = undef;
-        while(<CNF>)
+        if (open(CNF, "< $SRconf") )
         {
-            next if($_ =~ /^\s*#/);
+            while(<CNF>)
+            {
+                next if($_ =~ /^\s*#/);
 
-            if($_ =~ /^url\s*=\s*(\S*)\s*/ && defined $1 && $1 ne '')
-            {  $url = $1;  }
+                if($_ =~ /^url\s*=\s*(\S*)\s*/ && defined $1 && $1 ne '')
+                {  $url = $1;  }
+            }
+            close CNF;
         }
-        close CNF;
     }
 
     if ( -e $SRcert )
     {
         my $separator = $/;
         local $/ = undef;
-        open(CERT, "< $SRcert") || $cert = undef;
-        $cert = <CERT>;
-        close CERT;
+        if ( open(CERT, "< $SRcert") )
+        {
+            $cert = <CERT>;
+            close CERT;
+        }
         $/ = $separator;
     }
 
