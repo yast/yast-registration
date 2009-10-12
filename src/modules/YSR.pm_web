@@ -182,59 +182,50 @@ sub set_proxy
 }
 
 
-BEGIN { $TYPEINFO{statelessregister} = ["function", [ "map", "string", "any"], ["map", "string", "any"] ]; }
+BEGIN { $TYPEINFO{statelessregister} = ["function", [ "map", "string", "any"], ["map", "string", "any"], ["map", "string", "any"]]; }
 sub statelessregister
 {
     my $self  = shift;
-    my $args  = shift;
-printf "FOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBAR\n";
-#return { 'msg' => '4711' };
+    my $ctx = shift;
+    my $arguments = shift;
 
-    unless ( defined $args && ref($args) eq "HASH" )
+    unless ( defined $ctx && ref($ctx) eq "HASH" )
     {
-        print "args is not a hash in YSR::statless_register. This is a bug. Please report this error.\n";
-        #return { 'error' => 'The call of the registration failed because of missing arguments.' }
+        print "args is not a hash in YSR::statlessregister. This is a bug. Please report this error.\n";
         return { 'error' => { 'args' => 'The call of the registration failed because of missing arguments.' } };
     }
 
-#return { 'msg' => '4712' };
     # check if the system is still initialized - otherwise run init_ctx again
     unless ( defined $global_ctx && ref($global_ctx) eq "HASH" && exists $global_ctx->{debug} )
     {
         # not initialized - need to reinitialize
 
-#return { 'msg' => '4713' };
         # 1. proxy
-        if ( exists $args->{'proxy'} && ref($args->{'proxy'}) eq "HASH" )
+        if ( exists $ctx->{'proxy'} && ref($ctx->{'proxy'}) eq "HASH" )
         {
-            my $http  = $args->{'proxy'}{'http_proxy'}  || undef;
-            my $https = $args->{'proxy'}{'https_proxy'} || undef;
+            my $http  = $ctx->{'proxy'}{'http_proxy'}  || undef;
+            my $https = $ctx->{'proxy'}{'https_proxy'} || undef;
             $self->set_proxy($http, $https);
         }
 
-#return { 'msg' => '4714' };
         # 2. registration context
-        if ( exists $args->{'ctx'} && $args->{'ctx'} eq "HASH" )
-        {
-            $self->init_ctx($args->{'ctx'});
-            my $init_err = $self->get_errorcode();
+        $self->init_ctx($ctx);
+        my $init_err = $self->get_errorcode();
 
-            unless ($init_err == 0)
-            {
-                # init failed
-                return { 'error' => { 'init' => 'The initialization of the registration failed.' }  };
-            }
-        }
-        else
+        unless ($init_err == 0)
         {
-#return { 'msg' => '4715' };
-            # context is broken - return error message
-            return { 'error' => { 'ctx' => 'The context for the registration is invalid.' }  };
+            # init failed
+            return { 'error' => { 'init' => 'The initialization of the registration failed.' }  };
         }
     }
+    my $exitcode = $self->register();
 
-    return { 'success' => { 'msg' => 'This is the return string.' } };
-
+    return { 'success' => {  'msg' => 'This is the return string.'
+                            ,'exit code'     => $exitcode
+                            ,'error code'    => $self->get_errorcode()
+                            ,'register text' => $self->get_registerReadableText()
+                          #  ,'task list'     => $self->getTaskList() || ''
+           } };
 }
 
 
