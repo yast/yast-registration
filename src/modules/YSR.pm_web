@@ -182,8 +182,8 @@ sub set_proxy
 }
 
 
-BEGIN { $TYPEINFO{stateless_register} = ["function", [ "map", "string", "any"], ["map", "string", "any"] ]; }
-sub stateless_register
+BEGIN { $TYPEINFO{statelessregister} = ["function", [ "map", "string", "any"], ["map", "string", "any"] ]; }
+sub statelessregister
 {
     my $self  = shift;
     my $args  = shift;
@@ -238,8 +238,8 @@ printf "FOOOOOOOOOOOOOOOOOOOOOOOOOOOOOBAR\n";
 }
 
 
-BEGIN { $TYPEINFO{get_registrationConfig} = ["function", [ "map", "string", "any"] ]; }
-sub get_registrationConfig
+BEGIN { $TYPEINFO{getregistrationconfig} = ["function", [ "map", "string", "any"] ]; }
+sub getregistrationconfig
 {
     my $self = shift;
     my $SRconf = '/etc/suseRegister.conf';
@@ -280,8 +280,8 @@ sub get_registrationConfig
 }
 
 
-BEGIN { $TYPEINFO{set_registrationConfig} = ["function", "void", [ "map", "string", "any"] ]; }
-sub set_registrationConfig
+BEGIN { $TYPEINFO{setregistrationconfig} = ["function", "void", [ "map", "string", "any"] ]; }
+sub setregistrationconfig
 {
     my $self = shift;
     # TODO: write the config and write the certificate file
