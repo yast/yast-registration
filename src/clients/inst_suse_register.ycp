@@ -225,9 +225,58 @@ Please make sure that the network and proxy settings are correct.
 You can step back to the network setup to check or change the settings.
 </p>");
 
-string help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
+/*  START - Help Texts for OPEN-SLX  */
 
-if (! Mode::normal()) help = help + help_para6;
+string help_para1_openslx = _("<p>
+Configure your system to enable online updates by registering it with Open-SLX.
+To do this now, select <b>Configure Now</b>. Delay the registration with
+<b>Configure Later</b>.
+</p>");
+
+string help_para2_openslx = _("<p>
+To simplify the registration process, include information from your system
+with <b>Optional Information</b> and <b>Hardware Profile</b>. 
+<b>Details</b> shows the maximum amount of information that can be involved
+ in your registration. To obtain this information, it contacts the Open-SLX
+server to query what information is needed for your product. Only the identity
+of the installed product is sent in this initial exchange.
+</p>");
+
+string help_para4_openslx = _("<p>
+No information is passed to anyone outside Open-SLX. The data is used for
+statistical purposes and to enhance your convenience regarding driver support
+and your Web account. Find a detailed privacy policy in <b>Details</b>. View
+the transmitted information in the log file <tt>~/.suse_register.log</tt>.
+</p>");
+
+string help_para5_openslx = _("<p>
+<b>Regularly Synchronize with the Customer Center</b> checks that your update 
+sources are still valid and adds any new ones that may be available.
+It additionally sends any modifications to your included data to Open-SLX, such 
+as hardware information if <b>Hardware Information</b> is activated.
+This option does not remove any sources added manually.
+</p>");
+
+string help_para6_openslx = _("<p>
+The registration process will contact an Open-SLX server (or a local registration server if your company provides one).
+Please make sure that the network and proxy settings are correct.
+You can step back to the network setup to check or change the settings.
+</p>");
+
+/*  END - Help Texts for OPEN-SLX  */
+
+string help = "";
+
+if ( IAMSLE )
+{
+    help = help_title + help_para1 + help_para2 + (Register::display_forcereg ? help_para3:"") + help_para4;
+    if (! Mode::normal()) help = help + help_para6;
+}
+else
+{
+    help = help_title + help_para1_openslx + help_para2_openslx + help_para4_openslx;
+    if (! Mode::normal()) help = help + help_para6_openslx;
+}
 
 help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChapter2"]:"";
 

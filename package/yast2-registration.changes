@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 13 17:12:54 CEST 2009 - jdsn@suse.de
+
+- adding help texts for Open-SLX 
+
+-------------------------------------------------------------------
 Thu Sep 24 18:37:23 CEST 2009 - jdsn@suse.de
 
 - disable update repo restore because of bnc#449842
