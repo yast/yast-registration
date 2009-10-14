@@ -191,8 +191,7 @@ sub statelessregister
 
     unless ( defined $ctx && ref($ctx) eq "HASH" )
     {
-        print "args is not a hash in YSR::statlessregister. This is a bug. Please report this error.\n";
-        return { 'error' => { 'args' => 'The call of the registration failed because of missing arguments.' } };
+        return { 'error' => {  'ctx' => 'The context is missing or invalid.' } };
     }
 
     # check if the system is still initialized - otherwise run init_ctx again
@@ -215,16 +214,27 @@ sub statelessregister
         unless ($init_err == 0)
         {
             # init failed
-            return { 'error' => { 'init' => 'The initialization of the registration failed.' }  };
+            return { 'error' => { 'init' => 'The initialization of the registration failed.'
+                                 ,'errorcode' => $init_err
+                   }  };
         }
     }
-    my $exitcode = $self->register();
 
-    return { 'success' => {  'msg' => 'This is the return string.'
-                            ,'exit code'     => $exitcode
-                            ,'error code'    => $self->get_errorcode()
-                            ,'register text' => $self->get_registerReadableText()
-                          #  ,'task list'     => $self->getTaskList() || ''
+    # set arguments
+    $self->set_args($arguments);
+
+    # run registration
+    my $exitcode = $self->register();
+    my $errorcode = $self->get_errorcode();
+    my $readabletext = $self->get_registerReadableText();
+    my $tasklist = $exitcode == 0 ? $self->getTaskList() : '';
+
+
+    return { 'success' => {  'msg'          => 'Successfully ran registration.'
+                            ,'exitcode'     => $exitcode
+                            ,'errorcode'    => $errorcode
+                            ,'readabletext' => $readabletext
+                            ,'tasklist'     => $tasklist
            } };
 }
 
@@ -285,7 +295,6 @@ sub getregistrationconfig
             close CRED;
         }
     }
-
 
     $url  = '' unless defined $url;
     $cert = '' unless defined $cert;
