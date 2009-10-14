@@ -235,10 +235,13 @@ sub getregistrationconfig
     my $self = shift;
     my $SRconf = '/etc/suseRegister.conf';
     my $SRcert = '/etc/ssl/certs/registration-server.pem';
+    my $SRcredentials = '/etc/zypp/credentials.d/NCCcredentials';
 
     my $url = undef;
     my $cert = undef;
+    my $guid = undef;
 
+    # read the registration server url
     if ( -e $SRconf )
     {
         if (open(CNF, "< $SRconf") )
@@ -254,6 +257,7 @@ sub getregistrationconfig
         }
     }
 
+    #read the registration server ca certificate file
     if ( -e $SRcert )
     {
         my $separator = $/;
@@ -266,8 +270,30 @@ sub getregistrationconfig
         $/ = $separator;
     }
 
-    return { "url" => $url,
-             "certificate" => $cert };
+    # read the guid
+    if (-e $SRcredentials)
+        {
+        if (open(CRED, "< $SRcredentials") )
+        {
+            while(<CRED>)
+            {
+                next if($_ =~ /^\s*#/);
+
+                if($_ =~ /^\s*username\s*=\s*(\S*)\s*/ && defined $1 && $1 ne '')
+                {  $guid = $1;  }
+            }
+            close CRED;
+        }
+    }
+
+
+    $url  = '' unless defined $url;
+    $cert = '' unless defined $cert;
+    $guid = '' unless defined $guid;
+
+    return { "regserverurl" => $url,
+             "regserverca"  => $cert,
+             "guid"         => $guid };
 }
 
 
