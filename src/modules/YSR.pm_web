@@ -297,14 +297,87 @@ sub getregistrationconfig
 }
 
 
-BEGIN { $TYPEINFO{setregistrationconfig} = ["function", "void", [ "map", "string", "any"] ]; }
+BEGIN { $TYPEINFO{setregistrationconfig} = ["function", "integer", [ "map", "string", "string"] ]; }
 sub setregistrationconfig
 {
     my $self = shift;
-    # TODO: write the config and write the certificate file
+    my $config = shift;
 
-    return { "url" => "foobar",
-             "certificate" => "barfoo"  };
+    my $SRconf     = '/etc/suseRegister.conf';
+    my $SRcertpath = '/etc/ssl/certs/';
+    my $SRcert     = "$SRcertpath/registration-server.pem";
+    my $SRcertnew  = "$SRcertpath/registration-server.pem_new";
+
+    my $url  = ${$config}{'regserverurl'} || undef;
+    my $cert = ${$config}{'regserverca'}  || undef;
+    my $newconfig = '';
+    my $success = 0;
+
+    # write the new registration server url to the suseRegister.conf file
+    if ($url && $url =~ /^https:\/\//)
+    {
+        if ( -e $SRconf )
+        {
+            if (open(CNFR, "< $SRconf") )
+            {
+                while(<CNFR>)
+                {
+                    $_ =~ s/^url\s*=\s*(\S*)\s*/url = $url\n/;
+                    $newconfig .= $_;
+                }
+                close CNFR;
+
+                if ( open(CNFW, "> $SRconf") )
+                {
+                     $newconfig .= "\n# URLURL::: $url";
+                     $newconfig .= "\n# CACACA::: $cert";
+                     print CNFW $newconfig;
+                     close CNFW;
+                     $success += 1;
+                }
+            }
+        }
+    }
+
+    # write the new certificate and rehash the directory
+    if ($cert)
+    {
+        if ( open(CERT, "> $SRcertnew") )
+        {
+            print CERT $cert;
+            close CERT;
+            # writing the file succeeded
+            $success += 2;
+
+            my @verifyargs = ('openssl', 'x509', '-in', "$SRcertnew", '-text');
+            if ( system( @verifyargs ) == 0 )
+            {
+                my @moveargs = ('mv', "$SRcertnew", "$SRcert" );
+                if ( system( @moveargs ) == 0 )
+                {
+                    # certificate validation succeeded and it was moved to the real file name
+                    $success += 4;
+
+                    # rehash the certificate pool
+                    my @rehashargs = ('c_rehash', '/etc/ssl/certs/');
+                    if ( system( @rehashargs ) == 0 )
+                    {
+                        # c_rehashing of certificate pool succeeded
+                        $success += 8;
+                    }
+                }
+            }
+            else
+            {
+                # delete the *_new file
+                unlink( $SRcertnew );
+                # correct the success status
+                $success -= 2;
+            }
+        }
+    }
+
+    return $success;
 }
 
 
