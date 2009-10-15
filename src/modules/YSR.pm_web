@@ -338,8 +338,6 @@ sub setregistrationconfig
 
                 if ( open(CNFW, "> $SRconf") )
                 {
-                     $newconfig .= "\n# URLURL::: $url";
-                     $newconfig .= "\n# CACACA::: $cert";
                      print CNFW $newconfig;
                      close CNFW;
                      $success += 1;
