@@ -388,6 +388,164 @@ sub setregistrationconfig
 }
 
 
+
+#
+# change repos according to todo-list
+#
+# takes the resulting hash of getTaskList
+#
+BEGIN { $TYPEINFO{changerepos} = ["function", [ "map", "string", "any"], [ "map", "string", "any"] ]; }
+sub changerepos
+{
+    my $self = shift;
+    my $todo = shift;
+    my %result = {};
+    my @log    = [];
+
+    unless (defined $todo  &&  ref($todo) eq "HASH"  &&  keys %{$todo} > 0)
+    {
+        push @log, "No changes need to be done to the package system.";
+        return %result;
+    }
+
+    my ($pService, $pAny);
+    foreach $pService (keys %{$todo})
+    {
+        $pAny = ${$todo}{$pService};
+
+        if ( ref($pAny) ne 'HASH' )
+        {
+            push @log, "A service returned by SuseRegister did not contain any details: $pService";
+        }
+        elsif ( not defined $pService  || $pService eq '')
+        {
+            push @log, "A service returned by SuseRegister has no or an invalid name.";
+        }
+        else
+        {
+            if ( defined ${$pAny}{'TYPE'} )
+            {
+                if ( ${$pAny}{'TYPE'} eq 'zypp' )
+                {
+                    push @log, "Handling a service of the type zypp";
+
+                    if ( not defined ${$pAny}{'TASK'}  ||  ${$pAny}{'TASK'} eq '' )
+                    {
+                        push @log, "A service returned by SuseRegister has an invalid task: $pService";
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'le' )
+                    {
+                        push @log, "According to SuseRegister a service does not need to be changed: $pService";
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'a' )
+                    {
+                        push @log, "According to SuseRegister a service has to be added: $pService";
+                        my @zCMD = ['zypper', 'addrepo',  '--name', "${$pAny}{'NAME'}", '--refresh',  "${$pAny}{'URL'}", "${$pAny}{'ALIAS'}",  ];
+                        my @zCMDopt = ['zypper', 'modifyrepo', '--enable', '--refresh', '--priority', defined ${$pAny}{'URL'} ? ${$pAny}{'URL'} : 99 , "${$pAny}{'URL'}"];
+
+                        if ( system(@zCMD) == 0   &&   system(@zCMDopt) == 0 )
+                        {
+                            push @log, "Successfully added a new service: $pService";
+                        }
+                        else
+                        {
+                            push @log, "Adding a new service failed: $pService";
+                        }
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'd' )
+                    {
+                        push @log, "According to SuseRegister a service has to be deleted: $pService";
+                        my @zCMD = ['zypper', 'removerepo', "$pService"];
+                        if ( system(@zCMD) == 0 )
+                        {
+                            push @log, "Successfully deleted a service: $pService";
+                        }
+                        else
+                        {
+                            push @log, "Could not delete a service: $pService";
+                        }
+                    }
+
+                }
+                elsif ( ${$pAny}{'TYPE'} eq 'nu' )
+                {
+                    push @log, "Handling a service of the type nu";
+
+                    if ( not defined ${$pAny}{'TASK'}  ||  ${$pAny}{'TASK'} eq '' )
+                    {
+                        push @log, "A service returned by SuseRegister has an invalid task: $pService";
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'ld' )
+                    {
+                        push @log, "According to SuseRegister a service should be left disabled: $pService";
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'le' )
+                    {
+                        push @log, "According to SuseRegister a service should be left enabled: $pService";
+                        push @log, "Now checking the catalogs of the service: $pService";
+
+                        # TODO TODO FIXME FIXME 
+                        #
+                        # check catalogs
+
+                        
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'a' )
+                    {
+                        push @log, "According to SuseRegister a service has to be added: $pService";
+
+                        my @zCMD = ['zypper', 'addservice', '--refresh', ${$pAny}{'URL'}."&credentials=NCCcredentials", ${$pAny}{'ALIAS'}];
+                        if ( system(@zCMD) == 0 )
+                        {
+                            push @log, "Successfully added a new service: $pService";
+                            push @log, "Now checking the catalogs of the service: $pService";
+
+                            # TODO TODO FIXME FIXME
+                            #
+                            # check catalogs
+
+                            
+                        }
+                        else
+                        {
+                            push @log, "Adding a new service failed: $pService";
+                        }
+
+                    }
+                    elsif ( ${$pAny}{'TASK'} eq 'd' )
+                    {
+                        push @log, "According to SuseRegister a service has to be deleted: $pService";
+
+                        my @zCMD = ['zypper', 'removeservice', $pService];
+                        if ( system(@zCMD) )
+                        {
+                            push @log, "Successfully deleted a service: $pService";
+                        }
+                        else
+                        {
+                            push @log, "Could not delete a service: $pService";
+                        }
+
+                    }
+
+
+                }
+            } # end defined ${$pAny}{'TYPE'}
+            else
+            {
+                push @log, "A service returned by SuseRegister has an unsupported type: $pService (${$pAny}{'TYPE'})";
+            }
+        }
+
+
+
+    } # end foreach pService
+
+
+    return { 'log' => @log };
+}
+
+
 1;
 
 #############################################################################
