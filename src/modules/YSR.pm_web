@@ -224,18 +224,71 @@ sub statelessregister
     $self->set_args($arguments);
 
     # run registration
-    my $exitcode = $self->register();
-    my $errorcode = $self->get_errorcode();
-    my $readabletext = $self->get_registerReadableText();
-    my $tasklist = $exitcode == 0 ? $self->getTaskList() : '';
+    my $exitcode = 1;
+    my $errorcode = 0;
+    my $readabletext = '';
+    my $tasklist = '';
+    my $manualurl = '';
+    my @log = [];
 
+    my $counter = 0;
+    do
+    {
+        $exitcode = $self->register();
+        $counter++;
+    } while ( $exitcode == 1  &&  $counter < 5 );
 
-    return { 'success' => {  'msg'          => 'Successfully ran registration.'
-                            ,'exitcode'     => $exitcode
-                            ,'errorcode'    => $errorcode
-                            ,'readabletext' => $readabletext
-                            ,'tasklist'     => $tasklist
-           } };
+    $errorcode = $self->get_errorcode();
+    $readabletext = $self->get_registerReadableText();
+    $manualurl = $self->get_manualURL();
+
+    my %return = {  'exitcode'     => $exitcode
+                   ,'errorcode'    => $errorcode
+                   ,'readabletext' => $readabletext
+                   ,'manualurl'    => $manualurl
+                 };
+
+    if ( $exitcode == 0 )
+    {
+        $tasklist = $self->getTaskList();
+
+        my $ret = $self->changerepos($tasklist);
+        if ( ref($ret) eq 'HASH' )
+        {
+            my $rlog = ${$ret}{'log'} || [];
+            $return{'repochangeslog'} = $rlog;
+
+            my $errcount = 0;
+            foreach my $logline ( @{$rlog} )
+            {
+                $errcount++ if $logline =~ /^ERROR:/;
+            }
+            $return{'repochangeerrors'} = $errcount if $errcount > 0;
+        }
+
+        $return{'success'}  = 'Successfully ran registration';
+        $return{'tasklist'} =  $tasklist;
+    }
+    elsif ( $exitcode == 3 )
+    {
+        $return{'error'} = 'Conflicting registration data';
+        $return{'conflicterror'} = '1';
+    }
+    elsif ( $exitcode == 4 )
+    {
+        $return{'missinginfo'} = 'Missing Information';
+    }
+    elsif ( $exitcode == 100 || $exitcode == 101 )
+    {
+        $return{'error'} = 'No products to register';
+        $return{'noproducterror'} = '1';
+    }
+    else
+    {
+        $return{'error'} = 'Registration was not successful';
+    }
+
+    return %return;
 }
 
 
@@ -387,6 +440,81 @@ sub setregistrationconfig
     return $success;
 }
 
+#
+# check catalogs
+#
+# check catalogs of services and apply changes according to the CATALOGS-subhash of the getTaskList hash
+#
+sub checkcatalogs
+{
+    my $self = shift;
+    my $todo = shift;
+    my $pService = shift;
+
+    return ["Service name is undefined. Can not check the catalogs."] unless ( defined $pService );
+    return ["Catalog list is empty. No catalogs to check."]           unless ( defined $todo  &&  ref($todo) eq 'HASH' );
+
+    my @log = [];
+    my ($catalog, $pAny);
+
+    foreach $catalog (keys %{$todo})
+    {
+        if ( not defined $catalog  ||  $catalog eq '' )
+        {
+            push @log, "A catalog returned by SuseRegister has no or an invalid name.";
+        }
+        elsif ( not defined $pAny  ||  ref($pAny) ne 'HASH' )
+        {
+            push @log, "A catalog returned by SuseRegister did not contain any details: $catalog";
+        }
+        else
+        {
+            if ( not exists ${$pAny}{'ALIAS'} || not defined ${$pAny}{'ALIAS'} || ${$pAny}{'ALIAS'} eq '' )
+            {
+                push @log, "A catalog returned by SuseRegister has no or an invalid alias name.";
+            }
+            else
+            {
+                if ( not exists ${$pAny}{'TASK'} || not defined ${$pAny}{'TASK'} || ${$pAny}{'TASK'} eq '' )
+                {
+                    push @log, "A catalog returned by SuseRegister has an invalid task: $catalog ($pService)";
+                }
+                elsif ( ${$pAny}{"TASK"} eq 'le' ||  ${$pAny}{"TASK"} eq 'ld')
+                {
+                    push @log, "According to SuseRegister a catalog does not need to be changed: $catalog ($pService)";
+                }
+                elsif ( ${$pAny}{"TASK"} eq 'a' )
+                {
+                    push @log, "According to SuseRegister a catalog has to be enabled: $catalog ($pService)";
+                    my @zCMD = ['zypper', 'modifyrepo', '--enable', ${$pAny}{'ALIAS'}];
+                    if ( system(@zCMD) == 0 )
+                    {
+                        push @log, "Enabled catalog: ${$pAny}{'ALIAS'} ($pService)";
+                    }
+                    else
+                    {
+                        push @log, "ERROR: Could not enable catalog: ${$pAny}{'ALIAS'} ($pService)";
+                    }
+                }
+                elsif ( ${$pAny}{"TASK"} eq 'd' )
+                {
+                    push @log, "According to SuseRegister a service has to be disabled: $catalog ($pService)";
+                    my @zCMD = ['zypper', 'modifyrepo', '--disable', ${$pAny}{'ALIAS'}];
+                    if ( system(@zCMD) == 0 )
+                    {
+                        push @log, "Disabled catalog: ${$pAny}{'ALIAS'} ($pService)";
+                    }
+                    else
+                    {
+                        push @log, "ERROR: Could not enable catalog: ${$pAny}{'ALIAS'} ($pService)";
+                    }
+                }
+            }
+        }
+    }
+
+    return @log;
+}
 
 
 #
@@ -449,7 +577,7 @@ sub changerepos
                         }
                         else
                         {
-                            push @log, "Adding a new service failed: $pService";
+                            push @log, "ERROR: Adding a new service failed: $pService";
                         }
                     }
                     elsif ( ${$pAny}{'TASK'} eq 'd' )
@@ -462,7 +590,7 @@ sub changerepos
                         }
                         else
                         {
-                            push @log, "Could not delete a service: $pService";
+                            push @log, "ERROR: Could not delete a service: $pService";
                         }
                     }
 
@@ -484,11 +612,16 @@ sub changerepos
                         push @log, "According to SuseRegister a service should be left enabled: $pService";
                         push @log, "Now checking the catalogs of the service: $pService";
 
-                        # TODO TODO FIXME FIXME 
-                        #
-                        # check catalogs
-
-                        
+                        my @zCMD = ['zypper', 'refresh-services', $pService];
+                        if ( system(@zCMD) == 0 )
+                        {
+                            push @log, "Successfully refreshed service: $pService";
+                        }
+                        else
+                        {
+                            push @log, "ERROR: Could not refresh service: $pService";
+                        }
+                        push @log, $self->checkcatalogs( ${$pAny}{'CATALOGS'}, $pService );
                     }
                     elsif ( ${$pAny}{'TASK'} eq 'a' )
                     {
@@ -500,11 +633,16 @@ sub changerepos
                             push @log, "Successfully added a new service: $pService";
                             push @log, "Now checking the catalogs of the service: $pService";
 
-                            # TODO TODO FIXME FIXME
-                            #
-                            # check catalogs
-
-                            
+                            my @zCMD = ['zypper', 'refresh-services', $pService];
+                            if ( system(@zCMD) == 0 )
+                            {
+                                push @log, "Successfully refreshed service: $pService";
+                            }
+                            else
+                            {
+                                push @log, "ERROR: Could not refresh service: $pService";
+                            }
+                            push @log, $self->checkcatalogs( ${$pAny}{'CATALOGS'}, $pService );
                         }
                         else
                         {
@@ -523,24 +661,31 @@ sub changerepos
                         }
                         else
                         {
-                            push @log, "Could not delete a service: $pService";
+                            push @log, "ERROR: Could not delete a service: $pService";
                         }
-
                     }
-
-
+                }
+                else
+                {
+                    push @log, "A service returned by SuseRegister has an unsupported type: $pService (${$pAny}{'TYPE'})";
                 }
             } # end defined ${$pAny}{'TYPE'}
             else
             {
-                push @log, "A service returned by SuseRegister has an unsupported type: $pService (${$pAny}{'TYPE'})";
+                push @log, "A service returned by SuseRegister has an invalid type";
             }
         }
-
-
-
     } # end foreach pService
 
+    my @zCMD = ['zypper', 'refresh', '--services'];
+    if ( system(@zCMD) == 0 )
+    {
+        push @log, "Successfully refreshed all services";
+    }
+    else
+    {
+        push @log, "ERROR: Could not refresh all services";
+    }
 
     return { 'log' => @log };
 }
