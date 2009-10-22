@@ -227,7 +227,9 @@ sub statelessregister
     # must be set one for one, otherwise other data would be overwritten
     foreach my $key ( keys %{$arguments} )
     {
-        $self->set_arg( $key, ${$arguments}{$key} );
+        ## $self->set_arg( $key, { flag => 'i', value => ${$arguments}{$key} , kind => 'mandatory' } );
+        ## $self->set_arg( $key, { value => ${$arguments}{$key} } );
+        $self->set_arg( $key, { 'value' => ${$arguments}{$key} } );
     }
 
     # run registration
