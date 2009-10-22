@@ -264,7 +264,7 @@ sub statelessregister
         if ( ref($ret) eq 'HASH' )
         {
             my $rlog = ${$ret}{'log'} || [];
-            ${$regret}{'repochangeslog'} = XMLout( { 'log' => $rlog} );
+            ${$regret}{'repochangeslog'} = XMLout( { 'log' => $rlog}, rootname => 'log' );
 
             my $errcount = 0;
             foreach my $logline ( @{$rlog} )
@@ -275,7 +275,7 @@ sub statelessregister
         }
 
         ${$regret}{'success'}  = 'Successfully ran registration';
-        ${$regret}{'tasklist'} =  XMLout($tasklist);
+        ${$regret}{'tasklist'} =  XMLout($tasklist, rootname => 'tasklist');
     }
     elsif ( $exitcode == 3 )
     {
@@ -286,7 +286,7 @@ sub statelessregister
     {
         ${$regret}{'missinginfo'} = 'Missing Information';
         my $margs = $self->get_args() || {};
-        ${$regret}{'missingarguments'} = XMLout($margs);
+        ${$regret}{'missingarguments'} = XMLout($margs, rootname => 'missingarguments');
     }
     elsif ( $exitcode == 100 || $exitcode == 101 )
     {
