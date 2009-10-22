@@ -12,6 +12,7 @@ package YSR;
 use strict;
 use SUSE::SuseRegister;
 use Data::Dumper;
+use XML::Simple;
 
 use YaPI;
 
@@ -284,7 +285,7 @@ sub statelessregister
     {
         ${$regret}{'missinginfo'} = 'Missing Information';
         my $margs = $self->get_args() || {};
-        # ${$regret}{'missingarguments'} = $margs;
+        ${$regret}{'missingarguments'} = XMLout($margs);
     }
     elsif ( $exitcode == 100 || $exitcode == 101 )
     {
