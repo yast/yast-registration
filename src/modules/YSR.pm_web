@@ -246,7 +246,8 @@ sub statelessregister
     $readabletext = $self->get_registerReadableText();
     $manualurl = $self->get_manualURL();
 
-    my %return = {  'exitcode'     => $exitcode
+
+    my $regret = {  'exitcode'     => $exitcode
                    ,'errorcode'    => $errorcode
                    ,'readabletext' => $readabletext
                    ,'manualurl'    => $manualurl
@@ -254,47 +255,48 @@ sub statelessregister
 
     if ( $exitcode == 0 )
     {
+
         $tasklist = $self->getTaskList();
 
         my $ret = $self->changerepos($tasklist);
         if ( ref($ret) eq 'HASH' )
         {
             my $rlog = ${$ret}{'log'} || [];
-            $return{'repochangeslog'} = $rlog;
+            ${$regret}{'repochangeslog'} = $rlog;
 
             my $errcount = 0;
             foreach my $logline ( @{$rlog} )
             {
                 $errcount++ if $logline =~ /^ERROR:/;
             }
-            $return{'repochangeerrors'} = $errcount if $errcount > 0;
+            ${$regret}{'repochangeerrors'} = $errcount if $errcount > 0;
         }
 
-        $return{'success'}  = 'Successfully ran registration';
-        $return{'tasklist'} =  $tasklist;
+        ${$regret}{'success'}  = 'Successfully ran registration';
+        ${$regret}{'tasklist'} =  $tasklist;
     }
     elsif ( $exitcode == 3 )
     {
-        $return{'error'} = 'Conflicting registration data';
-        $return{'conflicterror'} = '1';
+        ${$regret}{'error'} = 'Conflicting registration data';
+        ${$regret}{'conflicterror'} = '1';
     }
     elsif ( $exitcode == 4 )
     {
-        $return{'missinginfo'} = 'Missing Information';
+        ${$regret}{'missinginfo'} = 'Missing Information';
         my $margs = $self->get_args() || {};
-        $return{'missingarguments'} = $margs;
+        # ${$regret}{'missingarguments'} = $margs;
     }
     elsif ( $exitcode == 100 || $exitcode == 101 )
     {
-        $return{'error'} = 'No products to register';
-        $return{'noproducterror'} = '1';
+        ${$regret}{'error'} = 'No products to register';
+        ${$regret}{'noproducterror'} = '1';
     }
     else
     {
-        $return{'error'} = 'Registration was not successful';
+        ${$regret}{'error'} = 'Registration was not successful';
     }
 
-    return %return;
+    return $regret;
 }
 
 
