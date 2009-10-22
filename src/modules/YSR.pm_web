@@ -192,7 +192,8 @@ sub statelessregister
 
     unless ( defined $ctx && ref($ctx) eq "HASH" )
     {
-        return { 'error' => {  'ctx' => 'The context is missing or invalid.' } };
+        return { 'error'        => 'The context is missing or invalid.',
+                 'contexterror' => '1' };
     }
 
     # check if the system is still initialized - otherwise run init_ctx again
@@ -215,9 +216,10 @@ sub statelessregister
         unless ($init_err == 0)
         {
             # init failed
-            return { 'error' => { 'init' => 'The initialization of the registration failed.'
-                                 ,'errorcode' => $init_err
-                   }  };
+            return {  'error'     => 'The initialization of the registration failed.'
+                     ,'initerror' => $init_err
+                     ,'errorcode' => $init_err
+                   };
         }
     }
 
@@ -256,14 +258,13 @@ sub statelessregister
 
     if ( $exitcode == 0 )
     {
-
-        $tasklist = $self->getTaskList();
+        $tasklist = $self->getTaskList() || {};
 
         my $ret = $self->changerepos($tasklist);
         if ( ref($ret) eq 'HASH' )
         {
             my $rlog = ${$ret}{'log'} || [];
-            ${$regret}{'repochangeslog'} = $rlog;
+            ${$regret}{'repochangeslog'} = XMLout( { 'log' => $rlog} );
 
             my $errcount = 0;
             foreach my $logline ( @{$rlog} )
@@ -274,7 +275,7 @@ sub statelessregister
         }
 
         ${$regret}{'success'}  = 'Successfully ran registration';
-        ${$regret}{'tasklist'} =  $tasklist;
+        ${$regret}{'tasklist'} =  XMLout($tasklist);
     }
     elsif ( $exitcode == 3 )
     {
