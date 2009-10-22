@@ -221,7 +221,11 @@ sub statelessregister
     }
 
     # set arguments
-    $self->set_args($arguments);
+    # must be set one for one, otherwise other data would be overwritten
+    foreach my $key ( keys %{$arguments} )
+    {
+        $self->set_arg( $key, ${$arguments}{$key} );
+    }
 
     # run registration
     my $exitcode = 1;
@@ -277,6 +281,8 @@ sub statelessregister
     elsif ( $exitcode == 4 )
     {
         $return{'missinginfo'} = 'Missing Information';
+        my $margs = $self->get_args() || {};
+        $return{'missingarguments'} = $margs;
     }
     elsif ( $exitcode == 100 || $exitcode == 101 )
     {
