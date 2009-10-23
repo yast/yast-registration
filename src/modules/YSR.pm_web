@@ -78,6 +78,10 @@ BEGIN { $TYPEINFO{register} = ["function", "integer"]; }
 sub register
 {
     my $self = shift;
+# open(LOG, ">> "."/var/log/YaST/global_ctx");
+# print LOG "global_ctx:\n";
+# print LOG Data::Dumper->Dump([$global_ctx])."\n";
+# close(LOG);
 
     my $ret = SUSE::SuseRegister::register($global_ctx);
 
@@ -123,11 +127,11 @@ sub set_arg
    {
        if(defined $value && ref($value) eq "HASH" )
        {
-           $global_ctx->{args}->{key} = $value;
+           $global_ctx->{args}->{$key} = $value;
        }
        else
        {
-           delete $global_ctx->{args}->{key};
+           delete $global_ctx->{args}->{$key};
        }
    }
 }
