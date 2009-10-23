@@ -267,6 +267,7 @@ sub statelessregister
         $tasklist = $self->getTaskList() || {};
 
         my $ret = $self->changerepos($tasklist);
+
         if ( ref($ret) eq 'HASH' )
         {
             my $rlog = ${$ret}{'log'} || [];
@@ -502,7 +503,7 @@ sub checkcatalogs
                 elsif ( ${$pAny}{"TASK"} eq 'a' )
                 {
                     push @log, "According to SuseRegister a catalog has to be enabled: $catalog ($pService)";
-                    my @zCMD = ['zypper', 'modifyrepo', '--enable', ${$pAny}{'ALIAS'}];
+                    my @zCMD = ('zypper', 'modifyrepo', '--enable', ${$pAny}{'ALIAS'});
                     if ( system(@zCMD) == 0 )
                     {
                         push @log, "Enabled catalog: ${$pAny}{'ALIAS'} ($pService)";
@@ -515,7 +516,7 @@ sub checkcatalogs
                 elsif ( ${$pAny}{"TASK"} eq 'd' )
                 {
                     push @log, "According to SuseRegister a service has to be disabled: $catalog ($pService)";
-                    my @zCMD = ['zypper', 'modifyrepo', '--disable', ${$pAny}{'ALIAS'}];
+                    my @zCMD = ('zypper', 'modifyrepo', '--disable', ${$pAny}{'ALIAS'});
                     if ( system(@zCMD) == 0 )
                     {
                         push @log, "Disabled catalog: ${$pAny}{'ALIAS'} ($pService)";
@@ -543,13 +544,12 @@ sub changerepos
 {
     my $self = shift;
     my $todo = shift;
-    my %result = {};
     my @log    = [];
 
     unless (defined $todo  &&  ref($todo) eq "HASH"  &&  keys %{$todo} > 0)
     {
         push @log, "No changes need to be done to the package system.";
-        return %result;
+        return { 'log' => @log };
     }
 
     my ($pService, $pAny);
@@ -584,9 +584,8 @@ sub changerepos
                     elsif ( ${$pAny}{'TASK'} eq 'a' )
                     {
                         push @log, "According to SuseRegister a service has to be added: $pService";
-                        my @zCMD = ['zypper', 'addrepo',  '--name', "${$pAny}{'NAME'}", '--refresh',  "${$pAny}{'URL'}", "${$pAny}{'ALIAS'}",  ];
-                        my @zCMDopt = ['zypper', 'modifyrepo', '--enable', '--refresh', '--priority', defined ${$pAny}{'URL'} ? ${$pAny}{'URL'} : 99 , "${$pAny}{'URL'}"];
-
+                        my @zCMD = ('zypper', 'addrepo',  '--name', "${$pAny}{'NAME'}", '--refresh',  "${$pAny}{'URL'}", "${$pAny}{'ALIAS'}" );
+                        my @zCMDopt = ('zypper', 'modifyrepo', '--enable', '--refresh', '--priority', defined ${$pAny}{'URL'} ? ${$pAny}{'URL'} : 99 , "${$pAny}{'URL'}");
                         if ( system(@zCMD) == 0   &&   system(@zCMDopt) == 0 )
                         {
                             push @log, "Successfully added a new service: $pService";
@@ -599,7 +598,7 @@ sub changerepos
                     elsif ( ${$pAny}{'TASK'} eq 'd' )
                     {
                         push @log, "According to SuseRegister a service has to be deleted: $pService";
-                        my @zCMD = ['zypper', 'removerepo', "$pService"];
+                        my @zCMD = ('zypper', 'removerepo', "$pService");
                         if ( system(@zCMD) == 0 )
                         {
                             push @log, "Successfully deleted a service: $pService";
@@ -628,7 +627,7 @@ sub changerepos
                         push @log, "According to SuseRegister a service should be left enabled: $pService";
                         push @log, "Now checking the catalogs of the service: $pService";
 
-                        my @zCMD = ['zypper', 'refresh-services', $pService];
+                        my @zCMD = ('zypper', 'refresh-services', $pService);
                         if ( system(@zCMD) == 0 )
                         {
                             push @log, "Successfully refreshed service: $pService";
@@ -643,13 +642,24 @@ sub changerepos
                     {
                         push @log, "According to SuseRegister a service has to be added: $pService";
 
-                        my @zCMD = ['zypper', 'addservice', '--refresh', ${$pAny}{'URL'}."&credentials=NCCcredentials", ${$pAny}{'ALIAS'}];
+                        my @zCMD = ('zypper', 'addservice', ${$pAny}{'URL'}."?credentials=NCCcredentials", ${$pAny}{'ALIAS'});
                         if ( system(@zCMD) == 0 )
                         {
                             push @log, "Successfully added a new service: $pService";
+
+                            my @zCMD = ('zypper', 'modifyservice', '--refresh', $pService);
+                            if ( system(@zCMD) == 0 )
+                            {
+                                push @log, "Successfully enabled refreshing for service: $pService";
+                            }
+                            else
+                            {
+                                push @log, "ERROR: Could not enable refreshing of service: $pService";
+                            }
+
                             push @log, "Now checking the catalogs of the service: $pService";
 
-                            my @zCMD = ['zypper', 'refresh-services', $pService];
+                            my @zCMD = ('zypper', 'refresh-services', $pService);
                             if ( system(@zCMD) == 0 )
                             {
                                 push @log, "Successfully refreshed service: $pService";
@@ -664,13 +674,12 @@ sub changerepos
                         {
                             push @log, "Adding a new service failed: $pService";
                         }
-
                     }
                     elsif ( ${$pAny}{'TASK'} eq 'd' )
                     {
                         push @log, "According to SuseRegister a service has to be deleted: $pService";
 
-                        my @zCMD = ['zypper', 'removeservice', $pService];
+                        my @zCMD = ('zypper', 'removeservice', $pService);
                         if ( system(@zCMD) )
                         {
                             push @log, "Successfully deleted a service: $pService";
@@ -693,7 +702,7 @@ sub changerepos
         }
     } # end foreach pService
 
-    my @zCMD = ['zypper', 'refresh', '--services'];
+    my @zCMD = ('zypper', 'refresh', '--services');
     if ( system(@zCMD) == 0 )
     {
         push @log, "Successfully refreshed all services";
