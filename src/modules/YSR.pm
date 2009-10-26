@@ -655,8 +655,8 @@ sub changerepos
 
                             push @log, "Now checking the catalogs of the service: $pService";
 
-                            my @zCMD = ('zypper', '--non-interactive', 'refresh-services', $pService);
-                            if ( system(@zCMD) == 0 )
+                            my @zrCMD = ('zypper', '--non-interactive', 'refresh-services', $pService);
+                            if ( system(@zrCMD) == 0 )
                             {
                                 push @log, "Successfully refreshed service: $pService";
                             }
