@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 26 15:01:41 CET 2009 - jdsn@suse.de
+
+- port webyast API to SLE11
+- 2.17.26 
+
+-------------------------------------------------------------------
 Thu Apr 23 21:14:23 CEST 2009 - jdsn@suse.de
 
 - check boolean values also for nil to prevent crashes (bnc#516330)
