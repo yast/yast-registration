@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 26 12:13:22 CET 2009 - jdsn@suse.de
+
+- enable the webyast API by default
+- 2.18.1 
+
+-------------------------------------------------------------------
 Tue Oct 13 17:12:54 CEST 2009 - jdsn@suse.de
 
 - adding help texts for Open-SLX 

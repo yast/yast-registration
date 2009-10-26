@@ -19,6 +19,7 @@ BuildRequires:  suseRegister
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
 
+Source1:        org.opensuse.yast.modules.ysr.policy 
 %description
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
@@ -34,11 +35,10 @@ Authors:
 @BUILD@
 
 @INSTALL@
-#%if %sles_version
-#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
-#%else
-#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
-#%endif
+
+mkdir -p $RPM_BUILD_ROOT/usr/share/PolicyKit/policy
+install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
+
 
 @CLEAN@
 
@@ -104,6 +104,7 @@ Authors:
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
 @fillupdir@/sysconfig.automatic_online_update-yast2-registration
+%attr(644,root,root) %config /usr/share/PolicyKit/policy/org.opensuse.yast.modules.*.policy
 
 %files branding-SLE
 %defattr(-,root,root)
