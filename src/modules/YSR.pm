@@ -278,7 +278,7 @@ sub statelessregister
         }
 
         ${$regret}{'success'}  = 'Successfully ran registration';
-        ${$regret}{'tasklist'} =  XMLout($tasklist, rootname => 'tasklist');
+        ${$regret}{'tasklist'} = XMLout( {'item' => $tasklist}, rootname => 'tasklist', KeyAttr => { item => "+ALIAS" }, NoAttr => 1);
     }
     elsif ( $exitcode == 3 )
     {
