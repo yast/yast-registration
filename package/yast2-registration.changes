@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov  5 17:28:43 CET 2009 - jdsn@suse.de
+
+- fix XML format for stateless registration API
+- disable help texts for Open-SLX (bnc#544907)
+- 2.19.0
+
+-------------------------------------------------------------------
 Mon Oct 26 12:13:22 CET 2009 - jdsn@suse.de
 
 - enable the webyast API by default
