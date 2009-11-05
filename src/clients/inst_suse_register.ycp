@@ -274,8 +274,11 @@ if ( IAMSLE )
 }
 else
 {
-    help = help_title + help_para1_openslx + help_para2_openslx + help_para4_openslx;
-    if (! Mode::normal()) help = help + help_para6_openslx;
+    // for now disable Open-SLX help texts (bnc#544907)
+    // help = help_title + help_para1_openslx + help_para2_openslx + help_para4_openslx;
+    // if (! Mode::normal()) help = help + help_para6_openslx;
+    help = help_title + help_para1 + help_para2 + help_para4;
+    if (! Mode::normal()) help = help + help_para6;
 }
 
 help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChapter2"]:"";
