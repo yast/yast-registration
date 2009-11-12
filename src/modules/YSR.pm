@@ -260,8 +260,9 @@ sub statelessregister
 
     if ( $exitcode == 0 )
     {
+        # successful registration, so we need to save the last ZMD config
+        $self->saveLastZmdConfig();
         $tasklist = $self->getTaskList() || {};
-
         my $ret = $self->changerepos($tasklist);
 
         if ( ref($ret) eq 'HASH' )
@@ -275,6 +276,15 @@ sub statelessregister
                 $errcount++ if $logline =~ /^ERROR:/;
             }
             ${$regret}{'repochangeerrors'} = $errcount if $errcount > 0;
+        }
+
+        # prepare the tasklist for XML conversion
+        foreach my $k (keys %{$tasklist})
+        {
+            if (exists ${${$tasklist}{$k}}{'CATALOGS'} )
+            {
+                ${${$tasklist}{$k}}{'CATALOGS'} = { 'catalog' => ${${$tasklist}{$k}}{'CATALOGS'} };
+            }
         }
 
         ${$regret}{'success'}  = 'Successfully ran registration';
@@ -472,6 +482,7 @@ sub checkcatalogs
 
     foreach $catalog (keys %{$todo})
     {
+        $pAny = ${$todo}{$catalog};
         if ( not defined $catalog  ||  $catalog eq '' )
         {
             push @log, "A catalog returned by SuseRegister has no or an invalid name.";

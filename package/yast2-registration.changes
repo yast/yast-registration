@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 12 20:32:57 CET 2009 - jdsn@suse.de
+
+- fix catalog checks in stateless registration API
+- fix XML format in stateless registration API
+
+-------------------------------------------------------------------
 Thu Nov  5 17:28:43 CET 2009 - jdsn@suse.de
 
 - fix XML format for stateless registration API
