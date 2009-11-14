@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Nov 14 04:37:29 CET 2009 - jdsn@suse.de
+
+- fixes in REST API to prevent server error and loops (bnc#553244)
+- 2.19.1 
+
+-------------------------------------------------------------------
 Thu Nov 12 20:32:57 CET 2009 - jdsn@suse.de
 
 - fix catalog checks in stateless registration API
