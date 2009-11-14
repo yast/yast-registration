@@ -189,6 +189,7 @@ sub statelessregister
     my $self  = shift;
     my $ctx = shift;
     my $arguments = shift;
+    my $SRregisterFlagFile = '/var/lib/yastws/registration_successful';
 
     unless ( defined $ctx && ref($ctx) eq "HASH" )
     {
@@ -260,8 +261,9 @@ sub statelessregister
 
     if ( $exitcode == 0 )
     {
+        # successful registration, so we need to save the last ZMD config
+        $self->saveLastZmdConfig();
         $tasklist = $self->getTaskList() || {};
-
         my $ret = $self->changerepos($tasklist);
 
         if ( ref($ret) eq 'HASH' )
@@ -278,7 +280,23 @@ sub statelessregister
         }
 
         ${$regret}{'success'}  = 'Successfully ran registration';
-        ${$regret}{'tasklist'} =  XMLout( {'item' => $tasklist}, rootname => 'tasklist', KeyAttr => { item => "+ALIAS" }, NoAttr => 1);
+        # prepare the tasklist for XML conversion
+        foreach my $k (keys %{$tasklist})
+        {
+            if ( exists ${${$tasklist}{$k}}{'CATALOGS'} )
+            {
+                ${${$tasklist}{$k}}{'CATALOGS'} = { 'catalog' => ${${$tasklist}{$k}}{'CATALOGS'} };
+            }
+        }
+        ${$regret}{'tasklist'} =  XMLout( {'item' => $tasklist}, rootname => 'tasklist', KeyAttr => { item => "+ALIAS", catalog => "+ALIAS" }, NoAttr => 1);
+
+        # write flagfile for successful registration
+        open(FLAGFILE, "> $SRregisterFlagFile");
+        print FLAGFILE localtime();
+        close FLAGFILE;
+
+        # to be on the safe side for a following registration request, we need to delete the context data
+        $self->del_ctx();
     }
     elsif ( $exitcode == 3 )
     {
@@ -312,6 +330,7 @@ sub getregistrationconfig
     my $SRconf = '/etc/suseRegister.conf';
     my $SRcert = '/etc/ssl/certs/registration-server.pem';
     my $SRcredentials = '/etc/zypp/credentials.d/NCCcredentials';
+    my $SRregisterFlagFile = '/var/lib/yastws/registration_successful';
 
     my $url = undef;
     my $cert = undef;
@@ -347,8 +366,8 @@ sub getregistrationconfig
     }
 
     # read the guid
-    if (-e $SRcredentials)
-        {
+    if ( -e $SRcredentials  &&  -e $SRregisterFlagFile )
+    {
         if (open(CRED, "< $SRcredentials") )
         {
             while(<CRED>)
@@ -365,6 +384,9 @@ sub getregistrationconfig
     $url  = '' unless defined $url;
     $cert = '' unless defined $cert;
     $guid = '' unless defined $guid;
+
+    # delete a flagfile that might be still there if no guid is found
+    unlink($SRregisterFlagFile) if $guid eq '';
 
     return { "regserverurl" => $url,
              "regserverca"  => $cert,
@@ -472,6 +494,7 @@ sub checkcatalogs
 
     foreach $catalog (keys %{$todo})
     {
+        $pAny = ${$todo}{$catalog};
         if ( not defined $catalog  ||  $catalog eq '' )
         {
             push @log, "A catalog returned by SuseRegister has no or an invalid name.";
@@ -499,7 +522,7 @@ sub checkcatalogs
                 elsif ( ${$pAny}{"TASK"} eq 'a' )
                 {
                     push @log, "According to SuseRegister a catalog has to be enabled: $catalog ($pService)";
-                    my @zCMD = ('zypper', '--non-interactive', 'modifyrepo', '--enable', ${$pAny}{'ALIAS'});
+                    my @zCMD = ('zypper', '--non-interactive', 'modifyrepo', '--enable', "${$pAny}{'ALIAS'}");
                     if ( system(@zCMD) == 0 )
                     {
                         push @log, "Enabled catalog: ${$pAny}{'ALIAS'} ($pService)";
@@ -623,7 +646,7 @@ sub changerepos
                         push @log, "According to SuseRegister a service should be left enabled: $pService";
                         push @log, "Now checking the catalogs of the service: $pService";
 
-                        my @zCMD = ('zypper', '--non-interactive', 'refresh-services', $pService);
+                        my @zCMD = ('zypper', '--non-interactive', 'refresh', '--services');
                         if ( system(@zCMD) == 0 )
                         {
                             push @log, "Successfully refreshed service: $pService";
@@ -655,7 +678,7 @@ sub changerepos
 
                             push @log, "Now checking the catalogs of the service: $pService";
 
-                            my @zrCMD = ('zypper', '--non-interactive', 'refresh-services', $pService);
+                            my @zrCMD = ('zypper', '--non-interactive', 'refresh', '--services');
                             if ( system(@zrCMD) == 0 )
                             {
                                 push @log, "Successfully refreshed service: $pService";

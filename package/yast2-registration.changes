@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Nov 14 04:35:21 CET 2009 - jdsn@suse.de
+
+- fixes in REST API to prevent server error and loops (bnc#553244)
+- 2.17.28
+
+-------------------------------------------------------------------
 Thu Nov  5 13:56:15 CET 2009 - jdsn@suse.de
 
 - fix XML format for stateless registration API
