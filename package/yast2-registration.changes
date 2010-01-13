@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Jan 13 18:26:17 CET 2010 - jdsn@suse.de
+
+- port changes from Code11 to Code11 SP1 (2.17.26-28)
+  * port webyast API to SLE11 - 2.17.26
+  * fix XML format for stateless registration API - 2.17.27
+  * fixes in REST API to prevent server error and loops
+    (bnc#553244) - 2.17.28
+- always reset registration server url (bnc#557194)
+- 2.17.29
+
+-------------------------------------------------------------------
 Thu Apr 23 21:14:23 CEST 2009 - jdsn@suse.de
 
 - check boolean values also for nil to prevent crashes (bnc#516330)

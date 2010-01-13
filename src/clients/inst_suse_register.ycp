@@ -673,6 +673,8 @@ boolean registrationServerSettings()
                 Register::smt_server_cert = curRegCert;
                 y2milestone("New registration server: %1", curRegURL);
                 y2milestone("New registration server CA certificate location: %1", curRegCert);
+                // run setup again, make sure settings get reset (maybe registration was already initalized and an error occurred) (bnc#557194)
+                Register::setupRegistrationServer(nil);
                 status=true;
                 break;
             }

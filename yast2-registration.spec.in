@@ -1,4 +1,22 @@
-@HEADER-COMMENT@
+#
+# spec file for package yast2-registration
+#
+# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
+# norootforbuild
+
 
 @HEADER@
 Requires:	yast2 >= 2.17.0
@@ -20,6 +38,7 @@ BuildRequires:	suseRegister
 BuildArchitectures:	noarch
 
 Summary:	Configuration of registration
+Source1:    org.opensuse.yast.modules.ysr.policy
 
 %description
 Performs the Registration
@@ -29,11 +48,10 @@ Performs the Registration
 @BUILD@
 
 @INSTALL@
-#%if %sles_version
-#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
-#%else
-#    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
-#%endif
+
+mkdir -p $RPM_BUILD_ROOT/usr/share/PolicyKit/policy
+install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
+
 
 @CLEAN@
 
@@ -87,6 +105,9 @@ Branding for yast2-registration for openSUSE
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
 @fillupdir@/sysconfig.automatic_online_update-yast2-registration
+
+# policy files
+%attr(644,root,root) %config /usr/share/PolicyKit/policy/org.opensuse.yast.modules.*.policy
 
 
 %files branding-SLE

@@ -280,6 +280,8 @@ global symbol xenType()
  */
 global symbol setupRegistrationServer(symbol mode)
 {
+    // invalidate a previous registration initialization as now settings may change (bnc#557194)
+    isInitializedSR = false;
     // in case smt_server is undefined nothing needs to be done
     if (smt_server == nil  ||  smt_server == "") return `ok;
 
