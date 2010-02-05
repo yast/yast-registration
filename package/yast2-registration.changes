@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb  5 19:23:34 CET 2010 - jdsn@suse.de
+
+- fix repos_to_en/disable flags (bnc#576532)
+- force reload of SourceManager (bnc#576532)
+- 2.17.28.1
+
+-------------------------------------------------------------------
 Sat Nov 14 04:35:21 CET 2009 - jdsn@suse.de
 
 - fixes in REST API to prevent server error and loops (bnc#553244)

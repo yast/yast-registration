@@ -913,17 +913,8 @@ global void finish()
         // Note: repeated calls to TargetInitialize with the same rootdir are ok, see libzypp/zypp/zypp_detail/ZYppImpl.cc:95
         y2debug("The Target currently is initialized - but due to bug bnc#468449 Pkg::TargetFinish will not be called.");
 
-        // Keeping the former code block commented out as a reference
-//        y2milestone("Package target was initialized. Now finishing target usage.");
-//        if ( Pkg::TargetFinish() )
-//        {
-//            y2milestone("Successfully finished the target usage of the package system.");
-//            isInitializedTarget = false;
-//        }
-//        else
-//        {
-//            y2error("Could not finish the target usage of the package system.");
-//        }
+        // keep it initialized but enforce a re-initialization if a workflow returns back to registration (bnc#576532)
+        isInitializedTarget = false;
     }
 }
 
@@ -1011,8 +1002,37 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
 
     map<string, any> serviceDetails = $[];
     serviceDetails = (map<string, any>) Pkg::ServiceGet(service);
-    serviceDetails["repos_to_enable"]  = union(serviceDetails["repos_to_enable"]:[],  catalogToEnable);
-    serviceDetails["repos_to_disable"] = union(serviceDetails["repos_to_disable"]:[], catalogToDisable);
+
+    // intelligently merge the repos_to_* flags (bnc#576532)
+    list<string> currentToEnable  = (list<string>) serviceDetails["repos_to_enable"]:[];
+    list<string> currentToDisable = (list<string>) serviceDetails["repos_to_disable"]:[];
+    // remove duplicates
+    currentToEnable  = toset(currentToEnable);
+    currentToDisable = toset(currentToDisable);
+    catalogToEnable  = toset(catalogToEnable);
+    catalogToDisable = toset(catalogToDisable);
+    y2debug("Current   repos_to_enable : %1", currentToEnable);
+    y2debug("Current   repos_to_disable: %1", currentToDisable);
+    y2debug("Requested repos_to_enable : %1", catalogToEnable);
+    y2debug("Requested repos_to_disable: %1", catalogToDisable);
+
+    list<string> newToEnable = [];
+    list<string> newToDisable = [];
+
+    // filter out "repos_to_enable" that are requested to be disabled (bnc#576532)
+    newToEnable = filter(string oneCatalog, union(currentToEnable, catalogToEnable), {
+        return ! contains(catalogToDisable, oneCatalog);
+    });
+
+    // filter out "repos_to_disable" that are requested to be enabled (bnc#576532)
+    newToDisable = filter(string oneCatalog, union(currentToDisable, catalogToDisable), {
+        return ! contains(catalogToEnable, oneCatalog);
+    });
+
+    y2debug("Resulting repos_to_enable : %1", newToEnable);
+    y2debug("Resulting repos_to_disable: %1", newToDisable);
+    serviceDetails["repos_to_enable"]  = newToEnable;
+    serviceDetails["repos_to_disable"] = newToDisable;
 
     // enabled flag must not be present - otherwise all catalogs will be activated
     serviceDetails = remove(serviceDetails, "enabled");
@@ -1414,17 +1434,13 @@ global integer suseRegister(symbol parameter)
     if ( registration_data != $[] )
     {
         // append sensitive data to the context map
-//        foreach (string key, string val, registration_data,  {
-//            key = String::CutRegexMatch(key, "[^A-Za-z0-9_-]+", true );
-//            contextData[key] =  sformat("%1", String::Quote(val));
-//        });
         contextData["args"] = registration_data;
         // do not log sensitive data to the log (#195624)
         y2milestone ("Added sensitive registration data to suse_register call - this data is not logged");
     }
 
 
-    if ( ! isInitializedSR  ||  ! isInitializedTarget  || contextData != contextDataSR )
+    if ( ! isInitializedSR  ||  ! isInitializedTarget || contextData != contextDataSR )
     {
         // initialize target
         if ( ! isInitializedTarget )
@@ -1437,43 +1453,38 @@ global integer suseRegister(symbol parameter)
             }
             y2milestone("Successfully initialized the target.");
             isInitializedTarget = true;
-
-            if ( Pkg::SourceStartManager(true) )
-            {
-                y2milestone("Successfully started source manager.");
-            }
-            else
-            {
-                y2error("Failed to start source manager");
-                return 199;
-            }
-
-//            y2debug("Setting Pkg::CallbackAuthentication to a dummy function");
-//            Pkg::CallbackAuthentication("Register::callbackAuthenticationOnRefresh");
-
-            y2milestone("Initially refreshing services.");
-            // refresh all services _once_ before interacting with SuseRegister
-            allCurrentServices = Pkg::ServiceAliases();
-
-            foreach ( string serviceAlias, allCurrentServices, {
-                y2milestone("Refreshing service with Alias: %1", serviceAlias);
-                Pkg::ServiceRefresh(serviceAlias);
-            });
-
-            y2milestone("Initially refreshing sources.");
-            // refresh all sources _once_ before interacting with SuseRegister
-            allCurrentSources = Pkg::SourceGetCurrent(true);
-
-            foreach ( integer srcID, allCurrentSources, {
-                y2milestone("Refreshing source with ID: %1", srcID);
-                // no "forced" refresh needed - default is sufficient (bnc#476429)
-                Pkg::SourceRefreshNow(srcID);
-            });
-            y2milestone("Initial refreshing ended.");
-
-//            y2debug("Resetting Pkg::CallbackAuthentication to default.");
-//            Pkg::CallbackAuthentication(nil);
         }
+
+        // always restart the source manager (bnc#576532)
+        if ( Pkg::SourceStartManager(true) )
+        {
+            y2milestone("Successfully started source manager.");
+        }
+        else
+        {
+            y2error("Failed to start source manager");
+            return 199;
+        }
+
+        y2milestone("Initially refreshing services.");
+        // refresh all services _once_ before interacting with SuseRegister
+        allCurrentServices = Pkg::ServiceAliases();
+
+        foreach ( string serviceAlias, allCurrentServices, {
+            y2milestone("Refreshing service with Alias: %1", serviceAlias);
+            Pkg::ServiceRefresh(serviceAlias);
+        });
+
+        y2milestone("Initially refreshing sources.");
+        // refresh all sources _once_ before interacting with SuseRegister
+        allCurrentSources = Pkg::SourceGetCurrent(true);
+
+        foreach ( integer srcID, allCurrentSources, {
+            y2milestone("Refreshing source with ID: %1", srcID);
+            // no "forced" refresh needed - default is sufficient (bnc#476429)
+            Pkg::SourceRefreshNow(srcID);
+        });
+        y2milestone("Initial refreshing ended.");
 
         // setting the proxy must happen before init_ctx is called (bnc#468480)
         // setting up proxy for SuseRegister
