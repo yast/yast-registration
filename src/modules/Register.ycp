@@ -280,6 +280,8 @@ global symbol xenType()
  */
 global symbol setupRegistrationServer(symbol mode)
 {
+    // invalidate a previous registration initialization as now settings may change (bnc#557194)
+    isInitializedSR = false;
     // in case smt_server is undefined nothing needs to be done
     if (smt_server == nil  ||  smt_server == "") return `ok;
 
@@ -1020,12 +1022,12 @@ global list<string> checkCatalogs(map<string, any> taskList, string service)
     list<string> newToDisable = [];
 
     // filter out "repos_to_enable" that are requested to be disabled (bnc#576532)
-    newToEnable = filter(string oneCatalog, union(currentToEnable, catalogToEnable), {
+    newToEnable = filter(string oneCatalog, (list<string>) union(currentToEnable, catalogToEnable), {
         return ! contains(catalogToDisable, oneCatalog);
     });
 
     // filter out "repos_to_disable" that are requested to be enabled (bnc#576532)
-    newToDisable = filter(string oneCatalog, union(currentToDisable, catalogToDisable), {
+    newToDisable = filter(string oneCatalog, (list<string>) union(currentToDisable, catalogToDisable), {
         return ! contains(catalogToEnable, oneCatalog);
     });
 
