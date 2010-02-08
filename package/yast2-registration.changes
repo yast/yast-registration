@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb  8 18:43:30 CET 2010 - jdsn@suse.de
+
+- fix repos_to_en/disable flags (bnc#576532)
+- force reload of SourceManager (bnc#576532)
+- 2.17.30
+
+-------------------------------------------------------------------
 Wed Jan 13 18:26:17 CET 2010 - jdsn@suse.de
 
 - port changes from Code11 to Code11 SP1 (2.17.26-28)
