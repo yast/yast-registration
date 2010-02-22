@@ -1336,46 +1336,29 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
     });
 
 
-    // on successful registration and only if there were changes, we need to refresh all sources
-    if ( size(summary) > 0 )
-    {
-        // save all changes to the sources that we have done
-        Pkg::SourceSaveAll();
+    // save all changes to the sources that we have done
+    Pkg::SourceSaveAll();
 
+    // finish sources (bnc#447080)
+
+    if ( Pkg::SourceFinishAll() )
+    {
+        y2milestone("Successfully finished all sources.");
         // we can not refresh in autoYaST mode as it may require manual interaction to import keys
         if ( doRefresh )
         {
-            y2milestone("Changes to the repositories and services were successful. Now refreshing all of them.");
+            y2milestone("Enforce a reload.");
 
-            list<string> currentNewServices = Pkg::ServiceAliases();
-            foreach ( string serviceAlias, currentNewServices, {
-                y2milestone("Refreshing service with Alias: %1", serviceAlias);
-                Pkg::ServiceRefresh(serviceAlias);
-            });
-
-            list<integer> currentNewSources = Pkg::SourceGetCurrent( true );
-            foreach (integer srcID, currentNewSources, {
-                y2milestone("Refreshing source with ID: %1", srcID);
-                // no "forced" refresh needed - default is sufficient (bnc#476429)
-                Pkg::SourceRefreshNow(srcID);
-            });
-        }
-    }
-
-    // finish sources (bnc#447080)
-    if ( Pkg::SourceFinishAll() )
-    {
-        y2milestone("Successfully finished all sources to enforce a reload.");
-
-        // restart the SourceManager to refill the cache with the current data (bnc#468449)
-        //   an application that called the registration (or that follows it) should be presented an updated pkg system
-        if ( Pkg::SourceStartManager(true) )
-        {
-            y2milestone("Successfully restarted source manager.");
-        }
-        else
-        {
-            y2error("Failed to restart source manager");
+            // restart the SourceManager to refill the cache with the current data (bnc#468449 bnc#572634)
+            // an application that called the registration (or that follows it) should be presented an updated pkg system
+            if ( Pkg::SourceStartManager(true) )
+            {
+                y2milestone("Successfully restarted source manager.");
+            }
+            else
+            {
+                y2error("Failed to restart source manager");
+            }
         }
     }
     else
