@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 21 13:46:58 UTC 2010 - coolo@novell.com
+
+- buildrequire PolicyKit-devel to fix build
+
+-------------------------------------------------------------------
 Sat Nov 14 04:37:29 CET 2009 - jdsn@suse.de
 
 - fixes in REST API to prevent server error and loops (bnc#553244)

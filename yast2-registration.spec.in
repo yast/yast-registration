@@ -33,6 +33,7 @@ BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packag
 BuildRequires:  limal limal-ca-mgm-perl limal-perl perl-TimeDate
 BuildRequires:  yast2-pkg-bindings >= 2.17.20
 BuildRequires:  suseRegister
+Buildrequires:  PolicyKit-devel
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
 
@@ -40,12 +41,6 @@ Source1:        org.opensuse.yast.modules.ysr.policy
 %description
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
-
-
-
-Authors:
---------
-    J. Daniel Schmidt <jdsn@suse.de>
 
 @PREP@
 
@@ -71,12 +66,6 @@ Group:          System/YaST
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
 
-
-
-Authors:
---------
-    J. Daniel Schmidt <jdsn@suse.de>
-
 %package branding-openSUSE
 License:        GPL v2 or later
 Requires:       yast2-registration
@@ -88,12 +77,6 @@ Group:          System/YaST
 %description branding-openSUSE
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
-
-
-
-Authors:
---------
-    J. Daniel Schmidt <jdsn@suse.de>
 
 %pre
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
