@@ -2,7 +2,8 @@
 # Makefile.am
 #
 
-ybin_SCRIPTS = online_update
+ybin_SCRIPTS = 
 
 
-EXTRA_DIST = $(ybin_SCRIPTS)
+#EXTRA_DIST = $(ybin_SCRIPTS)
+EXTRA_DIST = 

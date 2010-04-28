@@ -94,16 +94,12 @@ source (mirror) automatically.
 @moduledir@/*.ybc
 %dir @yncludedir@/registration
 @yncludedir@/registration/*.ycp
-@desktopdir@/online_update_configuration.desktop
 @schemadir@/autoyast/rnc/*.rnc
-/usr/lib/YaST2/bin/online_update
 /usr/share/YaST2/yastbrowser
 # agents
 @scrconfdir@/cfg_suse_register.scr
-@scrconfdir@/cfg_automatic_online_update.scr
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
-@fillupdir@/sysconfig.automatic_online_update-yast2-registration
 %attr(644,root,root) %config /usr/share/PolicyKit/policy/org.opensuse.yast.modules.*.policy
 
 %files branding-SLE

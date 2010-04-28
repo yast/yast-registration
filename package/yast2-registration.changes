@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 28 20:59:51 CEST 2010 - jdsn@suse.de
+
+- split off online-update-configuration module (fate#308494)
+- 2.19.2
+
+-------------------------------------------------------------------
 Wed Apr 21 13:46:58 UTC 2010 - coolo@novell.com
 
 - buildrequire PolicyKit-devel to fix build

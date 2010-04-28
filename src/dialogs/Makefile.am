@@ -1,5 +1,5 @@
 yncludedir = @yncludedir@/registration
-ynclude_DATA = OUCDialogs.ycp texts.ycp
+ynclude_DATA = texts.ycp
 
 EXTRA_DIST = $(ynclude_DATA)
 
