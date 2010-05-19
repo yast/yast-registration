@@ -298,6 +298,12 @@ sub statelessregister
         # to be on the safe side for a following registration request, we need to delete the context data
         $self->del_ctx();
     }
+    elsif ( $exitcode == 2 ) # catch error 2 and send error message up one layer (bnc#604777)
+    {
+        ${$regret}{'error'} = 'Registration did not succeed due to invalid data.';
+        ${$regret}{'invaliddataerror'} = '1';
+        ${$regret}{'invaliddataerrormessage'} = $self->get_errormsg();
+    }
     elsif ( $exitcode == 3 )
     {
         ${$regret}{'error'} = 'Conflicting registration data';
