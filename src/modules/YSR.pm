@@ -303,26 +303,35 @@ sub statelessregister
         ${$regret}{'error'} = 'Registration did not succeed due to invalid data.';
         ${$regret}{'invaliddataerror'} = '1';
         ${$regret}{'invaliddataerrormessage'} = $self->get_errormsg();
+        # to be on the safe side for a following registration request, we need to delete the context data
+        $self->del_ctx();
     }
     elsif ( $exitcode == 3 )
     {
         ${$regret}{'error'} = 'Conflicting registration data';
         ${$regret}{'conflicterror'} = '1';
+        # to be on the safe side for a following registration request, we need to delete the context data
+        $self->del_ctx();
     }
     elsif ( $exitcode == 4 )
     {
         ${$regret}{'missinginfo'} = 'Missing Information';
         my $margs = $self->get_args() || {};
         ${$regret}{'missingarguments'} = XMLout($margs, rootname => 'missingarguments');
+        # keep the context, do not delete it
     }
     elsif ( $exitcode == 100 || $exitcode == 101 )
     {
         ${$regret}{'error'} = 'No products to register';
         ${$regret}{'noproducterror'} = '1';
+        # to be on the safe side for a following registration request, we need to delete the context data
+        $self->del_ctx();
     }
     else
     {
         ${$regret}{'error'} = 'Registration was not successful';
+        # to be on the safe side for a following registration request, we need to delete the context data
+        $self->del_ctx();
     }
 
     return $regret;
