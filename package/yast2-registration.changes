@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul 15 16:09:26 CEST 2010 - jdsn@suse.de
+
+- fix for the SMT server configuration via WebYaST (bnc#621914)
+- 2.19.4 
+
+-------------------------------------------------------------------
 Wed May 19 18:10:23 CEST 2010 - jdsn@suse.de
 
 - catch severe backend error and pass error message on (bnc#604777)

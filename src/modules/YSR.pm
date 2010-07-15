@@ -20,6 +20,9 @@ our %TYPEINFO;
 
 my $global_ctx = {};
 
+# set the PATH in the perl environment (bnc#621914)
+# otherwise it is empty in system calls
+$ENV{PATH}="/usr/bin:/sbin:/usr/sbin:/bin";
 
 BEGIN { $TYPEINFO{init_ctx} = ["function", "void", [ "map", "string", "any"]]; }
 sub init_ctx
