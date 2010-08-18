@@ -487,7 +487,7 @@ global symbol setupRegistrationServer(symbol mode)
             if (ay) return `silentskip;
 
             // translators: this is a heading for an error message - so no punctuation
-            string fileCopyError = _("Could find SMT certificate file in local path");
+            string fileCopyError = _("Could not find SMT certificate file in local path");
             symbol errret = certificateError( fileCopyError, `file);
             if ( errret == `yes )
             {

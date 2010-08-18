@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug 18 15:19:55 CEST 2010 - mzugec@suse.cz
+
+- fixed typo (bnc#631743)
+- 2.19.5 
+
+-------------------------------------------------------------------
 Thu Jul 15 16:09:26 CEST 2010 - jdsn@suse.de
 
 - fix for the SMT server configuration via WebYaST (bnc#621914)
