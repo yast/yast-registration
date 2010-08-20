@@ -219,7 +219,7 @@ sub statelessregister
             # init failed
             return {  'error'     => 'The initialization of the registration failed.'
                      ,'initerror' => $init_err
-                     ,'errorcode' => $init_err
+                     ,'errorcode' => 199
                    };
         }
     }

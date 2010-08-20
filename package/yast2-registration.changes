@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 20 18:03:39 CEST 2010 - jdsn@suse.de
+
+- use correct error code for backend init errors (bnc#633183)
+- 2.18.4 
+
+-------------------------------------------------------------------
 Sat Nov 14 04:42:20 CET 2009 - jdsn@suse.de
 
 - fixes in REST API to prevent server error and loops (bnc#553244)
