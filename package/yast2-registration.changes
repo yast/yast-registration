@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 20 18:01:17 CEST 2010 - jdsn@suse.de
+
+- use correct error code for backend init errors (bnc#633183)
+- 2.17.34 
+
+-------------------------------------------------------------------
 Thu Jul 15 16:17:29 CEST 2010 - jdsn@suse.de
 
 - fix for the SMT server configuration via WebYaST (bnc#621914)
