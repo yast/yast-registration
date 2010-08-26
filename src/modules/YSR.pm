@@ -205,12 +205,14 @@ sub statelessregister
     {
         # not initialized - need to reinitialize
 
-        # 1. proxy
-        if ( exists $ctx->{'proxy'} && ref($ctx->{'proxy'}) eq "HASH" )
+        # 1. proxy - fixed proxy settings (bnc#626965)
+        if ( exists $ctx->{'proxy-http_proxy'} || exists $ctx->{'proxy-https_proxy'} )
         {
-            my $http  = $ctx->{'proxy'}{'http_proxy'}  || undef;
-            my $https = $ctx->{'proxy'}{'https_proxy'} || undef;
-            $self->set_proxy($http, $https);
+            my $http_proxy  = $ctx->{'proxy-http_proxy'}  || undef;
+            my $https_proxy = $ctx->{'proxy-https_proxy'} || undef;
+            $self->set_proxy($http_proxy, $https_proxy);
+            delete $ctx->{'proxy-http_proxy'};
+            delete $ctx->{'proxy-https_proxy'};
         }
 
         # 2. registration context
