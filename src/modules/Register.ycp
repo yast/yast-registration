@@ -1540,8 +1540,9 @@ global integer suseRegister(symbol parameter)
     if ( initialSRstatus == 0 )
     {
         y2milestone("SuseRegister returned with status: %1", initialSRstatus);
-        // touch webyast flag file to show in webyast that this machine is already registered
-        SCR::Execute(.target.bash, sformat(" [ -d  /var/lib/yastws ] && touch /var/lib/yastws/enable_SLM_webyast_registration_workaround "));
+        // touch webyast flag file to show in webyast that this machine is already registered (bnc#634026)
+        SCR::Execute(.target.bash, " [ -d  /var/lib/yastws ]       && date +%s > /var/lib/yastws/registration_successful " );
+        SCR::Execute(.target.bash, " [ -d  /var/lib/suseRegister ] && date +%s > /var/lib/suseRegister/y2_registration_successful " );
     }
 
 

@@ -20,6 +20,12 @@ our %TYPEINFO;
 
 my $global_ctx = {};
 
+# flag files for registration status
+my $FFwebyast_dir = '/var/lib/yastws';
+my $FFwebyast     = $FFwebyast_dir.'/registration_successful';
+my $FFgeneric_dir = '/var/lib/suseRegister';
+my $FFgeneric     = $FFgeneric_dir.'/y2_registration_successful';
+
 # set the PATH in the perl environment (bnc#621914)
 # otherwise it is empty in system calls
 $ENV{PATH}="/usr/bin:/sbin:/usr/sbin:/bin";
@@ -185,6 +191,13 @@ sub set_proxy
     }
 }
 
+BEGIN { $TYPEINFO{unset_proxy} = ["function", "void"]; }
+sub unset_proxy
+{
+    my $self = shift;
+    delete $ENV{http_proxy}; 
+    delete $ENV{https_proxy}; 
+}
 
 BEGIN { $TYPEINFO{statelessregister} = ["function", [ "map", "string", "any"], ["map", "string", "any"], ["map", "string", "any"]]; }
 sub statelessregister
@@ -192,7 +205,6 @@ sub statelessregister
     my $self  = shift;
     my $ctx = shift;
     my $arguments = shift;
-    my $SRregisterFlagFile = '/var/lib/yastws/registration_successful';
 
     unless ( defined $ctx && ref($ctx) eq "HASH" )
     {
@@ -200,32 +212,30 @@ sub statelessregister
                  'contexterror' => '1' };
     }
 
-    # check if the system is still initialized - otherwise run init_ctx again
-    unless ( defined $global_ctx && ref($global_ctx) eq "HASH" && exists $global_ctx->{debug} )
+    # always do a fresh init of proxy and context - otherwise old cached wrong data may be used
+    # 1. proxy - fixed proxy settings (bnc#626965)
+    $self->unset_proxy();
+    if ( exists $ctx->{'proxy-http_proxy'} || exists $ctx->{'proxy-https_proxy'} )
     {
-        # not initialized - need to reinitialize
-
-        # 1. proxy
-        if ( exists $ctx->{'proxy'} && ref($ctx->{'proxy'}) eq "HASH" )
-        {
-            my $http  = $ctx->{'proxy'}{'http_proxy'}  || undef;
-            my $https = $ctx->{'proxy'}{'https_proxy'} || undef;
-            $self->set_proxy($http, $https);
-        }
-
-        # 2. registration context
-        $self->init_ctx($ctx);
-        my $init_err = $self->get_errorcode();
-
-        unless ($init_err == 0)
-        {
-            # init failed
-            return {  'error'     => 'The initialization of the registration failed.'
-                     ,'initerror' => $init_err
-                     ,'errorcode' => 199
-                   };
-        }
+        my $http_proxy  = $ctx->{'proxy-http_proxy'}  || undef;
+        my $https_proxy = $ctx->{'proxy-https_proxy'} || undef;
+        $self->set_proxy($http_proxy, $https_proxy);
+        delete $ctx->{'proxy-http_proxy'};
+        delete $ctx->{'proxy-https_proxy'};
     }
+
+    # 2. registration context
+    $self->init_ctx($ctx);
+    my $init_err = $self->get_errorcode();
+
+    unless ($init_err == 0)
+    {
+        # init failed
+        return {  'error'     => 'The initialization of the registration failed.'
+                 ,'initerror' => $init_err
+                 ,'errorcode' => 199
+               };
+        }
 
     # set arguments
     # must be set one for one, otherwise other data would be overwritten
@@ -262,6 +272,9 @@ sub statelessregister
                    ,'manualurl'    => $manualurl
                  };
 
+    # we had a new registration process - so we reset the flag files
+    $self->removeregisteredflag();
+
     if ( $exitcode == 0 )
     {
         # successful registration, so we need to save the last ZMD config
@@ -294,9 +307,7 @@ sub statelessregister
         ${$regret}{'tasklist'} =  XMLout( {'item' => $tasklist}, rootname => 'tasklist', KeyAttr => { item => "+ALIAS", catalog => "+ALIAS" }, NoAttr => 1);
 
         # write flagfile for successful registration
-        open(FLAGFILE, "> $SRregisterFlagFile");
-        print FLAGFILE localtime();
-        close FLAGFILE;
+        $self->setregisteredflag(1);
 
         # to be on the safe side for a following registration request, we need to delete the context data
         $self->del_ctx();
@@ -348,7 +359,6 @@ sub getregistrationconfig
     my $SRconf = '/etc/suseRegister.conf';
     my $SRcert = '/etc/ssl/certs/registration-server.pem';
     my $SRcredentials = '/etc/zypp/credentials.d/NCCcredentials';
-    my $SRregisterFlagFile = '/var/lib/yastws/registration_successful';
 
     my $url = undef;
     my $cert = undef;
@@ -384,7 +394,7 @@ sub getregistrationconfig
     }
 
     # read the guid
-    if ( -e $SRcredentials  &&  -e $SRregisterFlagFile )
+    if ( -e $SRcredentials  &&  $self->getregisteredflag() )
     {
         if (open(CRED, "< $SRcredentials") )
         {
@@ -404,7 +414,7 @@ sub getregistrationconfig
     $guid = '' unless defined $guid;
 
     # delete a flagfile that might be still there if no guid is found
-    unlink($SRregisterFlagFile) if $guid eq '';
+    $self->removeregisteredflag() if $guid eq '';
 
     return { "regserverurl" => $url,
              "regserverca"  => $cert,
@@ -492,6 +502,87 @@ sub setregistrationconfig
 
     return $success;
 }
+
+
+#
+# setregisteredflag
+#
+# Write flagfile to identify a successful registration
+# Note: this is only a good guess, only the registration server knows about the status
+# (bnc#634026)
+#
+sub setregisteredflag()
+{
+    my $self = shift;
+    my $status = shift;
+    my $written = 0;
+
+    my $status_str = time();
+    $status_str = '' unless defined $status;
+
+
+    # write flagfile for successful registration
+    if ( -d $FFgeneric_dir )
+    {
+        if ( ! -e $FFgeneric || defined $status )
+        {
+            open( FFG, "> $FFgeneric" );
+            print FFG "$status_str";
+            close FFG;
+        }
+        $written = 1;
+    }
+
+    # this is the old location - will be obsoleted in follwing releases
+    if ( -d $FFwebyast_dir )
+    {
+        if ( ! -e $FFwebyast || defined $status )
+        {
+            open( FFW, "> $FFwebyast" );
+            print FFW "$status_str";
+            close FFW;
+        }
+        $written = 1;
+    }
+
+    return $written;
+}
+
+#
+# remove both registration flag files
+#
+# Remove flagfiles that identify a successful registration
+# Note: this is only a good guess, only the registration server knows about the status
+# (bnc#634026)
+#
+sub removeregisteredflag()
+{
+    my $self = shift;
+    unlink($FFgeneric);
+    unlink($FFwebyast);
+}
+
+#
+# getregisteredflag status
+#
+#
+# Get flagfile status to identify a successful registration
+# Note: this is only a good guess, only the registration server knows about the status
+# (bnc#634026)
+#
+sub getregisteredflag()
+{
+    my $self = shift;
+
+    if ( -e $FFgeneric  ||  -e $FFwebyast )
+    {
+        # write them if only one is found
+        $self->setregisteredflag(undef);
+        return 1;
+    }
+    return 0;
+}
+
 
 #
 # check catalogs

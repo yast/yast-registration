@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug 27 20:33:46 CEST 2010 - jdsn@suse.de
+
+- fix registration status detection, common flag file (bnc#634026)
+- fix proxy settings for WebYaST registrations (bnc#626965)
+- 2.17.35 
+
+-------------------------------------------------------------------
 Fri Aug 20 18:01:17 CEST 2010 - jdsn@suse.de
 
 - use correct error code for backend init errors (bnc#633183)
