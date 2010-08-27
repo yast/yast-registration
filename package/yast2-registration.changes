@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Fri Aug 27 20:33:46 CEST 2010 - jdsn@suse.de
 
-- fix registration status detection, common flag file (bnc#634026)
+- fix registration status detection (bnc#634026)
+  use a common flag file (bnc#633183)
 - fix proxy settings for WebYaST registrations (bnc#626965)
 - 2.17.35 
 
