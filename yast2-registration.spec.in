@@ -81,6 +81,7 @@ Branding for yast2-registration for openSUSE
 
 %post
 %{fillup_only -ns suse_register yast2-registration}
+%{fillup_only -ns automatic_online_update yast2-registration}
 
 
 %files
