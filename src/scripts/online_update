@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# source the profile to get proper proxy settings, bnc#(678888)
+. /etc/profile.d/profile.sh
+
 zyppercmd="/usr/bin/zypper"
 upcmd="/bin/false"
 syscfgfile="/etc/sysconfig/automatic_online_update"

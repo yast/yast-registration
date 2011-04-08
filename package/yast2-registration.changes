@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  8 15:21:04 CEST 2011 - jdsn@suse.de
+
+- fix proxy settings in automatic online update script, bnc#(678888)
+
+-------------------------------------------------------------------
 Sat Aug 28 00:43:11 CEST 2010 - jdsn@suse.de
 
 - fix registration status detection (bnc#634026)
