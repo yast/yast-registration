@@ -24,14 +24,15 @@ then
 fi
 
 
-if [ ! $AOU_ENABLE_CRONJOB = "true" ]
+if [ ! "x$AOU_ENABLE_CRONJOB" = "xtrue" ]
 then
     echo "Online Update is disabled in ${syscfgfile}. Will not run update."
     exit 0
 fi
 
 
-if [ ${AOU_SKIP_INTERACTIVE_PATCHES} = "true"  ]
+
+if [ "x${AOU_SKIP_INTERACTIVE_PATCHES}" = "xtrue"  ]
 then
     skipInteractive="--skip-interactive"
 else
@@ -39,7 +40,7 @@ else
 fi
 
 
-if [ ${AOU_AUTO_AGREE_WITH_LICENSES} = "true"  ]
+if [ "x${AOU_AUTO_AGREE_WITH_LICENSES}" = "xtrue"  ]
 then
     autoAgreeWithLicenses="--auto-agree-with-licenses"
 else
