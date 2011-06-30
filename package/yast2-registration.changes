@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 30 19:45:18 CEST 2011 - jdsn@suse.de
+
+- cleanup xauth export after interactive registration (bnc#702638)
+
+-------------------------------------------------------------------
 Tue Jun 28 19:11:55 CEST 2011 - jdsn@suse.de
 
 - bump version
