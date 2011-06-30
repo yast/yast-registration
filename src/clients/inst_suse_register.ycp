@@ -450,6 +450,7 @@ boolean report_error()
 
 string su_exec(string user, string group, string command)
 {   // (#167255)
+    // introduce cleanup function to also cleanup the xauth entry (bnc#702638)
     string exec = sformat("
 #!/bin/bash -x
 
@@ -462,6 +463,8 @@ umask 0077
 
 XA=/root/.xauth
 mkdir -p $XA
+DELETEXAEXPORT=no
+[ ! -e $XA/export ] && DELETEXAEXPORT=yes
 grep ^$user$ $XA/export >/dev/null 2>&1  || echo $user >> $XA/export
 
 mkdir -p $fakehome
@@ -469,7 +472,22 @@ chmod 700 $fakehome
 tmp=$(mktemp $fakehome/.Xauthority.XXXXXX) || exit 1
 chmod 600 $tmp
 chown $user:$group $tmp $fakehome
-trap \"rm -rf $fakehome\" EXIT INT HUP TERM
+
+
+function cleanup
+{
+  if [ \"x$DELETEXAEXPORT\" = \"xyes\" ]
+  then
+    rm -f $XA/export
+  else
+    sed -i --follow-symlinks \"/^$user$/d\" $XA/export
+  fi
+  
+  rm -rf $fakehome
+}
+
+
+trap \"cleanup\" EXIT INT HUP TERM
 
 ", user, group, command );
 

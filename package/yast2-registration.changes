@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 30 20:35:56 CEST 2011 - jdsn@suse.de
+
+- cleanup xauth export after interactive registration (bnc#702638) 
+
+-------------------------------------------------------------------
 Fri Apr  8 16:22:22 CEST 2011 - jdsn@suse.de
 
 - fix proxy settings in automatic online update script, bnc#(678888)
