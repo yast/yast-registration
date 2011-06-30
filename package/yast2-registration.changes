@@ -1,7 +1,9 @@
 -------------------------------------------------------------------
-Thu Jun 30 19:45:18 CEST 2011 - jdsn@suse.de
+Thu Jun 30 21:25:18 CEST 2011 - jdsn@suse.de
 
 - cleanup xauth export after interactive registration (bnc#702638)
+- fix broken xauth export file in post install script (bnc#702423)
+- 2.21.1
 
 -------------------------------------------------------------------
 Tue Jun 28 19:11:55 CEST 2011 - jdsn@suse.de
