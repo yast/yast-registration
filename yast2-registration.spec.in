@@ -25,6 +25,7 @@ Requires:	suseRegister
 Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
 Requires:	yast2-pkg-bindings >= 2.17.20
 Requires:	yast2-registration-branding
+Requires(post): sed grep
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 
 PreReq:		%fillup_prereq
@@ -82,6 +83,13 @@ Branding for yast2-registration for openSUSE
 %post
 %{fillup_only -ns suse_register yast2-registration}
 %{fillup_only -ns automatic_online_update yast2-registration}
+# fix broken xauth export from previous registration (bnc#702638)
+export XAEXPORT=/root/.xauth/export
+if [ -e "$XAEXPORT" ] && grep -q -v "^\s*$" "$XAEXPORT"
+then
+  sed -i --follow-symlinks "/^suse-ncc$/d" "$XAEXPORT"
+  grep -q -v "^\s*$" "$XAEXPORT" || rm -f "$XAEXPORT"
+fi
 
 
 %files
