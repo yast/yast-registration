@@ -291,7 +291,7 @@ help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChap
     string error_msg        = _("Error");
     string starting_browser = _("Starting browser...");
     string error_target_init_failed = _("Initialization failed.\nCan not interact with the package system.");
-    string message_install_missing_packages = _("In order to registrer properly the system
+    string message_install_missing_packages = _("In order to register properly the system
 needs to install the following packages.");
 
     /* other string variables */
