@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug  5 17:26:09 CEST 2011 - jdsn@suse.de
+
+- make use of ButtonBox where possible to make button order
+  depending on desktop environment (bnc#701264)
+
+-------------------------------------------------------------------
 Mon Jul  4 15:59:24 CEST 2011 - jdsn@suse.de
 
 - fix typo in registration process (bnc#703222)

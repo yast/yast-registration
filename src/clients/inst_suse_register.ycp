@@ -372,10 +372,10 @@ needs to install the following packages.");
                                            `Left( `Label( mi_start_browser  ) ) ,
                                            `Left( `Label( mi_needinfo ) )  ,
                                                   `RichText(`id(`needinfo), ""  ),
-                                           `HBox(
-                                                  `PushButton(`id(`start_browser), mi_browser_btn )  ,
+                                           `ButtonBox(
+                                                  `PushButton(`id(`start_browser), `opt(`okButton), mi_browser_btn )  ,
                                                   `HSpacing( 3),
-                                                  `PushButton(`id(`cancel),  Label::CancelButton()  )
+                                                  `PushButton(`id(`cancel), `opt(`cancelButton),  Label::CancelButton()  )
                                            )
                                    ))
     );
@@ -442,7 +442,7 @@ needs to install the following packages.");
            `VSpacing( 0.5 ),
            `Left( `Label( nccc_success_msg ) ),
            `Left( `Label( nccc_success_server_added ) ),
-           `HBox(
+           `ButtonBox(
                   `HWeight(1, `PushButton(`id(`ok), Label::OKButton()  ) ),
                   `HSpacing( 3 ),
                   `HWeight(1, `PushButton(`id(`success_detail), details ) )
@@ -703,8 +703,8 @@ boolean registrationServerSettings()
         `VSpacing(0.5),
         `InputField(`id(`newRegistrationServerCert), TXT["serverCACertificateLocation"]:"", curRegCert ),
         `VSpacing(1),
-        `HBox(
-            `PushButton(`id(`okButton), Label::OKButton() ),
+        `ButtonBox(
+            `PushButton(`id(`ok), Label::OKButton() ),
             `PushButton(`id(`cancel), Label::CancelButton() )
         )
 
@@ -724,7 +724,7 @@ boolean registrationServerSettings()
             status=false;
             break;
         }
-        else if (ret ==  `okButton)
+        else if (ret ==  `ok)
         {
             curRegURL  = (string) UI::QueryWidget(`id(`newRegistrationServer),     `Value);
             curRegCert = (string) UI::QueryWidget(`id(`newRegistrationServerCert), `Value);

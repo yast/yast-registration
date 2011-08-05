@@ -651,11 +651,11 @@ global symbol setupRegistrationServer(symbol mode)
             `Left( `Label(`opt(`boldFont), trustQuestion)),
             `Left( `Label(trustMessage)),
             `RichText(sformat("%1",certInfo)),
-            `HBox(`PushButton(`id(`trust), _("Trust")), `HSpacing(1.5), `PushButton(`id(`notrust), _("Reject")) )
+            `ButtonBox(`PushButton(`id(`ok), _("Trust")), `HSpacing(1.5), `PushButton(`id(`cancel), _("Reject")) )
         )));
         any uret = UI::UserInput();
         UI::CloseDialog();
-        if ((symbol)uret == `trust) { trust = true; }
+        if ((symbol)uret == `ok) { trust = true; }
     }
 
     // (bnc#377929)

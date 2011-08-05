@@ -161,7 +161,7 @@ define term KeyValueDialog(integer id, term entry)  {
 	    `TextEntry(`id(`value), _("&Value"), entry[2]:"")
 	    ),
 	`HSpacing(1),
-	`HBox(
+	`ButtonBox(
 	    `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
 	    `PushButton(`id(`cancel), Label::CancelButton())
 	    )
