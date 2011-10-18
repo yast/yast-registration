@@ -25,7 +25,7 @@ Requires:	suseRegister
 Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
 Requires:	yast2-pkg-bindings >= 2.17.20
 Requires:	yast2-registration-branding
-Requires(post): sed grep
+Requires(post): sed
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 
 PreReq:		%fillup_prereq
@@ -42,7 +42,7 @@ Summary:	Configuration of registration
 Source1:    org.opensuse.yast.modules.ysr.policy
 
 %description
-Performs the Registration
+Performs the Registration of the installed system in order to receive updates and support
 
 @PREP@
 
@@ -60,6 +60,7 @@ install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
 Requires:	yast2-registration
 Provides:	yast2-registration-branding
 Conflicts:	otherproviders(yast2-registration-branding)
+Supplements:packageand(yast2-registration:branding-SLE)
 Summary:	Branding for yast2-registration for SLE products
 Group:      System/YaST
 %description branding-SLE
@@ -69,6 +70,7 @@ Branding for yast2-registration for SLE products
 Requires:	yast2-registration
 Provides:	yast2-registration-branding
 Conflicts:	otherproviders(yast2-registration-branding)
+Supplements:packageand(yast2-registration:branding-openSUSE)
 Summary:	Branding for yast2-registration for openSUSE
 Group:      System/YaST
 %description branding-openSUSE

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 14 17:52:05 CEST 2011 - jdsn@suse.de
+
+- use latest xulrunner 1.9.2 for yastbrowser (bnc#724209)
+- 2.17.35.3 
+
+-------------------------------------------------------------------
 Thu Jun 30 21:21:56 CEST 2011 - jdsn@suse.de
 
 - cleanup xauth export after interactive registration (bnc#702638) 

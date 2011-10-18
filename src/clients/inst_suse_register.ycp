@@ -551,19 +551,20 @@ string browser_command(string url)
     else
     {
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
-        required_package = "mozilla-xulrunner190";
+        required_package = "mozilla-xulrunner192";
         checkBinary = "/usr/bin/xulrunner";
     }
 
     // (bnc#443781)
-    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1", checkBinary)) == 0 ? true:false;
+    // updating to xulrunner 1.9.2 (bnc#724209)
+    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x  %1 && %2 -v 2>&1  | grep -qi \"^Mozilla XULRunner 1.9\" ", checkBinary, checkBinary)) == 0 ? true:false;
     if ( ! cmd_ok )
     {
         if (!Package::Installed(required_package))
         {
             Package::InstallAllMsg([required_package], nil);
         }
-        cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1", checkBinary)) == 0 ? true:false;
+        cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x  %1 && %2 -v 2>&1  | grep -qi \"^Mozilla XULRunner 1.9\" ", checkBinary, checkBinary)) == 0 ? true:false;
     }
 
     if ( ! cmd_ok )
