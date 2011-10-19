@@ -547,24 +547,23 @@ string browser_command(string url)
         bcmd = " w3m ";
         required_package = "w3m";
         checkBinary = "/usr/bin/w3m";
+        cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x %1", checkBinary)) == 0 ? true:false;
     }
     else
     {
         bcmd = " MOZ_DISABLE_PANGO=1 /usr/bin/xulrunner /usr/share/YaST2/yastbrowser/application.ini -url ";
         required_package = "mozilla-xulrunner192";
+        string required_package2 = "mozilla-xulrunner191";
         checkBinary = "/usr/bin/xulrunner";
-    }
 
-    // (bnc#443781)
-    // updating to xulrunner 1.9.2 (bnc#724209)
-    cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x  %1 && %2 -v 2>&1  | grep -qi \"^Mozilla XULRunner 1.9\" ", checkBinary, checkBinary)) == 0 ? true:false;
-    if ( ! cmd_ok )
-    {
-        if (!Package::Installed(required_package))
-        {
-            Package::InstallAllMsg([required_package], nil);
-        }
+        // (bnc#443781)
+        // updating to xulrunner 1.9.2 (bnc#724209) - 1.9.1 is ok as well
         cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x  %1 && %2 -v 2>&1  | grep -qi \"^Mozilla XULRunner 1.9\" ", checkBinary, checkBinary)) == 0 ? true:false;
+        if ( ! cmd_ok )
+        {
+            boolean dummy = (Package::InstallAllMsg([required_package], nil) || Package::InstallAllMsg([required_package2], nil)) ? true:false;
+            cmd_ok = (integer) SCR::Execute(.target.bash, sformat("test -x  %1 && %2 -v 2>&1  | grep -qi \"^Mozilla XULRunner 1.9\" ", checkBinary, checkBinary)) == 0 ? true:false;
+        }
     }
 
     if ( ! cmd_ok )
