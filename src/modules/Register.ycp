@@ -154,10 +154,11 @@ symbol certificateError(string heading, symbol type)
     if (heading == nil || heading == "") heading = _("Unknown error");
 
     string errorrMessage = "";
-    string question = _("Do you want to skip Registration?");
-    string otherwise = sformat( _("If you select %1 the Registration will most likely fail.
-Otherwise you may copy the certificate file to the system manually
-and then specify its path by choosing %2."), deletechars(Label::ContinueButton(), "&"), deletechars(Label::FileName(), "&") );
+    string question = _("Do you want to skip registration?");
+    string otherwise = sformat( _("If you select %1, registration will most likely fail.
+You can copy the certificate file to the system manually
+and then specify its path by choosing %2.
+"), deletechars(Label::ContinueButton(), "&"), deletechars(Label::FileName(), "&") );
     string errorMessage = "";
 
     if (type == `floppy)
@@ -174,7 +175,7 @@ and then specify its path by choosing %2."), deletechars(Label::ContinueButton()
     }
     else
     {
-        errorMessage = _("Unknown error occurred while retrieving SMT certificate file");
+        errorMessage = _("Unknown error occurred while retrieving SMT certificate file.");
     }
 
     errorMessage = errorMessage  + "\n\n" + question + "\n\n" + otherwise;
@@ -303,7 +304,7 @@ global symbol setupRegistrationServer(symbol mode)
 
         string no_smt1 = _("The registration server URL could not be validated as URL.");
         string no_smt2 = _("Registration can not be performed.");
-        string no_smt3 = _("Please change the URL and retry.");
+        string no_smt3 = _("Change the URL and retry.");
         string no_smt_current = sformat( _("The current registration server URL is\n%1"), smt_server);
 
         string no_smt_server = sformat("%1\n%2\n%3\n\n%4", no_smt1, no_smt2, no_smt3, no_smt_current);
@@ -454,7 +455,7 @@ global symbol setupRegistrationServer(symbol mode)
                 if (ay) return `silentskip;
 
                 // translators: this is a heading for an error message - so no punctuation
-                string fdCopyError = _("Could not read file floppy disk");
+                string fdCopyError = _("Could not read file on floppy disk");
                 symbol errret = certificateError( fdCopyError, `floppy);
 
                 if ( errret == `yes )
@@ -525,7 +526,7 @@ global symbol setupRegistrationServer(symbol mode)
 
             if (certFile == nil)
             {
-                string skipReg = _("Do you really want to cancel and thereby skip the Registration?");
+                string skipReg = _("Do you really want to cancel and thereby skip registration?");
                 if (Popup::YesNo(skipReg))
                 {
                     y2milestone("User selected to cancel manual certificate dialog and thereby skip registration");
@@ -603,7 +604,9 @@ global symbol setupRegistrationServer(symbol mode)
         }
 
         string trustQuestion = _("Do you want to trust this certificate?");
-        string trustMessage  = _("This certificate will be used to connect to the SMT server.\nYou have to trust this certificate in order to continue with the Registration.");
+        string trustMessage  = _("This certificate will be used to connect to the SMT server.
+You have to trust this certificate to continue with the registration.
+");
 
         string certInfo = "";
 
@@ -673,7 +676,9 @@ global symbol setupRegistrationServer(symbol mode)
         {
             y2error("Failed to install SMT certificate to common cert storage. Registration would fail and thus will be skipped.");
 
-            if (!ay) Popup::Message(_("Installation of the SMT certificates failed.\nPlease see the logs for further information."));
+            if (!ay) Popup::Message(_("Installation of the SMT certificates failed.
+See the logs for further information.
+"));
             return `silentskip;
         }
     }

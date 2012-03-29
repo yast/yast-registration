@@ -221,9 +221,10 @@ This option does not remove any sources added manually.
 
 string help_para6 = _("<p>
 The registration process will contact a Novell server (or a local registration server if your company provides one).
-Please make sure that the network and proxy settings are correct.
-You can step back to the network setup to check or change the settings.
-</p>");
+Make sure that the network and proxy settings are correct.
+You can go back to the network setup to check or change the settings.
+</p>
+");
 
 /*  START - Help Texts for OPEN-SLX  */
 
