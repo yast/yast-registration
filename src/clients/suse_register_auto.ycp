@@ -208,7 +208,7 @@ symbol suse_register_configuration()
     string help_text_caption = sformat("<p><b>%1</b></p>", caption);
     string help_text_para1   = _("<p>Product registration includes your product in Novell's database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>. To simplify the procedure, include information from your system with <b>Hardware Profile</b> and <b>Optional Information</b>.</p>");
     string help_text_para2   = _("<p>Get more information about the registration process with <tt>suse_register -h</tt>.</p>");
-    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration\nData</b>.<br>To add a new key and value pair, press <b>Add</b> then enter the\nappropriate values. These parameters are can be passed with <tt>suse_register\n-a</tt>.<br>Get more information with <tt>suse_register -p</tt>. Remove a\nkey-value pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
+    string help_text_para3   = _("<p>Other information used for registration is shown in <b>Registration\nData</b>.<br>To add a new key and value pair, press <b>Add</b> then enter the\nappropriate values. These parameters are the ones that can be passed with <tt>suse_register\n-a</tt>.<br>Get more information with <tt>suse_register -p</tt>. Remove a\nkey-value pair with <b>Delete</b> or modify an existing pair with <b>Edit</b>.</p>");
 
     string help_text_para4 = _("<p>If your network deploys a custom SMT server, set the URL of the SMT Server\nand the location of the SMT certificate in <b>SMT Server Settings</b>. Refer\nto your SMT manual for further assistance.</p>");
 
