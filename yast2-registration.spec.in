@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-registration
 #
-# Copyright (c) 2009 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -38,10 +38,15 @@ Buildrequires:  PolicyKit-devel
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
 
-Source1:        org.opensuse.yast.modules.ysr.policy 
+Source1:        org.opensuse.yast.modules.ysr.policy
 %description
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 @PREP@
 
@@ -67,6 +72,11 @@ Group:          System/YaST
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
 
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
+
 %package branding-openSUSE
 License:        GPL-2.0+
 Requires:       yast2-registration
@@ -78,6 +88,12 @@ Group:          System/YaST
 %description branding-openSUSE
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
+
 
 %pre
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
@@ -118,3 +134,4 @@ fi
 %files branding-openSUSE
 %defattr(-,root,root)
 @desktopdir@/suse_register.desktop
+%changelog
