@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 31 15:58:49 UTC 2012 - jdsn@suse.de
+
+- do not block registration browser via SSH (bnc#179614) (bnc#718334)
+
+-------------------------------------------------------------------
 Tue May  8 12:22:16 UTC 2012 - jdsn@suse.de
 
 - fix typo in help text (bnc#759735)
