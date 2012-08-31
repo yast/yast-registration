@@ -412,11 +412,15 @@ trap \"rm -rf $fakehome\" EXIT INT HUP TERM
     // create a script to run a system call as different user
     // thanks to werner (script)
     // unset DESKTOP_SESSION : (#207332)
+    // gracefully handle situations where hostname errors with -f or -s
+    // thus only call 'hostname' and strip the name via shell (bnc#179614), (bnc#718334)
     if (!textmode)
     {    exec = exec +
 "
 if test \"${DISPLAY%:*}\" = \"localhost\" ; then
-    disp=$(hostname -s)/unix:${DISPLAY#*:}
+    hname=$(hostname)
+    hname=${hname%%.*}
+    disp=${hname}/unix:${DISPLAY#*:}
 else
     disp=\"${DISPLAY}\"
 fi
