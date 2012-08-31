@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-registration
 #
-# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -36,13 +36,20 @@ BuildRequires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
 BuildRequires:	yast2-pkg-bindings >= 2.17.20
 BuildRequires:	suseRegister
 
-BuildArchitectures:	noarch
+BuildArch:	noarch
 
-Summary:	Configuration of registration
+Summary:	YaST2 - Registration Module
 Source1:    org.opensuse.yast.modules.ysr.policy
 
 %description
-Performs the Registration of the installed system in order to receive updates and support
+The registration module to register products and/or to fetch an update
+source (mirror) automatically.
+
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 @PREP@
 
@@ -66,6 +73,12 @@ Group:      System/YaST
 %description branding-SLE
 Branding for yast2-registration for SLE products
 
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
+
 %package branding-openSUSE
 Requires:	yast2-registration
 Provides:	yast2-registration-branding
@@ -75,6 +88,12 @@ Summary:	Branding for yast2-registration for openSUSE
 Group:      System/YaST
 %description branding-openSUSE
 Branding for yast2-registration for openSUSE
+
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 
 %pre
@@ -128,3 +147,4 @@ fi
 %files branding-openSUSE
 %defattr(-,root,root)
 @desktopdir@/suse_register.desktop
+%changelog
