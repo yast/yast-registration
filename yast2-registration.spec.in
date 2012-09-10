@@ -1,26 +1,33 @@
 @HEADER-COMMENT@
 
+# norootforbuild
+
 @HEADER@
-Requires:	yast2
-Requires:   yast2-network
-Requires:	suseRegister
-Requires:   perl-TimeDate limal limal-perl limal-ca-mgm-perl
+Requires:       yast2
+Requires:       yast2-network
+Requires:       suseRegister
+Requires:       perl-TimeDate limal limal-perl limal-ca-mgm-perl
 # because of SourceManager
-Requires:	yast2-packager >= 2.13.152
+Requires:       yast2-packager >= 2.13.152
 
 %if %sles_version
-Requires:   zmd rug
+Requires:       zmd rug
 %endif
 
-BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager 
+BuildRequires:  perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-packager
 BuildRequires:  perl-TimeDate limal limal-perl limal-ca-mgm-perl
-
-BuildArchitectures:	noarch
-
-Summary:	Configuration of registration
+BuildArch:      noarch
+Summary:        YaST2 Registration Module
 
 %description
-Performs the Registration
+The registration module to register products and/or to fetch an update
+source (mirror) automatically.
+
+
+
+Authors:
+--------
+    J. Daniel Schmidt <jdsn@suse.de>
 
 @PREP@
 
@@ -28,9 +35,9 @@ Performs the Registration
 
 @INSTALL@
 %if %sles_version
-    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/suse_register.desktop
+    rm $RPM_BUILD_ROOT/%{_prefix}/share/applications/YaST2/suse_register.desktop
 %else
-    rm $RPM_BUILD_ROOT/%{prefix}/share/applications/YaST2/customer_center.desktop
+    rm $RPM_BUILD_ROOT/%{_prefix}/share/applications/YaST2/customer_center.desktop
 %endif
 
 @CLEAN@
@@ -59,3 +66,4 @@ Performs the Registration
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
 
+%changelog
