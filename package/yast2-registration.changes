@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 10 10:32:18 UTC 2012 - jdsn@suse.de
+
+- do not block registration browser via SSH (bnc#179614) (bnc#718334)
+- 2.13.24.1
+
+-------------------------------------------------------------------
 Wed Jul  8 18:17:37 CEST 2009 - jdsn@suse.de
 
 - port the fix to override certificate handling for *.novell.com
