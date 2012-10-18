@@ -24,7 +24,6 @@
     import "Installation";
 
     include "registration/OUCDialogs.ycp";
-    include "registration/texts.ycp";
 
     // support basic command-line output (bnc#439050)
     list wfm_args = WFM::Args();
@@ -54,22 +53,25 @@
     string targetRootDir = Mode::normal() ? "/":Installation::destdir;
     Pkg::TargetInit(targetRootDir, false);  // (bnc#449844)
 
-    // check if we are in installation workflow or running independently
-    if (Mode::normal()) Wizard::CreateDialog();
+    // check if we are in installation workflow or running independently -  use OKDialog (bnc#440568)
+    if (Mode::normal()) Wizard::OpenOKDialog();
 
     // we always need the next button and never the back button
     Wizard::SetContents (moduleTitle, contents, help, false, true);
-    Wizard::SetTitleIcon ("yast-online_update");
-    Wizard::SetNextButton(`next, Label::FinishButton() );
+    
+    if( Mode::normal() )
+	Wizard::SetTitleIcon ("online_update_configuration");
+    else
+	Wizard::SetTitleIcon ("yast-online_update");
 
 /* -------------------------------- PROGRAM LOGIC START ----------------------------------------------------------- */
 
     OnlineUpdateConfiguration::Read();
 
-    if (false) // for testing only
-    {
-        OnlineUpdateConfiguration::currentUpdateRepo = "";
-    }
+//    if (false) // for testing only
+//    {
+//        OnlineUpdateConfiguration::currentUpdateRepo = "";
+//    }
 
     string replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo;
 
@@ -93,6 +95,7 @@
     UI::ChangeWidget(`id(`automaticOnlineUpdate),  `Value, OnlineUpdateConfiguration::enableAOU);
     UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
+    UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
 
 
     UI::RecalcLayout();
@@ -104,15 +107,16 @@
     {
         ret = Wizard::UserInput();
 
-        if (ret == `next)
+        if ( ret == `next || ret == `ok )
         {
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
+            OnlineUpdateConfiguration::autoAgreeWithLicenses  = (boolean) UI::QueryWidget(`id(`autoAgreeWithLicenses),  `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
 
             y2milestone("Writing online update configuration settings.");
             OnlineUpdateConfiguration::Write();
-            //break;
+            ret = `next;
         }
 
         if ( ret == `restoreDefault )
@@ -131,7 +135,7 @@
                 {
                     y2milestone("Registration is needed to get an update source.");
 
-                    if ( Popup::YesNo( TXT["needToRegister"]:"" + "\n\n" + TXT["runRegistrationNow"]:"" ) )
+                    if ( Popup::YesNo( needToRegister + "\n\n" + runRegistrationNow ) )
                     {
                         y2milestone("User wants to run the registration in order to setup the default update repository.");
                         // trigger registration
@@ -163,7 +167,14 @@
 
         if (ret == `register)
         {
-            WFM::call("inst_suse_register");
+            if ( WFM::ClientExists("inst_suse_register") )
+            {
+                WFM::call("inst_suse_register");
+            }
+            else
+            {
+                Popup::Error( _("The registration module is not available.") + "\n" + _("Please install yast2-registration and try again.") );
+            }
         }
 
 
@@ -187,8 +198,19 @@
             UI::RecalcLayout();
         }
 
+        if ( ret == `back || ret == `abort || ret == `cancel )
+        {
+            if ( Popup::ReallyAbort(true) )
+            {
+                break;
+            }
+            else
+            {
+                ret = `continue;
+            }
+        }
 
-    } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
+    } until (ret == `ok || ret == `next || ret == `abort || ret == `cancel || ret == `back);
 
     Pkg::SourceFinishAll();
 

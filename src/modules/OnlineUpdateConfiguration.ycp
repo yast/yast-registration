@@ -20,6 +20,7 @@ textdomain "registration";
 
 global boolean enableAOU = false;
 global boolean skipInteractivePatches = true;
+global boolean autoAgreeWithLicenses = false;
 global symbol  updateInterval = `weekly;
 global boolean OUCmodified = false;
 
@@ -64,7 +65,7 @@ boolean fetchBaseProductDetails()
 //FIXME: otherwise restoring of the default update repo is only possible via NCC registration
 /*
 productDetail[0, "category"]="base";
-productDetail[0, "update_urls"] = ["http://download.opensuse.org/update/11.1/"];
+productDetail[0, "update_urls"] = ["http://download.opensuse.org/update/11.2/"];
 */
 //FIXME END
 
@@ -456,6 +457,7 @@ global void Read()
     // only the fact that a cronjob exists makes this setting true
     enableAOU = ( interD >= 0 || interW >= 0 || interM >= 0  );
     skipInteractivePatches = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES) == "true" ) ? true:false;
+    autoAgreeWithLicenses  = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_AUTO_AGREE_WITH_LICENSES) == "true" ) ? true:false;
 
 }
 
@@ -471,6 +473,7 @@ global boolean Import(map settings)
 
     enableAOU              = (boolean) settings["enable_automatic_online_update"]:enableAOU;
     skipInteractivePatches = (boolean) settings["skip_interactive_patches"]:skipInteractivePatches;
+    autoAgreeWithLicenses  = (boolean) settings["auto_agree_with_licenses"]:autoAgreeWithLicenses;
 
     string getInterval     = (string) settings["update_interval"]:"";
 
@@ -488,8 +491,9 @@ global boolean Import(map settings)
  */
 global boolean Write()
 {
-    SCR::Write(.sysconfig.automatic_online_update.AOU_ENABLE_CRONJOB          , (enableAOU              ? "true":"false") );
-    SCR::Write(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES, (skipInteractivePatches ? "true":"false") );
+    SCR::Write(.sysconfig.automatic_online_update.AOU_ENABLE_CRONJOB          , (enableAOU              == true ? "true":"false") );
+    SCR::Write(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES, (skipInteractivePatches == true ? "true":"false") );
+    SCR::Write(.sysconfig.automatic_online_update.AOU_AUTO_AGREE_WITH_LICENSES, (autoAgreeWithLicenses  == true ? "true":"false") );
 
     if (enableAOU)
     {
@@ -522,6 +526,7 @@ global map Export()
     return $[
              "enable_automatic_online_update":enableAOU,
              "skip_interactive_patches":skipInteractivePatches,
+             "auto_agree_with_licenses":autoAgreeWithLicenses,
              "update_interval":intervalSymbolToString(updateInterval)
     ];
 }

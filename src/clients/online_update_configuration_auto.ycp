@@ -93,6 +93,9 @@ string Summary()
 
         summary = Summary::AddHeader (summary, skipInteractivePatches);
         summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::skipInteractivePatches ? enabledMsg:disabledMsg  );
+
+        summary = Summary::AddHeader (summary, autoAgreeWithLicenses);
+        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::autoAgreeWithLicenses ? enabledMsg:disabledMsg  );
     }
 
     return summary;
@@ -122,6 +125,7 @@ symbol OUC_configure()
     UI::ChangeWidget(`id(`automaticOnlineUpdate),  `Value, OnlineUpdateConfiguration::enableAOU);
     UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
+    UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
 
     UI::RecalcLayout();
 
@@ -135,6 +139,7 @@ symbol OUC_configure()
         {
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
+            OnlineUpdateConfiguration::autoAgreeWithLicenses  = (boolean) UI::QueryWidget(`id(`autoAgreeWithLicenses),  `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
             break;
         }
