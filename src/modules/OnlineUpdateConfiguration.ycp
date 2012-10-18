@@ -21,7 +21,9 @@ textdomain "registration";
 global boolean enableAOU = false;
 global boolean skipInteractivePatches = true;
 global boolean autoAgreeWithLicenses = false;
+global boolean includeRecommends = false;
 global symbol  updateInterval = `weekly;
+global list<string> currentCategories = [];
 global boolean OUCmodified = false;
 
 
@@ -458,7 +460,10 @@ global void Read()
     enableAOU = ( interD >= 0 || interW >= 0 || interM >= 0  );
     skipInteractivePatches = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES) == "true" ) ? true:false;
     autoAgreeWithLicenses  = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_AUTO_AGREE_WITH_LICENSES) == "true" ) ? true:false;
-
+    includeRecommends      = ( (string)SCR::Read(.sysconfig.automatic_online_update.AOU_INCLUDE_RECOMMENDS)       == "true" ) ? true:false;
+    string patchCategories = (string)SCR::Read(.sysconfig.automatic_online_update.AOU_PATCH_CATEGORIES);
+    currentCategories = splitstring(patchCategories, " ");
+    currentCategories = filter(string s, currentCategories, { return (s != nil && s != ""); });
 }
 
 
@@ -474,6 +479,7 @@ global boolean Import(map settings)
     enableAOU              = (boolean) settings["enable_automatic_online_update"]:enableAOU;
     skipInteractivePatches = (boolean) settings["skip_interactive_patches"]:skipInteractivePatches;
     autoAgreeWithLicenses  = (boolean) settings["auto_agree_with_licenses"]:autoAgreeWithLicenses;
+    includeRecommends      = (boolean) settings["include_recommends"]:includeRecommends;
 
     string getInterval     = (string) settings["update_interval"]:"";
 
@@ -494,6 +500,11 @@ global boolean Write()
     SCR::Write(.sysconfig.automatic_online_update.AOU_ENABLE_CRONJOB          , (enableAOU              == true ? "true":"false") );
     SCR::Write(.sysconfig.automatic_online_update.AOU_SKIP_INTERACTIVE_PATCHES, (skipInteractivePatches == true ? "true":"false") );
     SCR::Write(.sysconfig.automatic_online_update.AOU_AUTO_AGREE_WITH_LICENSES, (autoAgreeWithLicenses  == true ? "true":"false") );
+    SCR::Write(.sysconfig.automatic_online_update.AOU_INCLUDE_RECOMMENDS,       (includeRecommends      == true ? "true":"false") );
+    string catConf = "";
+    if (size(OnlineUpdateConfiguration::currentCategories) > 0)
+        catConf = mergestring(OnlineUpdateConfiguration::currentCategories, " ");
+    SCR::Write(.sysconfig.automatic_online_update.AOU_PATCH_CATEGORIES, catConf);
 
     if (enableAOU)
     {
@@ -527,6 +538,7 @@ global map Export()
              "enable_automatic_online_update":enableAOU,
              "skip_interactive_patches":skipInteractivePatches,
              "auto_agree_with_licenses":autoAgreeWithLicenses,
+             "include_recommends":includeRecommends,
              "update_interval":intervalSymbolToString(updateInterval)
     ];
 }
