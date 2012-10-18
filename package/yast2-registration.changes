@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Oct 18 20:33:00 UTC 2012 - jdsn@suse.de
+
+- backport feature from yast2-online-update-configuration
+  (due to package split)
+  category filter for automatic-online-update (fate#313278)
+- 2.17.35.5
+
+-------------------------------------------------------------------
 Fri Aug 31 16:09:13 UTC 2012 - jdsn@suse.de
 
 - do not block registration browser via SSH (bnc#179614) (bnc#718334)
