@@ -492,6 +492,7 @@ global boolean Import(map settings)
     skipInteractivePatches = (boolean) settings["skip_interactive_patches"]:skipInteractivePatches;
     autoAgreeWithLicenses  = (boolean) settings["auto_agree_with_licenses"]:autoAgreeWithLicenses;
     includeRecommends      = (boolean) settings["include_recommends"]:includeRecommends;
+    currentCategories      = (list<string>) settings["category_filter","category"]:currentCategories;
 
     string getInterval     = (string) settings["update_interval"]:"";
 
@@ -551,7 +552,8 @@ global map Export()
              "skip_interactive_patches":skipInteractivePatches,
              "auto_agree_with_licenses":autoAgreeWithLicenses,
              "include_recommends":includeRecommends,
-             "update_interval":intervalSymbolToString(updateInterval)
+             "update_interval":intervalSymbolToString(updateInterval),
+             "category_filter": $[ "category":currentCategories ]
     ];
 }
 

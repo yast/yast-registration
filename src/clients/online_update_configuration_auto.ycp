@@ -96,6 +96,12 @@ string Summary()
 
         summary = Summary::AddHeader (summary, autoAgreeWithLicenses);
         summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::autoAgreeWithLicenses ? enabledMsg:disabledMsg  );
+
+        summary = Summary::AddHeader (summary, includeRecommends);
+        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::includeRecommends ? enabledMsg:disabledMsg  );
+
+        summary = Summary::AddHeader (summary, filterByCategory);
+        summary = Summary::AddLine   (summary, mergestring(OnlineUpdateConfiguration::currentCategories, " ") );
     }
 
     return summary;
@@ -126,6 +132,9 @@ symbol OUC_configure()
     UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
     UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
+    UI::ChangeWidget(`id(`includeRecommends),      `Value, OnlineUpdateConfiguration::includeRecommends);
+    UI::ChangeWidget(`id(`category),               `Value, size(OnlineUpdateConfiguration::currentCategories) > 0);
+    refreshCategoryList(nil);
 
     UI::RecalcLayout();
 
@@ -141,8 +150,34 @@ symbol OUC_configure()
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
             OnlineUpdateConfiguration::autoAgreeWithLicenses  = (boolean) UI::QueryWidget(`id(`autoAgreeWithLicenses),  `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
+            OnlineUpdateConfiguration::includeRecommends      = (boolean) UI::QueryWidget(`id(`includeRecommends),      `Value );
+            // reset categories to disable the filter
+            boolean catFilter = (boolean) UI::QueryWidget(`id(`category), `Value);
+            if (! catFilter) OnlineUpdateConfiguration::currentCategories = [];
             break;
         }
+
+        if ( ret == `catadd || ret == `catdel )
+        {
+            string addcat = "";
+            if ( ret == `catadd )
+            {
+                addcat=tolower((string)UI::QueryWidget( `id(`catcustom), `Value));
+                addcat=filterchars(addcat, "abcdefghijklmnopqrstuvwxyz0123456789-_.");
+                if (! contains(OnlineUpdateConfiguration::currentCategories, addcat))
+                    OnlineUpdateConfiguration::currentCategories = add(OnlineUpdateConfiguration::currentCategories, addcat);
+            }
+
+            if ( ret == `catdel )
+            {
+                string delcat = (string)UI::QueryWidget( `id(`categories), `CurrentItem);
+                OnlineUpdateConfiguration::currentCategories = filter(string s, OnlineUpdateConfiguration::currentCategories, { return s != delcat; });
+
+            }
+
+            refreshCategoryList(addcat);
+        }
+
 
     } until (ret == `next || ret == `abort || ret == `cacel || ret == `back);
 
