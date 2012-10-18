@@ -4,14 +4,12 @@
 . /etc/profile.d/profile.sh
 
 zyppercmd="/usr/bin/zypper"
-upcmd="/bin/false"
+zcmd="/bin/false"
 syscfgfile="/etc/sysconfig/automatic_online_update"
-skipInteractive="--skip-interactive"
-autoAgreeWithLicenses=""
 
 if [ -x ${zyppercmd}  ]
 then
-    upcmd=${zyppercmd}
+    zcmd="${zyppercmd} --non-interactive --quiet patch"
 else
     echo "zypper is not installed. Can not run online update."
     exit 1
@@ -24,7 +22,7 @@ then
 fi
 
 
-if [ ! "x$AOU_ENABLE_CRONJOB" = "xtrue" ]
+if [ ! "$AOU_ENABLE_CRONJOB" = "true" ]
 then
     echo "Online Update is disabled in ${syscfgfile}. Will not run update."
     exit 0
@@ -32,22 +30,30 @@ fi
 
 
 
-if [ "x${AOU_SKIP_INTERACTIVE_PATCHES}" = "xtrue"  ]
-then
-    skipInteractive="--skip-interactive"
+if [ "${AOU_SKIP_INTERACTIVE_PATCHES}" = "true"  ] ; then
+    zcmd="$zcmd --skip-interactive"
 else
-    skipInteractive=
+    zcmd="$zcmd --with-interactive"
 fi
 
-
-if [ "x${AOU_AUTO_AGREE_WITH_LICENSES}" = "xtrue"  ]
-then
-    autoAgreeWithLicenses="--auto-agree-with-licenses"
-else
-    autoAgreeWithLicenses=
+if [ "${AOU_AUTO_AGREE_WITH_LICENSES}" = "true"  ] ; then
+    zcmd="$zcmd --auto-agree-with-licenses"
 fi
 
+if [ "${AOU_INCLUDE_RECOMMENDS}" = "true"  ] ; then
+    zcmd="$zcmd --recommends"
+else
+    zcmd="$zcmd --no-recommends"
+fi
 
+# trim whitespaces
+AOU_PATCH_CATEGORIES=`echo $AOU_PATCH_CATEGORIES`
 # run the update
-${upcmd} --quiet up -y -t patch  ${skipInteractive}  ${autoAgreeWithLicenses}
+if [ -z "$AOU_PATCH_CATEGORIES" ] ; then
+  $zcmd
+else
+  for cat in $AOU_PATCH_CATEGORIES ; do
+    $zcmd --category "$cat"
+  done
+fi
 
