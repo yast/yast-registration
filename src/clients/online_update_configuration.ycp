@@ -58,7 +58,7 @@
 
     // we always need the next button and never the back button
     Wizard::SetContents (moduleTitle, contents, help, false, true);
-    
+
     if( Mode::normal() )
 	Wizard::SetTitleIcon ("online_update_configuration");
     else
@@ -76,7 +76,7 @@
     string replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo;
 
 
-    if ( OnlineUpdateConfiguration::compareUpdateURLs( OnlineUpdateConfiguration::currentUpdateRepo, 
+    if ( OnlineUpdateConfiguration::compareUpdateURLs( OnlineUpdateConfiguration::currentUpdateRepo,
                                                        OnlineUpdateConfiguration::defaultUpdateRepo, false ) )
     {// in this case - we have default update repo installed
         replaceUpdateRepoString = OnlineUpdateConfiguration::currentUpdateRepo + "   " + defaultMark;
