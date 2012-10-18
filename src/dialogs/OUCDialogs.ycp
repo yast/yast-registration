@@ -32,6 +32,11 @@ string setDefaultButtonLabel = _("Set Default");
 // translators: a short button label called "Advanced"
 string advancedMenuButtonLabel = _("Advanced");
 
+// for category filter
+string filterByCategory = _("Filter by Category");
+// for category filter //translators: means: categories of patches
+string patchCategories = _("Patch Categories");
+
 string help_title = sformat( "<p><b>%1</b></p>", moduleTitle);
 string help_para1 = sformat(_("<p>In <b>%1</b> the current update repository is shown.</p>"), updateRepository );
 string help_para2 = sformat(_("<p>Press <b>%1</b> to use the default update repository.</p>"), setDefaultButtonLabel );
@@ -45,6 +50,7 @@ string sendDataToSmolt          = _("Send hardware information to the smolt proj
 string interval                 = _("Interval");
 string skipInteractivePatches   = _("Skip Interactive Patches");
 string autoAgreeWithLicenses    = _("Agree with Licenses");
+string includeRecommends        = _("Include Recommended Packages");
 string currentUpdateRepo        = _("Current Update Repository:");
 string needToRegister           = _("In order to add the default update repository\nyou have to register this product.");
 string runRegistrationNow       = _("Do you want to perform the registration now?");
@@ -53,7 +59,6 @@ string runRegistrationNow       = _("Do you want to perform the registration now
 
 string enabledMsg  = _("enabled");
 string disabledMsg = _("disabled");
-
 
 
 string getOUCHelp(symbol type)
@@ -79,9 +84,9 @@ term getOUCDialog(symbol type)
                               `item(`id(`register),    registerForSupport )
                         ];
 
-    list<term> updateIntervals = [ `item(`id(`daily)  ,  _("daily"))  ,
-                                   `item(`id(`weekly) ,  _("weekly")) ,
-                                   `item(`id(`monthly),  _("monthly"))   ];
+    list<term> updateIntervals = maplist(symbol intid, string intname, OnlineUpdateConfiguration::Intervals, {
+        return `item( `id(intid), intname);
+    });
 
     term upRepo = `Frame(updateRepository,
                         `HBox(
@@ -98,26 +103,47 @@ term getOUCDialog(symbol type)
                         )
                     );
 
-    term autoOnlineUp = `VBox(
+    list<string> sortedCatKeys = [];
+    sortedCatKeys = maplist(string s, term t, OnlineUpdateConfiguration::defaultCategories, { return s; });
+    sortedCatKeys = sort(string a, string b, toset(sortedCatKeys), ``(a > b));
+    list<term> allCategories = maplist(string s, sortedCatKeys, { return OnlineUpdateConfiguration::defaultCategories[s]:`item(); });
+
+    term autoOnlineUp = `HVSquash(
+      `VBox(
         `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, false,
-        `VBox(
-            `VSpacing(0.8),
-            `HBox(
-                `HStretch(),
-                `ComboBox(`id(`updateInterval), interval, updateIntervals ),
-                `HSpacing(3),
-                `VBox(
-                 //   `VSpacing(1.4),
-                    `Left( `CheckBox(`id(`skipInteractivePatches), skipInteractivePatches, OnlineUpdateConfiguration::skipInteractivePatches == true ? true:false ) ),
-                    `Left( `CheckBox(`id(`autoAgreeWithLicenses),  autoAgreeWithLicenses,  OnlineUpdateConfiguration::autoAgreeWithLicenses  == true ? true:false ) )
-                ),
-                `HStretch()
+          `HBox(
+            `HSpacing(2),
+            `VBox(
+              `Left ( `ComboBox(`id(`updateInterval), interval, updateIntervals )),
+              `VSpacing(0.2),
+              `Left( `CheckBox(`id(`skipInteractivePatches), skipInteractivePatches, OnlineUpdateConfiguration::skipInteractivePatches == true ? true:false ) ),
+              `VSpacing(0.2),
+              `Left( `CheckBox(`id(`autoAgreeWithLicenses),  autoAgreeWithLicenses,  OnlineUpdateConfiguration::autoAgreeWithLicenses  == true ? true:false ) ),
+              `VSpacing(0.2),
+              `Left( `CheckBox(`id(`includeRecommends),  includeRecommends,  OnlineUpdateConfiguration::includeRecommends == true ? true:false ) ),
+              `VSpacing(0.8),
+              `CheckBoxFrame( `id(`category), filterByCategory,  false,
+                `HBox(
+                  `HSpacing(2),
+                  `VBox(
+                    `SelectionBox( `id(`categories), patchCategories, [] ),
+                    `HBox(
+                      `MinWidth(15, `ComboBox( `id(`catcustom), `opt(`editable), "", allCategories ) ),
+                      `PushButton( `id(`catadd), Label::AddButton() ),
+                      `HSpacing(4),
+                      `PushButton( `id(`catdel), Label::DeleteButton() )
+                    )
+                  )
+                )
+              ),
+              `VSpacing(0.8)
             ),
-            `VSpacing(0.8)
-        )
+            `HSpacing(2)
+          )
         ),
-        `VSpacing(1),
-        `Right( `MenuButton( advancedMenuButtonLabel, expertMenu) )
+       `Right( `MenuButton( advancedMenuButtonLabel, expertMenu) ),
+       `VStretch()
+      )
     );
 
 

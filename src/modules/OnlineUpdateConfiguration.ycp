@@ -41,9 +41,21 @@ global string defaultRegistrationURL = "";
 
 // cache the base product details
 map<string, any> baseProductDetail = $[];
-map<symbol, string> Intervals = $[  `daily  : "daily",
-                                    `weekly : "weekly",
-                                    `monthly: "monthly" ];
+
+global map<symbol, string> Intervals = $[
+    `daily  : "daily",
+    `weekly : "weekly",
+    `monthly: "monthly"
+    ];
+
+global map<string,term> defaultCategories = $[
+    "yast"        : `item( `id("yast"),        "Packagemanager and YaST"),
+    "security"    : `item( `id("security"),    "Security"),
+    "recommended" : `item( `id("recommended"), "Recommended"),
+    "optional"    : `item( `id("optional"),    "Optional"),
+    "document"    : `item( `id("document"),    "Document"),
+    "other"       : `item( `id("other"),       "Other")
+    ];
 
 /*
  * fetchBaseProductDetails
