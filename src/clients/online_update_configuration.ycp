@@ -96,6 +96,7 @@
     UI::ChangeWidget(`id(`updateInterval),         `Value, OnlineUpdateConfiguration::updateInterval);
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
     UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
+    UI::ChangeWidget(`id(`includeRecommends),      `Value, OnlineUpdateConfiguration::includeRecommends);
 
 
     UI::RecalcLayout();
@@ -112,7 +113,11 @@
             OnlineUpdateConfiguration::updateInterval         = (symbol)  UI::QueryWidget(`id(`updateInterval),         `Value );
             OnlineUpdateConfiguration::skipInteractivePatches = (boolean) UI::QueryWidget(`id(`skipInteractivePatches), `Value );
             OnlineUpdateConfiguration::autoAgreeWithLicenses  = (boolean) UI::QueryWidget(`id(`autoAgreeWithLicenses),  `Value );
+            OnlineUpdateConfiguration::includeRecommends      = (boolean) UI::QueryWidget(`id(`includeRecommends),      `Value );
             OnlineUpdateConfiguration::enableAOU              = (boolean) UI::QueryWidget(`id(`automaticOnlineUpdate),  `Value );
+            // reset categories to disable the filter
+            boolean catFilter = (boolean) UI::QueryWidget(`id(`category), `Value);
+            if (! catFilter) OnlineUpdateConfiguration::currentCategories = [];
 
             y2milestone("Writing online update configuration settings.");
             OnlineUpdateConfiguration::Write();
