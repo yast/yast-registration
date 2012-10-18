@@ -29,3 +29,22 @@ AOU_SKIP_INTERACTIVE_PATCHES="true"
 # Automatically agree with licenses.
 #
 AOU_AUTO_AGREE_WITH_LICENSES="false"
+
+## Type:    boolean
+## Default: "false"
+#
+# Include packages that are recommended by patches.
+#
+AOU_INCLUDE_RECOMMENDS="false"
+
+
+## Type: string
+## Default: ""
+#
+# Only install patches of these categories.
+# Space separated list of categories.
+# Most prominent categories are: (security recommended optional pkgmanager feature document)
+#
+AOU_PATCH_CATEGORIES=""
+
+
