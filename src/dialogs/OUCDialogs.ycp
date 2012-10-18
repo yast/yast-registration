@@ -168,5 +168,21 @@ term getOUCDialog(symbol type)
 }
 
 
+integer refreshCategoryList(string selected)
+{
+    OnlineUpdateConfiguration::currentCategories = toset(OnlineUpdateConfiguration::currentCategories);
+    OnlineUpdateConfiguration::currentCategories = sort(string a, string b, OnlineUpdateConfiguration::currentCategories, ``(a < b));
+    list<term> newcat = maplist(string onecat, OnlineUpdateConfiguration::currentCategories,  {
+        onecat=filterchars(onecat, "abcdefghijklmnopqrstuvwxyz0123456789-_.");
+        return OnlineUpdateConfiguration::defaultCategories[onecat]:(`item( `id(onecat), onecat));
+    });
+    UI::ChangeWidget( `id(`categories), `Items, newcat);
+
+    if ( selected != nil && selected != "" )
+    {
+        UI::ChangeWidget( `id(`categories), `CurrentItem, selected);
+    }
+}
+
 
 }

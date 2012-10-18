@@ -97,7 +97,8 @@
     UI::ChangeWidget(`id(`skipInteractivePatches), `Value, OnlineUpdateConfiguration::skipInteractivePatches);
     UI::ChangeWidget(`id(`autoAgreeWithLicenses),  `Value, OnlineUpdateConfiguration::autoAgreeWithLicenses);
     UI::ChangeWidget(`id(`includeRecommends),      `Value, OnlineUpdateConfiguration::includeRecommends);
-
+    UI::ChangeWidget(`id(`category),               `Value, size(OnlineUpdateConfiguration::currentCategories) > 0);
+    refreshCategoryList(nil);
 
     UI::RecalcLayout();
     //UI::RedrawScreen();
@@ -202,6 +203,28 @@
 
             UI::RecalcLayout();
         }
+
+        if ( ret == `catadd || ret == `catdel )
+        {
+            string addcat = "";
+            if ( ret == `catadd )
+            {
+                addcat=tolower((string)UI::QueryWidget( `id(`catcustom), `Value));
+                addcat=filterchars(addcat, "abcdefghijklmnopqrstuvwxyz0123456789-_.");
+                if (! contains(OnlineUpdateConfiguration::currentCategories, addcat))
+                    OnlineUpdateConfiguration::currentCategories = add(OnlineUpdateConfiguration::currentCategories, addcat);
+            }
+
+            if ( ret == `catdel )
+            {
+                string delcat = (string)UI::QueryWidget( `id(`categories), `CurrentItem);
+                OnlineUpdateConfiguration::currentCategories = filter(string s, OnlineUpdateConfiguration::currentCategories, { return s != delcat; });
+
+            }
+
+            refreshCategoryList(addcat);
+        }
+
 
         if ( ret == `back || ret == `abort || ret == `cancel )
         {
