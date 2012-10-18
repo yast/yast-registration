@@ -2,12 +2,13 @@ default namespace = "http://www.suse.com/1.0/yast2ns"
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
 namespace config = "http://www.suse.com/1.0/configns"
 
-online_update_configuration = element online_update_configuration { enable_automatic_online_update? & skip_interactive_patches? & auto_agree_with_licenses? & update_interval?  }
+online_update_configuration = element online_update_configuration { enable_automatic_online_update? & skip_interactive_patches? & auto_agree_with_licenses? & include_recommends? & update_interval?  }
 
 
 enable_automatic_online_update = element enable_automatic_online_update { BOOLEAN }
 skip_interactive_patches = element skip_interactive_patches { BOOLEAN }
 auto_agree_with_licenses = element auto_agree_with_licenses { BOOLEAN }
+include_recommends = element include_recommends { BOOLEAN }
 update_interval  = element update_interval { text  }
 
 
