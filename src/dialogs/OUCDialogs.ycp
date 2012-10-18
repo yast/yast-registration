@@ -99,7 +99,7 @@ term getOUCDialog(symbol type)
                     );
 
     term autoOnlineUp = `VBox(
-        `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, true,
+        `CheckBoxFrame(`id(`automaticOnlineUpdate), automaticOnlineUpdate, false,
         `VBox(
             `VSpacing(0.8),
             `HBox(

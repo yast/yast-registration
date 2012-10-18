@@ -413,7 +413,7 @@ global boolean setOnlineUpdateCronjob(symbol interval)
     }
     else
     {
-        y2milestone("Could not create online update cron job at %1", cronSel);
+        y2error("Could not create online update cron job at %1", cronSel);
         return false;
     }
 
