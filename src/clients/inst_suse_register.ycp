@@ -30,6 +30,7 @@
     import "Label";
     import "Internet";
     import "Register";
+    import "RegistrationStatus";
     import "YSR";
     import "SourceManager";
     import "Package";
@@ -77,6 +78,8 @@
     // Register::initialize() is mandatory - never remove it
     Register::initialize();
 
+    map<any,any> registration_status = $[];
+
     map ui = UI::GetDisplayInfo();
     boolean textmode = (boolean) ui["TextMode"]:nil;
 
@@ -121,16 +124,22 @@ by registering this installation.");
 
     string nccc_configure   = _("Configure Now (Recommended)");
     string nccc_noconfigure = _("Configure Later");
+    /* alternative strings for the main dialog */
+    string nccc_register_now = _("Register Now (Recommended)");
+    string nccc_register_later = _("Register Later");
 
     string nccc_sub_comment = _("Include for Convenience");
     string nccc_sub_hwinfo  = _("Hardware Profile");
+    string nccc_cur_reg_stat= _("Registration Status");
     string nccc_sub_optional= _("Optional Information");
     string nccc_forcereg= _("Registration Code");
     string nccc_sub_showbtn = _("Details...");
+    string nccc_privacy_detail = _("Registration and Privacy Details");
 
 
     /*  strings for success popup   */
     string nccc_success_msg = _("Your configuration was successful.");
+    string nccc_success_msg_registration = _("Your registration was successful.");
     string nccc_success_server_added = _("An update server has been added to your configuration.");
     nccc_success_server_added = TXT["reposUpdated_old"]:"";
     string nccc_error_no_server_added = _("No update server could be added to your configuration.");
@@ -247,15 +256,89 @@ needs to install the following packages.");
     string information_text = "";
     string error_msg_details = "";
 
+/* strings for registration status */
+map<string,string> subscription_status_readable = $[
+//translators: active - describes an 'active' subscription
+        "ACTIVE"  : _("active"),
+//translators: expired - describes an 'expired' subscription
+        "EXPIRED" : _("expired"),
+//translators: active - describes a 'returned' or a 'refunded' subscription
+        "RMA"     : _("returned or refunded")
+    ];
+
+map<string,string> subscription_type_readable = $[
+//translators: full version - describes a subscription for a full product without limitation
+        "FULL"        : _("full version"),
+//translators: evaluation - describes an evaluation subscription (limitations may be applied)
+        "EVALUATION"  : _("evaluation"),
+//translators: full version - describes a provisional subscription (valid only for a short period of time)
+        "PROVISIONAL" : _("provisional")
+    ];
+
+map<string,string> registration_errorcode_readable = $[
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "OK"           : _("Registration is successful."),
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "ERR_SUB_EXP"  : _("Subscription is expired."),
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "ERR_SUB_EXP_alternative"  : _("Registration is expired."),
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "ERR_NO_CODE"  : _("Registration code is missing."),
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "ERR_INV_CODE" : _("Registration code is invalid."),
+// translators: short status message for the registration/subscription status, should be as short as possible
+        "ERR_LOCKED"   : _("Registration code does not match mail address.")
+];
+
+// translators: heading for the status of the registration AT a certain POINT in time (not a period), the status may have changed the other second
+string reg_stat_heading      = "<p>" + _("Registration Status at: <b>%1</b>") + "</p>";
+// translators: heading for a list of products, 1: product name, 2: architecture (x86, x86_64, ppc,...), 3: release (CD, DVD,...)
+string reg_stat_product      = _("Product: <b>%1</b> (%2, %3)");
+// translators: heading for the subscription (of a product): 1: status (active, expired,...), 2: type (full version, provisional,...)
+string reg_stat_subscription = _("Subscription: <b>%1</b> (%2)");
+// translators: heading for a (error) message of a subscription: 1: translated text
+string reg_stat_message      = _("Message: %1");
+// translators: heading for the date of the expiry of a subscription
+string reg_stat_expiry       = _("Expiry: %1");
+// translators: error message for the case that no registration status for any product is available
+string reg_stat_missing      = "<p><b>" + _("No status information about registered products available.") + "</b></p>";
+
+/* dialogs for the registration status */
+term registration_status_missing_dialog = `VBox(
+        `Label( `opt(`boldFont), _("Registration status is not available.") ),
+        `ButtonBox(`PushButton(`id(`close), Label::CloseButton()))
+    );
+
+term registration_status_dialog(boolean with_repo)
+{
+    return `VBox(
+        `MinSize(  75, 10, `VBox(
+            `Label( nccc_cur_reg_stat ),
+            `RichText(`id(`information_text_status), "" )
+        ) ),
+        with_repo ? `MinSize(  75, 4, `VBox(
+            `Label( success_detail_label ),
+            `RichText(`id(`information_text_repos), `opt(`plainText), "" )
+        ) ) : `Empty(),
+
+        `ButtonBox(`PushButton(`id(`ok), Label::OKButton()))
+    );
+}
+
+
+
+
+/* general dialogs */
+
     // default is true, see statement in layout term
     boolean configure_status = true;
-
 
 
     /* --   MAIN (WIZARD) LAYOUT  --  */
     term sr_layout=nil;
 
-    list<term> expertMenu = [ `item(`id(`localRegistrationServer), TXT["localRegistrationServer"]:"" )
+    list<term> expertMenu = [ `item(`id(`localRegistrationServer), TXT["localRegistrationServer"]:"" ),
+                              `item(`id(`showinfo), nccc_privacy_detail)
                             ];
 
 
@@ -281,15 +364,17 @@ needs to install the following packages.");
                             // active in SLE products only
                             IAMSLE ? `Left( `CheckBox(`id(`regularly_run), `opt(`notify), title_regularly_run, Register::register_regularly ) ):`Empty(),
                            `Right(
-                                   `HBox( `PushButton(`id(`showinfo), nccc_sub_showbtn ),
-                                           IAMSLE ? `MenuButton( _("Advanced"), expertMenu ):`Empty()
-                                   )
+                                   `HBox( IAMSLE ? `MenuButton( _("Advanced"), expertMenu ):`Empty() )
                            )
                         )
                     )
                 )
             ))
-        ))
+        )),
+        `VSpacing(0.4),
+        `PushButton(`id(`registration_status), nccc_cur_reg_stat )
+        //,`PushButton(`id(`registration_status_with_repos), nccc_cur_reg_stat + " with repos" )
+        //,`PushButton(`id(`registration_status_without_repos), nccc_cur_reg_stat + " without repos" )
     ));
 
 
@@ -385,20 +470,22 @@ needs to install the following packages.");
 
 
     /* --       SUCCESS MESSAGE    --  */
-    term nccc_success=
-    `VBox(
-           `Left( `Label( `opt(`boldFont), title ) ),
-           `VSpacing( 0.5 ),
-           `Left( `Label( nccc_success_msg ) ),
-           `Left( `Label( nccc_success_server_added ) ),
-           `HBox(
-                  `HWeight(1, `PushButton(`id(`ok), Label::OKButton()  ) ),
-                  `HSpacing( 3 ),
-                  `HWeight(1, `PushButton(`id(`success_detail), details ) )
-           )
-    );
-
-
+term registration_status_short_dialog(string message)
+{
+    term inner = `VBox(
+               `Left( `Label( `opt(`boldFont), title ) ),
+               `VSpacing( 0.5 ),
+               `Left( `Label( message ) ),
+               `VSpacing( 0.5 ),
+               `HBox(
+                      `HWeight(1, `PushButton(`id(`ok), Label::OKButton()  ) ),
+                      `HSpacing( 3 ),
+                      `HWeight(1, `PushButton(`id(`details), details ) )
+               )
+           );
+    float spacing = 0.5;
+    return `VBox( `VSpacing(spacing), `HBox( `HSpacing(spacing), inner, `HSpacing(spacing) ), `VSpacing(spacing) );
+}
 
 
     /* --    SUCCESS DETAILS     --  */
@@ -706,7 +793,137 @@ boolean registrationServerSettings()
     return status;
 }
 
+// refresh the current registration status
+// return true if a correct and parsable status is present and false otherwise
+boolean refresh_registration_status()
+{
+    registration_status = RegistrationStatus::ParseStatusXML(RegistrationStatus::RegFile());
+    y2milestone("Current registration status: %1", registration_status);
+    return registration_status["__parser_status"]:"1" == "0" ? true : false;
+}
 
+symbol overall_registration_status()
+{
+    map<any,map> pall = registration_status["products"]:$[];
+    integer pnum_all = size(pall);
+    integer pnum_ok  = 0;
+    integer pnum_err = 0;
+    foreach(any k, map<any,any> m, pall, {
+        string m_errorcode = toupper(sformat("%1", m["errorcode"]:"NOTOK"));
+        string m_result    = tolower(sformat("%1", m["result"]:"error"));
+        if ( m_errorcode != "OK" || m_result != "success" )
+            pnum_err = pnum_err + 1;
+        else
+            pnum_ok = pnum_ok + 1;
+    });
+    symbol ret = `error;
+    if (pnum_all > 0 && pnum_ok == pnum_all && pnum_err == 0)
+        ret = `success;
+    else if (pnum_all > 0 && pnum_err > 0 && pnum_err < pnum_all && pnum_err + pnum_ok == pnum_all)
+        ret = `partial;
+    else if (pnum_all == 0)
+        ret = `noproducts;
+    else
+       ret = `error;
+
+   return ret;
+}
+
+string registration_status_formatted(symbol format)
+{
+    string rs="";
+    if (format == `simple_html)
+    {
+        rs = rs + sformat(reg_stat_heading, registration_status["_generated_fmt"]:"");
+        if (is(registration_status["products"]:nil, map) && size(registration_status["products"]:$[]) > 0)
+        {
+            rs = rs + "<p><ul>";
+            foreach(any prodkey, map<any, any> prod, registration_status["products"]:$[], {
+                map<any,any> sub = prod["subscription"]:$[];
+                map<any,any> prodinfo = prod["_productinfo"]:$[];
+                string sub_status = subscription_status_readable[toupper(sub["status"]:"")]:"";
+                string sub_type   = subscription_type_readable[toupper(sub["type"]:"")]:"";
+                string sub_expiry = sformat("%1", sub["_expiration_fmt"]:"");
+                string errorcode  = toupper(prod["errorcode"]:"");
+                string product_name_version = sformat("%1 %2", prod["product"]:"", prod["version"]:"" );
+                if (haskey(prodinfo, "summary"))
+                    product_name_version = prodinfo["summary"]:product_name_version;
+                rs = rs + "<li>"
+                     + sformat(reg_stat_product, product_name_version, prod["arch"]:"", prod["release"]:"")
+                     + (sub_status != "" && sub_type != "" ? "<br />" + sformat(reg_stat_subscription, sub_status, sub_type) : "")
+                     + (errorcode  != "OK" ? "<br />" + sformat(reg_stat_message, registration_errorcode_readable[errorcode]:"") : "")
+                     + (sub_expiry != ""   ? "<br />" + sformat(reg_stat_expiry, sub_expiry) : "")
+                     + "</li>";
+            });
+            rs = rs + "</ul></p>";
+        }
+        else
+        {
+            rs = rs + reg_stat_missing;
+        }
+    }
+    //else if (format == `plain_text)
+    //{
+    //    rs = "not implemented yet";
+    //}
+    else
+    {
+        rs = sformat("%1", registration_status);
+    }
+
+    return rs;
+}
+
+void show_registration_status(map<symbol, any> options)
+{
+    // make a refresh, no matter what might have happened before
+    boolean have_status = refresh_registration_status();
+    if (! have_status)
+    {
+        UI::OpenDialog( registration_status_missing_dialog );
+        UI::UserInput();
+        UI::CloseDialog();
+        return;
+    }
+
+    string changed_repos = nccc_no_source_changes;
+    boolean show_repos = haskey(options, `repos);
+    if (show_repos && is(options[`repos]:[], list<string>) && size(options[`repos]:[]) > 0)
+    {
+        changed_repos = mergestring((list<string>)options[`repos]:[], "\n");
+    }
+
+    // process registration_status
+    symbol reg_overall = overall_registration_status();
+    map<symbol,string> reg_message = $[
+        `success : nccc_success_msg,
+        // translators: failed partially - means: some products were registered, some were not.
+        `partial : _("Registration failed partially."),
+        // translators: failed - means: No products were registered.
+        `error : _("Registration failed."),
+        // translators: No products found to be registered - means: None of the currently installed products needs (or can be) registered.
+        `noproducts : _("No products found to be registered.")
+    ];
+    // translators: unknown status - meaning: fallback message if the the registration status could not be computed
+    string reg_status_unknown = _("unknown status");
+    UI::OpenDialog(registration_status_short_dialog(reg_message[reg_overall]:reg_status_unknown));
+    UI::SetFocus(`id(`ok));
+
+    symbol sret = nil;
+    repeat {
+        sret = (symbol) UI::UserInput();
+        if (sret == `details) {
+            UI::OpenDialog( registration_status_dialog(show_repos) );
+            UI::SetFocus(`id(`ok));
+            UI::ChangeWidget(`id(`information_text_status), `Value, registration_status_formatted(`simple_html) );
+            if (show_repos)
+                UI::ChangeWidget(`id(`information_text_repos),  `Value, changed_repos );
+            UI::UserInput();
+            UI::CloseDialog();
+        }
+    } until (sret == `ok || sret == `close);
+    UI::CloseDialog();
+}
 
 /* ----------------------------------- END FUNCTIONS -------------------------------------------------------------  */
 
@@ -803,6 +1020,18 @@ boolean registrationServerSettings()
                 error_msg_details = "";
             }
 
+        }
+        //else if (ret == `registration_status_with_repos)
+        //{
+        //    show_registration_status($[`repos : ["added service nu_novell_com", "SLE-11-SP2 (nu_novell_com)", "SLE-11-SP2-SDK (nu_novell_com)", "SLE-11-SP2-Updates (nu_novell_com)"]]);
+        //}
+        //else if (ret == `registration_status_without_repos)
+        //{
+        //    show_registration_status($[ `repos : [] ]);
+        //}
+        else if (ret == `registration_status)
+        {
+            show_registration_status($[]);
         }
         else if (ret == `next)
         {
@@ -987,47 +1216,15 @@ boolean registrationServerSettings()
                         // add/delete/change repositories
                         repoSummary = Register::updateSoftwareRepositories(taskList, true);
 
-                        // #186978  -  hide the passwords of the urls in the status window
-                        // now obsolete - the summary created by "updateSoftwareRepositories" will not contain passwords of URLs
-
                         UI::CloseDialog();
-
-                        // and then show success message
-                        symbol sret=nil;
-
-                        // (#261239) show success popup only on success else error message
-                        if (repoSummary != nil && size(repoSummary) != 0)
-                        {
-                            UI::OpenDialog( nccc_success );
-                            repeat
-                            {
-                                sret = (symbol) UI::UserInput();
-                                if (sret == `success_detail)
-                                {
-                                    string text = mergestring (repoSummary, "\n");
-                                    // Show the URLs that were added as update sources.
-                                    // Not STDERR of suse_register output, we may have
-                                    // declined some unsigned ones, #180820#c26.
-                                    UI::OpenDialog( nccc_success_detail );
-                                    UI::SetFocus(`id(`ok));
-                                    UI::ChangeWidget(`id(`success_detail_richtext), `Value, text );
-                                    UI::UserInput();
-                                    UI::CloseDialog();
-                                }
-                            } until (sret == `ok );
-                            UI::CloseDialog();
-                        }
-                        else
-                        {
-                            //Popup::Error(nccc_error_no_server_added);
-                            Popup::Notify(nccc_no_source_changes);
-                        }
                     }
+
+                    // show new status overview and the added repos
+                    show_registration_status( $[`repos : repoSummary] );
 
                     // we are done - finally
                     loopend = true;
                 }
-
 
 
                 //  show a message when there are no products to register
