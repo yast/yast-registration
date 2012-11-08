@@ -55,7 +55,7 @@ global boolean iamroot = false;
 global boolean submit_optional = false;
 global boolean submit_hwdata   = false;
 global boolean force_registration = false;
-global boolean display_forcereg = false;
+global boolean display_forcereg = true;
 global boolean register_regularly = false;  // (FATE #301822)
 global boolean disable_w3m = false;
 global boolean use_proxy   = false;
@@ -742,7 +742,9 @@ void read_config()
     submit_optional = ProductFeatures::GetBooleanFeature("globals", "enable_register_optional");
     submit_hwdata   = ProductFeatures::GetBooleanFeature("globals", "enable_register_hwdata");
     // this boolean comes only from the control file - nowhere to be saved
-    display_forcereg = ProductFeatures::GetBooleanFeature("globals", "display_register_forcereg");
+    // do never hide the regcode checkbox, fix on behalf of (bnc#784588) as its fix will not hit already installed systems
+    //display_forcereg = ProductFeatures::GetBooleanFeature("globals", "display_register_forcereg");
+    display_forcereg = true;
     disable_w3m = ProductFeatures::GetBooleanFeature("globals", "disable_register_w3m");
 
     register_regularly = ((integer) SCR::Execute(.target.bash, "[ -f /var/lib/suseRegister/neverRegisterOnBoot ]") ) == 0 ? false:true;
