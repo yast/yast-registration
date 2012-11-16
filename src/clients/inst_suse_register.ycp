@@ -240,26 +240,26 @@ if (! Mode::normal()) help = help + help_para6;
 
 help = help + HELP["localRegistrationChapter1"]:"" + HELP["localRegistrationChapter2"]:"";
 
-    /*  further strings   */
-    string checking         = _("Checking...");
-    string error            = _("Error");
-    string server_error     = _("An error occurred while connecting to the server.");
-    string details          = _("Details...");
-    string error_msg        = _("Error");
-    string starting_browser = _("Starting browser...");
-    string error_target_init_failed = _("Initialization failed.\nCan not interact with the package system.");
-    // FIXME LATER (in order to not break the translations now): registrer -> register (bnc#703222)
-    string message_install_missing_packages = _("In order to registrer properly the system
+/*  further strings   */
+string checking         = _("Checking...");
+string error            = _("Error");
+string server_error     = _("An error occurred while connecting to the server.");
+string details          = _("Details...");
+string error_msg        = _("Error");
+string starting_browser = _("Starting browser...");
+string error_target_init_failed = _("Initialization failed.\nCan not interact with the package system.");
+// fixed typo: registrer -> register (bnc#703222)
+string message_install_missing_packages = _("In order to register properly the system
 needs to install the following packages.");
 
-    /* other string variables */
-    string information_text = "";
-    string error_msg_details = "";
+/* other string variables */
+string information_text = "";
+string error_msg_details = "";
 
 /* strings for registration status */
 map<string,string> subscription_status_readable = $[
 //translators: active - describes an 'active' subscription
-        "ACTIVE"  : _("active"),
+    "ACTIVE"  : _("active"),
 //translators: expired - describes an 'expired' subscription
         "EXPIRED" : _("expired"),
 //translators: active - describes a 'returned' or a 'refunded' subscription
@@ -332,7 +332,6 @@ term registration_status_dialog(boolean with_repo)
 
     // default is true, see statement in layout term
     boolean configure_status = true;
-
 
     /* --   MAIN (WIZARD) LAYOUT  --  */
     term sr_layout=nil;
