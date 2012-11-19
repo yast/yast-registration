@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov 19 17:08:25 UTC 2012 - jdsn@suse.de
+
+- show detailed registration status window (fate#312712)
+- 2.17.36
+
+-------------------------------------------------------------------
 Thu Oct 18 20:33:00 UTC 2012 - jdsn@suse.de
 
 - backport feature from yast2-online-update-configuration

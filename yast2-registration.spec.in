@@ -19,7 +19,7 @@
 
 
 @HEADER@
-Requires:	yast2 >= 2.17.0
+Requires:	yast2 >= 2.17.122
 Requires:	yast2-packager >= 2.17.0
 Requires:	suseRegister
 Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
@@ -30,7 +30,7 @@ Requires(post): sed
 
 PreReq:		%fillup_prereq
 
-BuildRequires:	yast2 >= 2.17.0
+BuildRequires:	yast2 >= 2.17.122
 BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
 BuildRequires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
 BuildRequires:	yast2-pkg-bindings >= 2.17.20
