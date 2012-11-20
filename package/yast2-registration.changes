@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov 20 17:26:13 UTC 2012 - jdsn@suse.de
+
+- show detailed registration status window (fate#312712)
+- confirmed license GPL v2
+- 2.21.2
+
+-------------------------------------------------------------------
 Fri Aug 31 15:58:49 UTC 2012 - jdsn@suse.de
 
 - do not block registration browser via SSH (bnc#179614) (bnc#718334)

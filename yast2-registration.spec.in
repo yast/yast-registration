@@ -20,7 +20,7 @@
 @HEADER@
 Group:          System/YaST
 License:        GPL-2.0
-Requires:       yast2 >= 2.17.0
+Requires:       yast2 >= 2.23.13
 Requires:       yast2-packager >= 2.17.0
 Requires:       suseRegister
 Requires:       perl-TimeDate limal limal-perl limal-ca-mgm-perl
@@ -29,7 +29,7 @@ Requires:       yast2-registration-branding
 Requires(post): sed grep
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 PreReq:         %fillup_prereq
-BuildRequires:  yast2 >= 2.17.0
+BuildRequires:  yast2 >= 2.23.13
 BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packager yast2-testsuite
 BuildRequires:  limal limal-ca-mgm-perl limal-perl perl-TimeDate
 BuildRequires:  yast2-pkg-bindings >= 2.17.20
