@@ -19,7 +19,7 @@
 
 @HEADER@
 Group:          System/YaST
-License:        GPL-2.0+
+License:        GPL-2.0
 Requires:       yast2 >= 2.17.0
 Requires:       yast2-packager >= 2.17.0
 Requires:       suseRegister
@@ -61,7 +61,7 @@ install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
 @CLEAN@
 
 %package branding-SLE
-License:        GPL-2.0+
+License:        GPL-2.0
 Requires:       yast2-registration
 Provides:       yast2-registration-branding
 Conflicts:      otherproviders(yast2-registration-branding)
@@ -78,7 +78,7 @@ Authors:
     J. Daniel Schmidt <jdsn@suse.de>
 
 %package branding-openSUSE
-License:        GPL-2.0+
+License:        GPL-2.0
 Requires:       yast2-registration
 Provides:       yast2-registration-branding
 Conflicts:      otherproviders(yast2-registration-branding)
