@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb  7 17:15:41 UTC 2013 - jdsn@suse.de
+
+- fix the consistent use of the term repository (bnc#776362)
+- 2.17.37
+
+-------------------------------------------------------------------
 Mon Nov 19 17:08:25 UTC 2012 - jdsn@suse.de
 
 - show detailed registration status window (fate#312712)
