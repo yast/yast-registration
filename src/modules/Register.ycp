@@ -1143,7 +1143,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                     else
                     {
                         y2milestone("Successfully added a new service: %1 (%2)", pService, newSrcID);
-                        summary = add(summary, sformat(_("Added Source: %1"), pService ));
+                        summary = add(summary, sformat(_("Added Repository: %1"), pService ));
                     }
 
                 }
@@ -1163,7 +1163,7 @@ global list<string> updateSoftwareRepositories(map<string, any> taskList, boolea
                         if ( Pkg::SourceDelete(srcID) )
                         {
                             y2milestone("Successfully deleted a service: %1 (%2)", pService, srcID);
-                            summary = add(summary, sformat(_("Deleted Source: %1"), pService));
+                            summary = add(summary, sformat(_("Deleted Repository: %1"), pService));
                         }
                         else
                         {

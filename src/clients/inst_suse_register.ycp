@@ -167,16 +167,6 @@ the configuration on the opened Web site.");
     string conflict_need_info = _("The server requires additional system information. Activating 
 submission of the hardware profile automatically.");
 
-     /*  nonroot-message strings */
-     string nonroot_title = _("Update Source Issues");
-     string nonroot_message = _("Registering as a regular user does not include the update source
-in the Online Update YaST module. If you continue and later want 
-to update with Online Update, the source must be added manually.
-Other tools, such as Software Updater in the panel, can still be 
-used. Alternatively, cancel then register through YaST as root 
-so the sources are available to all tools.");
-
-
 
     /* error messages  */
     string data_invalid = _("Error: Data received is invalid.");
@@ -185,7 +175,7 @@ so the sources are available to all tools.");
 Run the suse_register command manually.");
     string no_product_msg = _("No product found to be registered.
 You do not need to register this installation.
-Please add update sources yourself.");
+Please add update repositories yourself.");
     string no_w3m_msg = _("Your registration requires interactive input that is not
 supported in text mode. Run YaST2 in the graphical mode or
 run the suse_register command manually.");
@@ -222,10 +212,10 @@ the transmitted information in the log file <tt>~/.suse_register.log</tt>.
 
 string help_para5 = _("<p>
 <b>Regularly Synchronize with the Customer Center</b> checks that your update 
-sources are still valid and adds any new ones that may be available.
+repositories are still valid and adds any new ones that may be available.
 It additionally sends any modifications to your included data to Novell, such 
 as hardware information if <b>Hardware Information</b> is activated.
-This option does not remove any sources added manually.
+This option does not remove any repositories that were added manually.
 </p>");
 
 string help_para6 = _("<p>
@@ -1208,7 +1198,6 @@ void show_registration_status(map<symbol, any> options)
 
                     if ( taskList != $[] )
                     {
-                        string oldMessage = _("Setting up online update source...");
                         string newMessage = _("Updating software repositories...");
                         UI::OpenDialog(`VBox(`Label( newMessage )));
 
