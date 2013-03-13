@@ -42,19 +42,25 @@ global string defaultRegistrationURL = "";
 // cache the base product details
 map<string, any> baseProductDetail = $[];
 
-global map<symbol, string> Intervals = $[
-    `daily  : "daily",
-    `weekly : "weekly",
-    `monthly: "monthly"
+global map<symbol, map<symbol,string> > Intervals = $[
+    `daily  : $[`name:"daily" ,  `trans:_("daily")  ],
+    `weekly : $[`name:"weekly",  `trans:_("weekly") ],
+    `monthly: $[`name:"monthly", `trans:_("monthly")]
     ];
 
 global map<string,term> defaultCategories = $[
-    "yast"        : `item( `id("yast"),        "Packagemanager and YaST"),
-    "security"    : `item( `id("security"),    "Security"),
-    "recommended" : `item( `id("recommended"), "Recommended"),
-    "optional"    : `item( `id("optional"),    "Optional"),
-    "document"    : `item( `id("document"),    "Document"),
-    "other"       : `item( `id("other"),       "Other")
+    //translators: this name is a (technical) category for an update package
+    "yast"        : `item( `id("yast"),        _("Packagemanager and YaST")),
+    //translators: this name is a (technical) category for an update package
+    "security"    : `item( `id("security"),    _("Security")),
+    //translators: this name is a (technical) category for an update package
+    "recommended" : `item( `id("recommended"), _("Recommended")),
+    //translators: this name is a (technical) category for an update package
+    "optional"    : `item( `id("optional"),    _("Optional")),
+    //translators: this name is a (technical) category for an update package: Document, meaning Documentation
+    "document"    : `item( `id("document"),    _("Document")),
+    //translators: this name is a (technical) category for an update package
+    "other"       : `item( `id("other"),       _("Other"))
     ];
 
 /*
@@ -377,16 +383,17 @@ global boolean setUpdateRepo(string updateRepo)
     return true;
 }
 
-global string intervalSymbolToString(symbol intervalSym)
+global string intervalSymbolToString(symbol intervalSym, symbol strType)
 {
-    return Intervals[intervalSym]:"none";
+    map<symbol,string> i = Intervals[intervalSym]:$[];
+    return i[strType]:"none";
 }
 
 global symbol intervalStringToSymbol(string intervalStr)
 {
     symbol result = `none;
-    foreach(symbol sym, string str, Intervals, {
-        if ( str == intervalStr ) result = sym;
+    foreach(symbol sym, map<symbol,string> i, Intervals, {
+        if ( i[`name]:"none" == intervalStr ) result = sym;
         return;
     } );
     return result;
@@ -552,7 +559,7 @@ global map Export()
              "skip_interactive_patches":skipInteractivePatches,
              "auto_agree_with_licenses":autoAgreeWithLicenses,
              "include_recommends":includeRecommends,
-             "update_interval":intervalSymbolToString(updateInterval),
+             "update_interval":intervalSymbolToString(updateInterval, `name),
              "category_filter": $[ "category":currentCategories ]
     ];
 }

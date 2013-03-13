@@ -89,7 +89,7 @@ string Summary()
     if (OnlineUpdateConfiguration::enableAOU)
     {
         summary = Summary::AddHeader (summary, interval);
-        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::intervalSymbolToString(OnlineUpdateConfiguration::updateInterval) );
+        summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::intervalSymbolToString(OnlineUpdateConfiguration::updateInterval, `trans) );
 
         summary = Summary::AddHeader (summary, skipInteractivePatches);
         summary = Summary::AddLine   (summary, OnlineUpdateConfiguration::skipInteractivePatches ? enabledMsg:disabledMsg  );
