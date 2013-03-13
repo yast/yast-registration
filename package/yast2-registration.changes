@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 13 15:20:43 UTC 2013 - jdsn@suse.de
+
+- translate cron intervals and update categories (bnc#807773)
+- 2.17.38
+
+-------------------------------------------------------------------
 Thu Feb  7 17:15:41 UTC 2013 - jdsn@suse.de
 
 - fix the consistent use of the term repository (bnc#776362)
