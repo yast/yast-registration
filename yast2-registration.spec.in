@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-registration
 #
-# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -19,27 +19,27 @@
 
 
 @HEADER@
-Requires:	yast2 >= 2.17.122
-Requires:	yast2-packager >= 2.17.0
-Requires:	suseRegister
-Requires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
-Requires:	yast2-pkg-bindings >= 2.17.20
-Requires:	yast2-registration-branding
+Requires:       yast2 >= 2.17.122
+Requires:       yast2-packager >= 2.17.0
+Requires:       suseRegister
+Requires:       perl-TimeDate limal limal-perl limal-ca-mgm-perl
+Requires:       yast2-pkg-bindings >= 2.17.20
+Requires:       yast2-registration-branding
 Requires(post): sed
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 
-PreReq:		%fillup_prereq
+PreReq:         %fillup_prereq
 
-BuildRequires:	yast2 >= 2.17.122
-BuildRequires:	perl-XML-Writer update-desktop-files yast2-devtools yast2-testsuite yast2-packager
-BuildRequires:	perl-TimeDate limal limal-perl limal-ca-mgm-perl
-BuildRequires:	yast2-pkg-bindings >= 2.17.20
-BuildRequires:	suseRegister
+BuildRequires:  yast2 >= 2.17.122
+BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packager yast2-testsuite
+BuildRequires:  limal limal-ca-mgm-perl limal-perl perl-TimeDate
+BuildRequires:  yast2-pkg-bindings >= 2.17.20
+BuildRequires:  suseRegister
 
-BuildArch:	noarch
+BuildArch:      noarch
 
-Summary:	YaST2 - Registration Module
-Source1:    org.opensuse.yast.modules.ysr.policy
+Summary:        YaST2 - Registration Module
+Source1:        org.opensuse.yast.modules.ysr.policy
 
 %description
 The registration module to register products and/or to fetch an update
@@ -56,20 +56,20 @@ Authors:
 @BUILD@
 
 @INSTALL@
-
 mkdir -p $RPM_BUILD_ROOT/usr/share/PolicyKit/policy
 install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
-
 
 @CLEAN@
 
 %package branding-SLE
-Requires:	yast2-registration
-Provides:	yast2-registration-branding
-Conflicts:	otherproviders(yast2-registration-branding)
-Supplements:packageand(yast2-registration:branding-SLE)
-Summary:	Branding for yast2-registration for SLE products
-Group:      System/YaST
+
+Requires:       yast2-registration
+Provides:       yast2-registration-branding
+Conflicts:      otherproviders(yast2-registration-branding)
+Supplements:    packageand(yast2-registration:branding-SLE)
+Summary:        Branding for yast2-registration for SLE products
+Group:          System/YaST
+
 %description branding-SLE
 Branding for yast2-registration for SLE products
 
@@ -80,12 +80,14 @@ Authors:
     J. Daniel Schmidt <jdsn@suse.de>
 
 %package branding-openSUSE
-Requires:	yast2-registration
-Provides:	yast2-registration-branding
-Conflicts:	otherproviders(yast2-registration-branding)
-Supplements:packageand(yast2-registration:branding-openSUSE)
-Summary:	Branding for yast2-registration for openSUSE
-Group:      System/YaST
+
+Requires:       yast2-registration
+Provides:       yast2-registration-branding
+Conflicts:      otherproviders(yast2-registration-branding)
+Supplements:    packageand(yast2-registration:branding-openSUSE)
+Summary:        Branding for yast2-registration for openSUSE
+Group:          System/YaST
+
 %description branding-openSUSE
 Branding for yast2-registration for openSUSE
 
@@ -100,7 +102,6 @@ Authors:
 /usr/sbin/groupadd -r suse-ncc 2> /dev/null || :
 /usr/sbin/useradd -r -s /bin/bash -c "Novell Customer Center User" -d /var/lib/YaST2/suse-ncc-fakehome -g suse-ncc suse-ncc 2> /dev/null || :
 
-
 %post
 %{fillup_only -ns suse_register yast2-registration}
 %{fillup_only -ns automatic_online_update yast2-registration}
@@ -111,7 +112,6 @@ then
   sed -i --follow-symlinks "/^suse-ncc$/d" "$XAEXPORT"
   grep -q -v "^\s*$" "$XAEXPORT" || rm -f "$XAEXPORT"
 fi
-
 
 %files
 %defattr(-,root,root)
@@ -139,7 +139,6 @@ fi
 # policy files
 %attr(644,root,root) %config /usr/share/PolicyKit/policy/org.opensuse.yast.modules.*.policy
 
-
 %files branding-SLE
 %defattr(-,root,root)
 @desktopdir@/customer_center.desktop
@@ -147,4 +146,5 @@ fi
 %files branding-openSUSE
 %defattr(-,root,root)
 @desktopdir@/suse_register.desktop
+
 %changelog
