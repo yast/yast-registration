@@ -2,6 +2,8 @@
 Tue Jul  2 05:30:32 UTC 2013 - lslezak@suse.cz
 
 - use new polkit instead of deprecated PolicyKit
+- use perl-camgm instead of limal-ca-mgm-perl (dropped in
+  Factory/openSUSE-13.1)
 
 -------------------------------------------------------------------
 Tue Nov 20 17:26:13 UTC 2012 - jdsn@suse.de
