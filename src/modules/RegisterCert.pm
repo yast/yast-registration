@@ -3,8 +3,7 @@
 package RegisterCert;
 
 use strict;
-use LIMAL;
-use LIMAL::CaMgm;
+use CaMgm;
 use Date::Format;
 use YaST::YCP qw(:LOGGING);
 use Data::Dumper;
@@ -32,7 +31,7 @@ sub parseCertificate
         return undef;
     }
     
-    my $certData = LIMAL::CaMgm::LocalManagement::getCertificate($file, $LIMAL::CaMgm::E_PEM);
+    my $certData = CaMgm::LocalManagement::getCertificate($file, $CaMgm::E_PEM);
     
     my $rdnlist = $certData->getSubjectDN()->getDN();
     
