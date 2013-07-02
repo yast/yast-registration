@@ -30,10 +30,7 @@ Requires(post): sed grep
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 PreReq:         %fillup_prereq
 BuildRequires:  yast2 >= 2.23.13
-BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packager yast2-testsuite
-BuildRequires:  perl-camgm perl-TimeDate
-BuildRequires:  yast2-pkg-bindings >= 2.17.20
-BuildRequires:  suseRegister
+BuildRequires:  update-desktop-files yast2-devtools
 Buildrequires:  polkit
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
