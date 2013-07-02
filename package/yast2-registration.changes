@@ -7,6 +7,7 @@ Tue Jul  2 05:30:32 UTC 2013 - lslezak@suse.cz
 - removed useless BuildRequires: perl-XML-Writer yast2-packager
   yast2-testsuite perl-TimeDate yast2-pkg-bindings suseRegister
   (not needed durign build)
+- 2.24.0
 
 -------------------------------------------------------------------
 Tue Nov 20 17:26:13 UTC 2012 - jdsn@suse.de
