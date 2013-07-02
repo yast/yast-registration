@@ -34,7 +34,7 @@ BuildRequires:  perl-XML-Writer update-desktop-files yast2-devtools yast2-packag
 BuildRequires:  limal limal-ca-mgm-perl limal-perl perl-TimeDate
 BuildRequires:  yast2-pkg-bindings >= 2.17.20
 BuildRequires:  suseRegister
-Buildrequires:  PolicyKit-devel
+Buildrequires:  polkit
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
 
@@ -54,8 +54,8 @@ Authors:
 
 @INSTALL@
 
-mkdir -p $RPM_BUILD_ROOT/usr/share/PolicyKit/policy
-install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/PolicyKit/policy/
+mkdir -p $RPM_BUILD_ROOT/usr/share/polkit-1/actions
+install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/polkit-1/actions
 
 
 @CLEAN@
@@ -125,7 +125,7 @@ fi
 @scrconfdir@/cfg_suse_register.scr
 #fillup
 @fillupdir@/sysconfig.suse_register-yast2-registration
-%attr(644,root,root) %config /usr/share/PolicyKit/policy/org.opensuse.yast.modules.*.policy
+%attr(644,root,root) %config /usr/share/polkit-1/actions/org.opensuse.yast.modules.*.policy
 
 %files branding-SLE
 %defattr(-,root,root)
