@@ -26,6 +26,7 @@ Requires:       suseRegister
 Requires:       perl-camgm perl-TimeDate
 Requires:       yast2-pkg-bindings >= 2.17.20
 Requires:       yast2-registration-branding
+Requires:       yast2-ruby-bindings >= 1.0.0
 Requires(post): sed grep
 ## do never require "mozilla-xulrunner190" (bnc#436900)
 PreReq:         %fillup_prereq
@@ -110,12 +111,11 @@ fi
 %files
 %defattr(-,root,root)
 %doc @docdir@
-@clientdir@/*.ycp
+@clientdir@/*.rb
 @moduledir@/*.pm
-@moduledir@/*.ycp
-@moduledir@/*.ybc
+@moduledir@/*.rb
 %dir @yncludedir@/registration
-@yncludedir@/registration/*.ycp
+@yncludedir@/registration/*.rb
 @schemadir@/autoyast/rnc/*.rnc
 /usr/share/YaST2/yastbrowser
 # agents
