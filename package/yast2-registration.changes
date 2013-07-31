@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul 31 08:38:22 UTC 2013 - yast-devel@opensuse.org
+
+- converted from YCP to Ruby by YCP Killer
+  (https://github.com/yast/ycp-killer)
+- version 3.0.0
+
+-------------------------------------------------------------------
 Tue Jul  2 05:30:32 UTC 2013 - lslezak@suse.cz
 
 - use new polkit instead of deprecated PolicyKit
