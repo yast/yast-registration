@@ -15,9 +15,14 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-# norootforbuild
 
-@HEADER@
+Name:           yast2-registration
+Version:        3.1.0
+Release:        0
+
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Source0:        %{name}-%{version}.tar.bz2
+
 Group:          System/YaST
 License:        GPL-2.0
 Requires:       yast2 >= 2.23.13
@@ -28,10 +33,10 @@ Requires:       yast2-pkg-bindings >= 2.17.20
 Requires:       yast2-registration-branding
 Requires:       yast2-ruby-bindings >= 1.0.0
 Requires(post): sed grep
-## do never require "mozilla-xulrunner190" (bnc#436900)
 PreReq:         %fillup_prereq
 BuildRequires:  yast2 >= 2.23.13
-BuildRequires:  update-desktop-files yast2-devtools
+BuildRequires:  update-desktop-files
+BuildRequires:  yast2-devtools >= 3.0.6
 Buildrequires:  polkit
 BuildArch:      noarch
 Summary:        YaST2 - Registration Module
@@ -46,17 +51,18 @@ Authors:
 --------
     J. Daniel Schmidt <jdsn@suse.de>
 
-@PREP@
+%prep
+%setup -n %{name}-%{version}
 
-@BUILD@
+%build
+%yast_build
 
-@INSTALL@
+%install
+%yast_install
 
 mkdir -p $RPM_BUILD_ROOT/usr/share/polkit-1/actions
 install -m 0644 %SOURCE1 $RPM_BUILD_ROOT/usr/share/polkit-1/actions
 
-
-@CLEAN@
 
 %package branding-SLE
 License:        GPL-2.0
@@ -110,25 +116,25 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc @docdir@
-@clientdir@/*.rb
-@moduledir@/*.pm
-@moduledir@/*.rb
-%dir @yncludedir@/registration
-@yncludedir@/registration/*.rb
-@schemadir@/autoyast/rnc/*.rnc
+%doc %{yast_docdir}
+%{yast_clientdir}/*.rb
+%{yast_moduledir}/*.pm
+%{yast_moduledir}/*.rb
+%dir %{yast_yncludedir}/registration
+%{yast_yncludedir}/registration/*.rb
+%{yast_schemadir}/autoyast/rnc/*.rnc
 /usr/share/YaST2/yastbrowser
 # agents
-@scrconfdir@/cfg_suse_register.scr
+%{yast_scrconfdir}/cfg_suse_register.scr
 #fillup
-@fillupdir@/sysconfig.suse_register-yast2-registration
+/var/adm/fillup-templates/sysconfig.suse_register-yast2-registration
 %attr(644,root,root) %config /usr/share/polkit-1/actions/org.opensuse.yast.modules.*.policy
 
 %files branding-SLE
 %defattr(-,root,root)
-@desktopdir@/customer_center.desktop
+%{yast_desktopdir}/customer_center.desktop
 
 %files branding-openSUSE
 %defattr(-,root,root)
-@desktopdir@/suse_register.desktop
+%{yast_desktopdir}/suse_register.desktop
 %changelog

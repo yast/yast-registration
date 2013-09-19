@@ -8,7 +8,6 @@
 .deps
 .libs
 package/*.bz2
-package/*.spec
 stamp-h*
 aclocal.m4
 autodocs-cc.ami
@@ -24,7 +23,7 @@ config.log
 config.status
 config.sub
 configure
-configure.in
+configure.ac
 COPYING
 COPYRIGHT.english
 depcomp
