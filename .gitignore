@@ -31,4 +31,4 @@ Makefile.in
 missing
 mkinstalldirs
 pluglib-bindings.ami
-/nbproject/private/
+/nbproject/
