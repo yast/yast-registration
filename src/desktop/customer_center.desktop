@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Support;
+
+X-SuSE-YaST-Call=scc
+#X-SuSE-YaST-AutoInstClient=suse_register_auto
+X-SuSE-YaST-RootOnly=false
+X-SuSE-YaST-Group=Support
+#X-SuSE-YaST-AutoInst=all
+#X-SuSE-YaST-AutoInstClonable=true
+#X-SuSE-YaST-AutoInstRequires=lan,proxy
+#X-SuSE-YaST-AutoInstSchema=registration.rnc
+#X-SuSE-YaST-AutoInstResource=suse_register
+
+Icon=yast-product-registration
+Exec=/sbin/yast2 scc
+
+Name=SUSE Customer Center Configuration
+GenericName=SUSE Customer Center Configuration
+StartupNotify=true
