@@ -1,0 +1,557 @@
+-------------------------------------------------------------------
+Thu Sep 19 15:15:58 UTC 2013 - lslezak@suse.cz
+
+- do not use *.spec.in template, use *.spec file with RPM macros
+  instead
+- 3.1.0
+
+-------------------------------------------------------------------
+Wed Jul 31 08:38:22 UTC 2013 - yast-devel@opensuse.org
+
+- converted from YCP to Ruby by YCP Killer
+  (https://github.com/yast/ycp-killer)
+- version 3.0.0
+
+-------------------------------------------------------------------
+Tue Jul  2 05:30:32 UTC 2013 - lslezak@suse.cz
+
+- use new polkit instead of deprecated PolicyKit
+- use perl-camgm instead of limal-ca-mgm-perl (dropped in
+  Factory/openSUSE-13.1)
+- removed useless BuildRequires: perl-XML-Writer yast2-packager
+  yast2-testsuite perl-TimeDate yast2-pkg-bindings suseRegister
+  (not needed durign build)
+- 2.24.0
+
+-------------------------------------------------------------------
+Tue Nov 20 17:26:13 UTC 2012 - jdsn@suse.de
+
+- show detailed registration status window (fate#312712)
+- confirmed license GPL v2
+- 2.21.2
+
+-------------------------------------------------------------------
+Fri Aug 31 15:58:49 UTC 2012 - jdsn@suse.de
+
+- do not block registration browser via SSH (bnc#179614) (bnc#718334)
+
+-------------------------------------------------------------------
+Tue May  8 12:22:16 UTC 2012 - jdsn@suse.de
+
+- fix typo in help text (bnc#759735)
+
+-------------------------------------------------------------------
+Thu Mar 29 15:50:13 CEST 2012 - jsuchome@suse.cz
+
+- merge proofread texts 
+
+-------------------------------------------------------------------
+Fri Aug  5 17:26:09 CEST 2011 - jdsn@suse.de
+
+- make use of ButtonBox where possible to make button order
+  depending on desktop environment (bnc#701264)
+
+-------------------------------------------------------------------
+Mon Jul  4 15:59:24 CEST 2011 - jdsn@suse.de
+
+- fix typo in registration process (bnc#703222)
+
+-------------------------------------------------------------------
+Thu Jun 30 21:25:18 CEST 2011 - jdsn@suse.de
+
+- cleanup xauth export after interactive registration (bnc#702638)
+- fix broken xauth export file in post install script (bnc#702423)
+- 2.21.1
+
+-------------------------------------------------------------------
+Tue Jun 28 19:11:55 CEST 2011 - jdsn@suse.de
+
+- bump version
+- 2.21.0 
+
+-------------------------------------------------------------------
+Sat Aug 28 00:43:11 CEST 2010 - jdsn@suse.de
+
+- fix registration status detection (bnc#634026)
+  use a common flag file (bnc#633183)
+- fix proxy settings for WebYaST registrations (bnc#626965)
+- 2.19.7
+
+-------------------------------------------------------------------
+Fri Aug 20 15:45:49 CEST 2010 - jdsn@suse.de
+
+- use correct error code for backend init errors (bnc#633183)
+- touch flag file to show in webyast that the system is registered
+- 2.19.6 
+
+-------------------------------------------------------------------
+Wed Aug 18 15:19:55 CEST 2010 - mzugec@suse.cz
+
+- fixed typo (bnc#631743)
+- 2.19.5 
+
+-------------------------------------------------------------------
+Thu Jul 15 16:09:26 CEST 2010 - jdsn@suse.de
+
+- fix for the SMT server configuration via WebYaST (bnc#621914)
+- 2.19.4 
+
+-------------------------------------------------------------------
+Wed May 19 18:10:23 CEST 2010 - jdsn@suse.de
+
+- catch severe backend error and pass error message on (bnc#604777)
+- 2.19.3
+
+-------------------------------------------------------------------
+Wed Apr 28 20:59:51 CEST 2010 - jdsn@suse.de
+
+- split off online-update-configuration module (fate#308494)
+- 2.19.2
+
+-------------------------------------------------------------------
+Wed Apr 21 13:46:58 UTC 2010 - coolo@novell.com
+
+- buildrequire PolicyKit-devel to fix build
+
+-------------------------------------------------------------------
+Sat Nov 14 04:37:29 CET 2009 - jdsn@suse.de
+
+- fixes in REST API to prevent server error and loops (bnc#553244)
+- 2.19.1 
+
+-------------------------------------------------------------------
+Thu Nov 12 20:32:57 CET 2009 - jdsn@suse.de
+
+- fix catalog checks in stateless registration API
+- fix XML format in stateless registration API
+
+-------------------------------------------------------------------
+Thu Nov  5 17:28:43 CET 2009 - jdsn@suse.de
+
+- fix XML format for stateless registration API
+- disable help texts for Open-SLX (bnc#544907)
+- 2.19.0
+
+-------------------------------------------------------------------
+Mon Oct 26 12:13:22 CET 2009 - jdsn@suse.de
+
+- enable the webyast API by default
+- 2.18.1 
+
+-------------------------------------------------------------------
+Tue Oct 13 17:12:54 CEST 2009 - jdsn@suse.de
+
+- adding help texts for Open-SLX 
+
+-------------------------------------------------------------------
+Thu Sep 24 18:37:23 CEST 2009 - jdsn@suse.de
+
+- disable update repo restore because of bnc#449842
+- update cronjob support for auto license agreement (bnc#474573)
+- 2.18.0
+
+-------------------------------------------------------------------
+Wed Jul  8 14:48:32 CEST 2009 - ug@suse.de
+
+- Autoinst Resource in desktop file fixed
+
+-------------------------------------------------------------------
+Thu Apr 23 21:15:50 CEST 2009 - jdsn@suse.de
+
+- check boolean values also for nil to prevent crashes (bnc#463800) 
+
+-------------------------------------------------------------------
+Mon Feb 23 12:50:14 CET 2009 - jdsn@suse.de
+
+- reload SourceManager after registration (bnc#468449)
+- do not force the refreshes during registration (bnc#476429)
+
+-------------------------------------------------------------------
+Tue Feb 17 21:46:59 CET 2009 - jdsn@suse.de
+
+- fix autoyast registration; fix ported from SLE11 (bnc#476494) 
+- without network connection skip registration (bnc#475795)
+
+-------------------------------------------------------------------
+Tue Jan 27 17:35:44 CET 2009 - jdsn@suse.de
+
+- use OKDialog for online_update_configuration (bnc#440568)
+
+-------------------------------------------------------------------
+Mon Jan 26 17:48:44 CET 2009 - jdsn@suse.de
+
+- keep target initialized on exit (bnc#468449)
+- setup proxy before suseRegister initializes (bnc#468480)
+- setup http and https proxy settings individually (bnc#468919)
+
+-------------------------------------------------------------------
+Mon Dec  1 18:21:35 CET 2008 - jdsn@suse.de
+
+- fix detection of base product (bnc#449844)
+- 2.17.17
+
+-------------------------------------------------------------------
+Thu Nov 27 21:08:07 CET 2008 - jdsn@suse.de
+
+- fix restoring the default update repository (bnc#444301)
+- 2.17.16 
+
+-------------------------------------------------------------------
+Mon Nov 24 12:27:12 CET 2008 - jdsn@suse.de
+
+- call other modules via WFM (bnc#447043)
+- 2.17.15
+
+-------------------------------------------------------------------
+Fri Nov 21 12:22:33 CET 2008 - jdsn@suse.de
+
+- adapt to new suseRegister states (bnc#446572)
+- 2.17.14
+
+-------------------------------------------------------------------
+Thu Nov 20 17:33:30 CET 2008 - jdsn@suse.de
+
+- finish sources when changed to enforce reload (bnc#447080)
+- merge service repo flags instead overwriting them
+
+-------------------------------------------------------------------
+Fri Nov 14 17:55:56 CET 2008 - jdsn@suse.de
+
+- fix repo type definition for adding sources (bnc#444770)
+- remove deprecated unused function
+- add more debug logging
+- service changes should not enable all its catalogs
+- refresh services prior to repositories
+- 2.17.13
+
+-------------------------------------------------------------------
+Thu Nov 13 15:33:39 CET 2008 - jdsn@suse.de
+
+- fix empty install message (bnc#444638)
+
+-------------------------------------------------------------------
+Tue Nov 11 16:34:24 CET 2008 - jdsn@suse.de
+
+- fix error in sformat statement (bnc#443781)
+- 2.17.12 
+
+-------------------------------------------------------------------
+Tue Nov 11 14:51:44 CET 2008 - jdsn@suse.de
+
+- fix registration code parameter (bnc#443704) 
+
+-------------------------------------------------------------------
+Fri Nov  7 19:14:00 CET 2008 - jdsn@suse.de
+
+- fix reading repo settings (bnc#427698)
+- 2.17.11
+
+-------------------------------------------------------------------
+Thu Nov  6 15:21:49 CET 2008 - jdsn@suse.de
+
+- split off branding packages (bnc#436644)
+- fix error code handling of SuseRegister
+- updated yastbrowser for xulrunner191 (bnc#383660)
+
+-------------------------------------------------------------------
+Wed Nov  5 14:37:32 CET 2008 - ug@suse.de
+
+- desktop file changed
+
+-------------------------------------------------------------------
+Fri Oct 31 10:38:49 CET 2008 - mc@suse.de
+
+- YSR module should return true 
+
+-------------------------------------------------------------------
+Thu Oct 30 21:09:12 CET 2008 - jdsn@suse.de
+
+- check for w3m in textmode registration (bnc#440289)
+- reset registration backend before exiting
+
+-------------------------------------------------------------------
+Wed Oct 29 16:32:31 CET 2008 - jdsn@suse.de
+
+- remove requires to sles-release
+- 2.17.10
+
+-------------------------------------------------------------------
+Wed Oct 29 15:31:04 CET 2008 - jdsn@suse.de
+
+- consistent naming in autoYaST profile
+
+-------------------------------------------------------------------
+Fri Oct 24 23:06:02 CEST 2008 - jdsn@suse.de
+
+- checking if registration runs on xen (bnc#418287)
+- more verbose logging
+- 2.17.9
+
+-------------------------------------------------------------------
+Mon Oct 20 19:15:42 CEST 2008 - jdsn@suse.de
+
+- activate autorefresh for new services
+- remove requires to mozilla-xulrunner (bnc#436900) 
+- 2.17.8
+
+-------------------------------------------------------------------
+Fri Oct 17 19:22:24 CEST 2008 - jdsn@suse.de
+
+- changing repos and services only via pkg-bindings (bnc#435669)
+- 2.17.7
+
+-------------------------------------------------------------------
+Fri Oct 17 18:03:34 CEST 2008 - jdsn@suse.de
+
+- fix to display correct text in manual interaction (bnc#435869)
+- refresh services after creating them
+- 2.17.6
+
+-------------------------------------------------------------------
+Fri Oct 17 17:17:50 CEST 2008 - jdsn@suse.de
+
+- display correct text during manual interaction (bnc#435869)
+- fix repeated initializations of suseRegister
+- ask to trust CA certificate of registration server (port from SP2)
+- spec file clean up
+- 2.17.5
+
+-------------------------------------------------------------------
+Thu Oct 16 13:12:43 CEST 2008 - jdsn@suse.de
+
+- call to saveLastZmdConfig added (bnc#435696)
+- removed installing the certificate to zmd (bnc#435631)
+- add credetials information to services url (bnc#435645)
+- fix xulrunner dependency (bnc#435872)
+- 2.17.4
+
+-------------------------------------------------------------------
+Tue Oct 14 18:06:33 CEST 2008 - jdsn@suse.de
+
+- check if initialization of SuseRegister succeeds (bnc#435188)
+- initialize the target to prevent repeated key import (bnc#435192)
+- adapting repo changes as well in autoYaST mode
+- 2.17.3 
+
+-------------------------------------------------------------------
+Mon Oct 13 18:38:31 CEST 2008 - jdsn@suse.de
+
+- support repository changes in catalogs (bnc#430896)
+- added mandatory source refreshes
+- 2.17.2
+
+-------------------------------------------------------------------
+Wed Oct  8 23:39:11 CEST 2008 - jdsn@suse.de
+
+- use new suse_register backend (bnc#430896)
+- change registration server in UI
+- 2.17.1
+
+-------------------------------------------------------------------
+Fri Sep 12 14:57:48 CEST 2008 - jdsn@suse.de
+
+- new module for online update configuration (fate#303458)
+- simplifying/cleaning up sw management (fate#303458) 
+- 2.17.0
+
+-------------------------------------------------------------------
+Tue Jul  1 16:02:14 CEST 2008 - jdsn@suse.de
+
+- removed unused GetInstArgs call
+
+-------------------------------------------------------------------
+Fri May 30 08:02:51 CEST 2008 - lslezak@suse.cz
+
+- initialize the target to read the GPG keys (bnc#394662)
+- 2.16.7
+
+-------------------------------------------------------------------
+Thu May 29 17:33:18 CEST 2008 - locilka@suse.cz
+
+- Lslezak's patch for inst_suse_register to save all sources but
+  not to disable them (bnc #395333).
+- 2.16.6
+
+-------------------------------------------------------------------
+Thu May 29 14:26:25 CEST 2008 - jdsn@suse.de
+
+- call Pkg::SourceRestore before adding new source (bnc#395333)
+- 2.16.5
+
+-------------------------------------------------------------------
+Tue May 27 18:10:13 CEST 2008 - jdsn@suse.de
+
+- handling cancel event in info window (bnc#217249)
+
+-------------------------------------------------------------------
+Mon May 26 17:05:32 CEST 2008 - jdsn@suse.de
+
+- fix preselected checkboxes (bnc#390367)
+- create repositories with proper umask (bnc#392072)
+- 2.16.4
+
+-------------------------------------------------------------------
+Fri May 16 16:40:22 CEST 2008 - jsrain@suse.cz
+
+- added categories Settings and System into desktop file
+  (bnc #382778)
+
+-------------------------------------------------------------------
+Fri May  9 14:35:19 CEST 2008 - jdsn@suse.de
+
+- removed online update from piwo (bnc#386633)
+- adapted version compatibility flag of yastbrowser (bnc#383660)
+- 2.16.3 
+
+-------------------------------------------------------------------
+Fri Apr 25 15:59:18 CEST 2008 - jdsn@suse.de
+
+- show error output behind details button on error 101 (bnc#308117) 
+
+-------------------------------------------------------------------
+Fri Apr 25 14:21:22 CEST 2008 - jdsn@suse.de
+
+- adding alternative strings using repository instead of source 
+
+-------------------------------------------------------------------
+Tue Apr 24 17:15:09 CEST 2008 - jdsn@suse.de
+
+- fixed SMT autoyast bug (bnc#377929)
+- integrated SMT renaming (bnc#376000)
+- removed dependencies to limal for SMT support (bnc#380060)
+- cleaned gui layout
+- initial release of postinstallation workflow (piwo) (fate#303359)
+- 2.16.2 
+
+-------------------------------------------------------------------
+Tue Apr  1 21:09:48 CEST 2008 - jdsn@suse.de
+
+- proper pluralization in autoYaST (bnc#184893) 
+
+-------------------------------------------------------------------
+Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
+
+- added 'StartupNotify=true' to the desktop file (bnc #304964)
+
+-------------------------------------------------------------------
+Wed Mar  5 20:56:16 CET 2008 - jdsn@suse.de
+
+- added support for SMT (registration proxy)
+- 2.16.1 
+
+-------------------------------------------------------------------
+Fri Nov  2 16:53:01 CET 2007 - locilka@suse.cz
+
+- Removed dependency on yast2-network, Internet YCP module has been
+  moved to yast2.rpm.
+- 2.16.0
+
+-------------------------------------------------------------------
+Fri Sep  7 16:37:41 CEST 2007 - jdsn@suse.de
+
+- importing PackageCallbacks (#307764)
+- 2.15.3 
+
+-------------------------------------------------------------------
+Sat Sep  1 08:34:49 CEST 2007 - jdsn@suse.de
+
+- adapted source management changes (#304310)
+- wrapping of detailled error messages (#239570)
+- 2.15.2 
+
+-------------------------------------------------------------------
+Tue Aug 21 21:42:33 CEST 2007 - jdsn@suse.de
+
+- handling sysconfig file with fillup (#300064)
+- code cleanup - nonroot user not supported
+- 2.15.1
+
+-------------------------------------------------------------------
+Fri Aug  3 20:13:19 CEST 2007 - jdsn@suse.de
+
+- new version
+- 2.15.0 
+
+-------------------------------------------------------------------
+Tue Jul 17 20:44:16 CEST 2007 - jdsn@suse.de
+
+- made multiline texts gettext compatible (#230388)
+- reactivated skip button in case of error (#240174)
+- ensure that Sources are initialized on startup (#270899)
+- 2.14.6 
+
+-------------------------------------------------------------------
+Fri May 25 12:51:16 CEST 2007 - jsrain@suse.cz
+
+- removed X-SuSE-translate in order to build
+- 2.14.5
+
+-------------------------------------------------------------------
+Mon Apr  2 17:09:52 CEST 2007 - jdsn@suse.de
+
+- fixed category in desktop files (#259914)
+- 2.14.4 
+
+-------------------------------------------------------------------
+Mon Mar 19 17:53:01 CET 2007 - jdsn@suse.de
+
+- improved dependecies in spec file (#253975)
+- 2.14.3 
+
+-------------------------------------------------------------------
+Tue Nov 21 21:49:45 CET 2006 - jdsn@suse.de
+
+- added autoyast schema file (#219408)
+- 2.14.2
+
+-------------------------------------------------------------------
+Fri Nov 17 18:00:55 CET 2006 - jdsn@suse.de
+
+- yastbrowser update, support for mozilla-xulrunner181 (#219354)
+- removed dependencies to rug and zmd for openSUSE (#220807)
+- hard dependencies to rug and zmd for SLE (#220807)
+- check for wrong proxy settings (#208651)
+- removed SuSEregister.pango call (FATE #300947)
+- 2.14.1
+
+-------------------------------------------------------------------
+Mon Nov 13 16:45:50 CET 2006 - jsrain@suse.cz
+
+- 2.14.0
+
+-------------------------------------------------------------------
+Thu Nov  9 14:43:24 CET 2006 - jsrain@suse.cz
+
+- fixed textdomain (#219378)
+- 2.13.4
+
+-------------------------------------------------------------------
+Tue Oct 31 21:57:57 CET 2006 - jdsn@suse.de
+
+- using own icon in installation workflow (#211552)
+- check for rug and zmd to be installed (#191135)
+- show message if no product to be registered (#191258)
+- avoid missing file error in log (#211899)
+- do not log sensitive data from autoyast (#195624)
+- renamed the _not_ missing file (inst_)suse_register.ycp
+- 2.13.3
+
+-------------------------------------------------------------------
+Wed Oct  4 09:14:50 CEST 2006 - jsrain@suse.cz
+
+- added missing inst_suse_register.ycp
+- 2.13.2
+
+-------------------------------------------------------------------
+Mon Oct  2 11:07:40 CEST 2006 - locilka@suse.cz
+
+- Added missing yast2-packager into BuildRequires
+- 2.13.1
+
+-------------------------------------------------------------------
+Sat Aug 26 20:20:49 2006 - jdsn@suse.de
+
+- initial version
+- split off registration from installation (#203551)
+- fixed desktop files (#165891)
+- fixed proxy bug under Gnome (#207332)
