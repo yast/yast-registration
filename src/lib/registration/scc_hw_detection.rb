@@ -15,11 +15,18 @@ module Yast
       0x8086 => "intel"
     }
 
-    def self.cpu_info
+    def self.cpu_sockets
       lc_all_bak = ENV["LC_ALL"]
       # run "lscpu" in "C" locale to suppress translations
       ENV["LC_ALL"] = "C"
-      return `lscpu`
+      ret = `lscpu`
+
+      if ret.match /^Socket\(s\):\s*(\d+)\s*$/
+        Builtins.y2milestone("Detected CPU sockets: #{$1}")
+        return $1.to_i
+      else
+        raise "CPU detection failed"
+      end
     ensure
       ENV["LC_ALL"] = lc_all_bak
     end

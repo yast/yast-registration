@@ -66,7 +66,7 @@ module Yast
         "hostname" => Socket.gethostname,
         "hwinfo" => {
           # TODO FIXME: check the expected structure
-          "sockets" => SccHwDetection.cpu_info,
+          "sockets" => SccHwDetection.cpu_sockets,
           "graphics" => SccHwDetection.gfx_vendor
         }
       }.to_json
