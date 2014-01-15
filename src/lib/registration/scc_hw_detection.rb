@@ -15,6 +15,8 @@ module Yast
       0x8086 => "intel"
     }
 
+    UNKNOWN_VENDOR = "unknown"
+
     def self.cpu_sockets
       lc_all_bak = ENV["LC_ALL"]
       # run "lscpu" in "C" locale to suppress translations
@@ -32,10 +34,16 @@ module Yast
     end
 
     def self.gfx_vendor
-      vendor_id = SCR.Read(Path.new(".probe.display")).first["vendor_id"] - 0x10000
-      Builtins.y2milestone("Graphics card vendor_id: #{vendor_id.inspect}")
+      display_list = SCR.Read(Path.new(".probe.display"))
+      return UNKNOWN_VENDOR if display_list.nil? || display_list.empty?
 
-      VENDOR_ID_MAPPING[vendor_id] || "unknown"
+      # use only lower 16 bits for vendor ID, the higher bits contain
+      # bus prefix (see TAG_* values, ID_VALUE() and MAKE_ID() macros in <hd/hd.h>)
+      # (https://github.com/openSUSE/hwinfo/blob/master/src/hd/hd.h#L83)
+      vendor_id = display_list.first["vendor_id"] & 0xffff
+      Builtins.y2milestone("Graphics card vendor_id: #{vendor_id} (#{sprintf("%#x", vendor_id)})")
+
+      VENDOR_ID_MAPPING[vendor_id] || UNKNOWN_VENDOR
     end
   end
 
