@@ -7,7 +7,8 @@ client_DATA = \
 ylibdir = @ylibdir@/registration
 ylib_DATA = \
   lib/registration/scc_client.rb \
-  lib/registration/scc_credentials.rb
+  lib/registration/scc_credentials.rb \
+  lib/registration/scc_hw_detection.rb
 
 desktop_DATA = \
   desktop/customer_center.desktop
