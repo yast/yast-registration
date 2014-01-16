@@ -2,6 +2,7 @@
 
 require "yast"
 require "registration/scc_hw_detection"
+require "registration/scc_credentials"
 
 require "json"
 
@@ -15,7 +16,7 @@ module Yast
   # TODO FIXME: add Yardoc comments
   class SccClient
 
-    attr_accessor :url, :email, :reg_code, :insecure
+    attr_accessor :url, :email, :reg_code, :insecure, :credentials
 
     # FIXME: internal testing SCC instance, change to the public production server later
     DEFAULT_SCC_URL = "http://10.122.166.25:3000/connect"
@@ -59,6 +60,26 @@ module Yast
         :method => :post
       }
 
+      result = json_http_handler(params)
+
+      self.credentials = SccCredentials.new(result["login"], result["password"])
+    end
+
+    def register(base_product)
+      body = {
+        "token" => reg_code,
+        "product_ident" => base_product["name"],
+        "product_version" => base_product["version"],
+        "arch" => base_product["arch"]
+      }.to_json
+
+      params = {
+        :url => URI(url + "/activate"),
+        :body => body,
+        :method => :post,
+        :credentials => credentials
+      }
+
       json_http_handler(params)
     end
 
@@ -69,7 +90,9 @@ module Yast
     def json_http_handler(params, redirect_count = MAX_REDIRECTS)
       raise "Reached maximum number of HTTP redirects, aborting" if redirect_count == 0
 
-      target_url = params[:url] || URI("")
+      target_url = params[:url]
+      raise "URL parameter missing" unless target_url
+
       headers = params[:headers] || {}
       body = params[:body] || ""
       method = params[:method] || :get
