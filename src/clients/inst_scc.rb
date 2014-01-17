@@ -54,7 +54,7 @@ module Yast
             begin
               register(email, reg_code)
             rescue Exception => e
-              Builtins.y2error("SCC announcement failed: #{e}")
+              Builtins.y2error("SCC registration failed: #{e}, #{e.backtrace}")
               # TODO: display error details
               ret = nil if Popup.YesNo(_("Registration failed.\nTry it again?"))
             end
@@ -71,17 +71,29 @@ module Yast
     def register(email, reg_code)
       scc = SccClient.new(email, reg_code)
 
+      # announce (register the system) first
       begin
         Popup.ShowFeedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server"))
         result = scc.announce
-
-        # TODO: remove this
-        Popup.Message("SCC response:\n#{JSON.pretty_generate(result)}")
-        return result
       ensure
         Popup.ClearFeedback
       end
 
+      # then register the product(s)
+      begin
+        Popup.ShowFeedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server"))
+
+        # there will be just one base product, but theoretically there can be more...
+        selected_base_products.each do |base_product|
+          Builtins.y2milestone("Registering base product: #{base_product.inspect}")
+          result = scc.register(base_product)
+
+          # TODO: remove this
+          Popup.Message("SCC response:\n#{JSON.pretty_generate(result)}")
+        end
+      ensure
+        Popup.ClearFeedback
+      end
     end
 
     def scc_credentials_dialog
@@ -127,8 +139,6 @@ module Yast
       product_info
     end
 
-    def contact_scc(token)
-    end
   end
 end
 
