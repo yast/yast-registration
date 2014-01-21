@@ -11,10 +11,9 @@ Yast::Tasks.configuration do |conf|
   conf.obs_project = "Devel:YaST:Head"
 
   # target project for submit requests
-  # (SUSE:Factory:Head:Internal is for packages *not* in openSUSE)
-  conf.obs_sr_project = "SUSE:Factory:Head:Internal"
+  conf.obs_sr_project = "SUSE:SLE-12:GA"
 
   # BS build target (repository)
-  conf.obs_target = "factory"
+  conf.obs_target = "SLE-12"
 end
 
