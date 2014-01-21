@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 21 10:19:13 UTC 2014 - lslezak@suse.cz
+
+- changed the implementation to use SCC instead of NCC
+- 3.1.1
+
+-------------------------------------------------------------------
 Thu Sep 19 15:15:58 UTC 2013 - lslezak@suse.cz
 
 - do not use *.spec.in template, use *.spec file with RPM macros
