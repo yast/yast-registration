@@ -24,7 +24,10 @@ module Yast
     MAX_REDIRECTS = 10
 
     JSON_HTTP_HEADER = {
-      "Content-Type" => "application/json",
+      # TODO FIXME: a workaround for SCC not accepting JSON input,
+      #  remove when JSON is correctly supported and use this instead:
+      #  "Content-Type" => "application/json",
+      "Content-Type" => "application/x-www-form-urlencoded",
       "Accept" => "application/json"
     }
 
@@ -56,7 +59,8 @@ module Yast
       params = {
         :url => URI(url + "/announce"),
         :headers => {"Authorization" => "Token token=\"#{reg_code}\""},
-        :body => body,
+         # TODO FIXME: a workaround for SCC not accepting JSON input
+        :body => "payload=#{URI.escape body}",
         :method => :post
       }
 
@@ -66,6 +70,8 @@ module Yast
     end
 
     def register(base_product)
+      Builtins.y2milestone("Registering base product: #{base_product.inspect}")
+
       body = {
         "token" => reg_code,
         "product_ident" => base_product["name"],
@@ -75,7 +81,8 @@ module Yast
 
       params = {
         :url => URI(url + "/activate"),
-        :body => body,
+        # TODO FIXME: a workaround for SCC not accepting JSON input
+        :body => "payload=#{URI.escape body}",
         :method => :post,
         :credentials => credentials
       }

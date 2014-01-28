@@ -50,16 +50,18 @@ module Yast
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
 
-          if !email.empty? && !reg_code.empty?
-            begin
-              register(email, reg_code)
-            rescue Exception => e
-              Builtins.y2error("SCC registration failed: #{e}, #{e.backtrace}")
-              # TODO: display error details
-              ret = nil if Popup.YesNo(_("Registration failed.\nTry it again?"))
-            end
+          begin
+            register(email, reg_code)
+          rescue Exception => e
+            Builtins.y2error("SCC registration failed: #{e}, #{e.backtrace}")
+            # TODO: display error details
+            Report.Error(_("Registration failed."))
+            ret = nil
           end
         end
+
+        # skip the registration
+        return :next if ret == :skip
       end
 
       return ret
@@ -89,7 +91,8 @@ module Yast
           result = scc.register(base_product)
 
           # TODO: remove this
-          Popup.Message("SCC response:\n#{JSON.pretty_generate(result)}")
+          # Popup.Message("SCC response:\n#{JSON.pretty_generate(result)}")
+          Popup.Message("The system has been registered.")
         end
       ensure
         Popup.ClearFeedback
@@ -97,15 +100,18 @@ module Yast
     end
 
     def scc_credentials_dialog
-      Frame(_("SUSE Customer Center Credentials"),
-        MarginBox(1, 0.5,
-          VBox(
-            InputField(Id(:email), _("&Email")),
-            VSpacing(0.5),
-            # FIXME: remove the testing reg. key, leave the field empty by default
-            InputField(Id(:reg_code), _("Registration &Code"), "4e4ad427")
+      VBox(
+        Frame(_("SUSE Customer Center Credentials"),
+          MarginBox(1, 0.5,
+            VBox(
+              InputField(Id(:email), _("&Email")),
+              VSpacing(0.5),
+              InputField(Id(:reg_code), _("Registration &Code"))
+            )
           )
-        )
+        ),
+        VSpacing(3),
+        PushButton(Id(:skip), _("&Skip Registration"))
       )
     end
 
@@ -125,6 +131,8 @@ module Yast
     end
 
     def selected_base_products
+      # just for debugging: return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12"}]
+
       # source 0 is the base installation repo, the repos added later are considered as add-ons
       # although they can also contain a different base product
       selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
