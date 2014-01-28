@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 27 15:11:17 UTC 2014 - lslezak@suse.cz
+
+- added "Skip Registration" button (FATE#312925)
+- workaround for SCC not accepting JSON input
+- 3.1.2
+
+-------------------------------------------------------------------
 Tue Jan 21 10:19:13 UTC 2014 - lslezak@suse.cz
 
 - changed the implementation to use SCC instead of NCC
