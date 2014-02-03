@@ -22,7 +22,8 @@
 # Summary: Ask user for the SCC credentials
 #
 
-require "registration/scc_client.rb"
+# use external rubygem for SCC communication
+require "scc_api"
 
 module Yast
   class InstSccClient < Client
@@ -37,6 +38,9 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+
+      # redirect the scc_api log to y2log
+      SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       show_scc_credentials_dialog
 
@@ -71,7 +75,7 @@ module Yast
     private
 
     def register(email, reg_code)
-      scc = SccClient.new(email, reg_code)
+      scc = SccApi::Connection.new(email, reg_code)
 
       # announce (register the system) first
       begin
