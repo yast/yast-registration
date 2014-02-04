@@ -22,10 +22,13 @@
 # Summary: Ask user for the SCC credentials
 #
 
-require "registration/scc_client.rb"
+# use external rubygem for SCC communication
+require "scc_api"
 
 module Yast
   class InstSccClient < Client
+    include Yast::Logger
+
     def main
       Yast.import "UI"
       Yast.import "Pkg"
@@ -37,6 +40,9 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+
+      # redirect the scc_api log to y2log
+      SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       show_scc_credentials_dialog
 
@@ -53,7 +59,7 @@ module Yast
           begin
             register(email, reg_code)
           rescue Exception => e
-            Builtins.y2error("SCC registration failed: #{e}, #{e.backtrace}")
+            log.error("SCC registration failed: #{e}, #{e.backtrace}")
             # TODO: display error details
             Report.Error(_("Registration failed."))
             ret = nil
@@ -71,7 +77,7 @@ module Yast
     private
 
     def register(email, reg_code)
-      scc = SccClient.new(email, reg_code)
+      scc = SccApi::Connection.new(email, reg_code)
 
       # announce (register the system) first
       begin
@@ -87,7 +93,7 @@ module Yast
 
         # there will be just one base product, but theoretically there can be more...
         selected_base_products.each do |base_product|
-          Builtins.y2milestone("Registering base product: #{base_product.inspect}")
+          log.info("Registering base product: #{base_product.inspect}")
           result = scc.register(base_product)
 
           # TODO: remove this
@@ -142,7 +148,7 @@ module Yast
       # filter out not needed data
       product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
 
-      Builtins.y2milestone("Found selected base products: #{product_info}")
+      log.info("Found selected base products: #{product_info}")
 
       product_info
     end

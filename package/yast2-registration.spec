@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.2
+Version:        3.1.3
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -28,9 +28,10 @@ License:        GPL-2.0
 
 Requires:       yast2 >= 2.23.13
 Requires:       yast2-pkg-bindings >= 2.17.20
-Requires:       yast2-ruby-bindings >= 1.0.0
-# provides "lscpu"
-Requires:       util-linux
+# Y2Logger
+Requires:       yast2-ruby-bindings >= 3.1.7
+# SCC API library
+Requires:       rubygem-scc_api
 
 BuildRequires:  yast2 >= 2.23.13
 BuildRequires:  update-desktop-files
@@ -63,9 +64,6 @@ Authors:
 %defattr(-,root,root)
 %{yast_desktopdir}/customer_center.desktop
 %{yast_clientdir}/*.rb
-%dir %{yast_libdir}
-%dir %{yast_libdir}/registration
-%{yast_libdir}/registration/*.rb
 %doc %{yast_docdir}
 
 %changelog
