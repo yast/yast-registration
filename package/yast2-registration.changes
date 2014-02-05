@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 21 08:02:38 UTC 2014 - vmoravec@suse.com
+
+- Add SLP service discovery dialog for registration (FATE#316384)
+- 3.1.8
+
+-------------------------------------------------------------------
 Fri Feb 14 16:09:13 UTC 2014 - lslezak@suse.cz
 
 - display progress when adding registered services
