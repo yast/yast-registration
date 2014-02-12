@@ -25,9 +25,14 @@
 # use external rubygem for SCC communication
 require "scc_api"
 
+require "tmpdir"
+require "fileutils"
+
 module Yast
   class InstSccClient < Client
     include Yast::Logger
+
+    ZYPP_DIR = "/etc/zypp"
 
     def main
       Yast.import "UI"
@@ -80,28 +85,46 @@ module Yast
       scc = SccApi::Connection.new(email, reg_code)
 
       # announce (register the system) first
-      begin
-        Popup.ShowFeedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server"))
-        result = scc.announce
-      ensure
-        Popup.ClearFeedback
+      credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
+        scc.announce
       end
 
+      # ensure the zypp config directories are writable in inst-sys
+      ensure_zypp_config_writable
+
+      # write the global credentials
+      credentials.write
+
       # then register the product(s)
-      begin
-        Popup.ShowFeedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server"))
-
+      product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
         # there will be just one base product, but theoretically there can be more...
-        selected_base_products.each do |base_product|
+        selected_base_products.map do |base_product|
           log.info("Registering base product: #{base_product.inspect}")
-          result = scc.register(base_product)
-
-          # TODO: remove this
-          # Popup.Message("SCC response:\n#{JSON.pretty_generate(result)}")
-          Popup.Message("The system has been registered.")
+          scc.register(base_product)
         end
-      ensure
-        Popup.ClearFeedback
+      end
+
+      add_services(product_services, credentials)
+    end
+
+    # add the services to libzypp and load (refresh) them
+    def add_services(product_services, credentials)
+      # each registered product
+      product_services.each do |product_service|
+        # services for the each product
+        product_service.services.each do |service|
+          log.info "Adding service #{service.name.inspect} (#{service.url})"
+
+          # TODO FIXME: SCC currenly does not return credentials for the service,
+          # just reuse the global credentials and save to a different file
+          credentials.file = service.name + "_credentials"
+          credentials.write
+
+          Pkg.ServiceAdd(service.name, service.url.to_s)
+          # refresh works only for saved services
+          Pkg.ServiceSave(service.name)
+          Pkg.ServiceRefresh(service.name)
+        end
       end
     end
 
@@ -137,7 +160,8 @@ module Yast
     end
 
     def selected_base_products
-      # just for debugging: return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12"}]
+      # just for debugging:
+      # return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12-"}]
 
       # source 0 is the base installation repo, the repos added later are considered as add-ons
       # although they can also contain a different base product
@@ -151,6 +175,32 @@ module Yast
       log.info("Found selected base products: #{product_info}")
 
       product_info
+    end
+
+    def run_with_feedback(header, label, &block)
+      Popup.ShowFeedback(header, label)
+      yield
+    ensure
+      Popup.ClearFeedback
+    end
+
+    # during installation /etc/zypp directory is not writable (mounted on
+    # a read-only file system), the workaround is to copy the whole directory
+    # structure into a writable temporary directory and override the original
+    # location by "mount -o bind"
+    def ensure_zypp_config_writable
+      if Mode.installation && !File.writable?(ZYPP_DIR)
+        log.info "Copying libzypp config to a writable place"
+
+        # create writable zypp directory structure in /tmp
+        tmpdir = Dir.mktmpdir
+
+        log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
+        ::FileUtils.cp_r ZYPP_DIR, tmpdir
+
+        log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
+        `mount -o bind #{tmpdir} #{ZYPP_DIR}`
+      end
     end
 
   end
