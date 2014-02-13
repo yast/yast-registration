@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb 13 11:17:39 UTC 2014 - lslezak@suse.cz
+
+- save repositories before refreshing added services (otherwise
+  pkg-bindings will treat them as removed by the service refresh
+  and unloads them)
+- 3.1.5
+
+-------------------------------------------------------------------
 Wed Feb 12 14:12:23 UTC 2014 - lslezak@suse.cz
 
 - pass the repository services returned by SCC to libzypp
