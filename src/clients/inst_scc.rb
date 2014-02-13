@@ -109,6 +109,11 @@ module Yast
 
     # add the services to libzypp and load (refresh) them
     def add_services(product_services, credentials)
+      # save repositories before refreshing added services (otherwise
+      # pkg-bindings will treat them as removed by the service refresh and
+      # unload them)
+      Pkg.SourceSaveAll
+
       # each registered product
       product_services.each do |product_service|
         # services for the each product
