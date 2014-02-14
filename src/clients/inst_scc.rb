@@ -45,6 +45,8 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+      Yast.import "Progress"
+      Yast.import "PackageCallbacks"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -104,7 +106,22 @@ module Yast
         end
       end
 
-      add_services(product_services, credentials)
+      if !product_services.empty?
+        Progress.New(
+          # TRANSLATORS: dialog caption
+          _("Adding Registered Software Repositories"),
+          " ",
+          product_services.size,
+          [ _("Add Services") ],
+          [ _("Adding Services") ],
+          # TRANSLATORS: dialog help
+          _("<p>The repository manager is downloading registered repositories...</p>")
+        )
+
+        Progress.NextStage
+        add_services(product_services, credentials)
+        Progress.Finish
+      end
     end
 
     # add the services to libzypp and load (refresh) them
@@ -120,6 +137,9 @@ module Yast
         product_service.services.each do |service|
           log.info "Adding service #{service.name.inspect} (#{service.url})"
 
+          # progress bar label
+          Progress.Title(_("Adding service %s...") % service.name)
+
           # TODO FIXME: SCC currenly does not return credentials for the service,
           # just reuse the global credentials and save to a different file
           credentials.file = service.name + "_credentials"
@@ -129,6 +149,8 @@ module Yast
           # refresh works only for saved services
           Pkg.ServiceSave(service.name)
           Pkg.ServiceRefresh(service.name)
+
+          Progress.NextStep
         end
       end
     end
