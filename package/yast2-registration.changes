@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 14 14:31:09 UTC 2014 - lslezak@suse.cz
+
+- fixed mounting write copy of /etc/zypp at installation
+- 3.1.6
+
+-------------------------------------------------------------------
 Thu Feb 13 11:17:39 UTC 2014 - lslezak@suse.cz
 
 - save repositories before refreshing added services (otherwise
