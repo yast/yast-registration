@@ -204,7 +204,7 @@ module Yast
         ::FileUtils.cp_r ZYPP_DIR, tmpdir
 
         log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
-        `mount -o bind #{tmpdir} #{ZYPP_DIR}`
+        `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
       end
     end
 
