@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 14 16:09:13 UTC 2014 - lslezak@suse.cz
+
+- display progress when adding registered services
+- 3.1.7
+
+-------------------------------------------------------------------
 Fri Feb 14 14:31:09 UTC 2014 - lslezak@suse.cz
 
 - fixed mounting write copy of /etc/zypp at installation
