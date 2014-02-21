@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.7
+Version:        3.1.8
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -32,6 +32,7 @@ Requires:       yast2-pkg-bindings >= 2.17.20
 Requires:       yast2-ruby-bindings >= 3.1.7
 # SCC API library
 Requires:       rubygem-scc_api
+Requires:       yast2-slp >= 3.1.2
 
 BuildRequires:  yast2 >= 2.23.13
 BuildRequires:  update-desktop-files
@@ -40,6 +41,7 @@ BuildRequires:  yast2-devtools >= 3.1.6
 BuildArch:      noarch
 
 Summary:        YaST2 - Registration Module
+Url:            https://github.com/yast/yast-registration
 
 %description
 The registration module to register products and/or to fetch an update
