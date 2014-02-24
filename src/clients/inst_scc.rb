@@ -73,8 +73,17 @@ module Yast
           end
         end
 
-        # skip the registration
-        return :next if ret == :skip
+        # Popup question: confirm skipping the registration
+        if ret == :skip && Popup.YesNo(_(
+"If you do not register your system we will not be able
+to grant you access to the update repositories.
+
+You can register after the installation or visit our
+Customer Center for online registration.
+
+Really skip the registration now?"))
+          return :next
+        end
       end
 
       return ret
