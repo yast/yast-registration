@@ -63,14 +63,36 @@ module Yast
         if ret == :next
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
+          # reset the user input in case an exception is raised
+          ret = nil
 
           begin
             register(email, reg_code)
+            return :next
+          rescue SccApi::NoNetworkError
+            # Error popup
+            Report.Error(_("Network is not configured, the registration server cannot be reached."))
+          rescue SccApi::NotAuthorized
+            # Error popup
+            Report.Error(_("The email address or the registration\ncode is not valid."))
+          rescue Timeout::Error
+            # Error popup
+            Report.Error(_("Connection time out."))
+          rescue SccApi::ErrorResponse => e
+            # TODO FIXME: display error details from the response
+            Report.Error(_("Registration server error.\n\nRetry registration later."))
+          rescue SccApi::HttpError => e
+            case e.response
+            when Net::HTTPClientError
+              Report.Error(_("Registration client error."))
+            when Net::HTTPServerError
+              Report.Error(_("Registration server error.\n\nRetry registration later."))
+            else
+              Report.Error(_("Registration failed."))
+            end
           rescue Exception => e
             log.error("SCC registration failed: #{e}, #{e.backtrace}")
-            # TODO: display error details
             Report.Error(_("Registration failed."))
-            ret = nil
           end
         end
 
