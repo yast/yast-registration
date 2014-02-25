@@ -47,6 +47,7 @@ module Yast
       Yast.import "Mode"
       Yast.import "Progress"
       Yast.import "PackageCallbacks"
+      Yast.import "Language"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -94,6 +95,9 @@ Really skip the registration now?"))
 
     def register(email, reg_code)
       scc = SccApi::Connection.new(email, reg_code)
+
+      # set the current language to receive translated error messages
+      scc.language = language
 
       # announce (register the system) first
       credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
@@ -243,6 +247,19 @@ Really skip the registration now?"))
       end
     end
 
+    def language
+      lang = Language.language
+      log.info "Current language: #{lang}"
+
+      # remove the encoding (e.g. ".UTF-8")
+      lang.sub!(/\..*$/, "")
+      # replace lang/country separator "_" -> "-"
+      # see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+      lang.tr!("_", "-")
+
+      log.info "Language for HTTP requests set to #{lang.inspect}"
+      lang
+    end
   end
 end
 
