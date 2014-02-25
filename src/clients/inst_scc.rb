@@ -74,17 +74,7 @@ module Yast
           end
         end
 
-        # Popup question: confirm skipping the registration
-        if ret == :skip && Popup.YesNo(_(
-"If you do not register your system we will not be able
-to grant you access to the update repositories.
-
-You can register after the installation or visit our
-Customer Center for online registration.
-
-Really skip the registration now?"))
-          return :next
-        end
+        return :next if ret == :skip && confirm_skipping
       end
 
       return ret
@@ -245,6 +235,17 @@ Really skip the registration now?"))
         log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
         `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
       end
+    end
+
+    def confirm_skipping
+      # Popup question: confirm skipping the registration
+      confirmation = _("If you do not register your system we will not be able\n" +
+        "to grant you access to the update repositories.\n\n" +
+        "You can register after the installation or visit our\n" +
+        "Customer Center for online registration.\n\n" +
+        "Really skip the registration now?")
+
+      Popup.YesNo(confirmation)
     end
 
     def language
