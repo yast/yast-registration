@@ -47,6 +47,7 @@ module Yast
       Yast.import "Mode"
       Yast.import "Progress"
       Yast.import "PackageCallbacks"
+      Yast.import "Language"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -73,8 +74,7 @@ module Yast
           end
         end
 
-        # skip the registration
-        return :next if ret == :skip
+        return :next if ret == :skip && confirm_skipping
       end
 
       return ret
@@ -85,6 +85,9 @@ module Yast
 
     def register(email, reg_code)
       scc = SccApi::Connection.new(email, reg_code)
+
+      # set the current language to receive translated error messages
+      scc.language = language
 
       # announce (register the system) first
       credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
@@ -157,14 +160,18 @@ module Yast
 
     def scc_credentials_dialog
       VBox(
-        Frame(_("SUSE Customer Center Credentials"),
-          MarginBox(1, 0.5,
-            VBox(
-              InputField(Id(:email), _("&Email")),
-              VSpacing(0.5),
-              InputField(Id(:reg_code), _("Registration &Code"))
+        HBox(
+          HSpacing(Opt(:hstretch), 3),
+          Frame(_("SUSE Customer Center Credentials"),
+            MarginBox(1, 0.5,
+              VBox(
+                MinWidth(32, InputField(Id(:email), _("&Email"))),
+                VSpacing(0.5),
+                MinWidth(32, InputField(Id(:reg_code), _("Registration &Code")))
+              )
             )
-          )
+          ),
+          HSpacing(Opt(:hstretch), 3),
         ),
         VSpacing(3),
         PushButton(Id(:skip), _("&Skip Registration"))
@@ -230,6 +237,30 @@ module Yast
       end
     end
 
+    def confirm_skipping
+      # Popup question: confirm skipping the registration
+      confirmation = _("If you do not register your system we will not be able\n" +
+        "to grant you access to the update repositories.\n\n" +
+        "You can register after the installation or visit our\n" +
+        "Customer Center for online registration.\n\n" +
+        "Really skip the registration now?")
+
+      Popup.YesNo(confirmation)
+    end
+
+    def language
+      lang = Language.language
+      log.info "Current language: #{lang}"
+
+      # remove the encoding (e.g. ".UTF-8")
+      lang.sub!(/\..*$/, "")
+      # replace lang/country separator "_" -> "-"
+      # see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+      lang.tr!("_", "-")
+
+      log.info "Language for HTTP requests set to #{lang.inspect}"
+      lang
+    end
   end
 end
 

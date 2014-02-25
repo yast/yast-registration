@@ -20,6 +20,8 @@ module Yast
     end
 
     def main
+      textdomain "registration"
+
       busy_box do
         log.info(
           "Searching for SLP registration services of type #{SUPPORTED_SERVICES.join(', ')}"
