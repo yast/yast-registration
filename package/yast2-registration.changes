@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb 26 10:11:05 UTC 2014 - vmoravec@suse.com
+
+- Check for defined client class
+- 3.1.11
+
+-------------------------------------------------------------------
 Tue Feb 25 16:37:23 UTC 2014 - lslezak@suse.cz
 
 - better error handling

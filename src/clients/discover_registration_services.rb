@@ -116,6 +116,6 @@ module Yast
     ensure
       Popup.ClearFeedback
     end
-  end
+  end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main
 end
