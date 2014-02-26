@@ -7,6 +7,10 @@ client_DATA = \
 desktop_DATA = \
   desktop/customer_center.desktop
 
-EXTRA_DIST = $(client_DATA) $(desktop_DATA)
+ylibdir = @ylibdir@/registration
+ylib_DATA = \
+  lib/registration/registration.rb
+
+EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA)
 
 include $(top_srcdir)/Makefile.am.common

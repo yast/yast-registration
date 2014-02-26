@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # ------------------------------------------------------------------------------
-# Copyright (c) 2013 Novell, Inc. All Rights Reserved.
+# Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -21,16 +21,24 @@
 #
 #
 
-# this is just a wrapper for running the SCC client in installed system
-
-require "registration/registration"
+require "yast"
 
 module Yast
-  import "Wizard"
+  Yast.import "Pkg"
+  Yast.import "Installation"
+  Yast.import "PackageCallbacksInit"
 
-  Wizard.CreateDialog
-  Yast::Registration.initialize_libzypp
-  WFM.call("inst_scc")
-  Yast::Registration.save_libzypp
-  Wizard.CloseDialog
+  class Registration
+    def self.initialize_libzypp
+      PackageCallbacksInit.InitPackageCallbacks
+      Pkg.TargetInitialize(Installation.destdir)
+      Pkg.TargetLoad
+      Pkg.SourceStartManager(true)
+    end
+
+    def self.save_libzypp
+      Pkg.SourceSaveAll
+    end
+  end
 end
+

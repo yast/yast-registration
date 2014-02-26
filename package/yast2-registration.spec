@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.11
+Version:        3.1.12
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -68,6 +68,7 @@ Authors:
 %defattr(-,root,root)
 %{yast_desktopdir}/customer_center.desktop
 %{yast_clientdir}/*.rb
+%{yast_dir}/lib/registration
 %doc %{yast_docdir}
 
 %changelog
