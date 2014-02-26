@@ -23,13 +23,23 @@
 
 require "yast"
 
+require "tmpdir"
+require "fileutils"
+
+require "registration/exceptions"
+
 module Registration
+  Yast.import "Mode"
   Yast.import "Pkg"
   Yast.import "Installation"
   Yast.import "PackageCallbacksInit"
 
   class SwMgmt
     include Yast
+    include Yast::Logger
+    extend Yast::I18n
+
+    ZYPP_DIR = "/etc/zypp"
 
     def self.init
       # display progress when refreshing repositories
@@ -42,6 +52,90 @@ module Registration
     def self.save
       Pkg.SourceSaveAll
     end
+
+    # during installation /etc/zypp directory is not writable (mounted on
+    # a read-only file system), the workaround is to copy the whole directory
+    # structure into a writable temporary directory and override the original
+    # location by "mount -o bind"
+    def self.ensure_zypp_config_writable
+      if Mode.installation && !File.writable?(ZYPP_DIR)
+        log.info "Copying libzypp config to a writable place"
+
+        # create writable zypp directory structure in /tmp
+        tmpdir = Dir.mktmpdir
+
+        log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
+        ::FileUtils.cp_r ZYPP_DIR, tmpdir
+
+        log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
+        `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
+      end
+    end
+
+    def self.selected_base_products
+      # just for debugging:
+      # return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12-"}]
+
+      # source 0 is the base installation repo, the repos added later are considered as add-ons
+      # although they can also contain a different base product
+      #
+      # on a running system, products are :installed
+      selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
+        p["status"] == :selected || p["status"] == :installed
+      end
+
+      # filter out not needed data
+      product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
+
+      log.info("Found selected/installed base products: #{product_info}")
+
+      product_info
+    end
+
+    # add the services to libzypp and load (refresh) them
+    def self.add_services(product_services, credentials)
+      # save repositories before refreshing added services (otherwise
+      # pkg-bindings will treat them as removed by the service refresh and
+      # unload them)
+      if !Pkg.SourceSaveAll
+        # error message
+        raise Registration::PkgError, N_("Saving repository configuration failed.")
+      end
+
+      # each registered product
+      product_services.each do |product_service|
+        # services for the each product
+        product_service.services.each do |service|
+          log.info "Adding service #{service.name.inspect} (#{service.url})"
+
+          # progress bar label
+          Progress.Title(_("Adding service %s...") % service.name)
+
+          # TODO FIXME: SCC currenly does not return credentials for the service,
+          # just reuse the global credentials and save to a different file
+          credentials.file = service.name + "_credentials"
+          credentials.write
+
+          if !Pkg.ServiceAdd(service.name, service.url.to_s)
+            # error message
+            raise Registration::PkgError, N_("Adding the service failed.")
+          end
+          # refresh works only for saved services
+          if !Pkg.ServiceSave(service.name)
+            # error message
+            raise Registration::PkgError, N_("Saving the new service failed.")
+          end
+
+          if !Pkg.ServiceRefresh(service.name)
+            # error message
+            raise Registration::PkgError, N_("The service refresh has failed.")
+          end
+
+          Progress.NextStep
+        end
+      end
+    end
+
   end
 end
 

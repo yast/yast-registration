@@ -25,20 +25,15 @@
 # use external rubygem for SCC communication
 require "scc_api"
 
-require "tmpdir"
-require "fileutils"
-
 require "registration/exceptions"
+require "registration/helpers"
 
 module Yast
   class InstSccClient < Client
     include Yast::Logger
 
-    ZYPP_DIR = "/etc/zypp"
-
     def main
       Yast.import "UI"
-      Yast.import "Pkg"
 
       textdomain "registration"
 
@@ -48,7 +43,6 @@ module Yast
       Yast.import "Report"
       Yast.import "Mode"
       Yast.import "Progress"
-      Yast.import "PackageCallbacks"
       Yast.import "Language"
 
       # redirect the scc_api log to y2log
@@ -114,7 +108,7 @@ module Yast
       scc = SccApi::Connection.new(email, reg_code)
 
       # set the current language to receive translated error messages
-      scc.language = language
+      scc.language = Registration::Helpers.language
 
       # announce (register the system) first
       credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
@@ -122,7 +116,7 @@ module Yast
       end
 
       # ensure the zypp config directories are writable in inst-sys
-      ensure_zypp_config_writable
+      Registration::SwMgmt.ensure_zypp_config_writable
 
       # write the global credentials
       credentials.write
@@ -130,7 +124,7 @@ module Yast
       # then register the product(s)
       product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
         # there will be just one base product, but theoretically there can be more...
-        selected_base_products.map do |base_product|
+        Registration::SwMgmt.selected_base_products.map do |base_product|
           log.info("Registering base product: #{base_product.inspect}")
           scc.register(base_product)
         end
@@ -151,53 +145,9 @@ module Yast
         Progress.NextStage
 
         begin
-          add_services(product_services, credentials)
+          Registration::SwMgmt.add_services(product_services, credentials)
         ensure
           Progress.Finish
-        end
-      end
-    end
-
-    # add the services to libzypp and load (refresh) them
-    def add_services(product_services, credentials)
-      # save repositories before refreshing added services (otherwise
-      # pkg-bindings will treat them as removed by the service refresh and
-      # unload them)
-      if !Pkg.SourceSaveAll
-        # error message
-        raise Registration::PkgError, N_("Saving repository configuration failed.")
-      end
-
-      # each registered product
-      product_services.each do |product_service|
-        # services for the each product
-        product_service.services.each do |service|
-          log.info "Adding service #{service.name.inspect} (#{service.url})"
-
-          # progress bar label
-          Progress.Title(_("Adding service %s...") % service.name)
-
-          # TODO FIXME: SCC currenly does not return credentials for the service,
-          # just reuse the global credentials and save to a different file
-          credentials.file = service.name + "_credentials"
-          credentials.write
-
-          if !Pkg.ServiceAdd(service.name, service.url.to_s)
-            # error message
-            raise Registration::PkgError, N_("Adding the service failed.")
-          end
-          # refresh works only for saved services
-          if !Pkg.ServiceSave(service.name)
-            # error message
-            raise Registration::PkgError, N_("Saving the new service failed.")
-          end
-
-          if !Pkg.ServiceRefresh(service.name)
-            # error message
-            raise Registration::PkgError, N_("The service refresh has failed.")
-          end
-
-          Progress.NextStep
         end
       end
     end
@@ -237,50 +187,11 @@ module Yast
       )
     end
 
-    def selected_base_products
-      # just for debugging:
-      # return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12-"}]
-
-      # source 0 is the base installation repo, the repos added later are considered as add-ons
-      # although they can also contain a different base product
-      #
-      # on a running system, products are :installed
-      selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        p["status"] == :selected || p["status"] == :installed
-      end
-
-      # filter out not needed data
-      product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
-
-      log.info("Found selected/installed base products: #{product_info}")
-
-      product_info
-    end
-
     def run_with_feedback(header, label, &block)
       Popup.ShowFeedback(header, label)
       yield
     ensure
       Popup.ClearFeedback
-    end
-
-    # during installation /etc/zypp directory is not writable (mounted on
-    # a read-only file system), the workaround is to copy the whole directory
-    # structure into a writable temporary directory and override the original
-    # location by "mount -o bind"
-    def ensure_zypp_config_writable
-      if Mode.installation && !File.writable?(ZYPP_DIR)
-        log.info "Copying libzypp config to a writable place"
-
-        # create writable zypp directory structure in /tmp
-        tmpdir = Dir.mktmpdir
-
-        log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
-        ::FileUtils.cp_r ZYPP_DIR, tmpdir
-
-        log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
-        `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
-      end
     end
 
     def confirm_skipping
@@ -294,19 +205,6 @@ module Yast
       Popup.YesNo(confirmation)
     end
 
-    def language
-      lang = Language.language
-      log.info "Current language: #{lang}"
-
-      # remove the encoding (e.g. ".UTF-8")
-      lang.sub!(/\..*$/, "")
-      # replace lang/country separator "_" -> "-"
-      # see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
-      lang.tr!("_", "-")
-
-      log.info "Language for HTTP requests set to #{lang.inspect}"
-      lang
-    end
   end
 end
 
