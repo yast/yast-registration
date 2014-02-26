@@ -221,14 +221,16 @@ module Yast
 
       # source 0 is the base installation repo, the repos added later are considered as add-ons
       # although they can also contain a different base product
+      #
+      # on a running system, products are :installed
       selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        p["source"] == 0 && p["status"] == :selected
+        (p["source"] == 0 && p["status"] == :selected) || (p["category"] == "base" && p["status"] == :installed)
       end
 
       # filter out not needed data
       product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
 
-      log.info("Found selected base products: #{product_info}")
+      log.info("Found selected/installed base products: #{product_info}")
 
       product_info
     end
