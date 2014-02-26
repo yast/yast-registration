@@ -23,20 +23,23 @@
 
 require "yast"
 
-module Yast
+module Registration
   Yast.import "Pkg"
   Yast.import "Installation"
   Yast.import "PackageCallbacksInit"
 
-  class Registration
-    def self.initialize_libzypp
+  class SwMgmt
+    include Yast
+
+    def self.init
+      # display progress when refreshing repositories
       PackageCallbacksInit.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
       Pkg.SourceStartManager(true)
     end
 
-    def self.save_libzypp
+    def self.save
       Pkg.SourceSaveAll
     end
   end

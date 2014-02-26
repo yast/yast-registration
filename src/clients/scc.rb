@@ -23,14 +23,16 @@
 
 # this is just a wrapper for running the SCC client in installed system
 
-require "registration/registration"
+require "registration/sw_mgmt"
 
 module Yast
   import "Wizard"
 
   Wizard.CreateDialog
-  Yast::Registration.initialize_libzypp
+  Registration::SwMgmt.init
+
   WFM.call("inst_scc")
-  Yast::Registration.save_libzypp
+
+  Registration::SwMgmt.save
   Wizard.CloseDialog
 end
