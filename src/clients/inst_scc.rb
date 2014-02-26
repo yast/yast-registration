@@ -224,7 +224,7 @@ module Yast
       #
       # on a running system, products are :installed
       selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        (p["source"] == 0 && p["status"] == :selected) || (p["category"] == "base" && p["status"] == :installed)
+        p["status"] == :selected || p["status"] == :installed
       end
 
       # filter out not needed data
