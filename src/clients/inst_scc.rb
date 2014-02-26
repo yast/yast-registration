@@ -28,6 +28,8 @@ require "scc_api"
 require "tmpdir"
 require "fileutils"
 
+require "registration/exceptions"
+
 module Yast
   class InstSccClient < Client
     include Yast::Logger
@@ -90,6 +92,9 @@ module Yast
             else
               Report.Error(_("Registration failed."))
             end
+          rescue Registration::PkgError => e
+            log.error("Pkg error: #{e.message}")
+            Report.Error(_(e.message))
           rescue Exception => e
             log.error("SCC registration failed: #{e}, #{e.backtrace}")
             Report.Error(_("Registration failed."))
@@ -144,8 +149,12 @@ module Yast
         )
 
         Progress.NextStage
-        add_services(product_services, credentials)
-        Progress.Finish
+
+        begin
+          add_services(product_services, credentials)
+        ensure
+          Progress.Finish
+        end
       end
     end
 
@@ -154,7 +163,10 @@ module Yast
       # save repositories before refreshing added services (otherwise
       # pkg-bindings will treat them as removed by the service refresh and
       # unload them)
-      Pkg.SourceSaveAll
+      if !Pkg.SourceSaveAll
+        # error message
+        raise Registration::PkgError, N_("Saving repository configuration failed.")
+      end
 
       # each registered product
       product_services.each do |product_service|
@@ -170,10 +182,20 @@ module Yast
           credentials.file = service.name + "_credentials"
           credentials.write
 
-          Pkg.ServiceAdd(service.name, service.url.to_s)
+          if !Pkg.ServiceAdd(service.name, service.url.to_s)
+            # error message
+            raise Registration::PkgError, N_("Adding the service failed.")
+          end
           # refresh works only for saved services
-          Pkg.ServiceSave(service.name)
-          Pkg.ServiceRefresh(service.name)
+          if !Pkg.ServiceSave(service.name)
+            # error message
+            raise Registration::PkgError, N_("Saving the new service failed.")
+          end
+
+          if !Pkg.ServiceRefresh(service.name)
+            # error message
+            raise Registration::PkgError, N_("The service refresh has failed.")
+          end
 
           Progress.NextStep
         end
