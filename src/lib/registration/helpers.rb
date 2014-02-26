@@ -24,15 +24,20 @@
 require "yast"
 
 module Registration
-  Yast.import "Language"
 
   class Helpers
     include Yast
     include Yast::Logger
 
+    # Get the language for using in HTTP requests (in "Accept-Language" header)
     def self.language
-      lang = Language.language
+      lang = WFM.GetLanguage
       log.info "Current language: #{lang}"
+
+      if lang == "POSIX" || lang == "C"
+        log.warn "Ignoring #{lang.inspect} language for HTTP requests"
+        return nil
+      end
 
       # remove the encoding (e.g. ".UTF-8")
       lang.sub!(/\..*$/, "")
