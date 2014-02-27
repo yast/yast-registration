@@ -33,6 +33,7 @@ module Registration
   Yast.import "Pkg"
   Yast.import "Installation"
   Yast.import "PackageCallbacksInit"
+  Yast.import "Progress"
 
   class SwMgmt
     include Yast

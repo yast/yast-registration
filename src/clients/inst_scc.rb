@@ -42,8 +42,6 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
-      Yast.import "Progress"
-      Yast.import "Language"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
