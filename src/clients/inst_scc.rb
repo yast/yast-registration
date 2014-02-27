@@ -124,7 +124,7 @@ module Yast
       # then register the product(s)
       product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
         # there will be just one base product, but theoretically there can be more...
-        Registration::SwMgmt.selected_base_products.map do |base_product|
+        Registration::SwMgmt.products_to_register.map do |base_product|
           log.info("Registering base product: #{base_product.inspect}")
           scc.register(base_product)
         end

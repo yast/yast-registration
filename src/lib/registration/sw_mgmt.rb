@@ -72,14 +72,12 @@ module Registration
       end
     end
 
-    def self.selected_base_products
+    def self.products_to_register
       # just for debugging:
       # return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12-"}]
 
-      # source 0 is the base installation repo, the repos added later are considered as add-ons
-      # although they can also contain a different base product
-      #
-      # on a running system, products are :installed
+      # during installation the products are :selected,
+      # on a running system the products are :installed
       selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
         p["status"] == :selected || p["status"] == :installed
       end
@@ -87,7 +85,7 @@ module Registration
       # filter out not needed data
       product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
 
-      log.info("Found selected/installed base products: #{product_info}")
+      log.info("Products to register: #{product_info}")
 
       product_info
     end
