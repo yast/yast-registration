@@ -24,4 +24,13 @@ module Registration
   # Exception class for handling all Pkg errors
   class PkgError < RuntimeError
   end
+
+  class ServiceError < PkgError
+    attr_reader :service
+
+    def initialize(msg, service)
+      super(msg)
+      @service = service
+    end
+  end
 end

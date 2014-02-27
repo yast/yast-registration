@@ -84,6 +84,9 @@ module Yast
             else
               Report.Error(_("Registration failed."))
             end
+          rescue Registration::ServiceError => e
+            log.error("Service error: #{e.message % e.service}")
+            Report.Error(_(e.message) % e.service)
           rescue Registration::PkgError => e
             log.error("Pkg error: #{e.message}")
             Report.Error(_(e.message))
@@ -114,7 +117,7 @@ module Yast
       end
 
       # ensure the zypp config directories are writable in inst-sys
-      Registration::SwMgmt.ensure_zypp_config_writable
+      Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
       credentials.write

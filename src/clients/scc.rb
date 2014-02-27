@@ -33,6 +33,5 @@ module Yast
 
   WFM.call("inst_scc")
 
-  Registration::SwMgmt.save
   Wizard.CloseDialog
 end

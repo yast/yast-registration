@@ -26,12 +26,11 @@ require "yast"
 module Registration
 
   class Helpers
-    include Yast
     include Yast::Logger
 
     # Get the language for using in HTTP requests (in "Accept-Language" header)
     def self.language
-      lang = WFM.GetLanguage
+      lang = Yast::WFM.GetLanguage
       log.info "Current language: #{lang}"
 
       if lang == "POSIX" || lang == "C"

@@ -52,27 +52,23 @@ module Registration
       Pkg.SourceStartManager(true)
     end
 
-    def self.save
-      Pkg.SourceSaveAll
-    end
-
     # during installation /etc/zypp directory is not writable (mounted on
     # a read-only file system), the workaround is to copy the whole directory
     # structure into a writable temporary directory and override the original
     # location by "mount -o bind"
-    def self.ensure_zypp_config_writable
-      if Mode.installation && !File.writable?(ZYPP_DIR)
-        log.info "Copying libzypp config to a writable place"
+    def self.zypp_config_writable!
+      return if !Mode.installation || File.writable?(ZYPP_DIR)
 
-        # create writable zypp directory structure in /tmp
-        tmpdir = Dir.mktmpdir
+      log.info "Copying libzypp config to a writable place"
 
-        log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
-        ::FileUtils.cp_r ZYPP_DIR, tmpdir
+      # create writable zypp directory structure in /tmp
+      tmpdir = Dir.mktmpdir
 
-        log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
-        `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
-      end
+      log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
+      ::FileUtils.cp_r ZYPP_DIR, tmpdir
+
+      log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
+      `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
     end
 
     def self.products_to_register
@@ -81,12 +77,14 @@ module Registration
 
       # during installation the products are :selected,
       # on a running system the products are :installed
-      selected_base_products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
+      products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
         p["status"] == :selected || p["status"] == :installed
       end
 
       # filter out not needed data
-      product_info = selected_base_products.map{|p| { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}}
+      product_info = products.map do |p|
+        { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}
+      end
 
       log.info("Products to register: #{product_info}")
 
@@ -103,38 +101,39 @@ module Registration
         raise Registration::PkgError, N_("Saving repository configuration failed.")
       end
 
-      # each registered product
-      product_services.each do |product_service|
-        # services for the each product
-        product_service.services.each do |service|
-          log.info "Adding service #{service.name.inspect} (#{service.url})"
+      # services for registered products
+      services = product_services.map &:services
 
-          # progress bar label
-          Progress.Title(_("Adding service %s...") % service.name)
+      services.each do |service|
+        log.info "Adding service #{service.name.inspect} (#{service.url})"
 
-          # TODO FIXME: SCC currenly does not return credentials for the service,
-          # just reuse the global credentials and save to a different file
-          credentials.file = service.name + "_credentials"
-          credentials.write
+        # progress bar label
+        Progress.Title(_("Adding service %s...") % service.name)
 
-          if !Pkg.ServiceAdd(service.name, service.url.to_s)
-            # error message
-            raise Registration::PkgError, N_("Adding the service failed.")
-          end
-          # refresh works only for saved services
-          if !Pkg.ServiceSave(service.name)
-            # error message
-            raise Registration::PkgError, N_("Saving the new service failed.")
-          end
+        # TODO FIXME: SCC currenly does not return credentials for the service,
+        # just reuse the global credentials and save to a different file
+        credentials.file = service.name + "_credentials"
+        credentials.write
 
-          if !Pkg.ServiceRefresh(service.name)
-            # error message
-            raise Registration::PkgError, N_("The service refresh has failed.")
-          end
-
-          Progress.NextStep
+        if !Pkg.ServiceAdd(service.name, service.url.to_s)
+          # error message
+          raise Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
         end
+        # refresh works only for saved services
+        if !Pkg.ServiceSave(service.name)
+          # error message
+          raise Registration::ServiceError.new(N_("Saving service '%s' failed."), service.name)
+        end
+
+        if !Pkg.ServiceRefresh(service.name)
+          # error message
+          raise Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service.name)
+        end
+
+        Progress.NextStep
       end
+    ensure
+      Pkg.SourceSaveAll
     end
 
   end
