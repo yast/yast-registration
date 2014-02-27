@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 27 08:35:31 UTC 2014 - lslezak@suse.cz
+
+- Check for errors when adding/refreshing services
+- 3.1.13
+
+-------------------------------------------------------------------
 Wed Feb 26 14:44:09 CET 2014 - locilka@suse.com
 
 - Initializing packager before registration on a running system

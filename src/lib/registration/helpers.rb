@@ -23,22 +23,30 @@
 
 require "yast"
 
-module Yast
-  Yast.import "Pkg"
-  Yast.import "Installation"
-  Yast.import "PackageCallbacksInit"
+module Registration
 
-  class Registration
-    def self.initialize_libzypp
-      PackageCallbacksInit.InitPackageCallbacks
-      Pkg.TargetInitialize(Installation.destdir)
-      Pkg.TargetLoad
-      Pkg.SourceStartManager(true)
+  class Helpers
+    include Yast::Logger
+
+    # Get the language for using in HTTP requests (in "Accept-Language" header)
+    def self.language
+      lang = Yast::WFM.GetLanguage
+      log.info "Current language: #{lang}"
+
+      if lang == "POSIX" || lang == "C"
+        log.warn "Ignoring #{lang.inspect} language for HTTP requests"
+        return nil
+      end
+
+      # remove the encoding (e.g. ".UTF-8")
+      lang.sub!(/\..*$/, "")
+      # replace lang/country separator "_" -> "-"
+      # see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+      lang.tr!("_", "-")
+
+      log.info "Language for HTTP requests set to #{lang.inspect}"
+      lang
     end
 
-    def self.save_libzypp
-      Pkg.SourceSaveAll
-    end
   end
 end
-

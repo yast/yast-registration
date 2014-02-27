@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.12
+Version:        3.1.13
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -28,13 +28,11 @@ License:        GPL-2.0
 
 Requires:       yast2 >= 2.23.13
 Requires:       yast2-pkg-bindings >= 2.17.20
-# Y2Logger
-Requires:       yast2-ruby-bindings >= 3.1.7
+# N_() method
+Requires:       yast2-ruby-bindings >= 3.1.12
 # SCC API library
 Requires:       rubygem-scc_api >= 0.2.4
 Requires:       yast2-slp >= 3.1.2
-# Language module
-Requires:       yast2-country
 
 BuildRequires:  yast2 >= 2.23.13
 BuildRequires:  update-desktop-files

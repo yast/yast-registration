@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # ------------------------------------------------------------------------------
-# Copyright (c) 2013 Novell, Inc. All Rights Reserved.
+# Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -20,18 +20,17 @@
 # ------------------------------------------------------------------------------
 #
 #
+module Registration
+  # Exception class for handling all Pkg errors
+  class PkgError < RuntimeError
+  end
 
-# this is just a wrapper for running the SCC client in installed system
+  class ServiceError < PkgError
+    attr_reader :service
 
-require "registration/sw_mgmt"
-
-module Yast
-  import "Wizard"
-
-  Wizard.CreateDialog
-  Registration::SwMgmt.init
-
-  WFM.call("inst_scc")
-
-  Wizard.CloseDialog
+    def initialize(msg, service)
+      super(msg)
+      @service = service
+    end
+  end
 end

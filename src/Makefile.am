@@ -9,7 +9,9 @@ desktop_DATA = \
 
 ylibdir = @ylibdir@/registration
 ylib_DATA = \
-  lib/registration/registration.rb
+  lib/registration/exceptions.rb \
+  lib/registration/sw_mgmt.rb \
+  lib/registration/helpers.rb
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA)
 
