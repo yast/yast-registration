@@ -40,6 +40,8 @@ module Registration
     include Yast::Logger
     extend Yast::I18n
 
+    textdomain "registration"
+
     ZYPP_DIR = "/etc/zypp"
 
     def self.init
