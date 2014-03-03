@@ -20,6 +20,7 @@ config.status
 config.sub
 configure
 configure.ac
+/coverage/
 install-sh
 libtool
 ltconfig
