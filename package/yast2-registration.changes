@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar  3 13:18:11 UTC 2014 - lslezak@suse.cz
+
+- allow changing the registration server URL in installation via
+  boot command line ("reg_url" option) (FATE#312433)
+- 3.1.14
+
+-------------------------------------------------------------------
 Thu Feb 27 08:35:31 UTC 2014 - lslezak@suse.cz
 
 - Check for errors when adding/refreshing services

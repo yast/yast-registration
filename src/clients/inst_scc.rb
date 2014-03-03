@@ -111,6 +111,13 @@ module Yast
       # set the current language to receive translated error messages
       scc.language = Registration::Helpers.language
 
+      reg_url = Registration::Helpers.registration_url
+
+      if reg_url
+        log.info "Using custom registration URL: #{reg_url.inspect}"
+        scc.url = reg_url
+      end
+
       # announce (register the system) first
       credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
         scc.announce
