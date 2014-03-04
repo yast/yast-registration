@@ -4,8 +4,6 @@ require_relative "spec_helper"
 
 require "registration/helpers"
 
-Yast.import "SlpService"
-
 describe Registration::Helpers do
 
   describe ".registration_url" do
@@ -77,6 +75,36 @@ describe Registration::Helpers do
         expect(Yast::Linuxrc).to receive(:InstallInf).never
         expect(Registration::Helpers.registration_url).to be_nil
       end
+    end
+  end
+
+  describe ".service_url" do
+    it "converts a SLP service to plain URL" do
+      url = "https://example.com/registration"
+      service = "service:susemanager:#{url}"
+      expect(Registration::Helpers.service_url(service)).to eq(url)
+    end
+  end
+
+  describe ".service_description" do
+    let(:slp_url) { "https://example.com/registration" }
+    let(:slp_attributes) { double }
+    let(:slp_service) { double }
+
+    before do
+      expect(slp_service).to receive(:attributes).and_return(slp_attributes)
+      expect(slp_service).to receive(:slp_url).and_return("service:susemanager:#{slp_url}")
+    end
+
+    it "creates a label with description and url" do
+      description = "Description"
+      expect(slp_attributes).to receive(:to_h).and_return({:description => description})
+      expect(Registration::Helpers.service_description(slp_service)).to eq("#{description} (#{slp_url})")
+    end
+
+    it "creates a label with url only when description is missing" do
+      expect(slp_attributes).to receive(:to_h).and_return({})
+      expect(Registration::Helpers.service_description(slp_service)).to eq(slp_url)
     end
   end
 
