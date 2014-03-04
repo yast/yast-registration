@@ -1,6 +1,7 @@
 # Sources for installation
 
 client_DATA = \
+  clients/discover_registration_services.rb \
   clients/inst_scc.rb \
   clients/scc.rb
 
