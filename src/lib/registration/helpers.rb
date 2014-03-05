@@ -66,10 +66,36 @@ module Registration
         return boot_url if boot_url
       end
 
-      # TODO FIXME: add SLP discovery
+      # SLP discovery
+      # TODO FIXME: replace "true" by reading the SLP option from configuration file
+      if Yast::Mode.installation || true
+        slp_url = slp_service_url
+        return slp_url if slp_url
+      end
+
+      # TODO FIXME: read the URL from configuration file to use the same URL
+      # at re-registration at installed system
 
       # no custom URL, use the default
       nil
+    end
+
+    # convert service URL to plain URL, remove the SLP service prefix
+    # "service:susemanager:https://scc.suse.com/connect" ->
+    # "https://scc.suse.com/connect"
+    def self.service_url(service)
+      service.sub(/\Aservice:[^:]+:/, "")
+    end
+
+    # Create radio button label for a SLP service
+    # @param service [Yast::SlpServiceClass::Service] SLP service
+    # @return [String] label
+    def self.service_description(service)
+      url  = Registration::Helpers.service_url(service.slp_url)
+      descr = service.attributes.to_h[:description]
+
+      # display URL and the description if it is present
+      (descr && !descr.empty?) ? "#{descr} (#{url})" : url
     end
 
     private
@@ -86,6 +112,14 @@ module Registration
       log.info "Boot reg_url option: #{reg_url.inspect}"
 
       reg_url
+    end
+
+    def self.slp_service_url
+      log.info "Starting SLP discovery..."
+      url = Yast::WFM.call("discover_registration_services")
+      log.info "Selected SLP service: #{url.inspect}"
+
+      url
     end
 
   end

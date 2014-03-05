@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  5 07:49:49 UTC 2014 - lslezak@suse.cz
+
+- added SLP service discovery (FATE#316384)
+- 3.1.15
+
+-------------------------------------------------------------------
 Mon Mar  3 13:18:11 UTC 2014 - lslezak@suse.cz
 
 - allow changing the registration server URL in installation via
