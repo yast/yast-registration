@@ -102,9 +102,7 @@ module Registration
       end
 
       # services for registered products
-      services = product_services.map &:services
-
-      services.each do |service|
+      product_services.map(&:services).flatten.each do |service|
         log.info "Adding service #{service.name.inspect} (#{service.url})"
 
         # progress bar label

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  6 14:18:51 UTC 2014 - lslezak@suse.cz
+
+- fixed service refresh loop (bnc#867120)
+- 3.1.17
+
+-------------------------------------------------------------------
 Thu Mar  6 12:57:21 UTC 2014 - lslezak@suse.cz
 
 - fixed crash at start (added missing "require" call) (bnc#867120)
