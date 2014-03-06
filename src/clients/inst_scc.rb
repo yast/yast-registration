@@ -43,6 +43,7 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+      Yast.import "Label"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -139,6 +140,8 @@ module Yast
         end
       end
 
+      log.info "product_services: #{product_services.inspect}"
+
       if !product_services.empty?
         Progress.New(
           # TRANSLATORS: dialog caption
@@ -158,6 +161,9 @@ module Yast
         ensure
           Progress.Finish
         end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_services) if Mode.installation
       end
     end
 
@@ -196,6 +202,53 @@ module Yast
       )
     end
 
+    def repo_items(repos)
+      repos.map{|repo| Item(Id(repo["SrcId"]), repo["name"], repo["enabled"])}
+    end
+
+    def repo_selection_dialog(repos)
+      label = _("You can manually change the repository states,\n" +
+          "select repositories which will be used for installation.")
+
+      VBox(
+        Heading(_("Repository State")),
+        VSpacing(0.5),
+        Label(label),
+        MultiSelectionBox(Id(:repositories), "", repo_items(repos)),
+        VSpacing(0.5),
+        HBox(
+          PushButton(Id(:ok), Opt(:default), Label.OKButton),
+          PushButton(Id(:cancel), Label.CancelButton)
+        )
+      )
+    end
+
+    def activate_repo_settings(repos)
+      selected_items = UI.QueryWidget(Id(:repositories), :SelectedItems)
+      log.info "Selected items: #{selected_items.inspect}"
+
+      repos.each do |repo|
+        repo_id = repo["SrcId"]
+        enabled = selected_items.include?(repo["SrcId"])
+        log.info "Repository #{repo["name"]} enabled: #{enabled}"
+        Pkg.SourceSetEnabled(repo_id, enabled)
+      end
+    end
+
+    def select_repositories(product_services)
+      repos = Registration::SwMgmt.service_repos(product_services)
+
+      UI.OpenDialog(repo_selection_dialog(repos))
+      UI.SetFocus(:ok)
+
+      begin
+        ret = UI.UserInput
+        activate_repo_settings(repos) if ret == :ok
+      ensure
+        UI.CloseDialog
+      end
+    end
+
     def run_with_feedback(header, label, &block)
       Popup.ShowFeedback(header, label)
       yield
@@ -206,10 +259,10 @@ module Yast
     def confirm_skipping
       # Popup question: confirm skipping the registration
       confirmation = _("If you do not register your system we will not be able\n" +
-        "to grant you access to the update repositories.\n\n" +
-        "You can register after the installation or visit our\n" +
-        "Customer Center for online registration.\n\n" +
-        "Really skip the registration now?")
+          "to grant you access to the update repositories.\n\n" +
+          "You can register after the installation or visit our\n" +
+          "Customer Center for online registration.\n\n" +
+          "Really skip the registration now?")
 
       Popup.YesNo(confirmation)
     end
