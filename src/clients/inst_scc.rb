@@ -27,6 +27,7 @@ require "scc_api"
 
 require "registration/exceptions"
 require "registration/helpers"
+require "registration/sw_mgmt"
 
 module Yast
   class InstSccClient < Client
