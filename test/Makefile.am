@@ -1,6 +1,7 @@
 TESTS = \
   discover_registration_services_spec.rb \
   helpers_spec.rb \
+  scc_finish_test.rb \
   sw_mgmt_test.rb
 
 TEST_EXTENSIONS = .rb

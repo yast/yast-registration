@@ -3,7 +3,8 @@
 client_DATA = \
   clients/discover_registration_services.rb \
   clients/inst_scc.rb \
-  clients/scc.rb
+  clients/scc.rb \
+  clients/scc_finish.rb
 
 desktop_DATA = \
   desktop/customer_center.desktop

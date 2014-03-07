@@ -28,6 +28,7 @@ require "scc_api"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/sw_mgmt"
+require "registration/repo_state"
 
 module Yast
   class InstSccClient < Client
@@ -230,8 +231,15 @@ module Yast
       repos.each do |repo|
         repo_id = repo["SrcId"]
         enabled = selected_items.include?(repo["SrcId"])
-        log.info "Repository #{repo["name"]} enabled: #{enabled}"
-        Pkg.SourceSetEnabled(repo_id, enabled)
+
+        if repo["enabled"] != enabled
+          # remember the original state
+          repo_state = Registration::RepoState.new(repo["SrcId"], repo["enabled"])
+          Registration::RepoStateStorage.instance.repositories << repo_state
+
+          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
+          Pkg.SourceSetEnabled(repo_id, enabled)
+        end
       end
     end
 
