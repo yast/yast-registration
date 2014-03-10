@@ -28,6 +28,7 @@ require "scc_api"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/sw_mgmt"
+require "registration/repo_state"
 
 module Yast
   class InstSccClient < Client
@@ -43,6 +44,7 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+      Yast.import "Label"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -85,10 +87,10 @@ module Yast
             else
               Report.Error(_("Registration failed."))
             end
-          rescue Registration::ServiceError => e
+          rescue ::Registration::ServiceError => e
             log.error("Service error: #{e.message % e.service}")
             Report.Error(_(e.message) % e.service)
-          rescue Registration::PkgError => e
+          rescue ::Registration::PkgError => e
             log.error("Pkg error: #{e.message}")
             Report.Error(_(e.message))
           rescue Exception => e
@@ -110,9 +112,9 @@ module Yast
       scc = SccApi::Connection.new(email, reg_code)
 
       # set the current language to receive translated error messages
-      scc.language = Registration::Helpers.language
+      scc.language = ::Registration::Helpers.language
 
-      reg_url = Registration::Helpers.registration_url
+      reg_url = ::Registration::Helpers.registration_url
 
       if reg_url
         log.info "Using custom registration URL: #{reg_url.inspect}"
@@ -125,7 +127,7 @@ module Yast
       end
 
       # ensure the zypp config directories are writable in inst-sys
-      Registration::SwMgmt.zypp_config_writable!
+      ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
       credentials.write
@@ -133,11 +135,13 @@ module Yast
       # then register the product(s)
       product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
         # there will be just one base product, but theoretically there can be more...
-        Registration::SwMgmt.products_to_register.map do |base_product|
+        ::Registration::SwMgmt.products_to_register.map do |base_product|
           log.info("Registering base product: #{base_product.inspect}")
           scc.register(base_product)
         end
       end
+
+      log.info "product_services: #{product_services.inspect}"
 
       if !product_services.empty?
         Progress.New(
@@ -154,10 +158,13 @@ module Yast
         Progress.NextStage
 
         begin
-          Registration::SwMgmt.add_services(product_services, credentials)
+          ::Registration::SwMgmt.add_services(product_services, credentials)
         ensure
           Progress.Finish
         end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_services) if Mode.installation
       end
     end
 
@@ -196,6 +203,60 @@ module Yast
       )
     end
 
+    def repo_items(repos)
+      repos.map{|repo| Item(Id(repo["SrcId"]), repo["name"], repo["enabled"])}
+    end
+
+    def repo_selection_dialog(repos)
+      label = _("You can manually change the repository states,\n" +
+          "select repositories which will be used for installation.")
+
+      VBox(
+        Heading(_("Repository State")),
+        VSpacing(0.5),
+        Label(label),
+        MultiSelectionBox(Id(:repositories), "", repo_items(repos)),
+        VSpacing(0.5),
+        HBox(
+          PushButton(Id(:ok), Opt(:default), Label.OKButton),
+          PushButton(Id(:cancel), Label.CancelButton)
+        )
+      )
+    end
+
+    def activate_repo_settings(repos)
+      selected_items = UI.QueryWidget(Id(:repositories), :SelectedItems)
+      log.info "Selected items: #{selected_items.inspect}"
+
+      repos.each do |repo|
+        repo_id = repo["SrcId"]
+        enabled = selected_items.include?(repo["SrcId"])
+
+        if repo["enabled"] != enabled
+          # remember the original state
+          repo_state = ::Registration::RepoState.new(repo["SrcId"], repo["enabled"])
+          ::Registration::RepoStateStorage.instance.repositories << repo_state
+
+          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
+          Pkg.SourceSetEnabled(repo_id, enabled)
+        end
+      end
+    end
+
+    def select_repositories(product_services)
+      repos = ::Registration::SwMgmt.service_repos(product_services)
+
+      UI.OpenDialog(repo_selection_dialog(repos))
+      UI.SetFocus(:ok)
+
+      begin
+        ret = UI.UserInput
+        activate_repo_settings(repos) if ret == :ok
+      ensure
+        UI.CloseDialog
+      end
+    end
+
     def run_with_feedback(header, label, &block)
       Popup.ShowFeedback(header, label)
       yield
@@ -206,10 +267,10 @@ module Yast
     def confirm_skipping
       # Popup question: confirm skipping the registration
       confirmation = _("If you do not register your system we will not be able\n" +
-        "to grant you access to the update repositories.\n\n" +
-        "You can register after the installation or visit our\n" +
-        "Customer Center for online registration.\n\n" +
-        "Really skip the registration now?")
+          "to grant you access to the update repositories.\n\n" +
+          "You can register after the installation or visit our\n" +
+          "Customer Center for online registration.\n\n" +
+          "Really skip the registration now?")
 
       Popup.YesNo(confirmation)
     end

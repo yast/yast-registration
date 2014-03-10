@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # ------------------------------------------------------------------------------
-# Copyright (c) 2013 Novell, Inc. All Rights Reserved.
+# Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -21,17 +21,39 @@
 #
 #
 
-# this is just a wrapper for running the SCC client in installed system
+require "singleton"
 
-require "registration/sw_mgmt"
+require "yast"
 
-module Yast
-  import "Wizard"
+module Registration
+  Yast.import "Pkg"
 
-  Wizard.CreateDialog
-  ::Registration::SwMgmt.init
+  # storage for changed repositories
+  class RepoStateStorage
+    include Singleton
 
-  WFM.call("inst_scc")
+    attr_accessor :repositories
 
-  Wizard.CloseDialog
+    def initialize
+      @repositories = []
+    end
+  end
+
+  # store repository ID and it's original state (enabled/disabled)
+  class RepoState
+    include Yast::Logger
+
+    attr_reader :repo_id, :enabled
+
+    def initialize(repo_id, enabled)
+      @repo_id = repo_id
+      @enabled = enabled
+    end
+
+    def restore_state
+      log.info "Restoring the original repository state: id: #{repo_id}, enabled: #{enabled}"
+      Yast::Pkg.SourceSetEnabled(repo_id, enabled)
+    end
+  end
 end
+

@@ -134,6 +134,24 @@ module Registration
       Pkg.SourceSaveAll
     end
 
+    # get list of repositories belonging to registered services
+    def self.service_repos(product_services)
+      repo_data = Pkg.SourceGetCurrent(false).map do |repo|
+        data = Pkg.SourceGeneralData(repo)
+        data["SrcId"] = repo
+        data
+      end
+
+      service_names = product_services.map(&:services).flatten.map(&:name)
+      log.info "Added services: #{service_names.inspect}"
+
+      # select only repositories belonging to the product services
+      repos = repo_data.select{|repo| service_names.include?(repo["service"])}
+      log.info "Service repositories: #{repos}"
+
+      repos
+    end
+
   end
 end
 

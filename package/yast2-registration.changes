@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Mar  6 20:31:05 UTC 2014 - lslezak@suse.cz
+
+- display a popup for selecting/deselecting registered repositories
+  (to allow e.g. disabling Updates and installing GA version)
+  (FATE#312012)
+- 3.1.18
+
+-------------------------------------------------------------------
 Thu Mar  6 14:18:51 UTC 2014 - lslezak@suse.cz
 
 - fixed service refresh loop (bnc#867120)
