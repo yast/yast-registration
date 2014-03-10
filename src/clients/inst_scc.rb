@@ -87,10 +87,10 @@ module Yast
             else
               Report.Error(_("Registration failed."))
             end
-          rescue Registration::ServiceError => e
+          rescue ::Registration::ServiceError => e
             log.error("Service error: #{e.message % e.service}")
             Report.Error(_(e.message) % e.service)
-          rescue Registration::PkgError => e
+          rescue ::Registration::PkgError => e
             log.error("Pkg error: #{e.message}")
             Report.Error(_(e.message))
           rescue Exception => e
@@ -112,9 +112,9 @@ module Yast
       scc = SccApi::Connection.new(email, reg_code)
 
       # set the current language to receive translated error messages
-      scc.language = Registration::Helpers.language
+      scc.language = ::Registration::Helpers.language
 
-      reg_url = Registration::Helpers.registration_url
+      reg_url = ::Registration::Helpers.registration_url
 
       if reg_url
         log.info "Using custom registration URL: #{reg_url.inspect}"
@@ -127,7 +127,7 @@ module Yast
       end
 
       # ensure the zypp config directories are writable in inst-sys
-      Registration::SwMgmt.zypp_config_writable!
+      ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
       credentials.write
@@ -135,7 +135,7 @@ module Yast
       # then register the product(s)
       product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
         # there will be just one base product, but theoretically there can be more...
-        Registration::SwMgmt.products_to_register.map do |base_product|
+        ::Registration::SwMgmt.products_to_register.map do |base_product|
           log.info("Registering base product: #{base_product.inspect}")
           scc.register(base_product)
         end
@@ -158,7 +158,7 @@ module Yast
         Progress.NextStage
 
         begin
-          Registration::SwMgmt.add_services(product_services, credentials)
+          ::Registration::SwMgmt.add_services(product_services, credentials)
         ensure
           Progress.Finish
         end
@@ -234,8 +234,8 @@ module Yast
 
         if repo["enabled"] != enabled
           # remember the original state
-          repo_state = Registration::RepoState.new(repo["SrcId"], repo["enabled"])
-          Registration::RepoStateStorage.instance.repositories << repo_state
+          repo_state = ::Registration::RepoState.new(repo["SrcId"], repo["enabled"])
+          ::Registration::RepoStateStorage.instance.repositories << repo_state
 
           log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
           Pkg.SourceSetEnabled(repo_id, enabled)
@@ -244,7 +244,7 @@ module Yast
     end
 
     def select_repositories(product_services)
-      repos = Registration::SwMgmt.service_repos(product_services)
+      repos = ::Registration::SwMgmt.service_repos(product_services)
 
       UI.OpenDialog(repo_selection_dialog(repos))
       UI.SetFocus(:ok)

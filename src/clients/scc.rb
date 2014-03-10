@@ -29,7 +29,7 @@ module Yast
   import "Wizard"
 
   Wizard.CreateDialog
-  Registration::SwMgmt.init
+  ::Registration::SwMgmt.init
 
   WFM.call("inst_scc")
 

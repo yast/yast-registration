@@ -83,7 +83,7 @@ module Yast
             selected_service = services[selected.to_i]
             log.info "Selected service #{selected_service.inspect}"
 
-            url = Registration::Helpers.service_url(selected_service.slp_url)
+            url = ::Registration::Helpers.service_url(selected_service.slp_url)
             log.info "Selected service URL: #{url}"
 
             return url
@@ -101,7 +101,7 @@ module Yast
         Left(
           RadioButton(
             Id(index.to_s),
-            Registration::Helpers.service_description(service),
+            ::Registration::Helpers.service_description(service),
             false
           )
         )
