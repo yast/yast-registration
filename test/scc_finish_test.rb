@@ -46,6 +46,12 @@ describe "scc_finish client" do
 
   context "without any parameter" do
     it "the client call returns false" do
+      # even when there are some changes they are not saved
+      Registration::RepoStateStorage.instance.repositories = [
+        Registration::RepoState.new(1, true),
+        Registration::RepoState.new(2, false)
+      ]
+
       expect(pkg).to receive(:SourceSetEnabled).never
       expect(pkg).to receive(:SourceSaveAll).never
 
@@ -58,10 +64,16 @@ describe "scc_finish client" do
 
   context "with a wrong parameter" do
     it "the client call returns false" do
+      # even when there are some changes they are not saved
+      Registration::RepoStateStorage.instance.repositories = [
+        Registration::RepoState.new(1, true),
+        Registration::RepoState.new(2, false)
+      ]
+
       expect(pkg).to receive(:SourceSetEnabled).never
       expect(pkg).to receive(:SourceSaveAll).never
 
-      expect(Yast::WFM.call("scc_finish", ["Invallid_Parameter"])).to be_false
+      expect(Yast::WFM.call("scc_finish", ["Invalid_Parameter"])).to be_false
     end
   end
 end
