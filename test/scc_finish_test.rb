@@ -21,7 +21,7 @@ describe "scc_finish client" do
   end
 
   context "with Write parameter" do
-    it "writes the changed repositories" do
+    it "restores the original repository states" do
       Registration::RepoStateStorage.instance.repositories = [
         Registration::RepoState.new(1, true),
         Registration::RepoState.new(2, false)

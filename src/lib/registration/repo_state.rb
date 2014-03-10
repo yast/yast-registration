@@ -50,8 +50,8 @@ module Registration
       @enabled = enabled
     end
 
-    def activate
-      log.info "Setting original repository state: id: #{repo_id}, enabled: #{enabled}"
+    def restore_state
+      log.info "Restoring the original repository state: id: #{repo_id}, enabled: #{enabled}"
       Yast::Pkg.SourceSetEnabled(repo_id, enabled)
     end
   end

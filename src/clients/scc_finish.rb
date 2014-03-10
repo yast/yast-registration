@@ -44,15 +44,16 @@ module Yast
           "steps" => 1,
           # progress step title
           "title" => _("Setting original repository configuration..."),
-          "when"  => [:installation, :update, :autoinst]
+          "when"  => ::Registration::RepoStateStorage.instance.repositories.empty? ?
+            [] : [:installation, :live_installation, :update, :autoinst]
         }
       elsif func == "Write"
         # nothing to write
-        changed_repos = Registration::RepoStateStorage.instance.repositories
+        changed_repos = ::Registration::RepoStateStorage.instance.repositories
         return nil if changed_repos.empty?
 
         # activate the original repository states
-        changed_repos.each(&:activate)
+        changed_repos.each(&:restore_state)
 
         # save all repositories
         Pkg.SourceSaveAll
