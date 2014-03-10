@@ -35,11 +35,8 @@ module Yast
 
       textdomain "registration"
 
-      if WFM.Args.empty?
-        raise "#{File.basename(__FILE__)}: missing parameter"
-      else
-        func = WFM.Args(0)
-      end
+      func = WFM.Args.first
+      raise "#{File.basename(__FILE__)}: missing parameter" unless func
 
       log.info "starting #{__FILE__} (func: #{func})"
 
