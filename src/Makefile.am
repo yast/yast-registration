@@ -13,6 +13,7 @@ ylibdir = @ylibdir@/registration
 ylib_DATA = \
   lib/registration/exceptions.rb \
   lib/registration/sw_mgmt.rb \
+  lib/registration/repo_state.rb \
   lib/registration/helpers.rb
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA)

@@ -44,13 +44,24 @@ describe "scc_finish client" do
     end
   end
 
-  context "without any parameter " do
-    it "does not do anything" do
+  context "without any parameter" do
+    it "the client call returns false" do
       expect(pkg).to receive(:SourceSetEnabled).never
       expect(pkg).to receive(:SourceSaveAll).never
 
-      expect(Yast::WFM.call("scc_finish")).to be_nil
-      expect(Yast::WFM.call("scc_finish", [])).to be_nil
+      # WFM.call catches all exceptions and returns false
+      # see https://github.com/yast/yast-ruby-bindings/blob/master/src/ruby/yast/wfm.rb#L195
+      expect(Yast::WFM.call("scc_finish")).to be_false
+      expect(Yast::WFM.call("scc_finish", [])).to be_false
+    end
+  end
+
+  context "with a wrong parameter" do
+    it "the client call returns false" do
+      expect(pkg).to receive(:SourceSetEnabled).never
+      expect(pkg).to receive(:SourceSaveAll).never
+
+      expect(Yast::WFM.call("scc_finish", ["Invallid_Parameter"])).to be_false
     end
   end
 end

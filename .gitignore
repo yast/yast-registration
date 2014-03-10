@@ -33,3 +33,4 @@ missing
 mkinstalldirs
 pluglib-bindings.ami
 /nbproject/
+test-driver

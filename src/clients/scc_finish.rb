@@ -35,7 +35,11 @@ module Yast
 
       textdomain "registration"
 
-      func = WFM.Args(0) unless WFM.Args.empty?
+      if WFM.Args.empty?
+        raise "#{File.basename(__FILE__)}: missing parameter"
+      else
+        func = WFM.Args(0)
+      end
 
       log.info "starting #{__FILE__} (func: #{func})"
 
@@ -58,7 +62,7 @@ module Yast
         # save all repositories
         Pkg.SourceSaveAll
       else
-        log.error "unknown function: #{func.inspect}"
+        raise "#{File.basename(__FILE__)}:unknown parameter: #{func.inspect}"
       end
 
       log.info "#{__FILE__} finished"
