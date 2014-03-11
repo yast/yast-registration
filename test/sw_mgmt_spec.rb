@@ -1,10 +1,18 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
+require_relative "yast_stubs"
 
-require "registration/sw_mgmt"
+describe "Registration::SwMgmt" do
+  let(:yast_pkg) { double("Yast::Pkg") }
 
-describe Registration::SwMgmt do
+  before do
+    stub_yast_require
+    require "registration/sw_mgmt"
+
+    stub_const("Yast::Pkg", yast_pkg)
+  end
+
   describe ".service_repos" do
     it "returns list of repositories belonging to a service" do
       service_name = "SLES"
@@ -52,9 +60,9 @@ describe Registration::SwMgmt do
       services = double
       expect(services).to receive(:services).and_return([service])
 
-      expect(Yast::Pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
+      expect(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
-        expect(Yast::Pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
+        expect(yast_pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
       end
 
       expect(Registration::SwMgmt.service_repos([services])).to eq([repos[1], repos[2]])
