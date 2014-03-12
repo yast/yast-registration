@@ -14,6 +14,7 @@ ylib_DATA = \
   lib/registration/addon.rb \
   lib/registration/exceptions.rb \
   lib/registration/sw_mgmt.rb \
+  lib/registration/storage.rb \
   lib/registration/repo_state.rb \
   lib/registration/helpers.rb
 

@@ -108,4 +108,21 @@ describe Registration::Helpers do
     end
   end
 
+  describe ".credentials_from_url" do
+    it "returns credentials parameter from URL" do
+      url = "https://scc.suse.com/service/repo/repoindex.xml?credentials=SLES_credentials"
+      expect(Registration::Helpers.credentials_from_url(url)).to eq("SLES_credentials")
+    end
+
+    it "returns nil if the URL misses credentials parameter" do
+      url = "https://scc.suse.com/service/repo/repoindex.xml?nocredentials=SLES_credentials"
+      expect(Registration::Helpers.credentials_from_url(url)).to eq(nil)
+    end
+
+    it "raises URI::InvalidURIError when URL is invalid" do
+      url = ":foo:"
+      expect{Registration::Helpers.credentials_from_url(url)}.to raise_error(URI::InvalidURIError)
+    end
+  end
+
 end

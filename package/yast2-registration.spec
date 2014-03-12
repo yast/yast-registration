@@ -31,7 +31,7 @@ Requires:       yast2-pkg-bindings >= 2.17.20
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
 # SCC API library
-Requires:       rubygem-scc_api >= 0.2.4
+Requires:       rubygem-scc_api >= 0.2.7
 Requires:       yast2-slp >= 3.1.2
 
 BuildRequires:  yast2 >= 2.23.13

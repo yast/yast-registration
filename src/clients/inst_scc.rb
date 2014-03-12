@@ -27,11 +27,11 @@ require "scc_api"
 
 require "cgi"
 
-require "registration/addon"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/sw_mgmt"
 require "registration/repo_state"
+require "registration/storage"
 
 module Yast
   class InstSccClient < Client
@@ -53,16 +53,43 @@ module Yast
       Yast.import "Mode"
       Yast.import "Label"
       Yast.import "Sequencer"
+      Yast.import "Installation"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       @selected_addons = []
 
+      initialize_regkeys
+
       start_workflow
     end
 
     private
+
+    # initialize known reg. keys
+    def initialize_regkeys
+      @known_reg_keys = ::Registration::Storage::RegKeys.instance.reg_keys
+      if @known_reg_keys
+        log.info "Known reg keys: #{@known_reg_keys.size} keys"
+        return
+      end
+
+      if !Mode.normal
+        # read registration keys from USB media
+        log.info "Reading keys from USB media..."
+        # TODO FIXME: placeholder for FATE#316796 (https://fate.suse.com/316796)
+        # read the keys here, return Hash with mapping product_name => reg_key
+        @known_reg_keys = {}
+        log.info "Found #{@known_reg_keys.size} keys"
+      else
+        log.info "Initializing empty known reg keys"
+        @known_reg_keys = {}
+      end
+
+      # cache the values
+      ::Registration::Storage::RegKeys.instance.reg_keys = @known_reg_keys
+    end
 
     def register_base_system
       show_scc_credentials_dialog
@@ -74,47 +101,17 @@ module Yast
         ret = UI.UserInput
 
         if ret == :next
-          return :next if ENV["TESTING"] == "1"
 
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
           # reset the user input in case an exception is raised
           ret = nil
 
-          begin
+          catch_registration_errors do
             register(email, reg_code)
             return :next
-          rescue SccApi::NoNetworkError
-            # Error popup
-            Report.Error(_("Network is not configured, the registration server cannot be reached."))
-          rescue SccApi::NotAuthorized
-            # Error popup
-            Report.Error(_("The email address or the registration\ncode is not valid."))
-          rescue Timeout::Error
-            # Error popup
-            Report.Error(_("Connection time out."))
-          rescue SccApi::ErrorResponse => e
-            # TODO FIXME: display error details from the response
-            Report.Error(_("Registration server error.\n\nRetry registration later."))
-          rescue SccApi::HttpError => e
-            case e.response
-            when Net::HTTPClientError
-              Report.Error(_("Registration client error."))
-            when Net::HTTPServerError
-              Report.Error(_("Registration server error.\n\nRetry registration later."))
-            else
-              Report.Error(_("Registration failed."))
-            end
-          rescue ::Registration::ServiceError => e
-            log.error("Service error: #{e.message % e.service}")
-            Report.Error(_(e.message) % e.service)
-          rescue ::Registration::PkgError => e
-            log.error("Pkg error: #{e.message}")
-            Report.Error(_(e.message))
-          rescue Exception => e
-            log.error("SCC registration failed: #{e}, #{e.backtrace}")
-            Report.Error(_("Registration failed."))
           end
+
         end
 
         return ret if ret == :skip && confirm_skipping
@@ -123,66 +120,109 @@ module Yast
       return ret
     end
 
+    def catch_registration_errors(&block)
+      begin
+        yield
+      rescue SccApi::NoNetworkError
+        # Error popup
+        Report.Error(_("Network is not configured, the registration server cannot be reached."))
+      rescue SccApi::NotAuthorized
+        # Error popup
+        Report.Error(_("The email address or the registration\ncode is not valid."))
+      rescue Timeout::Error
+        # Error popup
+        Report.Error(_("Connection time out."))
+      rescue SccApi::ErrorResponse => e
+        # TODO FIXME: display error details from the response
+        Report.Error(_("Registration server error.\n\nRetry registration later."))
+      rescue SccApi::HttpError => e
+        case e.response
+        when Net::HTTPClientError
+          Report.Error(_("Registration client error."))
+        when Net::HTTPServerError
+          Report.Error(_("Registration server error.\n\nRetry registration later."))
+        else
+          Report.Error(_("Registration failed."))
+        end
+      rescue ::Registration::ServiceError => e
+        log.error("Service error: #{e.message % e.service}")
+        Report.Error(_(e.message) % e.service)
+      rescue ::Registration::PkgError => e
+        log.error("Pkg error: #{e.message}")
+        Report.Error(_(e.message))
+      rescue Exception => e
+        log.error("SCC registration failed: #{e}, #{e.backtrace}")
+        Report.Error(_("Registration failed."))
+      end
+    end
+
     def register(email, reg_code)
-      scc = SccApi::Connection.new(email, reg_code)
+      @scc = SccApi::Connection.new(email, reg_code)
 
       # set the current language to receive translated error messages
-      scc.language = ::Registration::Helpers.language
+      @scc.language = ::Registration::Helpers.language
 
       reg_url = ::Registration::Helpers.registration_url
 
       if reg_url
         log.info "Using custom registration URL: #{reg_url.inspect}"
-        scc.url = reg_url
+        @scc.url = reg_url
       end
 
       # announce (register the system) first
-      credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
-        scc.announce
+      @credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
+        @scc.announce
       end
 
       # ensure the zypp config directories are writable in inst-sys
       ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
-      credentials.write
+      @credentials.write
 
       # then register the product(s)
-      product_services = run_with_feedback(_("Registering the Product..."), _("Contacting the SUSE Customer Center server")) do
-        # there will be just one base product, but theoretically there can be more...
-        ::Registration::SwMgmt.products_to_register.map do |base_product|
-          log.info("Registering base product: #{base_product.inspect}")
-          scc.register(base_product)
+      products = ::Registration::SwMgmt.products_to_register
+      register_products(products)
+
+      # remember the base products for later (to get the respective addons)
+      ::Registration::Storage::BaseProducts.instance.products = products
+    end
+
+    def register_products(products)
+      product_services = run_with_feedback(n_("Registering Product...", "Registering Products...", products.size), _("Contacting the SUSE Customer Center server")) do
+        products.map do |product|
+          log.info("Registering product: #{product["name"]}")
+
+          begin
+            orig_reg_code = @scc.reg_code
+            # use product specific reg. key (e.g. for addons)
+            @scc.reg_code = product["reg_key"] if product["reg_key"]
+
+            ret = @scc.register(product)
+          ensure
+            # restore the original base product key
+            @scc.reg_code = orig_reg_code
+          end
+
+          ret
         end
       end
 
-      log.info "product_services: #{product_services.inspect}"
+      log.info "registered product_services: #{product_services.inspect}"
 
       if !product_services.empty?
-        Progress.New(
-          # TRANSLATORS: dialog caption
-          _("Adding Registered Software Repositories"),
-          " ",
-          product_services.size,
-          [ _("Add Services") ],
-          [ _("Adding Services") ],
-          # TRANSLATORS: dialog help
-          _("<p>The repository manager is downloading registered repositories...</p>")
-        )
-
-        Progress.NextStage
-
-        begin
-          ::Registration::SwMgmt.add_services(product_services, credentials)
-        ensure
-          Progress.Finish
-        end
+        add_product_services(product_services)
 
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services) if Mode.installation
       end
     end
 
+    def add_product_services(product_services)
+      ::Registration::SwMgmt.add_services(product_services, @credentials)
+    end
+
+    # content for the main registration dialog
     def scc_credentials_dialog
       VBox(
         HBox(
@@ -203,11 +243,13 @@ module Yast
       )
     end
 
+    # help text for the main registration dialog
     def scc_help_text
       # TODO: improve the help text
       _("Enter SUSE Customer Center credentials here to register the system to get updates and add-on products.")
     end
 
+    # display the main registration dialog
     def show_scc_credentials_dialog
       Wizard.SetContents(
         _("SUSE Customer Center Registration"),
@@ -279,39 +321,110 @@ module Yast
       Popup.ClearFeedback
     end
 
+    # create item list (available addons items)
     def addon_selection_items(addons)
-      addons.map{|a| Item(Id(a.name), a.label, @selected_addons.include?(a))}
+      addons.map{|a| Item(Id(a.product_ident), a.short_name, @selected_addons.include?(a))}
     end
 
+    # create content fot the addon selection dialog
     def addon_selection_dialog_content(addons)
+      media_checkbox = Empty()
+
+      # the media check box is displayed only at installation
+      # to modify the installation workflow (display extra add-on dialog)
+      if Mode.installation || true
+        media_checkbox = VBox(
+          VSpacing(0.4),
+          HBox(
+            HSpacing(1),
+            Left(CheckBox(Id(:media), _("In&clude Add-on Products from Separate Media"),
+                Installation.add_on_selected)),
+          )
+        )
+      end
+
       VBox(
         VWeight(75, MultiSelectionBox(Id(:addons), Opt(:notify), "",
             addon_selection_items(addons))),
         MinHeight(8,
-          VWeight(25, RichText(Id(:details), "<small><font color='grey'>" +
-                _("Select an addon to show details here") + "</font><small>")),
+          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
+                _("Select an addon to show details here") + "<small>")),
         ),
-        VSpacing(0.4),
-        HBox(
-          HSpacing(1),
-          CheckBox(Id(:media), Opt(:hstretch), _("In&clude Add-on Products from Separate Media")),
-        ),
+        media_checkbox,
         VSpacing(0.4)
       )
     end
 
+    # update addon details after changing the current addon in the UI
     def show_addon_details(addon)
-      details = "<p><big><b>#{CGI.escape_html(addon.label)}</b></big></p><p>#{CGI.escape_html(addon.description)}</p>"
-      
-      if !addon.depends_on.empty?
-        details << _("<p><b>Required Add-ons:</b> %s</p>") % CGI.escape_html(addon.depends_on.map(&:label).join(", "))
+      details = "<p><big><b>#{CGI.escape_html(addon.long_name)}</b></big></p>" +
+        "<p>#{CGI.escape_html(addon.description)}</p>"
+
+      # TODO FIXME: SCC does not support dependencies yet
+      #
+      #  if !addon.depends_on.empty?
+      #    # rich text content: list of required (dependent) addons,
+      #    # %s is a list of product names
+      #    details << (_("<p><b>Required Add-ons:</b> %s</p>") %
+      #    CGI.escape_html(addon.depends_on.map(&:label).join(", ")))
+      #  end
+
+      if !addon.free
+        # rich text content: the selected addon requires a registration key
+        details << _("<p><b>A Registration Key is Required</b></p>")
       end
 
-      details << _("<p><b>A Registration Key is Required</b></p>") if addon.regkey_needed
-
       UI.ChangeWidget(Id(:details), :Value, details)
+      UI.ChangeWidget(Id(:details), :Enabled, true)
     end
 
+    # check addon dependencies and automatically select required addons
+    def check_addon_dependencies(addons)
+      selected = UI.QueryWidget(Id(:addons), :SelectedItems)
+      selected_addons = addons.select{|a| selected.include?(a.name)}
+
+      selected_addons.each do |a|
+        missing = a.required_addons - selected_addons
+
+        if !missing.empty?
+          # popup message, %s are product names
+          Popup.Message((_("Automatically selecting '%s'\ndependencies:\n\n%s") %
+              [a.label, missing.map(&:label).join("\n")]))
+          # select the missing entries
+          UI.ChangeWidget(Id(:addons), :SelectedItems, selected + missing.map(&:name))
+        end
+      end
+    end
+
+    # check for the maximum amount of reg. codes supported by Yast
+    def supported_addon_count(addons, selected)
+      # maximum number or reg codes which can be displayed in two column layout
+      max_supported = 2*MAX_REGCODES_PER_COLUMN
+
+      if addons.select{|a| selected.include?(a.product_ident) && !a.free}.size > max_supported
+        Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
+        return false
+      end
+
+      return true
+    end
+
+    # read the addon media checkbox and adapt the installation workflow accordingly
+    def set_media_addons
+      if Mode.installation
+        # the widget exists only at installation
+        Installation.add_on_selected = UI.QueryWidget(Id(:media), :Value)
+        log.info "Add-on media selected: #{Installation.add_on_selected}"
+
+        # lazy include, the file is part of yast2-installation
+        # avoid yast2-installation runtime dependency by including it only here,
+        # not at the global level
+        Yast.include self, "installation/misc.rb"
+        AdjustStepsAccordingToInstallationSettings()
+      end
+    end
+
+    # handle user input in the addon selection dialog
     def handle_addon_selection_dialog(addons)
       ret = nil
       continue_buttons = [:next, :back, :close, :abort, :skip]
@@ -319,25 +432,28 @@ module Yast
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
 
-        if ret == :addons
+        # current item has been changed, refresh details, check dependencies
+        case ret
+        when :addons
           current_addon = UI.QueryWidget(Id(:addons), :CurrentItem)
 
           if current_addon
-            show_addon_details(addons.find{|addon| addon.name == current_addon})
+            show_addon_details(addons.find{|addon| addon.product_ident == current_addon})
+            # TODO FIXME: SCC does not support dependencies yet
+            # check_addon_dependencies(addons)
           end
-        elsif ret == :next
-          # check for the maximum amount of reg. codes supported by Yast
+        when :next
           selected = UI.QueryWidget(Id(:addons), :SelectedItems)
-          # maximum number or reg codes which can be displayed in two column layout
-          max_supported = 2*MAX_REGCODES_PER_COLUMN
 
-          if addons.select{|a| selected.include?(a.name) && a.regkey_needed}.size > max_supported
-            Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
+          if !supported_addon_count(addons, selected)
             ret = nil
+            next
           end
 
-          @selected_addons = addons.select{|a| selected.include?(a.name)}
-          log.info "Selected addons: #{@selected_addons.inspect}"
+          @selected_addons = addons.select{|a| selected.include?(a.product_ident)}
+          log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
+
+          set_media_addons
 
           ret = :skip if @selected_addons.empty?
         end
@@ -346,6 +462,7 @@ module Yast
       ret
     end
 
+    # run the addon selection dialog
     def select_addons
       addons = get_available_addons
       Wizard.SetContents(
@@ -359,27 +476,29 @@ module Yast
       )
 
       handle_addon_selection_dialog(addons)
-
-      # TODO register the addons
     end
 
+    
+    # create widgets for entering the addon reg keys
     def addon_regkey_items(addons)
-      textmode = UI.GetDisplayInfo["TextMode"]
+      textmode = UI.TextMode
       box = VBox()
 
       addons.each do |addon|
-        box[box.size] = MinWidth(32, InputField(Id(addon.name), addon.label))
+        label = addon.short_name
+        label << " (#{addon.long_name})" if !addon.long_name.empty?
+
+        box[box.size] = MinWidth(32, InputField(Id(addon.product_ident), label,
+            @known_reg_keys.fetch(addon.product_ident, "")))
         # add extra spacing when there are just few addons, in GUI always
-        box[box.size] = VSpacing(1) if addons.size < 5 || !textmode
+        box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
       end
 
       box
     end
 
+    # create content for the addon reg keys dialog
     def addon_regkeys_dialog_content(addons)
-      box1 = nil
-      box2 = nil
-
       # display the second column if needed
       if addons.size > MAX_REGCODES_PER_COLUMN
         # display only the addons which fit two column layout
@@ -405,28 +524,97 @@ module Yast
       )
     end
 
+    # load available addons from SCC server
+    # the result is cached to avoid reloading when going back and forth in the
+    # installation workflow
     def get_available_addons
       # cache the available addons
       return @available_addons if @available_addons
 
-      run_with_feedback(_("Loading Available Add-on Products and Extensions..."), _("Contacting the SUSE Customer Center server")) do
-        # TODO FIXME contact SCC here and query for the available add-ons
-        sleep 3
+      @available_addons = run_with_feedback(_("Loading Available Add-on Products and Extensions..."),
+        _("Contacting the SUSE Customer Center server")) do
 
-        hae = ::Registration::Addon.new("SUSE_HAE", "12", "x86_64", label: "SLES12 High Availability Extension", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus pulvinar sollicitudin mollis. Morbi sit amet purus at purus eleifend elementum in sed tortor. Cras volutpat et augue ac vulputate. Sed pretium eget turpis id sodales. Maecenas ultricies volutpat egestas. Proin ut adipiscing risus")
-
-        @available_addons =
-          [
-          ::Registration::Addon.new("SUSE_SDK", "12", "x86_64", label: "SLE12 SDK", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec molestie felis vel arcu mollis, non dapibus mi dapibus. Duis felis augue, tincidunt quis lectus in, scelerisque aliquam velit. Nam iaculis viverra imperdiet. Cras ac dignissim mi. Duis dignissim quam metus, nec pharetra augue imperdiet et. Sed vel tellus nisl. Fusce a risus nec dui suscipit interdum ut id sapien. Suspendisse nibh velit, ullamcorper nec orci ac, semper bibendum arcu", regkey_needed: false),
-          hae,
-          ::Registration::Addon.new("SUSE_HAE_GEO", "12", "x86_64", label: "SLES12 High Availability GEO Extension", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id justo nibh. Cras congue pharetra mauris, vel tincidunt sem commodo a. Morbi in est feugiat, adipiscing purus sed, porttitor metus. Sed sem libero, mollis sed lobortis id, tempor quis tortor. Curabitur posuere ante sed pharetra mollis.", depends_on: [hae])
-        ]
+        # extensions for base product
+        ::Registration::Storage::BaseProducts.instance.products.reduce([]) do |acc, product|
+          acc.concat(@scc.extensions_for(product["name"]).extensions)
+        end
       end
+
+      log.info "Received product extensions: #{@available_addons}"
+      @available_addons
     end
 
-    def register_addons()
-      missing_regkeys = @selected_addons.select{|a| a.regkey_needed}
+    # handle user input in the addon reg keys dialog
+    def handle_register_addons_dialog(addons_with_keys)
+      continue_buttons = [:next, :back, :close, :abort]
 
+      ret = nil
+      while !continue_buttons.include?(ret) do
+        ret = UI.UserInput
+
+        if ret == :next
+          collect_addon_regkeys(addons_with_keys)
+
+          # register the add-ons
+          ret = nil unless register_selected_addons
+        end
+      end
+
+      return ret
+    end
+
+    # collect the entered reg keys from UI
+    # @return [Hash<Addon,String>] addon => reg. code mapping
+    def collect_addon_regkeys(addons_with_keys)
+      pairs = addons_with_keys.map do |a|
+        [a.product_ident, UI.QueryWidget(Id(a.product_ident), :Value)]
+      end
+      @known_reg_keys.merge!(Hash[pairs])
+    end
+
+    # register all selected addons
+    def register_selected_addons
+      registration_order = @selected_addons
+      # TODO FIXME: SCC does not report dependoencies
+      #      begin
+      #        # compute the registration order according to the dependencies
+      #        registration_order = Registration::AddonSorter.registration_order(@selected_addons)
+      #      rescue KeyError
+      #        # Continuew/Cancel dialog: missing dependency error
+      #        if Popup.ContinueCancel(_("Addon dependencies cannot be solved.\n" +
+      #                "Register without solving dependencies?"))
+      #          # just try the current order it might work
+      #        else
+      #          return false
+      #        end
+      #      end
+      #
+      # log.info "Addon registration order: #{registration_order.map(&:short_name)}"
+
+      products = registration_order.map do |a|
+        {
+          "name" => a.product_ident,
+          "reg_key" => @known_reg_keys[a.product_ident],
+          # TODO FIXME: not handled by SCC yet
+          "arch" => nil,
+          "version" => nil
+        }
+      end
+
+      catch_registration_errors do
+        register_products(products)
+        return true
+      end
+
+      return false
+    end
+
+    # run the addon reg keys dialog
+    def register_addons
+      missing_regkeys = @selected_addons.reject(&:free)
+
+      # if registering only add-ons which do not need a reg. key (like SDK)
+      # then simply start the registration
       if missing_regkeys.empty?
         Wizard.SetContents(
           # dialog title
@@ -438,6 +626,8 @@ module Yast
           false,
           false
         )
+        # when registration fails go back
+        return register_selected_addons ? :next : :back
       else
         Wizard.SetContents(
           # dialog title
@@ -450,10 +640,8 @@ module Yast
           GetInstArgs.enable_next || Mode.normal
         )
 
-        ret = UI.UserInput
+        return handle_register_addons_dialog(missing_regkeys)
       end
-
-      # TODO FIXME register the selected addons
     end
 
     def confirm_skipping
@@ -467,6 +655,7 @@ module Yast
       Popup.YesNo(confirmation)
     end
 
+    # UI workflow definition
     def start_workflow
       aliases = {
         "register"        => lambda { register_base_system() },
