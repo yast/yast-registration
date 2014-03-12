@@ -26,12 +26,29 @@
 require "registration/sw_mgmt"
 
 module Yast
-  import "Wizard"
+  class SccClient < Client
+    Yast.import "Wizard"
+    Yast.import "CommandLine"
 
-  Wizard.CreateDialog
-  ::Registration::SwMgmt.init
+    def main
+      if WFM.Args == ["help"]
+        cmdline_description = {
+          "id" => "scc",
+          # Command line help text for the repository module, %1 is "SUSEconnect"
+          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect",
+        }
 
-  WFM.call("inst_scc")
+        CommandLine.Run(cmdline_description)
+      else
+        Wizard.CreateDialog
+        ::Registration::SwMgmt.init
 
-  Wizard.CloseDialog
+        WFM.call("inst_scc")
+
+        Wizard.CloseDialog
+      end
+    end
+  end
 end
+
+Yast::SccClient.new.main

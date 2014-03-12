@@ -58,6 +58,7 @@ module Yast
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       @selected_addons = []
+
       start_workflow
     end
 
@@ -73,6 +74,8 @@ module Yast
         ret = UI.UserInput
 
         if ret == :next
+          return :next if ENV["TESTING"] == "1"
+
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
           # reset the user input in case an exception is raised
