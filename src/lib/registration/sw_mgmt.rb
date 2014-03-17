@@ -48,7 +48,6 @@ module Registration
       PackageCallbacksInit.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
-      Pkg.SourceStartManager(true)
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
