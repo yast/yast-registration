@@ -22,6 +22,7 @@
 #
 
 require "yast"
+require "uri"
 
 module Registration
 
@@ -85,6 +86,16 @@ module Registration
     # "https://scc.suse.com/connect"
     def self.service_url(service)
       service.sub(/\Aservice:[^:]+:/, "")
+    end
+
+    # return "credentials" parameter from URL
+    # raises URI::InvalidURIError if URL is invalid
+    # @param url [String] URL as string
+    def self.credentials_from_url(url)
+      parsed_url = URI(url)
+      params = Hash[URI.decode_www_form(parsed_url.query)]
+
+      params["credentials"]
     end
 
     # Create radio button label for a SLP service

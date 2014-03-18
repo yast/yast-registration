@@ -1,7 +1,8 @@
+
 # encoding: utf-8
 
 # ------------------------------------------------------------------------------
-# Copyright (c) 2013 Novell, Inc. All Rights Reserved.
+# Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -21,34 +22,19 @@
 #
 #
 
-# this is just a wrapper for running the SCC client in installed system
+require "singleton"
 
-require "registration/sw_mgmt"
+module Registration
+  module Storage
 
-module Yast
-  class SccClient < Client
-    Yast.import "Wizard"
-    Yast.import "CommandLine"
+    # storage for changed repositories
+    class RegKeys < Struct.new(:reg_keys)
+      include Singleton
+    end
 
-    def main
-      if WFM.Args.include?("help")
-        cmdline_description = {
-          "id" => "scc",
-          # Command line help text for the repository module, %1 is "SUSEconnect"
-          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect",
-        }
-
-        CommandLine.Run(cmdline_description)
-      else
-        Wizard.CreateDialog
-        ::Registration::SwMgmt.init
-
-        WFM.call("inst_scc")
-
-        Wizard.CloseDialog
-      end
+    # remember the registered base product
+    class BaseProducts < Struct.new(:products)
+      include Singleton
     end
   end
 end
-
-Yast::SccClient.new.main

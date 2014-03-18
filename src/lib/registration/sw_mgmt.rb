@@ -33,7 +33,6 @@ module Registration
   Yast.import "Pkg"
   Yast.import "Installation"
   Yast.import "PackageCallbacksInit"
-  Yast.import "Progress"
 
   class SwMgmt
     include Yast
@@ -49,7 +48,6 @@ module Registration
       PackageCallbacksInit.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
-      Pkg.SourceStartManager(true)
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
@@ -73,7 +71,7 @@ module Registration
 
     def self.products_to_register
       # just for debugging:
-      # return [{"name" => "SUSE_SLES", "arch" => "x86_64", "version" => "12-"}]
+      # return [{"name" => "SLES", "arch" => "x86_64", "version" => "12-1.47"}]
 
       # during installation the products are :selected,
       # on a running system the products are :installed
@@ -105,13 +103,14 @@ module Registration
       product_services.map(&:services).flatten.each do |service|
         log.info "Adding service #{service.name.inspect} (#{service.url})"
 
-        # progress bar label
-        Progress.Title(_("Adding service %s...") % service.name)
+        credentials_file = Helpers.credentials_from_url(service.url)
 
-        # TODO FIXME: SCC currenly does not return credentials for the service,
-        # just reuse the global credentials and save to a different file
-        credentials.file = service.name + "_credentials"
-        credentials.write
+        if credentials_file
+          # TODO FIXME: SCC currenly does not return credentials for the service,
+          # just reuse the global credentials and save to a different file
+          credentials.file = credentials_file
+          credentials.write
+        end
 
         if !Pkg.ServiceAdd(service.name, service.url.to_s)
           # error message
@@ -127,8 +126,6 @@ module Registration
           # error message
           raise Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service.name)
         end
-
-        Progress.NextStep
       end
     ensure
       Pkg.SourceSaveAll

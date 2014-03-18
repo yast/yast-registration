@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 18 09:31:39 UTC 2014 - lslezak@suse.cz
+
+- Display and allow registering online add-ons from SCC during
+  installation (FATE#312925, FATE#315685)
+- 3.1.19
+
+-------------------------------------------------------------------
 Thu Mar  6 20:31:05 UTC 2014 - lslezak@suse.cz
 
 - display a popup for selecting/deselecting registered repositories
