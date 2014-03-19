@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 19 14:28:56 UTC 2014 - lslezak@suse.cz
+
+- ask for media addons when the respective checkbox is set
+  (bnc#868942)
+- 3.1.20
+
+-------------------------------------------------------------------
 Tue Mar 18 09:31:39 UTC 2014 - lslezak@suse.cz
 
 - Display and allow registering online add-ons from SCC during

@@ -54,6 +54,7 @@ module Yast
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
+      Yast.import "ProductControl"
 
       # redirect the scc_api log to y2log
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
@@ -478,7 +479,7 @@ module Yast
       handle_addon_selection_dialog(addons)
     end
 
-    
+
     # create widgets for entering the addon reg keys
     def addon_regkey_items(addons)
       textmode = UI.TextMode
@@ -655,12 +656,22 @@ module Yast
       Popup.YesNo(confirmation)
     end
 
+    def media_addons
+      if Installation.add_on_selected
+        # start the next step (add-on media selection)
+        ProductControl.RunFrom(ProductControl.CurrentStep + 1, false)
+      else
+        :next
+      end
+    end
+
     # UI workflow definition
     def start_workflow
       aliases = {
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
-        "register_addons" => lambda { register_addons() }
+        "register_addons" => lambda { register_addons() },
+        "media_addons"    => lambda { media_addons() }
       }
 
       sequence = {
@@ -672,10 +683,14 @@ module Yast
         },
         "select_addons" => {
           :abort   => :abort,
-          :skip    => :next,
+          :skip    => "media_addons",
           :next => "register_addons"
         },
         "register_addons" => {
+          :abort   => :abort,
+          :next => "media_addons"
+        },
+        "media_addons" => {
           :abort   => :abort,
           :next => :next
         }
