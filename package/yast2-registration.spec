@@ -67,6 +67,7 @@ Authors:
 %defattr(-,root,root)
 %{yast_desktopdir}/customer_center.desktop
 %{yast_clientdir}/*.rb
+%{yast_schemadir}/autoyast/rnc/*.rnc
 %{yast_dir}/lib/registration
 %doc %{yast_docdir}
 

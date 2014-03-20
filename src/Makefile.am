@@ -18,6 +18,10 @@ ylib_DATA = \
   lib/registration/repo_state.rb \
   lib/registration/helpers.rb
 
-EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA)
+schemafilesdir = $(schemadir)/autoyast/rnc
+schemafiles_DATA = \
+  autoyast-rnc/registration.rnc
+
+EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(schemafiles_DATA)
 
 include $(top_srcdir)/Makefile.am.common
