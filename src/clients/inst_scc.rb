@@ -484,8 +484,11 @@ module Yast
         # dialog title
         _("Available Products and Extensions"),
         addon_selection_dialog_content(addons),
-        # FIXME: help text
-        "",
+        # help text for add-ons installation, %s is URL
+        _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
+            "<b>Include Add-on Products from Separate Media</b>.</p>\n" +
+            "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
+        "http://drivers.suse.com",
         GetInstArgs.enable_back || Mode.normal,
         GetInstArgs.enable_next || Mode.normal
       )
