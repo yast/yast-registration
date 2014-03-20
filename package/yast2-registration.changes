@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Mar 20 14:55:07 UTC 2014 - lslezak@suse.cz
+
+- added "Network Configuration" button for manual network
+  configuration, ask user to configure network if registration
+  fails because of missing network setup (bnc#868830)
+- 3.1.21
+
+-------------------------------------------------------------------
 Wed Mar 19 14:28:56 UTC 2014 - lslezak@suse.cz
 
 - ask for media addons when the respective checkbox is set
