@@ -92,6 +92,11 @@ module Yast
       ::Registration::Storage::RegKeys.instance.reg_keys = @known_reg_keys
     end
 
+    def run_network_configuration
+      log.info "Running network configuration..."
+      WFM.call("inst_lan")
+    end
+
     def register_base_system
       show_scc_credentials_dialog
 
@@ -101,8 +106,10 @@ module Yast
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
 
-        if ret == :next
-
+        case ret
+        when :network
+          run_network_configuration
+        when :next
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
           # reset the user input in case an exception is raised
@@ -112,7 +119,6 @@ module Yast
             register(email, reg_code)
             return :next
           end
-
         end
 
         return ret if ret == :skip && confirm_skipping
@@ -126,7 +132,10 @@ module Yast
         yield
       rescue SccApi::NoNetworkError
         # Error popup
-        Report.Error(_("Network is not configured, the registration server cannot be reached."))
+        if Popup.YesNo(_("Network is not configured, the registration server cannot be reached.\n" +
+                "Do you want to configure the network now?") )
+          run_network_configuration
+        end
       rescue SccApi::NotAuthorized
         # Error popup
         Report.Error(_("The email address or the registration\ncode is not valid."))
@@ -226,6 +235,10 @@ module Yast
     # content for the main registration dialog
     def scc_credentials_dialog
       VBox(
+        Mode.installation ?
+          Right(PushButton(Id(:network), _("Network Configuration..."))) :
+          Empty(),
+        VStretch(),
         HBox(
           HSpacing(Opt(:hstretch), 3),
           Frame(_("SUSE Customer Center Credentials"),
@@ -240,7 +253,8 @@ module Yast
           HSpacing(Opt(:hstretch), 3),
         ),
         VSpacing(3),
-        PushButton(Id(:skip), _("&Skip Registration"))
+        PushButton(Id(:skip), _("&Skip Registration")),
+        VStretch()
       )
     end
 
