@@ -38,6 +38,8 @@ BuildRequires:  yast2 >= 2.23.13
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
+BuildRequires:  rubygem-scc_api >= 0.2.7
+BuildRequires:  yast2-slp >= 3.1.2
 
 BuildArch:      noarch
 

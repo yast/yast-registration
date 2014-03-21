@@ -23,18 +23,31 @@
 
 require "yast"
 require "uri"
+require "scc_api"
 
 module Registration
 
   class Helpers
     include Yast::Logger
+    extend Yast::I18n
+
+    textdomain "registration"
 
     Yast.import "Linuxrc"
     Yast.import "Mode"
     Yast.import "Popup"
+    Yast.import "Report"
+    Yast.import "SlpService"
 
     # name of the boot parameter
     BOOT_PARAM = "reg_url"
+
+    REGISTRATION_SERVICES = {
+      'susemanager' => 'SUSE Manager'
+    }
+
+    SUPPORTED_SERVICES = REGISTRATION_SERVICES.keys
+
 
     # Get the language for using in HTTP requests (in "Accept-Language" header)
     def self.language
@@ -119,7 +132,56 @@ module Registration
 
     def self.run_network_configuration
       log.info "Running network configuration..."
-      WFM.call("inst_lan")
+      Yast::WFM.call("inst_lan")
+    end
+
+    def self.catch_registration_errors(&block)
+      begin
+        yield
+        true
+      rescue SccApi::NoNetworkError
+        # Error popup
+        if Yast::Mode.installation && Yast::Popup.YesNo(
+            _("Network is not configured, the registration server cannot be reached.\n" +
+                "Do you want to configure the network now?") )
+          Registration::Helpers::run_network_configuration
+        end
+        false
+      rescue SccApi::NotAuthorized
+        # Error popup
+        Yast::Report.Error(_("The email address or the registration\ncode is not valid."))
+        false
+      rescue Timeout::Error
+        # Error popup
+        Yast::Report.Error(_("Connection time out."))
+        false
+      rescue SccApi::ErrorResponse => e
+        # TODO FIXME: display error details from the response
+        Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
+        false
+      rescue SccApi::HttpError => e
+        case e.response
+        when Net::HTTPClientError
+          Yast::Report.Error(_("Registration client error."))
+        when Net::HTTPServerError
+          Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
+        else
+          Yast::Report.Error(_("Registration failed."))
+        end
+        false
+      rescue ::Registration::ServiceError => e
+        log.error("Service error: #{e.message % e.service}")
+        Yast::Report.Error(_(e.message) % e.service)
+        false
+      rescue ::Registration::PkgError => e
+        log.error("Pkg error: #{e.message}")
+        Yast::Report.Error(_(e.message))
+        false
+      rescue Exception => e
+        log.error("SCC registration failed: #{e}, #{e.backtrace}")
+        Yast::Report.Error(_("Registration failed."))
+        false
+      end
     end
 
     private
@@ -145,6 +207,28 @@ module Registration
 
       url
     end
+
+    def self.slp_discovery
+      services = []
+
+      SUPPORTED_SERVICES.each do |service_name|
+        log.info "Searching for #{service_name} SLP services"
+        services.concat(Yast::SlpService.all(service_name))
+      end
+
+      log.debug "Found services: #{services.inspect}"
+      log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
+
+      services
+    end
+
+    def self.slp_discovery_feedback
+      Yast::Popup.ShowFeedback(_("Searching..."), _("Looking up local registration servers..."))
+      slp_discovery
+    ensure
+      Yast::Popup.ClearFeedback
+    end
+
 
   end
 end

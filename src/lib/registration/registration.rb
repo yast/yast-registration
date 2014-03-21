@@ -30,19 +30,21 @@ module Registration
   class Registration
     include Yast::Logger
 
-    attr_reader :scc, :credentials
-    
+    attr_accessor :url
+
+    def initialize(url = nil)
+      @url = url
+    end
+
     def register(email, reg_code)
       @scc = SccApi::Connection.new(email, reg_code)
 
       # set the current language to receive translated error messages
       @scc.language = ::Registration::Helpers.language
 
-      reg_url = ::Registration::Helpers.registration_url
-
-      if reg_url
-        log.info "Using custom registration URL: #{reg_url.inspect}"
-        @scc.url = reg_url
+      if @url
+        log.info "Using custom registration URL: #{@url.inspect}"
+        @scc.url = @url
       end
 
       # announce (register the system) first
@@ -54,7 +56,7 @@ module Registration
       # write the global credentials
       @credentials.write
     end
-    
+
 
     def register_products(products)
       product_services = products.map do |product|
@@ -79,14 +81,14 @@ module Registration
       if !product_services.empty?
         add_product_services(product_services)
       end
-      
+
       product_services
     end
 
     def add_product_services(product_services)
       ::Registration::SwMgmt.add_services(product_services, @credentials)
     end
-    
+
     def get_addon_list
       # extensions for base product
       ::Registration::Storage::BaseProducts.instance.products.reduce([]) do |acc, product|

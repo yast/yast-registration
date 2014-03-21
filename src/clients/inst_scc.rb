@@ -61,7 +61,6 @@ module Yast
       SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       @selected_addons = []
-      @registration = Registration::Registration.new
 
       initialize_regkeys
 
@@ -105,21 +104,29 @@ module Yast
 
         case ret
         when :network
-          Registration::Helpers::run_network_configuration
+          ::Registration::Helpers::run_network_configuration
         when :next
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
           # reset the user input in case an exception is raised
           ret = nil
 
-          catch_registration_errors do
-            Registration::Helpers::run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
+          url = ::Registration::Helpers.registration_url
+          @registration = ::Registration::Registration.new(url)
+
+          ::Registration::Helpers.catch_registration_errors do
+            ::Registration::Helpers::run_with_feedback(_("Registering the System..."),
+              _("Contacting the SUSE Customer Center server")) do
+
               @registration.register(email, reg_code)
             end
 
             # then register the product(s)
             products = ::Registration::SwMgmt.products_to_register
-            product_services = Registration::Helpers::run_with_feedback(n_("Registering Product...", "Registering Products...", products.size), _("Contacting the SUSE Customer Center server")) do
+            product_services = ::Registration::Helpers::run_with_feedback(
+              n_("Registering Product...", "Registering Products...", products.size),
+              _("Contacting the SUSE Customer Center server")) do
+
               @registration.register_products(products)
             end
 
@@ -137,45 +144,6 @@ module Yast
       end
 
       return ret
-    end
-
-    def catch_registration_errors(&block)
-      begin
-        yield
-      rescue SccApi::NoNetworkError
-        # Error popup
-        if Popup.YesNo(_("Network is not configured, the registration server cannot be reached.\n" +
-                "Do you want to configure the network now?") )
-          Registration::Helpers::run_network_configuration
-        end
-      rescue SccApi::NotAuthorized
-        # Error popup
-        Report.Error(_("The email address or the registration\ncode is not valid."))
-      rescue Timeout::Error
-        # Error popup
-        Report.Error(_("Connection time out."))
-      rescue SccApi::ErrorResponse => e
-        # TODO FIXME: display error details from the response
-        Report.Error(_("Registration server error.\n\nRetry registration later."))
-      rescue SccApi::HttpError => e
-        case e.response
-        when Net::HTTPClientError
-          Report.Error(_("Registration client error."))
-        when Net::HTTPServerError
-          Report.Error(_("Registration server error.\n\nRetry registration later."))
-        else
-          Report.Error(_("Registration failed."))
-        end
-      rescue ::Registration::ServiceError => e
-        log.error("Service error: #{e.message % e.service}")
-        Report.Error(_(e.message) % e.service)
-      rescue ::Registration::PkgError => e
-        log.error("Pkg error: #{e.message}")
-        Report.Error(_(e.message))
-      rescue Exception => e
-        log.error("SCC registration failed: #{e}, #{e.backtrace}")
-        Report.Error(_("Registration failed."))
-      end
     end
 
     # content for the main registration dialog
@@ -488,7 +456,8 @@ module Yast
       # cache the available addons
       return @available_addons if @available_addons
 
-      @available_addons = Registration::Helpers::run_with_feedback(_("Loading Available Add-on Products and Extensions..."),
+      @available_addons = ::Registration::Helpers::run_with_feedback(
+        _("Loading Available Add-on Products and Extensions..."),
         _("Contacting the SUSE Customer Center server")) do
 
         @registration.get_addon_list
@@ -555,8 +524,11 @@ module Yast
         }
       end
 
-      catch_registration_errors do
-        product_services = Registration::Helpers::run_with_feedback(n_("Registering Product...", "Registering Products...", products.size), _("Contacting the SUSE Customer Center server")) do
+      ret = ::Registration::Helpers.catch_registration_errors do
+        product_services = ::Registration::Helpers.run_with_feedback(
+          n_("Registering Product...", "Registering Products...", products.size),
+          _("Contacting the SUSE Customer Center server")) do
+
           @registration.register_products(products)
         end
 
@@ -566,7 +538,7 @@ module Yast
         return true
       end
 
-      return false
+      return ret
     end
 
     # run the addon reg keys dialog

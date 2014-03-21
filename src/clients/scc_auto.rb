@@ -26,7 +26,10 @@
 #
 #
 
+require "scc_api"
+
 require "registration/storage"
+require "registration/registration"
 
 module Yast
   class SccAutoClient < Client
@@ -34,6 +37,7 @@ module Yast
 
     def main
       Yast.import "UI"
+      Yast.import "Pkg"
 
       textdomain "registration"
 
@@ -90,6 +94,8 @@ module Yast
 
       ret
     end
+
+    private
 
     # Get all settings from the first parameter
     # (For use by autoinstallation.)
@@ -176,10 +182,90 @@ module Yast
       summary
     end
 
-    # Write all settings
+    # register the system, base product and optional addons
     # return true on success
     def write
-      Report.Error("Write not implemented yet")
+      # registration disabled, nothing to do
+      return true unless @config.do_registration
+
+      # initialize libzypp if applying settings in installed system or
+      # in AutoYast configuration mode ("Apply to System")
+      ::Registration::SwMgmt.init if Mode.normal || Mode.config
+
+      # redirect the scc_api log to y2log
+      SccApi::GlobalLogger.instance.log = Y2Logger.instance
+
+      # set the registration URL
+      url = @config.reg_server if @config.reg_server && !@config.reg_server.empty?
+
+      # use SLP discovery
+      if @config.slp_discovery
+        url = find_slp_server
+        return false unless url
+      end
+
+      @registration = ::Registration::Registration.new(url)
+
+      # TODO FIXME: import the server certificate
+      if @config.reg_server_cert
+
+      end
+
+      ret = ::Registration::Helpers.catch_registration_errors do
+        # register the system
+        ::Registration::Helpers::run_with_feedback(_("Registering the System..."),
+          _("Contacting the SUSE Customer Center server")) do
+
+          @registration.register(@config.email, @config.reg_key)
+        end
+
+        # register the base product
+        products = ::Registration::SwMgmt.products_to_register
+        ::Registration::Helpers::run_with_feedback(
+          n_("Registering Product...", "Registering Products...", products.size),
+          _("Contacting the SUSE Customer Center server")) do
+
+          @registration.register_products(products)
+        end
+
+        # register addons if configured
+        if !@config.addons.empty?
+          addon_products = @config.addons.map do |a|
+            {
+              "name" => a["name"],
+              "reg_key" => a["reg_key"],
+              # TODO FIXME: not handled by SCC yet
+              "arch" => nil,
+              "version" => nil
+            }
+          end
+
+          # register addons
+          ::Registration::Helpers::run_with_feedback(
+            n_("Registering Product...", "Registering Products...", addon_products.size),
+            _("Contacting the SUSE Customer Center server")) do
+
+            @registration.register_products(addon_products)
+          end
+        end
+      end
+
+      return false unless ret
+
+      # disable updates
+      if !@config.install_updates
+        # TODO FIXME: disable Update repositories
+      end
+
+      # save the registered repositories
+      Pkg.SourceSaveAll
+
+      if Mode.normal || Mode.config
+        # popup message: registration finished properly
+        Popup.Message(_("Registration was successfull."))
+      end
+
+      return true
     end
 
     def auto_packages
@@ -230,11 +316,9 @@ module Yast
 
     def delete_addon
       selected = UI.QueryWidget(Id(:addons_table), :CurrentItem)
-      if selected
-        if Popup.YesNo(_("Really delete add-on '%s'?") % selected)
-          @config.addons.reject!{|a| a["name"] == selected}
-          set_addon_table_content
-        end
+      if selected && Popup.YesNo(_("Really delete add-on '%s'?") % selected)
+        @config.addons.reject!{|a| a["name"] == selected}
+        set_addon_table_content
       end
     end
 
@@ -316,7 +400,9 @@ module Yast
       caption = _("Product Registration")
       help_text = "<p><b>#{caption}</b></p>"
       help_text << _(
-        "<p>Product registration includes your product in SUSE Customer Center database, enabling you to get online updates and technical support. To register while installing automatically, select <b>Run Product Registration</b>.</p>"
+        "<p>Product registration includes your product in SUSE Customer Center database,\n"+
+          "enabling you to get online updates and technical support.\n"+
+          "To register while installing automatically, select <b>Run Product Registration</b>.</p>"
       )
       help_text << _(
         "<p>If your network deploys a custom registration server, set the correct URL of the server\n" +
@@ -326,7 +412,8 @@ module Yast
 
       regsettings = VBox(
         Left(
-          CheckBox(Id(:do_registration), Opt(:notify), _("Register the Product"), @config.do_registration)
+          CheckBox(Id(:do_registration), Opt(:notify), _("Register the Product"),
+            @config.do_registration)
         )
       )
 
@@ -336,9 +423,12 @@ module Yast
           VBox(
             MinWidth(32, InputField(Id(:email), _("&Email"), @config.email)),
             VSpacing(0.4),
-            MinWidth(32, InputField(Id(:reg_key), _("Registration &Code"), @config.reg_key)),
+            MinWidth(32, InputField(Id(:reg_key), _("Registration &Code"),
+                @config.reg_key)),
             VSpacing(0.4),
-            Left(CheckBox(Id(:install_updates), _("Install Available Patches from Update Repositories"), @config.install_updates))
+            Left(CheckBox(Id(:install_updates),
+                _("Install Available Patches from Update Repositories"),
+                @config.install_updates))
           )
         )
       )
@@ -348,10 +438,14 @@ module Yast
         Frame(_("Server Settings"),
           VBox(
             VSpacing(0.2),
-            Left(CheckBox(Id(:slp_discovery), Opt(:notify), _("Find Registration Server Using SLP Discovery"), @config.slp_discovery)),
+            Left(CheckBox(Id(:slp_discovery), Opt(:notify),
+                _("Find Registration Server Using SLP Discovery"),
+                @config.slp_discovery)),
             VSpacing(0.4),
             # Translators: Text for UI Label - capitalized
-            InputField(Id(:reg_server), Opt(:hstretch), _("Use Specific Server URL Instead of the Default"), @config.reg_server),
+            InputField(Id(:reg_server), Opt(:hstretch),
+              _("Use Specific Server URL Instead of the Default"),
+              @config.reg_server),
             VSpacing(0.4),
             # Translators: Text for UI Label - capitalized
             InputField(
@@ -397,29 +491,7 @@ module Yast
         when :abort, :cancel
           break if Popup.ReallyAbort(true)
         when :next
-          #          smtServer = Convert.to_string(UI.QueryWidget(Id(:smturl), :Value))
-          #          smtServerCert = Convert.to_string(
-          #            UI.QueryWidget(Id(:smtcert), :Value)
-          #          )
-          #
-          #          if !Builtins.regexpmatch(smtServer, "^https://.+") && smtServer != "" ||
-          #              smtServer == "" && smtServerCert != ""
-          #            Popup.Message(_("SMT Server URL must start with https://"))
-          #            ret = nil
-          #          end
-          #
-          #          if !Builtins.regexpmatch(smtServerCert, "^(https?|ftp)://.+") &&
-          #              !Builtins.regexpmatch(smtServerCert, "^floppy/.+") &&
-          #              !Builtins.regexpmatch(smtServerCert, "^/.+") &&
-          #              !Builtins.regexpmatch(smtServerCert, "^(ask|done)$") &&
-          #              smtServerCert != ""
-          #            Popup.Message(
-          #              _(
-          #                "Location of SMT Certificate invalid.\nSee your SMT documentation.\n"
-          #              )
-          #            )
-          #            ret = nil
-          #          end
+          # TODO FIXME: input validation
         end
       end until ret == :next || ret == :back || ret == :addons
 
@@ -439,6 +511,32 @@ module Yast
       end
 
       ret
+    end
+
+    # find registration server via SLP
+    # @retun [String,nil] URL of the server, nil on error
+    def find_slp_server
+      # do SLP query
+      slp_services = ::Registration::Helpers.slp_discovery_feedback
+      slp_urls = slp_services.map(&:slp_url)
+
+      # remove possible duplicates
+      slp_urls.uniq!
+      log.info "Found #{slp_urls.size} SLP servers"
+
+      case slp_urls.size
+      when 0
+        Report.Error(_("SLP discovery failed, no server found"))
+        return nil
+      when 1
+        return slp_urls.first
+      else
+        # more than one server found: let the user select, we cannot automatically
+        # decide which one to use, asking user in AutoYast mode is not nice
+        # but better than aborting the installation...
+        return ::Registration::Helpers.slp_service_url
+      end
+
     end
 
     # UI workflow definition
