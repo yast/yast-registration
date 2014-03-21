@@ -17,6 +17,7 @@ ylib_DATA = \
   lib/registration/sw_mgmt.rb \
   lib/registration/storage.rb \
   lib/registration/repo_state.rb \
+  lib/registration/registration.rb \
   lib/registration/helpers.rb
 
 schemafilesdir = $(schemadir)/autoyast/rnc

@@ -31,6 +31,7 @@ module Registration
 
     Yast.import "Linuxrc"
     Yast.import "Mode"
+    Yast.import "Popup"
 
     # name of the boot parameter
     BOOT_PARAM = "reg_url"
@@ -107,6 +108,18 @@ module Registration
 
       # display URL and the description if it is present
       (descr && !descr.empty?) ? "#{descr} (#{url})" : url
+    end
+
+    def self.run_with_feedback(header, label, &block)
+      Yast::Popup.ShowFeedback(header, label)
+      yield
+    ensure
+      Yast::Popup.ClearFeedback
+    end
+
+    def self.run_network_configuration
+      log.info "Running network configuration..."
+      WFM.call("inst_lan")
     end
 
     private

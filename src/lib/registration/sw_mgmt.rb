@@ -114,17 +114,17 @@ module Registration
 
         if !Pkg.ServiceAdd(service.name, service.url.to_s)
           # error message
-          raise Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
+          raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
         end
         # refresh works only for saved services
         if !Pkg.ServiceSave(service.name)
           # error message
-          raise Registration::ServiceError.new(N_("Saving service '%s' failed."), service.name)
+          raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), service.name)
         end
 
         if !Pkg.ServiceRefresh(service.name)
           # error message
-          raise Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service.name)
+          raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service.name)
         end
       end
     ensure

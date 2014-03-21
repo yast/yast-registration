@@ -385,7 +385,7 @@ module Yast
       Wizard.SetContents(caption, contents, help_text, false, true)
       Wizard.SetNextButton(:next, Label.FinishButton)
 
-      #disable_widgets
+      disable_widgets
 
       begin
         ret = UI.UserInput
