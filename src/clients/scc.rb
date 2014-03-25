@@ -31,6 +31,9 @@ module Yast
     Yast.import "CommandLine"
 
     def main
+
+      textdomain "registration"
+
       if WFM.Args.include?("help")
         cmdline_description = {
           "id" => "scc",

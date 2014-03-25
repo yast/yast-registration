@@ -23,7 +23,7 @@
 #
 
 # use external rubygem for SCC communication
-require "scc_api"
+require "yast/scc_api"
 
 require "cgi"
 
@@ -32,6 +32,7 @@ require "registration/helpers"
 require "registration/sw_mgmt"
 require "registration/repo_state"
 require "registration/storage"
+require "registration/registration"
 
 module Yast
   class InstSccClient < Client
@@ -55,9 +56,6 @@ module Yast
       Yast.import "Sequencer"
       Yast.import "Installation"
       Yast.import "ProductControl"
-
-      # redirect the scc_api log to y2log
-      SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       @selected_addons = []
 
@@ -92,31 +90,49 @@ module Yast
       ::Registration::Storage::RegKeys.instance.reg_keys = @known_reg_keys
     end
 
-    def run_network_configuration
-      log.info "Running network configuration..."
-      WFM.call("inst_lan")
-    end
-
     def register_base_system
       show_scc_credentials_dialog
 
       ret = nil
 
-      continue_buttons = [:next, :back, :close, :abort]
+      continue_buttons = [:next, :back, :cancel, :abort]
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
 
         case ret
         when :network
-          run_network_configuration
+          ::Registration::Helpers::run_network_configuration
         when :next
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
           # reset the user input in case an exception is raised
           ret = nil
 
-          catch_registration_errors do
-            register(email, reg_code)
+          url = ::Registration::Helpers.registration_url
+          @registration = ::Registration::Registration.new(url)
+
+          ::Registration::Helpers.catch_registration_errors do
+            Popup.Feedback(_("Registering the System..."),
+              _("Contacting the SUSE Customer Center server")) do
+
+              @registration.register(email, reg_code)
+            end
+
+            # then register the product(s)
+            products = ::Registration::SwMgmt.products_to_register
+            product_services = Popup.Feedback(
+              n_("Registering Product...", "Registering Products...", products.size),
+              _("Contacting the SUSE Customer Center server")) do
+
+              @registration.register_products(products)
+            end
+
+            # remember the base products for later (to get the respective addons)
+            ::Registration::Storage::BaseProducts.instance.products = products
+
+            # select repositories to use in installation (e.g. enable/disable Updates)
+            select_repositories(product_services) if Mode.installation
+
             return :next
           end
         end
@@ -125,111 +141,6 @@ module Yast
       end
 
       return ret
-    end
-
-    def catch_registration_errors(&block)
-      begin
-        yield
-      rescue SccApi::NoNetworkError
-        # Error popup
-        if Popup.YesNo(_("Network is not configured, the registration server cannot be reached.\n" +
-                "Do you want to configure the network now?") )
-          run_network_configuration
-        end
-      rescue SccApi::NotAuthorized
-        # Error popup
-        Report.Error(_("The email address or the registration\ncode is not valid."))
-      rescue Timeout::Error
-        # Error popup
-        Report.Error(_("Connection time out."))
-      rescue SccApi::ErrorResponse => e
-        # TODO FIXME: display error details from the response
-        Report.Error(_("Registration server error.\n\nRetry registration later."))
-      rescue SccApi::HttpError => e
-        case e.response
-        when Net::HTTPClientError
-          Report.Error(_("Registration client error."))
-        when Net::HTTPServerError
-          Report.Error(_("Registration server error.\n\nRetry registration later."))
-        else
-          Report.Error(_("Registration failed."))
-        end
-      rescue ::Registration::ServiceError => e
-        log.error("Service error: #{e.message % e.service}")
-        Report.Error(_(e.message) % e.service)
-      rescue ::Registration::PkgError => e
-        log.error("Pkg error: #{e.message}")
-        Report.Error(_(e.message))
-      rescue Exception => e
-        log.error("SCC registration failed: #{e}, #{e.backtrace}")
-        Report.Error(_("Registration failed."))
-      end
-    end
-
-    def register(email, reg_code)
-      @scc = SccApi::Connection.new(email, reg_code)
-
-      # set the current language to receive translated error messages
-      @scc.language = ::Registration::Helpers.language
-
-      reg_url = ::Registration::Helpers.registration_url
-
-      if reg_url
-        log.info "Using custom registration URL: #{reg_url.inspect}"
-        @scc.url = reg_url
-      end
-
-      # announce (register the system) first
-      @credentials = run_with_feedback(_("Registering the System..."), _("Contacting the SUSE Customer Center server")) do
-        @scc.announce
-      end
-
-      # ensure the zypp config directories are writable in inst-sys
-      ::Registration::SwMgmt.zypp_config_writable!
-
-      # write the global credentials
-      @credentials.write
-
-      # then register the product(s)
-      products = ::Registration::SwMgmt.products_to_register
-      register_products(products)
-
-      # remember the base products for later (to get the respective addons)
-      ::Registration::Storage::BaseProducts.instance.products = products
-    end
-
-    def register_products(products)
-      product_services = run_with_feedback(n_("Registering Product...", "Registering Products...", products.size), _("Contacting the SUSE Customer Center server")) do
-        products.map do |product|
-          log.info("Registering product: #{product["name"]}")
-
-          begin
-            orig_reg_code = @scc.reg_code
-            # use product specific reg. key (e.g. for addons)
-            @scc.reg_code = product["reg_key"] if product["reg_key"]
-
-            ret = @scc.register(product)
-          ensure
-            # restore the original base product key
-            @scc.reg_code = orig_reg_code
-          end
-
-          ret
-        end
-      end
-
-      log.info "registered product_services: #{product_services.inspect}"
-
-      if !product_services.empty?
-        add_product_services(product_services)
-
-        # select repositories to use in installation (e.g. enable/disable Updates)
-        select_repositories(product_services) if Mode.installation
-      end
-    end
-
-    def add_product_services(product_services)
-      ::Registration::SwMgmt.add_services(product_services, @credentials)
     end
 
     # content for the main registration dialog
@@ -329,13 +240,6 @@ module Yast
       end
     end
 
-    def run_with_feedback(header, label, &block)
-      Popup.ShowFeedback(header, label)
-      yield
-    ensure
-      Popup.ClearFeedback
-    end
-
     # create item list (available addons items)
     def addon_selection_items(addons)
       addons.map{|a| Item(Id(a.product_ident), a.short_name, @selected_addons.include?(a))}
@@ -347,7 +251,7 @@ module Yast
 
       # the media check box is displayed only at installation
       # to modify the installation workflow (display extra add-on dialog)
-      if Mode.installation || true
+      if Mode.installation
         media_checkbox = VBox(
           VSpacing(0.4),
           HBox(
@@ -484,8 +388,11 @@ module Yast
         # dialog title
         _("Available Products and Extensions"),
         addon_selection_dialog_content(addons),
-        # FIXME: help text
-        "",
+        # help text for add-ons installation, %s is URL
+        _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
+            "<b>Include Add-on Products from Separate Media</b>.</p>\n" +
+            "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
+        "http://drivers.suse.com",
         GetInstArgs.enable_back || Mode.normal,
         GetInstArgs.enable_next || Mode.normal
       )
@@ -546,13 +453,11 @@ module Yast
       # cache the available addons
       return @available_addons if @available_addons
 
-      @available_addons = run_with_feedback(_("Loading Available Add-on Products and Extensions..."),
+      @available_addons = Popup.Feedback(
+        _("Loading Available Add-on Products and Extensions..."),
         _("Contacting the SUSE Customer Center server")) do
 
-        # extensions for base product
-        ::Registration::Storage::BaseProducts.instance.products.reduce([]) do |acc, product|
-          acc.concat(@scc.extensions_for(product["name"]).extensions)
-        end
+        @registration.get_addon_list
       end
 
       log.info "Received product extensions: #{@available_addons}"
@@ -616,12 +521,21 @@ module Yast
         }
       end
 
-      catch_registration_errors do
-        register_products(products)
+      ret = ::Registration::Helpers.catch_registration_errors do
+        product_services = ::Registration::Helpers.run_with_feedback(
+          n_("Registering Product...", "Registering Products...", products.size),
+          _("Contacting the SUSE Customer Center server")) do
+
+          @registration.register_products(products)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_services) if Mode.installation
+
         return true
       end
 
-      return false
+      return ret
     end
 
     # run the addon reg keys dialog
@@ -692,6 +606,7 @@ module Yast
         "ws_start" => "register",
         "register"  => {
           :abort   => :abort,
+          :cancel   => :abort,
           :skip    => :next,
           :next    => "select_addons"
         },

@@ -1,0 +1,27 @@
+default namespace = "http://www.suse.com/1.0/yast2ns"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace config = "http://www.suse.com/1.0/configns"
+
+suse_register = element suse_register {
+  addons? &
+  do_registration? &
+  email? &
+  install_updates? &
+  reg_key? &
+  reg_server? &
+  reg_server_cert? &
+  slp_discovery?
+}
+
+addons = element addons { LIST, addon }
+addon = element addon { addon_name & addon_reg_key? }
+addon_name = element name { text }
+addon_reg_key = element reg_key { text }
+
+do_registration = element do_registration { BOOLEAN }
+reg_server = element reg_server { text }
+reg_server_cert = element reg_server_cert { text }
+email = element email { text }
+reg_key = element reg_key { text }
+install_updates = element install_updates { BOOLEAN }
+slp_discovery = element slp_discovery { BOOLEAN }

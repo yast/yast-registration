@@ -25,6 +25,8 @@
 require "singleton"
 
 module Registration
+
+  # a module holding data needed during (auto)installation
   module Storage
 
     # storage for changed repositories
@@ -35,6 +37,60 @@ module Registration
     # remember the registered base product
     class BaseProducts < Struct.new(:products)
       include Singleton
+    end
+
+    # AutoYast configuration
+    class Config
+      include Singleton
+
+      attr_accessor :do_registration, :reg_server, :reg_server_cert, :email,
+        :reg_key, :install_updates, :addons, :slp_discovery
+
+      def initialize
+        reset
+      end
+
+      def reset
+        @do_registration = false
+        @reg_server = ""
+        @reg_server_cert = ""
+        @email = ""
+        @reg_key = ""
+        @install_updates = false
+        @addons = []
+        @slp_discovery = false
+      end
+
+      def export
+        ret = { "do_registration" => @do_registration }
+
+        if @do_registration
+          ret.merge!(
+            {
+              "reg_server" => @reg_server,
+              "slp_discovery" => @slp_discovery,
+              "reg_server_cert" => @reg_server_cert,
+              "email" => @email,
+              "reg_key" => @reg_key,
+              "install_updates" => @install_updates,
+              "addons" => @addons
+            }
+          )
+        end
+
+        ret
+      end
+
+      def import(settings)
+        @do_registration = settings.fetch("do_registration", false)
+        @reg_server = settings["reg_server"] || ""
+        @slp_discovery = settings.fetch("slp_discovery", false)
+        @reg_server_cert = settings["reg_server_cert"] || ""
+        @email = settings["email"] || ""
+        @reg_key = settings["reg_key"] || ""
+        @install_updates = settings.fetch("install_updates", false)
+        @addons = settings["addons"] || []
+      end
     end
   end
 end

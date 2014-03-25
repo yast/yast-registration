@@ -2,19 +2,12 @@
 require "registration/helpers"
 
 module Yast
-  import 'SlpService'
   import 'UI'
   import 'Label'
   import 'Report'
 
   class DiscoverRegistrationServicesClient < Client
     include Yast::Logger
-
-    REGISTRATION_SERVICES = {
-      'susemanager' => 'SUSE Manager'
-    }
-
-    SUPPORTED_SERVICES = REGISTRATION_SERVICES.keys
 
     attr_reader :services
 
@@ -25,15 +18,7 @@ module Yast
     def main
       textdomain "registration"
 
-      busy_box do
-        log.info "Searching for #{SUPPORTED_SERVICES.inspect} SLP services"
-        SUPPORTED_SERVICES.each do |service_name|
-          services.concat(SlpService.all(service_name))
-        end
-      end
-
-      log.debug "Found services: #{services.inspect}"
-      log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
+      @services = ::Registration::Helpers.slp_discovery_feedback
 
       services.empty? ? nil : select_registration_service
     end
@@ -108,12 +93,6 @@ module Yast
       end
     end
 
-    def busy_box
-      Popup.ShowFeedback(_("Searching..."), _("Looking up local registration servers..."))
-      yield
-    ensure
-      Popup.ClearFeedback
-    end
   end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main
 end
