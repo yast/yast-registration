@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 25 09:25:38 UTC 2014 - lslezak@suse.cz
+
+- initial AutoYast support, allow specifying the registration
+  server URL in the AutoYast profile (FATE#312433)
+- 3.1.22
+
+-------------------------------------------------------------------
 Thu Mar 20 14:55:07 UTC 2014 - lslezak@suse.cz
 
 - added "Network Configuration" button for manual network
