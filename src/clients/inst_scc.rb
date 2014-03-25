@@ -112,7 +112,7 @@ module Yast
           @registration = ::Registration::Registration.new(url)
 
           ::Registration::Helpers.catch_registration_errors do
-            ::Registration::Helpers::run_with_feedback(_("Registering the System..."),
+            Popup.Feedback(_("Registering the System..."),
               _("Contacting the SUSE Customer Center server")) do
 
               @registration.register(email, reg_code)
@@ -120,7 +120,7 @@ module Yast
 
             # then register the product(s)
             products = ::Registration::SwMgmt.products_to_register
-            product_services = ::Registration::Helpers::run_with_feedback(
+            product_services = Popup.Feedback(
               n_("Registering Product...", "Registering Products...", products.size),
               _("Contacting the SUSE Customer Center server")) do
 
@@ -453,7 +453,7 @@ module Yast
       # cache the available addons
       return @available_addons if @available_addons
 
-      @available_addons = ::Registration::Helpers::run_with_feedback(
+      @available_addons = Popup.Feedback(
         _("Loading Available Add-on Products and Extensions..."),
         _("Contacting the SUSE Customer Center server")) do
 

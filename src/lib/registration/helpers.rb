@@ -123,13 +123,6 @@ module Registration
       (descr && !descr.empty?) ? "#{descr} (#{url})" : url
     end
 
-    def self.run_with_feedback(header, label, &block)
-      Yast::Popup.ShowFeedback(header, label)
-      yield
-    ensure
-      Yast::Popup.ClearFeedback
-    end
-
     def self.run_network_configuration
       log.info "Running network configuration..."
       Yast::WFM.call("inst_lan")

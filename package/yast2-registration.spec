@@ -26,7 +26,8 @@ Source0:        %{name}-%{version}.tar.bz2
 Group:          System/YaST
 License:        GPL-2.0
 
-Requires:       yast2 >= 2.23.13
+# Popup.Feedback
+Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 2.17.20
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
@@ -34,7 +35,7 @@ Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem-scc_api >= 0.2.7
 Requires:       yast2-slp >= 3.1.2
 
-BuildRequires:  yast2 >= 2.23.13
+BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
