@@ -193,9 +193,6 @@ module Yast
       # in AutoYast configuration mode ("Apply to System")
       ::Registration::SwMgmt.init if Mode.normal || Mode.config
 
-      # redirect the scc_api log to y2log
-      require "yast/scc_api"
-
       # set the registration URL
       url = @config.reg_server if @config.reg_server && !@config.reg_server.empty?
 
