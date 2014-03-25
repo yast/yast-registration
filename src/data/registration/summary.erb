@@ -1,0 +1,48 @@
+<%
+=begin the textdomain for y2makepot
+textdomain "registration"
+=end
+%>
+
+<h3><%= _("Product Registration") %></h3>
+<ul>
+  <li>
+    <%= @config.do_registration ?
+      _("Run registration during autoinstallation") :
+      _("Skip registration during autoinstallation") %>
+  </li>
+</ul>
+
+<% if @config.do_registration %>
+  <h3><%= _("Registration Settings") %></h3>
+  <ul>
+    <li><%= _("Email: %s") % h(@config.email) %></li>
+    <% if !@config.reg_key.empty? %>
+      <li><%= _("Registration Key is Configured") %></li>
+    <% end %>
+
+    <% if @config.install_updates %>
+      <li><%= _("Install Available Patches") %></li>
+    <% end %>
+  </ul>
+
+  <h3><%= _("Registration Server") %></h3>
+  <ul>
+    <% if !@config.reg_server.empty? %>
+      <li><%= _("Server URL: %s") % h(@config.reg_server) %></li>
+    <% elsif @config.slp_discovery %>
+      <li><%= (_("Server URL: %s") % _("Use SLP discovery")) %></li>
+    <% end %>
+
+    <% if !@config.reg_server_cert.empty? %>
+      <li><%= _("Server Certificate: %s") % h(@config.reg_server_cert) %></li>
+    <% end %>
+  </ul>
+
+  <h3><%= _("Addon Products") %></h3>
+  <ul>
+    <% @config.addons.each do |addon| %>
+      <li><%= h(addon["name"]) %></li>
+    <% end %>
+  </ul>
+<% end %>

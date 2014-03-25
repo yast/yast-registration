@@ -27,6 +27,7 @@
 #
 
 require "yast/scc_api"
+require "erb"
 
 require "registration/storage"
 require "registration/registration"
@@ -34,6 +35,7 @@ require "registration/registration"
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
+    include ERB::Util
 
     def main
       Yast.import "UI"
@@ -44,7 +46,6 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Label"
       Yast.import "Report"
-      Yast.import "Summary"
       Yast.import "Popup"
       Yast.import "Sequencer"
 
@@ -116,71 +117,17 @@ module Yast
     end
 
 
-    # Create a textual summary and a list of unconfigured cards
-    # return summary of the current configuration
+    # Create a textual summary
+    # @return [String] summary of the current configuration
     def summary
-      summary = ""
+      # use erb template for rendering the richtext summary
+      erb_file = File.expand_path("../../data/registration/summary.erb", __FILE__)
 
-      # Translators: Heading - capitalized
-      summary = Summary.AddHeader(summary, _("Product Registration"))
+      log.info "Loading ERB template #{erb_file}"
+      erb = ERB.new(File.read(erb_file))
 
-      summary = Summary.OpenList(summary)
-      summary = Summary.AddListItem(summary,
-        @config.do_registration ?
-          _("Run registration during autoinstallation") :
-          _("Skip registration during autoinstallation")
-      )
-      summary = Summary.CloseList(summary)
-
-      # registration disabled, no summary details needed
-      return summary unless @config.do_registration
-
-      summary = Summary.AddHeader(summary, _("Registration Settings"))
-      summary = Summary.OpenList(summary)
-      summary = Summary.AddListItem(summary, _("Email: %s") % @config.email)
-
-      if @config.reg_key && !@config.reg_key.empty?
-        summary = Summary.AddListItem(summary, _("Registration Key: <em>Configured</em>"))
-      end
-
-      if @config.install_updates
-        summary = Summary.AddListItem(summary, _("Install Available Patches"))
-      end
-
-      summary = Summary.CloseList(summary)
-
-      if (@config.reg_server && !@config.reg_server.empty?) || (@config.slp_discovery)
-        summary = Summary.AddHeader(summary, _("Registration Server Settings"))
-        summary = Summary.OpenList(summary)
-
-        if !@config.reg_server.empty?
-          summary = Summary.AddListItem(summary, (_("Server URL: %s") % @config.reg_server))
-        end
-
-        if @config.slp_discovery
-          summary = Summary.AddListItem(summary, _("Server URL: %s") % _("Use SLP discovery"))
-        end
-
-        if @config.reg_server_cert && !@config.reg_server.empty?
-          summary = Summary.AddListItem(
-            summary,
-            _("Server Certificate: %s") % @config.reg_server_cert
-          )
-        end
-        summary = Summary.CloseList(summary)
-      end
-
-      if !@config.addons.empty?
-        summary = Summary.AddHeader(summary, _("Addon Products"))
-        summary = Summary.OpenList(summary)
-
-        @config.addons.each do |addon|
-          summary = Summary.AddListItem(summary, addon["name"])
-        end
-        summary = Summary.CloseList(summary)
-      end
-
-      summary
+      # render the ERB template in the context of the current object
+      erb.result(binding)
     end
 
     # register the system, base product and optional addons

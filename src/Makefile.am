@@ -28,6 +28,10 @@ schemafilesdir = $(schemadir)/autoyast/rnc
 schemafiles_DATA = \
   autoyast-rnc/registration.rnc
 
-EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibyast_DATA) $(schemafiles_DATA)
+ydatadir = @ydatadir@/registration
+ydata_DATA = \
+  data/registration/summary.erb
+
+EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibyast_DATA) $(schemafiles_DATA) $(ydata_DATA)
 
 include $(top_srcdir)/Makefile.am.common
