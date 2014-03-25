@@ -71,6 +71,8 @@ Authors:
 %{yast_clientdir}/*.rb
 %{yast_schemadir}/autoyast/rnc/*.rnc
 %{yast_dir}/lib/registration
+%{yast_dir}/lib/yast
+%{yast_dir}/lib/yast/scc_api.rb
 %doc %{yast_docdir}
 
 %changelog

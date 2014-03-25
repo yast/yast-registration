@@ -20,10 +20,14 @@ ylib_DATA = \
   lib/registration/registration.rb \
   lib/registration/helpers.rb
 
+ylibyastdir = @ylibdir@/yast
+ylibyast_DATA = \
+  lib/yast/scc_api.rb
+
 schemafilesdir = $(schemadir)/autoyast/rnc
 schemafiles_DATA = \
   autoyast-rnc/registration.rnc
 
-EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(schemafiles_DATA)
+EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibyast_DATA) $(schemafiles_DATA)
 
 include $(top_srcdir)/Makefile.am.common

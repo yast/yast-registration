@@ -26,7 +26,7 @@
 #
 #
 
-require "scc_api"
+require "yast/scc_api"
 
 require "registration/storage"
 require "registration/registration"
@@ -86,7 +86,7 @@ module Yast
         # TODO FIXME: set modified status
       else
         log.error "Unknown function: #{func}"
-        ret = false
+        raise "Unknown function parameter: #{func}"
       end
 
       log.info "ret: #{ret}"
@@ -132,51 +132,52 @@ module Yast
       )
       summary = Summary.CloseList(summary)
 
-      if @config.do_registration
-        summary = Summary.AddHeader(summary, _("Registration Settings"))
+      # registration disabled, no summary details needed
+      return summary unless @config.do_registration
+
+      summary = Summary.AddHeader(summary, _("Registration Settings"))
+      summary = Summary.OpenList(summary)
+      summary = Summary.AddListItem(summary, _("Email: %s") % @config.email)
+
+      if @config.reg_key && !@config.reg_key.empty?
+        summary = Summary.AddListItem(summary, _("Registration Key: <em>Configured</em>"))
+      end
+
+      if @config.install_updates
+        summary = Summary.AddListItem(summary, _("Install Available Patches"))
+      end
+
+      summary = Summary.CloseList(summary)
+
+      if (@config.reg_server && !@config.reg_server.empty?) || (@config.slp_discovery)
+        summary = Summary.AddHeader(summary, _("Registration Server Settings"))
         summary = Summary.OpenList(summary)
-        summary = Summary.AddListItem(summary, _("Email: %s") % @config.email)
 
-        if @config.reg_key && !@config.reg_key.empty?
-          summary = Summary.AddListItem(summary, _("Registration Key: <em>Configured</em>"))
+        if !@config.reg_server.empty?
+          summary = Summary.AddListItem(summary, (_("Server URL: %s") % @config.reg_server))
         end
 
-        if @config.install_updates
-          summary = Summary.AddListItem(summary, _("Install Available Patches"))
+        if @config.slp_discovery
+          summary = Summary.AddListItem(summary, _("Server URL: %s") % _("Use SLP discovery"))
         end
 
+        if @config.reg_server_cert && !@config.reg_server.empty?
+          summary = Summary.AddListItem(
+            summary,
+            _("Server Certificate: %s") % @config.reg_server_cert
+          )
+        end
         summary = Summary.CloseList(summary)
+      end
 
-        if (@config.reg_server && !@config.reg_server.empty?) || (@config.slp_discovery)
-          summary = Summary.AddHeader(summary, _("Registration Server Settings"))
-          summary = Summary.OpenList(summary)
+      if !@config.addons.empty?
+        summary = Summary.AddHeader(summary, _("Addon Products"))
+        summary = Summary.OpenList(summary)
 
-          if !@config.reg_server.empty?
-            summary = Summary.AddListItem(summary, (_("Server URL: %s") % @config.reg_server))
-          end
-
-          if @config.slp_discovery
-            summary = Summary.AddListItem(summary, _("Server URL: %s") % _("Use SLP discovery"))
-          end
-
-          if @config.reg_server_cert && !@config.reg_server.empty?
-            summary = Summary.AddListItem(
-              summary,
-              _("Server Certificate: %s") % @config.reg_server_cert
-            )
-          end
-          summary = Summary.CloseList(summary)
+        @config.addons.each do |addon|
+          summary = Summary.AddListItem(summary, addon["name"])
         end
-
-        if !@config.addons.empty?
-          summary = Summary.AddHeader(summary, _("Addon Products"))
-          summary = Summary.OpenList(summary)
-
-          @config.addons.each do |addon|
-            summary = Summary.AddListItem(summary, addon["name"])
-          end
-          summary = Summary.CloseList(summary)
-        end
+        summary = Summary.CloseList(summary)
       end
 
       summary
@@ -193,17 +194,18 @@ module Yast
       ::Registration::SwMgmt.init if Mode.normal || Mode.config
 
       # redirect the scc_api log to y2log
-      SccApi::GlobalLogger.instance.log = Y2Logger.instance
+      require "yast/scc_api"
 
       # set the registration URL
       url = @config.reg_server if @config.reg_server && !@config.reg_server.empty?
 
       # use SLP discovery
-      if @config.slp_discovery
+      if !url && @config.slp_discovery
         url = find_slp_server
         return false unless url
       end
 
+      # nil = use the default URL
       @registration = ::Registration::Registration.new(url)
 
       # TODO FIXME: import the server certificate
@@ -359,6 +361,7 @@ module Yast
           PushButton(Id(:delete), Label.DeleteButton)
         )
       )
+      # TODO FIXME: add a help text
       help_text = ""
       Wizard.SetContents(_("Register Optional Add-ons"), contents, help_text, true, true)
       Wizard.SetNextButton(:next, Label.OKButton)
@@ -383,7 +386,7 @@ module Yast
       ret
     end
 
-    def disable_widgets
+    def refresh_widget_state
       enabled = UI.QueryWidget(Id(:do_registration), :Value)
       all_widgets = [ :reg_server_cert, :email, :reg_key, :slp_discovery,
         :install_updates, :addons ]
@@ -479,7 +482,7 @@ module Yast
       Wizard.SetContents(caption, contents, help_text, false, true)
       Wizard.SetNextButton(:next, Label.FinishButton)
 
-      disable_widgets
+      refresh_widget_state
 
       begin
         ret = UI.UserInput
@@ -487,7 +490,7 @@ module Yast
 
         case ret
         when :do_registration, :slp_discovery
-          disable_widgets
+          refresh_widget_state
         when :abort, :cancel
           break if Popup.ReallyAbort(true)
         when :next

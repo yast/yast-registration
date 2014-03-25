@@ -23,7 +23,7 @@
 #
 
 # use external rubygem for SCC communication
-require "scc_api"
+require "yast/scc_api"
 
 require "cgi"
 
@@ -56,9 +56,6 @@ module Yast
       Yast.import "Sequencer"
       Yast.import "Installation"
       Yast.import "ProductControl"
-
-      # redirect the scc_api log to y2log
-      SccApi::GlobalLogger.instance.log = Y2Logger.instance
 
       @selected_addons = []
 
