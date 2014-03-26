@@ -215,12 +215,10 @@ module Registration
     end
 
     def self.slp_discovery_feedback
-      Yast::Popup.ShowFeedback(_("Searching..."), _("Looking up local registration servers..."))
-      slp_discovery
-    ensure
-      Yast::Popup.ClearFeedback
+      Yast::Popup.Feedback(_("Searching..."), _("Looking up local registration servers...")) do
+        slp_discovery
+      end
     end
-
 
   end
 end
