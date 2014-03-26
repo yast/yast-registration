@@ -29,6 +29,7 @@ require "cgi"
 
 require "registration/exceptions"
 require "registration/helpers"
+require "registration/scc_helpers"
 require "registration/sw_mgmt"
 require "registration/repo_state"
 require "registration/storage"
@@ -111,7 +112,7 @@ module Yast
           url = ::Registration::Helpers.registration_url
           @registration = ::Registration::Registration.new(url)
 
-          ::Registration::Helpers.catch_registration_errors do
+          ::Registration::SccHelpers.catch_registration_errors do
             Popup.Feedback(_("Registering the System..."),
               _("Contacting the SUSE Customer Center server")) do
 
@@ -521,7 +522,7 @@ module Yast
         }
       end
 
-      ret = ::Registration::Helpers.catch_registration_errors do
+      ret = ::Registration::SccHelpers.catch_registration_errors do
         product_services = ::Registration::Helpers.run_with_feedback(
           n_("Registering Product...", "Registering Products...", products.size),
           _("Contacting the SUSE Customer Center server")) do
