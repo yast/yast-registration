@@ -1,9 +1,9 @@
 TESTS = \
   addon_spec.rb \
-  discover_registration_services_spec.rb \
+  discover_registration_services_test.rb \
   helpers_spec.rb \
   scc_finish_test.rb \
-  sw_mgmt_test.rb
+  sw_mgmt_spec.rb
 
 TEST_EXTENSIONS = .rb
 RB_LOG_COMPILER = rspec --format doc
