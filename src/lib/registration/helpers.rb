@@ -23,7 +23,6 @@
 
 require "yast"
 require "uri"
-require "scc_api"
 
 module Registration
 
@@ -128,54 +127,6 @@ module Registration
       Yast::WFM.call("inst_lan")
     end
 
-    def self.catch_registration_errors(&block)
-      begin
-        yield
-        true
-      rescue SccApi::NoNetworkError
-        # Error popup
-        if Yast::Mode.installation && Yast::Popup.YesNo(
-            _("Network is not configured, the registration server cannot be reached.\n" +
-                "Do you want to configure the network now?") )
-          Registration::Helpers::run_network_configuration
-        end
-        false
-      rescue SccApi::NotAuthorized
-        # Error popup
-        Yast::Report.Error(_("The email address or the registration\ncode is not valid."))
-        false
-      rescue Timeout::Error
-        # Error popup
-        Yast::Report.Error(_("Connection time out."))
-        false
-      rescue SccApi::ErrorResponse => e
-        # TODO FIXME: display error details from the response
-        Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
-        false
-      rescue SccApi::HttpError => e
-        case e.response
-        when Net::HTTPClientError
-          Yast::Report.Error(_("Registration client error."))
-        when Net::HTTPServerError
-          Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
-        else
-          Yast::Report.Error(_("Registration failed."))
-        end
-        false
-      rescue ::Registration::ServiceError => e
-        log.error("Service error: #{e.message % e.service}")
-        Yast::Report.Error(_(e.message) % e.service)
-        false
-      rescue ::Registration::PkgError => e
-        log.error("Pkg error: #{e.message}")
-        Yast::Report.Error(_(e.message))
-        false
-      rescue Exception => e
-        log.error("SCC registration failed: #{e}, #{e.backtrace}")
-        Yast::Report.Error(_("Registration failed."))
-        false
-      end
-    end
 
     private
 
@@ -216,12 +167,10 @@ module Registration
     end
 
     def self.slp_discovery_feedback
-      Yast::Popup.ShowFeedback(_("Searching..."), _("Looking up local registration servers..."))
-      slp_discovery
-    ensure
-      Yast::Popup.ClearFeedback
+      Yast::Popup.Feedback(_("Searching..."), _("Looking up local registration servers...")) do
+        slp_discovery
+      end
     end
-
 
   end
 end

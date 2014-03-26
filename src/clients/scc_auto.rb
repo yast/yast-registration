@@ -31,6 +31,8 @@ require "erb"
 
 require "registration/storage"
 require "registration/registration"
+require "registration/helpers"
+require "registration/scc_helpers"
 
 module Yast
   class SccAutoClient < Client
@@ -157,7 +159,7 @@ module Yast
 
       end
 
-      ret = ::Registration::Helpers.catch_registration_errors do
+      ret = ::Registration::SccHelpers.catch_registration_errors do
         # register the system
         Popup.Feedback(_("Registering the System..."),
           _("Contacting the SUSE Customer Center server")) do

@@ -18,7 +18,8 @@ ylib_DATA = \
   lib/registration/storage.rb \
   lib/registration/repo_state.rb \
   lib/registration/registration.rb \
-  lib/registration/helpers.rb
+  lib/registration/helpers.rb \
+  lib/registration/scc_helpers.rb
 
 ylibyastdir = @ylibdir@/yast
 ylibyast_DATA = \
