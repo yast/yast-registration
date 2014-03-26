@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 25 17:38:37 UTC 2014 - lslezak@suse.cz
+
+- use an ERB template instead of ugly Summary module for rendering
+  AutoYast rich text summary
+- 3.1.23
+
+-------------------------------------------------------------------
 Tue Mar 25 09:25:38 UTC 2014 - lslezak@suse.cz
 
 - initial AutoYast support, allow specifying the registration

@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.22
+Version:        3.1.23
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -70,10 +70,11 @@ Authors:
 %defattr(-,root,root)
 %{yast_desktopdir}/customer_center.desktop
 %{yast_clientdir}/*.rb
+%{yast_ydatadir}/registration
 %{yast_schemadir}/autoyast/rnc/*.rnc
-%{yast_dir}/lib/registration
-%{yast_dir}/lib/yast
-%{yast_dir}/lib/yast/scc_api.rb
+%{yast_libdir}/registration
+%{yast_libdir}/yast
+%{yast_libdir}/yast/scc_api.rb
 %doc %{yast_docdir}
 
 %changelog
