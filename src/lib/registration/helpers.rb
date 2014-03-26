@@ -23,7 +23,6 @@
 
 require "yast"
 require "uri"
-require "scc_api"
 
 module Registration
 
