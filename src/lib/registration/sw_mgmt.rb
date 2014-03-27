@@ -55,7 +55,7 @@ module Registration
     # structure into a writable temporary directory and override the original
     # location by "mount -o bind"
     def self.zypp_config_writable!
-      return if !Mode.installation || File.writable?(ZYPP_DIR)
+      return if !(Mode.installation || Mode.update) || File.writable?(ZYPP_DIR)
 
       log.info "Copying libzypp config to a writable place"
 
