@@ -165,6 +165,49 @@ module Yast
       return ret
     end
 
+    def refresh_base_product
+      init_registration
+
+      ::Registration::SccHelpers.catch_registration_errors do
+        # then register the product(s)
+        base_product = ::Registration::SwMgmt.base_product_to_register
+        product_services = Popup.Feedback(
+          _("Registering Product..."),
+          _("Contacting the SUSE Customer Center server")) do
+
+          @registration.register_product(base_product)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_services)
+      end
+    end
+
+    # display the registration update dialog
+    def show_registration_update_dialog
+      Wizard.SetContents(
+        _("Registration"),
+        Label(_("Registration is being updated...")),
+        # TODO FIXME
+        "",
+        GetInstArgs.enable_back,
+        GetInstArgs.enable_next || Mode.normal
+      )
+    end
+
+    def update_registration
+      show_registration_update_dialog
+
+      if refresh_base_product
+        return :next
+      else
+        # automatic registration refresh during system upgrade failed, register from scratch
+        Report.Error(_("Automatic registration upgrade failed.\n" +
+              "You can manually register the system from scratch."))
+        return :register
+      end
+    end
+
     # content for the main registration dialog
     def scc_credentials_dialog
       base_product = ::Registration::SwMgmt.find_base_product
@@ -678,6 +721,23 @@ module Yast
         return Mode.normal ? :abort : :auto
       end
 
+      if Mode.update
+        Wizard.SetContents(
+          _("Registration"),
+          Empty(),
+          "",
+          false,
+          false
+        )
+
+        ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
+
+        if File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+          # update the registration using the old credentials
+          return :update
+        end
+      end
+
       if Mode.normal && ::Registration::Registration.is_registered?
         return display_registered_dialog
       else
@@ -696,6 +756,7 @@ module Yast
         "check"           => [ lambda { registration_check() }, true ],
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
+        "update"          => [ lambda { update_registration() }, true ],
         "media_addons"    => lambda { media_addons() },
         "addon_eula"      => lambda { addon_eula() },
         "register_addons" => lambda { register_addons() }
@@ -709,7 +770,14 @@ module Yast
           :cancel     => :abort,
           :register   => "register",
           :extensions => "select_addons",
+          :update     => "update",
           :next       => :next
+        },
+        "update" => {
+          :abort   => :abort,
+          :cancel   => :abort,
+          :next => "select_addons",
+          :register => "register",
         },
         "register" => {
           :abort    => :abort,
