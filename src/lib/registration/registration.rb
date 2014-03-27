@@ -30,6 +30,8 @@ module Registration
   class Registration
     include Yast::Logger
 
+    SCC_CREDENTIALS = SccApi::Credentials::DEFAULT_CREDENTIALS_DIR + "/SCCCredentials"
+
     attr_accessor :url
 
     def initialize(url = nil)
@@ -96,5 +98,8 @@ module Registration
       end
     end
 
+    def self.is_registered?
+      File.exist?(SCC_CREDENTIALS)
+    end
   end
 end

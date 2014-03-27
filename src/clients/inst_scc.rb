@@ -594,17 +594,65 @@ module Yast
       end
     end
 
+    def registered_dialog
+      VBox(
+        Heading(_("The system is already registered.")),
+        VSpacing(1),
+        Label(_("Note: Registering your system again will\n" +
+              "consume an additional subscription.")),
+        VSpacing(1),
+        PushButton(Id(:register), _("Register Again"))
+      )
+    end
+
+    def display_registered_dialog
+      Wizard.SetContents(
+        # dialog title
+        _("Registration Status"),
+        registered_dialog,
+        # FIXME: help text
+        "",
+        GetInstArgs.enable_back || Mode.normal,
+        GetInstArgs.enable_back || Mode.normal
+      )
+
+      Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
+
+      continue_buttons = [:next, :back, :close, :abort, :register]
+
+      ret = nil
+      while !continue_buttons.include?(ret) do
+        ret = UI.UserInput
+      end
+
+      return ret
+    end
+
+    def registration_check
+      return :register unless ::Registration::Registration.is_registered?
+
+      display_registered_dialog
+    end
+
     # UI workflow definition
     def start_workflow
       aliases = {
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
         "register_addons" => lambda { register_addons() },
-        "media_addons"    => lambda { media_addons() }
+        "media_addons"    => lambda { media_addons() },
+        # skip this when going back
+        "check"           => [ lambda { registration_check() }, true ]
       }
 
       sequence = {
-        "ws_start" => "register",
+        "ws_start" => "check",
+        "check" => {
+          :abort   => :abort,
+          :cancel   => :abort,
+          :register    => "register",
+          :next    => :next
+        },
         "register"  => {
           :abort   => :abort,
           :cancel   => :abort,
