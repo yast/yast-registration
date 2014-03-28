@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 28 08:20:17 UTC 2014 - mfilka@suse.com
+
+- bnc#870622
+  - fixed handling "Network Configuration" button
+- 3.1.24 
+
+-------------------------------------------------------------------
 Tue Mar 25 17:38:37 UTC 2014 - lslezak@suse.cz
 
 - use an ERB template instead of ugly Summary module for rendering
