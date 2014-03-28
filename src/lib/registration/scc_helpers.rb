@@ -60,8 +60,9 @@ module Registration
         Yast::Report.Error(_("Connection time out."))
         false
       rescue SccApi::ErrorResponse => e
-        # TODO FIXME: display error details from the response
-        Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
+        # error popup, a generic message when no details are available
+        message = JSON.parse(e.message)["localized_error"] || _("Unknown error")
+        Yast::Report.Error(message)
         false
       rescue SccApi::HttpError => e
         case e.response
