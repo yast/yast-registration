@@ -53,7 +53,7 @@ module Registration
         false
       rescue SccApi::NotAuthorized
         # Error popup
-        Yast::Report.Error(_("The email address or the registration\ncode is not valid."))
+        Yast::Report.Error(_("The email address is not known or\nthe registration code is not valid."))
         false
       rescue Timeout::Error
         # Error popup
