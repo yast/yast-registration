@@ -124,7 +124,7 @@ module Registration
 
     def self.run_network_configuration
       log.info "Running network configuration..."
-      Yast::WFM.call("inst_lan")
+      Yast::WFM.call("inst_lan", ["skip_detection"])
     end
 
 
