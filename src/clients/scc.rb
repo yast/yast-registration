@@ -23,6 +23,7 @@
 
 # this is just a wrapper for running the SCC client in installed system
 
+require "yast"
 require "registration/sw_mgmt"
 
 module Yast

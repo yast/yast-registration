@@ -55,7 +55,7 @@ module Registration
     # structure into a writable temporary directory and override the original
     # location by "mount -o bind"
     def self.zypp_config_writable!
-      return if !Mode.installation || File.writable?(ZYPP_DIR)
+      return if !(Mode.installation || Mode.update) || File.writable?(ZYPP_DIR)
 
       log.info "Copying libzypp config to a writable place"
 
@@ -69,14 +69,22 @@ module Registration
       `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
     end
 
-    def self.products_to_register
+    def self.base_products_to_register
       # just for debugging:
       # return [{"name" => "SLES", "arch" => "x86_64", "version" => "12-1.47"}]
 
       # during installation the products are :selected,
       # on a running system the products are :installed
+      # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        p["status"] == :selected || p["status"] == :installed
+        if Mode.normal
+          # in installed system the base product has valid type
+          p["status"] == :installed && p["type"] == "base"
+        else
+          # however during installation it's not set yet
+          # but the base product comes from the first repository
+          p["status"] == :selected && p["source"] == 0
+        end
       end
 
       # filter out not needed data
@@ -84,7 +92,7 @@ module Registration
         { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}
       end
 
-      log.info("Products to register: #{product_info}")
+      log.info("Base products to register: #{product_info}")
 
       product_info
     end

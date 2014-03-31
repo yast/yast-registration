@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Mar 31 13:46:00 UTC 2014 - lslezak@suse.cz
+
+- fixes/enhancements:
+  - do not ask for credentials when the system is already
+    registered (avoid re-registration when going back)
+  - display details when registration fails
+  - register only the base product (add-ons use a different reg.
+    key, important in running system)
+- 3.1.25
+
+-------------------------------------------------------------------
 Fri Mar 28 10:39:38 UTC 2014 - lslezak@suse.cz
 
 - better error message for failed registration (bnc#870787#c2)

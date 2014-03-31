@@ -74,22 +74,12 @@ module Registration
     # for details
     # @return [String,nil] registration URL, nil means use the default
     def self.registration_url
-      if Yast::Mode.installation
-        # boot command line if present
-        boot_url = boot_reg_url
-        return boot_url if boot_url
-      end
+      # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
+      return reg_url_at_upgrade if Yast::Mode.update
+      return reg_url_at_installation if Yast::Mode.installation
+      return reg_url_at_runnig_system if Yast::Mode.normal
 
-      # SLP discovery
-      # TODO FIXME: replace "true" by reading the SLP option from configuration file
-      if Yast::Mode.installation || true
-        slp_url = slp_service_url
-        return slp_url if slp_url
-      end
-
-      # TODO FIXME: read the URL from configuration file to use the same URL
-      # at re-registration at installed system
-
+      log.warn "Unknown mode: #{Mode.mode} using default URL"
       # no custom URL, use the default
       nil
     end
@@ -129,6 +119,51 @@ module Registration
 
 
     private
+
+    # get registration URL in installation mode
+    def self.reg_url_at_installation
+      # boot command line if present
+      boot_url = boot_reg_url
+      return boot_url if boot_url
+
+      # SLP discovery
+      slp_url = slp_service_url
+      return slp_url if slp_url
+
+      # use the default
+      nil
+    end
+
+    # get registration URL in upgrade mode
+    def self.reg_url_at_upgrade
+      # boot command line if present
+      boot_url = boot_reg_url
+      return boot_url if boot_url
+
+      # TODO FIXME: read the URL from the old configuration file
+      # (old suse_register.conf or old SCC config file)
+
+      # try SLP if not registered
+      slp_url = slp_service_url
+      return slp_url if slp_url
+
+      # use the default
+      nil
+    end
+
+    # get registration URL in running system
+    def self.reg_url_at_runnig_system
+      # TODO FIXME: read the URL from configuration file to use the same URL
+      # at re-registration as in installation
+
+      # try SLP if not registered yet
+      slp_url = slp_service_url
+      return slp_url if slp_url
+
+      # use the default
+      nil
+    end
+
 
     # return the boot command line parameter
     def self.boot_reg_url

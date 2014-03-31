@@ -23,6 +23,8 @@ describe "Registration::Helpers" do
     context "at installation" do
       before do
         allow(yast_mode).to receive(:installation).and_return(true)
+        allow(yast_mode).to receive(:update).and_return(false)
+        allow(yast_mode).to receive(:normal).and_return(false)
       end
 
       context "no local registration server is announced via SLP" do
@@ -78,6 +80,8 @@ describe "Registration::Helpers" do
 
     context "at installed system" do
       before do
+        allow(yast_mode).to receive(:normal).and_return(true)
+        allow(yast_mode).to receive(:update).and_return(false)
         allow(yast_mode).to receive(:installation).and_return(false)
         # FIXME: stub SLP service discovery, later add config file reading
         expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)

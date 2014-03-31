@@ -168,7 +168,7 @@ module Yast
         end
 
         # register the base product
-        products = ::Registration::SwMgmt.products_to_register
+        products = ::Registration::SwMgmt.base_products_to_register
         Popup.Feedback(
           n_("Registering Product...", "Registering Products...", products.size),
           _("Contacting the SUSE Customer Center server")) do
