@@ -648,29 +648,29 @@ module Yast
       sequence = {
         "ws_start" => "check",
         "check" => {
-          :abort   => :abort,
+          :abort    => :abort,
           :cancel   => :abort,
-          :register    => "register",
-          :next    => :next
+          :register => "register",
+          :next     => :next
         },
-        "register"  => {
-          :abort   => :abort,
+        "register" => {
+          :abort    => :abort,
           :cancel   => :abort,
-          :skip    => :next,
-          :next    => "select_addons"
+          :skip     => :next,
+          :next     => "select_addons"
         },
         "select_addons" => {
-          :abort   => :abort,
-          :skip    => "media_addons",
-          :next => "register_addons"
+          :abort    => :abort,
+          :skip     => "media_addons",
+          :next     => "register_addons"
         },
         "register_addons" => {
-          :abort   => :abort,
-          :next => "media_addons"
+          :abort    => :abort,
+          :next     => "media_addons"
         },
         "media_addons" => {
-          :abort   => :abort,
-          :next => :next
+          :abort    => :abort,
+          :next     => :next
         }
       }
 
