@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr  1 08:25:30 UTC 2014 - lslezak@suse.cz
+
+- do not restore the original repository status (enabled/disabled
+  Updates), keep the user changes in installed system (bnc#869088)
+- 3.1.26
+
+-------------------------------------------------------------------
 Mon Mar 31 13:46:00 UTC 2014 - lslezak@suse.cz
 
 - fixes/enhancements:

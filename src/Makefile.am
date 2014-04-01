@@ -4,8 +4,7 @@ client_DATA = \
   clients/discover_registration_services.rb \
   clients/inst_scc.rb \
   clients/scc.rb \
-  clients/scc_auto.rb \
-  clients/scc_finish.rb
+  clients/scc_auto.rb
 
 desktop_DATA = \
   desktop/customer_center.desktop
@@ -16,7 +15,6 @@ ylib_DATA = \
   lib/registration/exceptions.rb \
   lib/registration/sw_mgmt.rb \
   lib/registration/storage.rb \
-  lib/registration/repo_state.rb \
   lib/registration/registration.rb \
   lib/registration/helpers.rb \
   lib/registration/scc_helpers.rb
