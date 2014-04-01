@@ -31,7 +31,6 @@ require "registration/exceptions"
 require "registration/helpers"
 require "registration/scc_helpers"
 require "registration/sw_mgmt"
-require "registration/repo_state"
 require "registration/storage"
 require "registration/registration"
 
