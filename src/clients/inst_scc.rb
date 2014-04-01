@@ -217,10 +217,6 @@ module Yast
         enabled = selected_items.include?(repo["SrcId"])
 
         if repo["enabled"] != enabled
-          # remember the original state
-          repo_state = ::Registration::RepoState.new(repo["SrcId"], repo["enabled"])
-          ::Registration::RepoStateStorage.instance.repositories << repo_state
-
           log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
           Pkg.SourceSetEnabled(repo_id, enabled)
         end
