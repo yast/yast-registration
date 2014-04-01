@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  1 13:53:37 UTC 2014 - lslezak@suse.cz
+
+- fix up, removed forgotten require (bnc#871400)
+- 3.1.27
+
+-------------------------------------------------------------------
 Tue Apr  1 08:25:30 UTC 2014 - lslezak@suse.cz
 
 - do not restore the original repository status (enabled/disabled
