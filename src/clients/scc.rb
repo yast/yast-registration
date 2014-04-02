@@ -47,9 +47,11 @@ module Yast
         Wizard.CreateDialog
         ::Registration::SwMgmt.init
 
-        WFM.call("inst_scc")
-
-        Wizard.CloseDialog
+        begin
+          return WFM.call("inst_scc")
+        ensure
+          Wizard.CloseDialog
+        end
       end
     end
   end
