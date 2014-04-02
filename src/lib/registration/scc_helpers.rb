@@ -48,7 +48,7 @@ module Registration
         if Yast::Mode.installation && Yast::Popup.YesNo(
             _("Network is not configured, the registration server cannot be reached.\n" +
                 "Do you want to configure the network now?") )
-          Registration::Helpers::run_network_configuration
+          ::Registration::Helpers::run_network_configuration
         end
         false
       rescue SccApi::NotAuthorized

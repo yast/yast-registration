@@ -236,54 +236,22 @@ module Yast
       end
     end
 
-    def repo_items(repos)
-      repos.map{|repo| Item(Id(repo["SrcId"]), repo["name"], repo["enabled"])}
-    end
-
-    def repo_selection_dialog(repos)
-      label = _("You can manually change the repository states,\n" +
-          "select repositories which will be used for installation.")
-
-      VBox(
-        Heading(_("Repository State")),
-        VSpacing(0.5),
-        Label(label),
-        MultiSelectionBox(Id(:repositories), "", repo_items(repos)),
-        VSpacing(0.5),
-        HBox(
-          PushButton(Id(:ok), Opt(:default), Label.OKButton),
-          PushButton(Id(:cancel), Label.CancelButton)
-        )
-      )
-    end
-
-    def activate_repo_settings(repos)
-      selected_items = UI.QueryWidget(Id(:repositories), :SelectedItems)
-      log.info "Selected items: #{selected_items.inspect}"
-
-      repos.each do |repo|
-        repo_id = repo["SrcId"]
-        enabled = selected_items.include?(repo["SrcId"])
-
-        if repo["enabled"] != enabled
-          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
-          Pkg.SourceSetEnabled(repo_id, enabled)
-        end
-      end
-    end
-
     def select_repositories(product_services)
-      repos = ::Registration::SwMgmt.service_repos(product_services)
+      options = ::Registration::Storage::InstallationOptions.instance
 
-      UI.OpenDialog(repo_selection_dialog(repos))
-      UI.SetFocus(:ok)
+      # added update repositories
+      updates = ::Registration::SwMgmt.service_repos(product_services, only_updates: true)
+      log.info "Found update repositories: #{updates.size}"
 
-      begin
-        ret = UI.UserInput
-        activate_repo_settings(repos) if ret == :ok
-      ensure
-        UI.CloseDialog
+      # not set yet?
+      if options.install_updates.nil?
+        options.install_updates = Popup.YesNo(
+          _("Registration added some update repositories.\n\n" +
+            "Do you want to install the latest available\n" +
+            "on-line updates during installation?"))
       end
+
+      ::Registration::SwMgmt.set_repos_state(updates, options.install_updates)
     end
 
     # create item list (available addons items)
