@@ -151,17 +151,17 @@ module Yast
           Empty(),
         VStretch(),
         HBox(
-          HSpacing(Opt(:hstretch), 3),
           Frame(_("SUSE Customer Center Credentials"),
             MarginBox(1, 0.5,
-              VBox(
-                MinWidth(32, InputField(Id(:email), _("&Email"))),
-                VSpacing(0.5),
-                MinWidth(32, InputField(Id(:reg_code), _("Registration &Code")))
+              HSquash(
+                VBox(
+                  MinWidth(33, InputField(Id(:email), _("&Email"))),
+                  VSpacing(0.5),
+                  MinWidth(33, InputField(Id(:reg_code), _("Registration &Code")))
+                )
               )
             )
-          ),
-          HSpacing(Opt(:hstretch), 3),
+          )
         ),
         VSpacing(3),
         PushButton(Id(:skip), _("&Skip Registration")),
