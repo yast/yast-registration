@@ -613,7 +613,7 @@ module Yast
 
       Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
 
-      continue_buttons = [:next, :back, :close, :abort, :register]
+      continue_buttons = [:next, :back, :cancel, :abort, :register]
 
       ret = nil
       while !continue_buttons.include?(ret) do
