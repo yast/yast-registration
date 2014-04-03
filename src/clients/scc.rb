@@ -54,7 +54,7 @@ module Yast
         end
       end
     end
-  end
+  end unless defined?(SccClient)
 end
 
 Yast::SccClient.new.main
