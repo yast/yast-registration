@@ -187,22 +187,22 @@ module Yast
         VStretch(),
         HSquash(
           VBox(
+            VSpacing(1),
             Left(Heading(base_product_name)),
             VSpacing(1),
-            # TODO FIXME: replace by a real text describing the Email and the reg.code
-            Label("Lorem ipsum dolor sit amet, consectetur adipiscing elit pulvinar vel nunc.
-Phasellus fermentum eros eget auctor tincidunt. Maecenas tempus sapien id
-orci pellentesque vestibulum. Ut tellus enim, vestibulum eget consequat id,
-scelerisque a justo. Maecenas bibendum, mauris ut cursus pharetra, mi nibh
-ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
-            VSpacing(1),
+            Label(info)
+          )
+        ),
+        VSpacing(2),
+        HSquash(
+          VBox(
             MinWidth(33, InputField(Id(:email), _("&Email"), options.email)),
             VSpacing(0.5),
             MinWidth(33, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
         VSpacing(3),
-        PushButton(Id(:skip), _("&Skip Registration")),
+        Mode.normal ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
     end
@@ -215,6 +215,8 @@ ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
 
     # display the main registration dialog
     def show_scc_credentials_dialog
+      registered = ::Registration::Registration.is_registered?
+
       Wizard.SetContents(
         # dialog title
         _("Registration"),
@@ -225,7 +227,7 @@ ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
       )
 
       # disable the input fields when already registered
-      if ::Registration::Registration.is_registered?
+      if registered && !Mode.normal
         UI.ChangeWidget(Id(:email), :Enabled, false)
         UI.ChangeWidget(Id(:reg_code), :Enabled, false)
       end
