@@ -69,10 +69,7 @@ module Registration
       `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
     end
 
-    def self.base_products_to_register
-      # just for debugging:
-      # return [{"name" => "SLES", "arch" => "x86_64", "version" => "12-1.47"}]
-
+    def self.find_base_product
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
@@ -87,12 +84,27 @@ module Registration
         end
       end
 
-      # filter out not needed data
-      product_info = products.map do |p|
-        { "name" => p["name"], "arch" => p["arch"], "version" => p["version"]}
-      end
+      log.debug "Found base products: #{products}"
+      log.info "Found base products: #{products.map{|p| p["name"]}}"
+      log.warn "More than one base product found!" if products.size > 1
 
-      log.info("Base products to register: #{product_info}")
+      products.first
+    end
+
+    def self.base_product_to_register
+      # just for debugging:
+      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12-1.47"}
+
+      base_product = find_base_product
+
+      # filter out not needed data
+      product_info = {
+        "name"    => base_product["name"],
+        "arch"    => base_product["arch"],
+        "version" => base_product["version"]
+      }
+
+      log.info("Base product to register: #{product_info}")
 
       product_info
     end

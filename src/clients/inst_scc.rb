@@ -145,22 +145,51 @@ module Yast
 
     # content for the main registration dialog
     def scc_credentials_dialog
+      base_product = ::Registration::SwMgmt.find_base_product
+      base_product_name = base_product["display_name"] ||
+        base_product["short_name"] ||
+        base_product["name"] ||
+        _("Unknown product")
+
+      options = ::Registration::Storage::InstallationOptions.instance
+
+      # TODO FIXME: still not the final text
+      # label text describing the registration (1/2)
+      # use \n to split to more lines if needed (use max. 76 chars/line)
+      info = _("Please enter a registration or evaluation code for this product and your\n" +
+          "User Name/EMail from the SUSE Customer Center in the fields below.\n" +
+          "Access to security and general software updates is only possible on\n" +
+          "a registered system.")
+
+      if !Mode.normal || true
+        # add a paragraph separator
+        info << "\n\n"
+
+        # label text describing the registration (2/2),
+        # not displayed in installed system
+        # use \n to split to more lines if needed (use max. 76 chars/line)
+        info << _("If you skip the registration now be sure to do so in the installed system.")
+      end
+
       VBox(
         Mode.installation ?
           Right(PushButton(Id(:network), _("Network Configuration..."))) :
           Empty(),
         VStretch(),
-        HBox(
-          Frame(_("SUSE Customer Center Credentials"),
-            MarginBox(1, 0.5,
-              HSquash(
-                VBox(
-                  MinWidth(33, InputField(Id(:email), _("&Email"))),
-                  VSpacing(0.5),
-                  MinWidth(33, InputField(Id(:reg_code), _("Registration &Code")))
-                )
-              )
-            )
+        HSquash(
+          VBox(
+            Left(Heading(base_product_name)),
+            VSpacing(1),
+            # TODO FIXME: replace by a real text describing the Email and the reg.code
+            Label("Lorem ipsum dolor sit amet, consectetur adipiscing elit pulvinar vel nunc.
+Phasellus fermentum eros eget auctor tincidunt. Maecenas tempus sapien id
+orci pellentesque vestibulum. Ut tellus enim, vestibulum eget consequat id,
+scelerisque a justo. Maecenas bibendum, mauris ut cursus pharetra, mi nibh
+ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
+            VSpacing(1),
+            MinWidth(33, InputField(Id(:email), _("&Email"))),
+            VSpacing(0.5),
+            MinWidth(33, InputField(Id(:reg_code), _("Registration &Code")))
           )
         ),
         VSpacing(3),
