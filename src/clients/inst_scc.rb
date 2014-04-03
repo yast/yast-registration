@@ -57,7 +57,7 @@ module Yast
       Yast.import "Installation"
       Yast.import "ProductControl"
 
-      @selected_addons = []
+      @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
       initialize_regkeys
 
@@ -193,7 +193,7 @@ module Yast
             Label(info)
           )
         ),
-        VSpacing(2),
+        VSpacing(UI.TextMode ? 1 : 2),
         HSquash(
           VBox(
             MinWidth(33, InputField(Id(:email), _("&Email"), options.email)),
@@ -201,7 +201,7 @@ module Yast
             MinWidth(33, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        VSpacing(3),
+        VSpacing(UI.TextMode ? 1 : 3),
         Mode.normal ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
@@ -285,7 +285,23 @@ module Yast
 
     # create item list (available addons items)
     def addon_selection_items(addons)
-      addons.map{|a| Item(Id(a.product_ident), a.short_name, @selected_addons.include?(a))}
+      box = VBox()
+
+      # whether to add extra spacing in the UI
+      add_extra_spacing = (addons.size < 5) || !UI.TextMode
+
+      addons.each do |addon|
+        label = addon.short_name
+        label << " (#{addon.long_name})" if !addon.long_name.empty?
+
+        box[box.size] = Left(CheckBox(Id(addon.product_ident), Opt(:notify),
+            addon.short_name, @selected_addons.include?(addon)))
+
+        # add extra spacing when there are just few addons, in GUI always
+        box[box.size] = VSpacing(0.7) if add_extra_spacing
+      end
+
+      box
     end
 
     # create content fot the addon selection dialog
@@ -305,38 +321,42 @@ module Yast
         )
       end
 
+      # less lines in textmode to fit 80x25 size
+      lines = UI.TextMode ? 9 : 14
+
+      # use two column layout if needed
+      vbox1 = addon_selection_items(addons[0..(lines - 1)])
+      vbox2 = (addons.size > lines) ? HBox(
+        HSpacing(1),
+        VBox(
+          addon_selection_items(addons[lines..(2*lines - 1)]),
+          VStretch()
+        )
+      ) :
+        Empty()
+
       VBox(
-        VWeight(75, MultiSelectionBox(Id(:addons), Opt(:notify), "",
-            addon_selection_items(addons))),
+        VStretch(),
+        Left(Heading(_("Available Extensions"))),
+        VWeight(75, MarginBox(2, 1, HBox(
+              vbox1,
+              vbox2
+            ))),
+        Left(Label(_("Details"))),
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an addon to show details here") + "<small>")),
+                _("Select an addon to show details here") + "</small>")),
         ),
         media_checkbox,
-        VSpacing(0.4)
+        VSpacing(0.4),
+        VStretch()
       )
     end
 
     # update addon details after changing the current addon in the UI
     def show_addon_details(addon)
-      details = "<p><big><b>#{CGI.escape_html(addon.long_name)}</b></big></p>" +
-        "<p>#{CGI.escape_html(addon.description)}</p>"
-
-      # TODO FIXME: SCC does not support dependencies yet
-      #
-      #  if !addon.depends_on.empty?
-      #    # rich text content: list of required (dependent) addons,
-      #    # %s is a list of product names
-      #    details << (_("<p><b>Required Add-ons:</b> %s</p>") %
-      #    CGI.escape_html(addon.depends_on.map(&:label).join(", ")))
-      #  end
-
-      if !addon.free
-        # rich text content: the selected addon requires a registration key
-        details << _("<p><b>A Registration Key is Required</b></p>")
-      end
-
-      UI.ChangeWidget(Id(:details), :Value, details)
+      # addon description is a rich text
+      UI.ChangeWidget(Id(:details), :Value, addon.description)
       UI.ChangeWidget(Id(:details), :Enabled, true)
     end
 
@@ -359,11 +379,12 @@ module Yast
     end
 
     # check for the maximum amount of reg. codes supported by Yast
-    def supported_addon_count(addons, selected)
+    def supported_addon_count(selected)
       # maximum number or reg codes which can be displayed in two column layout
       max_supported = 2*MAX_REGCODES_PER_COLUMN
 
-      if addons.select{|a| selected.include?(a.product_ident) && !a.free}.size > max_supported
+      # check the addons requiring a reg. code
+      if selected.select{|a| !a.free}.size > max_supported
         Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
         return false
       end
@@ -394,30 +415,32 @@ module Yast
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
 
-        # current item has been changed, refresh details, check dependencies
         case ret
-        when :addons
-          current_addon = UI.QueryWidget(Id(:addons), :CurrentItem)
-
-          if current_addon
-            show_addon_details(addons.find{|addon| addon.product_ident == current_addon})
-            # TODO FIXME: SCC does not support dependencies yet
-            # check_addon_dependencies(addons)
-          end
         when :next
-          selected = UI.QueryWidget(Id(:addons), :SelectedItems)
+          selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
 
-          if !supported_addon_count(addons, selected)
+          if !supported_addon_count(selected)
             ret = nil
             next
           end
 
-          @selected_addons = addons.select{|a| selected.include?(a.product_ident)}
+          @selected_addons = selected
+          ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
           log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
 
           set_media_addons
 
           ret = :skip if @selected_addons.empty?
+        else
+          # check whether it's an add-on ID (checkbox clicked)
+          addon = addons.find{|addon| addon.product_ident == ret}
+
+          # an addon has been changed, refresh details, check dependencies
+          if addon
+            show_addon_details(addon)
+            # TODO FIXME: SCC does not support dependencies yet
+            # check_addon_dependencies(addons)
+          end
         end
       end
 
@@ -429,7 +452,7 @@ module Yast
       addons = get_available_addons
       Wizard.SetContents(
         # dialog title
-        _("Available Products and Extensions"),
+        _("Extension Selection"),
         addon_selection_dialog_content(addons),
         # help text for add-ons installation, %s is URL
         _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
@@ -451,7 +474,7 @@ module Yast
 
       addons.each do |addon|
         label = addon.short_name
-        label << " (#{addon.long_name})" if !addon.long_name.empty?
+        label << " (#{addon.long_name})" unless addon.long_name.empty?
 
         box[box.size] = MinWidth(32, InputField(Id(addon.product_ident), label,
             @known_reg_keys.fetch(addon.product_ident, "")))
