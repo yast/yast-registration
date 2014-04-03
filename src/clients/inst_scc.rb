@@ -672,7 +672,7 @@ module Yast
       log.info "Starting scc sequence"
       Sequencer.Run(aliases, sequence)
     end
-  end
+  end unless defined?(InstSccClient)
 end
 
 Yast::InstSccClient.new.main

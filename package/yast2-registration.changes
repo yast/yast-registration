@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr  3 07:17:20 UTC 2014 - lslezak@suse.cz
+
+- avoid client class redefinition (bnc#871651)
+
+-------------------------------------------------------------------
 Tue Apr  1 16:08:46 UTC 2014 - lslezak@suse.cz
 
 - make the input fields slighly narrow (bnc#864882#c7)

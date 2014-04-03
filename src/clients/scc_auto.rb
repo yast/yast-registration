@@ -512,7 +512,7 @@ module Yast
       Sequencer.Run(aliases, sequence)
     end
 
-  end
+  end unless defined?(SccAutoClient)
 end
 
 Yast::SccAutoClient.new.main
