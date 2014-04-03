@@ -178,7 +178,8 @@ module Yast
     # display the main registration dialog
     def show_scc_credentials_dialog
       Wizard.SetContents(
-        _("SUSE Customer Center Registration"),
+        # dialog title
+        _("Registration"),
         scc_credentials_dialog,
         scc_help_text,
         GetInstArgs.enable_back,
@@ -603,7 +604,7 @@ module Yast
     def display_registered_dialog
       Wizard.SetContents(
         # dialog title
-        _("Registration Status"),
+        _("Registration"),
         registered_dialog,
         # FIXME: help text
         "",
