@@ -103,8 +103,17 @@ module Yast
         when :network
           ::Registration::Helpers::run_network_configuration
         when :next
+          # do not re-register during installation
+          return :next if ::Registration::Registration.is_registered? && !Mode.normal
+
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
+
+          # remember the entered values in case user goes back
+          options = ::Registration::Storage::InstallationOptions.instance
+          options.email = email
+          options.reg_code = reg_code
+
           # reset the user input in case an exception is raised
           ret = nil
 
@@ -187,9 +196,9 @@ orci pellentesque vestibulum. Ut tellus enim, vestibulum eget consequat id,
 scelerisque a justo. Maecenas bibendum, mauris ut cursus pharetra, mi nibh
 ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
             VSpacing(1),
-            MinWidth(33, InputField(Id(:email), _("&Email"))),
+            MinWidth(33, InputField(Id(:email), _("&Email"), options.email)),
             VSpacing(0.5),
-            MinWidth(33, InputField(Id(:reg_code), _("Registration &Code")))
+            MinWidth(33, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
         VSpacing(3),
@@ -214,6 +223,12 @@ ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
         GetInstArgs.enable_back,
         GetInstArgs.enable_next || Mode.normal
       )
+
+      # disable the input fields when already registered
+      if ::Registration::Registration.is_registered?
+        UI.ChangeWidget(Id(:email), :Enabled, false)
+        UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+      end
     end
 
     def repo_items(repos)
@@ -654,9 +669,11 @@ ehicula massa, eu luctus turpis eros eu arcu. Suspendisse iaculis nunc eu."),
     end
 
     def registration_check
-      return :register unless ::Registration::Registration.is_registered?
-
-      display_registered_dialog
+      if Mode.normal && ::Registration::Registration.is_registered?
+        return display_registered_dialog
+      else
+        return :register
+      end
     end
 
     # UI workflow definition

@@ -39,6 +39,16 @@ module Registration
       include Singleton
     end
 
+    # remember the values entered by user
+    class InstallationOptions < Struct.new(:install_updates, :email, :reg_code)
+      include Singleton
+
+      def initialize
+        self.email = ""
+        self.reg_code = ""
+      end
+    end
+
     # AutoYast configuration
     class Config
       include Singleton
