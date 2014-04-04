@@ -116,7 +116,7 @@ module Registration
       # unload them)
       if !Pkg.SourceSaveAll
         # error message
-        raise Registration::PkgError, N_("Saving repository configuration failed.")
+        raise ::Registration::PkgError, N_("Saving repository configuration failed.")
       end
 
       # services for registered products
