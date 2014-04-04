@@ -93,9 +93,8 @@ module Registration
 
     def get_addon_list
       # extensions for base product
-      ::Registration::Storage::BaseProducts.instance.products.reduce([]) do |acc, product|
-        acc.concat(@scc.extensions_for(product["name"]).extensions)
-      end
+      base_product = ::Registration::Storage::BaseProduct.instance.product
+      @scc.extensions_for(base_product["name"]).extensions
     end
 
     def self.is_registered?

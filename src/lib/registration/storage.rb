@@ -35,7 +35,7 @@ module Registration
     end
 
     # remember the registered base product
-    class BaseProducts < Struct.new(:products)
+    class BaseProduct < Struct.new(:product)
       include Singleton
     end
 
