@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr  4 10:56:53 UTC 2014 - lslezak@suse.cz
+
+- fixed undefined method (bnc#872012)
+- 3.1.29
+
+-------------------------------------------------------------------
 Thu Apr  3 07:17:20 UTC 2014 - lslezak@suse.cz
 
 - avoid client class redefinition (bnc#871651)
