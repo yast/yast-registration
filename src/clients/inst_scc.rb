@@ -518,7 +518,7 @@ module Yast
       end
 
       ret = ::Registration::SccHelpers.catch_registration_errors do
-        product_services = ::Registration::Helpers.run_with_feedback(
+        product_services = Popup.Feedback(
           n_("Registering Product...", "Registering Products...", products.size),
           _("Contacting the SUSE Customer Center server")) do
 
