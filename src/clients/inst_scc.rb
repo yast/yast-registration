@@ -517,7 +517,10 @@ module Yast
     # installation workflow
     def get_available_addons
       # cache the available addons
-      return @available_addons if @available_addons
+      if ::Registration::Storage::Cache.instance.available_addons
+        @available_addons = ::Registration::Storage::Cache.instance.available_addons
+        return @available_addons
+      end
 
       @available_addons = Popup.Feedback(
         _("Loading Available Add-on Products and Extensions..."),
@@ -527,6 +530,7 @@ module Yast
       end
 
       log.info "Received product extensions: #{@available_addons}"
+      ::Registration::Storage::Cache.instance.available_addons = @available_addons
       @available_addons
     end
 

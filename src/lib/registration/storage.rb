@@ -51,6 +51,10 @@ module Registration
       end
     end
 
+    class Cache < Struct.new(:available_addons)
+      include Singleton
+    end
+
     # AutoYast configuration
     class Config
       include Singleton
