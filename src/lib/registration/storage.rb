@@ -40,14 +40,15 @@ module Registration
     end
 
     # remember the values entered by user
-    class InstallationOptions < Struct.new(:install_updates, :email,
-        :reg_code, :selected_addons)
+    class InstallationOptions
       include Singleton
 
+      attr_accessor :install_updates, :email, :reg_code, :selected_addons
+
       def initialize
-        self.email = ""
-        self.reg_code = ""
-        self.selected_addons = []
+        @email = ""
+        @reg_code = ""
+        @selected_addons = []
       end
     end
 

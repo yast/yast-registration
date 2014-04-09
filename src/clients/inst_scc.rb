@@ -42,6 +42,9 @@ module Yast
     # this is the limit for 80x25 textmode UI
     MAX_REGCODES_PER_COLUMN = 9
 
+    # width of reg code input field widget
+    REG_CODE_WIDTH = 33
+
     def main
       Yast.import "UI"
 
@@ -104,7 +107,7 @@ module Yast
           ::Registration::Helpers::run_network_configuration
         when :next
           # do not re-register during installation
-          return :next if ::Registration::Registration.is_registered? && !Mode.normal
+          return :next if !Mode.normal && ::Registration::Registration.is_registered?
 
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
@@ -170,7 +173,7 @@ module Yast
           "Access to security and general software updates is only possible on\n" +
           "a registered system.")
 
-      if !Mode.normal || true
+      if !Mode.normal
         # add a paragraph separator
         info << "\n\n"
 
@@ -196,9 +199,9 @@ module Yast
         VSpacing(UI.TextMode ? 1 : 2),
         HSquash(
           VBox(
-            MinWidth(33, InputField(Id(:email), _("&Email"), options.email)),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&Email"), options.email)),
             VSpacing(0.5),
-            MinWidth(33, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
         VSpacing(UI.TextMode ? 1 : 3),
@@ -215,7 +218,6 @@ module Yast
 
     # display the main registration dialog
     def show_scc_credentials_dialog
-      registered = ::Registration::Registration.is_registered?
 
       Wizard.SetContents(
         # dialog title
@@ -226,6 +228,7 @@ module Yast
         GetInstArgs.enable_next || Mode.normal
       )
 
+      registered = ::Registration::Registration.is_registered?
       # disable the input fields when already registered
       if registered && !Mode.normal
         UI.ChangeWidget(Id(:email), :Enabled, false)
@@ -288,17 +291,21 @@ module Yast
       box = VBox()
 
       # whether to add extra spacing in the UI
-      add_extra_spacing = (addons.size < 5) || !UI.TextMode
+      if UI.TextMode
+        add_extra_spacing = addons.size < 5
+      else
+        add_extra_spacing = true
+      end
 
       addons.each do |addon|
         label = addon.short_name
         label << " (#{addon.long_name})" if !addon.long_name.empty?
 
-        box[box.size] = Left(CheckBox(Id(addon.product_ident), Opt(:notify),
+        box.params << Left(CheckBox(Id(addon.product_ident), Opt(:notify),
             addon.short_name, @selected_addons.include?(addon)))
 
         # add extra spacing when there are just few addons, in GUI always
-        box[box.size] = VSpacing(0.7) if add_extra_spacing
+        box.params << VSpacing(0.7) if add_extra_spacing
       end
 
       box
@@ -384,7 +391,7 @@ module Yast
       max_supported = 2*MAX_REGCODES_PER_COLUMN
 
       # check the addons requiring a reg. code
-      if selected.select{|a| !a.free}.size > max_supported
+      if selected.count{|a| !a.free} > max_supported
         Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
         return false
       end
@@ -476,7 +483,7 @@ module Yast
         label = addon.short_name
         label << " (#{addon.long_name})" unless addon.long_name.empty?
 
-        box[box.size] = MinWidth(32, InputField(Id(addon.product_ident), label,
+        box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.product_ident), label,
             @known_reg_keys.fetch(addon.product_ident, "")))
         # add extra spacing when there are just few addons, in GUI always
         box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
@@ -517,10 +524,8 @@ module Yast
     # installation workflow
     def get_available_addons
       # cache the available addons
-      if ::Registration::Storage::Cache.instance.available_addons
-        @available_addons = ::Registration::Storage::Cache.instance.available_addons
-        return @available_addons
-      end
+      @available_addons = ::Registration::Storage::Cache.instance.available_addons
+      return @available_addons if @available_addons
 
       @available_addons = Popup.Feedback(
         _("Loading Available Add-on Products and Extensions..."),
