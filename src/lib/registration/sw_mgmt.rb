@@ -108,9 +108,9 @@ module Registration
 
       # filter out not needed data
       product_info = {
-        "name"    => base_product["name"],
-        "arch"    => base_product["arch"],
-        "version" => ::Registration::Helpers.base_version(base_product["version"]),
+        "name"         => base_product["name"],
+        "arch"         => base_product["arch"],
+        "version"      => ::Registration::Helpers.base_version(base_product["version"]),
         "release_type" => base_product["flavor"]
       }
 
@@ -130,49 +130,50 @@ module Registration
       end
 
       # services for registered products
-      product_services.map(&:services).flatten.each do |service|
-        log.info "Adding service #{service.name.inspect} (#{service.url})"
+      product_services.map(&:sources).flatten.each do |source|
+        log.info "Adding service #{source.name.inspect} (#{source.url})"
 
-        credentials_file = ::Registration::Helpers.credentials_from_url(service.url)
+        credentials_file = Helpers.credentials_from_url(source.url)
 
         if credentials_file
           # TODO FIXME: SCC currenly does not return credentials for the service,
           # just reuse the global credentials and save to a different file
-          credentials.file = credentials_file
-          credentials.write
+          service_credentials = credentials.dup
+          service_credentials.file = credentials_file
+          service_credentials.write
         end
 
         # add a new service or update the existing service
-        if Pkg.ServiceAliases.include?(service.name)
-          log.info "Updating existing service: #{service.name}"
-          if !Pkg.ServiceSet(service.name, {
-                "alias" => service.name,
-                "name" => service.name,
-                "url" => service.url.to_s,
+        if Pkg.ServiceAliases.include?(source.name)
+          log.info "Updating existing service: #{source.name}"
+          if !Pkg.ServiceSet(source.name, {
+                "alias" => source.name,
+                "name" => source.name,
+                "url" => source.url.to_s,
                 "enabled" => true,
                 "autorefresh" => true,
               })
 
             ## error message
-            raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service.name)
+            raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), source.name)
           end
         else
-          log.info "Adding new service: #{service.name}"
-          if !Pkg.ServiceAdd(service.name, service.url.to_s)
+          log.info "Adding new service: #{source.name}"
+          if !Pkg.ServiceAdd(source.name, source.url.to_s)
             # error message
-            raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
+            raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), source.name)
           end
         end
 
         # refresh works only for saved services
-        if !Pkg.ServiceSave(service.name)
+        if !Pkg.ServiceSave(source.name)
           # error message
-          raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), service.name)
+          raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), source.name)
         end
 
-        if !Pkg.ServiceRefresh(service.name)
+        if !Pkg.ServiceRefresh(source.name)
           # error message
-          raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service.name)
+          raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), source.name)
         end
       end
     ensure
@@ -180,7 +181,7 @@ module Registration
     end
 
     # get list of repositories belonging to registered services
-    # @param product_services [Array<SccApi::ProductServices>] added services
+    # @param product_services [Array<SUSE::Connect::Service>] added services
     # @param only_updates [Boolean] return only update repositories
     # @return [Array<Hash>] list of repositories
     def self.service_repos(product_services, only_updates: false)

@@ -22,7 +22,7 @@
 #
 
 require "yast"
-require "scc_api"
+require "suse/connect"
 
 require "registration/helpers"
 require "registration/exceptions"
@@ -43,35 +43,35 @@ module Registration
       begin
         yield
         true
-      rescue SccApi::NoNetworkError
+      rescue SocketError
         # Error popup
-        if Yast::Mode.installation && Yast::Popup.YesNo(
-            _("Network is not configured, the registration server cannot be reached.\n" +
-                "Do you want to configure the network now?") )
-          ::Registration::Helpers::run_network_configuration
+        if Yast::Mode.installation
+          if Yast::Popup.YesNo(
+              _("Network is not configured, the registration server cannot be reached.\n" +
+                  "Do you want to configure the network now?"))
+
+            ::Registration::Helpers::run_network_configuration
+          end
+        else
+          Yast::Report.Error(_("Network error, check the network configuration."))
         end
-        false
-      rescue SccApi::NotAuthorized
-        # Error popup
-        Yast::Report.Error(_("The email address is not known or\nthe registration code is not valid."))
         false
       rescue Timeout::Error
         # Error popup
         Yast::Report.Error(_("Connection time out."))
         false
-      rescue SccApi::ErrorResponse => e
-        # error popup, a generic message when no details are available
-        message = JSON.parse(e.message)["localized_error"] || _("Unknown error")
-        Yast::Report.Error(message)
-        false
-      rescue SccApi::HttpError => e
+      rescue SUSE::Connect::ApiError => e
+        log.error "Received error: #{e.code}: #{e.body}"
         case e.response
+        when Net::HTTPUnauthorized, Net::HTTPUnprocessableEntity
+          # Error popup
+          report_error(_("The email address is not known or\nthe registration code is not valid."), e)
         when Net::HTTPClientError
-          Yast::Report.Error(_("Registration client error."))
+          report_error(_("Registration client error."), e)
         when Net::HTTPServerError
-          Yast::Report.Error(_("Registration server error.\n\nRetry registration later."))
+          report_error(_("Registration server error.\nRetry registration later."), e)
         else
-          Yast::Report.Error(_("Registration failed."))
+          report_error(_("Registration failed."), e)
         end
         false
       rescue ::Registration::ServiceError => e
@@ -87,6 +87,19 @@ module Registration
         Yast::Report.Error(_("Registration failed."))
         false
       end
+    end
+
+    private
+
+    def self.report_error(msg, api_error)
+      localized_error = api_error.body["localized_error"] || ""
+
+      if !localized_error.empty?
+        # %s are error details
+        localized_error = ("\n\n" + _("Details: %s") % localized_error)
+      end
+
+      Yast::Report.Error(msg + localized_error)
     end
 
   end

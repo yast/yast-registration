@@ -23,13 +23,13 @@
 #
 
 # use external rubygem for SCC communication
-require "yast/scc_api"
+require "yast/suse_connect"
 
 require "cgi"
 
 require "registration/exceptions"
 require "registration/helpers"
-require "registration/scc_helpers"
+require "registration/connect_helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/registration"
@@ -119,28 +119,32 @@ module Yast
           @registration = ::Registration::Registration.new(url)
 
           ::Registration::SccHelpers.catch_registration_errors do
+            distro_target = ::Registration::SwMgmt.find_base_product["register_target"]
 
             if !::Registration::Registration.is_registered?
+              log.info "Registering system, distro_target: #{distro_target}"
+
               Popup.Feedback(_("Registering the System..."),
                 _("Contacting the SUSE Customer Center server")) do
 
-                @registration.register(email, reg_code)
+                @registration.register(email, reg_code, distro_target)
               end
             end
 
             if !options.base_registered
               # then register the product(s)
-              base_product = ::Registration::SwMgmt.base_product_to_register
               product_services = Popup.Feedback(
                 _("Registering Product..."),
                 _("Contacting the SUSE Customer Center server")) do
 
+                base_product = ::Registration::SwMgmt.base_product_to_register
+                base_product["reg_code"] = reg_code
                 @registration.register_products([base_product])
-              end
 
-              # remember the base products for later (to get the respective addons)
-              ::Registration::Storage::BaseProduct.instance.product = base_product
-              options.base_registered = true
+                # remember the base products for later (to get the respective addons)
+                ::Registration::Storage::BaseProduct.instance.product = base_product
+                options.base_registered = true
+              end
 
               # select repositories to use in installation (e.g. enable/disable Updates)
               select_repositories(product_services) if Mode.installation

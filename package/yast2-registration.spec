@@ -31,15 +31,14 @@ Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 2.17.20
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
-# SCC API library
-Requires:       rubygem-scc_api >= 0.2.9
+Requires:       rubygem-suse-connect
 Requires:       yast2-slp >= 3.1.2
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
-BuildRequires:  rubygem-scc_api >= 0.2.9
+BuildRequires:  rubygem-suse-connect
 BuildRequires:  yast2-slp >= 3.1.2
 
 BuildArch:      noarch
@@ -74,7 +73,7 @@ Authors:
 %{yast_schemadir}/autoyast/rnc/*.rnc
 %{yast_libdir}/registration
 %{yast_libdir}/yast
-%{yast_libdir}/yast/scc_api.rb
+%{yast_libdir}/yast/suse_connect.rb
 %doc %{yast_docdir}
 
 %changelog

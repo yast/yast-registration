@@ -22,10 +22,10 @@
 #
 # ***************************************************************************
 #
-# Summary: SCC API initialization
+# Summary: SUSE Connect API initialization
 #
 
-require "scc_api"
-require "yast/logger"
+require "suse/connect"
+require "yast/y2logger"
 
-SccApi::GlobalLogger.instance.log = Yast::Y2Logger.instance
+SUSE::Connect::GlobalLogger.instance.log = Yast::Y2Logger.instance
