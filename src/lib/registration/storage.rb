@@ -35,7 +35,24 @@ module Registration
     end
 
     # remember the registered base product
-    class BaseProducts < Struct.new(:products)
+    class BaseProduct < Struct.new(:product)
+      include Singleton
+    end
+
+    # remember the values entered by user
+    class InstallationOptions
+      include Singleton
+
+      attr_accessor :install_updates, :email, :reg_code, :selected_addons
+
+      def initialize
+        @email = ""
+        @reg_code = ""
+        @selected_addons = []
+      end
+    end
+
+    class Cache < Struct.new(:available_addons)
       include Singleton
     end
 

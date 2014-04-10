@@ -42,6 +42,9 @@ module Yast
     # this is the limit for 80x25 textmode UI
     MAX_REGCODES_PER_COLUMN = 9
 
+    # width of reg code input field widget
+    REG_CODE_WIDTH = 33
+
     def main
       Yast.import "UI"
 
@@ -57,7 +60,7 @@ module Yast
       Yast.import "Installation"
       Yast.import "ProductControl"
 
-      @selected_addons = []
+      @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
       initialize_regkeys
 
@@ -103,8 +106,17 @@ module Yast
         when :network
           ::Registration::Helpers::run_network_configuration
         when :next
+          # do not re-register during installation
+          return :next if !Mode.normal && ::Registration::Registration.is_registered?
+
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
+
+          # remember the entered values in case user goes back
+          options = ::Registration::Storage::InstallationOptions.instance
+          options.email = email
+          options.reg_code = reg_code
+
           # reset the user input in case an exception is raised
           ret = nil
 
@@ -119,16 +131,16 @@ module Yast
             end
 
             # then register the product(s)
-            products = ::Registration::SwMgmt.base_products_to_register
+            base_product = ::Registration::SwMgmt.base_product_to_register
             product_services = Popup.Feedback(
-              n_("Registering Product...", "Registering Products...", products.size),
+              _("Registering Product..."),
               _("Contacting the SUSE Customer Center server")) do
 
-              @registration.register_products(products)
+              @registration.register_products([base_product])
             end
 
             # remember the base products for later (to get the respective addons)
-            ::Registration::Storage::BaseProducts.instance.products = products
+            ::Registration::Storage::BaseProduct.instance.product = base_product
 
             # select repositories to use in installation (e.g. enable/disable Updates)
             select_repositories(product_services) if Mode.installation
@@ -145,26 +157,55 @@ module Yast
 
     # content for the main registration dialog
     def scc_credentials_dialog
+      base_product = ::Registration::SwMgmt.find_base_product
+      base_product_name = base_product["display_name"] ||
+        base_product["short_name"] ||
+        base_product["name"] ||
+        _("Unknown product")
+
+      options = ::Registration::Storage::InstallationOptions.instance
+
+      # TODO FIXME: still not the final text
+      # label text describing the registration (1/2)
+      # use \n to split to more lines if needed (use max. 76 chars/line)
+      info = _("Please enter a registration or evaluation code for this product and your\n" +
+          "User Name/EMail from the SUSE Customer Center in the fields below.\n" +
+          "Access to security and general software updates is only possible on\n" +
+          "a registered system.")
+
+      if !Mode.normal
+        # add a paragraph separator
+        info << "\n\n"
+
+        # label text describing the registration (2/2),
+        # not displayed in installed system
+        # use \n to split to more lines if needed (use max. 76 chars/line)
+        info << _("If you skip the registration now be sure to do so in the installed system.")
+      end
+
       VBox(
         Mode.installation ?
           Right(PushButton(Id(:network), _("Network Configuration..."))) :
           Empty(),
         VStretch(),
-        HBox(
-          Frame(_("SUSE Customer Center Credentials"),
-            MarginBox(1, 0.5,
-              HSquash(
-                VBox(
-                  MinWidth(33, InputField(Id(:email), _("&Email"))),
-                  VSpacing(0.5),
-                  MinWidth(33, InputField(Id(:reg_code), _("Registration &Code")))
-                )
-              )
-            )
+        HSquash(
+          VBox(
+            VSpacing(1),
+            Left(Heading(base_product_name)),
+            VSpacing(1),
+            Label(info)
           )
         ),
-        VSpacing(3),
-        PushButton(Id(:skip), _("&Skip Registration")),
+        VSpacing(UI.TextMode ? 1 : 2),
+        HSquash(
+          VBox(
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&Email"), options.email)),
+            VSpacing(0.5),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
+          )
+        ),
+        VSpacing(UI.TextMode ? 1 : 3),
+        Mode.normal ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
     end
@@ -177,13 +218,22 @@ module Yast
 
     # display the main registration dialog
     def show_scc_credentials_dialog
+
       Wizard.SetContents(
-        _("SUSE Customer Center Registration"),
+        # dialog title
+        _("Registration"),
         scc_credentials_dialog,
         scc_help_text,
         GetInstArgs.enable_back,
         GetInstArgs.enable_next || Mode.normal
       )
+
+      registered = ::Registration::Registration.is_registered?
+      # disable the input fields when already registered
+      if registered && !Mode.normal
+        UI.ChangeWidget(Id(:email), :Enabled, false)
+        UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+      end
     end
 
     def repo_items(repos)
@@ -238,7 +288,27 @@ module Yast
 
     # create item list (available addons items)
     def addon_selection_items(addons)
-      addons.map{|a| Item(Id(a.product_ident), a.short_name, @selected_addons.include?(a))}
+      box = VBox()
+
+      # whether to add extra spacing in the UI
+      if UI.TextMode
+        add_extra_spacing = addons.size < 5
+      else
+        add_extra_spacing = true
+      end
+
+      addons.each do |addon|
+        label = addon.short_name
+        label << " (#{addon.long_name})" if !addon.long_name.empty?
+
+        box.params << Left(CheckBox(Id(addon.product_ident), Opt(:notify),
+            addon.short_name, @selected_addons.include?(addon)))
+
+        # add extra spacing when there are just few addons, in GUI always
+        box.params << VSpacing(0.7) if add_extra_spacing
+      end
+
+      box
     end
 
     # create content fot the addon selection dialog
@@ -258,38 +328,42 @@ module Yast
         )
       end
 
+      # less lines in textmode to fit 80x25 size
+      lines = UI.TextMode ? 9 : 14
+
+      # use two column layout if needed
+      vbox1 = addon_selection_items(addons[0..(lines - 1)])
+      vbox2 = (addons.size > lines) ? HBox(
+        HSpacing(1),
+        VBox(
+          addon_selection_items(addons[lines..(2*lines - 1)]),
+          VStretch()
+        )
+      ) :
+        Empty()
+
       VBox(
-        VWeight(75, MultiSelectionBox(Id(:addons), Opt(:notify), "",
-            addon_selection_items(addons))),
+        VStretch(),
+        Left(Heading(_("Available Extensions"))),
+        VWeight(75, MarginBox(2, 1, HBox(
+              vbox1,
+              vbox2
+            ))),
+        Left(Label(_("Details"))),
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an addon to show details here") + "<small>")),
+                _("Select an addon to show details here") + "</small>")),
         ),
         media_checkbox,
-        VSpacing(0.4)
+        VSpacing(0.4),
+        VStretch()
       )
     end
 
     # update addon details after changing the current addon in the UI
     def show_addon_details(addon)
-      details = "<p><big><b>#{CGI.escape_html(addon.long_name)}</b></big></p>" +
-        "<p>#{CGI.escape_html(addon.description)}</p>"
-
-      # TODO FIXME: SCC does not support dependencies yet
-      #
-      #  if !addon.depends_on.empty?
-      #    # rich text content: list of required (dependent) addons,
-      #    # %s is a list of product names
-      #    details << (_("<p><b>Required Add-ons:</b> %s</p>") %
-      #    CGI.escape_html(addon.depends_on.map(&:label).join(", ")))
-      #  end
-
-      if !addon.free
-        # rich text content: the selected addon requires a registration key
-        details << _("<p><b>A Registration Key is Required</b></p>")
-      end
-
-      UI.ChangeWidget(Id(:details), :Value, details)
+      # addon description is a rich text
+      UI.ChangeWidget(Id(:details), :Value, addon.description)
       UI.ChangeWidget(Id(:details), :Enabled, true)
     end
 
@@ -312,11 +386,12 @@ module Yast
     end
 
     # check for the maximum amount of reg. codes supported by Yast
-    def supported_addon_count(addons, selected)
+    def supported_addon_count(selected)
       # maximum number or reg codes which can be displayed in two column layout
       max_supported = 2*MAX_REGCODES_PER_COLUMN
 
-      if addons.select{|a| selected.include?(a.product_ident) && !a.free}.size > max_supported
+      # check the addons requiring a reg. code
+      if selected.count{|a| !a.free} > max_supported
         Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
         return false
       end
@@ -347,30 +422,32 @@ module Yast
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
 
-        # current item has been changed, refresh details, check dependencies
         case ret
-        when :addons
-          current_addon = UI.QueryWidget(Id(:addons), :CurrentItem)
-
-          if current_addon
-            show_addon_details(addons.find{|addon| addon.product_ident == current_addon})
-            # TODO FIXME: SCC does not support dependencies yet
-            # check_addon_dependencies(addons)
-          end
         when :next
-          selected = UI.QueryWidget(Id(:addons), :SelectedItems)
+          selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
 
-          if !supported_addon_count(addons, selected)
+          if !supported_addon_count(selected)
             ret = nil
             next
           end
 
-          @selected_addons = addons.select{|a| selected.include?(a.product_ident)}
+          @selected_addons = selected
+          ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
           log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
 
           set_media_addons
 
           ret = :skip if @selected_addons.empty?
+        else
+          # check whether it's an add-on ID (checkbox clicked)
+          addon = addons.find{|addon| addon.product_ident == ret}
+
+          # an addon has been changed, refresh details, check dependencies
+          if addon
+            show_addon_details(addon)
+            # TODO FIXME: SCC does not support dependencies yet
+            # check_addon_dependencies(addons)
+          end
         end
       end
 
@@ -382,7 +459,7 @@ module Yast
       addons = get_available_addons
       Wizard.SetContents(
         # dialog title
-        _("Available Products and Extensions"),
+        _("Extension Selection"),
         addon_selection_dialog_content(addons),
         # help text for add-ons installation, %s is URL
         _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
@@ -404,9 +481,9 @@ module Yast
 
       addons.each do |addon|
         label = addon.short_name
-        label << " (#{addon.long_name})" if !addon.long_name.empty?
+        label << " (#{addon.long_name})" unless addon.long_name.empty?
 
-        box[box.size] = MinWidth(32, InputField(Id(addon.product_ident), label,
+        box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.product_ident), label,
             @known_reg_keys.fetch(addon.product_ident, "")))
         # add extra spacing when there are just few addons, in GUI always
         box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
@@ -447,6 +524,7 @@ module Yast
     # installation workflow
     def get_available_addons
       # cache the available addons
+      @available_addons = ::Registration::Storage::Cache.instance.available_addons
       return @available_addons if @available_addons
 
       @available_addons = Popup.Feedback(
@@ -457,6 +535,7 @@ module Yast
       end
 
       log.info "Received product extensions: #{@available_addons}"
+      ::Registration::Storage::Cache.instance.available_addons = @available_addons
       @available_addons
     end
 
@@ -603,7 +682,7 @@ module Yast
     def display_registered_dialog
       Wizard.SetContents(
         # dialog title
-        _("Registration Status"),
+        _("Registration"),
         registered_dialog,
         # FIXME: help text
         "",
@@ -624,9 +703,11 @@ module Yast
     end
 
     def registration_check
-      return :register unless ::Registration::Registration.is_registered?
-
-      display_registered_dialog
+      if Mode.normal && ::Registration::Registration.is_registered?
+        return display_registered_dialog
+      else
+        return :register
+      end
     end
 
     # UI workflow definition
