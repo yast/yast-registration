@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Apr 10 08:43:48 UTC 2014 - lslezak@suse.cz
+
+- ask simple Yes/No for installing online updates (instead of
+  complex repository selection)
+- 3.1.31
+
+-------------------------------------------------------------------
 Tue Apr  8 16:05:20 UTC 2014 - lslezak@suse.cz
 
 - redesiged addon selection dialog
