@@ -152,7 +152,10 @@ module Registration
     end
 
     # get list of repositories belonging to registered services
-    def self.service_repos(product_services)
+    # @param product_services [Array<SccApi::ProductServices>] added services
+    # @param only_updates [Boolean] return only update repositories
+    # @return [Array<Hash>] list of repositories
+    def self.service_repos(product_services, only_updates: false)
       repo_data = Pkg.SourceGetCurrent(false).map do |repo|
         data = Pkg.SourceGeneralData(repo)
         data["SrcId"] = repo
@@ -166,7 +169,29 @@ module Registration
       repos = repo_data.select{|repo| service_names.include?(repo["service"])}
       log.info "Service repositories: #{repos}"
 
+      if only_updates
+        # TODO FIXME: curently just check the name,
+        # later use a new libzypp flag for detecting update repos
+        repos.select!{|repo| repo["name"].match(/update/i)}
+      end
+
       repos
+    end
+
+    # Set repository state (enabled/disabled)
+    # @param repos [Array<Hash>] list of repositories
+    # @param repos [Boolean] true = enable, false = disable, nil = no change
+    # @return [void]
+    def self.set_repos_state(repos, enabled)
+      # keep the defaults when not defined
+      return if enabled.nil?
+
+      repos.each do |repo|
+        if repo["enabled"] != enabled
+          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
+          Pkg.SourceSetEnabled(repo["SrcId"], enabled)
+        end
+      end
     end
 
   end
