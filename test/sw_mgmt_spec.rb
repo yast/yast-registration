@@ -14,9 +14,10 @@ describe "Registration::SwMgmt" do
   end
 
   describe ".service_repos" do
-    it "returns list of repositories belonging to a service" do
-      service_name = "SLES"
-      repos = {
+    let(:services) { double }
+    let(:service_name) { "SLES" }
+    let(:repos) do
+      {
         # installation repository, not from registration
         0 => {
           "alias"=>"SLES12", "autorefresh"=>false,
@@ -54,18 +55,36 @@ describe "Registration::SwMgmt" do
           "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
         }
       }
+    end
 
+    before do
       service = double
       expect(service).to receive(:name).and_return(service_name)
-      services = double
       expect(services).to receive(:services).and_return([service])
 
       expect(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
         expect(yast_pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
       end
+    end
 
+    it "returns list of repositories belonging to a service" do
       expect(Registration::SwMgmt.service_repos([services])).to eq([repos[1], repos[2]])
+    end
+
+    it "optionally returns only update repositories" do
+      expect(Registration::SwMgmt.service_repos([services], only_updates: true)).to eq([repos[2]])
+    end
+  end
+
+  describe ".base_product_to_register" do
+    it "returns base product base version and release_type" do
+      expect(Registration::SwMgmt).to receive(:find_base_product)
+        .and_return({"name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47",
+            "flavor" => "DVD"})
+
+      expect(Registration::SwMgmt.base_product_to_register).to eq({"name" => "SLES",
+          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD"})
     end
   end
 
