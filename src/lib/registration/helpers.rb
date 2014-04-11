@@ -84,7 +84,7 @@ module Registration
     # "service:registration.suse:smt:https://scc.suse.com/connect" ->
     # "https://scc.suse.com/connect"
     def self.service_url(service)
-      service.sub(/\Aservice:#{SLP_SERVICE}:[^:]+:/, "")
+      service.sub(/\Aservice:#{Regexp.escape(SLP_SERVICE)}:[^:]+:/, "")
     end
 
     # return "credentials" parameter from URL
