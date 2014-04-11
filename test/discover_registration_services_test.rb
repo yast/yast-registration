@@ -38,7 +38,7 @@ describe "discover_registration_services client" do
       slp_attributes = double
       allow(slp_attributes).to receive(:to_h).and_return({:description => "Description"})
       allow(slp_service).to receive(:attributes).and_return(slp_attributes)
-      allow(slp_service).to receive(:slp_url).and_return("service:susemanager:#{slp_url}")
+      allow(slp_service).to receive(:slp_url).and_return("service:registration.suse:manager:#{slp_url}")
       allow(slpservice).to receive(:all).and_return([slp_service])
     end
 

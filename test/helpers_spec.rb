@@ -98,8 +98,10 @@ describe "Registration::Helpers" do
   describe ".service_url" do
     it "converts a SLP service to plain URL" do
       url = "https://example.com/registration"
-      service = "service:susemanager:#{url}"
-      expect(Registration::Helpers.service_url(service)).to eq(url)
+      service1 = "service:registration.suse:manager:#{url}"
+      service2 = "service:registration.suse:smt:#{url}"
+      expect(Registration::Helpers.service_url(service1)).to eq(url)
+      expect(Registration::Helpers.service_url(service2)).to eq(url)
     end
   end
 
@@ -110,7 +112,7 @@ describe "Registration::Helpers" do
 
     before do
       expect(slp_service).to receive(:attributes).and_return(slp_attributes)
-      expect(slp_service).to receive(:slp_url).and_return("service:susemanager:#{slp_url}")
+      expect(slp_service).to receive(:slp_url).and_return("service:registration.suse:manager:#{slp_url}")
     end
 
     it "creates a label with description and url" do

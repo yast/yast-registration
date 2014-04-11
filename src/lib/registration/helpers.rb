@@ -41,12 +41,8 @@ module Registration
     # name of the boot parameter
     BOOT_PARAM = "reg_url"
 
-    REGISTRATION_SERVICES = {
-      'susemanager' => 'SUSE Manager'
-    }
-
-    SUPPORTED_SERVICES = REGISTRATION_SERVICES.keys
-
+    # SLP service name
+    SLP_SERVICE = "registration.suse"
 
     # Get the language for using in HTTP requests (in "Accept-Language" header)
     def self.language
@@ -85,10 +81,10 @@ module Registration
     end
 
     # convert service URL to plain URL, remove the SLP service prefix
-    # "service:susemanager:https://scc.suse.com/connect" ->
+    # "service:registration.suse:smt:https://scc.suse.com/connect" ->
     # "https://scc.suse.com/connect"
     def self.service_url(service)
-      service.sub(/\Aservice:[^:]+:/, "")
+      service.sub(/\Aservice:#{Regexp.escape(SLP_SERVICE)}:[^:]+:/, "")
     end
 
     # return "credentials" parameter from URL
@@ -105,7 +101,7 @@ module Registration
     # @param service [Yast::SlpServiceClass::Service] SLP service
     # @return [String] label
     def self.service_description(service)
-      url  = Registration::Helpers.service_url(service.slp_url)
+      url  = service_url(service.slp_url)
       descr = service.attributes.to_h[:description]
 
       # display URL and the description if it is present
@@ -190,10 +186,8 @@ module Registration
     def self.slp_discovery
       services = []
 
-      SUPPORTED_SERVICES.each do |service_name|
-        log.info "Searching for #{service_name} SLP services"
-        services.concat(Yast::SlpService.all(service_name))
-      end
+      log.info "Searching for #{SLP_SERVICE} SLP services"
+      services.concat(Yast::SlpService.all(SLP_SERVICE))
 
       log.debug "Found services: #{services.inspect}"
       log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
