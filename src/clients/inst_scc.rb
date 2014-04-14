@@ -558,9 +558,8 @@ module Yast
         {
           "name" => a.product_ident,
           "reg_key" => @known_reg_keys[a.product_ident],
-          # TODO FIXME: not handled by SCC yet
-          "arch" => nil,
-          "version" => nil
+          "arch" => a.arch,
+          "version" => a.version
         }
       end
 
