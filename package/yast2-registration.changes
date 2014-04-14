@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr 14 10:52:16 UTC 2014 - lslezak@suse.cz
+
+- pass also "release_type" product parameter (bnc#873194)
+- 3.1.33
+
+-------------------------------------------------------------------
 Fri Apr 11 12:14:04 UTC 2014 - lslezak@suse.cz
 
 - use generic SLP service name for both SMT and SUSE Manager

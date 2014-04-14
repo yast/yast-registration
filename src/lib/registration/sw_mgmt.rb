@@ -101,7 +101,8 @@ module Registration
       product_info = {
         "name"    => base_product["name"],
         "arch"    => base_product["arch"],
-        "version" => base_product["version"]
+        "version" => base_product["version"],
+        "release_type" => base_product["flavor"]
       }
 
       log.info("Base product to register: #{product_info}")
