@@ -106,14 +106,16 @@ module Yast
         when :network
           ::Registration::Helpers::run_network_configuration
         when :next
+          options = ::Registration::Storage::InstallationOptions.instance
+
           # do not re-register during installation
-          return :next if !Mode.normal && ::Registration::Registration.is_registered?
+          return :next if !Mode.normal && ::Registration::Registration.is_registered? &&
+            options.base_registered
 
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
 
           # remember the entered values in case user goes back
-          options = ::Registration::Storage::InstallationOptions.instance
           options.email = email
           options.reg_code = reg_code
 
@@ -124,26 +126,32 @@ module Yast
           @registration = ::Registration::Registration.new(url)
 
           ::Registration::SccHelpers.catch_registration_errors do
-            Popup.Feedback(_("Registering the System..."),
-              _("Contacting the SUSE Customer Center server")) do
 
-              @registration.register(email, reg_code)
+            if !::Registration::Registration.is_registered?
+              Popup.Feedback(_("Registering the System..."),
+                _("Contacting the SUSE Customer Center server")) do
+
+                @registration.register(email, reg_code)
+              end
             end
 
-            # then register the product(s)
-            base_product = ::Registration::SwMgmt.base_product_to_register
-            product_services = Popup.Feedback(
-              _("Registering Product..."),
-              _("Contacting the SUSE Customer Center server")) do
+            if !options.base_registered
+              # then register the product(s)
+              base_product = ::Registration::SwMgmt.base_product_to_register
+              product_services = Popup.Feedback(
+                _("Registering Product..."),
+                _("Contacting the SUSE Customer Center server")) do
 
-              @registration.register_products([base_product])
+                @registration.register_products([base_product])
+              end
+
+              # remember the base products for later (to get the respective addons)
+              ::Registration::Storage::BaseProduct.instance.product = base_product
+              options.base_registered = true
+
+              # select repositories to use in installation (e.g. enable/disable Updates)
+              select_repositories(product_services) if Mode.installation
             end
-
-            # remember the base products for later (to get the respective addons)
-            ::Registration::Storage::BaseProduct.instance.product = base_product
-
-            # select repositories to use in installation (e.g. enable/disable Updates)
-            select_repositories(product_services) if Mode.installation
 
             return :next
           end
@@ -247,8 +255,8 @@ module Yast
       if options.install_updates.nil?
         options.install_updates = Popup.YesNo(
           _("Registration added some update repositories.\n\n" +
-            "Do you want to install the latest available\n" +
-            "on-line updates during installation?"))
+              "Do you want to install the latest available\n" +
+              "on-line updates during installation?"))
       end
 
       ::Registration::SwMgmt.set_repos_state(updates, options.install_updates)

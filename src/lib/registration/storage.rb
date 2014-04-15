@@ -43,12 +43,13 @@ module Registration
     class InstallationOptions
       include Singleton
 
-      attr_accessor :install_updates, :email, :reg_code, :selected_addons
+      attr_accessor :install_updates, :email, :reg_code, :selected_addons, :base_registered
 
       def initialize
         @email = ""
         @reg_code = ""
         @selected_addons = []
+        @base_registered = false
       end
     end
 
