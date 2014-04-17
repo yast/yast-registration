@@ -681,6 +681,13 @@ module Yast
     end
 
     def registration_check
+      # check the base product at start to avoid problems later
+      if ::Registration::SwMgmt.find_base_product.nil?
+        # error message
+        Report.Error(_("The base product was not found,\ncheck your system."))
+        return Mode.normal ? :abort : :auto
+      end
+
       if Mode.normal && ::Registration::Registration.is_registered?
         return display_registered_dialog
       else
@@ -702,6 +709,7 @@ module Yast
       sequence = {
         "ws_start" => "check",
         "check" => {
+          :auto     => :auto,
           :abort    => :abort,
           :cancel   => :abort,
           :register => "register",
