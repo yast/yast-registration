@@ -109,8 +109,11 @@ module Yast
           options = ::Registration::Storage::InstallationOptions.instance
 
           # do not re-register during installation
-          return :next if !Mode.normal && ::Registration::Registration.is_registered? &&
-            options.base_registered
+          if !Mode.normal && ::Registration::Registration.is_registered? &&
+              options.base_registered
+
+            return :next
+          end
 
           email = UI.QueryWidget(:email, :Value)
           reg_code = UI.QueryWidget(:reg_code, :Value)
