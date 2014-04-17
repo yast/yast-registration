@@ -77,17 +77,7 @@ module Yast
         return
       end
 
-      if !Mode.normal
-        # read registration codes from USB media
-        log.info "Reading codes from USB media..."
-        # TODO FIXME: placeholder for FATE#316796 (https://fate.suse.com/316796)
-        # read the codes here, return Hash with mapping product_name => reg_code
-        @known_reg_codes = {}
-        log.info "Found #{@known_reg_codes.size} codes"
-      else
-        log.info "Initializing empty known reg codes"
-        @known_reg_codes = {}
-      end
+      @known_reg_codes = {}
 
       # cache the values
       ::Registration::Storage::RegCodes.instance.reg_codes = @known_reg_codes
