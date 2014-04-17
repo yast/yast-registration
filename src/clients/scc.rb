@@ -45,7 +45,7 @@ module Yast
         CommandLine.Run(cmdline_description)
       else
         Wizard.CreateDialog
-        ::Registration::SwMgmt.init
+        return false unless ::Registration::SwMgmt.init
 
         begin
           return WFM.call("inst_scc")
