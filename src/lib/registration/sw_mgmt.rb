@@ -31,6 +31,7 @@ require "registration/exceptions"
 module Registration
   Yast.import "Mode"
   Yast.import "Pkg"
+  Yast.import "PackageLock"
   Yast.import "Installation"
   Yast.import "PackageCallbacksInit"
 
@@ -44,6 +45,10 @@ module Registration
     ZYPP_DIR = "/etc/zypp"
 
     def self.init
+      # false = do not allow continuing without the libzypp lock
+      lock = PackageLock.Connect(false)
+      return false unless lock["connected"]
+
       # display progress when refreshing repositories
       PackageCallbacksInit.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
