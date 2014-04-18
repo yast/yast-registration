@@ -54,6 +54,7 @@ module Registration
       PackageCallbacksInit.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
+      Pkg.SourceRestore
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
@@ -99,7 +100,9 @@ module Registration
 
     def self.base_product_to_register
       # just for debugging:
-      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12"}
+      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+      #   "release_type" => "DVD"
+      # }
 
       base_product = find_base_product
 
@@ -139,10 +142,28 @@ module Registration
           credentials.write
         end
 
-        if !Pkg.ServiceAdd(service.name, service.url.to_s)
-          # error message
-          raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
+        # add a new service or update the existing service
+        if Pkg.ServiceAliases.include?(service.name)
+          log.info "Updating existing service: #{service.name}"
+          if !Pkg.ServiceSet(service.name, {
+                "alias" => service.name,
+                "name" => service.name,
+                "url" => service.url.to_s,
+                "enabled" => true,
+                "autorefresh" => true,
+              })
+
+            ## error message
+            raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service.name)
+          end
+        else
+          log.info "Adding new service: #{service.name}"
+          if !Pkg.ServiceAdd(service.name, service.url.to_s)
+            # error message
+            raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service.name)
+          end
         end
+
         # refresh works only for saved services
         if !Pkg.ServiceSave(service.name)
           # error message

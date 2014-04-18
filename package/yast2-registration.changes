@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr 18 10:00:40 UTC 2014 - lslezak@suse.cz
+
+- do not fail if the service already exists (bnc#873198)
+- 3.1.37
+
+-------------------------------------------------------------------
 Thu Apr 18 08:42:01 UTC 2014 - lslezak@suse.cz
 
 - send base product base version (i.e. remove build suffix from the
