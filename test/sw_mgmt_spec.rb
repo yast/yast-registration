@@ -3,6 +3,8 @@
 require_relative "spec_helper"
 require_relative "yast_stubs"
 
+require "scc_api"
+
 describe "Registration::SwMgmt" do
   let(:yast_pkg) { double("Yast::Pkg") }
 
@@ -79,12 +81,39 @@ describe "Registration::SwMgmt" do
 
   describe ".base_product_to_register" do
     it "returns base product base version and release_type" do
-      expect(Registration::SwMgmt).to receive(:find_base_product)
-        .and_return({"name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47",
-            "flavor" => "DVD"})
+      expect(Registration::SwMgmt).to(receive(:find_base_product)
+        .and_return({"name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47", "flavor" => "DVD"}))
 
       expect(Registration::SwMgmt.base_product_to_register).to eq({"name" => "SLES",
           "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD"})
+    end
+  end
+
+  describe ".add_services" do
+    let(:service_url) { "https://example.com/foo/bar?credentials=TEST_credentials" }
+    let(:credentials) { SccApi::Credentials.new("user", "password", "file") }
+    let(:product_services) do
+      service = SccApi::Service.new("test", service_url)
+      SccApi::ProductServices.new([service], [], [])
+    end
+
+    before do
+      expect(yast_pkg).to receive(:SourceSaveAll).and_return(true).twice
+      expect(yast_pkg).to receive(:ServiceRefresh).with("test").and_return(true)
+      expect(yast_pkg).to receive(:ServiceSave).with("test").and_return(true)
+      expect(credentials).to receive(:write)
+    end
+
+    it "it creates a new service if the service does not exist yet" do
+      expect(yast_pkg).to receive(:ServiceAliases).and_return([])
+      expect(yast_pkg).to receive(:ServiceAdd).with("test", service_url).and_return(true)
+      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
+    end
+
+    it "updates the existing service if the service already exists" do
+      expect(yast_pkg).to receive(:ServiceAliases).and_return(["test"])
+      expect(yast_pkg).to receive(:ServiceSet).with("test", hash_including("url" => service_url)).and_return(true)
+      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
     end
   end
 

@@ -21,6 +21,7 @@ describe "scc client" do
     expect(Yast::Wizard).to receive(:CloseDialog)
 
     expect(Registration::SwMgmt).to receive(:init).and_return(true)
+    expect(Registration::SwMgmt).to receive(:find_base_product).and_return("name" => "SLES")
   end
 
   context "the system is already registered" do
