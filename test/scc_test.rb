@@ -20,7 +20,7 @@ describe "scc client" do
     expect(Yast::Wizard).to receive(:CreateDialog)
     expect(Yast::Wizard).to receive(:CloseDialog)
 
-    expect(Registration::SwMgmt).to receive(:init)
+    expect(Registration::SwMgmt).to receive(:init).and_return(true)
   end
 
   context "the system is already registered" do
