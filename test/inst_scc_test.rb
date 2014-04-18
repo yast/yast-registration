@@ -15,6 +15,7 @@ describe "inst_scc client" do
     allow(Yast::UI).to receive(:ChangeWidget)
     allow(Yast::UI).to receive(:SetFocus)
     allow(Yast::UI).to receive(:ReplaceWidget)
+    expect(Registration::SwMgmt).to receive(:find_base_product).and_return("name" => "SLES")
   end
 
   context "the system is already registered" do
