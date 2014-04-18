@@ -104,26 +104,16 @@ describe "Registration::SwMgmt" do
       expect(credentials).to receive(:write)
     end
 
-    context "service does not exist yet" do
-      before do
-        expect(yast_pkg).to receive(:ServiceAliases).and_return([])
-      end
-
-      it "creates a new service" do
-        expect(yast_pkg).to receive(:ServiceAdd).with("test", service_url).and_return(true)
-        expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
-      end
+    it "it creates a new service if the service does not exist yet" do
+      expect(yast_pkg).to receive(:ServiceAliases).and_return([])
+      expect(yast_pkg).to receive(:ServiceAdd).with("test", service_url).and_return(true)
+      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
     end
 
-    context "service already exists" do
-      before do
-        expect(yast_pkg).to receive(:ServiceAliases).and_return(["test"])
-      end
-
-      it "updates the existing service" do
-        expect(yast_pkg).to receive(:ServiceSet).with("test", hash_including("url" => service_url)).and_return(true)
-        expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
-      end
+    it "updates the existing service if the service already exists" do
+      expect(yast_pkg).to receive(:ServiceAliases).and_return(["test"])
+      expect(yast_pkg).to receive(:ServiceSet).with("test", hash_including("url" => service_url)).and_return(true)
+      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
     end
   end
 
