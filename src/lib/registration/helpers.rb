@@ -113,6 +113,14 @@ module Registration
       Yast::WFM.call("inst_lan", [{"skip_detection" => true}])
     end
 
+    # return base version
+    # "12-1.47" => "12"
+    # "12-1" => "12"
+    # "12.1-1.47" => "12.1"
+    # "12.1-1" => "12.1"
+    def self.base_version(version)
+      version.sub(/-.*\z/, "")
+    end
 
     private
 

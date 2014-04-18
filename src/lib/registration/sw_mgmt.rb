@@ -27,6 +27,7 @@ require "tmpdir"
 require "fileutils"
 
 require "registration/exceptions"
+require "registration/helpers"
 
 module Registration
   Yast.import "Mode"
@@ -98,7 +99,7 @@ module Registration
 
     def self.base_product_to_register
       # just for debugging:
-      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12-1.47"}
+      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12"}
 
       base_product = find_base_product
 
@@ -106,7 +107,7 @@ module Registration
       product_info = {
         "name"    => base_product["name"],
         "arch"    => base_product["arch"],
-        "version" => base_product["version"],
+        "version" => ::Registration::Helpers.base_version(base_product["version"]),
         "release_type" => base_product["flavor"]
       }
 
@@ -129,7 +130,7 @@ module Registration
       product_services.map(&:services).flatten.each do |service|
         log.info "Adding service #{service.name.inspect} (#{service.url})"
 
-        credentials_file = Helpers.credentials_from_url(service.url)
+        credentials_file = ::Registration::Helpers.credentials_from_url(service.url)
 
         if credentials_file
           # TODO FIXME: SCC currenly does not return credentials for the service,

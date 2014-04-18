@@ -144,4 +144,17 @@ describe "Registration::Helpers" do
     end
   end
 
+  describe ".base_version" do
+    it "returns the version if build suffix is missing" do
+      expect(Registration::Helpers.base_version("12")).to eq("12")
+      expect(Registration::Helpers.base_version("12.1")).to eq("12.1")
+    end
+
+    it "returns base version without build suffix" do
+      expect(Registration::Helpers.base_version("12.1-1.47")).to eq("12.1")
+      expect(Registration::Helpers.base_version("12.1-1")).to eq("12.1")
+      expect(Registration::Helpers.base_version("12-1.47")).to eq("12")
+      expect(Registration::Helpers.base_version("12-1")).to eq("12")
+    end
+  end
 end
