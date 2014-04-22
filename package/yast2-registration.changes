@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 22 07:04:33 UTC 2014 - lslezak@suse.cz
+
+- use "registration code" term everywhere to be consistent with
+  SCC terminology
+
+-------------------------------------------------------------------
 Fri Apr 18 10:00:40 UTC 2014 - lslezak@suse.cz
 
 - do not fail if the service already exists (bnc#873198)

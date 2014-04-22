@@ -62,35 +62,35 @@ module Yast
 
       @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
-      initialize_regkeys
+      initialize_regcodes
 
       start_workflow
     end
 
     private
 
-    # initialize known reg. keys
-    def initialize_regkeys
-      @known_reg_keys = ::Registration::Storage::RegKeys.instance.reg_keys
-      if @known_reg_keys
-        log.info "Known reg keys: #{@known_reg_keys.size} keys"
+    # initialize known reg. codes
+    def initialize_regcodes
+      @known_reg_codes = ::Registration::Storage::RegCodes.instance.reg_codes
+      if @known_reg_codes
+        log.info "Known reg codes: #{@known_reg_codes.size} codes"
         return
       end
 
       if !Mode.normal
-        # read registration keys from USB media
-        log.info "Reading keys from USB media..."
+        # read registration codes from USB media
+        log.info "Reading codes from USB media..."
         # TODO FIXME: placeholder for FATE#316796 (https://fate.suse.com/316796)
-        # read the keys here, return Hash with mapping product_name => reg_key
-        @known_reg_keys = {}
-        log.info "Found #{@known_reg_keys.size} keys"
+        # read the codes here, return Hash with mapping product_name => reg_code
+        @known_reg_codes = {}
+        log.info "Found #{@known_reg_codes.size} codes"
       else
-        log.info "Initializing empty known reg keys"
-        @known_reg_keys = {}
+        log.info "Initializing empty known reg codes"
+        @known_reg_codes = {}
       end
 
       # cache the values
-      ::Registration::Storage::RegKeys.instance.reg_keys = @known_reg_keys
+      ::Registration::Storage::RegCodes.instance.reg_codes = @known_reg_codes
     end
 
     def register_base_system
@@ -453,8 +453,8 @@ module Yast
     end
 
 
-    # create widgets for entering the addon reg keys
-    def addon_regkey_items(addons)
+    # create widgets for entering the addon reg codes
+    def addon_regcode_items(addons)
       textmode = UI.TextMode
       box = VBox()
 
@@ -463,7 +463,7 @@ module Yast
         label << " (#{addon.long_name})" unless addon.long_name.empty?
 
         box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.product_ident), label,
-            @known_reg_keys.fetch(addon.product_ident, "")))
+            @known_reg_codes.fetch(addon.product_ident, "")))
         # add extra spacing when there are just few addons, in GUI always
         box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
       end
@@ -471,8 +471,8 @@ module Yast
       box
     end
 
-    # create content for the addon reg keys dialog
-    def addon_regkeys_dialog_content(addons)
+    # create content for the addon reg codes dialog
+    def addon_regcodes_dialog_content(addons)
       # display the second column if needed
       if addons.size > MAX_REGCODES_PER_COLUMN
         # display only the addons which fit two column layout
@@ -481,13 +481,13 @@ module Yast
         # round the half up (more items in the first column for odd number of items)
         half = (display_addons.size + 1) / 2
 
-        box1 = addon_regkey_items(display_addons[0..half - 1])
+        box1 = addon_regcode_items(display_addons[0..half - 1])
         box2 = HBox(
           HSpacing(2),
-          addon_regkey_items(display_addons[half..-1])
+          addon_regcode_items(display_addons[half..-1])
         )
       else
-        box1 = addon_regkey_items(addons)
+        box1 = addon_regcode_items(addons)
       end
 
       HBox(
@@ -518,8 +518,8 @@ module Yast
       @available_addons
     end
 
-    # handle user input in the addon reg keys dialog
-    def handle_register_addons_dialog(addons_with_keys)
+    # handle user input in the addon reg codes dialog
+    def handle_register_addons_dialog(addons_with_codes)
       continue_buttons = [:next, :back, :close, :abort]
 
       ret = nil
@@ -527,7 +527,7 @@ module Yast
         ret = UI.UserInput
 
         if ret == :next
-          collect_addon_regkeys(addons_with_keys)
+          collect_addon_regcodes(addons_with_codes)
 
           # register the add-ons
           ret = nil unless register_selected_addons
@@ -537,13 +537,13 @@ module Yast
       return ret
     end
 
-    # collect the entered reg keys from UI
+    # collect the entered reg codes from UI
     # @return [Hash<Addon,String>] addon => reg. code mapping
-    def collect_addon_regkeys(addons_with_keys)
-      pairs = addons_with_keys.map do |a|
+    def collect_addon_regcodes(addons_with_codes)
+      pairs = addons_with_codes.map do |a|
         [a.product_ident, UI.QueryWidget(Id(a.product_ident), :Value)]
       end
-      @known_reg_keys.merge!(Hash[pairs])
+      @known_reg_codes.merge!(Hash[pairs])
     end
 
     # register all selected addons
@@ -568,7 +568,7 @@ module Yast
       products = registration_order.map do |a|
         {
           "name" => a.product_ident,
-          "reg_key" => @known_reg_keys[a.product_ident],
+          "reg_code" => @known_reg_codes[a.product_ident],
           "arch" => a.arch,
           "version" => a.version
         }
@@ -591,17 +591,17 @@ module Yast
       return ret
     end
 
-    # run the addon reg keys dialog
+    # run the addon reg codes dialog
     def register_addons
-      missing_regkeys = @selected_addons.reject(&:free)
+      missing_regcodes = @selected_addons.reject(&:free)
 
-      # if registering only add-ons which do not need a reg. key (like SDK)
+      # if registering only add-ons which do not need a reg. code (like SDK)
       # then simply start the registration
-      if missing_regkeys.empty?
+      if missing_regcodes.empty?
         Wizard.SetContents(
           # dialog title
           _("Registering Selected Add-on Products and Extensions"),
-          # display only the products which need a registration key
+          # display only the products which need a registration code
           Empty(),
           # FIXME: help text
           "",
@@ -613,16 +613,16 @@ module Yast
       else
         Wizard.SetContents(
           # dialog title
-          _("Enter Registration Keys for Selected Add-on Products and Extensions"),
-          # display only the products which need a registration key
-          addon_regkeys_dialog_content(missing_regkeys),
+          _("Enter Registration Codes for Selected Add-on Products and Extensions"),
+          # display only the products which need a registration code
+          addon_regcodes_dialog_content(missing_regcodes),
           # FIXME: help text
           "",
           GetInstArgs.enable_back || Mode.normal,
           GetInstArgs.enable_next || Mode.normal
         )
 
-        return handle_register_addons_dialog(missing_regkeys)
+        return handle_register_addons_dialog(missing_regcodes)
       end
     end
 

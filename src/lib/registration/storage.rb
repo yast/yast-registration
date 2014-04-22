@@ -30,7 +30,7 @@ module Registration
   module Storage
 
     # storage for changed repositories
-    class RegKeys < Struct.new(:reg_keys)
+    class RegCodes < Struct.new(:reg_codes)
       include Singleton
     end
 
@@ -62,7 +62,7 @@ module Registration
       include Singleton
 
       attr_accessor :do_registration, :reg_server, :reg_server_cert, :email,
-        :reg_key, :install_updates, :addons, :slp_discovery
+        :reg_code, :install_updates, :addons, :slp_discovery
 
       def initialize
         reset
@@ -73,7 +73,7 @@ module Registration
         @reg_server = ""
         @reg_server_cert = ""
         @email = ""
-        @reg_key = ""
+        @reg_code = ""
         @install_updates = false
         @addons = []
         @slp_discovery = false
@@ -89,7 +89,7 @@ module Registration
               "slp_discovery" => @slp_discovery,
               "reg_server_cert" => @reg_server_cert,
               "email" => @email,
-              "reg_key" => @reg_key,
+              "reg_code" => @reg_code,
               "install_updates" => @install_updates,
               "addons" => @addons
             }
@@ -105,7 +105,7 @@ module Registration
         @slp_discovery = settings.fetch("slp_discovery", false)
         @reg_server_cert = settings["reg_server_cert"] || ""
         @email = settings["email"] || ""
-        @reg_key = settings["reg_key"] || ""
+        @reg_code = settings["reg_code"] || ""
         @install_updates = settings.fetch("install_updates", false)
         @addons = settings["addons"] || []
       end

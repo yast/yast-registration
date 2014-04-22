@@ -26,18 +26,18 @@ module Registration
     # product data needed for registration
     attr_reader :name, :version, :arch
     # additional data: UI labels, dependencies on other add-ons and
-    # a flag indicating required registration key
-    attr_reader :label, :description, :depends_on, :regkey_needed
+    # a flag indicating required registration code
+    attr_reader :label, :description, :depends_on, :regcode_needed
 
     def initialize(name, version, arch, label: "", description: "",
-        depends_on: [], regkey_needed: true)
+        depends_on: [], regcode_needed: true)
       @name = name
       @version = version
       @arch = arch
       @label = label
       @description = description
       @depends_on = depends_on
-      @regkey_needed = regkey_needed
+      @regcode_needed = regcode_needed
     end
 
     # recursively collect all addon dependecies and create a flat list
