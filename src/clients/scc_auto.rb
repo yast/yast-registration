@@ -164,7 +164,7 @@ module Yast
         Popup.Feedback(_("Registering the System..."),
           _("Contacting the SUSE Customer Center server")) do
 
-          @registration.register(@config.email, @config.reg_key)
+          @registration.register(@config.email, @config.reg_code)
         end
 
         # register the base product
@@ -181,7 +181,7 @@ module Yast
           addon_products = @config.addons.map do |a|
             {
               "name" => a["name"],
-              "reg_key" => a["reg_key"],
+              "reg_code" => a["reg_code"],
               # TODO FIXME: not handled by SCC yet
               "arch" => nil,
               "version" => nil
@@ -226,17 +226,17 @@ module Yast
 
     def set_addon_table_content(current = nil)
       content = @config.addons.map do |a|
-        Item(Id(a["name"]), a["name"], a["reg_key"])
+        Item(Id(a["name"]), a["name"], a["reg_code"])
       end
 
       UI.ChangeWidget(Id(:addons_table), :Items, content)
       UI.ChangeWidget(Id(:addons_table), :CurrentItem, current) if current
     end
 
-    def display_addon_popup(name = "", reg_key = "")
+    def display_addon_popup(name = "", reg_code = "")
       content = VBox(
         InputField(Id(:name), _("Add-on &Name"), name),
-        InputField(Id(:reg_key), _("Registration &Key"), reg_key),
+        InputField(Id(:reg_code), _("Registration &Code"), reg_code),
         VSpacing(1),
         HBox(
           PushButton(Id(:ok), Label.OKButton),
@@ -252,7 +252,7 @@ module Yast
         if ui == :ok
           return {
             "name" => UI.QueryWidget(Id(:name), :Value),
-            "reg_key" => UI.QueryWidget(Id(:reg_key), :Value)
+            "reg_code" => UI.QueryWidget(Id(:reg_code), :Value)
           }
         else
           return nil
@@ -275,10 +275,10 @@ module Yast
       if selected
         addon = @config.addons.find{|a| a["name"] == selected}
 
-        ret = display_addon_popup(selected, addon["reg_key"])
+        ret = display_addon_popup(selected, addon["reg_code"])
         if ret
           addon["name"] = ret["name"]
-          addon["reg_key"] = ret["reg_key"]
+          addon["reg_code"] = ret["reg_code"]
           set_addon_table_content(addon["name"])
         end
       end
@@ -289,7 +289,7 @@ module Yast
       if ret
         addon = @config.addons.find{|a| a["name"] == ret["name"]}
         if addon
-          addon["reg_key"] = ret["reg_key"]
+          addon["reg_code"] = ret["reg_code"]
         else
           @config.addons << ret
         end
@@ -298,7 +298,7 @@ module Yast
     end
 
     def select_addons
-      header = Header(_("Name"), _("Registration key"))
+      header = Header(_("Name"), _("Registration Code"))
       contents = VBox(
         Table(Id(:addons_table), header, []),
         HBox(
@@ -334,7 +334,7 @@ module Yast
 
     def refresh_widget_state
       enabled = UI.QueryWidget(Id(:do_registration), :Value)
-      all_widgets = [ :reg_server_cert, :email, :reg_key, :slp_discovery,
+      all_widgets = [ :reg_server_cert, :email, :reg_code, :slp_discovery,
         :install_updates, :addons ]
 
       all_widgets.each do |w|
@@ -366,14 +366,14 @@ module Yast
         )
       )
 
-      reg_key_settings = VBox(
+      reg_code_settings = VBox(
         # Translators: Text for UI Label - capitalized
         Frame(_("Registration"),
           VBox(
             MinWidth(32, InputField(Id(:email), _("&Email"), @config.email)),
             VSpacing(0.4),
-            MinWidth(32, InputField(Id(:reg_key), _("Registration &Code"),
-                @config.reg_key)),
+            MinWidth(32, InputField(Id(:reg_code), _("Registration &Code"),
+                @config.reg_code)),
             VSpacing(0.4),
             Left(CheckBox(Id(:install_updates),
                 _("Install Available Patches from Update Repositories"),
@@ -414,7 +414,7 @@ module Yast
           HSpacing(2),
           VBox(
             VSpacing(1),
-            reg_key_settings,
+            reg_code_settings,
             VSpacing(1),
             server_settings,
             VSpacing(0.4),
@@ -446,7 +446,7 @@ module Yast
 
       if ret == :next || ret == :addons
         data_widgets = [ :do_registration, :reg_server, :reg_server_cert,
-          :email, :reg_key, :slp_discovery, :install_updates
+          :email, :reg_code, :slp_discovery, :install_updates
         ]
 
         data = data_widgets.map do |w|

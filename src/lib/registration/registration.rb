@@ -66,12 +66,12 @@ module Registration
 
         begin
           orig_reg_code = @scc.reg_code
-          # use product specific reg. key (e.g. for addons)
-          @scc.reg_code = product["reg_key"] if product["reg_key"]
+          # use product specific reg. code (e.g. for addons)
+          @scc.reg_code = product["reg_code"] if product["reg_code"]
 
           ret = @scc.register(product)
         ensure
-          # restore the original base product key
+          # restore the original base product code
           @scc.reg_code = orig_reg_code
         end
 
