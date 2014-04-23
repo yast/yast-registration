@@ -114,6 +114,11 @@ module Registration
         default_params[:url] = @url
       end
 
+      if Helpers.insecure_registration
+        log.warn "SSL certificate check disabled via reg_ssl boot parameter"
+        default_params[:insecure] = true
+      end
+
       default_params.merge(params)
     end
   end

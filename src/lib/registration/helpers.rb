@@ -209,5 +209,23 @@ module Registration
       end
     end
 
+    # check if insecure registration is requested
+    # (the "reg_ssl_verify=0" boot commandline option is used)
+    def self.insecure_registration
+      # check the boot parameter only at installation/update
+      return false unless Yast::Mode.installation || Yast::Mode.update
+
+      parameters = Yast::Linuxrc.InstallInf("Cmdline")
+      return false unless parameters
+
+      reg_ssl_verify_param = parameters.split.grep(/\Areg_ssl_verify=/i).last
+      return false unless reg_ssl_verify_param
+
+      reg_ssl_verify = reg_ssl_verify_param.split('=', 2).last
+      log.info "Boot reg_ssl_verify option: #{reg_ssl_verify.inspect}"
+
+      reg_ssl_verify == "0"
+    end
+
   end
 end

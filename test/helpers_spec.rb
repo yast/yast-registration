@@ -157,4 +157,52 @@ describe "Registration::Helpers" do
       expect(Registration::Helpers.base_version("12-1")).to eq("12")
     end
   end
+
+  describe ".insecure_registration" do
+    let(:yast_mode) { double("Yast::Mode") }
+    let(:yast_linuxrc) { double("Yast::Linuxrc") }
+
+    before do
+      stub_const("Yast::Mode", yast_mode)
+      stub_const("Yast::Linuxrc", yast_linuxrc)
+    end
+
+    context "outside installation/update" do
+      before do
+        allow(yast_mode).to receive(:installation).and_return(false)
+        allow(yast_mode).to receive(:update).and_return(false)
+      end
+
+      it "returns false and does not check boot parameters" do
+        expect(yast_linuxrc).to receive(:InstallInf).never
+        expect(Registration::Helpers.insecure_registration).to eq(false)
+      end
+    end
+
+    context "at installation" do
+      before do
+        allow(yast_mode).to receive(:installation).and_return(true)
+        allow(yast_mode).to receive(:update).and_return(false)
+      end
+
+      it "returns false when reg_ssl_verify option is not used at boot commandline" do
+        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
+          and_return("splash=silent vga=0x314")
+        expect(Registration::Helpers.insecure_registration).to eq(false)
+      end
+
+      it "returns false when reg_ssl_verify=1 boot option is used" do
+        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
+          and_return("splash=silent reg_ssl_verify=1 vga=0x314")
+        expect(Registration::Helpers.insecure_registration).to eq(false)
+      end
+
+      it "returns true when reg_ssl_verify=0 boot option is used" do
+        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
+          and_return("splash=silent reg_ssl_verify=0 vga=0x314")
+        expect(Registration::Helpers.insecure_registration).to eq(true)
+      end
+    end
+  end
+
 end

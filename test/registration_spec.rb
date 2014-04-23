@@ -21,6 +21,7 @@ describe "Registration::Registration" do
       reg_code = "reg_code"
 
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
+      expect(Registration::Helpers).to receive(:insecure_registration).and_return(false)
       SUSE::Connect::Credentials.any_instance.should_receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(:token => reg_code))
@@ -30,7 +31,7 @@ describe "Registration::Registration" do
       Registration::Registration.new.register("email", reg_code, "sles-12-x86_64")
     end
   end
-  
+
   describe ".register_products" do
     it "registers the selected product and returns added zypp services" do
       product = {
@@ -39,7 +40,7 @@ describe "Registration::Registration" do
         "version" => "12",
         "release_type" => "DVD"
       }
-      
+
       source = SUSE::Connect::Source.new("service", "https://example.com")
       service = SUSE::Connect::Service.new([source], [], [])
 
@@ -54,10 +55,12 @@ describe "Registration::Registration" do
           ))
         .and_return(service)
       )
+
+      expect(Registration::Helpers).to receive(:insecure_registration).and_return(false)
       expect(Registration::SwMgmt).to receive(:add_services)
       expect(SUSE::Connect::Credentials).to receive(:read)
         .with(SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
-      
+
       service_list = Registration::Registration.new.register_products([product])
       expect(service_list).to eq([service])
     end
