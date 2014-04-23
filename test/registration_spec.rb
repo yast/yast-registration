@@ -32,7 +32,7 @@ describe "Registration::Registration" do
   end
   
   describe ".register_products" do
-    it "registers the product and adds services" do
+    it "registers the selected product and returns added zypp services" do
       product = {
         "arch" => "x86_64",
         "name" => "SLES",
