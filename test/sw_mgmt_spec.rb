@@ -3,7 +3,7 @@
 require_relative "spec_helper"
 require_relative "yast_stubs"
 
-require "scc_api"
+require "suse/connect"
 
 describe "Registration::SwMgmt" do
   let(:yast_pkg) { double("Yast::Pkg") }
@@ -91,17 +91,16 @@ describe "Registration::SwMgmt" do
 
   describe ".add_services" do
     let(:service_url) { "https://example.com/foo/bar?credentials=TEST_credentials" }
-    let(:credentials) { SccApi::Credentials.new("user", "password", "file") }
+    let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
     let(:product_services) do
-      service = SccApi::Service.new("test", service_url)
-      SccApi::ProductServices.new([service], [], [])
+      SUSE::Connect::Service.new({"test" => service_url}, [], [])
     end
 
     before do
       expect(yast_pkg).to receive(:SourceSaveAll).and_return(true).twice
       expect(yast_pkg).to receive(:ServiceRefresh).with("test").and_return(true)
       expect(yast_pkg).to receive(:ServiceSave).with("test").and_return(true)
-      expect(credentials).to receive(:write)
+      SUSE::Connect::Credentials.any_instance.should_receive(:write)
     end
 
     it "it creates a new service if the service does not exist yet" do

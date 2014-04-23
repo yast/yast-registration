@@ -17,11 +17,11 @@ ylib_DATA = \
   lib/registration/storage.rb \
   lib/registration/registration.rb \
   lib/registration/helpers.rb \
-  lib/registration/scc_helpers.rb
+  lib/registration/connect_helpers.rb
 
 ylibyastdir = @ylibdir@/yast
 ylibyast_DATA = \
-  lib/yast/scc_api.rb
+  lib/yast/suse_connect.rb
 
 schemafilesdir = $(schemadir)/autoyast/rnc
 schemafiles_DATA = \

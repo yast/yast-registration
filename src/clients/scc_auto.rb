@@ -26,13 +26,13 @@
 #
 #
 
-require "yast/scc_api"
+require "yast/suse_connect"
 require "erb"
 
 require "registration/storage"
 require "registration/registration"
 require "registration/helpers"
-require "registration/scc_helpers"
+require "registration/connect_helpers"
 
 module Yast
   class SccAutoClient < Client

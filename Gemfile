@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "scc_api", :github => "yast/rubygem-scc_api"
+gem "suse-connect", :github => "SUSE/connect"
 
 group :test do
   gem "rake"

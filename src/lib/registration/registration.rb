@@ -19,8 +19,8 @@
 # ------------------------------------------------------------------------------
 #
 
-require "scc_api"
 require "yast"
+require "suse/connect"
 
 require "registration/helpers"
 require "registration/sw_mgmt"
@@ -30,7 +30,7 @@ module Registration
   class Registration
     include Yast::Logger
 
-    SCC_CREDENTIALS = SccApi::Credentials::DEFAULT_CREDENTIALS_DIR + "/SCCCredentials"
+    SCC_CREDENTIALS = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
 
     attr_accessor :url
 
@@ -38,67 +38,83 @@ module Registration
       @url = url
     end
 
-    def register(email, reg_code)
-      @scc = SccApi::Connection.new(email, reg_code)
+    def register(email, reg_code, distro_target)
+      settings = connect_params(
+          :token => reg_code,
+          :distro_target => distro_target,
+          :email => email
+      )
 
-      # set the current language to receive translated error messages
-      @scc.language = ::Registration::Helpers.language
+      login, password = SUSE::Connect::YaST.announce_system(settings)
+      credentials = SUSE::Connect::Credentials.new(login, password, SCC_CREDENTIALS)
 
-      if @url
-        log.info "Using custom registration URL: #{@url.inspect}"
-        @scc.url = @url
-      end
-
-      # announce (register the system) first
-      @credentials = @scc.announce
+      log.info "Global SCC credentials: #{credentials}"
 
       # ensure the zypp config directories are writable in inst-sys
       ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
-      @credentials.write
+      credentials.write
     end
 
 
     def register_products(products)
       product_services = products.map do |product|
-        log.info("Registering product: #{product["name"]}")
 
-        begin
-          orig_reg_code = @scc.reg_code
-          # use product specific reg. code (e.g. for addons)
-          @scc.reg_code = product["reg_code"] if product["reg_code"]
+        product_ident = {
+          :arch         => product["arch"],
+          :name         => product["name"],
+          :version      => product["version"],
+          :release_type => product["release_type"]
+        }
+        log.info "Registering product: #{product_ident}"
 
-          ret = @scc.register(product)
-        ensure
-          # restore the original base product code
-          @scc.reg_code = orig_reg_code
-        end
+        params = connect_params(:product_ident => product_ident)
 
-        ret
+        # use product specific reg. code (e.g. for addons)
+        params[:token] = product["reg_code"] if product["reg_code"]
+
+        SUSE::Connect::YaST.activate_product(params)
       end
 
       log.info "registered product_services: #{product_services.inspect}"
 
       if !product_services.empty?
-        add_product_services(product_services)
+        credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
+        ::Registration::SwMgmt.add_services(product_services, credentials)
       end
 
       product_services
     end
 
-    def add_product_services(product_services)
-      ::Registration::SwMgmt.add_services(product_services, @credentials)
-    end
-
     def get_addon_list
       # extensions for base product
       base_product = ::Registration::Storage::BaseProduct.instance.product
-      @scc.extensions_for(base_product["name"]).extensions
+      params = connect_params(:product_ident => {:name => base_product["name"]})
+
+      log.info "Reading available addons for product: #{base_product["name"]}"
+      SUSE::Connect::YaST.list_products(params)
     end
 
     def self.is_registered?
-      File.exist?(SCC_CREDENTIALS)
+      SUSE::Connect::System.registered?
+    end
+
+    private
+
+    def connect_params(params)
+      default_params = {
+        :language => ::Registration::Helpers.language,
+        :debug => ENV["SCCDEBUG"],
+        :verbose => ENV["Y2DEBUG"] == "1"
+      }
+
+      if @url
+        log.info "Using custom registration URL: #{@url.inspect}"
+        default_params[:url] = @url
+      end
+
+      default_params.merge(params)
     end
   end
 end
