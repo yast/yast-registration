@@ -199,9 +199,9 @@ module Registration
       log.info "Service repositories: #{repos}"
 
       if only_updates
-        # TODO FIXME: curently just check the name,
-        # later use a new libzypp flag for detecting update repos
-        repos.select!{|repo| repo["name"].match(/update/i)}
+        # leave only update repositories
+        repos.select!{|repo| repo["is_update_repo"]}
+        log.info "Found update repositories: #{repos}"
       end
 
       repos

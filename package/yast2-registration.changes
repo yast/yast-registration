@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 24 07:53:57 UTC 2014 - lslezak@suse.cz
+
+- use "is_update_repo" flag for finding update repositories
+
+-------------------------------------------------------------------
 Wed Apr 23 07:29:37 UTC 2014 - lslezak@suse.cz
 
 - use "suse-connect" gem as the backend (to share the code with
