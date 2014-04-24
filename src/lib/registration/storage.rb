@@ -57,6 +57,18 @@ module Registration
       include Singleton
     end
 
+    # remember the details about SSL verification failure
+    # the attributes are read from
+    class SSLErrors < Struct.new(:ssl_error_code, :ssl_error_msg, :ssl_failed_cert)
+      include Singleton
+
+      def reset
+        self.ssl_error_code = nil
+        self.ssl_error_msg = nil
+        self.ssl_failed_cert = nil
+      end
+    end
+
     # AutoYast configuration
     class Config
       include Singleton

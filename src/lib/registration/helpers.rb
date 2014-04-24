@@ -215,5 +215,14 @@ module Registration
       reg_ssl_verify == "0"
     end
 
+    # @param x509_name [OpenSSL::X509::Name] name object
+    # @param attribute [String] requested attribute name. e.g. "CN"
+    def self.find_name_attribute(x509_name, attribute)
+      # to_a returns an attribute list, e.g.:
+      # [["CN", "linux", 19], ["emailAddress", "root@...", 22], ["O", "YaST", 19], ...]
+      attr_list = x509_name.to_a.find { |a| a.first == attribute}
+      attr_list ? attr_list[1] : nil
+    end
+
   end
 end

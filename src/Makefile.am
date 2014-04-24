@@ -19,6 +19,10 @@ ylib_DATA = \
   lib/registration/helpers.rb \
   lib/registration/connect_helpers.rb
 
+ylibuidir = @ylibdir@/registration/ui
+ylibui_DATA = \
+  lib/registration/ui/import_certificate_dialog.rb
+
 ylibyastdir = @ylibdir@/yast
 ylibyast_DATA = \
   lib/yast/suse_connect.rb
@@ -29,8 +33,10 @@ schemafiles_DATA = \
 
 ydatadir = @ydatadir@/registration
 ydata_DATA = \
+  data/registration/certificate_summary.erb \
   data/registration/summary.erb
 
-EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibyast_DATA) $(schemafiles_DATA) $(ydata_DATA)
+EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibui_DATA) \
+  $(ylibyast_DATA) $(schemafiles_DATA) $(ydata_DATA)
 
 include $(top_srcdir)/Makefile.am.common
