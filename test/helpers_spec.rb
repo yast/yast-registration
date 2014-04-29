@@ -186,20 +186,20 @@ describe "Registration::Helpers" do
       end
 
       it "returns false when reg_ssl_verify option is not used at boot commandline" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
-          and_return("splash=silent vga=0x314")
+        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+          and_return(nil)
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns false when reg_ssl_verify=1 boot option is used" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
-          and_return("splash=silent reg_ssl_verify=1 vga=0x314")
+        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+          and_return("1")
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns true when reg_ssl_verify=0 boot option is used" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").
-          and_return("splash=silent reg_ssl_verify=0 vga=0x314")
+        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+          and_return("0")
         expect(Registration::Helpers.insecure_registration).to eq(true)
       end
     end
