@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr 24 16:05:17 UTC 2014 - lslezak@suse.cz
+
+- "reg_ssl_verify=0" boot parameter disables SSL checks (part of
+  bnc#874745)
+- reuse already known "regurl" parameter (instead "reg_url" cannot
+  be used as it conflicts with it) (bnc#874997)
+- 3.1.39
+
+-------------------------------------------------------------------
 Thu Apr 24 07:53:57 UTC 2014 - lslezak@suse.cz
 
 - use "is_update_repo" flag for finding update repositories

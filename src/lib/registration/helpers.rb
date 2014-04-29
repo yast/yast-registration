@@ -171,14 +171,8 @@ module Registration
 
     # return the boot command line parameter
     def self.boot_reg_url
-      parameters = Yast::Linuxrc.InstallInf("Cmdline")
-      return nil unless parameters
-
-      registration_param = parameters.split.grep(/\A#{BOOT_PARAM}=/i).last
-      return nil unless registration_param
-
-      reg_url = registration_param.split('=', 2).last
-      log.info "Boot reg_url option: #{reg_url.inspect}"
+      reg_url = Yast::Linuxrc.InstallInf("regurl")
+      log.info "Boot regurl option: #{reg_url.inspect}"
 
       reg_url
     end
@@ -207,6 +201,18 @@ module Registration
       Yast::Popup.Feedback(_("Searching..."), _("Looking up local registration servers...")) do
         slp_discovery
       end
+    end
+
+    # check if insecure registration is requested
+    # (the "reg_ssl_verify=0" boot commandline option is used)
+    def self.insecure_registration
+      # check the boot parameter only at installation/update
+      return false unless Yast::Mode.installation || Yast::Mode.update
+
+      reg_ssl_verify = Yast::Linuxrc.InstallInf("reg_ssl_verify")
+      log.info "Boot reg_ssl_verify option: #{reg_ssl_verify.inspect}"
+
+      reg_ssl_verify == "0"
     end
 
   end
