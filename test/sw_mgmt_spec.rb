@@ -42,7 +42,7 @@ describe "Registration::SwMgmt" do
         2 => {
           "alias"=>"SLES:SLES12-Updates", "autorefresh"=>true,
           "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-          "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
+          "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
           "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
           "service"=>service_name, "type"=>"YUM",
           "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
@@ -51,7 +51,7 @@ describe "Registration::SwMgmt" do
         3 => {
           "alias"=>"Another:SLES12-Updates", "autorefresh"=>true,
           "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-          "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
+          "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
           "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
           "service"=> "Another", "type"=>"YUM",
           "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
