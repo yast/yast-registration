@@ -12,6 +12,7 @@ describe "Registration::Registration" do
 
     stub_const("Yast::WFM", yast_wfm)
     yast_wfm.stub(:GetLanguage).and_return("en")
+    allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
   end
 
   describe ".register" do
@@ -21,7 +22,6 @@ describe "Registration::Registration" do
       reg_code = "reg_code"
 
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
-      expect(Registration::Helpers).to receive(:insecure_registration).and_return(false)
       SUSE::Connect::Credentials.any_instance.should_receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(:token => reg_code))
@@ -56,7 +56,6 @@ describe "Registration::Registration" do
         .and_return(service)
       )
 
-      expect(Registration::Helpers).to receive(:insecure_registration).and_return(false)
       expect(Registration::SwMgmt).to receive(:add_services)
       expect(SUSE::Connect::Credentials).to receive(:read)
         .with(SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
