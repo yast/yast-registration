@@ -171,14 +171,8 @@ module Registration
 
     # return the boot command line parameter
     def self.boot_reg_url
-      parameters = Yast::Linuxrc.InstallInf("Cmdline")
-      return nil unless parameters
-
-      registration_param = parameters.split.grep(/\A#{BOOT_PARAM}=/i).last
-      return nil unless registration_param
-
-      reg_url = registration_param.split('=', 2).last
-      log.info "Boot reg_url option: #{reg_url.inspect}"
+      reg_url = Yast::Linuxrc.InstallInf("regurl")
+      log.info "Boot regurl option: #{reg_url.inspect}"
 
       reg_url
     end

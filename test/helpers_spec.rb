@@ -28,31 +28,16 @@ describe "Registration::Helpers" do
       end
 
       context "no local registration server is announced via SLP" do
-        it "returns 'reg_url' boot parameter from Linuxrc" do
+        it "returns 'regurl' boot parameter from Linuxrc" do
           url = "https://example.com/register"
-          expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").and_return("splash=silent reg_url=#{url} vga=0x314")
+          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
           # make sure no SLP discovery is executed, the boot parameter has higher priority
           expect(yast_wfm).to receive(:call).with("discover_registration_services").never
           expect(Registration::Helpers.registration_url).to eq(url)
         end
 
-        it "uses the last 'reg_url' boot parameter from Linuxrc" do
-          url1 = "https://example.com/register"
-          url2 = "https://foo.org/registration"
-          expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").and_return("splash=silent reg_url=#{url1} reg_url=#{url2} vga=0x314")
-          # make sure no SLP discovery is executed, the boot parameter has higher priority
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").never
-          expect(Registration::Helpers.registration_url).to eq(url2)
-        end
-
         it "returns nil when no custom URL is required in Linuxrc" do
-          expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").and_return("splash=silent vga=0x314")
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-          expect(Registration::Helpers.registration_url).to be_nil
-        end
-
-        it "returns nil when no boot command line is defined in Linuxrc" do
-          expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").and_return(nil)
+          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
           expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
           expect(Registration::Helpers.registration_url).to be_nil
         end
@@ -61,7 +46,7 @@ describe "Registration::Helpers" do
       context "no boot parameter is used and a SLP server is announced" do
         before do
           # no boot parameter passed, it would have higher priority
-          expect(yast_linuxrc).to receive(:InstallInf).with("Cmdline").and_return("splash=silent vga=0x314")
+          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
         end
 
         it "returns the SLP server selected by user" do
@@ -186,19 +171,19 @@ describe "Registration::Helpers" do
       end
 
       it "returns false when reg_ssl_verify option is not used at boot commandline" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+        expect(yast_linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
           and_return(nil)
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns false when reg_ssl_verify=1 boot option is used" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+        expect(yast_linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
           and_return("1")
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns true when reg_ssl_verify=0 boot option is used" do
-        expect(yast_linuxrc).to receive(:InstallInf).with("regsslverify").
+        expect(yast_linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
           and_return("0")
         expect(Registration::Helpers.insecure_registration).to eq(true)
       end
