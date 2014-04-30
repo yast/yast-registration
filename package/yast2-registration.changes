@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Apr 30 11:45:57 UTC 2014 - lslezak@suse.cz
+
+- fixed failure when registering the base product 
+  (fixed return value from product registration call) (bnc#875412)
+- 3.1.40
+
+-------------------------------------------------------------------
 Thu Apr 24 16:05:17 UTC 2014 - lslezak@suse.cz
 
 - "reg_ssl_verify=0" boot parameter disables SSL checks (part of
