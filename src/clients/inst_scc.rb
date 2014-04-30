@@ -139,11 +139,13 @@ module Yast
 
                 base_product = ::Registration::SwMgmt.base_product_to_register
                 base_product["reg_code"] = reg_code
-                @registration.register_products([base_product])
+                registered_services = @registration.register_products([base_product])
 
                 # remember the base products for later (to get the respective addons)
                 ::Registration::Storage::BaseProduct.instance.product = base_product
                 options.base_registered = true
+
+                registered_services
               end
 
               # select repositories to use in installation (e.g. enable/disable Updates)
