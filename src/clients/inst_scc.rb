@@ -274,7 +274,7 @@ module Yast
 
       addons.each do |addon|
         label = addon.short_name
-        label << " (#{addon.long_name})" if !addon.long_name.empty?
+        label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
 
         box.params << Left(CheckBox(Id(addon.product_ident), Opt(:notify),
             addon.short_name, @selected_addons.include?(addon)))
