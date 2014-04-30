@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Wed Apr 30 11:45:57 UTC 2014 - lslezak@suse.cz
 
-- fixed return value from product registration call (bnc#875412)
+- fixed failure when registering the base product 
+  (fixed return value from product registration call) (bnc#875412)
 - 3.1.40
 
 -------------------------------------------------------------------
