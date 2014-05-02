@@ -1,5 +1,6 @@
 language: ruby
 rvm:
-  - "2.1.0"
+# rvm 2.1.0 is currently broken at Travis, disabling temporarily...
+#  - "2.1.0"
   - "2.0.0"
 script: bundle exec rake -f Rakefile.travis
