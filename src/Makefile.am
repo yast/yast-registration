@@ -34,7 +34,7 @@ schemafiles_DATA = \
 ydatadir = @ydatadir@/registration
 ydata_DATA = \
   data/registration/certificate_summary.erb \
-  data/registration/summary.erb
+  data/registration/autoyast_summary.erb
 
 EXTRA_DIST = $(client_DATA) $(desktop_DATA) $(ylib_DATA) $(ylibui_DATA) \
   $(ylibyast_DATA) $(schemafiles_DATA) $(ydata_DATA)
