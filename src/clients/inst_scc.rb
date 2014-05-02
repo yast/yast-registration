@@ -64,6 +64,7 @@ module Yast
       Yast.import "Sequencer"
       Yast.import "Installation"
       Yast.import "ProductControl"
+      Yast.import "SourceDialogs"
 
       @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
@@ -291,21 +292,6 @@ module Yast
 
     # create content fot the addon selection dialog
     def addon_selection_dialog_content(addons)
-      media_checkbox = Empty()
-
-      # the media check box is displayed only at installation
-      # to modify the installation workflow (display extra add-on dialog)
-      if Mode.installation
-        media_checkbox = VBox(
-          VSpacing(0.4),
-          HBox(
-            HSpacing(1),
-            Left(CheckBox(Id(:media), _("In&clude Extensions from Separate Media"),
-                Installation.add_on_selected)),
-          )
-        )
-      end
-
       # less lines in textmode to fit 80x25 size
       lines = UI.TextMode ? 9 : 14
 
@@ -332,8 +318,6 @@ module Yast
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
                 _("Select an extension or a module to show details here") + "</small>")),
         ),
-        media_checkbox,
-        VSpacing(0.4),
         VStretch()
       )
     end
@@ -377,21 +361,6 @@ module Yast
       return true
     end
 
-    # read the addon media checkbox and adapt the installation workflow accordingly
-    def set_media_addons
-      if Mode.installation
-        # the widget exists only at installation
-        Installation.add_on_selected = UI.QueryWidget(Id(:media), :Value)
-        log.info "Add-on media selected: #{Installation.add_on_selected}"
-
-        # lazy include, the file is part of yast2-installation
-        # avoid yast2-installation runtime dependency by including it only here,
-        # not at the global level
-        Yast.include self, "installation/misc.rb"
-        AdjustStepsAccordingToInstallationSettings()
-      end
-    end
-
     # handle user input in the addon selection dialog
     def handle_addon_selection_dialog(addons)
       ret = nil
@@ -415,8 +384,6 @@ module Yast
           @selected_addons = selected
           ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
           log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
-
-          set_media_addons
 
           ret = :skip if @selected_addons.empty?
         else
@@ -442,11 +409,8 @@ module Yast
         # dialog title
         _("Extension Selection"),
         addon_selection_dialog_content(addons),
-        # help text for add-ons installation, %s is URL
-        _("<p>\nTo install an extension or a module from separate media together with the product, select\n" +
-            "<b>Include Extensions from Separate Media</b>.</p>\n" +
-            "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
-        "http://drivers.suse.com",
+        # TODO FIXME: add a help text
+        "",
         GetInstArgs.enable_back || Mode.normal,
         GetInstArgs.enable_next || Mode.normal
       )
@@ -652,12 +616,15 @@ module Yast
     end
 
     def media_addons
-      if Installation.add_on_selected
-        # start the next step (add-on media selection)
-        ProductControl.RunFrom(ProductControl.CurrentStep + 1, false)
-      else
-        :next
-      end
+      # force displaying the UI
+      Installation.add_on_selected = true
+      # display global enable/disable switch
+      SourceDialogs.display_addon_checkbox = true
+
+      WFM.call("inst_add-on")
+    ensure
+      # make sure to revert the change if something goes wrong
+      SourceDialogs.display_addon_checkbox = false
     end
 
     def registered_dialog
@@ -736,7 +703,7 @@ module Yast
         "register" => {
           :abort    => :abort,
           :cancel   => :abort,
-          :skip     => :next,
+          :skip     => "media_addons",
           :next     => "select_addons"
         },
         "select_addons" => {
@@ -750,7 +717,8 @@ module Yast
         },
         "media_addons" => {
           :abort    => :abort,
-          :next     => :next
+          :next     => :next,
+          :auto     => :auto
         }
       }
 
