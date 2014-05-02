@@ -41,7 +41,7 @@ module Registration
     IMPORT_ERROR_CODES = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES.keys
 
     # indent size used in error popup
-    INDENT = "   "
+    INDENT = " " * 3
 
     textdomain "registration"
 
@@ -154,7 +154,7 @@ module Registration
         details.concat(cert_name_details(cert.issuer))
         details << ""
         details << _("SHA1 Fingerprint: ")
-        details << "   " + ::SUSE::Connect::SSLCertificate.sha1_fingerprint(cert)
+        details << INDENT + ::SUSE::Connect::SSLCertificate.sha1_fingerprint(cert)
         details << _("SHA256 Fingerprint: ")
 
         sha256 = ::SUSE::Connect::SSLCertificate.sha256_fingerprint(cert)
@@ -171,38 +171,33 @@ module Registration
     end
 
     def self.cert_name_details(x509_name)
-      details = []
-
       # label followed by the SSL certificate identification
-      details << INDENT + _("Common Name (CN): ") + Helpers.find_name_attribute(x509_name, "CN")
+      details = [ INDENT + _("Common Name (CN): ") + Helpers.find_name_attribute(x509_name, "CN") ]
       # label followed by the SSL certificate identification
       details << INDENT + _("Organization (O): ") + Helpers.find_name_attribute(x509_name, "O")
       # label followed by the SSL certificate identification
       details << INDENT + _("Organization Unit (OU): ") + Helpers.find_name_attribute(x509_name, "OU")
-
-      details
     end
 
     def self.import_ssl_certificate(cert)
       # run the import dialog, check the user selection
-      if UI::ImportCertificateDialog.run(cert) == :import
-        cn = Helpers.find_name_attribute(cert.subject, "CN")
-        log.info "Importing '#{cn}' certificate..."
-
-        # progress label
-        result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
-          _("Importing '%s' certificate...") % cn) do
-
-          ::SUSE::Connect::SSLCertificate.import(cert)
-        end
-
-        log.info "Certificate import result: #{result}"
-        return true
-      else
+      if UI::ImportCertificateDialog.run(cert) != :import
         log.info "Certificate import rejected"
+        return false
       end
 
-      false
+      cn = Helpers.find_name_attribute(cert.subject, "CN")
+      log.info "Importing '#{cn}' certificate..."
+
+      # progress label
+      result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
+        _("Importing '%s' certificate...") % cn) do
+
+        ::SUSE::Connect::SSLCertificate.import(cert)
+      end
+
+      log.info "Certificate import result: #{result}"
+      true
     end
 
   end
