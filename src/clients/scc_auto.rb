@@ -123,7 +123,7 @@ module Yast
     # @return [String] summary of the current configuration
     def summary
       # use erb template for rendering the richtext summary
-      erb_file = File.expand_path("../../data/registration/summary.erb", __FILE__)
+      erb_file = File.expand_path("../../data/registration/autoyast_summary.erb", __FILE__)
 
       log.info "Loading ERB template #{erb_file}"
       erb = ERB.new(File.read(erb_file))
