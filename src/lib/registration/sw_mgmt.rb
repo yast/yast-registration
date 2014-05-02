@@ -191,7 +191,7 @@ module Registration
         data
       end
 
-      service_names = product_services.map(&:services).flatten.map(&:name)
+      service_names = product_services.map(&:sources).flatten.map(&:name)
       log.info "Added services: #{service_names.inspect}"
 
       # select only repositories belonging to the product services

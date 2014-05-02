@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri May  2 12:01:45 UTC 2014 - lslezak@suse.cz
+
+- ask user to import an unknown SSL certificate (bnc#874745)
+- fixed wrong method name causing crash when adding repositories
+  (bnc#875412)
+
+-------------------------------------------------------------------
 Wed Apr 30 12:26:52 UTC 2014 - lslezak@suse.cz
 
 - added a nil check when reading the long product name to avoid
