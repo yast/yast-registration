@@ -2,18 +2,15 @@
 textdomain "registration"
 %>
 
-<% # dialog heading
-%>
+<%# dialog heading %>
 <h2><%= _("Secure Connection Error") %></h2>
 
 <p>
-  <% # label followed by error details
-  %>
+  <%# label followed by error details %>
   <%= _("Details:") %> <%= _(OPENSSL_ERROR_MESSAGES[Storage::SSLErrors.instance.ssl_error_code]) %>
 </p>
 
-<% # dialog sub-heading
-%>
+<%# dialog sub-heading %>
 <h3><%= _("Failed Certificate Details") %></h3>
 
 <h4><%= _("Issued To") %></h4>
@@ -37,22 +34,17 @@ textdomain "registration"
 <h4><%= _("Validity") %></h4>
 <blockquote>
   <p>
-    <% # label followed by the certificate issue date
-    %>
+    <%# label followed by the certificate issue date %>
     <b><%= _("Issued On: ") %></b><%= h(@certificate.not_before.localtime.strftime("%F")) %><br>
     <% if Time.now < @certificate.not_before %>
-      <% # warning added after the certificate issue date
-      # if the certificate is not valid yet
-      %>
+      <%# warning added after the certificate issue date if the certificate is not valid yet %>
       <b><font color="red"><%= _("WARNING: The certificate is not valid yet!") %></font></b><br>
     <% end %>
     <% # label followed by the certificate expiration date
     %>
     <b><%= _("Expires On: ") %></b><%= h(@certificate.not_after.localtime.strftime("%F")) %><br>
     <% if Time.now > @certificate.not_after %>
-      <% # warning added after the certificate expiration date
-      # if the certificate has expired
-      %>
+      <%# warning added after the certificate expiration date if the certificate has expired %>
       <b><font color="red"><%= _("WARNING: The certificate has expired!") %></font></b>
     <% end %>
   </p>
@@ -60,8 +52,7 @@ textdomain "registration"
 </blockquote>
 
 <p>
-  <% # label followed by the certificate serial number (in HEX format, e.g. AB:CD:42:FF...)
-  %>
+  <%# label followed by the certificate serial number (in HEX format, e.g. AB:CD:42:FF...) %>
   <b><%= _("Serial Number: ") %></b><%= h(@certificate.serial.to_s(16).scan(/../).join(":")) %><br>
   <b><%= _("SHA1 Fingerprint: ") %></b>
   <%= h(::SUSE::Connect::SSLCertificate.sha1_fingerprint(@certificate)) %>
