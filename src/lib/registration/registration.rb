@@ -93,7 +93,9 @@ module Registration
       params = connect_params(:product_ident => {:name => base_product["name"]})
 
       log.info "Reading available addons for product: #{base_product["name"]}"
-      SUSE::Connect::YaST.list_products(params)
+      addons = SUSE::Connect::YaST.list_products(params)
+      # ignore the base product "addon"
+      addons.reject{ |a| a.product_ident == base_product["name"] }
     end
 
     def self.is_registered?
