@@ -62,7 +62,7 @@ describe "Registration::SwMgmt" do
     before do
       service = double
       expect(service).to receive(:name).and_return(service_name)
-      expect(services).to receive(:services).and_return([service])
+      expect(services).to receive(:sources).and_return([service])
 
       expect(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
