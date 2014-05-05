@@ -176,6 +176,10 @@ module Registration
           raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), source.name)
         end
       end
+
+      # activate the requested repository setup
+      repos_enable(product_services.map(&:enabled).flatten)
+      repos_disable_autorefresh(product_services.map(&:norefresh).flatten)
     ensure
       Pkg.SourceSaveAll
     end
@@ -223,6 +227,45 @@ module Registration
       end
     end
 
+    # Disable specified repositories
+    # @param repo_aliases [Array<String>] list of repository aliases
+    def self.repos_enable(repo_aliases)
+      each_repo(repo_aliases) do |repo_alias|
+        log.info "Enabling repository #{repo_alias}"
+        Pkg.SourceSetEnabled(repo_alias, true)
+      end
+    end
+
+    # Disable autorefresh for specified repositories
+    # @param repo_aliases [Array<String>] list of repository aliases
+    def self.repos_disable_autorefresh(repo_aliases)
+      each_repo(repo_aliases) do |repo_alias|
+        log.info "Disabling autorefresh for #{repo_alias} repository"
+        Pkg.SourceSetAutorefresh(repo_alias, false)
+      end
+    end
+
+    # a helper method for iterating over repositories
+    # @param repo_aliases [Array<String>] list of repository aliases
+    # @param block block evaluated for each found repository
+    def self.each_repo(repo_aliases, &block)
+      all_repos = Pkg.SourceGetCurrent(false)
+
+      repo_aliases.each do |repo_alias|
+        # find the repository with the alias
+        repo = all_repos.find do |repo|
+          Pkg.SourceGeneralData(repo)["alias"] == repo_alias
+        end
+
+        if repo
+          yield(repo)
+        else
+          log.warning "Repository '#{repo_alias}' was not found, skipping"
+        end
+      end
+    end
+
+    private_class_method :each_repo
   end
 end
 

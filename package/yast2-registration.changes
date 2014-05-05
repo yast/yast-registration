@@ -5,6 +5,15 @@ Mon May  5 15:34:47 UTC 2014 - jreidinger@suse.com
   registration(bnc#872481)
 - register as much addons as possible and skip only failed ones
 - improve progress to print which addon it register
+- 3.1.44
+
+-------------------------------------------------------------------
+
+Mon May  5 13:33:21 UTC 2014 - lslezak@suse.cz
+
+- Update "enabled" and "autorefresh" repository flags according to
+  the registration response, e.g. enable -Pool repositories
+  (bnc#875839)
 - 3.1.43
 
 -------------------------------------------------------------------
