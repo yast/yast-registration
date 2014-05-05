@@ -260,7 +260,7 @@ module Registration
         if repo
           yield(repo)
         else
-          log.warning "Repository '#{repo_alias}' was not found, skipping"
+          log.warn "Repository '#{repo_alias}' was not found, skipping"
         end
       end
     end

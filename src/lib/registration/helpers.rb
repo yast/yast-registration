@@ -24,6 +24,8 @@
 require "yast"
 require "uri"
 
+require "registration/storage"
+
 module Registration
 
   class Helpers
@@ -70,14 +72,28 @@ module Registration
     # for details
     # @return [String,nil] registration URL, nil means use the default
     def self.registration_url
-      # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
-      return reg_url_at_upgrade if Yast::Mode.update
-      return reg_url_at_installation if Yast::Mode.installation
-      return reg_url_at_runnig_system if Yast::Mode.normal
+      # cache the URL to use the same server for all operations
+      cache = ::Registration::Storage::Cache.instance
+      return cache.reg_url if cache.reg_url
 
-      log.warn "Unknown mode: #{Mode.mode} using default URL"
-      # no custom URL, use the default
-      nil
+      # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
+      # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
+      url = case Yast::Mode.mode
+      when "installation"
+        reg_url_at_installation
+      when "normal"
+        reg_url_at_runnig_system
+      when "update"
+        reg_url_at_upgrade
+      else
+        log.warn "Unknown mode: #{Yast::Mode.mode}, using default URL"
+        # use the default
+        nil
+      end
+
+      # cache the URL
+      ::Registration::Storage::Cache.instance.reg_url = url
+      url
     end
 
     # convert service URL to plain URL, remove the SLP service prefix
