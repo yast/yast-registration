@@ -18,13 +18,13 @@ describe "Registration::Helpers" do
       stub_const("Yast::Mode", yast_mode)
       stub_const("Yast::Linuxrc", yast_linuxrc)
       stub_const("Yast::WFM", yast_wfm)
+      # reset the cache befor each test
+      ::Registration::Storage::Cache.instance.reg_url = nil
     end
 
     context "at installation" do
       before do
-        allow(yast_mode).to receive(:installation).and_return(true)
-        allow(yast_mode).to receive(:update).and_return(false)
-        allow(yast_mode).to receive(:normal).and_return(false)
+        allow(yast_mode).to receive(:mode).and_return("installation")
       end
 
       context "no local registration server is announced via SLP" do
@@ -65,9 +65,8 @@ describe "Registration::Helpers" do
 
     context "at installed system" do
       before do
-        allow(yast_mode).to receive(:normal).and_return(true)
-        allow(yast_mode).to receive(:update).and_return(false)
-        allow(yast_mode).to receive(:installation).and_return(false)
+        allow(yast_mode).to receive(:mode).and_return("normal")
+
         # FIXME: stub SLP service discovery, later add config file reading
         expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
       end

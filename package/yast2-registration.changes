@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon May  5 15:54:04 UTC 2014 - lslezak@suse.cz
+
+- initialize the connection object when reading addons
+  (otherwise a "nil" bug appears when going back in the
+  installation workflow)
+- cache the registration server URL (to use the same server when
+  going back)
+- added "nil" check for long product description
+- typo in a logger call
+- 3.1.45
+
+-------------------------------------------------------------------
 Mon May  5 15:34:47 UTC 2014 - jreidinger@suse.com
 
 - add product name when something wrong happen with addon

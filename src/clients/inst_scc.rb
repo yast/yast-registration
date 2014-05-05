@@ -115,8 +115,7 @@ module Yast
           # reset the user input in case an exception is raised
           ret = nil
 
-          url = ::Registration::Helpers.registration_url
-          @registration = ::Registration::Registration.new(url)
+          init_registration
 
           ::Registration::SccHelpers.catch_registration_errors do
             distro_target = ::Registration::SwMgmt.find_base_product["register_target"]
@@ -456,7 +455,7 @@ module Yast
 
       addons.each do |addon|
         label = addon.short_name
-        label << " (#{addon.long_name})" unless addon.long_name.empty?
+        label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
 
         box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.product_ident), label,
             @known_reg_codes.fetch(addon.product_ident, "")))
@@ -569,6 +568,8 @@ module Yast
           "version" => a.version
         }
       end
+
+      init_registration
 
       product_succeed = product.map do |product|
         ::Registration::SccHelpers.catch_registration_errors("#{product["name"]}:") do
@@ -736,6 +737,12 @@ module Yast
       log.info "Starting scc sequence"
       Sequencer.Run(aliases, sequence)
     end
+
+    def init_registration
+      url = ::Registration::Helpers.registration_url
+      @registration = ::Registration::Registration.new(url)
+    end
+
   end unless defined?(InstSccClient)
 end
 
