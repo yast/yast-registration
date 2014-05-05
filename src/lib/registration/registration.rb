@@ -58,33 +58,30 @@ module Registration
     end
 
 
-    def register_products(products)
-      product_services = products.map do |product|
+    def register_product(product)
+      product_ident = {
+        :arch         => product["arch"],
+        :name         => product["name"],
+        :version      => product["version"],
+        :release_type => product["release_type"]
+      }
+      log.info "Registering product: #{product_ident}"
 
-        product_ident = {
-          :arch         => product["arch"],
-          :name         => product["name"],
-          :version      => product["version"],
-          :release_type => product["release_type"]
-        }
-        log.info "Registering product: #{product_ident}"
+      params = connect_params(:product_ident => product_ident)
 
-        params = connect_params(:product_ident => product_ident)
+      # use product specific reg. code (e.g. for addons)
+      params[:token] = product["reg_code"] if product["reg_code"]
 
-        # use product specific reg. code (e.g. for addons)
-        params[:token] = product["reg_code"] if product["reg_code"]
+      product_service = SUSE::Connect::YaST.activate_product(params)
 
-        SUSE::Connect::YaST.activate_product(params)
-      end
+      log.info "registered product_services: #{product_service.inspect}"
 
-      log.info "registered product_services: #{product_services.inspect}"
-
-      if !product_services.empty?
+      if product_service
         credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
-        ::Registration::SwMgmt.add_services(product_services, credentials)
+        ::Registration::SwMgmt.add_services([product_service], credentials)
       end
 
-      product_services
+      product_service ? [product_service] : []
     end
 
     def get_addon_list

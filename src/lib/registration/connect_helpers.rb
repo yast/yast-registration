@@ -49,7 +49,8 @@ module Registration
     Yast.import "Popup"
     Yast.import "Report"
 
-    def self.catch_registration_errors(&block)
+    # @param prefix[String] Prefix before error like affected product or addon
+    def self.catch_registration_errors(prefix = "", &block)
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
@@ -79,13 +80,13 @@ module Registration
         case e.response
         when Net::HTTPUnauthorized, Net::HTTPUnprocessableEntity
           # Error popup
-          report_error(_("The email address is not known or\nthe registration code is not valid."), e)
+          report_error(prefix + _("The email address is not known or\nthe registration code is not valid."), e)
         when Net::HTTPClientError
-          report_error(_("Registration client error."), e)
+          report_error(prefix + _("Registration client error."), e)
         when Net::HTTPServerError
-          report_error(_("Registration server error.\nRetry registration later."), e)
+          report_error(prefix + _("Registration server error.\nRetry registration later."), e)
         else
-          report_error(_("Registration failed."), e)
+          report_error(prefix + _("Registration failed."), e)
         end
         false
       rescue ::Registration::ServiceError => e
