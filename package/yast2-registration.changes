@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon May  5 15:34:47 UTC 2014 - jreidinger@suse.com
+
+- add product name when something wrong happen with addon
+  registration(bnc#872481)
+- register as much addons as possible and skip only failed ones
+- improve progress to print which addon it register
+- 3.1.43
+
+-------------------------------------------------------------------
 Fri May  2 12:01:45 UTC 2014 - lslezak@suse.cz
 
 - ask user to import an unknown SSL certificate (bnc#874745)
