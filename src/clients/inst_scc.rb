@@ -139,7 +139,7 @@ module Yast
 
                 base_product = ::Registration::SwMgmt.base_product_to_register
                 base_product["reg_code"] = reg_code
-                registered_services = @registration.register_products([base_product])
+                registered_services = @registration.register_product(base_product)
 
                 # remember the base products for later (to get the respective addons)
                 ::Registration::Storage::BaseProduct.instance.product = base_product
@@ -570,21 +570,22 @@ module Yast
         }
       end
 
-      ret = ::Registration::SccHelpers.catch_registration_errors do
-        product_services = Popup.Feedback(
-          n_("Registering Product...", "Registering Products...", products.size),
-          _("Contacting the SUSE Customer Center server")) do
+      product_succeed = product.map do |product|
+        ::Registration::SccHelpers.catch_registration_errors("#{product["name"]}:") do
+          product_service = Popup.Feedback(
+            # %s is name of given product
+            _("Registering Product %s ...") % product["name"],
+            _("Contacting the SUSE Customer Center server")) do
 
-          @registration.register_products(products)
+            @registration.register_product(product)
+          end
+
+          # select repositories to use in installation (e.g. enable/disable Updates)
+          select_repositories(product_service) if Mode.installation
         end
-
-        # select repositories to use in installation (e.g. enable/disable Updates)
-        select_repositories(product_services) if Mode.installation
-
-        return true
       end
 
-      return ret
+      return !product_succeed.include?(false) # succeed only if noone failed
     end
 
     # run the addon reg codes dialog

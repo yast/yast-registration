@@ -32,7 +32,7 @@ describe "Registration::Registration" do
     end
   end
 
-  describe ".register_products" do
+  describe ".register_product" do
     it "registers the selected product and returns added zypp services" do
       product = {
         "arch" => "x86_64",
@@ -60,7 +60,7 @@ describe "Registration::Registration" do
       expect(SUSE::Connect::Credentials).to receive(:read)
         .with(SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
 
-      service_list = Registration::Registration.new.register_products([product])
+      service_list = Registration::Registration.new.register_product(product)
       expect(service_list).to eq([service])
     end
   end
