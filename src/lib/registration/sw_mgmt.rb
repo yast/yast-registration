@@ -34,7 +34,7 @@ module Registration
   Yast.import "Pkg"
   Yast.import "PackageLock"
   Yast.import "Installation"
-  Yast.import "PackageCallbacksInit"
+  Yast.import "PackageCallbacks"
 
   class SwMgmt
     include Yast
@@ -51,7 +51,7 @@ module Registration
       return false unless lock["connected"]
 
       # display progress when refreshing repositories
-      PackageCallbacksInit.InitPackageCallbacks
+      PackageCallbacks.InitPackageCallbacks
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
       Pkg.SourceRestore

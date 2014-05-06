@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May  6 12:38:51 UTC 2014 - lslezak@suse.cz
+
+- use PackageCallbacks instead of obsoleted PackageCallbacksInit
+  module (bnc#873936)
+
+-------------------------------------------------------------------
 Tue May  6 07:07:56 UTC 2014 - lslezak@suse.cz
 
 - fixed a crash in addon registration
