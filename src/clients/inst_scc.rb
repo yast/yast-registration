@@ -139,9 +139,8 @@ module Yast
               # then register the product(s)
               base_product = ::Registration::SwMgmt.base_product_to_register
               product_services = Popup.Feedback(_(CONTACTING_MESSAGE),
-                _("Registering %s ...") % base_product["display_name"] ||
-                  base_product["short_name"] ||
-                  base_product["name"]) do
+                _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+              ) do
 
                 base_product["reg_code"] = reg_code
                 registered_services = @registration.register_product(base_product)
@@ -170,10 +169,6 @@ module Yast
     # content for the main registration dialog
     def scc_credentials_dialog
       base_product = ::Registration::SwMgmt.find_base_product
-      base_product_name = base_product["display_name"] ||
-        base_product["short_name"] ||
-        base_product["name"] ||
-        _("Unknown product")
 
       options = ::Registration::Storage::InstallationOptions.instance
 
@@ -203,7 +198,7 @@ module Yast
         HSquash(
           VBox(
             VSpacing(1),
-            Left(Heading(base_product_name)),
+            Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
             VSpacing(1),
             Label(info)
           )

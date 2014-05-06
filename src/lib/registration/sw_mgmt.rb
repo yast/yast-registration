@@ -98,6 +98,16 @@ module Registration
       products.first
     end
 
+    # create UI label for a base product
+    # @param [Hash] Product (hash from pkg-bindings)
+    # @return [String] UI Label
+    def self.base_product_label(base_product)
+      base_product["display_name"] ||
+        base_product["short_name"] ||
+        base_product["name"] ||
+        _("Unknown product")
+    end
+
     def self.base_product_to_register
       # just for debugging:
       # return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
