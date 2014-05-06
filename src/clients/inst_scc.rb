@@ -37,6 +37,8 @@ require "registration/registration"
 module Yast
   class InstSccClient < Client
     include Yast::Logger
+    extend Yast::I18n
+
 
     # the maximum number of reg. codes displayed vertically,
     # this is the limit for 80x25 textmode UI
@@ -44,6 +46,9 @@ module Yast
 
     # width of reg code input field widget
     REG_CODE_WIDTH = 33
+
+    # popup message
+    CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
       Yast.import "UI"
@@ -123,8 +128,8 @@ module Yast
             if !::Registration::Registration.is_registered?
               log.info "Registering system, distro_target: #{distro_target}"
 
-              Popup.Feedback(_("Registering the System..."),
-                _("Contacting the SUSE Customer Center server")) do
+              Popup.Feedback(_(CONTACTING_MESSAGE),
+                _("Registering the System...")) do
 
                 @registration.register(email, reg_code, distro_target)
               end
@@ -132,11 +137,11 @@ module Yast
 
             if !options.base_registered
               # then register the product(s)
-              product_services = Popup.Feedback(
-                _("Registering Product..."),
-                _("Contacting the SUSE Customer Center server")) do
+              base_product = ::Registration::SwMgmt.base_product_to_register
+              product_services = Popup.Feedback(_(CONTACTING_MESSAGE),
+                _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+              ) do
 
-                base_product = ::Registration::SwMgmt.base_product_to_register
                 base_product["reg_code"] = reg_code
                 registered_services = @registration.register_product(base_product)
 
@@ -164,10 +169,6 @@ module Yast
     # content for the main registration dialog
     def scc_credentials_dialog
       base_product = ::Registration::SwMgmt.find_base_product
-      base_product_name = base_product["display_name"] ||
-        base_product["short_name"] ||
-        base_product["name"] ||
-        _("Unknown product")
 
       options = ::Registration::Storage::InstallationOptions.instance
 
@@ -197,7 +198,7 @@ module Yast
         HSquash(
           VBox(
             VSpacing(1),
-            Left(Heading(base_product_name)),
+            Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
             VSpacing(1),
             Label(info)
           )
@@ -502,8 +503,8 @@ module Yast
       return @available_addons if @available_addons
 
       @available_addons = Popup.Feedback(
-        _("Loading Available Add-on Products and Extensions..."),
-        _("Contacting the SUSE Customer Center server")) do
+        _(CONTACTING_MESSAGE),
+        _("Loading Available Add-on Products and Extensions...")) do
 
         @registration.get_addon_list
       end
@@ -560,25 +561,23 @@ module Yast
       #
       # log.info "Addon registration order: #{registration_order.map(&:short_name)}"
 
-      products = registration_order.map do |a|
-        {
-          "name" => a.product_ident,
-          "reg_code" => @known_reg_codes[a.product_ident],
-          "arch" => a.arch,
-          "version" => a.version
-        }
-      end
-
       init_registration
 
-      product_succeed = product.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors("#{product["name"]}:") do
+      product_succeed = registration_order.map do |product|
+        ::Registration::SccHelpers.catch_registration_errors("#{product.short_name}:") do
           product_service = Popup.Feedback(
+            _(CONTACTING_MESSAGE),
             # %s is name of given product
-            _("Registering Product %s ...") % product["name"],
-            _("Contacting the SUSE Customer Center server")) do
+            _("Registering %s ...") % product.short_name) do
 
-            @registration.register_product(product)
+            product_data = {
+              "name" => product.product_ident,
+              "reg_code" => @known_reg_codes[product.product_ident],
+              "arch" => product.arch,
+              "version" => product.version
+            }
+
+            @registration.register_product(product_data)
           end
 
           # select repositories to use in installation (e.g. enable/disable Updates)
@@ -648,9 +647,6 @@ module Yast
       VBox(
         Heading(_("The system is already registered.")),
         VSpacing(1),
-        Label(_("Note: Registering your system again will\n" +
-              "consume an additional subscription.")),
-        VSpacing(1),
         PushButton(Id(:register), _("Register Again"))
       )
     end
@@ -674,6 +670,8 @@ module Yast
       while !continue_buttons.include?(ret) do
         ret = UI.UserInput
       end
+
+      Wizard.RestoreNextButton
 
       return ret
     end
