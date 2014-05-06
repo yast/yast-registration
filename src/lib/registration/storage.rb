@@ -53,7 +53,7 @@ module Registration
       end
     end
 
-    class Cache < Struct.new(:available_addons, :reg_url)
+    class Cache < Struct.new(:available_addons, :reg_url, :reg_url_cached)
       include Singleton
     end
 

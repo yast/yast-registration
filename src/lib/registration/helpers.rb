@@ -74,7 +74,7 @@ module Registration
     def self.registration_url
       # cache the URL to use the same server for all operations
       cache = ::Registration::Storage::Cache.instance
-      return cache.reg_url if cache.reg_url
+      return cache.reg_url if cache.reg_url_cached
 
       # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
       # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
@@ -93,6 +93,7 @@ module Registration
 
       # cache the URL
       ::Registration::Storage::Cache.instance.reg_url = url
+      ::Registration::Storage::Cache.instance.reg_url_cached = true
       url
     end
 

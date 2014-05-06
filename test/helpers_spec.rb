@@ -19,7 +19,7 @@ describe "Registration::Helpers" do
       stub_const("Yast::Linuxrc", yast_linuxrc)
       stub_const("Yast::WFM", yast_wfm)
       # reset the cache befor each test
-      ::Registration::Storage::Cache.instance.reg_url = nil
+      ::Registration::Storage::Cache.instance.reg_url_cached = nil
     end
 
     context "at installation" do
