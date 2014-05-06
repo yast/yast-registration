@@ -87,7 +87,7 @@ module Registration
         else
           # however during installation it's not set yet
           # but the base product comes from the first repository
-          p["status"] == :selected && p["source"] == 0
+          p["source"] == 0
         end
       end
 
