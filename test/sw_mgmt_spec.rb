@@ -94,8 +94,8 @@ describe "Registration::SwMgmt" do
     let(:service_url) { "https://example.com/foo/bar?credentials=TEST_credentials" }
     let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
     let(:product_services) do
-      SUSE::Connect::Service.new({service_name => service_url}, ["SLES:SLES12-Pool"],
-        ["SLES:SLES12-Pool"])
+      SUSE::Connect::Service.new({service_name => service_url}, ["SLES12-Pool"],
+        ["SLES12-Pool"])
     end
 
     before do
