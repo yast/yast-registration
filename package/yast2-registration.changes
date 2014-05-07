@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May  7 11:38:30 UTC 2014 - lslezak@suse.cz
+
+- fixed setting the repository status (to properly enable e.g. the
+  *-Pool repositories) (bnc#875839)
+- 3.1.48
+
+-------------------------------------------------------------------
 Tue May  6 12:38:51 UTC 2014 - lslezak@suse.cz
 
 - use PackageCallbacks instead of obsoleted PackageCallbacksInit

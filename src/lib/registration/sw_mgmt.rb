@@ -188,8 +188,14 @@ module Registration
       end
 
       # activate the requested repository setup
-      repos_enable(product_services.map(&:enabled).flatten)
-      repos_disable_autorefresh(product_services.map(&:norefresh).flatten)
+      product_services.each do |product_service|
+        # there is always only one service
+        service_name = product_service.sources.first.name
+        log.info "Updating repositories for service: #{service_name}"
+
+        repos_enable(service_aliases(service_name, product_service.enabled))
+        repos_disable_autorefresh(service_aliases(service_name, product_service.norefresh))
+      end
     ensure
       Pkg.SourceSaveAll
     end
@@ -274,8 +280,14 @@ module Registration
         end
       end
     end
+    
+    # get libzypp repository aliases for a service
+    # (libzypp internally uses the service name as the prefix)
+    def self.service_aliases(service, aliases)
+      aliases.map{ |a| "#{service}:#{a}"}
+    end
 
-    private_class_method :each_repo
+    private_class_method :each_repo, :service_aliases
   end
 end
 
