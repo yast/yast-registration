@@ -146,6 +146,14 @@ module Registration
         credentials_file = Helpers.credentials_from_url(source.url)
 
         if credentials_file
+          if Mode.update
+            # at update libzypp is already switched to /mnt target,
+            # update the path accordingly
+            credentials_file = File.join(Installation.destdir,
+              ::SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR,
+              credentials_file)
+            log.info "Using #{credentials_file} credentials path in update mode"
+          end
           # TODO FIXME: SCC currenly does not return credentials for the service,
           # just reuse the global credentials and save to a different file
           service_credentials = credentials.dup

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May  7 13:17:23 UTC 2014 - lslezak@suse.cz
+
+- Save the repository credentials to /mnt during upgrade (libzypp
+  is already switched to the target system) (bnc#876151)
+- 3.1.49
+
+-------------------------------------------------------------------
 Wed May  7 11:38:30 UTC 2014 - lslezak@suse.cz
 
 - fixed setting the repository status (to properly enable e.g. the

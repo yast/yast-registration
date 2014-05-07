@@ -97,6 +97,7 @@ describe "Registration::SwMgmt" do
       SUSE::Connect::Service.new({service_name => service_url}, ["SLES12-Pool"],
         ["SLES12-Pool"])
     end
+    let(:yast_mode) { double("Yast::Mode") }
 
     before do
       expect(yast_pkg).to receive(:SourceSaveAll).and_return(true).twice
@@ -112,6 +113,9 @@ describe "Registration::SwMgmt" do
       repos.each do |id, repo|
         allow(yast_pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
       end
+
+      stub_const("Yast::Mode", yast_mode)
+      expect(yast_mode).to receive(:update).and_return(false)
     end
 
     it "it creates a new service if the service does not exist yet" do
