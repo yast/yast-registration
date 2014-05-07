@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May  7 17:55:39 UTC 2014 - lslezak@suse.cz
+
+- allow registering extensions in installed system without
+  re-registering the base product (bnc#876328)
+
+-------------------------------------------------------------------
 Wed May  7 13:17:23 UTC 2014 - lslezak@suse.cz
 
 - Save the repository credentials to /mnt during upgrade (libzypp

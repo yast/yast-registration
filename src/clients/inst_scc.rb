@@ -144,9 +144,6 @@ module Yast
 
                 base_product["reg_code"] = reg_code
                 registered_services = @registration.register_product(base_product)
-
-                # remember the base products for later (to get the respective addons)
-                ::Registration::Storage::BaseProduct.instance.product = base_product
                 options.base_registered = true
 
                 registered_services
@@ -502,6 +499,8 @@ module Yast
       @available_addons = ::Registration::Storage::Cache.instance.available_addons
       return @available_addons if @available_addons
 
+      init_registration
+
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
         _("Loading Available Add-on Products and Extensions...")) do
@@ -646,8 +645,12 @@ module Yast
     def registered_dialog
       VBox(
         Heading(_("The system is already registered.")),
+        VSpacing(2),
+        # button label
+        PushButton(Id(:register), _("Register Again")),
         VSpacing(1),
-        PushButton(Id(:register), _("Register Again"))
+        # button label
+        PushButton(Id(:extensions), _("Select Extensions"))
       )
     end
 
@@ -664,7 +667,7 @@ module Yast
 
       Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
 
-      continue_buttons = [:next, :back, :cancel, :abort, :register]
+      continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
 
       ret = nil
       while !continue_buttons.include?(ret) do
@@ -705,11 +708,12 @@ module Yast
       sequence = {
         "ws_start" => "check",
         "check" => {
-          :auto     => :auto,
-          :abort    => :abort,
-          :cancel   => :abort,
-          :register => "register",
-          :next     => :next
+          :auto       => :auto,
+          :abort      => :abort,
+          :cancel     => :abort,
+          :register   => "register",
+          :extensions => "select_addons",
+          :next       => :next
         },
         "register" => {
           :abort    => :abort,
@@ -737,8 +741,10 @@ module Yast
     end
 
     def init_registration
-      url = ::Registration::Helpers.registration_url
-      @registration = ::Registration::Registration.new(url)
+      if !@registration
+        url = ::Registration::Helpers.registration_url
+        @registration = ::Registration::Registration.new(url)
+      end
     end
 
   end unless defined?(InstSccClient)
