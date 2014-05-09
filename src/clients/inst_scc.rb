@@ -276,8 +276,6 @@ module Yast
         add_extra_spacing = true
       end
 
-      registered = ::Registration::Storage::Cache.instance.registered_addons
-
       addons.each do |addon|
         label = addon.short_name
         label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
@@ -285,7 +283,7 @@ module Yast
         box.params << Left(CheckBox(Id(addon.product_ident),
             Opt(:notify),
             addon.short_name,
-            @selected_addons.include?(addon) || registered.include?(addon.product_ident)))
+            @selected_addons.include?(addon) || registered_addons.include?(addon.product_ident)))
 
         # add extra spacing when there are just few addons, in GUI always
         box.params << VSpacing(0.7) if add_extra_spacing
@@ -410,9 +408,7 @@ module Yast
           selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
 
           # ignore already registered addons
-          selected.reject! do |a|
-            ::Registration::Storage::Cache.instance.registered_addons.include?(a.product_ident)
-          end
+          selected.reject!{|a| registered_addons.include?(a.product_ident) }
 
           if !supported_addon_count(selected)
             ret = nil
@@ -459,7 +455,7 @@ module Yast
       )
 
       # disable already registered addons in UI
-      ::Registration::Storage::Cache.instance.registered_addons.each do |addon|
+      registered_addons.each do |addon|
         UI.ChangeWidget(Id(addon), :Enabled, false)
       end
 
@@ -602,7 +598,7 @@ module Yast
           select_repositories(product_service) if Mode.installation
 
           # move from selected to registered
-          ::Registration::Storage::Cache.instance.registered_addons << product.product_ident
+          registered_addons << product.product_ident
           @selected_addons.reject!{|selected| selected.product_ident == product.product_ident}
         end
       end
@@ -761,6 +757,11 @@ module Yast
     def init_registration
       url = ::Registration::Helpers.registration_url
       @registration = ::Registration::Registration.new(url)
+    end
+
+    # helper method for accessing the registered addons
+    def registered_addons
+      ::Registration::Storage::Cache.instance.registered_addons
     end
 
   end unless defined?(InstSccClient)
