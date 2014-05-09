@@ -190,6 +190,8 @@ module Yast
         info << _("If you skip the registration now be sure to do so in the installed system.")
       end
 
+      registered = ::Registration::Registration.is_registered?
+
       VBox(
         Mode.installation ?
           Right(PushButton(Id(:network), _("Network Configuration..."))) :
@@ -200,7 +202,9 @@ module Yast
             VSpacing(1),
             Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
             VSpacing(1),
-            Label(info)
+            registered ?
+              Heading(_("The system is already registered.")) :
+              Label(info)
           )
         ),
         VSpacing(UI.TextMode ? 1 : 2),
@@ -212,7 +216,7 @@ module Yast
           )
         ),
         VSpacing(UI.TextMode ? 1 : 3),
-        Mode.normal ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
+        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
     end
@@ -272,12 +276,16 @@ module Yast
         add_extra_spacing = true
       end
 
+      registered = ::Registration::Storage::Cache.instance.registered_addons
+
       addons.each do |addon|
         label = addon.short_name
         label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
 
-        box.params << Left(CheckBox(Id(addon.product_ident), Opt(:notify),
-            addon.short_name, @selected_addons.include?(addon)))
+        box.params << Left(CheckBox(Id(addon.product_ident),
+            Opt(:notify),
+            addon.short_name,
+            @selected_addons.include?(addon) || registered.include?(addon.product_ident)))
 
         # add extra spacing when there are just few addons, in GUI always
         box.params << VSpacing(0.7) if add_extra_spacing
@@ -401,6 +409,11 @@ module Yast
         when :next
           selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
 
+          # ignore already registered addons
+          selected.reject! do |a|
+            ::Registration::Storage::Cache.instance.registered_addons.include?(a.product_ident)
+          end
+
           if !supported_addon_count(selected)
             ret = nil
             next
@@ -444,6 +457,11 @@ module Yast
         GetInstArgs.enable_back || Mode.normal,
         GetInstArgs.enable_next || Mode.normal
       )
+
+      # disable already registered addons in UI
+      ::Registration::Storage::Cache.instance.registered_addons.each do |addon|
+        UI.ChangeWidget(Id(addon), :Enabled, false)
+      end
 
       handle_addon_selection_dialog(addons)
     end
@@ -582,6 +600,10 @@ module Yast
 
           # select repositories to use in installation (e.g. enable/disable Updates)
           select_repositories(product_service) if Mode.installation
+
+          # move from selected to registered
+          ::Registration::Storage::Cache.instance.registered_addons << product.product_ident
+          @selected_addons.reject!{|selected| selected.product_ident == product.product_ident}
         end
       end
 

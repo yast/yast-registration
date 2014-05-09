@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri May  9 12:27:20 UTC 2014 - lslezak@suse.cz
+
+- remember registered extensions, do not register them again
+  and disable the checkboxes (extensions cannot be "unregistered")
+- display registered status in the main dialog
+
+-------------------------------------------------------------------
 Wed May  7 13:17:23 UTC 2014 - lslezak@suse.cz
 
 - Save the repository credentials to /mnt during upgrade (libzypp
