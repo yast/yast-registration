@@ -610,7 +610,7 @@ module Yast
       else
         Wizard.SetContents(
           # dialog title
-          _("Extensions Registration Codes"),
+          _("Extension Registration Codes"),
           # display only the products which need a registration code
           addon_regcodes_dialog_content(missing_regcodes),
           # FIXME: help text
