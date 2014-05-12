@@ -182,12 +182,12 @@ module Yast
 
       if !Mode.normal
         # add a paragraph separator
-        info << "\n\n"
+        info += "\n\n"
 
         # label text describing the registration (2/2),
         # not displayed in installed system
         # use \n to split to more lines if needed (use max. 76 chars/line)
-        info << _("If you skip the registration now be sure to do so in the installed system.")
+        info += _("If you skip the registration now be sure to do so in the installed system.")
       end
 
       VBox(
