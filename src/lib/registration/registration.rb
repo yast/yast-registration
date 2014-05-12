@@ -86,7 +86,7 @@ module Registration
 
     def get_addon_list
       # extensions for base product
-      base_product = ::Registration::Storage::BaseProduct.instance.product
+      base_product = ::Registration::SwMgmt.find_base_product
       params = connect_params(:product_ident => {:name => base_product["name"]})
 
       log.info "Reading available addons for product: #{base_product["name"]}"
@@ -110,7 +110,7 @@ module Registration
         :verify_callback => lambda do |verify_ok, context|
           # we cannot raise an exception with details here (all exceptions in
           # verify_callback are caught and ignored), we need to store the error
-          # details is a global instance
+          # details in a global instance
           if !verify_ok
             log.error "SSL verification failed: #{context.error}: #{context.error_string}"
             Storage::SSLErrors.instance.ssl_error_code = context.error

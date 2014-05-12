@@ -34,11 +34,6 @@ module Registration
       include Singleton
     end
 
-    # remember the registered base product
-    class BaseProduct < Struct.new(:product)
-      include Singleton
-    end
-
     # remember the values entered by user
     class InstallationOptions
       include Singleton
