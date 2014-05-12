@@ -322,7 +322,7 @@ module Yast
 
       VBox(
         VStretch(),
-        Left(Heading(_("Available Extensions"))),
+        Left(Heading(_("Available Extensions and Modules"))),
         VWeight(75, MarginBox(2, 1, HBox(
               vbox1,
               vbox2
@@ -330,7 +330,7 @@ module Yast
         Left(Label(_("Details"))),
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an extension to show details here") + "</small>")),
+                _("Select an extension or a module to show details here") + "</small>")),
         ),
         media_checkbox,
         VSpacing(0.4),
@@ -443,7 +443,7 @@ module Yast
         _("Extension Selection"),
         addon_selection_dialog_content(addons),
         # help text for add-ons installation, %s is URL
-        _("<p>\nTo install an extension product from separate media together with the product, select\n" +
+        _("<p>\nTo install an extension or a module from separate media together with the product, select\n" +
             "<b>Include Extensions from Separate Media</b>.</p>\n" +
             "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
         "http://drivers.suse.com",
@@ -614,7 +614,7 @@ module Yast
       if missing_regcodes.empty?
         Wizard.SetContents(
           # dialog title
-          _("Register Extensions"),
+          _("Register Extensions and Modules"),
           # display only the products which need a registration code
           Empty(),
           # FIXME: help text
@@ -627,7 +627,7 @@ module Yast
       else
         Wizard.SetContents(
           # dialog title
-          _("Extension Registration Codes"),
+          _("Extension and Module Registration Codes"),
           # display only the products which need a registration code
           addon_regcodes_dialog_content(missing_regcodes),
           # FIXME: help text
