@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May  7 15:09:58 UTC 2014 - lslezak@suse.cz
+
+- use "extension" term consistently (bnc#875199)
+
+-------------------------------------------------------------------
 Wed May  7 13:17:23 UTC 2014 - lslezak@suse.cz
 
 - Save the repository credentials to /mnt during upgrade (libzypp

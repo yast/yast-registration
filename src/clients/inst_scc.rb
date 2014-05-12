@@ -297,7 +297,7 @@ module Yast
           VSpacing(0.4),
           HBox(
             HSpacing(1),
-            Left(CheckBox(Id(:media), _("In&clude Add-on Products from Separate Media"),
+            Left(CheckBox(Id(:media), _("In&clude Extensions from Separate Media"),
                 Installation.add_on_selected)),
           )
         )
@@ -327,7 +327,7 @@ module Yast
         Left(Label(_("Details"))),
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an addon to show details here") + "</small>")),
+                _("Select an extension to show details here") + "</small>")),
         ),
         media_checkbox,
         VSpacing(0.4),
@@ -437,8 +437,8 @@ module Yast
         _("Extension Selection"),
         addon_selection_dialog_content(addons),
         # help text for add-ons installation, %s is URL
-        _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
-            "<b>Include Add-on Products from Separate Media</b>.</p>\n" +
+        _("<p>\nTo install an extension product from separate media together with the product, select\n" +
+            "<b>Include Extensions from Separate Media</b>.</p>\n" +
             "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
         "http://drivers.suse.com",
         GetInstArgs.enable_back || Mode.normal,
@@ -597,7 +597,7 @@ module Yast
       if missing_regcodes.empty?
         Wizard.SetContents(
           # dialog title
-          _("Registering Selected Add-on Products and Extensions"),
+          _("Register Extensions"),
           # display only the products which need a registration code
           Empty(),
           # FIXME: help text
@@ -610,7 +610,7 @@ module Yast
       else
         Wizard.SetContents(
           # dialog title
-          _("Enter Registration Codes for Selected Add-on Products and Extensions"),
+          _("Extension Registration Codes"),
           # display only the products which need a registration code
           addon_regcodes_dialog_content(missing_regcodes),
           # FIXME: help text
