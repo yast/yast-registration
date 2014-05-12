@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
-Wed May  7 17:55:39 UTC 2014 - lslezak@suse.cz
+Wed May  7 15:09:58 UTC 2014 - lslezak@suse.cz
 
+- use "extension" term consistently (bnc#875199)
 - allow registering extensions in installed system without
   re-registering the base product (bnc#876328)
 
