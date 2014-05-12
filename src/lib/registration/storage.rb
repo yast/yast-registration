@@ -48,12 +48,19 @@ module Registration
       end
     end
 
-    class Cache < Struct.new(:available_addons, :reg_url, :reg_url_cached)
+    class Cache < Struct.new(:available_addons, :registered_addons,
+        :reg_url, :reg_url_cached)
+
       include Singleton
+
+      def initialize
+        # TODO: handle registered addons in installed system
+        self.registered_addons = []
+      end
     end
 
     # remember the details about SSL verification failure
-    # the attributes are read from
+    # the attributes are read from the SSL error context
     class SSLErrors < Struct.new(:ssl_error_code, :ssl_error_msg, :ssl_failed_cert)
       include Singleton
 
