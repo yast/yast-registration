@@ -4,6 +4,9 @@ Fri May  9 12:27:20 UTC 2014 - lslezak@suse.cz
 - remember registered extensions, do not register them again
   and disable the checkboxes (extensions cannot be "unregistered")
 - display registered status in the main dialog
+- use "extension" term consistently (bnc#875199)
+- allow registering extensions in installed system without
+  re-registering the base product (bnc#876328)
 
 -------------------------------------------------------------------
 Wed May  7 13:17:23 UTC 2014 - lslezak@suse.cz

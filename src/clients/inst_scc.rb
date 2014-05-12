@@ -144,9 +144,6 @@ module Yast
 
                 base_product["reg_code"] = reg_code
                 registered_services = @registration.register_product(base_product)
-
-                # remember the base products for later (to get the respective addons)
-                ::Registration::Storage::BaseProduct.instance.product = base_product
                 options.base_registered = true
 
                 registered_services
@@ -182,12 +179,12 @@ module Yast
 
       if !Mode.normal
         # add a paragraph separator
-        info << "\n\n"
+        info += "\n\n"
 
         # label text describing the registration (2/2),
         # not displayed in installed system
         # use \n to split to more lines if needed (use max. 76 chars/line)
-        info << _("If you skip the registration now be sure to do so in the installed system.")
+        info += _("If you skip the registration now be sure to do so in the installed system.")
       end
 
       registered = ::Registration::Registration.is_registered?
@@ -303,7 +300,7 @@ module Yast
           VSpacing(0.4),
           HBox(
             HSpacing(1),
-            Left(CheckBox(Id(:media), _("In&clude Add-on Products from Separate Media"),
+            Left(CheckBox(Id(:media), _("In&clude Extensions from Separate Media"),
                 Installation.add_on_selected)),
           )
         )
@@ -333,7 +330,7 @@ module Yast
         Left(Label(_("Details"))),
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an addon to show details here") + "</small>")),
+                _("Select an extension to show details here") + "</small>")),
         ),
         media_checkbox,
         VSpacing(0.4),
@@ -446,8 +443,8 @@ module Yast
         _("Extension Selection"),
         addon_selection_dialog_content(addons),
         # help text for add-ons installation, %s is URL
-        _("<p>\nTo install an add-on product from separate media together with &product;, select\n" +
-            "<b>Include Add-on Products from Separate Media</b>.</p>\n" +
+        _("<p>\nTo install an extension product from separate media together with the product, select\n" +
+            "<b>Include Extensions from Separate Media</b>.</p>\n" +
             "<p>If you need specific hardware drivers for installation, see <i>%s</i> site.</p>") %
         "http://drivers.suse.com",
         GetInstArgs.enable_back || Mode.normal,
@@ -515,6 +512,8 @@ module Yast
       # cache the available addons
       @available_addons = ::Registration::Storage::Cache.instance.available_addons
       return @available_addons if @available_addons
+
+      init_registration
 
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
@@ -615,7 +614,7 @@ module Yast
       if missing_regcodes.empty?
         Wizard.SetContents(
           # dialog title
-          _("Registering Selected Add-on Products and Extensions"),
+          _("Register Extensions"),
           # display only the products which need a registration code
           Empty(),
           # FIXME: help text
@@ -628,7 +627,7 @@ module Yast
       else
         Wizard.SetContents(
           # dialog title
-          _("Enter Registration Codes for Selected Add-on Products and Extensions"),
+          _("Extension Registration Codes"),
           # display only the products which need a registration code
           addon_regcodes_dialog_content(missing_regcodes),
           # FIXME: help text
@@ -664,8 +663,12 @@ module Yast
     def registered_dialog
       VBox(
         Heading(_("The system is already registered.")),
+        VSpacing(2),
+        # button label
+        PushButton(Id(:register), _("Register Again")),
         VSpacing(1),
-        PushButton(Id(:register), _("Register Again"))
+        # button label
+        PushButton(Id(:extensions), _("Select Extensions"))
       )
     end
 
@@ -682,7 +685,7 @@ module Yast
 
       Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
 
-      continue_buttons = [:next, :back, :cancel, :abort, :register]
+      continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
 
       ret = nil
       while !continue_buttons.include?(ret) do
@@ -723,11 +726,12 @@ module Yast
       sequence = {
         "ws_start" => "check",
         "check" => {
-          :auto     => :auto,
-          :abort    => :abort,
-          :cancel   => :abort,
-          :register => "register",
-          :next     => :next
+          :auto       => :auto,
+          :abort      => :abort,
+          :cancel     => :abort,
+          :register   => "register",
+          :extensions => "select_addons",
+          :next       => :next
         },
         "register" => {
           :abort    => :abort,
@@ -755,8 +759,10 @@ module Yast
     end
 
     def init_registration
-      url = ::Registration::Helpers.registration_url
-      @registration = ::Registration::Registration.new(url)
+      if !@registration
+        url = ::Registration::Helpers.registration_url
+        @registration = ::Registration::Registration.new(url)
+      end
     end
 
     # helper method for accessing the registered addons
