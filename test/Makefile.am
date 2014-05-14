@@ -1,9 +1,10 @@
 TESTS = \
   addon_spec.rb \
   discover_registration_services_test.rb \
+  eula_downloader_spec.rb \
   helpers_spec.rb \
-  inst_scc_test.rb \
   import_certificate_dialog_test.rb \
+  inst_scc_test.rb \
   registration_spec.rb \
   scc_test.rb \
   sw_mgmt_spec.rb

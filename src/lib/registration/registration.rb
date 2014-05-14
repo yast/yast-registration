@@ -106,6 +106,7 @@ module Registration
         :language => ::Registration::Helpers.language,
         :debug => ENV["SCCDEBUG"],
         :verbose => ENV["Y2DEBUG"] == "1",
+        :product => {}, #SwMgmt.base_product_to_register,
         # pass a verify_callback to get details about failed SSL verification
         :verify_callback => lambda do |verify_ok, context|
           # we cannot raise an exception with details here (all exceptions in

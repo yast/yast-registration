@@ -33,6 +33,7 @@ require "registration/connect_helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/registration"
+require "registration/ui/addon_eula_dialog"
 
 module Yast
   class InstSccClient < Client
@@ -678,16 +679,21 @@ module Yast
         return :register
       end
     end
+    
+    def addon_eula
+      ::Registration::UI::AddonEulaDialog.run(@selected_addons)
+    end
 
     # UI workflow definition
     def start_workflow
       aliases = {
+        # skip this when going back
+        "check"           => [ lambda { registration_check() }, true ],
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
-        "register_addons" => lambda { register_addons() },
         "media_addons"    => lambda { media_addons() },
-        # skip this when going back
-        "check"           => [ lambda { registration_check() }, true ]
+        "addon_eula"      => lambda { addon_eula() },
+        "register_addons" => lambda { register_addons() }
       }
 
       sequence = {
@@ -709,16 +715,19 @@ module Yast
         "select_addons" => {
           :abort    => :abort,
           :skip     => "media_addons",
-          :next     => "register_addons"
-        },
-        "register_addons" => {
-          :abort    => :abort,
           :next     => "media_addons"
         },
         "media_addons" => {
           :abort    => :abort,
-          :next     => :next,
-          :auto     => :auto
+          :next     => "addon_eula",
+        },
+        "addon_eula" => {
+          :abort    => :abort,
+          :next     => "register_addons"
+        },
+        "register_addons" => {
+          :abort    => :abort,
+          :next     => :next
         }
       }
 

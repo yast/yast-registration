@@ -13,6 +13,7 @@ ylibdir = @ylibdir@/registration
 ylib_DATA = \
   lib/registration/addon.rb \
   lib/registration/exceptions.rb \
+  lib/registration/eula_downloader.rb \
   lib/registration/sw_mgmt.rb \
   lib/registration/storage.rb \
   lib/registration/registration.rb \
@@ -21,6 +22,7 @@ ylib_DATA = \
 
 ylibuidir = @ylibdir@/registration/ui
 ylibui_DATA = \
+  lib/registration/ui/addon_eula_dialog.rb \
   lib/registration/ui/import_certificate_dialog.rb
 
 ylibyastdir = @ylibdir@/yast
