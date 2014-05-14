@@ -33,8 +33,8 @@ Requires:       yast2-pkg-bindings >= 2.17.20
 Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem-suse-connect
 Requires:       yast2-slp >= 3.1.2
-Requires:       yast2-addon > 3.1.3
-Requires:       yast2-packager > 3.1.14
+Requires:       yast2-addon >= 3.1.3
+Requires:       yast2-packager >= 3.1.14
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
@@ -42,6 +42,7 @@ BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
 BuildRequires:  rubygem-suse-connect
 BuildRequires:  yast2-slp >= 3.1.2
+BuildRequires:  yast2-packager >= 3.1.14
 
 BuildArch:      noarch
 
