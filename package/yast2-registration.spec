@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.51
+Version:        3.1.52
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -33,6 +33,8 @@ Requires:       yast2-pkg-bindings >= 2.17.20
 Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem-suse-connect
 Requires:       yast2-slp >= 3.1.2
+Requires:       yast2-addon > 3.1.3
+Requires:       yast2-packager > 3.1.14
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files

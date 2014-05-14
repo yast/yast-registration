@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 13 20:12:46 UTC 2014 - lslezak@suse.cz
+
+- allow adding media addons without registering the base system
+  (bnc#870625)
+- 3.1.52
+
+-------------------------------------------------------------------
 Mon May 12 13:35:09 UTC 2014 - lslezak@suse.cz
 
 - use "modules" term as well (bnc#875199#c10)
