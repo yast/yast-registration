@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 15 13:36:12 UTC 2014 - lslezak@suse.cz
+
+- fixed package dependency (it is 'yast2-add-on')
+- 3.1.53
+
+-------------------------------------------------------------------
 Tue May 13 20:12:46 UTC 2014 - lslezak@suse.cz
 
 - allow adding media addons without registering the base system
