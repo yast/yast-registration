@@ -106,6 +106,10 @@ module Registration
         :language => ::Registration::Helpers.language,
         :debug => ENV["SCCDEBUG"],
         :verbose => ENV["Y2DEBUG"] == "1",
+        # TODO FIXME: workaround: just a dummy value (it is used only from
+        # suse-connect command line, makes no sense in Yast), suse-connect
+        # should be fixed to not call zypper when the :product key is missing
+        :product => {},
         # pass a verify_callback to get details about failed SSL verification
         :verify_callback => lambda do |verify_ok, context|
           # we cannot raise an exception with details here (all exceptions in
