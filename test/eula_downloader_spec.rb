@@ -60,7 +60,8 @@ describe "Registration::EulaDownloader" do
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
 
-        expect{loader.download}.to raise_error RuntimeError, "Download failed"
+        expect{loader.download}.to raise_error RuntimeError,
+          "Downloading https://example.com/eula/directory.yast failed: Not Found"
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])
