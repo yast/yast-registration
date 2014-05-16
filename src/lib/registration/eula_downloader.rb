@@ -31,7 +31,7 @@ module Registration
 
   # class for downloading addon EULAs from the registration server
   class EulaDownloader
-    attr_accessor :base_url, :target_dir, :insecure
+    attr_reader :base_url, :target_dir, :insecure
 
     include Yast::Logger
 
@@ -46,7 +46,7 @@ module Registration
 
     # start the download
     def download
-      licenses = download_license_index
+      licenses = available_licenses
 
       # download the files listed in the index
       licenses.each do |license|
@@ -55,7 +55,7 @@ module Registration
 
         log.info "Downloading license from #{license_file_url}..."
         license_text = download_file(license_file_url)
-        log.info "Downloaded license size: #{license_text.size}"
+        log.info "Downloaded license: #{license_text[0..32].inspect}... (#{license_text.size} bytes)"
 
         license_file_name = File.join(target_dir, license)
 
@@ -67,32 +67,32 @@ module Registration
     private
 
     def download_file(file_url)
-      url = file_url.is_a?(URI) ? file_url : URI(file_url)
-      http = Net::HTTP.new(url.host, url.port)
+      file_url = URI(file_url) unless file_url.is_a?(URI)
+      http = Net::HTTP.new(file_url.host, file_url.port)
 
       # switch to HTTPS connection if needed
-      if url.is_a? URI::HTTPS
+      if file_url.is_a? URI::HTTPS
         http.use_ssl = true
         http.verify_mode = insecure ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
         log.warn("Warning: SSL certificate verification disabled") if insecure
       else
-        log.warn("Warning: Using insecure \"#{url.scheme}\" transfer protocol")
+        log.warn("Warning: Using insecure \"#{file_url.scheme}\" transfer protocol")
       end
 
       # TODO: handle redirection?
-      request = Net::HTTP::Get.new(url.request_uri)
+      request = Net::HTTP::Get.new(file_url.request_uri)
       response = http.request(request)
 
       if response.is_a?(Net::HTTPSuccess)
         return response.body
       else
         log.error "HTTP request failed: Error #{response.code}:#{response.message}: #{response.body}"
-        raise "Download failed"
+        raise "Downloading #{file_url} failed: #{response.message}"
       end
     end
 
     # returns list of available files in a remote location
-    def download_license_index
+    def available_licenses
       # download the index file (directory.yast)
       index_url = URI(base_url)
 
@@ -104,7 +104,7 @@ module Registration
       licenses = download_file(index_url).split
 
       # the index file itself might be also present in the list, just remove it
-      licenses.reject!{|license| license == INDEX_FILE}
+      licenses.delete(INDEX_FILE)
       log.info "Downloaded license index: #{licenses}"
 
       licenses
