@@ -2,6 +2,7 @@
 Mon May 19 11:32:40 UTC 2014 - jreidinger@suse.com
 
 - fix sequencer in inst_scc (bnc#878534)
+- adapt to changes in suseconnect API(bnc#875456)
 - 3.1.55
 
 -------------------------------------------------------------------
