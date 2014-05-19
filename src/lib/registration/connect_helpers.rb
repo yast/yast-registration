@@ -76,7 +76,7 @@ module Registration
         Yast::Report.Error(_("Connection time out."))
         false
       rescue SUSE::Connect::ApiError => e
-        log.error "Received error: #{e.code}: #{e.body}"
+        log.error "Received error: #{e.code}: #{e.response.body}"
         case e.response
         when Net::HTTPUnauthorized, Net::HTTPUnprocessableEntity
           # Error popup
@@ -130,7 +130,7 @@ module Registration
     private
 
     def self.report_error(msg, api_error)
-      localized_error = api_error.body["localized_error"]
+      localized_error = api_error.message
 
       Yast::Report.Error(error_with_details(msg, localized_error))
     end
