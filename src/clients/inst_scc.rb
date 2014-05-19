@@ -622,7 +622,11 @@ module Yast
       # display global enable/disable switch
       SourceDialogs.display_addon_checkbox = true
 
-      WFM.call("inst_add-on")
+      ret = WFM.call("inst_add-on")
+      ret = :next if [:auto, :finish].include? ret
+      ret = :abort if [:back].include? ret
+
+      return ret
     ensure
       # make sure to revert the change if something goes wrong
       SourceDialogs.display_addon_checkbox = false
