@@ -75,7 +75,8 @@ module Registration
             log.error "Download failed: #{e.message}: #{e.backtrace}"
             # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
             Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.short_name)
-            return false
+            #FIXME change for GA!!!
+            return true
           end
 
           Yast::ProductLicense.AskLicensesAgreementWithHeading(
