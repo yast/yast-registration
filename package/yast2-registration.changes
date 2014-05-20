@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 20 09:05:39 UTC 2014 - jreidinger@suse.com
+
+- Allow failed eula download for betas to make testing easier
+- 3.1.56
+
+-------------------------------------------------------------------
 Mon May 19 11:32:40 UTC 2014 - jreidinger@suse.com
 
 - fix sequencer in inst_scc (bnc#878534)
