@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 21 20:14:26 UTC 2014 - jreidinger@suse.com
+
+- Do not abort after pressing back in add-on dialog (bnc#878997)
+- 3.1.57
+
+-------------------------------------------------------------------
 Tue May 20 09:05:39 UTC 2014 - jreidinger@suse.com
 
 - Allow failed eula download for betas to make testing easier
