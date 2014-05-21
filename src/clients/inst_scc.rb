@@ -624,7 +624,6 @@ module Yast
 
       ret = WFM.call("inst_add-on")
       ret = :next if [:auto, :finish].include? ret
-      ret = :abort if [:back].include? ret
 
       return ret
     ensure
