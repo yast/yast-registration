@@ -60,7 +60,7 @@ module Registration
         true
       rescue SocketError
         # Error popup
-        if Yast::Mode.installation
+        if Yast::Mode.installation || Yast::Mode.update
           if Yast::Popup.YesNo(
               _("Network is not configured, the registration server cannot be reached.\n" +
                   "Do you want to configure the network now?"))

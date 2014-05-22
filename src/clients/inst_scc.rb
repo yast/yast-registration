@@ -151,8 +151,8 @@ module Yast
                 registered_services
               end
 
-              # select repositories to use in installation (e.g. enable/disable Updates)
-              select_repositories(product_services) if Mode.installation
+              # select repositories to use in installation or update (e.g. enable/disable Updates)
+              select_repositories(product_services) if Mode.installation || Mode.update
             end
 
             return :next
@@ -192,7 +192,7 @@ module Yast
       registered = ::Registration::Registration.is_registered?
 
       VBox(
-        Mode.installation ?
+        Mode.installation || Mode.update ?
           Right(PushButton(Id(:network), _("Network Configuration..."))) :
           Empty(),
         VStretch(),
@@ -559,7 +559,7 @@ module Yast
           end
 
           # select repositories to use in installation (e.g. enable/disable Updates)
-          select_repositories(product_service) if Mode.installation
+          select_repositories(product_service) if Mode.installation || Mode.update
 
           # move from selected to registered
           registered_addons << product.product_ident
@@ -624,7 +624,6 @@ module Yast
 
       ret = WFM.call("inst_add-on")
       ret = :next if [:auto, :finish].include? ret
-      ret = :abort if [:back].include? ret
 
       return ret
     ensure
