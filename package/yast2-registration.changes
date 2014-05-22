@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 22 07:57:07 UTC 2014 - jreidinger@suse.com
+
+- Enable next button for kernel cmdline specified addons
+  (bnc#878997,bnc#879140)
+- 3.1.58
+
+-------------------------------------------------------------------
 Wed May 21 20:14:26 UTC 2014 - jreidinger@suse.com
 
 - Do not abort after pressing back in add-on dialog (bnc#878997)
