@@ -522,7 +522,7 @@ module Yast
 
     # register all selected addons
     def register_selected_addons
-      registration_order = @selected_addons
+      registration_order = @selected_addons.clone #create duplicate as array is modified in loop for registration order
       # TODO FIXME: SCC does not report dependoencies
       #      begin
       #        # compute the registration order according to the dependencies
