@@ -42,7 +42,7 @@ module Registration
         )
 
         all_accepted = addons.all? do |addon|
-          if addon.eula_url
+          if addon.eula_url && !addon.eula_url.empty?
             log.info "Addon '#{addon.short_name}' has an EULA at #{addon.eula_url}"
             accept_eula(addon)
           else
