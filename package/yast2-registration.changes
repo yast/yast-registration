@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 26 11:15:39 UTC 2014 - jreidinger@suse.com
+
+- empty eula url mean no eula (Bnc#879456)
+- 3.1.60
+
+-------------------------------------------------------------------
 Fri May 23 13:14:45 UTC 2014 - jreidinger@suse.com
 
 - fix registration of multiple addons (bnc#879421)
