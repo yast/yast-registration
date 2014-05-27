@@ -2,6 +2,7 @@ TESTS = \
   addon_spec.rb \
   discover_registration_services_test.rb \
   eula_downloader_spec.rb \
+  finish_dialog_test.rb \
   helpers_spec.rb \
   import_certificate_dialog_test.rb \
   inst_scc_test.rb \

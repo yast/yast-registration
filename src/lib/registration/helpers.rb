@@ -25,6 +25,7 @@ require "yast"
 require "uri"
 
 require "registration/storage"
+require "suse/connect"
 
 module Registration
 
@@ -139,8 +140,6 @@ module Registration
       version.sub(/-.*\z/, "")
     end
 
-    private
-
     # get registration URL in installation mode
     def self.reg_url_at_installation
       # boot command line if present
@@ -224,12 +223,15 @@ module Registration
     # (the "reg_ssl_verify=0" boot commandline option is used)
     def self.insecure_registration
       # check the boot parameter only at installation/update
-      return false unless Yast::Mode.installation || Yast::Mode.update
+      if Yast::Mode.installation || Yast::Mode.update
+        reg_ssl_verify = Yast::Linuxrc.InstallInf("reg_ssl_verify")
+        log.info "Boot reg_ssl_verify option: #{reg_ssl_verify.inspect}"
 
-      reg_ssl_verify = Yast::Linuxrc.InstallInf("reg_ssl_verify")
-      log.info "Boot reg_ssl_verify option: #{reg_ssl_verify.inspect}"
-
-      reg_ssl_verify == "0"
+        return reg_ssl_verify == "0"
+      else
+        config = SUSE::Connect::Config.new
+        return config.insecure
+      end
     end
 
     # @param x509_name [OpenSSL::X509::Name] name object
