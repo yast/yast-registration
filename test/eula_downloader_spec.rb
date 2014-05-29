@@ -17,13 +17,13 @@ describe "Registration::EulaDownloader" do
       de_eula = "Deutsch EULA"
 
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
-      index.should_receive(:body).and_return("directory.yast\nlicense.txt\nlicense.de.txt")
+      expect(index).to receive(:body).and_return("directory.yast\nlicense.txt\nlicense.de.txt")
 
       license = Net::HTTPSuccess.new("1.1", 200, "OK")
-      license.should_receive(:body).and_return(en_eula)
+      expect(license).to receive(:body).and_return(en_eula)
 
       license_de = Net::HTTPSuccess.new("1.1", 200, "OK")
-      license_de.should_receive(:body).and_return(de_eula)
+      expect(license_de).to receive(:body).and_return(de_eula)
 
       # mock the responses for respective URL paths
       Net::HTTP.any_instance.stub(:request) do |request|
@@ -58,10 +58,10 @@ describe "Registration::EulaDownloader" do
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
       Dir.mktmpdir do |tmpdir|
-        loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
+        loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
 
         expect{loader.download}.to raise_error RuntimeError,
-          "Downloading https://example.com/eula/directory.yast failed: Not Found"
+          "Downloading http://example.com/eula/directory.yast failed: Not Found"
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])
