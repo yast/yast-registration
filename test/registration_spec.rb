@@ -32,8 +32,10 @@ describe "Registration::Registration" do
     end
   end
 
-  describe ".register_product" do
-    it "registers the selected product and returns added zypp services" do
+  # product registration and product upgrade behave the same, they only
+  # call a different connect funtion internally
+  shared_examples "add_product" do |connect_method, yast_method|
+    it "adds the selected product and returns added zypp services" do
       product = {
         "arch" => "x86_64",
         "name" => "SLES",
@@ -44,7 +46,7 @@ describe "Registration::Registration" do
       source = SUSE::Connect::Source.new("service", "https://example.com")
       service = SUSE::Connect::Service.new([source], [], [])
 
-      expect(SUSE::Connect::YaST).to(receive(:activate_product)
+      expect(SUSE::Connect::YaST).to(receive(connect_method)
         .with(hash_including(
             :product_ident => {
               :name => product["name"],
@@ -57,12 +59,23 @@ describe "Registration::Registration" do
       )
 
       expect(Registration::SwMgmt).to receive(:add_services)
-      expect(SUSE::Connect::Credentials).to receive(:read)
-        .with(SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
+      allow(File).to receive(:exist?).with(
+        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
+      allow(File).to receive(:read).with(
+        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(
+        "username=SCC_foo\npassword=bar")
 
-      service_list = Registration::Registration.new.register_product(product)
+      service_list = Registration::Registration.new.send(yast_method, product)
       expect(service_list).to eq([service])
     end
+  end
+
+  describe ".register_product" do
+    it_should_behave_like "add_product", :activate_product, :register_product
+  end
+
+  describe ".upgrade_product" do
+    it_should_behave_like "add_product", :upgrade_product, :upgrade_product
   end
 
 end

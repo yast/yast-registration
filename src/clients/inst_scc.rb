@@ -172,10 +172,10 @@ module Yast
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
-          _("Registering Product..."),
-          _("Contacting the SUSE Customer Center server")) do
-
-          @registration.register_product(base_product)
+          _(CONTACTING_MESSAGE),
+          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+        ) do
+          @registration.upgrade_product(base_product)
         end
 
         # select repositories to use in installation (e.g. enable/disable Updates)
