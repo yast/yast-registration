@@ -1,6 +1,7 @@
 
 require "yast"
 require "registration/eula_downloader"
+require "registration/helpers"
 
 module Registration
   module UI
@@ -9,8 +10,9 @@ module Registration
       include Yast::Logger
       include Yast::I18n
       include Yast::UIShortcuts
+      include Yast
 
-      attr_accessor :addons
+      attr_reader :addons
 
       Yast.import "Popup"
       Yast.import "ProductLicense"
@@ -58,6 +60,9 @@ module Registration
 
       private
 
+      # ask user to accept an addon EULA
+      # @param addon [SUSE::Connect::Product] the addon
+      # @return [Boolean] true if the EULA has been accepted
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           begin
@@ -79,23 +84,71 @@ module Registration
             return true
           end
 
-          Yast::ProductLicense.AskLicensesAgreementWithHeading(
-            [tmpdir],
-            Yast::ProductLicense.license_patterns,
-            # do not continue if not accepted
-            "abort",
-            # enable [Back]
-            true,
-            # base product
-            false,
-            # require agreement
-            true,
-            # dialog title
-            _("Extension and Module License Agreement"),
-            # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-            _("%s License Agreement") % addon.short_name
-          ) == :accepted
+          id = "#{addon.short_name} extension EULA"
+          Yast::ProductLicense.SetAcceptanceNeeded(id, true)
+          # TODO reset ProductLicense::license_file_print attribute
+
+          # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
+          title = _("%s License Agreement") % addon.short_name
+          eulas = read_downloaded_eulas(tmpdir)
+          enable_back = true
+
+          Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
+            eula_lang(eulas.keys), arg_ref(eulas), id, title)
+
+          base_product = false
+          action = "abort"
+          ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
+          log.debug "EULA dialog result: #{ret}"
+
+          accepted = ret == :accepted
+          log.info "EULA accepted: #{accepted}"
+          accepted
         end
+      end
+
+      # get the EULA translation to display
+      def eula_lang(eula_langs)
+        current_language = Helpers.language || "en_US"
+        current_language.tr!("-", "_")
+
+        # exact match
+        if eula_langs.include?(current_language)
+          return current_language
+        end
+
+        # partial match or English fallback
+        eula_langs.find { |eula_lang| remove_country_suffix(eula_lang) == current_language } || "en_US"
+      end
+
+      # read downloaded EULAs
+      # @param dir [String] directly with EULA files
+      # @return [Hash<String,String>] mapping { <locale> => <file_name> }
+      def read_downloaded_eulas(dir)
+        eulas = {}
+
+        Dir["#{dir}/license.*"].each do |license|
+          file = File.basename(license)
+
+          case file
+          when "license.txt"
+            eulas["en_US"] = license
+          when /\Alicense\.(.*)\.txt\z/
+            eulas[$1] = license
+          else
+            log.warn "Ignoring unknown file: #{file}"
+          end
+        end
+        
+        log.info "EULA files in #{dir}: #{eulas}"
+        eulas
+      end
+
+      # helper for removing the country suffix, e.g. "de_DE" => "de"
+      # @param code [String] input locale name
+      # @return [String] result locale name
+      def remove_country_suffix(code)
+        code.sub(/_.*\z/, "")
       end
 
     end

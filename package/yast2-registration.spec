@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.60
+Version:        3.1.61
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -34,7 +34,7 @@ Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem-suse-connect >= 0.0.16
 Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-add-on >= 3.1.3
-Requires:       yast2-packager >= 3.1.16
+Requires:       yast2-packager >= 3.1.21
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
@@ -42,7 +42,7 @@ BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
 BuildRequires:  rubygem-suse-connect >= 0.0.16
 BuildRequires:  yast2-slp >= 3.1.2
-BuildRequires:  yast2-packager >= 3.1.16
+BuildRequires:  yast2-packager >= 3.1.21
 
 BuildArch:      noarch
 

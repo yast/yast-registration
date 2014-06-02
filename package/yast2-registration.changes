@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri May 30 11:43:18 UTC 2014 - lslezak@suse.cz
+
+- fixed displaying EULA translations (bnc#880504)
+- removed EULA printing text (part of bnc#878976)
+- 3.1.61
+
+-------------------------------------------------------------------
 Mon May 26 11:15:39 UTC 2014 - jreidinger@suse.com
 
 - empty eula url mean no eula (Bnc#879456)
