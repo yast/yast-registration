@@ -130,10 +130,13 @@ module Registration
         Dir["#{dir}/license.*"].each do |license|
           file = File.basename(license)
 
-          if file == "license.txt"
+          case file
+          when "license.txt"
             eulas["en_US"] = license
-          elsif file.match /\Alicense\.(.*)\.txt\z/
+          when /\Alicense\.(.*)\.txt\z/
             eulas[$1] = license
+          else
+            log.warn "Ignoring unknown file: #{file}"
           end
         end
         
