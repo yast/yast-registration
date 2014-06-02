@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jun  2 16:47:14 UTC 2014 - lslezak@suse.cz
+
+- automatically upgrade the registration without asking for
+  a registration code when upgrading from SLE11 (bnc#876849)
+- 3.1.62
+
+-------------------------------------------------------------------
 Fri May 30 11:43:18 UTC 2014 - lslezak@suse.cz
 
 - fixed displaying EULA translations (bnc#880504)
