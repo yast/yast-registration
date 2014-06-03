@@ -33,8 +33,8 @@ module Yast
             # popup heading (in bold)
             Heading(_('Local Registration Servers')),
             VSpacing(0.5),
-            Label(_("Select a server from the list or press Cancel\n" +
-                "to use the default SUSE registration server.")),
+            Label(_("Select a detected registration server from the list\n" +
+                "or the default SUSE registration server.")),
             VSpacing(0.5),
             RadioButtonGroup(
               Id(:services),
@@ -46,8 +46,7 @@ module Yast
             ),
             VSpacing(Opt(:vstretch), 1),
             ButtonBox(
-              PushButton(Id(:ok), Label.OKButton),
-              PushButton(Id(:cancel), Label.CancelButton)
+              PushButton(Id(:ok), Label.OKButton)
             )
           )
         )
@@ -64,6 +63,8 @@ module Yast
               Report.Error(_("No registration server selected."))
               next
             end
+
+            break if selected == "scc"
 
             selected_service = services[selected.to_i]
             log.info "Selected service #{selected_service.inspect}"
@@ -82,7 +83,7 @@ module Yast
     end
 
     def services_radio_buttons
-      services.map.with_index do |service, index|
+      widgets = services.map.with_index do |service, index|
         Left(
           RadioButton(
             Id(index.to_s),
@@ -91,6 +92,7 @@ module Yast
           )
         )
       end
+      widgets.unshift Left(RadioButton(Id("scc"), _("SUSE Customer Center"), true))
     end
 
   end unless defined?(DiscoverRegistrationServicesClient)

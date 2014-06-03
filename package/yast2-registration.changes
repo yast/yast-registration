@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun  3 12:38:47 UTC 2014 - jsrain@suse.cz
+
+- UX improvements for registration server selection (bnc#878649)
+- 3.1.63
+
+-------------------------------------------------------------------
 Mon Jun  2 16:47:14 UTC 2014 - lslezak@suse.cz
 
 - automatically upgrade the registration without asking for

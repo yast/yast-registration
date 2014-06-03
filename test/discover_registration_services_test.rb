@@ -53,7 +53,8 @@ describe "discover_registration_services client" do
 
     it "returns nil when the SLP dialog is canceled" do
       # stub the user interaction in the SLP server selection dialog
-      expect(ui).to receive(:UserInput).and_return(:cancel)
+      expect(ui).to receive(:UserInput).and_return(:ok)
+      expect(ui).to receive(:QueryWidget).and_return("scc")
 
       expect(Yast::WFM.call("discover_registration_services")).to be_nil
     end
