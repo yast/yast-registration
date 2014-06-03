@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun  3 16:08:38 UTC 2014 - lslezak@suse.cz
+
+- fixed accepting more than one extension EULA (bnc#881078)
+- 3.1.64
+
+-------------------------------------------------------------------
 Tue Jun  3 12:38:47 UTC 2014 - jsrain@suse.cz
 
 - UX improvements for registration server selection (bnc#878649)
