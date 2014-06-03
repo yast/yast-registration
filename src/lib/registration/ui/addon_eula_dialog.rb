@@ -100,6 +100,7 @@ module Registration
           action = "abort"
           ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
           log.debug "EULA dialog result: #{ret}"
+          Yast::ProductLicense.CleanUp()
 
           accepted = ret == :accepted
           log.info "EULA accepted: #{accepted}"
