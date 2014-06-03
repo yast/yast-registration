@@ -619,18 +619,13 @@ module Yast
     def media_addons
       # force displaying the UI
       Installation.add_on_selected = true
-      # display global enable/disable switch
-      SourceDialogs.display_addon_checkbox = true
 
       ret = WFM.call("inst_add-on",
         [{ "enable_next" => true, "enable_back" => true}]
       )
-      ret = :next if [:auto, :finish].include? ret
+      ret = :next if [:auto, :finish].include?(ret)
 
       return ret
-    ensure
-      # make sure to revert the change if something goes wrong
-      SourceDialogs.display_addon_checkbox = false
     end
 
     def registered_dialog
