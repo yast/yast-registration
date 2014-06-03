@@ -59,14 +59,14 @@ module Registration
 
 
     def register_product(product)
-      add_product(product) do |params|
+      services_for_product(product) do |params|
         log.info "Registering product: #{product}"
         SUSE::Connect::YaST.activate_product(params)
       end
     end
 
     def upgrade_product(product)
-      add_product(product) do |params|
+      services_for_product(product) do |params|
         log.info "Upgrading product: #{product}"
         SUSE::Connect::YaST.upgrade_product(params)
       end
@@ -89,7 +89,7 @@ module Registration
 
     private
 
-    def add_product(product, &block)
+    def services_for_product(product, &block)
       product_ident = {
         :arch         => product["arch"],
         :name         => product["name"],
