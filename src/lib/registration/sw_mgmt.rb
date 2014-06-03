@@ -269,6 +269,39 @@ module Registration
       end
     end
 
+    # copy old NCC/SCC credentials from the old installation to new SCC credentials
+    # the files are copied to the current system
+    def self.copy_old_credentials(source_dir)
+      log.info "Searching registration credentials in #{source_dir}..."
+
+      # check for NCC credentials
+      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
+      ncc_file = File.join(source_dir, dir, "NCCcredentials")
+      scc_file = File.join(source_dir, SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
+      new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
+
+      # ensure the zypp directory is writable in inst-sys
+      zypp_config_writable!
+
+      # create the target directory if missing
+      if !File.exist?(dir)
+        log.info "Creating directory #{dir}"
+        ::FileUtils.mkdir_p(dir)
+      end
+
+      if File.exist?(ncc_file)
+        log.info "Copying the old NCC credentials from previous installation"
+        log.info "Copying #{ncc_file} to #{new_file}"
+        ::FileUtils.cp(ncc_file, new_file)
+      end
+
+      if File.exist?(scc_file)
+        log.info "Copying the old SCC credentials from previous installation"
+        log.info "Copying #{scc_file} to #{new_file}"
+        ::FileUtils.cp(scc_file, new_file)
+      end
+    end
+
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository

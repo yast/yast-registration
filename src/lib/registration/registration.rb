@@ -59,29 +59,17 @@ module Registration
 
 
     def register_product(product)
-      product_ident = {
-        :arch         => product["arch"],
-        :name         => product["name"],
-        :version      => product["version"],
-        :release_type => product["release_type"]
-      }
-      log.info "Registering product: #{product_ident}"
-
-      params = connect_params(:product_ident => product_ident)
-
-      # use product specific reg. code (e.g. for addons)
-      params[:token] = product["reg_code"] if product["reg_code"]
-
-      product_service = SUSE::Connect::YaST.activate_product(params)
-
-      log.info "registered product_services: #{product_service.inspect}"
-
-      if product_service
-        credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
-        ::Registration::SwMgmt.add_services([product_service], credentials)
+      services_for_product(product) do |params|
+        log.info "Registering product: #{product}"
+        SUSE::Connect::YaST.activate_product(params)
       end
+    end
 
-      product_service ? [product_service] : []
+    def upgrade_product(product)
+      services_for_product(product) do |params|
+        log.info "Upgrading product: #{product}"
+        SUSE::Connect::YaST.upgrade_product(params)
+      end
     end
 
     def get_addon_list
@@ -100,6 +88,32 @@ module Registration
     end
 
     private
+
+    def services_for_product(product, &block)
+      product_ident = {
+        :arch         => product["arch"],
+        :name         => product["name"],
+        :version      => product["version"],
+        :release_type => product["release_type"]
+      }
+      log.info "Using product: #{product_ident}"
+
+      params = connect_params(:product_ident => product_ident)
+
+      # use product specific reg. code (e.g. for addons)
+      params[:token] = product["reg_code"] if product["reg_code"]
+
+      product_service = yield(params)
+
+      log.info "registered product_services: #{product_service.inspect}"
+
+      if product_service
+        credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
+        ::Registration::SwMgmt.add_services([product_service], credentials)
+      end
+
+      product_service ? [product_service] : []
+    end
 
     def connect_params(params)
       default_params = {
