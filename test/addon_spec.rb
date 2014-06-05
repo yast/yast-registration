@@ -6,6 +6,22 @@ require "registration/addon"
 require "suse/connect"
 
 describe Registration::Addon do
+
+  # add cache reset, which is not needed in common case
+  class Registration::Addon
+    class << self
+      def reset_cache
+        @cached_addons = nil
+        @registereds = nil
+        @selecteds = nil
+      end
+    end
+  end
+
+  before(:each) do
+    Registration::Addon.reset_cache
+  end
+
   def product_generator(attrs = {})
     params = {}
     params['name'] = attrs['name'] || "Product#{rand(100000)}"
@@ -21,13 +37,13 @@ describe Registration::Addon do
     return params
   end
 
-  describe ".find_all_available" do
+  describe ".find_all" do
     it "find all addons for current base product" do
       prod1 = SUSE::Connect::Product.new(product_generator)
       prod2 = SUSE::Connect::Product.new(product_generator)
       registration = double(:get_addon_list => [prod1, prod2])
 
-      expect(Registration::Addon.find_all_available(registration).size).to be 2
+      expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
     it "find even dependend products" do
@@ -35,7 +51,7 @@ describe Registration::Addon do
       prod1 = SUSE::Connect::Product.new(product_generator('extensions' => [prod_child]))
       registration = double(:get_addon_list => [prod1])
 
-      expect(Registration::Addon.find_all_available(registration).size).to be 2
+      expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
     it "sets properly dependencies between addons" do
@@ -43,7 +59,7 @@ describe Registration::Addon do
       prod1 = SUSE::Connect::Product.new(product_generator('extensions' => [prod_child]))
       registration = double(:get_addon_list => [prod1])
 
-      addons = Registration::Addon.find_all_available(registration)
+      addons = Registration::Addon.find_all(registration)
       expect(addons.any? {|addon| addon.children.size == 1}).to be_true
       expect(addons.any?(&:depends_on)).to be_true
     end

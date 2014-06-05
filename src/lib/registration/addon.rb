@@ -20,15 +20,25 @@
 #
 
 require 'tsort'
+require "forwardable"
 
 module Registration
   class Addon
     class << self
-      def find_all_available(registration)
+      def find_all(registration)
+        return @cached_addons if @cached_addons
         pure_addons = registration.get_addon_list
-        pure_addons.reduce([]) do |res, addon|
+        @cached_addons = pure_addons.reduce([]) do |res, addon|
           res.concat(create_addon_with_deps(addon))
         end
+      end
+
+      def registereds
+        @registereds ||= []
+      end
+
+      def selecteds
+        @selecteds ||= []
       end
 
       private
@@ -48,11 +58,31 @@ module Registration
       end
     end
 
+    extend Forwardable
+
     attr_reader :children
-    attr_accessor :depends_on
+    attr_accessor :depends_on, :regcode
+
+    def_delegators :@pure_addon, :free, :product_ident, :short_name, :long_name
     def initialize pure_addon
       @pure_addon = pure_addon
       @children = []
+    end
+
+    def selected?
+      Addon.selecteds.include?(self)
+    end
+
+    def selected
+      Addon.selecteds << self unless selected?
+    end
+
+    def unselected
+      Addon.selecteds.delete(self) if selected?
+    end
+
+    def registered?
+      Addon.registereds.include?(self)
     end
   end
 
