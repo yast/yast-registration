@@ -23,32 +23,36 @@ require 'tsort'
 
 module Registration
   class Addon
-    # product data needed for registration
-    attr_reader :name, :version, :arch
-    # additional data: UI labels, dependencies on other add-ons and
-    # a flag indicating required registration code
-    attr_reader :label, :description, :depends_on, :regcode_needed
+    class << self
+      def find_all_available(registration)
+        pure_addons = registration.get_addon_list
+        pure_addons.reduce([]) do |res, addon|
+          res.concat(create_addon_with_deps(addon))
+        end
+      end
 
-    def initialize(name, version, arch, label: "", description: "",
-        depends_on: [], regcode_needed: true)
-      @name = name
-      @version = version
-      @arch = arch
-      @label = label
-      @description = description
-      @depends_on = depends_on
-      @regcode_needed = regcode_needed
+      private
+
+      def create_addon_with_deps(root)
+        root_addon = Addon.new(root)
+        result = [ root_addon ]
+
+        (root.extensions || []).each do |ext|
+          child = create_addon_with_deps(ext)
+          result.concat(child)
+          child.first.depends_on = root_addon
+          root_addon.children << child.first
+        end
+
+        return result
+      end
     end
 
-    # recursively collect all addon dependecies and create a flat list
-    # @return [Array<Addon>]
-    def required_addons
-      # this addon dependencies plus their dependencies
-      depends_on.inject(depends_on.dup) do |acc, dep|
-        acc.concat(dep.required_addons)
-        # remove duplicates
-        acc.uniq
-      end
+    attr_reader :children
+    attr_accessor :depends_on
+    def initialize pure_addon
+      @pure_addon = pure_addon
+      @children = []
     end
   end
 

@@ -3,61 +3,55 @@
 require_relative "spec_helper"
 
 require "registration/addon"
+require "suse/connect"
 
 describe Registration::Addon do
+  def product_generator(attrs = {})
+    params = {}
+    params['name'] = attrs['name'] || "Product#{rand(100000)}"
+    params['long_name'] = attrs['long_name'] || "The best cool #{params['name']}"
+    params['description'] = attrs['description'] || "Bla bla bla bla!"
+    params['zypper_name'] = attrs['zypper_name'] || "prod#{rand(100000)}"
+    params['zypper_version'] = attrs['version'] || "#{rand(13)}"
+    params['arch'] = attrs['arch'] || "x86_64"
+    params['free'] = attrs.fetch('free', true)
+    params['eula_url'] = attrs['eula_url']
+    params["extensions"] = attrs['extensions'] || []
 
-  describe ".required_addons" do
-    it "returns empty list if there are no dependencies" do
-      addon = Registration::Addon.new("SUSE_SLES", "12", "x86_64")
-
-      expect(addon.required_addons).to be_empty
-    end
-
-    it "returns an array containing the dependency name" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
-
-      expect(addon2.required_addons).to eq([addon1])
-    end
-
-    it "removes duplicates" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1])
-      addon4 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1])
-      addon5 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon2, addon3, addon4])
-
-      required_addons = addon5.required_addons
-
-      expect(required_addons).to eq(required_addons.uniq)
-      expect(required_addons).to include(addon1, addon2, addon3, addon4)
-    end
-
-    it "returns transitive dependencies" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon2])
-
-      expect(addon3.required_addons).to include(addon1, addon2)
-    end
-
-    it "returns multiple transitive dependencies" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64")
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1, addon2])
-      addon4 = Registration::Addon.new("SUSE_ADDON4", "12", "x86_64")
-      addon5 = Registration::Addon.new("SUSE_ADDON5", "12", "x86_64")
-      addon6 = Registration::Addon.new("SUSE_ADDON6", "12", "x86_64", depends_on: [addon4, addon5])
-      addon7 = Registration::Addon.new("SUSE_ADDON7", "12", "x86_64", depends_on: [addon3, addon6])
-
-      required_addons = addon7.required_addons
-      expect(required_addons.size).to eq(6)
-      expect(required_addons).to include(addon1, addon2, addon3, addon4, addon5, addon6)
-    end
+    return params
   end
 
+  describe ".find_all_available" do
+    it "find all addons for current base product" do
+      prod1 = SUSE::Connect::Product.new(product_generator)
+      prod2 = SUSE::Connect::Product.new(product_generator)
+      registration = double(:get_addon_list => [prod1, prod2])
+
+      expect(Registration::Addon.find_all_available(registration).size).to be 2
+    end
+
+    it "find even dependend products" do
+      prod_child = product_generator
+      prod1 = SUSE::Connect::Product.new(product_generator('extensions' => [prod_child]))
+      registration = double(:get_addon_list => [prod1])
+
+      expect(Registration::Addon.find_all_available(registration).size).to be 2
+    end
+
+    it "sets properly dependencies between addons" do
+      prod_child = product_generator
+      prod1 = SUSE::Connect::Product.new(product_generator('extensions' => [prod_child]))
+      registration = double(:get_addon_list => [prod1])
+
+      addons = Registration::Addon.find_all_available(registration)
+      expect(addons.any? {|addon| addon.children.size == 1}).to be_true
+      expect(addons.any?(&:depends_on)).to be_true
+    end
+
+  end
 end
 
+=begin
 describe Registration::AddonSorter do
   describe ".registration_order" do
     it "returns registration order according to the dependencies" do
@@ -91,3 +85,4 @@ describe Registration::AddonSorter do
     end
   end
 end
+=end
