@@ -307,164 +307,15 @@ module Yast
       ::Registration::SwMgmt.set_repos_state(updates, options.install_updates)
     end
 
-    # create item list (available addons items)
-    def addon_selection_items(addons)
-      box = VBox()
-
-      # whether to add extra spacing in the UI
-      if UI.TextMode
-        add_extra_spacing = addons.size < 5
-      else
-        add_extra_spacing = true
-      end
-
-      addons.each do |addon|
-        label = addon.short_name
-        label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
-
-        box.params << Left(CheckBox(Id(addon.product_ident),
-            Opt(:notify),
-            addon.short_name,
-            @selected_addons.include?(addon) || registered_addons.include?(addon.product_ident)))
-
-        # add extra spacing when there are just few addons, in GUI always
-        box.params << VSpacing(0.7) if add_extra_spacing
-      end
-
-      box
-    end
-
-    # create content fot the addon selection dialog
-    def addon_selection_dialog_content(addons)
-      # less lines in textmode to fit 80x25 size
-      lines = UI.TextMode ? 9 : 14
-
-      # use two column layout if needed
-      vbox1 = addon_selection_items(addons[0..(lines - 1)])
-      vbox2 = (addons.size > lines) ? HBox(
-        HSpacing(1),
-        VBox(
-          addon_selection_items(addons[lines..(2*lines - 1)]),
-          VStretch()
-        )
-      ) :
-        Empty()
-
-      VBox(
-        VStretch(),
-        Left(Heading(_("Available Extensions and Modules"))),
-        VWeight(75, MarginBox(2, 1, HBox(
-              vbox1,
-              vbox2
-            ))),
-        Left(Label(_("Details"))),
-        MinHeight(8,
-          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an extension or a module to show details here") + "</small>")),
-        ),
-        VStretch()
-      )
-    end
-
-    # update addon details after changing the current addon in the UI
-    def show_addon_details(addon)
-      # addon description is a rich text
-      UI.ChangeWidget(Id(:details), :Value, addon.description)
-      UI.ChangeWidget(Id(:details), :Enabled, true)
-    end
-
-    # check addon dependencies and automatically select required addons
-    def check_addon_dependencies(addons)
-      selected = UI.QueryWidget(Id(:addons), :SelectedItems)
-      selected_addons = addons.select{|a| selected.include?(a.name)}
-
-      selected_addons.each do |a|
-        missing = a.required_addons - selected_addons
-
-        if !missing.empty?
-          # popup message, %s are product names
-          Popup.Message((_("Automatically selecting '%s'\ndependencies:\n\n%s") %
-              [a.label, missing.map(&:label).join("\n")]))
-          # select the missing entries
-          UI.ChangeWidget(Id(:addons), :SelectedItems, selected + missing.map(&:name))
-        end
-      end
-    end
-
-    # check for the maximum amount of reg. codes supported by Yast
-    def supported_addon_count(selected)
-      # maximum number or reg codes which can be displayed in two column layout
-      max_supported = 2*MAX_REGCODES_PER_COLUMN
-
-      # check the addons requiring a reg. code
-      if selected.count{|a| !a.free} > max_supported
-        Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
-        return false
-      end
-
-      return true
-    end
-
-    # handle user input in the addon selection dialog
-    def handle_addon_selection_dialog(addons)
-      ret = nil
-      continue_buttons = [:next, :back, :close, :abort, :skip]
-
-      while !continue_buttons.include?(ret) do
-        ret = UI.UserInput
-
-        case ret
-        when :next
-          selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
-
-          # ignore already registered addons
-          selected.reject!{|a| registered_addons.include?(a.product_ident) }
-
-          if !supported_addon_count(selected)
-            ret = nil
-            next
-          end
-
-          @selected_addons = selected
-          ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-          log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
-
-          ret = :skip if @selected_addons.empty?
-        else
-          # check whether it's an add-on ID (checkbox clicked)
-          addon = addons.find{|addon| addon.product_ident == ret}
-
-          # an addon has been changed, refresh details, check dependencies
-          if addon
-            show_addon_details(addon)
-            # TODO FIXME: SCC does not support dependencies yet
-            # check_addon_dependencies(addons)
-          end
-        end
-      end
-
-      ret
-    end
-
     # run the addon selection dialog
     def select_addons
-      addons = get_available_addons
-      Wizard.SetContents(
-        # dialog title
-        _("Extension Selection"),
-        addon_selection_dialog_content(addons),
-        # TODO FIXME: add a help text
-        "",
-        GetInstArgs.enable_back || Mode.normal,
-        GetInstArgs.enable_next || Mode.normal
-      )
+      get_available_addons # FIXME just to fill cache with popup
 
-      # disable already registered addons in UI
-      registered_addons.each do |addon|
-        UI.ChangeWidget(Id(addon), :Enabled, false)
-      end
+      # FIXME workaround to reference between old way and new storage in Addon metaclass
+      @selected_addons = Addon.selecteds
+      ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 
-      handle_addon_selection_dialog(addons)
+      Registration::UI::AddonSelectionDialog.run(@registration)
     end
 
 
@@ -486,51 +337,20 @@ module Yast
       box
     end
 
-    # create content for the addon reg codes dialog
-    def addon_regcodes_dialog_content(addons)
-      # display the second column if needed
-      if addons.size > MAX_REGCODES_PER_COLUMN
-        # display only the addons which fit two column layout
-        display_addons = addons[0..2*MAX_REGCODES_PER_COLUMN - 1]
-
-        # round the half up (more items in the first column for odd number of items)
-        half = (display_addons.size + 1) / 2
-
-        box1 = addon_regcode_items(display_addons[0..half - 1])
-        box2 = HBox(
-          HSpacing(2),
-          addon_regcode_items(display_addons[half..-1])
-        )
-      else
-        box1 = addon_regcode_items(addons)
-      end
-
-      HBox(
-        HSpacing(Opt(:hstretch), 3),
-        box1,
-        box2 ? box2 : Empty(),
-        HSpacing(Opt(:hstretch), 3)
-      )
-    end
-
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow
     def get_available_addons
       # cache the available addons
-      @available_addons = ::Registration::Storage::Cache.instance.available_addons
-      return @available_addons if @available_addons
-
       init_registration
 
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
         _("Loading Available Add-on Products and Extensions...")) do
 
-        @registration.get_addon_list
+        Addon.find_all(@registration)
       end
 
-      log.info "Received product extensions: #{@available_addons}"
       ::Registration::Storage::Cache.instance.available_addons = @available_addons
       @available_addons
     end

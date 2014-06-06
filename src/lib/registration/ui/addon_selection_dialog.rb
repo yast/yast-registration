@@ -158,6 +158,14 @@ module Registration
         ret
       end
 
+      # update addon details after changing the current addon in the UI
+      def show_addon_details(addon)
+        # addon description is a rich text
+        UI.ChangeWidget(Id(:details), :Value, addon.description)
+        UI.ChangeWidget(Id(:details), :Enabled, true)
+      end
+
+
       def reactivate_dependencies
         @addons.each do |addon|
           UI.ChangeWidget(Id(addon.product_ident), :Enabled, enable_addon?(addon))

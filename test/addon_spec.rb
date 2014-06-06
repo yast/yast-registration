@@ -37,6 +37,10 @@ describe Registration::Addon do
     return params
   end
 
+  subject(:addon) do
+    Registration::Addon.new(SUSE::Connect::Product.new(product_generator))
+  end
+
   describe ".find_all" do
     it "find all addons for current base product" do
       prod1 = SUSE::Connect::Product.new(product_generator)
@@ -62,6 +66,52 @@ describe Registration::Addon do
       addons = Registration::Addon.find_all(registration)
       expect(addons.any? {|addon| addon.children.size == 1}).to be_true
       expect(addons.any?(&:depends_on)).to be_true
+    end
+  end
+
+  describe ".selecteds" do
+    it "returns array with selected addons" do
+      expect(Registration::Addon.selecteds).to be_a(Array)
+    end
+  end
+
+  describe ".registereds" do
+    it "returns array of already registered addons" do
+      expect(Registration::Addon.registereds).to be_a(Array)
+    end
+  end
+
+  describe "#selected?" do
+    it "checks if addon is selected" do
+      expect(addon.selected?).to be_false
+      Registration::Addon.selecteds << addon
+      expect(addon.selected?).to be_true
+    end
+  end
+
+  describe "#selected" do
+    it "marks addon as selected" do
+      expect(Registration::Addon.selecteds.include?(addon)).to be_false
+      addon.selected
+      expect(Registration::Addon.selecteds.include?(addon)).to be_true
+    end
+
+    it "adds to list of selected only one" do
+      addon.selected
+      addon.selected
+      expect(Registration::Addon.selecteds.count(addon)).to be 1
+    end
+  end
+
+  describe "#unselected" do
+    it "marks addon as unselected" do
+      Registration::Addon.selecteds << addon
+      addon.unselected
+      expect(Registration::Addon.selecteds.include?(addon)).to be_false
+    end
+
+    it "do nothing if addon is not selected" do
+      expect{addon.unselected}.to_not raise_error
     end
 
   end
