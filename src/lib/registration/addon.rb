@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require 'tsort'
 require "forwardable"
 
 module Registration
