@@ -678,7 +678,7 @@ module Yast
 
     # helper method for accessing the registered addons
     def registered_addons
-      ::Registration::Storage::Cache.instance.registered_addons
+      Registration::Addon.registereds
     end
 
   end unless defined?(InstSccClient)

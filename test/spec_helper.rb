@@ -14,6 +14,7 @@ if ENV["COVERAGE"]
   SimpleCov.start
 end
 
+
 $:.unshift(File.expand_path("../../src/lib", __FILE__))
 
 ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
@@ -21,3 +22,6 @@ ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 def fixtures_file(file)
   File.expand_path(File.join("../fixtures", file), __FILE__)
 end
+
+# load data generators
+require_relative "factories"
