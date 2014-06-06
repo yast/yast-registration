@@ -53,26 +53,10 @@ module Registration
       private
 
       def content
-        lines = Yast::UI.TextMode ? 9 : 14
-
-        # use two column layout if needed
-        vbox1 = addon_selection_items(@addons[0..(lines - 1)])
-        vbox2 = (@addons.size > lines) ? HBox(
-          HSpacing(1),
-          VBox(
-            addon_selection_items(@addons[lines..(2*lines - 1)]),
-            VStretch()
-          )
-        ) :
-          Empty()
-
         VBox(
           VStretch(),
           Left(Heading(_("Available Extensions and Modules"))),
-          VWeight(75, MarginBox(2, 1, HBox(
-                vbox1,
-                vbox2
-              ))),
+          addons_box,
           Left(Label(_("Details"))),
           MinHeight(8,
             VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
@@ -80,6 +64,23 @@ module Registration
           ),
           VStretch()
         )
+      end
+
+      def addons_box
+        lines = Yast::UI.TextMode ? 9 : 14
+        if @addons.size <= lines
+          content = addon_selection_items(@addons)
+        else
+          box2 = addon_selection_items(@addons[lines..(2*lines - 1)])
+          box2.params << VStretch() # just UI tweak
+          content = HBox(
+            addon_selection_items(@addons[0..(lines - 1)]),
+            HSpacing(1),
+            box2
+          )
+        end
+
+        VWeight(75, MarginBox(2, 1, content))
       end
 
       def addon_selection_items(addons)
@@ -93,25 +94,33 @@ module Registration
         end
 
         addons.each do |addon|
-          label = addon.short_name
-          label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
-
-          checkbox = Left(CheckBox(Id(addon.product_ident),
-              Opt(:notify),
-              addon.short_name,
-              addon.selected? || addon.registered?))
-
-          # usability help. If addon depends on something, then we get it
-          # immediatelly after parent, so indent it slightly, so it is easier visible
-          if addon.depends_on
-            checkbox = HBox(HSpacing(2.5), checkbox)
-          end
-          box.params << checkbox
-          # add extra spacing when there are just few addons, in GUI always
-          box.params << VSpacing(0.7) if add_extra_spacing
+          box.params.concat(addon_checkbox(addon, add_extra_spacing))
         end
 
         box
+      end
+
+      # @return [Array] Return array with one or two elements for VBox
+      def addon_checkbox(addon, extra_spacing)
+        checkbox = Left(addon_checkbox_element(addon))
+
+        # usability help. If addon depends on something, then we get it
+        # immediatelly after parent, so indent it slightly, so it is easier visible
+        if addon.depends_on
+          checkbox = HBox(HSpacing(2.5), checkbox)
+        end
+        res = [checkbox]
+        # add extra spacing when there are just few addons, in GUI always
+        res << VSpacing(0.7) if extra_spacing
+
+        return res
+      end
+
+      def addon_checkbox_element(addon)
+        CheckBox(Id(addon.product_ident),
+          Opt(:notify),
+          addon.short_name,
+          addon.selected? || addon.registered?)
       end
 
       def handle_dialog
@@ -123,39 +132,42 @@ module Registration
 
           case ret
           when :next
-            # ignore already registered addons
-            to_register = Addon.selected.reject(&:registered?)
-
-            if !supported_addon_count(to_register)
-              ret = nil
-              next
-            end
-
-            log.info "Selected addons: #{Addon.selected.map(&:short_name)}"
-
-            ret = :skip if Addon.selected.empty?
-          # when canceled switch to old selection
+            ret = handle_next_button
+            # when canceled switch to old selection
           when :close, :abort
             Addon.selected.replace(@old_selection)
           else
-            # check whether it's an add-on ID (checkbox clicked)
-            addon = @addons.find{|addon| addon.product_ident == ret}
-
-            # an addon has been changed, refresh details, check dependencies
-            if addon
-              show_addon_details(addon)
-              if Yast::UI.QueryWidget(Id(addon.product_ident), :Value)
-                addon.selected
-              else
-                addon.unselected
-              end
-              reactivate_dependencies
-            end
+            handle_addon_selection(ret)
           end
         end
 
         ret
       end
+
+      def handle_next_button
+        if !supported_addon_count?
+          return nil
+        end
+
+        log.info "Selected addons: #{Addon.selected.map(&:short_name)}"
+
+        Addon.selected.empty? ? :skip : :next
+      end
+
+      def handle_addon_selection(id)
+        # check whether it's an add-on ID (checkbox clicked)
+        addon = @addons.find{|addon| addon.product_ident == id}
+        return unless addon
+
+        show_addon_details(addon)
+        if Yast::UI.QueryWidget(Id(addon.product_ident), :Value)
+          addon.selected
+        else
+          addon.unselected
+        end
+        reactivate_dependencies
+      end
+
 
       # update addon details after changing the current addon in the UI
       def show_addon_details(addon)
@@ -184,15 +196,16 @@ module Registration
 
       # the maximum number of reg. codes displayed vertically,
       # this is the limit for 80x25 textmode UI
-      MAX_REGCODES_PER_COLUMN = 9
+      MAX_REGCODES_PER_COLUMN = 8
 
       # check for the maximum amount of reg. codes supported by Yast
-      def supported_addon_count(selected)
+      def supported_addon_count?
+        selected = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout
         max_supported = 2*MAX_REGCODES_PER_COLUMN
 
         # check the addons requiring a reg. code
-        if selected.count{|a| !a.free} > max_supported
+        if selected.size > max_supported
           Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
           return false
         end
