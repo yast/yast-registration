@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun  5 12:43:27 UTC 2014 - jsrain@suse.cz
+
+- add explanation to extension regcode dialog (bnc#881466)
+- 3.1.65
+
+-------------------------------------------------------------------
 Tue Jun  3 16:08:38 UTC 2014 - lslezak@suse.cz
 
 - fixed accepting more than one extension EULA (bnc#881078)

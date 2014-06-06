@@ -43,7 +43,7 @@ module Yast
 
     # the maximum number of reg. codes displayed vertically,
     # this is the limit for 80x25 textmode UI
-    MAX_REGCODES_PER_COLUMN = 9
+    MAX_REGCODES_PER_COLUMN = 8
 
     # width of reg code input field widget
     REG_CODE_WIDTH = 33
@@ -507,8 +507,25 @@ module Yast
 
       HBox(
         HSpacing(Opt(:hstretch), 3),
-        box1,
-        box2 ? box2 : Empty(),
+        VBox(
+          VStretch(),
+          Left(Label(n_(
+            "The extension you selected needs a separate registration code.",
+            "The extensions you selected need separate registration codes.",
+            addons.size
+          ))),
+          Left(Label(n_(
+            "Enter the registration code into the field below.",
+            "Enter the registration codes into the fields below.",
+            addons.size
+          ))),
+          VStretch(),
+          HBox(
+            box1,
+            box2 ? box2 : Empty()
+          ),
+          VStretch()
+        ),
         HSpacing(Opt(:hstretch), 3)
       )
     end
