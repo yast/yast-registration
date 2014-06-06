@@ -104,7 +104,7 @@ module Registration
           # usability help. If addon depends on something, then we get it
           # immediatelly after parent, so indent it slightly, so it is easier visible
           if addon.depends_on
-            checkbox = HBox(HSpacing(0.5), checkbox)
+            checkbox = HBox(HSpacing(2.5), checkbox)
           end
           box.params << checkbox
           # add extra spacing when there are just few addons, in GUI always
