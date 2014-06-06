@@ -11,21 +11,6 @@ describe Registration::Addon do
     addon_reset_cache
   end
 
-  def product_generator(attrs = {})
-    params = {}
-    params['name'] = attrs['name'] || "Product#{rand(100000)}"
-    params['long_name'] = attrs['long_name'] || "The best cool #{params['name']}"
-    params['description'] = attrs['description'] || "Bla bla bla bla!"
-    params['zypper_name'] = attrs['zypper_name'] || "prod#{rand(100000)}"
-    params['zypper_version'] = attrs['version'] || "#{rand(13)}"
-    params['arch'] = attrs['arch'] || "x86_64"
-    params['free'] = attrs.fetch('free', true)
-    params['eula_url'] = attrs['eula_url']
-    params["extensions"] = attrs['extensions'] || []
-
-    return params
-  end
-
   subject(:addon) do
     Registration::Addon.new(addon_generator)
   end

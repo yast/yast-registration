@@ -13,7 +13,7 @@ def suse_connect_product_generator(attrs={})
     params['eula_url'] = attrs['eula_url']
     params["extensions"] = attrs['extensions'] || []
 
-    return params
+    params
 end
 
 def addon_generator(params={})
