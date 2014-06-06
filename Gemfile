@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "suse-connect", ">= 0.0.19", :github => "SUSE/connect"
+gem "suse-connect", :github => "SUSE/connect"
 
 group :test do
   gem "rake"
