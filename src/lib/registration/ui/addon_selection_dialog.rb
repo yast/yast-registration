@@ -21,11 +21,10 @@ module Registration
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(registration)
-        dialog = AddonEulaDialog.new(registration)
+        dialog = AddonSelectionDialog.new(registration)
         dialog.run
       end
 
-      # @param selected_addons
       def initialize(registration)
         textdomain "registration"
         @addons = Addon.find_all(registration)
@@ -46,7 +45,7 @@ module Registration
 
         @old_selection = Addon.selecteds.dup
 
-        reactivate_depencies
+        reactivate_dependencies
 
         handle_dialog
       end
@@ -54,14 +53,14 @@ module Registration
       private
 
       def content
-        lines = UI.TextMode ? 9 : 14
+        lines = Yast::UI.TextMode ? 9 : 14
 
         # use two column layout if needed
-        vbox1 = addon_selection_items(addons[0..(lines - 1)])
-        vbox2 = (addons.size > lines) ? HBox(
+        vbox1 = addon_selection_items(@addons[0..(lines - 1)])
+        vbox2 = (@addons.size > lines) ? HBox(
           HSpacing(1),
           VBox(
-            addon_selection_items(addons[lines..(2*lines - 1)]),
+            addon_selection_items(@addons[lines..(2*lines - 1)]),
             VStretch()
           )
         ) :
@@ -87,7 +86,7 @@ module Registration
         box = VBox()
 
         # whether to add extra spacing in the UI
-        if UI.TextMode
+        if Yast::UI.TextMode
           add_extra_spacing = addons.size < 5
         else
           add_extra_spacing = true
@@ -120,7 +119,7 @@ module Registration
         continue_buttons = [:next, :back, :close, :abort, :skip]
 
         while !continue_buttons.include?(ret) do
-          ret = UI.UserInput
+          ret = Yast::UI.UserInput
 
           case ret
           when :next
@@ -140,17 +139,17 @@ module Registration
             Addon.selecteds.replace(@old_selection)
           else
             # check whether it's an add-on ID (checkbox clicked)
-            addon = addons.find{|addon| addon.product_ident == ret}
+            addon = @addons.find{|addon| addon.product_ident == ret}
 
             # an addon has been changed, refresh details, check dependencies
             if addon
               show_addon_details(addon)
-              if UI.QueryWidget(Id(addon.product_ident), :Value)
+              if Yast::UI.QueryWidget(Id(addon.product_ident), :Value)
                 addon.selected
               else
                 addon.unselected
               end
-              reactivate_depencies
+              reactivate_dependencies
             end
           end
         end
@@ -161,14 +160,14 @@ module Registration
       # update addon details after changing the current addon in the UI
       def show_addon_details(addon)
         # addon description is a rich text
-        UI.ChangeWidget(Id(:details), :Value, addon.description)
-        UI.ChangeWidget(Id(:details), :Enabled, true)
+        Yast::UI.ChangeWidget(Id(:details), :Value, addon.description)
+        Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
 
 
       def reactivate_dependencies
         @addons.each do |addon|
-          UI.ChangeWidget(Id(addon.product_ident), :Enabled, enable_addon?(addon))
+          Yast::UI.ChangeWidget(Id(addon.product_ident), :Enabled, enable_addon?(addon))
         end
       end
 

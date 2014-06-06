@@ -63,7 +63,7 @@ module Registration
     attr_reader :children
     attr_accessor :depends_on, :regcode
 
-    def_delegators :@pure_addon, :free, :product_ident, :short_name, :long_name
+    def_delegators :@pure_addon, :free, :product_ident, :short_name, :long_name, :description, :eula_url
     def initialize pure_addon
       @pure_addon = pure_addon
       @children = []

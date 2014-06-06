@@ -27,6 +27,7 @@ require "yast/suse_connect"
 
 require "cgi"
 
+require "registration/addon"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/connect_helpers"
@@ -34,6 +35,7 @@ require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/registration"
 require "registration/ui/addon_eula_dialog"
+require "registration/ui/addon_selection_dialog"
 
 module Yast
   class InstSccClient < Client
@@ -312,7 +314,7 @@ module Yast
       get_available_addons # FIXME just to fill cache with popup
 
       # FIXME workaround to reference between old way and new storage in Addon metaclass
-      @selected_addons = Addon.selecteds
+      @selected_addons = Registration::Addon.selecteds
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 
       Registration::UI::AddonSelectionDialog.run(@registration)
@@ -348,7 +350,7 @@ module Yast
         _(CONTACTING_MESSAGE),
         _("Loading Available Add-on Products and Extensions...")) do
 
-        Addon.find_all(@registration)
+        Registration::Addon.find_all(@registration)
       end
 
       ::Registration::Storage::Cache.instance.available_addons = @available_addons
