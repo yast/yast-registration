@@ -45,7 +45,7 @@ module Yast
 
     # the maximum number of reg. codes displayed vertically,
     # this is the limit for 80x25 textmode UI
-    MAX_REGCODES_PER_COLUMN = 9
+    MAX_REGCODES_PER_COLUMN = 8
 
     # width of reg code input field widget
     REG_CODE_WIDTH = 33
@@ -337,6 +337,50 @@ module Yast
       end
 
       box
+    end
+
+    # create content for the addon reg codes dialog
+    def addon_regcodes_dialog_content(addons)
+      # display the second column if needed
+      if addons.size > MAX_REGCODES_PER_COLUMN
+        # display only the addons which fit two column layout
+        display_addons = addons[0..2*MAX_REGCODES_PER_COLUMN - 1]
+
+        # round the half up (more items in the first column for odd number of items)
+        half = (display_addons.size + 1) / 2
+
+        box1 = addon_regcode_items(display_addons[0..half - 1])
+        box2 = HBox(
+          HSpacing(2),
+          addon_regcode_items(display_addons[half..-1])
+        )
+      else
+        box1 = addon_regcode_items(addons)
+      end
+
+      HBox(
+        HSpacing(Opt(:hstretch), 3),
+        VBox(
+          VStretch(),
+          Left(Label(n_(
+            "The extension you selected needs a separate registration code.",
+            "The extensions you selected need separate registration codes.",
+            addons.size
+          ))),
+          Left(Label(n_(
+            "Enter the registration code into the field below.",
+            "Enter the registration codes into the fields below.",
+            addons.size
+          ))),
+          VStretch(),
+          HBox(
+            box1,
+            box2 ? box2 : Empty()
+          ),
+          VStretch()
+        ),
+        HSpacing(Opt(:hstretch), 3)
+      )
     end
 
     # load available addons from SCC server
