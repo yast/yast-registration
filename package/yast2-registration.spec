@@ -40,7 +40,7 @@ BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem-rspec
-BuildRequires:  rubygem-suse-connect >= 0.0.18
+BuildRequires:  rubygem-suse-connect >= 0.0.19
 BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.21
 
