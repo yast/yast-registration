@@ -85,34 +85,4 @@ module Registration
       Addon.registereds.include?(self)
     end
   end
-
-  # class for sorting Addons according to their dependencies
-  # SCC requires to register addons in their dependency order
-  # @see TSort example http://ruby-doc.org/stdlib-2.1.0/libdoc/tsort/rdoc/TSort.html#module-TSort-label-A+Simple+Example
-  class AddonSorter < Hash
-    include TSort
-
-    alias tsort_each_node each_key
-
-    def tsort_each_child(node, &block)
-      fetch(node).each(&block)
-    end
-
-    # computes registration order of add-ons acording to their dependencies
-    # raises KeyError on missing dependency
-    # @param addons [Array<Addons>] input list with addons
-    # @return [Array<Addons>] input list sorted according to Addon dependencies
-    def self.registration_order(addons)
-      solver = AddonSorter.new
-
-      # fill the solver with addon dependencies
-      addons.each do |a|
-        solver[a] = a.depends_on
-      end
-
-      # compute the order using tsort
-      solver.tsort
-    end
-  end
-
 end

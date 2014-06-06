@@ -69,7 +69,7 @@ describe Registration::Addon do
   end
 
   describe "#selected?" do
-    it "checks if addon is selected" do
+    it "returns if addon is selected for installation" do
       expect(addon.selected?).to be_false
       Registration::Addon.selecteds << addon
       expect(addon.selected?).to be_true
@@ -99,6 +99,14 @@ describe Registration::Addon do
 
     it "do nothing if addon is not selected" do
       expect{addon.unselected}.to_not raise_error
+    end
+  end
+
+  describe "#registered?" do
+    it "returns if addon is already registered" do
+      expect(addon.registered?).to be_false
+      Registration::Addon.registereds << addon
+      expect(addon.registered?).to be_true
     end
   end
 end
