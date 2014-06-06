@@ -1,5 +1,6 @@
 TESTS = \
   addon_spec.rb \
+  addon_selection_dialog_test.rb \
   discover_registration_services_test.rb \
   eula_downloader_spec.rb \
   helpers_spec.rb \

@@ -23,6 +23,7 @@ ylib_DATA = \
 ylibuidir = @ylibdir@/registration/ui
 ylibui_DATA = \
   lib/registration/ui/addon_eula_dialog.rb \
+  lib/registration/ui/addon_selection_dialog.rb \
   lib/registration/ui/import_certificate_dialog.rb
 
 ylibyastdir = @ylibdir@/yast

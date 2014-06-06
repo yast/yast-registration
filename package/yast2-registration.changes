@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jun  6 11:41:21 UTC 2014 - jreidinger@suse.com
+
+- added support for nested extensions to display e.g. HA GEO
+  extension (bnc#873185)
+- improve test coverage
+- 3.1.66
+
+-------------------------------------------------------------------
 Thu Jun  5 12:43:27 UTC 2014 - jsrain@suse.cz
 
 - add explanation to extension regcode dialog (bnc#881466)

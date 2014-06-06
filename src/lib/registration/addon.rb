@@ -19,66 +19,69 @@
 # ------------------------------------------------------------------------------
 #
 
-require 'tsort'
+require "forwardable"
 
 module Registration
   class Addon
-    # product data needed for registration
-    attr_reader :name, :version, :arch
-    # additional data: UI labels, dependencies on other add-ons and
-    # a flag indicating required registration code
-    attr_reader :label, :description, :depends_on, :regcode_needed
-
-    def initialize(name, version, arch, label: "", description: "",
-        depends_on: [], regcode_needed: true)
-      @name = name
-      @version = version
-      @arch = arch
-      @label = label
-      @description = description
-      @depends_on = depends_on
-      @regcode_needed = regcode_needed
-    end
-
-    # recursively collect all addon dependecies and create a flat list
-    # @return [Array<Addon>]
-    def required_addons
-      # this addon dependencies plus their dependencies
-      depends_on.inject(depends_on.dup) do |acc, dep|
-        acc.concat(dep.required_addons)
-        # remove duplicates
-        acc.uniq
-      end
-    end
-  end
-
-  # class for sorting Addons according to their dependencies
-  # SCC requires to register addons in their dependency order
-  # @see TSort example http://ruby-doc.org/stdlib-2.1.0/libdoc/tsort/rdoc/TSort.html#module-TSort-label-A+Simple+Example
-  class AddonSorter < Hash
-    include TSort
-
-    alias tsort_each_node each_key
-
-    def tsort_each_child(node, &block)
-      fetch(node).each(&block)
-    end
-
-    # computes registration order of add-ons acording to their dependencies
-    # raises KeyError on missing dependency
-    # @param addons [Array<Addons>] input list with addons
-    # @return [Array<Addons>] input list sorted according to Addon dependencies
-    def self.registration_order(addons)
-      solver = AddonSorter.new
-
-      # fill the solver with addon dependencies
-      addons.each do |a|
-        solver[a] = a.depends_on
+    class << self
+      def find_all(registration)
+        return @cached_addons if @cached_addons
+        pure_addons = registration.get_addon_list
+        @cached_addons = pure_addons.reduce([]) do |res, addon|
+          res.concat(create_addon_with_deps(addon))
+        end
       end
 
-      # compute the order using tsort
-      solver.tsort
+      def registered
+        @registered ||= []
+      end
+
+      def selected
+        @selected ||= []
+      end
+
+      private
+
+      def create_addon_with_deps(root)
+        root_addon = Addon.new(root)
+        result = [ root_addon ]
+
+        (root.extensions || []).each do |ext|
+          child = create_addon_with_deps(ext)
+          result.concat(child)
+          child.first.depends_on = root_addon
+          root_addon.children << child.first
+        end
+
+        return result
+      end
+    end
+
+    extend Forwardable
+
+    attr_reader :children
+    attr_accessor :depends_on, :regcode
+
+    def_delegators :@pure_addon, :free, :product_ident, :short_name, :long_name, :description, :eula_url
+    def initialize pure_addon
+      @pure_addon = pure_addon
+      @children = []
+    end
+
+    def selected?
+      Addon.selected.include?(self)
+    end
+
+    def selected
+      Addon.selected << self unless selected?
+    end
+
+    def unselected
+      Addon.selected.delete(self) if selected?
+    end
+
+    def registered?
+      Addon.registered.include?(self)
     end
   end
-
 end
