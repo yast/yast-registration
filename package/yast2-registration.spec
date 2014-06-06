@@ -62,10 +62,13 @@ Authors:
 %setup -n %{name}-%{version}
 
 %build
-%yast_build
+
+%check
+rake test:unit
 
 %install
-%yast_install
+rake install DESTDIR="%{buildroot}"
+%suse_update_desktop_file customer-center
 
 
 %files
