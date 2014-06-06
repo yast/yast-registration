@@ -32,12 +32,12 @@ module Registration
         end
       end
 
-      def registereds
-        @registereds ||= []
+      def registered
+        @registered ||= []
       end
 
-      def selecteds
-        @selecteds ||= []
+      def selected
+        @selected ||= []
       end
 
       private
@@ -69,19 +69,19 @@ module Registration
     end
 
     def selected?
-      Addon.selecteds.include?(self)
+      Addon.selected.include?(self)
     end
 
     def selected
-      Addon.selecteds << self unless selected?
+      Addon.selected << self unless selected?
     end
 
     def unselected
-      Addon.selecteds.delete(self) if selected?
+      Addon.selected.delete(self) if selected?
     end
 
     def registered?
-      Addon.registereds.include?(self)
+      Addon.registered.include?(self)
     end
   end
 end

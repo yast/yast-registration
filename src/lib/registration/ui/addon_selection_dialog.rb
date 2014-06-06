@@ -43,7 +43,7 @@ module Registration
           GetInstArgs.enable_next || Mode.normal
         )
 
-        @old_selection = Addon.selecteds.dup
+        @old_selection = Addon.selected.dup
 
         reactivate_dependencies
 
@@ -124,19 +124,19 @@ module Registration
           case ret
           when :next
             # ignore already registered addons
-            to_register = Addon.selecteds.reject(&:registered?)
+            to_register = Addon.selected.reject(&:registered?)
 
             if !supported_addon_count(to_register)
               ret = nil
               next
             end
 
-            log.info "Selected addons: #{Addon.selecteds.map(&:short_name)}"
+            log.info "Selected addons: #{Addon.selected.map(&:short_name)}"
 
-            ret = :skip if Addon.selecteds.empty?
+            ret = :skip if Addon.selected.empty?
           # when canceled switch to old selection
           when :close, :abort
-            Addon.selecteds.replace(@old_selection)
+            Addon.selected.replace(@old_selection)
           else
             # check whether it's an add-on ID (checkbox clicked)
             addon = @addons.find{|addon| addon.product_ident == ret}

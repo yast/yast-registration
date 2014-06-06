@@ -30,8 +30,8 @@ class Registration::Addon
   class << self
     def reset_cache
       @cached_addons = nil
-      @registereds = nil
-      @selecteds = nil
+      @registered = nil
+      @selected = nil
     end
   end
 end

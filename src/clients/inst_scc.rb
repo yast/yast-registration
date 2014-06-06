@@ -314,7 +314,7 @@ module Yast
       get_available_addons # FIXME just to fill cache with popup
 
       # FIXME workaround to reference between old way and new storage in Addon metaclass
-      @selected_addons = Registration::Addon.selecteds
+      @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 
       Registration::UI::AddonSelectionDialog.run(@registration)
@@ -678,7 +678,7 @@ module Yast
 
     # helper method for accessing the registered addons
     def registered_addons
-      Registration::Addon.registereds
+      Registration::Addon.registered
     end
 
   end unless defined?(InstSccClient)

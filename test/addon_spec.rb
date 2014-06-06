@@ -56,45 +56,45 @@ describe Registration::Addon do
     end
   end
 
-  describe ".selecteds" do
+  describe ".selected" do
     it "returns array with selected addons" do
-      expect(Registration::Addon.selecteds).to be_a(Array)
+      expect(Registration::Addon.selected).to be_a(Array)
     end
   end
 
-  describe ".registereds" do
+  describe ".registered" do
     it "returns array of already registered addons" do
-      expect(Registration::Addon.registereds).to be_a(Array)
+      expect(Registration::Addon.registered).to be_a(Array)
     end
   end
 
   describe "#selected?" do
     it "returns if addon is selected for installation" do
       expect(addon.selected?).to be_false
-      Registration::Addon.selecteds << addon
+      Registration::Addon.selected << addon
       expect(addon.selected?).to be_true
     end
   end
 
   describe "#selected" do
     it "marks addon as selected" do
-      expect(Registration::Addon.selecteds.include?(addon)).to be_false
+      expect(Registration::Addon.selected.include?(addon)).to be_false
       addon.selected
-      expect(Registration::Addon.selecteds.include?(addon)).to be_true
+      expect(Registration::Addon.selected.include?(addon)).to be_true
     end
 
     it "adds to list of selected only one" do
       addon.selected
       addon.selected
-      expect(Registration::Addon.selecteds.count(addon)).to be 1
+      expect(Registration::Addon.selected.count(addon)).to be 1
     end
   end
 
   describe "#unselected" do
     it "marks addon as unselected" do
-      Registration::Addon.selecteds << addon
+      Registration::Addon.selected << addon
       addon.unselected
-      expect(Registration::Addon.selecteds.include?(addon)).to be_false
+      expect(Registration::Addon.selected.include?(addon)).to be_false
     end
 
     it "do nothing if addon is not selected" do
@@ -105,7 +105,7 @@ describe Registration::Addon do
   describe "#registered?" do
     it "returns if addon is already registered" do
       expect(addon.registered?).to be_false
-      Registration::Addon.registereds << addon
+      Registration::Addon.registered << addon
       expect(addon.registered?).to be_true
     end
   end
