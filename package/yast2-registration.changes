@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Fri Jun  6 11:41:21 UTC 2014 - jreidinger@suse.com
 
-- add support for nested addons (bnc#873185)
+- added support for nested extensions to display e.g. HA GEO
+  extension (bnc#873185)
 - improve test coverage
 - 3.1.66
 
