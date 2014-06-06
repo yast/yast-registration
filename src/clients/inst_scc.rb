@@ -509,12 +509,16 @@ module Yast
         HSpacing(Opt(:hstretch), 3),
         VBox(
           VStretch(),
-          Left(Label(addons.size == 1 ?
-            _("The extension you selected needs a separate registration code.") :
-            _("The extensions you selected need separate registration codes."))),
-          Left(Label(addons.size == 1 ?
-            _("Enter the registration code into the field below.") :
-            _("Enter the registration codes into the fields below."))),
+          Left(Label(n_(
+            "The extension you selected needs a separate registration code.",
+            "The extensions you selected need separate registration codes.",
+            addons.size
+          ))),
+          Left(Label(n_(
+            "Enter the registration code into the field below.",
+            "Enter the registration codes into the fields below.",
+            addons.size
+          ))),
           VStretch(),
           HBox(
             box1,
