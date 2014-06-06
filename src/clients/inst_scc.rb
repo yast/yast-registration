@@ -96,6 +96,7 @@ module Yast
       show_scc_credentials_dialog
 
       ret = nil
+      @registration_skipped = false
 
       continue_buttons = [:next, :back, :cancel, :abort]
       while !continue_buttons.include?(ret) do
@@ -161,7 +162,10 @@ module Yast
           end
         end
 
-        return ret if ret == :skip && confirm_skipping
+        if ret == :skip && confirm_skipping
+          @registration_skipped = true
+          return ret
+        end
       end
 
       return ret
@@ -534,6 +538,9 @@ module Yast
       )
       ret = :next if [:auto, :finish].include?(ret)
 
+      # leave the workflow if registration was skipped
+      ret = :finish if ret == :next && @registration_skipped
+
       return ret
     end
 
@@ -605,7 +612,7 @@ module Yast
         return :register
       end
     end
-    
+
     def addon_eula
       ::Registration::UI::AddonEulaDialog.run(@selected_addons)
     end
@@ -654,6 +661,7 @@ module Yast
         "media_addons" => {
           :abort    => :abort,
           :next     => "addon_eula",
+          :finish   => :next
         },
         "addon_eula" => {
           :abort    => :abort,
