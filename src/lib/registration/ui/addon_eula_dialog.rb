@@ -86,7 +86,7 @@ module Registration
 
           id = "#{addon.short_name} extension EULA"
           Yast::ProductLicense.SetAcceptanceNeeded(id, true)
-          # TODO reset ProductLicense::license_file_print attribute
+          Yast::ProductLicense.license_file_print = addon.eula_url
 
           # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
           title = _("%s License Agreement") % addon.short_name
