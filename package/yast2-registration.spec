@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.67
+Version:        3.1.68
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -39,6 +39,7 @@ Requires:       yast2-packager >= 3.1.21
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
+BuildRequires:  rubygem-yast-rake >= 0.1.8
 BuildRequires:  rubygem-rspec
 BuildRequires:  rubygem-suse-connect >= 0.0.19
 BuildRequires:  yast2-slp >= 3.1.2
@@ -62,10 +63,13 @@ Authors:
 %setup -n %{name}-%{version}
 
 %build
-%yast_build
+
+%check
+rake test:unit
 
 %install
-%yast_install
+rake install DESTDIR="%{buildroot}"
+%suse_update_desktop_file customer_center
 
 
 %files

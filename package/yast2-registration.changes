@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun  9 08:02:03 UTC 2014 - jreidinger@suse.com
+
+- switch build tool from autotools to yast-rake
+- 3.1.68
+
+-------------------------------------------------------------------
 Fri Jun  6 15:27:28 UTC 2014 - lslezak@suse.cz
 
 - properly leave the addon workflow when registration was skipped
