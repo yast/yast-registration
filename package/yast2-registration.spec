@@ -69,7 +69,7 @@ rake test:unit
 
 %install
 rake install DESTDIR="%{buildroot}"
-%suse_update_desktop_file customer-center
+%suse_update_desktop_file customer_center
 
 
 %files
