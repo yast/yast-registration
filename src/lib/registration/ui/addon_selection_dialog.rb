@@ -200,12 +200,12 @@ module Registration
 
       # check for the maximum amount of reg. codes supported by Yast
       def supported_addon_count?
-        selected = Addon.selected.reject(&:registered?).reject(&:free)
+        need_regcode = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout
         max_supported = 2*MAX_REGCODES_PER_COLUMN
 
         # check the addons requiring a reg. code
-        if selected.size > max_supported
+        if need_regcode.size > max_supported
           Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
           return false
         end
