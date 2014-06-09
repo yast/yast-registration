@@ -35,7 +35,7 @@ module Registration
       def run
         Wizard.SetContents(
           # dialog title
-          _("Extension Selection"),
+          _("Extension and Module Selection"),
           content,
           # TODO FIXME: add a help text
           "",
