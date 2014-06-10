@@ -43,15 +43,19 @@ module Registration
 
         Yast.import "Installation"
 
-        target_path = Yast::Installation.destdir + SUSE::Connect::Config::DEFAULT_CONFIG_FILE
-        config = SUSE::Connect::Config.new target_path
+        config_params = {
+          :url      => Helpers.registration_url,
+          :insecure => Helpers.insecure_registration
+        }
 
-        config.url = Helpers.registration_url
-        config.insecure = Helpers.insecure_registration
+        log.info "writing registration config: #{config_params}"
 
-        log.info "writing registration config: #{config.to_hash}"
+        SUSE::Connect::YaST.write_config
 
-        config.write
+        source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
+        target_path = Yast::Installation.destdir + source_path
+
+        Yast::SCR.Execute(Yast::Path.new(".target.bash"), "mv '#{source_path}' '#{target_path}'")
 
         nil
       else
