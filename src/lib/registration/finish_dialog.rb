@@ -55,7 +55,7 @@ module Registration
         source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
         target_path = Yast::Installation.destdir + source_path
 
-        Yast::SCR.Execute(Yast::Path.new(".target.bash"), "mv '#{source_path}' '#{target_path}'")
+        Yast::WFM.Execute(Yast::Path.new(".local.bash"), "mv '#{source_path}' '#{target_path}'")
 
         nil
       else

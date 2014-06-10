@@ -35,7 +35,7 @@ describe ::Registration::FinishDialog do
       it "creates at target system configuration for suse connect" do
         expect(Registration::Registration).to receive(:is_registered?).once.
           and_return(true)
-        expect(Yast::SCR).to receive(:Execute)
+        expect(Yast::WFM).to receive(:Execute)
         expect(SUSE::Connect::YaST).to receive(:write_config)
 
         subject.run("Write")
