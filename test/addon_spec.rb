@@ -3,91 +3,95 @@
 require_relative "spec_helper"
 
 require "registration/addon"
+require "suse/connect"
 
 describe Registration::Addon do
 
-  describe ".required_addons" do
-    it "returns empty list if there are no dependencies" do
-      addon = Registration::Addon.new("SUSE_SLES", "12", "x86_64")
+  before(:each) do
+    addon_reset_cache
+  end
 
-      expect(addon.required_addons).to be_empty
+  subject(:addon) do
+    Registration::Addon.new(addon_generator)
+  end
+
+  describe ".find_all" do
+    it "find all addons for current base product" do
+      prod1 = addon_generator
+      prod2 = addon_generator
+      registration = double(:get_addon_list => [prod1, prod2])
+
+      expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
-    it "returns an array containing the dependency name" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
+    it "find even dependend products" do
+      prod1 = addon_with_child_generator
+      registration = double(:get_addon_list => [prod1])
 
-      expect(addon2.required_addons).to eq([addon1])
+      expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
-    it "removes duplicates" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1])
-      addon4 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1])
-      addon5 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon2, addon3, addon4])
+    it "sets properly dependencies between addons" do
+      prod1 = addon_with_child_generator
+      registration = double(:get_addon_list => [prod1])
 
-      required_addons = addon5.required_addons
-
-      expect(required_addons).to eq(required_addons.uniq)
-      expect(required_addons).to include(addon1, addon2, addon3, addon4)
-    end
-
-    it "returns transitive dependencies" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64", depends_on: [addon1])
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon2])
-
-      expect(addon3.required_addons).to include(addon1, addon2)
-    end
-
-    it "returns multiple transitive dependencies" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64")
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1, addon2])
-      addon4 = Registration::Addon.new("SUSE_ADDON4", "12", "x86_64")
-      addon5 = Registration::Addon.new("SUSE_ADDON5", "12", "x86_64")
-      addon6 = Registration::Addon.new("SUSE_ADDON6", "12", "x86_64", depends_on: [addon4, addon5])
-      addon7 = Registration::Addon.new("SUSE_ADDON7", "12", "x86_64", depends_on: [addon3, addon6])
-
-      required_addons = addon7.required_addons
-      expect(required_addons.size).to eq(6)
-      expect(required_addons).to include(addon1, addon2, addon3, addon4, addon5, addon6)
+      addons = Registration::Addon.find_all(registration)
+      expect(addons.any? {|addon| addon.children.size == 1}).to be_true
+      expect(addons.any?(&:depends_on)).to be_true
     end
   end
 
-end
+  describe ".selected" do
+    it "returns array with selected addons" do
+      expect(Registration::Addon.selected).to be_a(Array)
+    end
+  end
 
-describe Registration::AddonSorter do
-  describe ".registration_order" do
-    it "returns registration order according to the dependencies" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON2", "12", "x86_64")
-      addon3 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1, addon2])
-      addon4 = Registration::Addon.new("SUSE_ADDON4", "12", "x86_64")
-      addon5 = Registration::Addon.new("SUSE_ADDON5", "12", "x86_64")
-      addon6 = Registration::Addon.new("SUSE_ADDON6", "12", "x86_64", depends_on: [addon4, addon5])
-      addon7 = Registration::Addon.new("SUSE_ADDON7", "12", "x86_64", depends_on: [addon3, addon6])
+  describe ".registered" do
+    it "returns array of already registered addons" do
+      expect(Registration::Addon.registered).to be_a(Array)
+    end
+  end
 
-      # deliberately use an order which does not follow dependencies to make sure it is changed
-      addons = [addon7, addon2, addon3, addon5, addon4, addon6, addon1]
+  describe "#selected?" do
+    it "returns if addon is selected for installation" do
+      expect(addon.selected?).to be_false
+      Registration::Addon.selected << addon
+      expect(addon.selected?).to be_true
+    end
+  end
 
-      solved = Registration::AddonSorter.registration_order(addons)
-
-      # check the order, iterate over the list and check for missing dependencies
-      registered = []
-      solved.each do |a|
-        # check that all dependendent add-ons are already registered
-        expect(a.depends_on - registered).to be_empty
-        registered << a
-      end
+  describe "#selected" do
+    it "marks addon as selected" do
+      expect(Registration::Addon.selected.include?(addon)).to be_false
+      addon.selected
+      expect(Registration::Addon.selected.include?(addon)).to be_true
     end
 
-    it "raises KeyError exception when there is an unresolved dependency" do
-      addon1 = Registration::Addon.new("SUSE_ADDON1", "12", "x86_64")
-      addon2 = Registration::Addon.new("SUSE_ADDON3", "12", "x86_64", depends_on: [addon1])
+    it "adds to list of selected only one" do
+      addon.selected
+      addon.selected
+      expect(Registration::Addon.selected.count(addon)).to be 1
+    end
+  end
 
-      expect{Registration::AddonSorter.registration_order([addon2])}.to raise_error(KeyError)
+  describe "#unselected" do
+    it "marks addon as unselected" do
+      Registration::Addon.selected << addon
+      addon.unselected
+      expect(Registration::Addon.selected.include?(addon)).to be_false
+    end
+
+    it "do nothing if addon is not selected" do
+      expect{addon.unselected}.to_not raise_error
+    end
+  end
+
+  describe "#registered?" do
+    it "returns if addon is already registered" do
+      expect(addon.registered?).to be_false
+      Registration::Addon.registered << addon
+      expect(addon.registered?).to be_true
     end
   end
 end

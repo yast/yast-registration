@@ -132,4 +132,46 @@ describe "Registration::SwMgmt" do
     end
   end
 
+  describe ".copy_old_credentials" do
+    let(:root_dir) { "/mnt" }
+    let(:target_dir) {SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR}
+
+    before do
+      expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
+
+      expect(File).to receive(:exist?).with(target_dir).and_return(false)
+      expect(FileUtils).to receive(:mkdir_p).with(target_dir)
+    end
+
+    it "does not fail when the old credentials are missing" do
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+
+      # no copy
+      expect(FileUtils).to receive(:cp).never
+
+      expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
+    end
+
+    it "copies old NCC credentials at upgrade" do
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(true)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+
+      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
+        File.join(target_dir, "SCCcredentials"))
+
+      expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
+    end
+
+    it "copies old SCC credentials at upgrade" do
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(true)
+
+      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
+        File.join(target_dir, "SCCcredentials"))
+
+      expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
+    end
+  end
+
 end

@@ -27,6 +27,7 @@ require "yast/suse_connect"
 
 require "cgi"
 
+require "registration/addon"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/connect_helpers"
@@ -34,6 +35,7 @@ require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/registration"
 require "registration/ui/addon_eula_dialog"
+require "registration/ui/addon_selection_dialog"
 
 module Yast
   class InstSccClient < Client
@@ -43,7 +45,7 @@ module Yast
 
     # the maximum number of reg. codes displayed vertically,
     # this is the limit for 80x25 textmode UI
-    MAX_REGCODES_PER_COLUMN = 9
+    MAX_REGCODES_PER_COLUMN = 8
 
     # width of reg code input field widget
     REG_CODE_WIDTH = 33
@@ -94,6 +96,7 @@ module Yast
       show_scc_credentials_dialog
 
       ret = nil
+      @registration_skipped = false
 
       continue_buttons = [:next, :back, :cancel, :abort]
       while !continue_buttons.include?(ret) do
@@ -159,10 +162,56 @@ module Yast
           end
         end
 
-        return ret if ret == :skip && confirm_skipping
+        if ret == :skip && confirm_skipping
+          @registration_skipped = true
+          return ret
+        end
       end
 
       return ret
+    end
+
+    def refresh_base_product
+      init_registration
+
+      ::Registration::SccHelpers.catch_registration_errors do
+        # then register the product(s)
+        base_product = ::Registration::SwMgmt.base_product_to_register
+        product_services = Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+        ) do
+          @registration.upgrade_product(base_product)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_services)
+      end
+    end
+
+    # display the registration update dialog
+    def show_registration_update_dialog
+      Wizard.SetContents(
+        _("Registration"),
+        Label(_("Registration is being updated...")),
+        # TODO FIXME
+        "",
+        GetInstArgs.enable_back,
+        GetInstArgs.enable_next || Mode.normal
+      )
+    end
+
+    def update_registration
+      show_registration_update_dialog
+
+      if refresh_base_product
+        return :next
+      else
+        # automatic registration refresh during system upgrade failed, register from scratch
+        Report.Error(_("Automatic registration upgrade failed.\n" +
+              "You can manually register the system from scratch."))
+        return :register
+      end
     end
 
     # content for the main registration dialog
@@ -264,164 +313,15 @@ module Yast
       ::Registration::SwMgmt.set_repos_state(updates, options.install_updates)
     end
 
-    # create item list (available addons items)
-    def addon_selection_items(addons)
-      box = VBox()
-
-      # whether to add extra spacing in the UI
-      if UI.TextMode
-        add_extra_spacing = addons.size < 5
-      else
-        add_extra_spacing = true
-      end
-
-      addons.each do |addon|
-        label = addon.short_name
-        label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
-
-        box.params << Left(CheckBox(Id(addon.product_ident),
-            Opt(:notify),
-            addon.short_name,
-            @selected_addons.include?(addon) || registered_addons.include?(addon.product_ident)))
-
-        # add extra spacing when there are just few addons, in GUI always
-        box.params << VSpacing(0.7) if add_extra_spacing
-      end
-
-      box
-    end
-
-    # create content fot the addon selection dialog
-    def addon_selection_dialog_content(addons)
-      # less lines in textmode to fit 80x25 size
-      lines = UI.TextMode ? 9 : 14
-
-      # use two column layout if needed
-      vbox1 = addon_selection_items(addons[0..(lines - 1)])
-      vbox2 = (addons.size > lines) ? HBox(
-        HSpacing(1),
-        VBox(
-          addon_selection_items(addons[lines..(2*lines - 1)]),
-          VStretch()
-        )
-      ) :
-        Empty()
-
-      VBox(
-        VStretch(),
-        Left(Heading(_("Available Extensions and Modules"))),
-        VWeight(75, MarginBox(2, 1, HBox(
-              vbox1,
-              vbox2
-            ))),
-        Left(Label(_("Details"))),
-        MinHeight(8,
-          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an extension or a module to show details here") + "</small>")),
-        ),
-        VStretch()
-      )
-    end
-
-    # update addon details after changing the current addon in the UI
-    def show_addon_details(addon)
-      # addon description is a rich text
-      UI.ChangeWidget(Id(:details), :Value, addon.description)
-      UI.ChangeWidget(Id(:details), :Enabled, true)
-    end
-
-    # check addon dependencies and automatically select required addons
-    def check_addon_dependencies(addons)
-      selected = UI.QueryWidget(Id(:addons), :SelectedItems)
-      selected_addons = addons.select{|a| selected.include?(a.name)}
-
-      selected_addons.each do |a|
-        missing = a.required_addons - selected_addons
-
-        if !missing.empty?
-          # popup message, %s are product names
-          Popup.Message((_("Automatically selecting '%s'\ndependencies:\n\n%s") %
-              [a.label, missing.map(&:label).join("\n")]))
-          # select the missing entries
-          UI.ChangeWidget(Id(:addons), :SelectedItems, selected + missing.map(&:name))
-        end
-      end
-    end
-
-    # check for the maximum amount of reg. codes supported by Yast
-    def supported_addon_count(selected)
-      # maximum number or reg codes which can be displayed in two column layout
-      max_supported = 2*MAX_REGCODES_PER_COLUMN
-
-      # check the addons requiring a reg. code
-      if selected.count{|a| !a.free} > max_supported
-        Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
-        return false
-      end
-
-      return true
-    end
-
-    # handle user input in the addon selection dialog
-    def handle_addon_selection_dialog(addons)
-      ret = nil
-      continue_buttons = [:next, :back, :close, :abort, :skip]
-
-      while !continue_buttons.include?(ret) do
-        ret = UI.UserInput
-
-        case ret
-        when :next
-          selected = addons.select{|a| UI.QueryWidget(Id(a.product_ident), :Value)}
-
-          # ignore already registered addons
-          selected.reject!{|a| registered_addons.include?(a.product_ident) }
-
-          if !supported_addon_count(selected)
-            ret = nil
-            next
-          end
-
-          @selected_addons = selected
-          ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-          log.info "Selected addons: #{@selected_addons.map(&:short_name)}"
-
-          ret = :skip if @selected_addons.empty?
-        else
-          # check whether it's an add-on ID (checkbox clicked)
-          addon = addons.find{|addon| addon.product_ident == ret}
-
-          # an addon has been changed, refresh details, check dependencies
-          if addon
-            show_addon_details(addon)
-            # TODO FIXME: SCC does not support dependencies yet
-            # check_addon_dependencies(addons)
-          end
-        end
-      end
-
-      ret
-    end
-
     # run the addon selection dialog
     def select_addons
-      addons = get_available_addons
-      Wizard.SetContents(
-        # dialog title
-        _("Extension Selection"),
-        addon_selection_dialog_content(addons),
-        # TODO FIXME: add a help text
-        "",
-        GetInstArgs.enable_back || Mode.normal,
-        GetInstArgs.enable_next || Mode.normal
-      )
+      get_available_addons # FIXME just to fill cache with popup
 
-      # disable already registered addons in UI
-      registered_addons.each do |addon|
-        UI.ChangeWidget(Id(addon), :Enabled, false)
-      end
+      # FIXME workaround to reference between old way and new storage in Addon metaclass
+      @selected_addons = Registration::Addon.selected
+      ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 
-      handle_addon_selection_dialog(addons)
+      Registration::UI::AddonSelectionDialog.run(@registration)
     end
 
 
@@ -464,8 +364,25 @@ module Yast
 
       HBox(
         HSpacing(Opt(:hstretch), 3),
-        box1,
-        box2 ? box2 : Empty(),
+        VBox(
+          VStretch(),
+          Left(Label(n_(
+            "The extension you selected needs a separate registration code.",
+            "The extensions you selected need separate registration codes.",
+            addons.size
+          ))),
+          Left(Label(n_(
+            "Enter the registration code into the field below.",
+            "Enter the registration codes into the fields below.",
+            addons.size
+          ))),
+          VStretch(),
+          HBox(
+            box1,
+            box2 ? box2 : Empty()
+          ),
+          VStretch()
+        ),
         HSpacing(Opt(:hstretch), 3)
       )
     end
@@ -475,19 +392,15 @@ module Yast
     # installation workflow
     def get_available_addons
       # cache the available addons
-      @available_addons = ::Registration::Storage::Cache.instance.available_addons
-      return @available_addons if @available_addons
-
       init_registration
 
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
         _("Loading Available Add-on Products and Extensions...")) do
 
-        @registration.get_addon_list
+        Registration::Addon.find_all(@registration)
       end
 
-      log.info "Received product extensions: #{@available_addons}"
       ::Registration::Storage::Cache.instance.available_addons = @available_addons
       @available_addons
     end
@@ -619,18 +532,16 @@ module Yast
     def media_addons
       # force displaying the UI
       Installation.add_on_selected = true
-      # display global enable/disable switch
-      SourceDialogs.display_addon_checkbox = true
 
       ret = WFM.call("inst_add-on",
         [{ "enable_next" => true, "enable_back" => true}]
       )
-      ret = :next if [:auto, :finish].include? ret
+      ret = :next if [:auto, :finish].include?(ret)
+
+      # leave the workflow if registration was skipped
+      ret = :finish if ret == :next && @registration_skipped
 
       return ret
-    ensure
-      # make sure to revert the change if something goes wrong
-      SourceDialogs.display_addon_checkbox = false
     end
 
     def registered_dialog
@@ -678,13 +589,30 @@ module Yast
         return Mode.normal ? :abort : :auto
       end
 
+      if Mode.update
+        Wizard.SetContents(
+          _("Registration"),
+          Empty(),
+          "",
+          false,
+          false
+        )
+
+        ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
+
+        if File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+          # update the registration using the old credentials
+          return :update
+        end
+      end
+
       if Mode.normal && ::Registration::Registration.is_registered?
         return display_registered_dialog
       else
         return :register
       end
     end
-    
+
     def addon_eula
       ::Registration::UI::AddonEulaDialog.run(@selected_addons)
     end
@@ -696,6 +624,7 @@ module Yast
         "check"           => [ lambda { registration_check() }, true ],
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
+        "update"          => [ lambda { update_registration() }, true ],
         "media_addons"    => lambda { media_addons() },
         "addon_eula"      => lambda { addon_eula() },
         "register_addons" => lambda { register_addons() }
@@ -709,7 +638,14 @@ module Yast
           :cancel     => :abort,
           :register   => "register",
           :extensions => "select_addons",
+          :update     => "update",
           :next       => :next
+        },
+        "update" => {
+          :abort   => :abort,
+          :cancel   => :abort,
+          :next => "select_addons",
+          :register => "register",
         },
         "register" => {
           :abort    => :abort,
@@ -725,6 +661,7 @@ module Yast
         "media_addons" => {
           :abort    => :abort,
           :next     => "addon_eula",
+          :finish   => :next
         },
         "addon_eula" => {
           :abort    => :abort,
@@ -749,7 +686,7 @@ module Yast
 
     # helper method for accessing the registered addons
     def registered_addons
-      ::Registration::Storage::Cache.instance.registered_addons
+      Registration::Addon.registered
     end
 
   end unless defined?(InstSccClient)

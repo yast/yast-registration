@@ -1,4 +1,63 @@
 -------------------------------------------------------------------
+Mon Jun  9 11:26:18 UTC 2014 - lslezak@suse.cz
+
+- display where to download the extension EULA text (bnc#880685)
+- 3.1.69
+
+-------------------------------------------------------------------
+Mon Jun  9 08:02:03 UTC 2014 - jreidinger@suse.com
+
+- switch build tool from autotools to yast-rake
+- 3.1.68
+
+-------------------------------------------------------------------
+Fri Jun  6 15:27:28 UTC 2014 - lslezak@suse.cz
+
+- properly leave the addon workflow when registration was skipped
+  (bnc#880941)
+- 3.1.67
+
+-------------------------------------------------------------------
+Fri Jun  6 11:41:21 UTC 2014 - jreidinger@suse.com
+
+- added support for nested extensions to display e.g. HA GEO
+  extension (bnc#873185)
+- improve test coverage
+- 3.1.66
+
+-------------------------------------------------------------------
+Thu Jun  5 12:43:27 UTC 2014 - jsrain@suse.cz
+
+- add explanation to extension regcode dialog (bnc#881466)
+- 3.1.65
+
+-------------------------------------------------------------------
+Tue Jun  3 16:08:38 UTC 2014 - lslezak@suse.cz
+
+- fixed accepting more than one extension EULA (bnc#881078)
+- 3.1.64
+
+-------------------------------------------------------------------
+Tue Jun  3 12:38:47 UTC 2014 - jsrain@suse.cz
+
+- UX improvements for registration server selection (bnc#878649)
+- 3.1.63
+
+-------------------------------------------------------------------
+Mon Jun  2 16:47:14 UTC 2014 - lslezak@suse.cz
+
+- automatically upgrade the registration without asking for
+  a registration code when upgrading from SLE11 (bnc#876849)
+- 3.1.62
+
+-------------------------------------------------------------------
+Fri May 30 11:43:18 UTC 2014 - lslezak@suse.cz
+
+- fixed displaying EULA translations (bnc#880504)
+- removed EULA printing text (part of bnc#878976)
+- 3.1.61
+
+-------------------------------------------------------------------
 Mon May 26 11:15:39 UTC 2014 - jreidinger@suse.com
 
 - empty eula url mean no eula (Bnc#879456)
