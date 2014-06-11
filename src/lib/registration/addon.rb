@@ -64,13 +64,13 @@ module Registration
 
     # delegate methods to underlaying suse connect object
     def_delegators :@pure_addon,
-      :free,
-      :product_ident,
-      :short_name,
-      :long_name,
+      :arch,
       :description,
       :eula_url,
-      :arch,
+      :free,
+      :long_name,
+      :product_ident,
+      :short_name,
       :version
 
     def initialize pure_addon
