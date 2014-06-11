@@ -50,7 +50,7 @@ module Registration
 
         log.info "writing registration config: #{config_params}"
 
-        SUSE::Connect::YaST.write_config
+        SUSE::Connect::YaST.write_config(config_params)
 
         source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
         target_path = Yast::Installation.destdir + source_path
