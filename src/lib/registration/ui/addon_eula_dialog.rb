@@ -3,6 +3,9 @@ require "yast"
 require "registration/eula_downloader"
 require "registration/helpers"
 
+# TODO FIXME: this is used in a workaround, remove before RC/GM!!
+require "tempfile"
+
 module Registration
   module UI
 
@@ -18,6 +21,7 @@ module Registration
       Yast.import "ProductLicense"
       Yast.import "Report"
       Yast.import "Wizard"
+      Yast.import "InstShowInfo"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(selected_addons)
@@ -96,6 +100,9 @@ module Registration
           Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
             eula_lang(eulas.keys), arg_ref(eulas), id, title)
 
+          # TODO FIXME: this a workaround, remove before RC/GM!!
+          display_beta_warning(addon.short_name)
+
           base_product = false
           action = "abort"
           ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
@@ -150,6 +157,38 @@ module Registration
       # @return [String] result locale name
       def remove_country_suffix(code)
         code.sub(/_.*\z/, "")
+      end
+
+      # TODO FIXME: this a workaround, remove before RC/GM!!
+      def display_beta_warning(addon_name)
+        beta_warning = <<EOF
+
+   #{addon_name}
+
+   Attention! You are accessing our Beta Distribution.  If you install
+   any package, note that we can NOT GIVE ANY SUPPORT for your system -
+   no matter if you update from a previous system or do a complete
+   new installation.
+
+   Use this BETA distribution at your own risk! We recommend it for
+   testing, porting and evaluation purposes but not for any critical
+   production systems.
+
+   Use this distribution at your own risk - and remember to have a
+   lot of fun! :)
+
+                Your SUSE Linux Enterprise Team
+EOF
+
+        # InstShowInfo reads the text from a file so use a tempfile
+        file = Tempfile.new("beta-warning-")
+        begin
+          file.write(beta_warning)
+          file.close
+          Yast::InstShowInfo.show_info_txt(file.path)
+        ensure
+          file.unlink
+        end
       end
 
     end
