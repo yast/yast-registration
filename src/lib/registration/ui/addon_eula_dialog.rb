@@ -3,6 +3,7 @@ require "yast"
 require "registration/eula_downloader"
 require "registration/helpers"
 
+# TODO FIXME: this is used in a workaround, remove before RC/GM!!
 require "tempfile"
 
 module Registration
@@ -99,6 +100,7 @@ module Registration
           Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
             eula_lang(eulas.keys), arg_ref(eulas), id, title)
 
+          # TODO FIXME: this a workaround, remove before RC/GM!!
           display_beta_warning(addon.short_name)
 
           base_product = false
@@ -157,6 +159,7 @@ module Registration
         code.sub(/_.*\z/, "")
       end
 
+      # TODO FIXME: this a workaround, remove before RC/GM!!
       def display_beta_warning(addon_name)
         beta_warning = <<EOF
 
