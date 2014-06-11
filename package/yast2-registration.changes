@@ -1,7 +1,20 @@
 -------------------------------------------------------------------
-Tue Jun 10 14:22:07 UTC 2014 - jreidinger@suse.com
+Tue Jun 11 14:22:07 UTC 2014 - jreidinger@suse.com
 
 - write changes at the end of installation for suse connect
+- 3.1.72
+
+-------------------------------------------------------------------
+Mon Jun 11 12:52:44 UTC 2014 - lslezak@suse.cz
+
+- updated dialog title (extension selection) (bnc#881627)
+- 3.1.71
+
+-------------------------------------------------------------------
+Wed Jun 11 12:42:53 UTC 2014 - lslezak@suse.cz
+
+- display a fixed Beta warning for all online extensions
+  (temporary workaround for bnc#882034)
 - 3.1.70
 
 -------------------------------------------------------------------
