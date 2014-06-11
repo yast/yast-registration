@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun 11 14:22:07 UTC 2014 - jreidinger@suse.com
+
+- write changes at the end of installation for suse connect
+- 3.1.72
+
+-------------------------------------------------------------------
 Mon Jun 11 12:52:44 UTC 2014 - lslezak@suse.cz
 
 - updated dialog title (extension selection) (bnc#881627)
