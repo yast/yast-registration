@@ -48,7 +48,7 @@ module Registration
       end
     end
 
-    class Cache < Struct.new(:available_addons, :registered_addons,
+    class Cache < Struct.new(:available_addons, :first_run, :registered_addons,
         :reg_url, :reg_url_cached)
 
       include Singleton
@@ -56,6 +56,7 @@ module Registration
       def initialize
         # TODO: handle registered addons in installed system
         self.registered_addons = []
+        self.first_run = true
       end
     end
 
