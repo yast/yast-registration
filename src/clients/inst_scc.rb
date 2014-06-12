@@ -63,11 +63,14 @@ module Yast
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "Mode"
+      Yast.import "Stage"
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
       Yast.import "ProductControl"
       Yast.import "SourceDialogs"
+
+      first_run
 
       @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
@@ -666,6 +669,18 @@ module Yast
     # helper method for accessing the registered addons
     def registered_addons
       Registration::Addon.registered
+    end
+
+    def first_run
+      if ::Registration::Storage::Cache.instance.first_run
+        ::Registration::Storage::Cache.instance.first_run = false
+
+        if Stage.initial && ::Registration::Registration.is_registered?
+          file = ::Registration::Registration::SCC_CREDENTIALS
+          log.info "Resetting registration status, removing #{file}"
+          File.rm(file)
+        end
+      end
     end
 
   end unless defined?(InstSccClient)
