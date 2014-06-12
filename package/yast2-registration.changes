@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 12 07:28:51 UTC 2014 - lslezak@suse.cz
+
+- removed media addons from registratoin workflow (bnc#880507)
+- 3.1.73
+
+-------------------------------------------------------------------
 Tue Jun 11 14:22:07 UTC 2014 - jreidinger@suse.com
 
 - write changes at the end of installation for suse connect

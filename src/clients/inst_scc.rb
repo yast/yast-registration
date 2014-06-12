@@ -529,21 +529,6 @@ module Yast
       Popup.YesNo(confirmation)
     end
 
-    def media_addons
-      # force displaying the UI
-      Installation.add_on_selected = true
-
-      ret = WFM.call("inst_add-on",
-        [{ "enable_next" => true, "enable_back" => true}]
-      )
-      ret = :next if [:auto, :finish].include?(ret)
-
-      # leave the workflow if registration was skipped
-      ret = :finish if ret == :next && @registration_skipped
-
-      return ret
-    end
-
     def registered_dialog
       VBox(
         Heading(_("The system is already registered.")),
@@ -625,7 +610,6 @@ module Yast
         "register"        => lambda { register_base_system() },
         "select_addons"   => lambda { select_addons() },
         "update"          => [ lambda { update_registration() }, true ],
-        "media_addons"    => lambda { media_addons() },
         "addon_eula"      => lambda { addon_eula() },
         "register_addons" => lambda { register_addons() }
       }
@@ -650,18 +634,13 @@ module Yast
         "register" => {
           :abort    => :abort,
           :cancel   => :abort,
-          :skip     => "media_addons",
+          :skip     => :next,
           :next     => "select_addons"
         },
         "select_addons" => {
           :abort    => :abort,
-          :skip     => "media_addons",
-          :next     => "media_addons"
-        },
-        "media_addons" => {
-          :abort    => :abort,
-          :next     => "addon_eula",
-          :finish   => :next
+          :skip     => :next,
+          :next     => "addon_eula"
         },
         "addon_eula" => {
           :abort    => :abort,
