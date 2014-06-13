@@ -130,7 +130,7 @@ module Registration
     end
 
     # add the services to libzypp and load (refresh) them
-    def self.add_services(product_services, credentials)
+    def self.add_service(product_service, credentials)
       # save repositories before refreshing added services (otherwise
       # pkg-bindings will treat them as removed by the service refresh and
       # unload them)
@@ -140,90 +140,80 @@ module Registration
       end
 
       # services for registered products
-      product_services.map(&:sources).flatten.each do |source|
-        log.info "Adding service #{source.name.inspect} (#{source.url})"
+      log.info "Adding service #{product_service.name.inspect} (#{product_service.url})"
 
-        credentials_file = Helpers.credentials_from_url(source.url)
+      credentials_file = Helpers.credentials_from_url(product_service.url)
 
-        if credentials_file
-          if Mode.update
-            # at update libzypp is already switched to /mnt target,
-            # update the path accordingly
-            credentials_file = File.join(Installation.destdir,
-              ::SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR,
-              credentials_file)
-            log.info "Using #{credentials_file} credentials path in update mode"
-          end
-          # TODO FIXME: SCC currenly does not return credentials for the service,
-          # just reuse the global credentials and save to a different file
-          service_credentials = credentials.dup
-          service_credentials.file = credentials_file
-          service_credentials.write
+      if credentials_file
+        if Mode.update
+          # at update libzypp is already switched to /mnt target,
+          # update the path accordingly
+          credentials_file = File.join(Installation.destdir,
+            ::SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR,
+            credentials_file)
+          log.info "Using #{credentials_file} credentials path in update mode"
         end
+        # TODO FIXME: SCC currenly does not return credentials for the service,
+        # just reuse the global credentials and save to a different file
+        service_credentials = credentials.dup
+        service_credentials.file = credentials_file
+        service_credentials.write
+      end
 
-        # add a new service or update the existing service
-        if Pkg.ServiceAliases.include?(source.name)
-          log.info "Updating existing service: #{source.name}"
-          if !Pkg.ServiceSet(source.name, {
-                "alias" => source.name,
-                "name" => source.name,
-                "url" => source.url.to_s,
-                "enabled" => true,
-                "autorefresh" => true,
-              })
+      service_name = product_service.name
 
-            ## error message
-            raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), source.name)
-          end
-        else
-          log.info "Adding new service: #{source.name}"
-          if !Pkg.ServiceAdd(source.name, source.url.to_s)
-            # error message
-            raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), source.name)
-          end
+      # add a new service or update the existing service
+      if Pkg.ServiceAliases.include?(service_name)
+        log.info "Updating existing service: #{service_name}"
+        if !Pkg.ServiceSet(service_name, {
+              "alias" => service_name,
+              "name" => service_name,
+              "url" => product_service.url.to_s,
+              "enabled" => true,
+              "autorefresh" => true,
+            })
+
+          ## error message
+          raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
         end
-
-        # refresh works only for saved services
-        if !Pkg.ServiceSave(source.name)
+      else
+        log.info "Adding new service: #{service_name}"
+        if !Pkg.ServiceAdd(service_name, product_service.url.to_s)
           # error message
-          raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), source.name)
-        end
-
-        if !Pkg.ServiceRefresh(source.name)
-          # error message
-          raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), source.name)
+          raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service_name)
         end
       end
 
-      # activate the requested repository setup
-      product_services.each do |product_service|
-        # there is always only one service
-        service_name = product_service.sources.first.name
-        log.info "Updating repositories for service: #{service_name}"
+      # refresh works only for saved services
+      if !Pkg.ServiceSave(service_name)
+        # error message
+        raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), service_name)
+      end
 
-        repos_enable(service_aliases(service_name, product_service.enabled))
-        repos_disable_autorefresh(service_aliases(service_name, product_service.norefresh))
+      if !Pkg.ServiceRefresh(service_name)
+        # error message
+        raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service_name)
       end
     ensure
       Pkg.SourceSaveAll
     end
 
     # get list of repositories belonging to registered services
-    # @param product_services [Array<SUSE::Connect::Service>] added services
+    # @param product_services [SUSE::Connect::Remote::Service] added service
     # @param only_updates [Boolean] return only update repositories
     # @return [Array<Hash>] list of repositories
-    def self.service_repos(product_services, only_updates: false)
+    def self.service_repos(product_service, only_updates: false)
       repo_data = Pkg.SourceGetCurrent(false).map do |repo|
         data = Pkg.SourceGeneralData(repo)
         data["SrcId"] = repo
         data
       end
 
-      service_names = product_services.map(&:sources).flatten.map(&:name)
-      log.info "Added services: #{service_names.inspect}"
+      service_name = product_service.name
+      log.info "Added service: #{service_name.inspect}"
 
       # select only repositories belonging to the product services
-      repos = repo_data.select{|repo| service_names.include?(repo["service"])}
+      repos = repo_data.select{|repo| service_name == repo["service"]}
       log.info "Service repositories: #{repos}"
 
       if only_updates
@@ -248,24 +238,6 @@ module Registration
           log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
           Pkg.SourceSetEnabled(repo["SrcId"], enabled)
         end
-      end
-    end
-
-    # Disable specified repositories
-    # @param repo_aliases [Array<String>] list of repository aliases
-    def self.repos_enable(repo_aliases)
-      each_repo(repo_aliases) do |repo_alias|
-        log.info "Enabling repository #{repo_alias}"
-        Pkg.SourceSetEnabled(repo_alias, true)
-      end
-    end
-
-    # Disable autorefresh for specified repositories
-    # @param repo_aliases [Array<String>] list of repository aliases
-    def self.repos_disable_autorefresh(repo_aliases)
-      each_repo(repo_aliases) do |repo_alias|
-        log.info "Disabling autorefresh for #{repo_alias} repository"
-        Pkg.SourceSetAutorefresh(repo_alias, false)
       end
     end
 
@@ -322,13 +294,7 @@ module Registration
       end
     end
     
-    # get libzypp repository aliases for a service
-    # (libzypp internally uses the service name as the prefix)
-    def self.service_aliases(service, aliases)
-      aliases.map{ |a| "#{service}:#{a}"}
-    end
-
-    private_class_method :each_repo, :service_aliases
+    private_class_method :each_repo
   end
 end
 

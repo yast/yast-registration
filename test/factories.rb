@@ -4,10 +4,10 @@ require "suse/connect"
 def suse_connect_product_generator(attrs={})
     params = {}
     params['name'] = attrs['name'] || "Product#{rand(100000)}"
-    params['long_name'] = attrs['long_name'] || "The best cool #{params['name']}"
+    params['friendly_name'] = attrs['friendly_name'] || "The best cool #{params['name']}"
     params['description'] = attrs['description'] || "Bla bla bla bla!"
-    params['zypper_name'] = attrs['zypper_name'] || "prod#{rand(100000)}"
-    params['zypper_version'] = attrs['version'] || "#{rand(13)}"
+    params['identifier'] = attrs['zypper_name'] || "prod#{rand(100000)}"
+    params['version'] = attrs['version'] || "#{rand(13)}"
     params['arch'] = attrs['arch'] || "x86_64"
     params['free'] = attrs.fetch('free', true)
     params['eula_url'] = attrs['eula_url']
@@ -17,12 +17,12 @@ def suse_connect_product_generator(attrs={})
 end
 
 def addon_generator(params={})
-  SUSE::Connect::Product.new(suse_connect_product_generator(params))
+  SUSE::Connect::Remote::Product.new(suse_connect_product_generator(params))
 end
 
 def addon_with_child_generator(parent_params={})
   prod_child = suse_connect_product_generator
-  SUSE::Connect::Product.new(suse_connect_product_generator(parent_params.merge('extensions' => [prod_child])))
+  SUSE::Connect::Remote::Product.new(suse_connect_product_generator(parent_params.merge('extensions' => [prod_child])))
 end
 
 # add cache reset, which is not needed in runtime, but for test it is critical

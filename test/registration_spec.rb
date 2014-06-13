@@ -20,15 +20,16 @@ describe "Registration::Registration" do
       username = "user"
       password = "password"
       reg_code = "reg_code"
+      target_distro = "sles-12-x86_64"
 
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
       SUSE::Connect::Credentials.any_instance.should_receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
-        .with(hash_including(:token => reg_code))
+        .with(hash_including(:token => reg_code), target_distro)
         .and_return([username, password])
       )
 
-      Registration::Registration.new.register("email", reg_code, "sles-12-x86_64")
+      Registration::Registration.new.register("email", reg_code, target_distro)
     end
   end
 
@@ -43,30 +44,25 @@ describe "Registration::Registration" do
         "release_type" => "DVD"
       }
 
-      source = SUSE::Connect::Source.new("service", "https://example.com")
-      service = SUSE::Connect::Service.new([source], [], [])
+      service_data = {
+        "name" => "service",
+        "url" => "https://example.com",
+        "product" => product
+      }
 
-      expect(SUSE::Connect::YaST).to(receive(connect_method)
-        .with(hash_including(
-            :product_ident => {
-              :name => product["name"],
-              :version => product["version"],
-              :arch => product["arch"],
-              :release_type => product["release_type"]
-            }
-          ))
-        .and_return(service)
-      )
+      service = SUSE::Connect::Remote::Service.new(service_data)
 
-      expect(Registration::SwMgmt).to receive(:add_services)
+      expect(SUSE::Connect::YaST).to receive(connect_method).and_return(service)
+
+      expect(Registration::SwMgmt).to receive(:add_service)
       allow(File).to receive(:exist?).with(
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
       allow(File).to receive(:read).with(
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(
         "username=SCC_foo\npassword=bar")
 
-      service_list = Registration::Registration.new.send(yast_method, product)
-      expect(service_list).to eq([service])
+      registered_service = Registration::Registration.new.send(yast_method, product)
+      expect(registered_service).to eq(service)
     end
   end
 

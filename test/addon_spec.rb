@@ -94,4 +94,26 @@ describe Registration::Addon do
       expect(addon.registered?).to be_true
     end
   end
+
+  describe "#label" do
+    it "returns short name when the long name is nil" do
+      product = addon_generator
+      product.friendly_name = nil
+
+      addon = Registration::Addon.new(product)
+      expect(addon.label).to eq(addon.name)
+    end
+
+    it "returns short name when the long name is empty" do
+      product = addon_generator("friendly_name" => "")
+
+      addon = Registration::Addon.new(product)
+      expect(addon.label).to eq(addon.name)
+    end
+
+    it "returns long name if it is present" do
+      expect(addon.label).to eq(addon.friendly_name)
+    end
+  end
+
 end

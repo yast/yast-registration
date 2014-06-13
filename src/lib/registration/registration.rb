@@ -41,11 +41,10 @@ module Registration
     def register(email, reg_code, distro_target)
       settings = connect_params(
         :token => reg_code,
-        :distro_target => distro_target,
         :email => email
       )
 
-      login, password = SUSE::Connect::YaST.announce_system(settings)
+      login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
       credentials = SUSE::Connect::Credentials.new(login, password, SCC_CREDENTIALS)
 
       log.info "Global SCC credentials: #{credentials}"
@@ -58,29 +57,37 @@ module Registration
     end
 
 
-    def register_product(product)
-      services_for_product(product) do |params|
+    def register_product(product, email = nil)
+      service_for_product(product) do |product_ident, params|
         log.info "Registering product: #{product}"
-        SUSE::Connect::YaST.activate_product(params)
+        SUSE::Connect::YaST.activate_product(product_ident, params, email)
       end
     end
 
     def upgrade_product(product)
-      services_for_product(product) do |params|
+      service_for_product(product) do |product_ident, params|
         log.info "Upgrading product: #{product}"
-        SUSE::Connect::YaST.upgrade_product(params)
+        SUSE::Connect::YaST.upgrade_product(product_ident, params)
       end
     end
 
     def get_addon_list
       # extensions for base product
       base_product = ::Registration::SwMgmt.find_base_product
-      params = connect_params(:product_ident => {:name => base_product["name"]})
 
       log.info "Reading available addons for product: #{base_product["name"]}"
-      addons = SUSE::Connect::YaST.list_products(params)
+
+      remote_product = SUSE::Connect::Remote::Product.new(
+        :arch         => base_product["arch"],
+        :identifier   => base_product["name"],
+        :version      => base_product["version"],
+        :release_type => base_product["release_type"]
+      )
+
+      params = connect_params({})
+      addons = SUSE::Connect::YaST.show_product(remote_product, params)
       # ignore the base product "addon"
-      addons.reject{ |a| a.product_ident == base_product["name"] }
+      addons.reject{ |a| a.identifier == base_product["name"] }
     end
 
     def self.is_registered?
@@ -89,30 +96,31 @@ module Registration
 
     private
 
-    def services_for_product(product, &block)
-      product_ident = {
+    def service_for_product(product, &block)
+      remote_product = SUSE::Connect::Remote::Product.new(
         :arch         => product["arch"],
-        :name         => product["name"],
+        :identifier   => product["name"],
         :version      => product["version"],
         :release_type => product["release_type"]
-      }
-      log.info "Using product: #{product_ident}"
+      )
 
-      params = connect_params(:product_ident => product_ident)
+      log.info "Using product: #{remote_product}"
+
+      params = connect_params({})
 
       # use product specific reg. code (e.g. for addons)
       params[:token] = product["reg_code"] if product["reg_code"]
 
-      product_service = yield(params)
+      product_service = yield(remote_product, params)
 
-      log.info "registered product_services: #{product_service.inspect}"
+      log.info "registration result: #{product_service}"
 
       if product_service
         credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
-        ::Registration::SwMgmt.add_services([product_service], credentials)
+        ::Registration::SwMgmt.add_service(product_service, credentials)
       end
 
-      product_service ? [product_service] : []
+      product_service
     end
 
     def connect_params(params)
@@ -120,10 +128,6 @@ module Registration
         :language => ::Registration::Helpers.language,
         :debug => ENV["SCCDEBUG"],
         :verbose => ENV["Y2DEBUG"] == "1",
-        # TODO FIXME: workaround: just a dummy value (it is used only from
-        # suse-connect command line, makes no sense in Yast), suse-connect
-        # should be fixed to not call zypper when the :product key is missing
-        :product => {},
         # pass a verify_callback to get details about failed SSL verification
         :verify_callback => lambda do |verify_ok, context|
           # we cannot raise an exception with details here (all exceptions in

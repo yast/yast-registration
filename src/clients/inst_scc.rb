@@ -131,7 +131,8 @@ module Yast
           init_registration
 
           ::Registration::SccHelpers.catch_registration_errors do
-            distro_target = ::Registration::SwMgmt.find_base_product["register_target"]
+            base_product = ::Registration::SwMgmt.find_base_product
+            distro_target = base_product["register_target"]
 
             if !::Registration::Registration.is_registered?
               log.info "Registering system, distro_target: #{distro_target}"
@@ -145,20 +146,20 @@ module Yast
 
             if !options.base_registered
               # then register the product(s)
-              base_product = ::Registration::SwMgmt.base_product_to_register
-              product_services = Popup.Feedback(_(CONTACTING_MESSAGE),
+              product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
                 _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
               ) do
 
-                base_product["reg_code"] = reg_code
-                registered_services = @registration.register_product(base_product)
+                base_product_data = ::Registration::SwMgmt.base_product_to_register
+                base_product_data["reg_code"] = reg_code
+                registered_service = @registration.register_product(base_product_data, email)
                 options.base_registered = true
 
-                registered_services
+                registered_service
               end
 
               # select repositories to use in installation or update (e.g. enable/disable Updates)
-              select_repositories(product_services) if Mode.installation || Mode.update
+              select_repositories(product_service) if Mode.installation || Mode.update
             end
 
             return :next
@@ -298,11 +299,11 @@ module Yast
       end
     end
 
-    def select_repositories(product_services)
+    def select_repositories(product_service)
       options = ::Registration::Storage::InstallationOptions.instance
 
       # added update repositories
-      updates = ::Registration::SwMgmt.service_repos(product_services, only_updates: true)
+      updates = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
       log.info "Found update repositories: #{updates.size}"
 
       # not set yet?
@@ -334,11 +335,8 @@ module Yast
       box = VBox()
 
       addons.each do |addon|
-        label = addon.short_name
-        label << " (#{addon.long_name})" if addon.long_name && !addon.long_name.empty?
-
-        box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.product_ident), label,
-            @known_reg_codes.fetch(addon.product_ident, "")))
+        box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
+            addon.label, @known_reg_codes.fetch(addon.identifier, "")))
         # add extra spacing when there are just few addons, in GUI always
         box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
       end
@@ -431,7 +429,7 @@ module Yast
     # @return [Hash<Addon,String>] addon => reg. code mapping
     def collect_addon_regcodes(addons_with_codes)
       pairs = addons_with_codes.map do |a|
-        [a.product_ident, UI.QueryWidget(Id(a.product_ident), :Value)]
+        [a.identifier, UI.QueryWidget(Id(a.identifier), :Value)]
       end
       @known_reg_codes.merge!(Hash[pairs])
     end
@@ -453,20 +451,20 @@ module Yast
       #        end
       #      end
       #
-      # log.info "Addon registration order: #{registration_order.map(&:short_name)}"
+      # log.info "Addon registration order: #{registration_order.map(&:name)}"
 
       init_registration
 
       product_succeed = registration_order.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors("#{product.short_name}:") do
+        ::Registration::SccHelpers.catch_registration_errors("#{product.label}:") do
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product
-            _("Registering %s ...") % product.short_name) do
+            _("Registering %s ...") % product.label) do
 
             product_data = {
-              "name" => product.product_ident,
-              "reg_code" => @known_reg_codes[product.product_ident],
+              "name" => product.identifier,
+              "reg_code" => @known_reg_codes[product.identifier],
               "arch" => product.arch,
               "version" => product.version
             }
@@ -478,8 +476,8 @@ module Yast
           select_repositories(product_service) if Mode.installation || Mode.update
 
           # move from selected to registered
-          registered_addons << product.product_ident
-          @selected_addons.reject!{|selected| selected.product_ident == product.product_ident}
+          registered_addons << product.identifier
+          @selected_addons.reject!{|selected| selected.identifier == product.identifier}
         end
       end
 
@@ -678,7 +676,7 @@ module Yast
         if Stage.initial && ::Registration::Registration.is_registered?
           file = ::Registration::Registration::SCC_CREDENTIALS
           log.info "Resetting registration status, removing #{file}"
-          File.rm(file)
+          File.unlink(file)
         end
       end
     end
