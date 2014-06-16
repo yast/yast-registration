@@ -60,14 +60,18 @@ module Registration
     def register_product(product, email = nil)
       service_for_product(product) do |product_ident, params|
         log.info "Registering product: #{product}"
-        SUSE::Connect::YaST.activate_product(product_ident, params, email)
+        service = SUSE::Connect::YaST.activate_product(product_ident, params, email)
+        log.info "Register product result: #{service}"
+        service
       end
     end
 
     def upgrade_product(product)
       service_for_product(product) do |product_ident, params|
         log.info "Upgrading product: #{product}"
-        SUSE::Connect::YaST.upgrade_product(product_ident, params)
+        service = SUSE::Connect::YaST.upgrade_product(product_ident, params)
+        log.info "Upgrade product result: #{service}"
+        service
       end
     end
 
@@ -85,7 +89,9 @@ module Registration
       )
 
       params = connect_params({})
-      addons = SUSE::Connect::YaST.show_product(remote_product, params)
+      addons = SUSE::Connect::YaST.show_product(remote_product, params).extensions || []
+      log.info "Available addons result: #{addons}"
+
       # ignore the base product "addon"
       addons.reject{ |a| a.identifier == base_product["name"] }
     end
