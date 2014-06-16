@@ -58,12 +58,10 @@ describe "Registration::SwMgmt" do
   end
 
   describe ".service_repos" do
-    let(:services) { double }
+    let(:service) { double }
 
     before do
-      service = double
       expect(service).to receive(:name).and_return(service_name)
-      expect(services).to receive(:sources).and_return([service])
 
       expect(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
@@ -72,11 +70,11 @@ describe "Registration::SwMgmt" do
     end
 
     it "returns list of repositories belonging to a service" do
-      expect(Registration::SwMgmt.service_repos([services])).to eq([repos[1], repos[2]])
+      expect(Registration::SwMgmt.service_repos(service)).to eq([repos[1], repos[2]])
     end
 
     it "optionally returns only update repositories" do
-      expect(Registration::SwMgmt.service_repos([services], only_updates: true)).to eq([repos[2]])
+      expect(Registration::SwMgmt.service_repos(service, only_updates: true)).to eq([repos[2]])
     end
   end
 
@@ -93,9 +91,12 @@ describe "Registration::SwMgmt" do
   describe ".add_services" do
     let(:service_url) { "https://example.com/foo/bar?credentials=TEST_credentials" }
     let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
-    let(:product_services) do
-      SUSE::Connect::Service.new({service_name => service_url}, ["SLES12-Pool"],
-        ["SLES12-Pool"])
+    let(:product_service) do
+      SUSE::Connect::Remote::Service.new(
+        "name" => service_name,
+        "url" => service_url,
+        "product" => {}
+      )
     end
     let(:yast_mode) { double("Yast::Mode") }
 
@@ -104,10 +105,6 @@ describe "Registration::SwMgmt" do
       expect(yast_pkg).to receive(:ServiceRefresh).with(service_name).and_return(true)
       expect(yast_pkg).to receive(:ServiceSave).with(service_name).and_return(true)
       SUSE::Connect::Credentials.any_instance.should_receive(:write)
-
-      # 1 -> "SLES:SLES12-Pool"
-      expect(yast_pkg).to receive(:SourceSetEnabled).with(1, true).and_return(true)
-      expect(yast_pkg).to receive(:SourceSetAutorefresh).with(1, false).and_return(true)
 
       allow(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
@@ -121,14 +118,14 @@ describe "Registration::SwMgmt" do
     it "it creates a new service if the service does not exist yet" do
       expect(yast_pkg).to receive(:ServiceAliases).and_return([])
       expect(yast_pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
-      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
+      expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
 
     it "updates the existing service if the service already exists" do
       expect(yast_pkg).to receive(:ServiceAliases).and_return([service_name])
       expect(yast_pkg).to receive(:ServiceSet).with(
         service_name, hash_including("url" => service_url)).and_return(true)
-      expect { Registration::SwMgmt.add_services([product_services], credentials) }.to_not raise_error
+      expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
   end
 

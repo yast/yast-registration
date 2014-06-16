@@ -68,9 +68,10 @@ module Registration
       :description,
       :eula_url,
       :free,
-      :long_name,
-      :product_ident,
-      :short_name,
+      :friendly_name,
+      :identifier,
+      :name,
+      :release_type,
       :version
 
     def initialize pure_addon
@@ -93,5 +94,12 @@ module Registration
     def registered?
       Addon.registered.include?(self)
     end
+
+    # get a product printable name (long name if present, fallbacks to the short name)
+    # @return [String] label usable in UI
+    def label
+      (friendly_name && !friendly_name.empty?) ? friendly_name : name
+    end
+
   end
 end

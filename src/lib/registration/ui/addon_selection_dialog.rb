@@ -28,6 +28,7 @@ module Registration
       def initialize(registration)
         textdomain "registration"
         @addons = Addon.find_all(registration)
+        log.info "Available addons: #{@addons}"
       end
 
       # display the EULA for each dialog and wait for a button click
@@ -117,9 +118,9 @@ module Registration
       end
 
       def addon_checkbox_element(addon)
-        CheckBox(Id(addon.product_ident),
+        CheckBox(Id(addon.identifier),
           Opt(:notify),
-          addon.short_name,
+          addon.label,
           addon.selected? || addon.registered?)
       end
 
@@ -149,18 +150,18 @@ module Registration
           return nil
         end
 
-        log.info "Selected addons: #{Addon.selected.map(&:short_name)}"
+        log.info "Selected addons: #{Addon.selected.map(&:name)}"
 
         Addon.selected.empty? ? :skip : :next
       end
 
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @addons.find{|addon| addon.product_ident == id}
+        addon = @addons.find{|addon| addon.identifier == id}
         return unless addon
 
         show_addon_details(addon)
-        if Yast::UI.QueryWidget(Id(addon.product_ident), :Value)
+        if Yast::UI.QueryWidget(Id(addon.identifier), :Value)
           addon.selected
         else
           addon.unselected
@@ -179,7 +180,7 @@ module Registration
 
       def reactivate_dependencies
         @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon.product_ident), :Enabled, enable_addon?(addon))
+          Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, enable_addon?(addon))
         end
       end
 

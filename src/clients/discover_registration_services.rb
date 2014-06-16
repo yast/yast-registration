@@ -34,7 +34,7 @@ module Yast
             Heading(_('Local Registration Servers')),
             VSpacing(0.5),
             Label(_("Select a detected registration server from the list\n" +
-                "or the default SUSE registration server.")),
+                  "or the default SUSE registration server.")),
             VSpacing(0.5),
             RadioButtonGroup(
               Id(:services),
@@ -46,7 +46,7 @@ module Yast
             ),
             VSpacing(Opt(:vstretch), 1),
             ButtonBox(
-              PushButton(Id(:ok), Label.OKButton)
+              PushButton(Id(:ok), Opt(:default), Label.OKButton)
             )
           )
         )
@@ -92,7 +92,11 @@ module Yast
           )
         )
       end
-      widgets.unshift Left(RadioButton(Id("scc"), _("SUSE Customer Center"), true))
+
+      widgets.unshift(Left(RadioButton(Id("scc"),
+          # %s is the default SCC URL
+          _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
+          true)))
     end
 
   end unless defined?(DiscoverRegistrationServicesClient)

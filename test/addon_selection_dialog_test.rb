@@ -32,10 +32,10 @@ describe Registration::UI::AddonSelectionDialog do
 
     it "returns `:next` if some addons are selected and user click next" do
       test_addon = addon_generator
-      expect(Yast::UI).to receive(:UserInput).and_return(test_addon.product_ident, :next)
+      expect(Yast::UI).to receive(:UserInput).and_return(test_addon.identifier, :next)
       # mock that widget is selected
       expect(Yast::UI).to receive(:QueryWidget).
-        with(Yast::Term.new(:id, test_addon.product_ident), :Value).
+        with(Yast::Term.new(:id, test_addon.identifier), :Value).
         and_return(true)
       registration = double(:get_addon_list => [test_addon])
       expect(subject.run(registration)).to eq :next

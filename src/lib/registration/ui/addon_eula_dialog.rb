@@ -49,7 +49,7 @@ module Registration
 
         all_accepted = addons.all? do |addon|
           if addon.eula_url && !addon.eula_url.empty?
-            log.info "Addon '#{addon.short_name}' has an EULA at #{addon.eula_url}"
+            log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
             accept_eula(addon)
           else
             # no EULA specified => accepted
@@ -68,11 +68,12 @@ module Registration
       # @param addon [SUSE::Connect::Product] the addon
       # @return [Boolean] true if the EULA has been accepted
       def accept_eula(addon)
+        addon_name = product.label
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           begin
             Yast::Popup.Feedback(
               _("Downloading License Agreement..."),
-              addon.short_name
+              addon_name
             ) do
               # download the license (with translations)
               loader = EulaDownloader.new(addon.eula_url, tmpdir,
@@ -83,17 +84,17 @@ module Registration
           rescue Exception => e
             log.error "Download failed: #{e.message}: #{e.backtrace}"
             # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-            Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.short_name)
+            Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon_name)
             #FIXME change for GA!!!
             return true
           end
 
-          id = "#{addon.short_name} extension EULA"
+          id = "#{addon_name} extension EULA"
           Yast::ProductLicense.SetAcceptanceNeeded(id, true)
           Yast::ProductLicense.license_file_print = addon.eula_url
 
           # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-          title = _("%s License Agreement") % addon.short_name
+          title = _("%s License Agreement") % addon_name
           eulas = read_downloaded_eulas(tmpdir)
           enable_back = true
 
@@ -101,7 +102,7 @@ module Registration
             eula_lang(eulas.keys), arg_ref(eulas), id, title)
 
           # TODO FIXME: this a workaround, remove before RC/GM!!
-          display_beta_warning(addon.short_name)
+          display_beta_warning(addon_name)
 
           base_product = false
           action = "abort"
@@ -147,7 +148,7 @@ module Registration
             log.warn "Ignoring unknown file: #{file}"
           end
         end
-        
+
         log.info "EULA files in #{dir}: #{eulas}"
         eulas
       end
