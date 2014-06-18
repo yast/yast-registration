@@ -59,7 +59,10 @@ module Registration
 
     def register_product(product, email = nil)
       service_for_product(product) do |product_ident, params|
-        log.info "Registering product: #{product}"
+        log_product = product.dup
+        log_product["reg_code"] = "[FILTERED]" if log_product["reg_code"]
+        log.info "Registering product: #{log_product}"
+
         service = SUSE::Connect::YaST.activate_product(product_ident, params, email)
         log.info "Register product result: #{service}"
         service
