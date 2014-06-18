@@ -100,8 +100,11 @@ module Registration
           Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
             eula_lang(eulas.keys), arg_ref(eulas), id, title)
 
-          # TODO FIXME: this a workaround, remove before RC/GM!!
-          display_beta_warning(addon.label)
+          # display info file if present
+          display_optional_info(File.join(tmpdir, "info.txt"))
+
+          # display beta warning if present
+          display_optional_info(File.join(tmpdir, "README.BETA"))
 
           base_product = false
           action = "abort"
@@ -159,36 +162,10 @@ module Registration
         code.sub(/_.*\z/, "")
       end
 
-      # TODO FIXME: this a workaround, remove before RC/GM!!
-      def display_beta_warning(addon_name)
-        beta_warning = <<EOF
-
-   #{addon_name}
-
-   Attention! You are accessing our Beta Distribution.  If you install
-   any package, note that we can NOT GIVE ANY SUPPORT for your system -
-   no matter if you update from a previous system or do a complete
-   new installation.
-
-   Use this BETA distribution at your own risk! We recommend it for
-   testing, porting and evaluation purposes but not for any critical
-   production systems.
-
-   Use this distribution at your own risk - and remember to have a
-   lot of fun! :)
-
-                Your SUSE Linux Enterprise Team
-EOF
-
-        # InstShowInfo reads the text from a file so use a tempfile
-        file = Tempfile.new("beta-warning-")
-        begin
-          file.write(beta_warning)
-          file.close
-          Yast::InstShowInfo.show_info_txt(file.path)
-        ensure
-          file.unlink
-        end
+      # read a file if it exists and display it in a popup
+      # @param info_file [String] the message is read from this file
+      def display_optional_info(info_file)
+        Yast::InstShowInfo.show_info_txt(info_file) if File.exist?(info_file)
       end
 
     end
