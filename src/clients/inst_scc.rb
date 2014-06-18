@@ -442,7 +442,7 @@ module Yast
       init_registration
 
       product_succeed = registration_order.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors("#{product.label}:") do
+        ::Registration::SccHelpers.catch_registration_errors("#{product.label}\n") do
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product
