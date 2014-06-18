@@ -187,8 +187,8 @@ module Registration
       def enable_addon?(addon)
         # Do not support unregister
         return false if addon.registered?
-        # Do not allow to select child without selected parent
-        return false if addon.depends_on && !addon.depends_on.selected?
+        # Do not allow to select child without selected or already registered parent
+        return false if addon.depends_on && (!addon.depends_on.selected? || !addon.depends_on.registered?)
         # Do not allow to unselect parent if any children is selected
         return false if addon.children.any?(&:selected?)
 
