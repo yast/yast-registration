@@ -436,22 +436,8 @@ module Yast
 
     # register all selected addons
     def register_selected_addons
-      registration_order = @selected_addons.clone #create duplicate as array is modified in loop for registration order
-      # TODO FIXME: SCC does not report dependoencies
-      #      begin
-      #        # compute the registration order according to the dependencies
-      #        registration_order = Registration::AddonSorter.registration_order(@selected_addons)
-      #      rescue KeyError
-      #        # Continuew/Cancel dialog: missing dependency error
-      #        if Popup.ContinueCancel(_("Addon dependencies cannot be solved.\n" +
-      #                "Register without solving dependencies?"))
-      #          # just try the current order it might work
-      #        else
-      #          return false
-      #        end
-      #      end
-      #
-      # log.info "Addon registration order: #{registration_order.map(&:name)}"
+      # create duplicate as array is modified in loop for registration order
+      registration_order = @selected_addons.clone
 
       init_registration
 
@@ -476,7 +462,7 @@ module Yast
           select_repositories(product_service) if Mode.installation || Mode.update
 
           # move from selected to registered
-          registered_addons << product.identifier
+          product.registered
           @selected_addons.reject!{|selected| selected.identifier == product.identifier}
         end
       end
@@ -662,11 +648,6 @@ module Yast
         url = ::Registration::Helpers.registration_url
         @registration = ::Registration::Registration.new(url)
       end
-    end
-
-    # helper method for accessing the registered addons
-    def registered_addons
-      Registration::Addon.registered
     end
 
     def first_run

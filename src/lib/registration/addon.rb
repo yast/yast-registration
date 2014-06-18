@@ -95,6 +95,10 @@ module Registration
       Addon.registered.include?(self)
     end
 
+    def registered
+      Addon.registered << self unless registered?
+    end
+
     # get a product printable name (long name if present, fallbacks to the short name)
     # @return [String] label usable in UI
     def label
