@@ -36,6 +36,7 @@ require "registration/storage"
 require "registration/registration"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
+require "registration/ui/local_server_dialog"
 
 module Yast
   class InstSccClient < Client
@@ -108,6 +109,13 @@ module Yast
         case ret
         when :network
           ::Registration::Helpers::run_network_configuration
+        when :local_server
+          options = ::Registration::Storage::InstallationOptions.instance
+          url = ::Registration::UI::LocalServerDialog.run(options.custom_url)
+          if url
+            log.info "Entered custom URL: #{url}"
+            options.custom_url = url
+          end
         when :next
           options = ::Registration::Storage::InstallationOptions.instance
 
@@ -130,7 +138,7 @@ module Yast
 
           init_registration
 
-          ::Registration::SccHelpers.catch_registration_errors do
+          success = ::Registration::SccHelpers.catch_registration_errors do
             base_product = ::Registration::SwMgmt.find_base_product
             distro_target = base_product["register_target"]
 
@@ -163,6 +171,13 @@ module Yast
             end
 
             return :next
+          end
+
+          if !success
+            log.info "registration failed, resetting the registration URL"
+            # reset the registration object and the cache to allow changing the URL
+            @registration = nil
+            ::Registration::Helpers::reset_registration_url
           end
         end
 
@@ -267,8 +282,14 @@ module Yast
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        VSpacing(UI.TextMode ? 1 : 3),
-        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
+        registered ? Empty() : VBox(
+          VSpacing(1),
+          # button label
+          PushButton(Id(:local_server), _("&Local Registration Server...")),
+          VSpacing(UI.TextMode ? 1 : 3),
+          # button label
+          PushButton(Id(:skip), _("&Skip Registration"))
+        ),
         VStretch()
       )
     end
@@ -368,15 +389,15 @@ module Yast
         VBox(
           VStretch(),
           Left(Label(n_(
-            "The extension you selected needs a separate registration code.",
-            "The extensions you selected need separate registration codes.",
-            addons.size
-          ))),
+                "The extension you selected needs a separate registration code.",
+                "The extensions you selected need separate registration codes.",
+                addons.size
+              ))),
           Left(Label(n_(
-            "Enter the registration code into the field below.",
-            "Enter the registration codes into the fields below.",
-            addons.size
-          ))),
+                "Enter the registration code into the field below.",
+                "Enter the registration codes into the fields below.",
+                addons.size
+              ))),
           VStretch(),
           HBox(
             box1,

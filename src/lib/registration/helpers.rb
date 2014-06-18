@@ -98,6 +98,11 @@ module Registration
       url
     end
 
+    def self.reset_registration_url
+      ::Registration::Storage::Cache.instance.reg_url = nil
+      ::Registration::Storage::Cache.instance.reg_url_cached = false
+    end
+
     # convert service URL to plain URL, remove the SLP service prefix
     # "service:registration.suse:smt:https://scc.suse.com/connect" ->
     # "https://scc.suse.com/connect"
@@ -142,6 +147,9 @@ module Registration
 
     # get registration URL in installation mode
     def self.reg_url_at_installation
+      custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
+      return custom_url if custom_url && !custom_url.empty?
+
       # boot command line if present
       boot_url = boot_reg_url
       return boot_url if boot_url
@@ -173,6 +181,9 @@ module Registration
 
     # get registration URL in running system
     def self.reg_url_at_runnig_system
+      custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
+      return custom_url if custom_url && !custom_url.empty?
+
       # TODO FIXME: read the URL from configuration file to use the same URL
       # at re-registration as in installation
 
