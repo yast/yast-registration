@@ -65,6 +65,7 @@ module Registration
     # delegate methods to underlaying suse connect object
     def_delegators :@pure_addon,
       :arch,
+      :available,
       :description,
       :eula_url,
       :free,
@@ -110,6 +111,9 @@ module Registration
     def selectable?
       # Do not support unregister
       return false if registered?
+      # Do not select not available addons
+      # (explicitly check for false, it's reported only by SMT)
+      return false if available == false
       # Do not allow to select child without selected or already registered parent
       return false if depends_on && !(depends_on.selected? || depends_on.registered?)
       # Do not allow to unselect parent if any children is selected
