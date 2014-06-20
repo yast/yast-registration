@@ -77,7 +77,7 @@ module Registration
 
     def get_addon_list
       # extensions for base product
-      base_product = ::Registration::SwMgmt.find_base_product
+      base_product = ::Registration::SwMgmt.base_product_to_register
 
       log.info "Reading available addons for product: #{base_product["name"]}"
 
