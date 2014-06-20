@@ -1,5 +1,6 @@
 
 require "yast"
+require "uri"
 
 module Registration
   module UI
@@ -13,6 +14,7 @@ module Registration
 
       Yast.import "UI"
       Yast.import "Label"
+      Yast.import "Report"
 
       # create a new dialog for editing server URL and run it
       # @param url [String] current server URL
@@ -38,9 +40,18 @@ module Registration
         Yast::UI.OpenDialog(Opt(:decorated), dialog_content)
 
         begin
-          Yast::UI.SetFocus(:url)
-          ui = Yast::UI.UserInput
-          log.info "User input: #{ui}"
+          ui = nil
+          while ![:ok, :cancel].include?(ui)
+            Yast::UI.SetFocus(:url)
+            ui = Yast::UI.UserInput
+            log.info "User input: #{ui}"
+
+            if ui == :ok && !valid_url?
+              # error message, the entered URL is not valid
+              Yast::Report.Error(_("Invalid URL."))
+              ui = nil
+            end
+          end
 
           (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil
         ensure
@@ -49,6 +60,15 @@ module Registration
       end
 
       private
+
+      def valid_url?
+        begin
+          uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
+          (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
+        rescue URI::InvalidURIError
+          false
+        end
+      end
 
       # create dialog content
       def local_sever_dialog_content

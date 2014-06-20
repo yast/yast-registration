@@ -16,22 +16,33 @@ describe Registration::UI::LocalServerDialog do
 
     expect(ui).to receive(:OpenDialog)
     expect(ui).to receive(:CloseDialog)
-    expect(ui).to receive(:SetFocus)
+    allow(ui).to receive(:SetFocus)
   end
 
   it "returns the URL entered by user" do
     # stub the user interaction in the dialog
     expect(ui).to receive(:UserInput).and_return(:ok)
     # the input field contains the URL
-    expect(ui).to receive(:QueryWidget).and_return(url)
+    expect(ui).to receive(:QueryWidget).twice.and_return(url)
 
-    expect(Registration::UI::LocalServerDialog.run(url)).to eq(url)
+    expect(Registration::UI::LocalServerDialog.run("")).to eq(url)
   end
 
   it "returns nil when the dialog is canceled" do
     # stub the user interaction in the dialog
     expect(ui).to receive(:UserInput).and_return(:cancel)
 
+    expect(Registration::UI::LocalServerDialog.run("")).to be_nil
+  end
+
+  it "reports error when URL is not valid" do
+    # stub the user interaction in the dialog:
+    # cancel the dialog after displaying an error for invalid URL
+    expect(ui).to receive(:UserInput).and_return(:ok, :cancel)
+    # the input field contains invalid URL
+    expect(ui).to receive(:QueryWidget).and_return("foobar")
+
+    expect(Yast::Report).to receive(:Error)
     expect(Registration::UI::LocalServerDialog.run(url)).to be_nil
   end
 
