@@ -105,5 +105,18 @@ module Registration
       (friendly_name && !friendly_name.empty?) ? friendly_name : name
     end
 
+    # can be the addon selected in UI or should it be disabled?
+    # return [Boolean] true if it should be enabled
+    def selectable?
+      # Do not support unregister
+      return false if registered?
+      # Do not allow to select child without selected or already registered parent
+      return false if depends_on && !(depends_on.selected? || depends_on.registered?)
+      # Do not allow to unselect parent if any children is selected
+      return false if children.any?(&:selected?)
+
+      return true
+    end
+
   end
 end

@@ -116,4 +116,41 @@ describe Registration::Addon do
     end
   end
 
+  describe "#selectable?" do
+    let(:addons) do
+      Registration::Addon.find_all(double(:get_addon_list => [addon_with_child_generator]))
+    end
+
+    let(:parent) { addons.first }
+    let(:child) { parent.children.first }
+
+    it "cannot be selected when the addon has been already registered" do
+      addon.registered
+      expect(addon.selectable?).to be_false
+    end
+
+    it "can be selected when the addon has not been already registered" do
+      expect(addon.selectable?).to be_true
+    end
+
+    it "cannot be selected when the parent is not selected or registered" do
+      expect(child.selectable?).to be_false
+    end
+
+    it "can be selected when the parent is selected" do
+      parent.selected
+      expect(child.selectable?).to be_true
+    end
+
+    it "can be selected when the parent is registered" do
+      parent.registered
+      expect(child.selectable?).to be_true
+    end
+
+    it "cannot be changed when any child is selected" do
+      child.selected
+      expect(parent.selectable?).to be_false
+    end
+  end
+
 end
