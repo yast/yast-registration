@@ -124,30 +124,30 @@ describe Registration::Addon do
     let(:parent) { addons.first }
     let(:child) { parent.children.first }
 
-    it "cannot be selected when the addon has been already registered" do
+    it "returns false when the addon has been already registered" do
       addon.registered
       expect(addon.selectable?).to be_false
     end
 
-    it "can be selected when the addon has not been already registered" do
+    it "returns true when the addon has not been already registered" do
       expect(addon.selectable?).to be_true
     end
 
-    it "cannot be selected when the parent is not selected or registered" do
+    it "returns false when the parent is not selected or registered" do
       expect(child.selectable?).to be_false
     end
 
-    it "can be selected when the parent is selected" do
+    it "returns true when the parent is selected" do
       parent.selected
       expect(child.selectable?).to be_true
     end
 
-    it "can be selected when the parent is registered" do
+    it "returns true when the parent is registered" do
       parent.registered
       expect(child.selectable?).to be_true
     end
 
-    it "cannot be changed when any child is selected" do
+    it "returns false when any child is selected" do
       child.selected
       expect(parent.selectable?).to be_false
     end
