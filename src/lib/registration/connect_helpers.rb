@@ -113,6 +113,7 @@ module Registration
           # the original error message from openSSL
           msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
           msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
+          msg = e.message if msg.nil? || msg.empty?
 
           Yast::Report.Error(
             error_with_details(_("Secure connection error: %s") % msg, ssl_error_details)
@@ -144,10 +145,11 @@ module Registration
 
     def self.ssl_error_details()
       # label follwed by a certificate description
-      details = [ _("Certificate:") ]
+      details = []
 
       cert = Storage::SSLErrors.instance.ssl_failed_cert
       if cert
+        details << _("Certificate:")
         details << _("Issued To")
         details.concat(cert_name_details(cert.subject))
         details << ""
@@ -168,7 +170,7 @@ module Registration
         end
       end
 
-      "\n\n" + details.join("\n")
+      details.empty? ? "" : ("\n\n" + details.join("\n"))
     end
 
     def self.cert_name_details(x509_name)
