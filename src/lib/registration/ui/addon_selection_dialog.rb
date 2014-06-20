@@ -180,19 +180,8 @@ module Registration
 
       def reactivate_dependencies
         @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, enable_addon?(addon))
+          Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, addon.selectable?)
         end
-      end
-
-      def enable_addon?(addon)
-        # Do not support unregister
-        return false if addon.registered?
-        # Do not allow to select child without selected parent
-        return false if addon.depends_on && !addon.depends_on.selected?
-        # Do not allow to unselect parent if any children is selected
-        return false if addon.children.any?(&:selected?)
-
-        return true
       end
 
       # the maximum number of reg. codes displayed vertically,
