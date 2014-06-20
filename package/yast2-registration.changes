@@ -5,6 +5,7 @@ Fri Jun 20 10:24:04 UTC 2014 - lslezak@suse.cz
   section if there are no details actually (bnc#882573)
 - send correct base product name when downloading available
   extensions (fix by Michael Calmer)
+- do not log the registration code to y2log
 
 -------------------------------------------------------------------
 Mon Jun 16 16:05:20 UTC 2014 - lslezak@suse.cz
