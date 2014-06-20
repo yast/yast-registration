@@ -157,10 +157,10 @@ module Registration
         details.concat(cert_name_details(cert.issuer))
         details << ""
         details << _("SHA1 Fingerprint: ")
-        details << INDENT + ::SUSE::Connect::SSLCertificate.sha1_fingerprint(cert)
+        details << INDENT + ::SUSE::Connect::YaST.cert_sha1_fingerprint(cert)
         details << _("SHA256 Fingerprint: ")
 
-        sha256 = ::SUSE::Connect::SSLCertificate.sha256_fingerprint(cert)
+        sha256 = ::SUSE::Connect::YaST.cert_sha256_fingerprint(cert)
         if Yast::UI.TextMode && Yast::UI.GetDisplayInfo["Width"] < 105
           # split the long SHA256 digest to two lines in small text mode UI
           details << INDENT + sha256[0..59]
@@ -196,7 +196,7 @@ module Registration
       result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
         _("Importing '%s' certificate...") % cn) do
 
-        ::SUSE::Connect::SSLCertificate.import(cert)
+        ::SUSE::Connect::YaST.import_certificate(cert)
       end
 
       log.info "Certificate import result: #{result}"
