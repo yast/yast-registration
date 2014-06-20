@@ -7,7 +7,6 @@ module Registration
     class LocalServerDialog
       include Yast::Logger
       include Yast::I18n
-      extend Yast::I18n
       include Yast::UIShortcuts
 
       attr_accessor :local_url
