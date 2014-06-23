@@ -164,6 +164,10 @@ describe Registration::Addon do
       expect(addon.selectable?).to be_true
     end
 
+    it "returns true when the addon availability is not set" do
+      expect(addon.selectable?).to be_true
+    end
+
   end
 
 end
