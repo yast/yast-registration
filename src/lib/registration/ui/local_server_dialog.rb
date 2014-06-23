@@ -35,7 +35,7 @@ module Registration
       def run
         log.info "Displaying local server URL: #{local_url}"
 
-        dialog_content = local_sever_dialog_content
+        dialog_content = local_server_dialog_content
         log.debug "URL dialog: #{dialog_content}"
         Yast::UI.OpenDialog(Opt(:decorated), dialog_content)
 
@@ -71,7 +71,7 @@ module Registration
       end
 
       # create dialog content
-      def local_sever_dialog_content
+      def local_server_dialog_content
         MarginBox(1, 0.6,
           VBox(
             # input field label
