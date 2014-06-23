@@ -65,7 +65,6 @@ module Registration
     # delegate methods to underlaying suse connect object
     def_delegators :@pure_addon,
       :arch,
-      :available,
       :description,
       :eula_url,
       :free,
@@ -112,14 +111,22 @@ module Registration
       # Do not support unregister
       return false if registered?
       # Do not select not available addons
-      # (explicitly check for false, it's reported only by SMT)
-      return false if available == false
+      return false if !available?
       # Do not allow to select child without selected or already registered parent
       return false if depends_on && !(depends_on.selected? || depends_on.registered?)
       # Do not allow to unselect parent if any children is selected
       return false if children.any?(&:selected?)
 
       return true
+    end
+
+    # is the addon available? SMT may have mirrored only some extensions,
+    # the not mirrored extensions are marked as not available
+    # @return [Boolean] true if the addon is available to register
+    def available?
+      # explicitly check for false, undefined (nil) means it is available,
+      # it's only reported by SMT
+      @pure_addon.available != false
     end
 
   end

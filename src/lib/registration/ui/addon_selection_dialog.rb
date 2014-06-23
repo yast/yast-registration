@@ -120,8 +120,7 @@ module Registration
       def addon_checkbox_element(addon)
         # checkbox label for an unavailable extension
         # (%s is an extension name)
-        label = (addon.available == false) ? (_("%s (not available)") % addon.label) :
-          label.addon
+        label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
         CheckBox(Id(addon.identifier),
           Opt(:notify),
