@@ -9,6 +9,8 @@ Fri Jun 20 10:24:04 UTC 2014 - lslezak@suse.cz
 - use the new suse-connect SSL API (0.1.2)
 - fixed selecting extensions when going back in the installation
   workflow
+- added a popup for changing the registration server URL
+  (bnc#883138)
 
 -------------------------------------------------------------------
 Mon Jun 16 16:05:20 UTC 2014 - lslezak@suse.cz
