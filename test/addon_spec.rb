@@ -151,6 +151,23 @@ describe Registration::Addon do
       child.selected
       expect(parent.selectable?).to be_false
     end
+
+    it "returns false when the addon is not available" do
+      product = addon_generator("available" => false)
+      addon = Registration::Addon.new(product)
+      expect(addon.selectable?).to be_false
+    end
+
+    it "returns true when the addon is available" do
+      product = addon_generator("available" => true)
+      addon = Registration::Addon.new(product)
+      expect(addon.selectable?).to be_true
+    end
+
+    it "returns true when the addon availability is not set" do
+      expect(addon.selectable?).to be_true
+    end
+
   end
 
 end
