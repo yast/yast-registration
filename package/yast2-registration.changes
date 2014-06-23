@@ -12,6 +12,7 @@ Fri Jun 20 10:24:04 UTC 2014 - lslezak@suse.cz
 - added a popup for changing the registration server URL
   (bnc#883138)
 - removed Beta warning workaround (bnc#882034) 
+- 3.1.77
 
 -------------------------------------------------------------------
 Mon Jun 16 16:05:20 UTC 2014 - lslezak@suse.cz
