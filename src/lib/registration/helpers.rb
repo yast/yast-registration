@@ -25,6 +25,7 @@ require "yast"
 require "uri"
 
 require "registration/storage"
+require "registration/suse_register"
 require "suse/connect"
 
 module Registration
@@ -35,6 +36,7 @@ module Registration
 
     textdomain "registration"
 
+    Yast.import "Installation"
     Yast.import "Linuxrc"
     Yast.import "Mode"
     Yast.import "Popup"
@@ -168,8 +170,14 @@ module Registration
       boot_url = boot_reg_url
       return boot_url if boot_url
 
-      # TODO FIXME: read the URL from the old configuration file
-      # (old suse_register.conf or old SCC config file)
+      # FIXME check at first new suseconnect conf
+      old_conf = SuseRegister.new(Yast::Installation.destdir)
+      if old_conf.found?
+        # use default if ncc was used in past
+        return nil if old_conf.ncc?
+        # if specific server is used, then also use it
+        return old_conf.stripped_url.to_s
+      end
 
       # try SLP if not registered
       slp_url = slp_service_url
