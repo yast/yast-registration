@@ -201,7 +201,8 @@ module Yast
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
           _(CONTACTING_MESSAGE),
-          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(
+            ::Registration::SwMgmt.find_base_product)
         ) do
           @registration.upgrade_product(base_product)
         end
