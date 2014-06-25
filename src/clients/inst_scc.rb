@@ -191,6 +191,9 @@ module Yast
     end
 
     def refresh_base_product
+      options = ::Registration::Storage::InstallationOptions.instance
+      return true if options.base_registered
+
       init_registration
 
       ::Registration::SccHelpers.catch_registration_errors do
@@ -202,6 +205,8 @@ module Yast
         ) do
           @registration.upgrade_product(base_product)
         end
+
+        options.base_registered = true
 
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services)
