@@ -201,7 +201,8 @@ module Yast
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
           _(CONTACTING_MESSAGE),
-          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(
+          # updating base product registration, %s is a new base product name
+          _("Updating to %s ...") % ::Registration::SwMgmt.base_product_label(
             ::Registration::SwMgmt.find_base_product)
         ) do
           @registration.upgrade_product(base_product)
@@ -212,6 +213,46 @@ module Yast
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services)
       end
+    end
+
+    def refresh_addons
+      addons = get_available_addons
+
+      # find addon updates
+      addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
+
+      failed_addons = addons_to_update.select do |addon_to_update|
+        !::Registration::SccHelpers.catch_registration_errors do
+          # then register the product(s)
+          product_services = Popup.Feedback(
+            _(CONTACTING_MESSAGE),
+            # updating registered addon/extension, %s is an extension name
+            _("Updating to %s ...") % addon_to_update.label
+          ) do
+            addon_product = {
+              "arch"         => addon_to_update.arch,
+              "name"         => addon_to_update.identifier,
+              "version"      => addon_to_update.version,
+              "release_type" => addon_to_update.release_type
+            }
+
+            @registration.upgrade_product(addon_product)
+          end
+
+          # mark as registered
+          addon_to_update.registered
+
+          select_repositories(product_services)
+        end
+      end
+
+      if !failed_addons.empty?
+        log.warn "Failed addons: #{failed_addons}"
+        # if update fails preselest the addon for full registration
+        failed_addons.each{ |failed_addon| failed_addon.selected }
+      end
+
+      :next
     end
 
     # display the registration update dialog
@@ -230,7 +271,7 @@ module Yast
       show_registration_update_dialog
 
       if refresh_base_product
-        return :next
+        return refresh_addons
       else
         # automatic registration refresh during system upgrade failed, register from scratch
         Report.Error(_("Automatic registration upgrade failed.\n" +
