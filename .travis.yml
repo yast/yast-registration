@@ -1,8 +1,4 @@
 language: ruby
 rvm:
   - "2.1.0"
-  - "2.0.0"
-matrix:
-  allow_failures:
-    - rvm: "2.1.0"
 script: bundle exec rake -f Rakefile.travis
