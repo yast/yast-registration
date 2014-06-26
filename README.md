@@ -10,3 +10,23 @@ Yast Registration Module
 This is a YaST module for registering the system against [SUSE Customer Center](https://scc.suse.com)
 
 
+Example Snippet for Autoyast registration
+=========================================
+
+```
+  <suse_register>
+      <do_registration config:type="boolean">true</do_registration>
+      <reg_server>https://mysmt</reg_server>
+      <reg_server_cert>text of our own certificate</reg_server_cert>
+      <email>jreidinger@suse.com</email>
+      <regcode>my secret SLES regcode</regcode>
+      <install_updates config:type="boolean">true</install_updates>
+      <slp_discovery config:type="boolean">false</slp_discovery>
+      <addons>
+        <addon>
+          <name>addon name</name>
+          <regcode>addon regcode</regcode>
+        </addon>
+      </addons>
+  </suse_register>
+```
