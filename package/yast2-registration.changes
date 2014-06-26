@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jun 26 10:34:02 UTC 2014 - lslezak@suse.cz
+
+- removed workaround for failed EULA download (now do not allow to
+  continue when download fails) (bnc#880649)
+- 3.1.79
+
+-------------------------------------------------------------------
 Wed Jun 25 09:37:12 UTC 2014 - jreidinger@suse.com
 
 - add reading of old url from suseRegister.conf during upgrade
