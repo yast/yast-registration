@@ -11,8 +11,7 @@ This is a YaST module for registering the system against [SUSE Customer Center](
 
 
 Example Snippet for Autoyast registration
-=========================================
-
+-----------------------------------------
 ```
   <suse_register>
       <do_registration config:type="boolean">true</do_registration>
