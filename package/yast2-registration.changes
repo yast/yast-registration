@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jun 26 17:59:09 UTC 2014 - lslezak@suse.cz
+
+- update: automatically update installed addons (using simple
+  product name match so far) (bnc#871141)
+- 3.1.80
+
+-------------------------------------------------------------------
 Thu Jun 26 10:34:02 UTC 2014 - lslezak@suse.cz
 
 - removed workaround for failed EULA download (now do not allow to
