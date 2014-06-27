@@ -106,19 +106,22 @@ module Registration
     private
 
     def service_for_product(product, &block)
-      remote_product = SUSE::Connect::Remote::Product.new(
+      remote_product = product.is_a?(Hash) ?
+        SUSE::Connect::Remote::Product.new(
         :arch         => product["arch"],
         :identifier   => product["name"],
         :version      => product["version"],
         :release_type => product["release_type"]
-      )
+      ) : product
 
       log.info "Using product: #{remote_product}"
 
       params = connect_params({})
 
       # use product specific reg. code (e.g. for addons)
-      params[:token] = product["reg_code"] if product["reg_code"]
+      if (product.is_a?(Hash) && product["reg_code"])
+        params[:token] = product["reg_code"]
+      end
 
       product_service = yield(remote_product, params)
 

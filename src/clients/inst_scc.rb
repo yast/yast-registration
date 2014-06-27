@@ -221,22 +221,15 @@ module Yast
       # find addon updates
       addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
 
-      failed_addons = addons_to_update.select do |addon_to_update|
-        !::Registration::SccHelpers.catch_registration_errors do
+      failed_addons = addons_to_update.reject do |addon_to_update|
+        ::Registration::SccHelpers.catch_registration_errors do
           # then register the product(s)
           product_services = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # updating registered addon/extension, %s is an extension name
             _("Updating to %s ...") % addon_to_update.label
           ) do
-            addon_product = {
-              "arch"         => addon_to_update.arch,
-              "name"         => addon_to_update.identifier,
-              "version"      => addon_to_update.version,
-              "release_type" => addon_to_update.release_type
-            }
-
-            @registration.upgrade_product(addon_product)
+            @registration.upgrade_product(addon_to_update)
           end
 
           # mark as registered
@@ -249,7 +242,7 @@ module Yast
       if !failed_addons.empty?
         log.warn "Failed addons: #{failed_addons}"
         # if update fails preselest the addon for full registration
-        failed_addons.each{ |failed_addon| failed_addon.selected }
+        failed_addons.each(&:selected)
       end
 
       :next

@@ -181,7 +181,7 @@ describe "Registration::SwMgmt" do
 
       addon_updates = Registration::SwMgmt.find_addon_updates(available_addons)
       # an update only for SDK addon is available
-      expect(addon_updates.size).to eq(1)
+      expect(addon_updates.size).to eq(1), "The result contains some extra items"
       expect(addon_updates.first.label).to \
         eq("SUSE Linux Enterprise Software Development Kit 12 x86_64")
     end

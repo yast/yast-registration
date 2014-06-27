@@ -283,8 +283,7 @@ module Registration
 
       ret = addons.select do |addon|
         installed_addons.any? do |installed_addon|
-          # simple product name match
-          installed_addon["name"] == addon.identifier
+          addon.updates_addon?(installed_addon)
         end
       end
 
