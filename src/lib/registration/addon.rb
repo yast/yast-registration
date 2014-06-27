@@ -129,5 +129,9 @@ module Registration
       @pure_addon.available != false
     end
 
+    def updates_addon?(old_addon)
+      old_addon["name"] == identifier
+    end
+
   end
 end

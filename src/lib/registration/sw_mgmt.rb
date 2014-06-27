@@ -274,6 +274,23 @@ module Registration
       end
     end
 
+    def self.find_addon_updates(addons)
+      products = Pkg.ResolvableProperties("", :product, "")
+
+      installed_addons = products.select do |product|
+        product["status"] == :installed && product["type"] != "base"
+      end
+
+      ret = addons.select do |addon|
+        installed_addons.any? do |installed_addon|
+          addon.updates_addon?(installed_addon)
+        end
+      end
+
+      log.info "Found addons to update: #{ret}"
+      ret
+    end
+
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository
@@ -293,7 +310,7 @@ module Registration
         end
       end
     end
-    
+
     private_class_method :each_repo
   end
 end

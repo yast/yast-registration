@@ -171,4 +171,20 @@ describe "Registration::SwMgmt" do
     end
   end
 
+  describe ".find_addon_updates" do
+    it "returns new available addons for installed addons" do
+      # installed: SLES11-SP2 + SLE11-SP2-SDK + SLE11-SP2-Webyast
+      expect(yast_pkg).to receive(:ResolvableProperties).with("", :product, "") \
+        .and_return(YAML.load_file(fixtures_file("products_sp2_update.yml")))
+      # available: SDK, HA, HA-GEO, ...
+      available_addons = YAML.load_file(fixtures_file("available_addons.yml"))
+
+      addon_updates = Registration::SwMgmt.find_addon_updates(available_addons)
+      # an update only for SDK addon is available
+      expect(addon_updates).to have(1).items
+      expect(addon_updates.first.label).to \
+        eq("SUSE Linux Enterprise Software Development Kit 12 x86_64")
+    end
+  end
+
 end

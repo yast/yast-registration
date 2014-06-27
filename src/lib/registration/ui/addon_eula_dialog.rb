@@ -3,9 +3,6 @@ require "yast"
 require "registration/eula_downloader"
 require "registration/helpers"
 
-# TODO FIXME: this is used in a workaround, remove before RC/GM!!
-require "tempfile"
-
 module Registration
   module UI
 
