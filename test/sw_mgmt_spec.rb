@@ -118,6 +118,7 @@ describe "Registration::SwMgmt" do
     it "it creates a new service if the service does not exist yet" do
       expect(yast_pkg).to receive(:ServiceAliases).and_return([])
       expect(yast_pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
+      expect(yast_pkg).to receive(:ServiceSet).with(service_name, hash_including("autorefresh" => true)).and_return(true)
       expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
 

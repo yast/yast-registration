@@ -182,6 +182,11 @@ module Registration
           # error message
           raise ::Registration::ServiceError.new(N_("Adding service '%s' failed."), service_name)
         end
+
+        if !Pkg.ServiceSet(service_name, "autorefresh" => true)
+          # error message
+          raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
+        end
       end
 
       # refresh works only for saved services
