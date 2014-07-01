@@ -74,4 +74,12 @@ describe "Registration::Registration" do
     it_should_behave_like "add_product", :upgrade_product, :upgrade_product
   end
 
+  describe ".activated_products" do
+    it "returns list of activated products" do
+      expect(SUSE::Connect::Status).to receive(:activated_products).and_return([])
+
+      expect(Registration::Registration.new.activated_products).to be_an(Array)
+    end
+  end
+
 end
