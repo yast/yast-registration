@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jul  1 11:49:20 UTC 2014 - lslezak@suse.cz
+
+- use the status call and properly mark the already registered
+  extensions
+- 3.1.82
+
+-------------------------------------------------------------------
 Mon Jun 30 11:36:46 UTC 2014 - lslezak@suse.cz
 
 - enable autorefresh for registered services (bnc#884937)

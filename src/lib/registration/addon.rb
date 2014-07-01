@@ -27,8 +27,18 @@ module Registration
       def find_all(registration)
         return @cached_addons if @cached_addons
         pure_addons = registration.get_addon_list
+        activated_addons = registration.activated_products
+
         @cached_addons = pure_addons.reduce([]) do |res, addon|
-          res.concat(create_addon_with_deps(addon))
+          yast_addons = create_addon_with_deps(addon)
+          res.concat(yast_addons)
+
+          # mark the root addon as registered if found in activated addons
+          if activated_addons.find { |activated_addon| activated_addon.id == addon.id }
+            yast_addons.first.registered
+          end
+
+          res
         end
       end
 

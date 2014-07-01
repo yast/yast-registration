@@ -99,6 +99,13 @@ module Registration
       addons.reject{ |a| a.identifier == base_product["name"] }
     end
 
+    def activated_products
+      activated = SUSE::Connect::YaST.status(connect_params({})).activated_products || []
+      log.info "Number of activated products: #{activated.size}"
+      log.debug "Activated products: #{activated.inspect}"
+      activated
+    end
+
     def self.is_registered?
       SUSE::Connect::System.registered?
     end

@@ -19,25 +19,51 @@ describe Registration::Addon do
     it "find all addons for current base product" do
       prod1 = addon_generator
       prod2 = addon_generator
-      registration = double(:get_addon_list => [prod1, prod2])
+      registration = double(
+        :activated_products => [],
+        :get_addon_list => [prod1, prod2]
+      )
 
       expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
     it "find even dependend products" do
       prod1 = addon_with_child_generator
-      registration = double(:get_addon_list => [prod1])
+      registration = double(
+        :activated_products => [],
+        :get_addon_list => [prod1]
+      )
 
       expect(Registration::Addon.find_all(registration).size).to be 2
     end
 
     it "sets properly dependencies between addons" do
       prod1 = addon_with_child_generator
-      registration = double(:get_addon_list => [prod1])
+      registration = double(
+        :activated_products => [],
+        :get_addon_list => [prod1]
+      )
 
       addons = Registration::Addon.find_all(registration)
       expect(addons.any? {|addon| addon.children.size == 1}).to be_true
       expect(addons.any?(&:depends_on)).to be_true
+    end
+
+    it "sets the registration status from status call" do
+      prod1 = addon_generator("name" => "prod1")
+      prod2 = addon_generator("name" => "prod2")
+      registration = double(
+        :activated_products => [prod1],
+        :get_addon_list => [prod1, prod2]
+      )
+
+      addons = Registration::Addon.find_all(registration)
+
+      addon1 = addons.find{ |addon| addon.name == "prod1"}
+      addon2 = addons.find{ |addon| addon.name == "prod2"}
+
+      expect(addon1.registered?).to be_true
+      expect(addon2.registered?).to be_false
     end
   end
 
@@ -118,7 +144,10 @@ describe Registration::Addon do
 
   describe "#selectable?" do
     let(:addons) do
-      Registration::Addon.find_all(double(:get_addon_list => [addon_with_child_generator]))
+      Registration::Addon.find_all(double(
+          :get_addon_list => [addon_with_child_generator],
+          :activated_products => []
+        ))
     end
 
     let(:parent) { addons.first }
