@@ -101,8 +101,7 @@ module Registration
 
     def activated_products
       activated = SUSE::Connect::YaST.status(connect_params({})).activated_products || []
-      log.info "Number of activated products: #{activated.size}"
-      log.debug "Activated products: #{activated.inspect}"
+      log.info "Activated products: #{activated.map(&:id)}"
       activated
     end
 
