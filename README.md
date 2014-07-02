@@ -12,7 +12,7 @@ This is a YaST module for registering the system against [SUSE Customer Center](
 
 Example Snippet for Autoyast registration
 -----------------------------------------
-```
+```xml
   <suse_register>
       <do_registration config:type="boolean">true</do_registration>
       <reg_server>https://mysmt</reg_server>
