@@ -235,7 +235,7 @@ module Yast
 
     def display_addon_popup(name = "", reg_code = "")
       content = VBox(
-        InputField(Id(:name), _("Add-on &Name"), name),
+        InputField(Id(:name), _("Extension or Module &Name"), name),
         InputField(Id(:reg_code), _("Registration &Code"), reg_code),
         VSpacing(1),
         HBox(
@@ -264,7 +264,7 @@ module Yast
 
     def delete_addon
       selected = UI.QueryWidget(Id(:addons_table), :CurrentItem)
-      if selected && Popup.YesNo(_("Really delete add-on '%s'?") % selected)
+      if selected && Popup.YesNo(_("Really delete '%s'?") % selected)
         @config.addons.reject!{|a| a["name"] == selected}
         set_addon_table_content
       end
@@ -298,7 +298,7 @@ module Yast
     end
 
     def select_addons
-      header = Header(_("Name"), _("Registration Code"))
+      header = Header(_("Identifier"), _("Registration Code"))
       contents = VBox(
         Table(Id(:addons_table), header, []),
         HBox(
@@ -307,9 +307,10 @@ module Yast
           PushButton(Id(:delete), Label.DeleteButton)
         )
       )
-      # TODO FIXME: add a help text
-      help_text = ""
-      Wizard.SetContents(_("Register Optional Add-ons"), contents, help_text, true, true)
+      # help text
+      help_text = _("<p>Here you can select which extensions or modules"\
+          "will be registered together with the base product.</p>")
+      Wizard.SetContents(_("Register Optional Extensions or Modules"), contents, help_text, true, true)
       Wizard.SetNextButton(:next, Label.OKButton)
       set_addon_table_content
 
@@ -376,7 +377,7 @@ module Yast
                 @config.reg_code)),
             VSpacing(0.4),
             Left(CheckBox(Id(:install_updates),
-                _("Install Available Patches from Update Repositories"),
+                _("Install Available Updates from Update Repositories"),
                 @config.install_updates))
           )
         )
@@ -400,7 +401,7 @@ module Yast
             InputField(
               Id(:reg_server_cert),
               Opt(:hstretch),
-              _("Optional Server Certificate"),
+              _("Optional SSL Server Certificate URL"),
               @config.reg_server_cert
             )
           )
@@ -418,7 +419,7 @@ module Yast
             VSpacing(1),
             server_settings,
             VSpacing(0.4),
-            PushButton(Id(:addons), _("Register Add-ons...")),
+            PushButton(Id(:addons), _("Register Extensions or Modules...")),
             VSpacing(0.4)
           )
         )

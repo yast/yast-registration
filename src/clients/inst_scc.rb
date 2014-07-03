@@ -253,8 +253,7 @@ module Yast
       Wizard.SetContents(
         _("Registration"),
         Label(_("Registration is being updated...")),
-        # TODO FIXME
-        "",
+        _("The previous registration is being updated."),
         GetInstArgs.enable_back,
         GetInstArgs.enable_next || Mode.normal
       )
@@ -279,7 +278,6 @@ module Yast
 
       options = ::Registration::Storage::InstallationOptions.instance
 
-      # TODO FIXME: still not the final text
       # label text describing the registration (1/2)
       # use \n to split to more lines if needed (use max. 76 chars/line)
       info = _("Please enter a registration or evaluation code for this product and your\n" +
@@ -337,7 +335,8 @@ module Yast
     # help text for the main registration dialog
     def scc_help_text
       # TODO: improve the help text
-      _("Enter SUSE Customer Center credentials here to register the system to get updates and add-on products.")
+      _("Enter SUSE Customer Center credentials here to register the system to " \
+          "get updates and extensions.")
     end
 
     # display the main registration dialog
@@ -458,7 +457,7 @@ module Yast
 
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
-        _("Loading Available Add-on Products and Extensions...")) do
+        _("Loading Available Extensions and Modules...")) do
 
         Registration::Addon.find_all(@registration)
       end
@@ -543,8 +542,8 @@ module Yast
           _("Register Extensions and Modules"),
           # display only the products which need a registration code
           Empty(),
-          # FIXME: help text
-          "",
+          # help text
+          _("<p>Extensions and Modules are being registered.</p>"),
           false,
           false
         )
@@ -556,8 +555,11 @@ module Yast
           _("Extension and Module Registration Codes"),
           # display only the products which need a registration code
           addon_regcodes_dialog_content(missing_regcodes),
-          # FIXME: help text
-          "",
+          # help text
+          _("<p>Enter registration codes for the requested extensions or modules.</p>\n"\
+              "<p>Registration codes are required for successfull registration." \
+              "If you cannot provide a registration code then go back and deselect " \
+              "the respective extension or module.</p>"),
           GetInstArgs.enable_back || Mode.normal,
           GetInstArgs.enable_next || Mode.normal
         )
@@ -594,8 +596,12 @@ module Yast
         # dialog title
         _("Registration"),
         registered_dialog,
-        # FIXME: help text
-        "",
+        # help text
+        _("<p>The system is already registered.</p>") +
+          _("<p>You can re-register it again or you can register additional "\
+            "extension or modules to enhance the functionality of the system.</p>") +
+          _("<p>If you want to deregister your system you need to log "\
+            "into the SUSE Customer Center and remove the system manually there.</p>"),
         GetInstArgs.enable_back || Mode.normal,
         GetInstArgs.enable_back || Mode.normal
       )
@@ -626,6 +632,7 @@ module Yast
         Wizard.SetContents(
           _("Registration"),
           Empty(),
+          # no help text needed, the dialog displays just a progress message
           "",
           false,
           false

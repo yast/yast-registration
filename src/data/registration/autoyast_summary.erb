@@ -20,7 +20,7 @@ textdomain "registration"
     <% end %>
 
     <% if @config.install_updates %>
-      <li><%= _("Install Available Patches") %></li>
+      <li><%= _("Install Available Updates") %></li>
     <% end %>
   </ul>
 
@@ -33,11 +33,11 @@ textdomain "registration"
     <% end %>
 
     <% if !@config.reg_server_cert.empty? %>
-      <li><%= _("Server Certificate: %s") % h(@config.reg_server_cert) %></li>
+      <li><%= _("SSL Server Certificate URL: %s") % h(@config.reg_server_cert) %></li>
     <% end %>
   </ul>
 
-  <h3><%= _("Addon Products") %></h3>
+  <h3><%= _("Extensions and Modules") %></h3>
   <ul>
     <% @config.addons.each do |addon| %>
       <li><%= h(addon["name"]) %></li>
