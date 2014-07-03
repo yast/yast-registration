@@ -31,15 +31,22 @@ module Registration
         log.info "Available addons: #{@addons}"
       end
 
-      # display the EULA for each dialog and wait for a button click
+      # display the extension selection dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
         Wizard.SetContents(
           # dialog title
           _("Extension and Module Selection"),
           content,
-          # TODO FIXME: add a help text
-          "",
+          # help text (1/3)
+          _("<p>Here you can select available extensions and modules for your"\
+              "system.</p>") +
+            # help text (2/3)
+          _("<p>Please note, that some extensions or modules might need "\
+              "specific registration code.</p>") +
+            # help text (3/3)
+          _("<p>If you want to remove any extension or module you need to log"\
+              "into the SUSE Customer Center and remove them manually there.</p>"),
           GetInstArgs.enable_back || Mode.normal, #FIXME make parameters
           GetInstArgs.enable_next || Mode.normal
         )
@@ -200,7 +207,7 @@ module Registration
 
         # check the addons requiring a reg. code
         if need_regcode.size > max_supported
-          Report.Error(_("YaST allows to select at most %s addons.") % max_supported)
+          Report.Error(_("YaST allows to select at most %s extensions or modules.") % max_supported)
           return false
         end
 
