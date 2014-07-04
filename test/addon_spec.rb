@@ -196,7 +196,37 @@ describe Registration::Addon do
     it "returns true when the addon availability is not set" do
       expect(addon.selectable?).to be_true
     end
+  end
 
+  describe "#updates_addon?" do
+    it "returns true if the old addon has the same name" do
+      product = addon_generator("zypper_name" => "sle-sdk")
+
+      new_addon = Registration::Addon.new(product)
+      old_addon = { "name" => "sle-sdk", "version" => "12", "arch" => "x86_64" }
+
+      expect(new_addon.updates_addon?(old_addon)).to be_true
+    end
+
+    it "returns true if the old addon is a predecessor" do
+      # "sle-haegeo" (SLE11-SP2) has been renamed to "sle-ha-geo" (SLE12)
+      product = addon_generator("zypper_name" => "sle-ha-geo",
+        "predecessor" => "sle-haegeo")
+
+      new_addon = Registration::Addon.new(product)
+      old_addon = { "name" => "sle-haegeo", "version" => "12", "arch" => "x86_64" }
+
+      expect(new_addon.updates_addon?(old_addon)).to be_true
+    end
+
+    it "returns false if the old addon is different" do
+      product = addon_generator("zypper_name" => "sle-sdk")
+
+      new_addon = Registration::Addon.new(product)
+      old_addon = { "name" => "sle-hae", "version" => "12", "arch" => "x86_64" }
+
+      expect(new_addon.updates_addon?(old_addon)).to be_false
+    end
   end
 
 end
