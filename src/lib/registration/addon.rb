@@ -77,7 +77,6 @@ module Registration
       :friendly_name,
       :identifier,
       :name,
-      :predecessor,
       :release_type,
       :version
 
@@ -140,7 +139,7 @@ module Registration
     # @param [Hash] old_addon addon Hash received from pkg-bindings
     # @return [Boolean] true if it updates the old addon, false otherwise
     def updates_addon?(old_addon)
-      old_addon["name"] == identifier || old_addon["name"] == predecessor
+      old_addon["name"] == identifier || old_addon["name"] == @pure_addon.predecessor
     end
 
   end
