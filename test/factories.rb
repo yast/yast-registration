@@ -14,7 +14,7 @@ def suse_connect_product_generator(attrs={})
     params['free'] = attrs.fetch('free', true)
     params['eula_url'] = attrs['eula_url']
     params["extensions"] = attrs['extensions'] || []
-    params["predecessor"] = attrs["predecessor"]
+    params["former_identifier"] = attrs["former_identifier"]
 
     params
 end
