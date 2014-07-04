@@ -30,6 +30,7 @@ require "registration/exceptions"
 require "registration/helpers"
 
 module Registration
+  Yast.import "AddOnProduct"
   Yast.import "Mode"
   Yast.import "Pkg"
   Yast.import "PackageLock"
@@ -294,6 +295,13 @@ module Registration
 
       log.info "Found addons to update: #{ret}"
       ret
+    end
+
+    # update the static defaults in AddOnProduct module
+    def self.update_product_renames(renames)
+      renames.each do |old_name, new_name|
+        AddOnProduct.add_rename(old_name, new_name)
+      end
     end
 
     # a helper method for iterating over repositories

@@ -95,6 +95,9 @@ module Registration
       addons = SUSE::Connect::YaST.show_product(remote_product, params).extensions || []
       log.info "Available addons result: #{addons}"
 
+      renames = collect_renames(addons)
+      ::Registration::SwMgmt.update_product_renames(renames)
+
       # ignore the base product "addon"
       addons.reject{ |a| a.identifier == base_product["name"] }
     end
@@ -172,6 +175,20 @@ module Registration
       end
 
       default_params.merge(params)
+    end
+
+    def collect_renames(addons)
+      renames = {}
+
+      addons.each do |addon|
+        if addon.former_identifier && addon.identifier != addon.former_identifier
+          renames[addon.former_identifier] = addon.identifier
+        end
+      end
+
+      log.info "Collected product renames: #{renames}"
+
+      renames
     end
   end
 end
