@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jul  4 15:37:14 UTC 2014 - lslezak@suse.cz
+
+- pass product renames to AddOnProduct module to update the
+  default fallback mapping
+- 3.1.85
+
+-------------------------------------------------------------------
 Fri Jul  4 07:55:33 UTC 2014 - lslezak@suse.cz
 
 - check also the previous product name to handle addon/extension
