@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Fri Jul  4 07:55:33 UTC 2014 - lslezak@suse.cz
 
-- use "predecessor" attribute to handle addons/extensions renames
-  (bnc#883206)
+- check also the previous product name to handle addon/extension
+  renames (bnc#883206)
 - 3.1.84
 
 -------------------------------------------------------------------
