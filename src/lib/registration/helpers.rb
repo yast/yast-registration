@@ -94,6 +94,9 @@ module Registration
         nil
       end
 
+      # SLP selection canceled, do not cache it
+      return url if url == :cancel
+
       # cache the URL
       ::Registration::Storage::Cache.instance.reg_url = url
       ::Registration::Storage::Cache.instance.reg_url_cached = true

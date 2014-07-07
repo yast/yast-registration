@@ -136,7 +136,7 @@ module Yast
           # reset the user input in case an exception is raised
           ret = nil
 
-          init_registration
+          next if init_registration == :cancel
 
           success = ::Registration::SccHelpers.catch_registration_errors do
             base_product = ::Registration::SwMgmt.find_base_product
@@ -714,6 +714,7 @@ module Yast
     def init_registration
       if !@registration
         url = ::Registration::Helpers.registration_url
+        return :cancel if url == :cancel
         @registration = ::Registration::Registration.new(url)
       end
     end
