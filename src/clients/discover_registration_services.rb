@@ -46,7 +46,8 @@ module Yast
             ),
             VSpacing(Opt(:vstretch), 1),
             ButtonBox(
-              PushButton(Id(:ok), Opt(:default), Label.OKButton)
+              PushButton(Id(:ok), Opt(:default), Label.OKButton),
+              PushButton(Id(:cancel), Label.CancelButton)
             )
           )
         )
@@ -74,7 +75,7 @@ module Yast
 
             return url
           when :cancel
-            break
+            return :cancel
           end
         end
       ensure
