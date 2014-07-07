@@ -58,7 +58,8 @@ module Registration
         yield
 
         true
-      rescue SocketError
+      rescue SocketError, Errno::ENETUNREACH => e
+        log.error "Network error: #{e.class}: #{e.message}"
         # Error popup
         if Yast::Mode.installation || Yast::Mode.update
           if Yast::Popup.YesNo(
@@ -122,7 +123,7 @@ module Registration
 
         false
       rescue Exception => e
-        log.error("SCC registration failed: #{e}, #{e.backtrace}")
+        log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(_("Registration failed."))
         false
       end
