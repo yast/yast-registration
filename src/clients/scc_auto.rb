@@ -211,6 +211,9 @@ module Yast
       if Mode.normal || Mode.config
         # popup message: registration finished properly
         Popup.Message(_("Registration was successfull."))
+      else
+        # copy the SSL certificate to the target system
+        ::Registration::Helpers.copy_certificate_to_target
       end
 
       return true

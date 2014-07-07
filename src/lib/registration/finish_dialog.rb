@@ -57,6 +57,8 @@ module Registration
 
         Yast::WFM.Execute(Yast::Path.new(".local.bash"), "mv '#{source_path}' '#{target_path}'")
 
+        # copy the imported SSL certificate
+        Helpers.copy_certificate_to_target
         nil
       else
         raise "Uknown action #{func} passed as first parameter"

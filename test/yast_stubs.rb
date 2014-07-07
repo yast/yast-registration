@@ -28,6 +28,13 @@ module Yast
   def self.import(mod)
     true
   end
+
+  # simply mock a Path as a String
+  class Path < String
+    def initialize(path)
+      super(path)
+    end
+  end
 end
 
 def stub_yast_require
