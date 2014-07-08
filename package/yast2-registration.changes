@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul  8 09:22:44 UTC 2014 - lslezak@suse.cz
+
+- fixed check for registered status (bnc#886116)
+- 3.1.89
+
+-------------------------------------------------------------------
 Mon Jul  7 13:46:45 UTC 2014 - lslezak@suse.cz
 
 - better handle "Network unreachable" error (Errno::ENETUNREACH)
