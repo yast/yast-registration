@@ -109,7 +109,8 @@ module Registration
     end
 
     def self.is_registered?
-      SUSE::Connect::System.registered?
+      # just a simple file check without connection to SCC
+      File.exist?(SCC_CREDENTIALS)
     end
 
     private
