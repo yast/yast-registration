@@ -223,6 +223,8 @@ module Yast
         log.info "Registration upgrade failed, removing the credentials to register from scratch"
         ::Registration::Helpers.reset_registration_status
       end
+
+      upgraded
     end
 
     def refresh_addons
