@@ -201,7 +201,7 @@ module Yast
 
       init_registration
 
-      ::Registration::SccHelpers.catch_registration_errors do
+      upgraded = ::Registration::SccHelpers.catch_registration_errors do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
@@ -217,6 +217,11 @@ module Yast
 
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services)
+      end
+
+      if !upgraded
+        log.info "Registration upgrade failed, removing the credentials to register from scratch"
+        reset_registration_status
       end
     end
 
@@ -727,11 +732,15 @@ module Yast
         ::Registration::Storage::Cache.instance.first_run = false
 
         if Stage.initial && ::Registration::Registration.is_registered?
-          file = ::Registration::Registration::SCC_CREDENTIALS
-          log.info "Resetting registration status, removing #{file}"
-          File.unlink(file)
+          reset_registration_status
         end
       end
+    end
+
+    def reset_registration_status
+      file = ::Registration::Registration::SCC_CREDENTIALS
+      log.info "Resetting registration status, removing #{file}"
+      File.unlink(file)
     end
 
   end unless defined?(InstSccClient)
