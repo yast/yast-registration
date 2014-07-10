@@ -325,14 +325,12 @@ module Yast
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        registered ? Empty() : VBox(
-          VSpacing(1),
-          # button label
-          PushButton(Id(:local_server), _("&Local Registration Server...")),
-          VSpacing(UI.TextMode ? 1 : 3),
-          # button label
-          PushButton(Id(:skip), _("&Skip Registration"))
-        ),
+        VSpacing(1),
+        # button label
+        PushButton(Id(:local_server), _("&Local Registration Server...")),
+        VSpacing(UI.TextMode ? 1 : 3),
+        # button label
+        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
     end
