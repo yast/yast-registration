@@ -195,8 +195,9 @@ module Registration
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
-      # TODO FIXME: read the URL from configuration file to use the same URL
-      # at re-registration as in installation
+      # check for previously saved config value
+      config = SUSE::Connect::Config.new
+      return config.url if config.url
 
       # try SLP if not registered yet
       slp_url = slp_service_url
@@ -281,6 +282,18 @@ module Registration
         log.info "Updating certificate links (#{cmd})..."
         Yast::SCR.Execute(Yast::Path.new(".target.bash"), cmd)
       end
+    end
+
+    # write the current configuration to the configuration file
+    def self.write_config
+      config_params = {
+        :url      => registration_url,
+        :insecure => insecure_registration
+      }
+
+      log.info "writing registration config: #{config_params}"
+
+      SUSE::Connect::YaST.write_config(config_params)
     end
   end
 end

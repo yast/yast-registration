@@ -111,7 +111,8 @@ module Yast
           ::Registration::Helpers::run_network_configuration
         when :local_server
           options = ::Registration::Storage::InstallationOptions.instance
-          url = ::Registration::UI::LocalServerDialog.run(options.custom_url)
+          current_url = options.custom_url || SUSE::Connect::Config.new.url
+          url = ::Registration::UI::LocalServerDialog.run(current_url)
           if url
             log.info "Entered custom URL: #{url}"
             options.custom_url = url
@@ -173,7 +174,11 @@ module Yast
             return :next
           end
 
-          if !success
+          if success
+            # save the config if running in installed system
+            # (in installation/upgrade it's written in _finish client)
+            ::Registration::Helpers.write_config if Mode.normal
+          else
             log.info "registration failed, resetting the registration URL"
             # reset the registration object and the cache to allow changing the URL
             @registration = nil

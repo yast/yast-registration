@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul 10 07:21:36 UTC 2014 - lslezak@suse.cz
+
+- skip SLP discovery if SMT is used, use the URL from config file
+  (bnc#886423)
+
+-------------------------------------------------------------------
 Tue Jul  8 09:22:44 UTC 2014 - lslezak@suse.cz
 
 - fixed check for registered status (bnc#886116)
