@@ -218,4 +218,22 @@ describe "Registration::Helpers" do
     end
   end
 
+  describe ".reset_registration_status" do
+    let(:credentials) { ::Registration::Registration::SCC_CREDENTIALS }
+
+    it "does nothing if there are no system credentials present" do
+      expect(File).to receive(:exist?).with(credentials).and_return(false)
+      expect(File).to receive(:unlink).never
+
+      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+    end
+
+    it "removes system credentials if present" do
+      expect(File).to receive(:exist?).with(credentials).and_return(true)
+      expect(File).to receive(:unlink).with(credentials)
+
+      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+    end
+  end
+
 end

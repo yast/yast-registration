@@ -111,7 +111,8 @@ module Yast
           ::Registration::Helpers::run_network_configuration
         when :local_server
           options = ::Registration::Storage::InstallationOptions.instance
-          url = ::Registration::UI::LocalServerDialog.run(options.custom_url)
+          current_url = options.custom_url || SUSE::Connect::Config.new.url
+          url = ::Registration::UI::LocalServerDialog.run(current_url)
           if url
             log.info "Entered custom URL: #{url}"
             options.custom_url = url
@@ -173,7 +174,11 @@ module Yast
             return :next
           end
 
-          if !success
+          if success
+            # save the config if running in installed system
+            # (in installation/upgrade it's written in _finish client)
+            ::Registration::Helpers.write_config if Mode.normal
+          else
             log.info "registration failed, resetting the registration URL"
             # reset the registration object and the cache to allow changing the URL
             @registration = nil
@@ -196,7 +201,7 @@ module Yast
 
       init_registration
 
-      ::Registration::SccHelpers.catch_registration_errors do
+      upgraded = ::Registration::SccHelpers.catch_registration_errors do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
@@ -213,6 +218,13 @@ module Yast
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services)
       end
+
+      if !upgraded
+        log.info "Registration upgrade failed, removing the credentials to register from scratch"
+        ::Registration::Helpers.reset_registration_status
+      end
+
+      upgraded
     end
 
     def refresh_addons
@@ -320,14 +332,12 @@ module Yast
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        registered ? Empty() : VBox(
-          VSpacing(1),
-          # button label
-          PushButton(Id(:local_server), _("&Local Registration Server...")),
-          VSpacing(UI.TextMode ? 1 : 3),
-          # button label
-          PushButton(Id(:skip), _("&Skip Registration"))
-        ),
+        VSpacing(1),
+        # button label
+        PushButton(Id(:local_server), _("&Local Registration Server...")),
+        VSpacing(UI.TextMode ? 1 : 3),
+        # button label
+        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
       )
     end
@@ -724,9 +734,7 @@ module Yast
         ::Registration::Storage::Cache.instance.first_run = false
 
         if Stage.initial && ::Registration::Registration.is_registered?
-          file = ::Registration::Registration::SCC_CREDENTIALS
-          log.info "Resetting registration status, removing #{file}"
-          File.unlink(file)
+          ::Registration::Helpers.reset_registration_status
         end
       end
     end

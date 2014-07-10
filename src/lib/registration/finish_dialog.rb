@@ -43,15 +43,10 @@ module Registration
 
         Yast.import "Installation"
 
-        config_params = {
-          :url      => Helpers.registration_url,
-          :insecure => Helpers.insecure_registration
-        }
+        # write the current config
+        Helpers.write_config
 
-        log.info "writing registration config: #{config_params}"
-
-        SUSE::Connect::YaST.write_config(config_params)
-
+        # copy it to the target system
         source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
         target_path = Yast::Installation.destdir + source_path
 
