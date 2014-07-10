@@ -24,6 +24,7 @@
 require "yast"
 require "uri"
 
+require "registration/registration"
 require "registration/storage"
 require "registration/suse_register"
 require "suse/connect"
@@ -295,5 +296,14 @@ module Registration
 
       SUSE::Connect::YaST.write_config(config_params)
     end
+
+    def self.reset_registration_status
+      file = ::Registration::Registration::SCC_CREDENTIALS
+      return unless File.exist?(file)
+
+      log.info "Resetting registration status, removing #{file}"
+      File.unlink(file)
+    end
+
   end
 end

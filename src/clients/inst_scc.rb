@@ -221,7 +221,7 @@ module Yast
 
       if !upgraded
         log.info "Registration upgrade failed, removing the credentials to register from scratch"
-        reset_registration_status
+        ::Registration::Helpers.reset_registration_status
       end
     end
 
@@ -732,15 +732,9 @@ module Yast
         ::Registration::Storage::Cache.instance.first_run = false
 
         if Stage.initial && ::Registration::Registration.is_registered?
-          reset_registration_status
+          ::Registration::Helpers.reset_registration_status
         end
       end
-    end
-
-    def reset_registration_status
-      file = ::Registration::Registration::SCC_CREDENTIALS
-      log.info "Resetting registration status, removing #{file}"
-      File.unlink(file)
     end
 
   end unless defined?(InstSccClient)
