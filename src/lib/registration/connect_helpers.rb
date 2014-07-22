@@ -203,11 +203,11 @@ module Registration
 
     def self.cert_name_details(x509_name)
       # label followed by the SSL certificate identification
-      details = [ INDENT + _("Common Name (CN): ") + Helpers.find_name_attribute(x509_name, "CN") ]
+      details = [ INDENT + _("Common Name (CN): ") + (Helpers.find_name_attribute(x509_name, "CN") || "") ]
       # label followed by the SSL certificate identification
-      details << INDENT + _("Organization (O): ") + Helpers.find_name_attribute(x509_name, "O")
+      details << INDENT + _("Organization (O): ") + (Helpers.find_name_attribute(x509_name, "O") || "")
       # label followed by the SSL certificate identification
-      details << INDENT + _("Organization Unit (OU): ") + Helpers.find_name_attribute(x509_name, "OU")
+      details << INDENT + _("Organization Unit (OU): ") + (Helpers.find_name_attribute(x509_name, "OU") || "")
     end
 
     def self.import_ssl_certificate(cert)
