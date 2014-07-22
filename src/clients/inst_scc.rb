@@ -289,7 +289,7 @@ module Yast
       # label text describing the registration (1/2)
       # use \n to split to more lines if needed (use max. 76 chars/line)
       info = _("Please enter a registration or evaluation code for this product and your\n" +
-          "User Name/EMail from the SUSE Customer Center in the fields below.\n" +
+          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" +
           "Access to security and general software updates is only possible on\n" +
           "a registered system.")
 
@@ -323,7 +323,7 @@ module Yast
         VSpacing(UI.TextMode ? 1 : 2),
         HSquash(
           VBox(
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&Email"), options.email)),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
             VSpacing(0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
