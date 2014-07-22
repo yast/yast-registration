@@ -187,6 +187,7 @@ module Yast
         end
 
         if ret == :skip && confirm_skipping
+          log.info "Skipping registration on user request"
           @registration_skipped = true
           return ret
         end
