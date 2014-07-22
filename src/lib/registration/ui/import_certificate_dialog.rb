@@ -23,6 +23,8 @@ module Registration
       # @note the text messages need to be translated at runtime via _() call
       OPENSSL_ERROR_MESSAGES = {
         # SSL error message
+        10 => N_("Certificate has expired"),
+        # SSL error message
         18 => N_("Self signed certificate"),
         # SSL error message
         19 => N_("Self signed certificate in certificate chain")
