@@ -49,8 +49,10 @@ module Registration
     Yast.import "Popup"
     Yast.import "Report"
 
-    # @param prefix[String] Prefix before error like affected product or addon
-    def self.catch_registration_errors(prefix = "", &block)
+    # @param prefix [String] Prefix before error like affected product or addon
+    # @param update [Boolean] true if an extra hint for registration update
+    #   should be displayed
+    def self.catch_registration_errors(prefix = "", update = false, &block)
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
@@ -77,14 +79,39 @@ module Registration
         Yast::Report.Error(_("Connection time out."))
         false
       rescue SUSE::Connect::ApiError => e
-        log.error "Received error: #{e.code}: #{e.response.body}"
-        case e.response
-        when Net::HTTPUnauthorized, Net::HTTPUnprocessableEntity
+        log.error "Received error: #{e.response.inspect}"
+        case e.code
+        when 401
+          if update
+            # TRANSLATORS: additional hint for an error message
+            msg = _("Check that this system is known to the registration server.")
+
+            # probably missing NCC->SCC sync, display a hint unless SMT is used
+            if Helpers.registration_url.nil?
+              msg += "\n\n"
+              # TRANSLATORS: additional hint for an error message
+              msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
+                  "knows the old NCC registration. Synchronization from NCC to SCC\n" \
+                  "might take very long time.\n\n" \
+                  "If the SLE11 system was installed recently you could log into\n" \
+                  "%s to speed up the synchronization process.\n" \
+                  "Just wait several minutes after logging in and then retry \n" \
+                  "the upgrade again.") % \
+                SUSE::Connect::Client::DEFAULT_URL
+            end
+
+            # add the hint to the error details
+            e.message << "\n\n\n" + msg
+            report_error(prefix + _("Registration failed."), e)
+          else
+            report_error(prefix + _("The email address is not known or\nthe registration code is not valid."), e)
+          end
+        when 422
           # Error popup
           report_error(prefix + _("The email address is not known or\nthe registration code is not valid."), e)
-        when Net::HTTPClientError
+        when 400..499
           report_error(prefix + _("Registration client error."), e)
-        when Net::HTTPServerError
+        when 500..599
           report_error(prefix + _("Registration server error.\nRetry registration later."), e)
         else
           report_error(prefix + _("Registration failed."), e)

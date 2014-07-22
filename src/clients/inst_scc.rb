@@ -199,7 +199,7 @@ module Yast
     def refresh_base_product
       init_registration
 
-      upgraded = ::Registration::SccHelpers.catch_registration_errors do
+      upgraded = ::Registration::SccHelpers.catch_registration_errors("", true) do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
