@@ -7,6 +7,7 @@ Tue Jul 22 15:45:44 UTC 2014 - lslezak@suse.cz
   upgrade from SLE11 fails (bnc#885506)
 - use "E-mail Address" label (bnc#888158)
 - handle missing SSL certificate attributes (bnc#886850)
+- 3.1.91
 
 -------------------------------------------------------------------
 Thu Jul 10 07:21:36 UTC 2014 - lslezak@suse.cz
