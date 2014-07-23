@@ -187,6 +187,7 @@ module Yast
         end
 
         if ret == :skip && confirm_skipping
+          log.info "Skipping registration on user request"
           @registration_skipped = true
           return ret
         end
@@ -196,12 +197,9 @@ module Yast
     end
 
     def refresh_base_product
-      options = ::Registration::Storage::InstallationOptions.instance
-      return true if options.base_registered
-
       init_registration
 
-      upgraded = ::Registration::SccHelpers.catch_registration_errors do
+      upgraded = ::Registration::SccHelpers.catch_registration_errors(show_update_hint: true) do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
@@ -212,8 +210,6 @@ module Yast
         ) do
           @registration.upgrade_product(base_product)
         end
-
-        options.base_registered = true
 
         # select repositories to use in installation (e.g. enable/disable Updates)
         select_repositories(product_services)
@@ -293,7 +289,7 @@ module Yast
       # label text describing the registration (1/2)
       # use \n to split to more lines if needed (use max. 76 chars/line)
       info = _("Please enter a registration or evaluation code for this product and your\n" +
-          "User Name/EMail from the SUSE Customer Center in the fields below.\n" +
+          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" +
           "Access to security and general software updates is only possible on\n" +
           "a registered system.")
 
@@ -327,7 +323,7 @@ module Yast
         VSpacing(UI.TextMode ? 1 : 2),
         HSquash(
           VBox(
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&Email"), options.email)),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
             VSpacing(0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
@@ -512,7 +508,7 @@ module Yast
       init_registration
 
       product_succeed = registration_order.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors("#{product.label}\n") do
+        ::Registration::SccHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product

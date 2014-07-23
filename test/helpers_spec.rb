@@ -66,15 +66,24 @@ describe "Registration::Helpers" do
     context "at installed system" do
       before do
         allow(yast_mode).to receive(:mode).and_return("normal")
-
-        # FIXME: stub SLP service discovery, later add config file reading
-        expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
+        allow(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
       end
 
       it "ignores Linuxrc boot parameters" do
         # must not ask Linuxrc at all
         expect(yast_linuxrc).to receive(:InstallInf).never
+        # stub config file reading
+        expect_any_instance_of(SUSE::Connect::Config).to receive(:url)
         expect(Registration::Helpers.registration_url).to be_nil
+      end
+
+      it "reads the URL from config file if present" do
+        # must not ask Linuxrc at all
+        expect(yast_linuxrc).to receive(:InstallInf).never
+        # stub config file reading
+        url = "https://example.com"
+        expect_any_instance_of(SUSE::Connect::Config).to receive(:url).twice.and_return(url)
+        expect(Registration::Helpers.registration_url).to eq(url)
       end
     end
   end

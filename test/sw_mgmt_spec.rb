@@ -157,6 +157,7 @@ describe "Registration::SwMgmt" do
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
         File.join(target_dir, "SCCcredentials"))
+      expect(SUSE::Connect::Credentials).to receive(:read)
 
       expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
     end
@@ -167,6 +168,7 @@ describe "Registration::SwMgmt" do
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
         File.join(target_dir, "SCCcredentials"))
+      expect(SUSE::Connect::Credentials).to receive(:read)
 
       expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
     end
