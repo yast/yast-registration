@@ -273,6 +273,7 @@ module Registration
         ::FileUtils.cp(ncc_file, new_file)
 
         credentials = SUSE::Connect::Credentials.read(new_file)
+        # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
         log.info "Using previous NCC credentials: #{credentials.inspect}"
       end
 
@@ -281,6 +282,7 @@ module Registration
         log.info "Copying #{scc_file} to #{new_file}"
         ::FileUtils.cp(scc_file, new_file)
         credentials = SUSE::Connect::Credentials.read(new_file)
+        # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
         log.info "Using previous SCC credentials: #{credentials.inspect}"
       end
     end

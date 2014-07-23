@@ -49,10 +49,10 @@ module Registration
     Yast.import "Popup"
     Yast.import "Report"
 
-    # @param prefix [String] Prefix before error like affected product or addon
-    # @param update [Boolean] true if an extra hint for registration update
+    # @param message_prefix [String] Prefix before error like affected product or addon
+    # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
-    def self.catch_registration_errors(prefix = "", update = false, &block)
+    def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
@@ -82,7 +82,7 @@ module Registration
         log.error "Received error: #{e.response.inspect}"
         case e.code
         when 401
-          if update
+          if show_update_hint
             # TRANSLATORS: additional hint for an error message
             msg = _("Check that this system is known to the registration server.")
 
@@ -102,19 +102,19 @@ module Registration
 
             # add the hint to the error details
             e.message << "\n\n\n" + msg
-            report_error(prefix + _("Registration failed."), e)
+            report_error(message_prefix + _("Registration failed."), e)
           else
-            report_error(prefix + _("The email address is not known or\nthe registration code is not valid."), e)
+            report_error(message_prefix + _("The email address is not known or\nthe registration code is not valid."), e)
           end
         when 422
           # Error popup
-          report_error(prefix + _("The email address is not known or\nthe registration code is not valid."), e)
+          report_error(message_prefix + _("The email address is not known or\nthe registration code is not valid."), e)
         when 400..499
-          report_error(prefix + _("Registration client error."), e)
+          report_error(message_prefix + _("Registration client error."), e)
         when 500..599
-          report_error(prefix + _("Registration server error.\nRetry registration later."), e)
+          report_error(message_prefix + _("Registration server error.\nRetry registration later."), e)
         else
-          report_error(prefix + _("Registration failed."), e)
+          report_error(message_prefix + _("Registration failed."), e)
         end
         false
       rescue ::Registration::ServiceError => e
@@ -202,8 +202,9 @@ module Registration
     end
 
     def self.cert_name_details(x509_name)
+      details = []
       # label followed by the SSL certificate identification
-      details = [ INDENT + _("Common Name (CN): ") + (Helpers.find_name_attribute(x509_name, "CN") || "") ]
+      details << INDENT + _("Common Name (CN): ") + (Helpers.find_name_attribute(x509_name, "CN") || "")
       # label followed by the SSL certificate identification
       details << INDENT + _("Organization (O): ") + (Helpers.find_name_attribute(x509_name, "O") || "")
       # label followed by the SSL certificate identification

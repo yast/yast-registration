@@ -199,7 +199,7 @@ module Yast
     def refresh_base_product
       init_registration
 
-      upgraded = ::Registration::SccHelpers.catch_registration_errors("", true) do
+      upgraded = ::Registration::SccHelpers.catch_registration_errors(show_update_hint: true) do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
@@ -508,7 +508,7 @@ module Yast
       init_registration
 
       product_succeed = registration_order.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors("#{product.label}\n") do
+        ::Registration::SccHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product
