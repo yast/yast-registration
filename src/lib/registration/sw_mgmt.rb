@@ -271,12 +271,17 @@ module Registration
         log.info "Copying the old NCC credentials from previous installation"
         log.info "Copying #{ncc_file} to #{new_file}"
         ::FileUtils.cp(ncc_file, new_file)
+
+        credentials = SUSE::Connect::Credentials.read(new_file)
+        log.info "Using previous NCC credentials: #{credentials.inspect}"
       end
 
       if File.exist?(scc_file)
         log.info "Copying the old SCC credentials from previous installation"
         log.info "Copying #{scc_file} to #{new_file}"
         ::FileUtils.cp(scc_file, new_file)
+        credentials = SUSE::Connect::Credentials.read(new_file)
+        log.info "Using previous SCC credentials: #{credentials.inspect}"
       end
     end
 
