@@ -174,13 +174,20 @@ module Registration
       boot_url = boot_reg_url
       return boot_url if boot_url
 
-      # FIXME check at first new suseconnect conf
-      old_conf = SuseRegister.new(Yast::Installation.destdir)
-      if old_conf.found?
-        # use default if ncc was used in past
-        return nil if old_conf.ncc?
-        # if specific server is used, then also use it
-        return old_conf.stripped_url.to_s
+      # check for suse_register config only when NCC credentials file exits
+      # (the config file exists even on a not registered system)
+      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
+      ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
+      if File.exist?(ncc_creds)
+        # FIXME check at first new suseconnect conf
+        old_conf = SuseRegister.new(Yast::Installation.destdir)
+
+        if old_conf.found?
+          # use default if ncc was used in past
+          return nil if old_conf.ncc?
+          # if specific server is used, then also use it
+          return old_conf.stripped_url.to_s
+        end
       end
 
       # try SLP if not registered

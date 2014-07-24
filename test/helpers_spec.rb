@@ -86,6 +86,73 @@ describe "Registration::Helpers" do
         expect(Registration::Helpers.registration_url).to eq(url)
       end
     end
+
+    context "at upgrade" do
+      let(:yast_installation) { double("Yast::Instrallation") }
+      let(:suse_register) { "/mnt/etc/suseRegister.conf" }
+
+      before do
+        allow(yast_mode).to receive(:mode).and_return("update")
+        allow(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
+
+        stub_const("Yast::Installation", yast_installation)
+        allow(yast_installation).to receive(:destdir).and_return("/mnt")
+      end
+
+      it "returns 'regurl' boot parameter from Linuxrc" do
+        url = "https://example.com/register"
+        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
+        # make sure no SLP discovery is executed, the boot parameter has higher priority
+        expect(yast_wfm).to receive(:call).with("discover_registration_services").never
+        expect(Registration::Helpers.registration_url).to eq(url)
+      end
+
+      context "the system has been already registered" do
+        before do
+          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
+          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
+        end
+
+        it "return default when NCC registration server was used" do
+          expect(File).to receive(:exist?).with(suse_register).and_return(true)
+          expect(File).to receive(:readlines).with(suse_register).\
+            and_return(File.readlines(fixtures_file("old_conf_ncc/etc/suseRegister.conf")))
+
+          expect(Registration::Helpers.registration_url).to be_nil
+        end
+
+        it "return URL of SMT server when used" do
+          expect(File).to receive(:exist?).with(suse_register).and_return(true)
+          expect(File).to receive(:readlines).with(suse_register).\
+            and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
+
+          expect(Registration::Helpers.registration_url).to eq("https://myserver.com")
+        end
+      end
+
+      context "the system has not been registered" do
+        before do
+          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(false)
+          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
+        end
+
+        it "calls SLP discovery" do
+          slp_url = "https://slp.example.com/register"
+          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
+          expect(Registration::Helpers.registration_url).to eq(slp_url)
+        end
+      end
+    end
+
+    context "at unknown mode" do
+      before do
+        allow(yast_mode).to receive(:mode).and_return("config")
+      end
+
+      it "returns nil (default URL)" do
+        expect(Registration::Helpers.registration_url).to be_nil
+      end
+    end
   end
 
   describe ".service_url" do
