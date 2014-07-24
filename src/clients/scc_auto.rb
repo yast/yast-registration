@@ -374,7 +374,7 @@ module Yast
         # Translators: Text for UI Label - capitalized
         Frame(_("Registration"),
           VBox(
-            MinWidth(32, InputField(Id(:email), _("&Email"), @config.email)),
+            MinWidth(32, InputField(Id(:email), _("&E-mail Address"), @config.email)),
             VSpacing(0.4),
             MinWidth(32, InputField(Id(:reg_code), _("Registration &Code"),
                 @config.reg_code)),
