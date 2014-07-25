@@ -14,7 +14,7 @@ textdomain "registration"
 <% if @config.do_registration %>
   <h3><%= _("Registration Settings") %></h3>
   <ul>
-    <li><%= _("Email: %s") % h(@config.email) %></li>
+    <li><%= _("E-mail Address: %s") % h(@config.email) %></li>
     <% if !@config.reg_code.empty? %>
       <li><%= _("Registration Code is Configured") %></li>
     <% end %>

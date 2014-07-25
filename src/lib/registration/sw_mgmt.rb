@@ -288,11 +288,16 @@ module Registration
     end
 
     def self.find_addon_updates(addons)
+      log.info "Available addons: #{addons.map(&:identifier)}"
+
       products = Pkg.ResolvableProperties("", :product, "")
 
       installed_addons = products.select do |product|
         product["status"] == :installed && product["type"] != "base"
       end
+
+      product_names = installed_addons.map{|a| "#{a["name"]}-#{a["version"]}-#{a["release"]}"}
+      log.info "Installed addons: #{product_names}"
 
       ret = addons.select do |addon|
         installed_addons.any? do |installed_addon|
@@ -300,7 +305,7 @@ module Registration
         end
       end
 
-      log.info "Found addons to update: #{ret}"
+      log.info "Found addons to update: #{ret.map(&:identifier)}"
       ret
     end
 
