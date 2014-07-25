@@ -174,7 +174,7 @@ module Registration
       boot_url = boot_reg_url
       return boot_url if boot_url
 
-      # check for suse_register config only when NCC credentials file exits
+      # check for suse_register config only when NCC credentials file exists
       # (the config file exists even on a not registered system)
       dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
       ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
