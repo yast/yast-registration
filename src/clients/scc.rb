@@ -28,8 +28,10 @@ require "registration/sw_mgmt"
 
 module Yast
   class SccClient < Client
-    Yast.import "Wizard"
     Yast.import "CommandLine"
+    Yast.import "Pkg"
+    Yast.import "Report"
+    Yast.import "Wizard"
 
     def main
 
@@ -45,9 +47,13 @@ module Yast
         CommandLine.Run(cmdline_description)
       else
         Wizard.CreateDialog
-        return :abort unless ::Registration::SwMgmt.init
 
         begin
+          if !::Registration::SwMgmt.init
+            Report.Error(Pkg.LastError)
+            return :abort
+          end
+
           return WFM.call("inst_scc")
         ensure
           Wizard.CloseDialog
