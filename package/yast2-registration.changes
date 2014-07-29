@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jul 29 12:24:36 UTC 2014 - lslezak@suse.cz
+
+- display error details when package management initialization
+  fails, do not abort silently (bnc#887089)
+- 3.1.94
+
+-------------------------------------------------------------------
 Fri Jul 25 12:36:39 UTC 2014 - lslezak@suse.cz
 
 - another "E-mail Address" label fixes (bnc#888158)
