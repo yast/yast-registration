@@ -300,7 +300,8 @@ module Yast
         # label text describing the registration (2/2),
         # not displayed in installed system
         # use \n to split to more lines if needed (use max. 76 chars/line)
-        info += _("If you skip the registration now be sure to do so in the installed system.")
+        info += _("If you skip product registration now, remember to register after\n" \
+            "installation has completed.")
       end
 
       registered = ::Registration::Registration.is_registered?
