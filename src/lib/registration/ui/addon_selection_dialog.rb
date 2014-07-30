@@ -18,6 +18,7 @@ module Registration
       Yast.import "Report"
       Yast.import "UI"
       Yast.import "Wizard"
+      Yast.import "Stage"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(registration)
@@ -147,6 +148,7 @@ module Registration
             ret = handle_next_button
             # when canceled switch to old selection
           when :close, :abort
+            ret = nil if Stage.initial && !Popup.ConfirmAbort(:painless)
             Addon.selected.replace(@old_selection)
           else
             handle_addon_selection(ret)
