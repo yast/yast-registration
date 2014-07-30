@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul 30 14:11:51 UTC 2014 - locilka@suse.com
+
+- Asking for confirmation when aborting Extension and Module
+  Selection dialog (bnc#886662)
+- 3.1.96
+
+-------------------------------------------------------------------
 Tue Jul 29 15:26:07 UTC 2014 - lslezak@suse.cz
 
 - improved "skip registration" label (bnc#888561)
