@@ -229,16 +229,21 @@ module Yast
 
     def set_addon_table_content(current = nil)
       content = @config.addons.map do |a|
-        Item(Id(a["name"]), a["name"], a["reg_code"])
+        Item(Id(a["name"]), a["name"], a["version"], a["arch"],
+          a["release_type"],  a["reg_code"])
       end
 
       UI.ChangeWidget(Id(:addons_table), :Items, content)
       UI.ChangeWidget(Id(:addons_table), :CurrentItem, current) if current
     end
 
-    def display_addon_popup(name = "", reg_code = "")
+    def display_addon_popup(name: "", version: "", arch: "", release_type: "",
+        reg_code: "")
       content = VBox(
-        InputField(Id(:name), _("Extension or Module &Name"), name),
+        InputField(Id(:name), _("Extension or Module &Identifier"), name),
+        InputField(Id(:version), _("&Version"), version),
+        InputField(Id(:arch), _("&Architecture"), arch),
+        InputField(Id(:release_type), _("&Release Type"), release_type),
         InputField(Id(:reg_code), _("Registration &Code"), reg_code),
         VSpacing(1),
         HBox(
@@ -255,6 +260,9 @@ module Yast
         if ui == :ok
           return {
             "name" => UI.QueryWidget(Id(:name), :Value),
+            "version" => UI.QueryWidget(Id(:version), :Value),
+            "arch" => UI.QueryWidget(Id(:arch), :Value),
+            "release_type" => UI.QueryWidget(Id(:release_type), :Value),
             "reg_code" => UI.QueryWidget(Id(:reg_code), :Value)
           }
         else
@@ -278,9 +286,19 @@ module Yast
       if selected
         addon = @config.addons.find{|a| a["name"] == selected}
 
-        ret = display_addon_popup(selected, addon["reg_code"])
+        ret = display_addon_popup(
+          name: selected,
+          version: addon["version"],
+          arch: addon["arch"],
+          release_type: addon["release_type"],
+          reg_code: addon["reg_code"]
+        )
+
         if ret
           addon["name"] = ret["name"]
+          addon["version"] = ret["version"]
+          addon["arch"] = ret["arch"]
+          addon["release_type"] = ret["release_type"]
           addon["reg_code"] = ret["reg_code"]
           set_addon_table_content(addon["name"])
         end
@@ -301,13 +319,23 @@ module Yast
     end
 
     def select_addons
-      header = Header(_("Identifier"), _("Registration Code"))
+      header = Header(
+        _("Identifier"),
+        _("Version"),
+        _("Architecture"),
+        _("Release Type"),
+        _("Registration Code")
+      )
       contents = VBox(
         Table(Id(:addons_table), header, []),
         HBox(
           PushButton(Id(:add), Label.AddButton),
           PushButton(Id(:edit), Label.EditButton),
-          PushButton(Id(:delete), Label.DeleteButton)
+          PushButton(Id(:delete), Label.DeleteButton),
+          HSpacing(0.5),
+          # button label
+          PushButton(Id(:download),  _("Download Available Extensions...")
+          ),
         )
       )
       # help text
@@ -316,6 +344,9 @@ module Yast
       Wizard.SetContents(_("Register Optional Extensions or Modules"), contents, help_text, true, true)
       Wizard.SetNextButton(:next, Label.OKButton)
       set_addon_table_content
+
+      # disable download on a non-registered system
+      UI.ChangeWidget(Id(:download), :Enabled, ::Registration::Registration.is_registered?)
 
       begin
         ret = UI.UserInput
@@ -339,7 +370,8 @@ module Yast
     def refresh_widget_state
       enabled = UI.QueryWidget(Id(:do_registration), :Value)
       all_widgets = [ :reg_server_cert, :email, :reg_code, :slp_discovery,
-        :install_updates, :addons ]
+        :install_updates, :addons, :reg_server_cert_fingerprint_type,
+        :reg_server_cert_fingerprint ]
 
       all_widgets.each do |w|
         UI.ChangeWidget(Id(w), :Enabled, enabled)
@@ -347,6 +379,9 @@ module Yast
 
       slp_enabled = UI.QueryWidget(Id(:slp_discovery), :Value)
       UI.ChangeWidget(Id(:reg_server), :Enabled, !slp_enabled && enabled)
+
+      fingeprint_enabled = UI.QueryWidget(Id(:reg_server_cert_fingerprint_type), :Value) != :none
+      UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled, fingeprint_enabled && enabled)
     end
 
     def configure_registration
@@ -406,6 +441,29 @@ module Yast
               Opt(:hstretch),
               _("Optional SSL Server Certificate URL"),
               @config.reg_server_cert
+            ),
+            VSpacing(0.4),
+            Left(
+              ComboBox(
+                Id(:reg_server_cert_fingerprint_type),
+                Opt(:notify),
+                # Translators: Text for UI Label - capitalized
+                _("Optional SSL Server Certificate Fingerprint"),
+                [
+                  Item(Id(:none), _("none"),
+                    @config.reg_server_cert_fingerprint_type != "SHA1" &&
+                      @config.reg_server_cert_fingerprint_type != "SHA256"),
+                  Item(Id("SHA1"), "SHA1", @config.reg_server_cert_fingerprint_type == "SHA1"),
+                  Item(Id("SHA256"), "SHA256", @config.reg_server_cert_fingerprint_type == "SHA256")
+                ]
+              )
+            ),
+            InputField(
+              Id(:reg_server_cert_fingerprint),
+              Opt(:hstretch),
+              # Translators: Text for UI Label - capitalized
+              _("SSL Certificate Fingerprint"),
+              @config.reg_server_cert_fingerprint
             )
           )
         )
@@ -439,7 +497,7 @@ module Yast
         log.info "ret: #{ret}"
 
         case ret
-        when :do_registration, :slp_discovery
+        when :do_registration, :slp_discovery, :reg_server_cert_fingerprint_type
           refresh_widget_state
         when :abort, :cancel
           break if Popup.ReallyAbort(true)

@@ -78,7 +78,8 @@ module Registration
       include Singleton
 
       attr_accessor :do_registration, :reg_server, :reg_server_cert, :email,
-        :reg_code, :install_updates, :addons, :slp_discovery
+        :reg_code, :install_updates, :addons, :slp_discovery,
+        :reg_server_cert_fingerprint_type, :reg_server_cert_fingerprint
 
       def initialize
         reset
@@ -93,6 +94,8 @@ module Registration
         @install_updates = false
         @addons = []
         @slp_discovery = false
+        @reg_server_cert_fingerprint_type = nil
+        @reg_server_cert_fingerprint = ""
       end
 
       def export
@@ -110,6 +113,15 @@ module Registration
               "addons" => @addons
             }
           )
+
+          if reg_server_cert_fingerprint_type == "SHA1" ||
+            reg_server_cert_fingerprint_type == "SHA256"
+
+            ret.merge!(
+              "reg_server_cert_fingerprint_type" => reg_server_cert_fingerprint_type,
+              "reg_server_cert_fingerprint" => reg_server_cert_fingerprint,
+            )
+          end
         end
 
         ret
