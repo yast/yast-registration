@@ -78,11 +78,15 @@ module Registration
     end
 
     def self.find_base_product
+#       return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+#         "release_type" => "DVD"
+#       }
+
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Mode.normal
+        if Mode.normal || Mode.config
           # in installed system the base product has valid type
           p["status"] == :installed && p["type"] == "base"
         else

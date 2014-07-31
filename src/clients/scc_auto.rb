@@ -30,9 +30,12 @@ require "yast/suse_connect"
 require "erb"
 
 require "registration/storage"
+require "registration/sw_mgmt"
 require "registration/registration"
 require "registration/helpers"
 require "registration/connect_helpers"
+require "registration/ui/addon_selection_dialog"
+require "registration/ui/addon_eula_dialog"
 
 module Yast
   class SccAutoClient < Client
@@ -182,9 +185,9 @@ module Yast
             {
               "name" => a["name"],
               "reg_code" => a["reg_code"],
-              # TODO FIXME: not handled by SCC yet
-              "arch" => nil,
-              "version" => nil
+              "arch" => a["arch"],
+              "version" => a["version"],
+              "release_type" => a["release_type"],
             }
           end
 
@@ -362,9 +365,29 @@ module Yast
         when :abort, :cancel
           break if Popup.ReallyAbort(true)
         end
-      end until ret == :next || ret == :back || ret == :addons
+      end until [ :next, :back, :download ].include?(ret)
 
       ret
+    end
+
+    def select_remote_addons
+      if !::Registration::SwMgmt.init
+        Report.Error(Pkg.LastError)
+        return :abort
+      end
+
+      url = ::Registration::Helpers.registration_url
+      registration = ::Registration::Registration.new(url)
+      ::Registration::UI::AddonSelectionDialog.run(registration)
+    end
+
+    def addons_eula
+      ::Registration::UI::AddonEulaDialog.run(::Registration::Addon.selected)
+    end
+
+    def addons_reg_codes
+      # FIXME
+      :next
     end
 
     def refresh_widget_state
@@ -553,8 +576,11 @@ module Yast
     # UI workflow definition
     def start_workflow
       aliases = {
-        "general"  => lambda { configure_registration() },
-        "addons"   => [ lambda { select_addons() }, true ]
+        "general"         => lambda { configure_registration() },
+        "addons"          => [ lambda { select_addons() }, true ],
+        "remote_addons"   => [ lambda { select_remote_addons() }, true ],
+        "addons_eula"     => [ lambda { addons_eula() }, true ],
+        "addons_regcodes" => [ lambda { addons_reg_codes() }, true ]
       }
 
       sequence = {
@@ -566,7 +592,20 @@ module Yast
         },
         "addons" => {
           :abort   => :abort,
-          :next    => "general"
+          :next    => "general",
+          :download => "remote_addons"
+        },
+        "remote_addons" => {
+          :abort   => :abort,
+          :next    => "addons_eula"
+        },
+        "addons_eula" => {
+          :abort   => :abort,
+          :next    => "addons_regcodes"
+        },
+        "addons_regcodes" => {
+          :abort   => :abort,
+          :next    => "addons"
         }
       }
 

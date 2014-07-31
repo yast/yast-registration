@@ -48,8 +48,8 @@ module Registration
             # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log"\
               "into the SUSE Customer Center and remove them manually there.</p>"),
-          GetInstArgs.enable_back || Mode.normal, #FIXME make parameters
-          GetInstArgs.enable_next || Mode.normal
+          GetInstArgs.enable_back || Mode.normal || Mode.config, #FIXME make parameters
+          GetInstArgs.enable_next || Mode.normal || Mode.config
         )
 
         @old_selection = Addon.selected.dup
