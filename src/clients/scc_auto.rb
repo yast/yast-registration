@@ -36,6 +36,7 @@ require "registration/helpers"
 require "registration/connect_helpers"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_eula_dialog"
+require "registration/ui/addon_reg_codes_dialog"
 
 module Yast
   class SccAutoClient < Client
@@ -386,8 +387,17 @@ module Yast
     end
 
     def addons_reg_codes
-      # FIXME
-      :next
+      # TODO store the data
+      return :next if ::Registration::Addon.selected.all?(&:free)
+
+      known_reg_codes = {}
+      ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected,
+        known_reg_codes)
+
+      # TODO store the data
+      log.info "known_reg_codes: #{known_reg_codes}"
+
+      ret
     end
 
     def refresh_widget_state

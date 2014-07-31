@@ -46,6 +46,7 @@ module Yast
 
     # the maximum number of reg. codes displayed vertically,
     # this is the limit for 80x25 textmode UI
+    # FIXME: move
     MAX_REGCODES_PER_COLUMN = 8
 
     # width of reg code input field widget
@@ -397,6 +398,7 @@ module Yast
 
 
     # create widgets for entering the addon reg codes
+    # FIXME moved
     def addon_regcode_items(addons)
       textmode = UI.TextMode
       box = VBox()
@@ -412,6 +414,7 @@ module Yast
     end
 
     # create content for the addon reg codes dialog
+    # FIXME moved
     def addon_regcodes_dialog_content(addons)
       # display the second column if needed
       if addons.size > MAX_REGCODES_PER_COLUMN
@@ -474,6 +477,7 @@ module Yast
     end
 
     # handle user input in the addon reg codes dialog
+    # FIXME: moved
     def handle_register_addons_dialog(addons_with_codes)
       continue_buttons = [:next, :back, :close, :abort]
 
@@ -494,6 +498,7 @@ module Yast
 
     # collect the entered reg codes from UI
     # @return [Hash<Addon,String>] addon => reg. code mapping
+    # FIXME: moved
     def collect_addon_regcodes(addons_with_codes)
       pairs = addons_with_codes.map do |a|
         [a.identifier, UI.QueryWidget(Id(a.identifier), :Value)]
