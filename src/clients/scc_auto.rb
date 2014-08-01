@@ -294,7 +294,8 @@ module Yast
           name: selected,
           version: addon["version"],
           arch: addon["arch"],
-          release_type: addon["release_type"],
+          # release_type can be nil
+          release_type: addon["release_type"] || "nil",
           reg_code: addon["reg_code"]
         )
 
@@ -302,7 +303,8 @@ module Yast
           addon["name"] = ret["name"]
           addon["version"] = ret["version"]
           addon["arch"] = ret["arch"]
-          addon["release_type"] = ret["release_type"]
+          # convert nil back
+          addon["release_type"] = ret["release_type"] == "nil" ? nil : ret["release_type"]
           addon["reg_code"] = ret["reg_code"]
           set_addon_table_content(addon["name"])
         end
@@ -387,15 +389,36 @@ module Yast
     end
 
     def addons_reg_codes
-      # TODO store the data
-      return :next if ::Registration::Addon.selected.all?(&:free)
-
+      # FIXME initialize known_reg_codes
       known_reg_codes = {}
-      ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected,
-        known_reg_codes)
 
-      # TODO store the data
-      log.info "known_reg_codes: #{known_reg_codes}"
+      if !::Registration::Addon.selected.all?(&:free)
+        ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
+        return ret unless ret == :next
+      end
+
+      ::Registration::Addon.selected.each do |addon|
+        new_addon = {
+          "name" => addon.identifier,
+          "version" => addon.version,
+          "arch" => addon.arch,
+          "release_type" => addon.release_type,
+          "reg_code" => known_reg_codes[addon.identifier] || ""
+        }
+
+        # already known?
+        config_addon = @config.addons.find{ |a|
+          a["name"] == new_addon["name"] &&  a["version"] == new_addon["version"] &&
+            a["arch"] == new_addon["arch"] && a["release_type"] == new_addon["release_type"]
+        }
+
+        # add or edit
+        if config_addon
+          config_addon.merge!(new_addon)
+        else
+          @config.addons << new_addon
+        end
+      end
 
       ret
     end

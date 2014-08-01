@@ -25,3 +25,5 @@ email = element email { text }
 reg_code = element reg_code { text }
 install_updates = element install_updates { BOOLEAN }
 slp_discovery = element slp_discovery { BOOLEAN }
+
+#FIXME: add new items
