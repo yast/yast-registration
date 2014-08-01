@@ -14,11 +14,8 @@ module Registration
 
       Yast.import "Mode"
       Yast.import "GetInstArgs"
-      Yast.import "Popup"
-      Yast.import "Report"
       Yast.import "UI"
       Yast.import "Wizard"
-      Yast.import "Stage"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(addons, known_reg_codes)
@@ -125,8 +122,7 @@ module Registration
         addons.reject(&:free)
       end
 
-      # collect the entered reg codes from UI
-      # @return [Hash<Addon,String>] addon => reg. code mapping
+      # collect and update the entered reg codes from UI
       def collect_addon_regcodes
         pairs = addons_with_regcode.map do |a|
           [a.identifier, Yast::UI.QueryWidget(Id(a.identifier), :Value)]

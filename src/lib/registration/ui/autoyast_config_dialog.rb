@@ -12,10 +12,7 @@ module Registration
       include Yast::UIShortcuts
       include Yast
 
-      Yast.import "Mode"
-      Yast.import "GetInstArgs"
       Yast.import "Popup"
-      Yast.import "Report"
       Yast.import "UI"
       Yast.import "Wizard"
       Yast.import "Label"

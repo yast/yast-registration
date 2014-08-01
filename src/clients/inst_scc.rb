@@ -36,18 +36,13 @@ require "registration/storage"
 require "registration/registration"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
+require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/local_server_dialog"
 
 module Yast
   class InstSccClient < Client
     include Yast::Logger
     extend Yast::I18n
-
-
-    # the maximum number of reg. codes displayed vertically,
-    # this is the limit for 80x25 textmode UI
-    # FIXME: move
-    MAX_REGCODES_PER_COLUMN = 8
 
     # width of reg code input field widget
     REG_CODE_WIDTH = 33
@@ -342,7 +337,7 @@ module Yast
 
     # help text for the main registration dialog
     def scc_help_text
-      # TODO: improve the help text
+      # help text
       _("Enter SUSE Customer Center credentials here to register the system to " \
           "get updates and extensions.")
     end
@@ -397,67 +392,6 @@ module Yast
     end
 
 
-    # create widgets for entering the addon reg codes
-    # FIXME moved
-    def addon_regcode_items(addons)
-      textmode = UI.TextMode
-      box = VBox()
-
-      addons.each do |addon|
-        box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
-            addon.label, @known_reg_codes.fetch(addon.identifier, "")))
-        # add extra spacing when there are just few addons, in GUI always
-        box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
-      end
-
-      box
-    end
-
-    # create content for the addon reg codes dialog
-    # FIXME moved
-    def addon_regcodes_dialog_content(addons)
-      # display the second column if needed
-      if addons.size > MAX_REGCODES_PER_COLUMN
-        # display only the addons which fit two column layout
-        display_addons = addons[0..2*MAX_REGCODES_PER_COLUMN - 1]
-
-        # round the half up (more items in the first column for odd number of items)
-        half = (display_addons.size + 1) / 2
-
-        box1 = addon_regcode_items(display_addons[0..half - 1])
-        box2 = HBox(
-          HSpacing(2),
-          addon_regcode_items(display_addons[half..-1])
-        )
-      else
-        box1 = addon_regcode_items(addons)
-      end
-
-      HBox(
-        HSpacing(Opt(:hstretch), 3),
-        VBox(
-          VStretch(),
-          Left(Label(n_(
-                "The extension you selected needs a separate registration code.",
-                "The extensions you selected need separate registration codes.",
-                addons.size
-              ))),
-          Left(Label(n_(
-                "Enter the registration code into the field below.",
-                "Enter the registration codes into the fields below.",
-                addons.size
-              ))),
-          VStretch(),
-          HBox(
-            box1,
-            box2 ? box2 : Empty()
-          ),
-          VStretch()
-        ),
-        HSpacing(Opt(:hstretch), 3)
-      )
-    end
-
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow
@@ -474,36 +408,6 @@ module Yast
 
       ::Registration::Storage::Cache.instance.available_addons = @available_addons
       @available_addons
-    end
-
-    # handle user input in the addon reg codes dialog
-    # FIXME: moved
-    def handle_register_addons_dialog(addons_with_codes)
-      continue_buttons = [:next, :back, :close, :abort]
-
-      ret = nil
-      while !continue_buttons.include?(ret) do
-        ret = UI.UserInput
-
-        if ret == :next
-          collect_addon_regcodes(addons_with_codes)
-
-          # register the add-ons
-          ret = nil unless register_selected_addons
-        end
-      end
-
-      return ret
-    end
-
-    # collect the entered reg codes from UI
-    # @return [Hash<Addon,String>] addon => reg. code mapping
-    # FIXME: moved
-    def collect_addon_regcodes(addons_with_codes)
-      pairs = addons_with_codes.map do |a|
-        [a.identifier, UI.QueryWidget(Id(a.identifier), :Value)]
-      end
-      @known_reg_codes.merge!(Hash[pairs])
     end
 
     # register all selected addons
@@ -544,11 +448,9 @@ module Yast
 
     # run the addon reg codes dialog
     def register_addons
-      missing_regcodes = @selected_addons.reject(&:free)
-
       # if registering only add-ons which do not need a reg. code (like SDK)
       # then simply start the registration
-      if missing_regcodes.empty?
+      if @selected_addons.all?(&:free)
         Wizard.SetContents(
           # dialog title
           _("Register Extensions and Modules"),
@@ -562,21 +464,12 @@ module Yast
         # when registration fails go back
         return register_selected_addons ? :next : :back
       else
-        Wizard.SetContents(
-          # dialog title
-          _("Extension and Module Registration Codes"),
-          # display only the products which need a registration code
-          addon_regcodes_dialog_content(missing_regcodes),
-          # help text
-          _("<p>Enter registration codes for the requested extensions or modules.</p>\n"\
-              "<p>Registration codes are required for successfull registration." \
-              "If you cannot provide a registration code then go back and deselect " \
-              "the respective extension or module.</p>"),
-          GetInstArgs.enable_back || Mode.normal,
-          GetInstArgs.enable_next || Mode.normal
-        )
+        loop do
+          ret = ::Registration::UI::AddonRegCodesDialog.run(@selected_addons, @known_reg_codes)
+          return ret unless ret == :next
 
-        return handle_register_addons_dialog(missing_regcodes)
+          return :next if register_selected_addons
+        end
       end
     end
 

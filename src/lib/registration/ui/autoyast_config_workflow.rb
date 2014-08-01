@@ -19,7 +19,8 @@ module Registration
       include Yast::UIShortcuts
       include Yast
 
-      Yast.import "UI"
+      Yast.import "Pkg"
+      Yast.import "Report"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(config)
