@@ -151,8 +151,8 @@ module Registration
           import_addon
         end
 
-        @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"]
-        @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"]
+        @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""
+        @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"] || ""
       end
     end
   end

@@ -40,6 +40,10 @@ module Yast
   class SccAutoClient < Client
     include Yast::Logger
     include ERB::Util
+    extend Yast::I18n
+
+    # popup message
+    CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
       Yast.import "UI"
@@ -162,50 +166,46 @@ module Yast
       end
 
       ret = ::Registration::SccHelpers.catch_registration_errors do
-        # register the system
-        Popup.Feedback(_("Registering the System..."),
-          _("Contacting the SUSE Customer Center server")) do
+        base_product = ::Registration::SwMgmt.find_base_product
+        distro_target = base_product["register_target"]
 
-          @registration.register(@config.email, @config.reg_code)
+        if !::Registration::Registration.is_registered?
+          log.info "Registering system, distro_target: #{distro_target}"
+
+          Popup.Feedback(_(CONTACTING_MESSAGE),
+            _("Registering the System...")) do
+
+            @registration.register(@config.email, @config.reg_code, distro_target)
+          end
         end
 
         # register the base product
-        products = ::Registration::SwMgmt.base_products_to_register
-        Popup.Feedback(
-          n_("Registering Product...", "Registering Products...", products.size),
-          _("Contacting the SUSE Customer Center server")) do
+        product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
+          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+        ) do
 
-          @registration.register_products(products)
+          base_product_data = ::Registration::SwMgmt.base_product_to_register
+          base_product_data["reg_code"] = @config.reg_code
+          @registration.register_product(base_product_data, @config.email)
         end
 
-        # register addons if configured
-        if !@config.addons.empty?
-          addon_products = @config.addons.map do |a|
-            {
-              "name" => a["name"],
-              "reg_code" => a["reg_code"],
-              "arch" => a["arch"],
-              "version" => a["version"],
-              "release_type" => a["release_type"],
-            }
+        disable_update_repos(product_service) if !@config.install_updates
+
+        # register addons
+        @config.addons.each do |addon|
+          product_service = Popup.Feedback(
+            _(CONTACTING_MESSAGE),
+            # %s is name of given product
+            _("Registering %s ...") % addon["name"]) do
+
+            @registration.register_product(addon)
           end
 
-          # register addons
-          Popup.Feedback(
-            n_("Registering Product...", "Registering Products...", addon_products.size),
-            _("Contacting the SUSE Customer Center server")) do
-
-            @registration.register_products(addon_products)
-          end
+          disable_update_repos(product_service) if !@config.install_updates
         end
       end
 
       return false unless ret
-
-      # disable updates
-      if !@config.install_updates
-        # TODO FIXME: disable Update repositories
-      end
 
       # save the registered repositories
       Pkg.SourceSaveAll
@@ -213,7 +213,7 @@ module Yast
       if Mode.normal || Mode.config
         # popup message: registration finished properly
         Popup.Message(_("Registration was successfull."))
-      else
+      elsif Stage.initial
         # copy the SSL certificate to the target system
         ::Registration::Helpers.copy_certificate_to_target
       end
@@ -225,6 +225,13 @@ module Yast
       ret = { "install" => [], "remove" => [] }
       log.info "Registration needs these packages: #{ret}"
       ret
+    end
+
+    # TODO: share this?
+    def disable_update_repos(product_service)
+      update_repos = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Disabling #{update_repos.size} update repositories: #{update_repos}"
+      ::Registration::SwMgmt.set_repos_state(update_repos, false)
     end
 
     # find registration server via SLP
