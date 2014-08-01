@@ -78,9 +78,10 @@ module Registration
     end
 
     def self.find_base_product
-#       return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
-#         "release_type" => "DVD"
-#       }
+      # just for debugging:
+      # return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+      #   "release_type" => "DVD"
+      # }
 
       # during installation the products are :selected,
       # on a running system the products are :installed

@@ -7,8 +7,6 @@ textdomain "registration"
 NEW_TEXTS = [
   # error message, %s is URL
   _("Cannot download SSL certificate from\n%s"),
-  # autoyast support for certificates
-  _("SSL Certificate Fingerprint: %s"),
   _("Import File..."),
   _("SSL Certificate"),
   # progress message

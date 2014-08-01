@@ -35,12 +35,21 @@ textdomain "registration"
     <% if !@config.reg_server_cert.empty? %>
       <li><%= _("SSL Server Certificate URL: %s") % h(@config.reg_server_cert) %></li>
     <% end %>
+
+    <% if !@config.reg_server_cert_fingerprint_type != nil %>
+      <li><%= _("SSL Certificate Fingerprint: %s") % h(
+          "#{@config.reg_server_cert_fingerprint} (#{@config.reg_server_cert_fingerprint_type})")
+      %></li>
+    <% end %>
+
   </ul>
 
-  <h3><%= _("Extensions and Modules") %></h3>
-  <ul>
-    <% @config.addons.each do |addon| %>
-      <li><%= h(addon["name"]) %></li>
-    <% end %>
-  </ul>
+  <% if !@config.addons.empty? %>
+    <h3><%= _("Extensions and Modules") %></h3>
+    <ul>
+      <% @config.addons.each do |addon| %>
+        <li><%= h(addon["name"]) %></li>
+      <% end %>
+    </ul>
+  <% end %>
 <% end %>

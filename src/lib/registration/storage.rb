@@ -150,6 +150,9 @@ module Registration
           import_addon["release_type"] = nil if a["release_type"] == "nil"
           import_addon
         end
+
+        @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"]
+        @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"]
       end
     end
   end
