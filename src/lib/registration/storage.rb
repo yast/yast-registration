@@ -109,10 +109,18 @@ module Registration
               "reg_server_cert" => @reg_server_cert,
               "email" => @email,
               "reg_code" => @reg_code,
-              "install_updates" => @install_updates,
-              "addons" => @addons
+              "install_updates" => @install_updates
             }
           )
+
+          # handle nil release_type at export
+          addons_export = @addons.map do |a|
+            addon_export = a.dup
+            addon_export["release_type"] = "nil" if addon_export["release_type"].nil?
+            addon_export
+          end
+
+          ret["addons"] = addons_export
 
           if reg_server_cert_fingerprint_type == "SHA1" ||
             reg_server_cert_fingerprint_type == "SHA256"
@@ -135,7 +143,13 @@ module Registration
         @email = settings["email"] || ""
         @reg_code = settings["reg_code"] || ""
         @install_updates = settings.fetch("install_updates", false)
-        @addons = settings["addons"] || []
+
+        # handle "nil" release_type
+        @addons = (settings["addons"] || []).map do |a|
+          import_addon = a.dup
+          import_addon["release_type"] = nil if a["release_type"] == "nil"
+          import_addon
+        end
       end
     end
   end

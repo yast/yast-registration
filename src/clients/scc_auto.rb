@@ -389,8 +389,7 @@ module Yast
     end
 
     def addons_reg_codes
-      # FIXME initialize known_reg_codes
-      known_reg_codes = {}
+      known_reg_codes = Hash[@config.addons.map{|a| [a["name"], a["reg_code"]]}]
 
       if !::Registration::Addon.selected.all?(&:free)
         ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
@@ -420,7 +419,7 @@ module Yast
         end
       end
 
-      ret
+      :next
     end
 
     def refresh_widget_state
