@@ -1,7 +1,6 @@
 
 require "yast"
 require "registration/addon"
-require "registration/helpers"
 
 module Registration
   module UI

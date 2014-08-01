@@ -1,6 +1,5 @@
 
 require "yast"
-require "registration/addon"
 require "registration/helpers"
 
 require "registration/ui/autoyast_addon_dialog"

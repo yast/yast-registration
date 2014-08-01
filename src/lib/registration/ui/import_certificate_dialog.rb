@@ -3,7 +3,6 @@ require "erb"
 require "yast"
 
 require "yast/suse_connect"
-require "registration/helpers"
 require "registration/storage"
 
 module Registration
