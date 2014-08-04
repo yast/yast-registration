@@ -130,22 +130,27 @@ module Registration
 
         cert = Storage::SSLErrors.instance.ssl_failed_cert
         error_code = Storage::SSLErrors.instance.ssl_error_code
+        expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
 
-        # in AutoYast mode just report an error without user interaction,
-        # otherwise check a certificate present and the error code
+        # in non-AutoYast mode ask the user to import the certificate
         if !Yast::Mode.autoinst && cert && IMPORT_ERROR_CODES.include?(error_code)
           # retry after successfull import
-          retry if import_ssl_certificate(cert)
-        else
-          # try to use a translatable message first, if not found then use
-          # the original error message from openSSL
-          msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
-          msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
-          msg = e.message if msg.nil? || msg.empty?
+          retry if ask_import_ssl_certificate(cert)
+          # in AutoYast mode check whether the certificate fingerprint match
+          # the configured value (if present)
+        elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
+          if expected_ssl_certificate?(cert, expected_cert_type,
+              Storage::Config.instance.reg_server_cert_fingerprint)
 
-          Yast::Report.Error(
-            error_with_details(_("Secure connection error: %s") % msg, ssl_error_details)
-          )
+            # import the certificate and retry
+            retry if import_ssl_certificate(cert)
+            report_ssl_error(e.message)
+          else
+            # error message
+            Yast::Report.Error(_("Received SSL Certificate does not match the expected certificate."))
+          end
+        else
+          report_ssl_error(e.message)
         end
 
         false
@@ -211,13 +216,17 @@ module Registration
       details << INDENT + _("Organization Unit (OU): ") + (Helpers.find_name_attribute(x509_name, "OU") || "")
     end
 
-    def self.import_ssl_certificate(cert)
+    def self.ask_import_ssl_certificate(cert)
       # run the import dialog, check the user selection
       if UI::ImportCertificateDialog.run(cert) != :import
         log.info "Certificate import rejected"
         return false
       end
 
+      import_ssl_certificate(cert)
+    end
+
+    def self.import_ssl_certificate(cert)
       cn = Helpers.find_name_attribute(cert.subject, "CN")
       log.info "Importing '#{cn}' certificate..."
 
@@ -230,6 +239,32 @@ module Registration
 
       log.info "Certificate import result: #{result}"
       true
+    end
+
+    # check whether SSL certificate matches the expected fingerprint
+    def self.expected_ssl_certificate?(cert, fingerprint_type, fingerprint)
+      case fingerprint_type.upcase
+      when "SHA1"
+        ::SUSE::Connect::YaST.cert_sha1_fingerprint(cert).upcase == fingerprint.upcase
+      when "SHA256"
+        ::SUSE::Connect::YaST.cert_sha256_fingerprint(cert).upcase == fingerprint.upcase
+      else
+        log.error "Unsupported SSL certificate fingerprint type: #{fingerprint_type}"
+        false
+      end
+    end
+
+    def self.report_ssl_error(message)
+      # try to use a translatable message first, if not found then use
+      # the original error message from openSSL
+      error_code = Storage::SSLErrors.instance.ssl_error_code
+      msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
+      msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
+      msg = message if msg.nil? || msg.empty?
+
+      Yast::Report.Error(
+        error_with_details(_("Secure connection error: %s") % msg, ssl_error_details)
+      )
     end
 
   end
