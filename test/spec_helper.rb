@@ -14,6 +14,12 @@ if ENV["COVERAGE"]
   SimpleCov.start
 end
 
+# allow only the new "expect" RSpec syntax
+RSpec.configure do |config|
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
+  end
+end
 
 $:.unshift(File.expand_path("../../src/lib", __FILE__))
 
