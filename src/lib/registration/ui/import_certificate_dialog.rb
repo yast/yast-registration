@@ -40,7 +40,7 @@ module Registration
         dialog.run
       end
 
-      # @param cert [OpenSSL::X509::Certificate] certificate to display
+      # @param cert [SslCertitificate] certificate to display
       def initialize(cert)
         textdomain "registration"
         @certificate = cert
@@ -50,9 +50,9 @@ module Registration
       # @return [Symbol] user input (:import, :cancel)
       def run
         log.info "Displaying certificate import dialog:"
-        log.info " * Issuer: #{@certificate.issuer}"
-        log.info " * Subject: #{@certificate.subject}"
-        log.info " * SHA1: #{::SUSE::Connect::SSLCertificate.sha1_fingerprint(@certificate)}"
+        log.info " * Issuer: #{certificate.issuer_name}"
+        log.info " * Subject: #{certificate.subject_name}"
+        log.info " * SHA1: #{certificate.sha1_fingerprint}"
 
         dialog_content = import_dialog_content
         log.debug "Certificate import dialog: #{dialog_content}"
@@ -113,8 +113,6 @@ module Registration
         log.info "Loading ERB template #{erb_file}"
         erb = ERB.new(File.read(erb_file))
 
-        @issuer = @certificate.issuer
-        @subject = @certificate.subject
         # render the ERB template in the context of the current object
         erb.result(binding)
       end

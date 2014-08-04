@@ -27,6 +27,7 @@ require "suse/connect"
 require "registration/helpers"
 require "registration/exceptions"
 require "registration/storage"
+require "registration/ssl_certificate"
 require "registration/ui/import_certificate_dialog"
 
 module Registration
@@ -128,7 +129,9 @@ module Registration
       rescue OpenSSL::SSL::SSLError => e
         log.error "OpenSSL error: #{e}"
 
-        cert = Storage::SSLErrors.instance.ssl_failed_cert
+        cert = Storage::SSLErrors.instance.ssl_failed_cert ?
+          SslCertitificate.load(Storage::SSLErrors.instance.ssl_failed_cert) : nil
+
         error_code = Storage::SSLErrors.instance.ssl_error_code
         expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
 
@@ -139,7 +142,7 @@ module Registration
           # in AutoYast mode check whether the certificate fingerprint match
           # the configured value (if present)
         elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
-          if expected_ssl_certificate?(cert, expected_cert_type,
+          if cert.fingerprint_match?(expected_cert_type,
               Storage::Config.instance.reg_server_cert_fingerprint)
 
             # import the certificate and retry
@@ -176,24 +179,23 @@ module Registration
       error + "\n\n" + (_("Details: %s") % details)
     end
 
-    def self.ssl_error_details()
+    def self.ssl_error_details(cert)
       # label follwed by a certificate description
       details = []
 
-      cert = Storage::SSLErrors.instance.ssl_failed_cert
       if cert
         details << _("Certificate:")
         details << _("Issued To")
-        details.concat(cert_name_details(cert.subject))
+        details.concat(cert_subject_details(cert))
         details << ""
         details << _("Issued By")
-        details.concat(cert_name_details(cert.issuer))
+        details.concat(cert_issuer_details(cert))
         details << ""
         details << _("SHA1 Fingerprint: ")
-        details << INDENT + ::SUSE::Connect::YaST.cert_sha1_fingerprint(cert)
+        details << INDENT + cert.sha1_fingerprint
         details << _("SHA256 Fingerprint: ")
 
-        sha256 = ::SUSE::Connect::YaST.cert_sha256_fingerprint(cert)
+        sha256 = cert.sha256_fingerprint
         if Yast::UI.TextMode && Yast::UI.GetDisplayInfo["Width"] < 105
           # split the long SHA256 digest to two lines in small text mode UI
           details << INDENT + sha256[0..59]
@@ -206,14 +208,23 @@ module Registration
       details.empty? ? "" : ("\n\n" + details.join("\n"))
     end
 
-    def self.cert_name_details(x509_name)
+    def self.cert_issuer_details(cert)
       details = []
       # label followed by the SSL certificate identification
-      details << INDENT + _("Common Name (CN): ") + (Helpers.find_name_attribute(x509_name, "CN") || "")
+      details << INDENT + _("Common Name (CN): ") + (cert.issuer_name || "")
       # label followed by the SSL certificate identification
-      details << INDENT + _("Organization (O): ") + (Helpers.find_name_attribute(x509_name, "O") || "")
+      details << INDENT + _("Organization (O): ") + (cert.issuer_organization || "")
       # label followed by the SSL certificate identification
-      details << INDENT + _("Organization Unit (OU): ") + (Helpers.find_name_attribute(x509_name, "OU") || "")
+      details << INDENT + _("Organization Unit (OU): ") + (cert.issuer_organization_unit || "")
+    end
+
+    def self.cert_subject_details(cert)
+      details = []
+      details << INDENT + _("Common Name (CN): ") + (cert.subject_name || "")
+      # label followed by the SSL certificate identification
+      details << INDENT + _("Organization (O): ") + (cert.subject_organization || "")
+      # label followed by the SSL certificate identification
+      details << INDENT + _("Organization Unit (OU): ") + (cert.subject_organization_unit || "")
     end
 
     def self.ask_import_ssl_certificate(cert)
@@ -227,34 +238,21 @@ module Registration
     end
 
     def self.import_ssl_certificate(cert)
-      cn = Helpers.find_name_attribute(cert.subject, "CN")
+      cn = cert.subject_name
       log.info "Importing '#{cn}' certificate..."
 
       # progress label
       result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
         _("Importing '%s' certificate...") % cn) do
 
-        ::SUSE::Connect::YaST.import_certificate(cert)
+        cert.import_to_system
       end
 
       log.info "Certificate import result: #{result}"
       true
     end
 
-    # check whether SSL certificate matches the expected fingerprint
-    def self.expected_ssl_certificate?(cert, fingerprint_type, fingerprint)
-      case fingerprint_type.upcase
-      when "SHA1"
-        ::SUSE::Connect::YaST.cert_sha1_fingerprint(cert).upcase == fingerprint.upcase
-      when "SHA256"
-        ::SUSE::Connect::YaST.cert_sha256_fingerprint(cert).upcase == fingerprint.upcase
-      else
-        log.error "Unsupported SSL certificate fingerprint type: #{fingerprint_type}"
-        false
-      end
-    end
-
-    def self.report_ssl_error(message)
+    def self.report_ssl_error(message, cert)
       # try to use a translatable message first, if not found then use
       # the original error message from openSSL
       error_code = Storage::SSLErrors.instance.ssl_error_code
@@ -263,7 +261,7 @@ module Registration
       msg = message if msg.nil? || msg.empty?
 
       Yast::Report.Error(
-        error_with_details(_("Secure connection error: %s") % msg, ssl_error_details)
+        error_with_details(_("Secure connection error: %s") % msg, ssl_error_details(cert))
       )
     end
 

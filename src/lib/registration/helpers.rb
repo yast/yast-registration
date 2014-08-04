@@ -265,15 +265,6 @@ module Registration
       end
     end
 
-    # @param x509_name [OpenSSL::X509::Name] name object
-    # @param attribute [String] requested attribute name. e.g. "CN"
-    def self.find_name_attribute(x509_name, attribute)
-      # to_a returns an attribute list, e.g.:
-      # [["CN", "linux", 19], ["emailAddress", "root@...", 22], ["O", "YaST", 19], ...]
-      attr_list = x509_name.to_a.find(Array.method(:new)) { |a| a.first == attribute }
-      attr_list[1]
-    end
-
     # copy the imported SSL certificate to the target system (if exists)
     def self.copy_certificate_to_target
       cert_file = SUSE::Connect::SSLCertificate::SERVER_CERT_FILE
