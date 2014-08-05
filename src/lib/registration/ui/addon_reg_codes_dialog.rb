@@ -41,8 +41,8 @@ module Registration
               "<p>Registration codes are required for successfull registration." \
               "If you cannot provide a registration code then go back and deselect " \
               "the respective extension or module.</p>"),
-          GetInstArgs.enable_back || Mode.normal || Mode.config,
-          GetInstArgs.enable_next || Mode.normal || Mode.config
+          true,
+          true
         )
 
         handle_dialog
