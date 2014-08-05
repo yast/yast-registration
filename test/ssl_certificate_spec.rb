@@ -1,10 +1,15 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
+require_relative "yast_stubs"
 
-require "registration/ssl_certificate"
 
-describe Registration::SslCertificate do
+describe "Registration::SslCertificate" do
+  before do
+    stub_yast_require
+    require "registration/ssl_certificate"
+  end
+
   subject { Registration::SslCertificate.load_file(fixtures_file("test.pem")) }
   # use "openssl x509 -in test.pem -noout -serial -fingerprint" to get serial and SHA1
   # use "openssl x509 -outform der -in test.pem -out test.der" and then
