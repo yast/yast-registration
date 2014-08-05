@@ -1,11 +1,14 @@
 
 require "openssl"
 require "suse/connect"
+require "registration/downloader"
 
 module Registration
 
   # class handling SSL certificate
   class SslCertificate
+    # adds download_file() method
+    extend Downloader
 
     attr_reader :x509_cert
 
@@ -21,6 +24,11 @@ module Registration
     def self.load(data)
       cert = OpenSSL::X509::Certificate.new(data)
       SslCertificate.new(cert)
+    end
+
+    def self.download(url, insecure: false)
+      result = download_file(url, insecure: insecure)
+      load(result)
     end
 
     def sha1_fingerprint

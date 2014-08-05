@@ -23,9 +23,7 @@
 
 require "yast"
 
-require "net/http"
-require "uri"
-require "openssl"
+require "registration/downloader"
 
 module Registration
 
@@ -34,6 +32,8 @@ module Registration
     attr_reader :base_url, :target_dir, :insecure
 
     include Yast::Logger
+    # adds download_file() method
+    include Downloader
 
     # name of the directory index file with list of available files
     INDEX_FILE = "directory.yast"
@@ -54,7 +54,7 @@ module Registration
         license_file_url.path = File.join(license_file_url.path, license)
 
         log.info "Downloading license from #{license_file_url}..."
-        license_text = download_file(license_file_url)
+        license_text = download_file(license_file_url, insecure: insecure)
         log.info "Downloaded license: #{license_text[0..32].inspect}... (#{license_text.bytesize} bytes)"
 
         license_file_name = File.join(target_dir, license)
@@ -65,31 +65,6 @@ module Registration
     end
 
     private
-
-    def download_file(file_url)
-      file_url = URI(file_url) unless file_url.is_a?(URI)
-      http = Net::HTTP.new(file_url.host, file_url.port)
-
-      # switch to HTTPS connection if needed
-      if file_url.is_a? URI::HTTPS
-        http.use_ssl = true
-        http.verify_mode = insecure ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
-        log.warn("Warning: SSL certificate verification disabled") if insecure
-      else
-        log.warn("Warning: Using insecure \"#{file_url.scheme}\" transfer protocol")
-      end
-
-      # TODO: handle redirection?
-      request = Net::HTTP::Get.new(file_url.request_uri)
-      response = http.request(request)
-
-      if response.is_a?(Net::HTTPSuccess)
-        return response.body
-      else
-        log.error "HTTP request failed: Error #{response.code}:#{response.message}: #{response.body}"
-        raise "Downloading #{file_url} failed: #{response.message}"
-      end
-    end
 
     # returns list of available files in a remote location
     def available_licenses
