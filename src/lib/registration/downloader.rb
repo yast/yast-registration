@@ -36,7 +36,9 @@ module Registration
 
     private
 
-    def download_file(file_url, insecure: false)
+    def download_file(file_url, insecure: false, redirection_count: 10)
+      raise "Redirection limit reached, download aborted" if redirection_count <= 0
+
       file_url = URI(file_url) unless file_url.is_a?(URI)
       http = Net::HTTP.new(file_url.host, file_url.port)
 
@@ -44,17 +46,23 @@ module Registration
       if file_url.is_a? URI::HTTPS
         http.use_ssl = true
         http.verify_mode = insecure ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
-        log.warn("Warning: SSL certificate verification disabled") if insecure
+        log.warn "Warning: SSL certificate verification disabled" if insecure
       else
-        log.warn("Warning: Using insecure \"#{file_url.scheme}\" transfer protocol")
+        log.warn "Warning: Using insecure #{file_url.scheme.inspect} transfer protocol"
       end
 
-      # TODO: handle redirection?
       request = Net::HTTP::Get.new(file_url.request_uri)
       response = http.request(request)
 
-      if response.is_a?(Net::HTTPSuccess)
-        return response.body
+      case response
+      when Net::HTTPSuccess
+        response.body
+      when Net::HTTPRedirection
+        location = response["location"]
+        log.info "Redirected to #{location}"
+
+        # retry recursively with redirected URL, decrease redirection counter
+        download_file(location, insecure: insecure, redirection_count: redirection_count - 1)
       else
         log.error "HTTP request failed: Error #{response.code}:#{response.message}: #{response.body}"
         raise "Downloading #{file_url} failed: #{response.message}"
