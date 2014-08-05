@@ -122,8 +122,9 @@ module Registration
 
           ret["addons"] = addons_export
 
-          if reg_server_cert_fingerprint_type == "SHA1" ||
-            reg_server_cert_fingerprint_type == "SHA256"
+          if reg_server_cert_fingerprint_type &&
+            reg_server_cert_fingerprint_type.upcase == "SHA1" ||
+            reg_server_cert_fingerprint_type.upcase == "SHA256"
 
             ret.merge!(
               "reg_server_cert_fingerprint_type" => reg_server_cert_fingerprint_type,
