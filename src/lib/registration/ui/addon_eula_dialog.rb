@@ -33,7 +33,7 @@ module Registration
       end
 
       # display the EULA for each dialog and wait for a button click
-      # @return [Symbol] user input (:import, :cancel)
+      # @return [Symbol] user input (:back, :abort, :next, :halt)
       def run
         Yast::Wizard.SetContents(
           # dialog title
@@ -44,26 +44,28 @@ module Registration
           false
         )
 
-        all_accepted = addons.all? do |addon|
+        # Default: no EULA specified => accepted
+        eula_ret = :accepted
+
+        addons.each do |addon|
           if addon.eula_url && !addon.eula_url.empty?
             log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
-            accept_eula(addon)
-          else
-            # no EULA specified => accepted
-            true
+            eula_ret = accept_eula(addon)
+            # any declined license needs to be handled separately
+            break if eula_ret != :accepted
           end
         end
 
-        # go back if any EULA has not been accepted, let the user deselect the
-        # not accepted extension
-        all_accepted ? :next : :back
+        # go back or abort if any EULA has not been accepted, let the user
+        # deselect the not accepted extension
+        eula_ret == :accepted ? :next : eula_ret
       end
 
       private
 
       # ask user to accept an addon EULA
       # @param addon [SUSE::Connect::Product] the addon
-      # @return [Boolean] true if the EULA has been accepted
+      # @return [Symbol] :accepted, :back, :abort
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           begin
@@ -108,9 +110,7 @@ module Registration
           log.debug "EULA dialog result: #{ret}"
           Yast::ProductLicense.CleanUp()
 
-          accepted = ret == :accepted
-          log.info "EULA accepted: #{accepted}"
-          accepted
+          ret
         end
       end
 
