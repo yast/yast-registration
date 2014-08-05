@@ -7,9 +7,6 @@ module Registration
 
   # class handling SSL certificate
   class SslCertificate
-    # adds download_file() method
-    extend Downloader
-
     attr_reader :x509_cert
 
     def initialize(x509_cert)
@@ -27,7 +24,7 @@ module Registration
     end
 
     def self.download(url, insecure: false)
-      result = download_file(url, insecure: insecure)
+      result = Downloader.download(url, insecure: insecure)
       load(result)
     end
 

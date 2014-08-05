@@ -136,6 +136,8 @@ module Registration
       end
 
       def import(settings)
+        reset
+
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
         @slp_discovery = settings.fetch("slp_discovery", false)

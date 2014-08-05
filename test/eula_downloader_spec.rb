@@ -15,27 +15,10 @@ describe "Registration::EulaDownloader" do
     it "downloads the license with translations" do
       en_eula = "English EULA"
       de_eula = "Deutsch EULA"
+      index = "directory.yast\nlicense.txt\nlicense.de.txt"
 
-      index = Net::HTTPSuccess.new("1.1", 200, "OK")
-      expect(index).to receive(:body).and_return("directory.yast\nlicense.txt\nlicense.de.txt")
-
-      license = Net::HTTPSuccess.new("1.1", 200, "OK")
-      expect(license).to receive(:body).and_return(en_eula)
-
-      license_de = Net::HTTPSuccess.new("1.1", 200, "OK")
-      expect(license_de).to receive(:body).and_return(de_eula)
-
-      # mock the responses for respective URL paths
-      Net::HTTP.any_instance.stub(:request) do |request|
-        case request.path
-        when "/eula/directory.yast"
-          index
-        when "/eula/license.txt"
-          license
-        when "/eula/license.de.txt"
-          license_de
-        end
-      end
+      expect(Registration::Downloader).to receive(:download).\
+        and_return(index, en_eula, de_eula)
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
@@ -51,43 +34,19 @@ describe "Registration::EulaDownloader" do
     end
 
     it "it raises an exception when download fails" do
-      index = Net::HTTPNotFound.new("1.1", 404, "Not Found")
-      expect(index).to receive(:body).and_return("")
-
-      Net::HTTP.any_instance.should_receive(:request).
-        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect(Registration::Downloader).to receive(:download).\
+        and_raise("Downloading failed")
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
 
-        expect{loader.download}.to raise_error RuntimeError,
-          "Downloading http://example.com/eula/directory.yast failed: Not Found"
+        expect{loader.download}.to raise_error RuntimeError, "Downloading failed"
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])
       end
     end
 
-    it "handles HTTP redirection" do
-      index1 = Net::HTTPRedirection.new("1.1", 302, "Found")
-      index1["location"] = "http://eulas.example.com/eula"
-
-      index2 = Net::HTTPSuccess.new("1.1", 200, "OK")
-      expect(index2).to receive(:body).and_return("")
-
-      http = double()
-      expect(Net::HTTP).to receive(:new).twice.and_return(http)
-      expect(http).to receive(:request).twice.and_return(index1, index2)
-
-      Dir.mktmpdir do |tmpdir|
-        loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
-
-        expect{loader.download}.not_to raise_error
-
-        # nothing saved
-        expect(Dir.entries(tmpdir)).to match_array([".", ".."])
-      end
-    end
   end
 
 end

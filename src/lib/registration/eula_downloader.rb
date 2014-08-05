@@ -32,8 +32,6 @@ module Registration
     attr_reader :base_url, :target_dir, :insecure
 
     include Yast::Logger
-    # adds download_file() method
-    include Downloader
 
     # name of the directory index file with list of available files
     INDEX_FILE = "directory.yast"
@@ -54,7 +52,7 @@ module Registration
         license_file_url.path = File.join(license_file_url.path, license)
 
         log.info "Downloading license from #{license_file_url}..."
-        license_text = download_file(license_file_url, insecure: insecure)
+        license_text = Downloader.download(license_file_url, insecure: insecure)
         log.info "Downloaded license: #{license_text[0..32].inspect}... (#{license_text.bytesize} bytes)"
 
         license_file_name = File.join(target_dir, license)
@@ -76,7 +74,7 @@ module Registration
 
       # download the index
       log.info "Downloading license index from #{index_url}..."
-      licenses = download_file(index_url).split
+      licenses = Downloader.download(index_url, insecure: insecure).split
 
       # the index file itself might be also present in the list, just remove it
       licenses.delete(INDEX_FILE)

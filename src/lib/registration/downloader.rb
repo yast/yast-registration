@@ -29,14 +29,17 @@ require "openssl"
 
 module Registration
 
-  # module for downloading files, include it in the classes which need
   # HTTP/HTTPS download support
-  module Downloader
-    include Yast::Logger
+  class Downloader
+    extend Yast::Logger
+
+    def self.download(file_url, insecure: false)
+      download_file(file_url, insecure: insecure)
+    end
 
     private
 
-    def download_file(file_url, insecure: false, redirection_count: 10)
+    def self.download_file(file_url, insecure: false, redirection_count: 10)
       raise "Redirection limit reached, download aborted" if redirection_count <= 0
 
       file_url = URI(file_url) unless file_url.is_a?(URI)

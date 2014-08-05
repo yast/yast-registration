@@ -34,14 +34,10 @@ describe "Registration::SslCertificate" do
 
   describe ".download" do
     it "downloads a SSL certificate from server" do
-      response = Net::HTTPSuccess.new("1.1", 200, "OK")
-      expect(response).to receive(:body).and_return(File.read(fixtures_file("test.pem")))
+      expect(Registration::Downloader).to receive(:download).\
+        and_return(File.read(fixtures_file("test.pem")))
 
-      http = double()
-      expect(http).to receive(:request).and_return(response)
-      expect(Net::HTTP).to receive(:new).and_return(http)
-
-      expect(Registration::SslCertificate.download("http://example.com")).to \
+      expect(Registration::SslCertificate.download("http://example.com/smt.crt")).to \
         be_a(Registration::SslCertificate)
     end
   end
