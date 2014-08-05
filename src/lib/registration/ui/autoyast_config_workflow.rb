@@ -95,16 +95,18 @@ module Registration
         ::Registration::UI::AddonEulaDialog.run(::Registration::Addon.selected)
       end
 
-      def addons_reg_codes
-        known_reg_codes = Hash[config.addons.map{|a| [a["name"], a["reg_code"]]}]
+      def collect_known_reg_codes
+        Hash[config.addons.map{|a| [a["name"], a["reg_code"]]}]
+      end
 
-        if !::Registration::Addon.selected.all?(&:free)
-          ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
-          return ret unless ret == :next
-        end
+      def addons_reg_codes
+        return :next if ::Registration::Addon.selected.all?(&:free)
+
+        known_reg_codes = collect_known_reg_codes
+        ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
+        return ret unless ret == :next
 
         update_addons(known_reg_codes)
-
         :next
       end
 

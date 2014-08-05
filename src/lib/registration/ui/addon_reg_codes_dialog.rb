@@ -59,7 +59,7 @@ module Registration
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
 
-      def content
+      def reg_code_boxes
         # display the second column if needed
         if addons_with_regcode.size > MAX_REGCODES_PER_COLUMN
           # display only the addons which fit two column layout
@@ -76,6 +76,12 @@ module Registration
         else
           box1 = addon_regcode_items(addons_with_regcode)
         end
+
+        [box1, box2]
+      end
+
+      def content
+        box1, box2 = reg_code_boxes
 
         HBox(
           HSpacing(Opt(:hstretch), 3),
@@ -102,15 +108,19 @@ module Registration
         )
       end
 
+      def addon_regcode_item(addon)
+        MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
+              addon.label, known_reg_codes.fetch(addon.identifier, "")))
+      end
+
       def addon_regcode_items(addons)
-        textmode = Yast::UI.TextMode
+        # add extra spacing when there are just few addons, in GUI always
+        extra_spacing = (addons.size < 5) || !Yast::UI.TextMode
         box = VBox()
 
         addons.each do |addon|
-          box[box.size] = MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
-              addon.label, known_reg_codes.fetch(addon.identifier, "")))
-          # add extra spacing when there are just few addons, in GUI always
-          box[box.size] = VSpacing(1) if (addons.size < 5) || !textmode
+          box[box.size] = addon_regcode_item(addon)
+          box[box.size] = VSpacing(1) if extra_spacing
         end
 
         box
