@@ -33,7 +33,7 @@ module Registration
       end
 
       # display the EULA for each dialog and wait for a button click
-      # @return [Symbol] user input (:back, :abort, :next, :halt)
+      # @return [Symbol] user input (:next, :back, :abort, :halt)
       def run
         Yast::Wizard.SetContents(
           # dialog title
@@ -65,7 +65,7 @@ module Registration
 
       # ask user to accept an addon EULA
       # @param addon [SUSE::Connect::Product] the addon
-      # @return [Symbol] :accepted, :back, :abort
+      # @return [Symbol] :accepted, :back, :abort, :halt
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           begin
