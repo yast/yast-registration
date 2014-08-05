@@ -174,6 +174,22 @@ module Registration
         Yast::UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled, fingeprint_enabled && enabled)
       end
 
+      def store_config
+        data_widgets = [ :do_registration, :reg_server, :reg_server_cert,
+          :email, :reg_code, :slp_discovery, :install_updates,
+          :reg_server_cert_fingerprint_type, :reg_server_cert_fingerprint
+        ]
+
+        data = data_widgets.map do |w|
+          [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
+        end
+
+        import_data = Hash[data]
+        # keep the current addons
+        import_data["addons"] = config.addons
+        config.import(import_data)
+      end
+
       def handle_dialog
         begin
           ret = Yast::UI.UserInput
@@ -189,24 +205,9 @@ module Registration
           end
         end until ret == :next || ret == :back || ret == :addons
 
-        if ret == :next || ret == :addons
-          data_widgets = [ :do_registration, :reg_server, :reg_server_cert,
-            :email, :reg_code, :slp_discovery, :install_updates,
-            :reg_server_cert_fingerprint_type, :reg_server_cert_fingerprint
-          ]
-
-          data = data_widgets.map do |w|
-            [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
-          end
-
-          import_data = Hash[data]
-          # keep the current addons
-          import_data["addons"] = config.addons
-          config.import(import_data)
-        end
+        store_config if ret == :next || ret == :addons
 
         ret
-
       end
 
     end

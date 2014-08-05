@@ -49,14 +49,10 @@ module Registration
       # display the dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
-        log.info "Displaying certificate import dialog:"
-        log.info " * Issuer: #{certificate.issuer_name}"
-        log.info " * Subject: #{certificate.subject_name}"
-        log.info " * SHA1: #{certificate.sha1_fingerprint}"
+        log.info "Certificate import dialog: issuer: #{certificate.issuer_name}, " \
+          "subject: #{certificate.subject_name}, SHA1: #{certificate.sha1_fingerprint}"
 
-        dialog_content = import_dialog_content
-        log.debug "Certificate import dialog: #{dialog_content}"
-        Yast::UI.OpenDialog(Opt(:decorated), dialog_content)
+        Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 
         begin
           Yast::UI.SetFocus(:cancel)
