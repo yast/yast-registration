@@ -108,6 +108,13 @@ module Registration
         :next
       end
 
+      def find_addon(addon)
+        config.addons.find do |a|
+          a["name"] == addon["name"] &&  a["version"] == addon["version"] &&
+            a["arch"] == addon["arch"] && a["release_type"] == addon["release_type"]
+        end
+      end
+
       def update_addons(known_reg_codes)
         ::Registration::Addon.selected.each do |addon|
           new_addon = {
@@ -119,10 +126,7 @@ module Registration
           }
 
           # already known?
-          config_addon = config.addons.find{ |a|
-            a["name"] == new_addon["name"] &&  a["version"] == new_addon["version"] &&
-              a["arch"] == new_addon["arch"] && a["release_type"] == new_addon["release_type"]
-          }
+          config_addon = find_addon(new_addon)
 
           # add or edit
           if config_addon

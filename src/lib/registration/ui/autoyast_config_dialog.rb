@@ -61,15 +61,17 @@ module Registration
 
       attr_reader :config
 
-      def content
-        regsettings = VBox(
+      def content_reg_settings
+        VBox(
           Left(
             CheckBox(Id(:do_registration), Opt(:notify), _("Register the Product"),
               config.do_registration)
           )
         )
+      end
 
-        reg_code_settings = VBox(
+      def content_reg_code_settings
+        VBox(
           # Translators: Text for UI Label - capitalized
           Frame(_("Registration"),
             VBox(
@@ -84,8 +86,10 @@ module Registration
             )
           )
         )
+      end
 
-        server_settings = VBox(
+      def content_server_settings
+        VBox(
           # Translators: Text for UI Label - capitalized
           Frame(_("Server Settings"),
             VBox(
@@ -132,17 +136,19 @@ module Registration
             )
           )
         )
+      end
 
+      def content
         VBox(
           VSpacing(1),
-          regsettings,
+          content_reg_settings,
           HBox(
             HSpacing(2),
             VBox(
               VSpacing(1),
-              reg_code_settings,
+              content_reg_code_settings,
               VSpacing(1),
-              server_settings,
+              content_server_settings,
               VSpacing(0.4),
               PushButton(Id(:addons), _("Register Extensions or Modules...")),
               VSpacing(0.4)
