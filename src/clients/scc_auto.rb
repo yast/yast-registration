@@ -34,6 +34,7 @@ require "registration/sw_mgmt"
 require "registration/registration"
 require "registration/helpers"
 require "registration/connect_helpers"
+require "registration/ssl_certificate"
 require "registration/ui/autoyast_config_workflow"
 
 module Yast
@@ -160,9 +161,8 @@ module Yast
       # nil = use the default URL
       @registration = ::Registration::Registration.new(url)
 
-      # TODO FIXME: import the server certificate
-      if @config.reg_server_cert
-
+      if @config.reg_server_cert && !@config.reg_server_cert.empty?
+        import_certificate(@config.reg_server_cert)
       end
 
       ret = ::Registration::SccHelpers.catch_registration_errors do
@@ -258,6 +258,18 @@ module Yast
         return ::Registration::Helpers.slp_service_url
       end
 
+    end
+
+    def import_certificate(url)
+      log.info "Importing certificate from #{url}..."
+
+      cert = Popup.Feedback(_("Downloading SSL Certificate"), url) do
+        ::Registration::SslCertificate.download(url)
+      end
+
+      Popup.Feedback(_("Importing SSL Certificate"), cert.subject_name) do
+        cert.import_to_system
+      end
     end
 
     # UI workflow definition
