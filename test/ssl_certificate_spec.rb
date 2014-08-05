@@ -23,9 +23,26 @@ describe "Registration::SslCertificate" do
     it "loads SSL certificate from a file" do
       expect(subject).to be_a(Registration::SslCertificate)
     end
+  end
 
+  describe ".load" do
     it "loads SSL certificate from data" do
-      expect(Registration::SslCertificate.load(File.read(fixtures_file("test.pem")))).to be_a(Registration::SslCertificate)
+      expect(Registration::SslCertificate.load(File.read(fixtures_file("test.pem")))).to \
+        be_a(Registration::SslCertificate)
+    end
+  end
+
+  describe ".download" do
+    it "downloads a SSL certificate from server" do
+      response = Net::HTTPSuccess.new("1.1", 200, "OK")
+      expect(response).to receive(:body).and_return(File.read(fixtures_file("test.pem")))
+
+      http = double()
+      expect(http).to receive(:request).and_return(response)
+      expect(Net::HTTP).to receive(:new).and_return(http)
+
+      expect(Registration::SslCertificate.download("http://example.com")).to \
+        be_a(Registration::SslCertificate)
     end
   end
 

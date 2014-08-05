@@ -52,7 +52,7 @@ describe "Registration::EulaDownloader" do
 
     it "it raises an exception when download fails" do
       index = Net::HTTPNotFound.new("1.1", 404, "Not Found")
-      index.should_receive(:body).and_return("")
+      expect(index).to receive(:body).and_return("")
 
       Net::HTTP.any_instance.should_receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
@@ -62,6 +62,27 @@ describe "Registration::EulaDownloader" do
 
         expect{loader.download}.to raise_error RuntimeError,
           "Downloading http://example.com/eula/directory.yast failed: Not Found"
+
+        # nothing saved
+        expect(Dir.entries(tmpdir)).to match_array([".", ".."])
+      end
+    end
+
+    it "handles HTTP redirection" do
+      index1 = Net::HTTPRedirection.new("1.1", 302, "Found")
+      index1["location"] = "http://eulas.example.com/eula"
+
+      index2 = Net::HTTPSuccess.new("1.1", 200, "OK")
+      expect(index2).to receive(:body).and_return("")
+
+      http = double()
+      expect(Net::HTTP).to receive(:new).twice.and_return(http)
+      expect(http).to receive(:request).twice.and_return(index1, index2)
+
+      Dir.mktmpdir do |tmpdir|
+        loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
+
+        expect{loader.download}.not_to raise_error
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])
