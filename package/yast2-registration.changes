@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug  5 14:48:35 CEST 2014 - locilka@suse.com
+
+- Fixed handling while aborting an extension license confirmation
+  (bnc#886662)
+- 3.1.97
+
+-------------------------------------------------------------------
 Wed Jul 30 14:11:51 UTC 2014 - locilka@suse.com
 
 - Asking for confirmation when aborting Extension and Module
