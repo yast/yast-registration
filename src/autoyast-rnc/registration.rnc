@@ -10,20 +10,31 @@ suse_register = element suse_register {
   reg_code? &
   reg_server? &
   reg_server_cert? &
+  reg_server_cert_fingerprint_type? &
+  reg_server_cert_fingerprint? &
   slp_discovery?
 }
 
 addons = element addons { LIST, addon }
-addon = element addon { addon_name & addon_reg_code? }
+addon = element addon {
+  addon_name &
+  addon_version &
+  addon_arch &
+  addon_release_type &
+  addon_reg_code?
+}
 addon_name = element name { text }
+addon_version = element version { text }
+addon_arch = element arch { text }
+addon_release_type = element release_type { text }
 addon_reg_code = element reg_code { text }
 
 do_registration = element do_registration { BOOLEAN }
 reg_server = element reg_server { text }
 reg_server_cert = element reg_server_cert { text }
+reg_server_cert_fingerprint_type = element reg_server_cert_fingerprint_type { text }
+reg_server_cert_fingerprint = element reg_server_cert_fingerprint { text }
 email = element email { text }
 reg_code = element reg_code { text }
 install_updates = element install_updates { BOOLEAN }
 slp_discovery = element slp_discovery { BOOLEAN }
-
-#FIXME: add new items
