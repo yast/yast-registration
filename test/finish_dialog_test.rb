@@ -36,7 +36,9 @@ describe ::Registration::FinishDialog do
         expect(Registration::Registration).to receive(:is_registered?).once.
           and_return(true)
         expect(Yast::WFM).to receive(:Execute)
-        expect(SUSE::Connect::YaST).to receive(:write_config)
+
+        expect(Registration::Helpers).to receive(:write_config)
+        expect(Registration::Helpers).to receive(:copy_certificate_to_target)
 
         subject.run("Write")
       end
