@@ -118,7 +118,7 @@ module Registration
                   # Translators: Text for UI Label - capitalized
                   _("Optional SSL Server Certificate Fingerprint"),
                   [
-                    Item(Id(:none), _("none"),
+                    Item(Id(""), _("none"),
                       config.reg_server_cert_fingerprint_type != "SHA1" &&
                         config.reg_server_cert_fingerprint_type != "SHA256"),
                     Item(Id("SHA1"), "SHA1", config.reg_server_cert_fingerprint_type == "SHA1"),

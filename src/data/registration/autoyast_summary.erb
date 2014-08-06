@@ -36,7 +36,7 @@ textdomain "registration"
       <li><%= _("SSL Server Certificate URL: %s") % h(@config.reg_server_cert) %></li>
     <% end %>
 
-    <% if !@config.reg_server_cert_fingerprint_type != nil %>
+    <% if @config.reg_server_cert_fingerprint_type && !@config.reg_server_cert_fingerprint_type.empty? %>
       <li><%= _("SSL Certificate Fingerprint: %s") % h(
           "#{@config.reg_server_cert_fingerprint} (#{@config.reg_server_cert_fingerprint_type})")
       %></li>
