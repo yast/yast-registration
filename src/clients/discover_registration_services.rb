@@ -1,5 +1,6 @@
 
 require "registration/helpers"
+require "registration/url_helpers"
 
 module Yast
   import 'UI'
@@ -18,7 +19,7 @@ module Yast
     def main
       textdomain "registration"
 
-      @services = ::Registration::Helpers.slp_discovery_feedback
+      @services = ::Registration::UrlHelpers.slp_discovery_feedback
 
       services.empty? ? nil : select_registration_service
     end
@@ -70,7 +71,7 @@ module Yast
             selected_service = services[selected.to_i]
             log.info "Selected service #{selected_service.inspect}"
 
-            url = ::Registration::Helpers.service_url(selected_service.slp_url)
+            url = ::Registration::UrlHelpers.service_url(selected_service.slp_url)
             log.info "Selected service URL: #{url}"
 
             return url

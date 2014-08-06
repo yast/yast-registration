@@ -28,6 +28,7 @@ require "registration/helpers"
 require "registration/exceptions"
 require "registration/storage"
 require "registration/ssl_certificate"
+require "registration/url_helpers"
 require "registration/ui/import_certificate_dialog"
 
 module Registration
@@ -88,7 +89,7 @@ module Registration
             msg = _("Check that this system is known to the registration server.")
 
             # probably missing NCC->SCC sync, display a hint unless SMT is used
-            if Helpers.registration_url.nil?
+            if UrlHelpers.registration_url.nil?
               msg += "\n\n"
               # TRANSLATORS: additional hint for an error message
               msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \

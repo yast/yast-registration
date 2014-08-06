@@ -28,6 +28,7 @@ require "fileutils"
 
 require "registration/exceptions"
 require "registration/helpers"
+require "registration/url_helpers"
 
 module Registration
   Yast.import "AddOnProduct"
@@ -148,7 +149,7 @@ module Registration
       # services for registered products
       log.info "Adding service #{product_service.name.inspect} (#{product_service.url})"
 
-      credentials_file = Helpers.credentials_from_url(product_service.url)
+      credentials_file = UrlHelpers.credentials_from_url(product_service.url)
 
       if credentials_file
         if Mode.update

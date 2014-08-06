@@ -1,6 +1,7 @@
 
 require "yast"
 require "registration/helpers"
+require "registration/url_helpers"
 
 require "registration/ui/autoyast_addon_dialog"
 require "registration/ui/autoyast_config_dialog"
@@ -86,7 +87,7 @@ module Registration
           return :abort
         end
 
-        url = ::Registration::Helpers.registration_url
+        url = ::Registration::UrlHelpers.registration_url
         registration = ::Registration::Registration.new(url)
         ::Registration::UI::AddonSelectionDialog.run(registration)
       end

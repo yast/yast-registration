@@ -3,6 +3,7 @@ require "yast"
 
 require "yast/suse_connect"
 require "registration/storage"
+require "registration/helpers"
 
 module Registration
   module UI
@@ -102,7 +103,7 @@ module Registration
 
       # render Richtext description with the certificate details
       def certificate_description
-        Helpers.render_erb_template("certificate_summary.erb", binding)
+        ::Registration::Helpers.render_erb_template("certificate_summary.erb", binding)
       end
 
       # inline help text displayed in the import dialog

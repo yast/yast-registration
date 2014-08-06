@@ -33,6 +33,7 @@ require "registration/helpers"
 require "registration/connect_helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
+require "registration/url_helpers"
 require "registration/registration"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
@@ -178,7 +179,7 @@ module Yast
             log.info "registration failed, resetting the registration URL"
             # reset the registration object and the cache to allow changing the URL
             @registration = nil
-            ::Registration::Helpers::reset_registration_url
+            ::Registration::UrlHelpers::reset_registration_url
           end
         end
 
@@ -618,7 +619,7 @@ module Yast
 
     def init_registration
       if !@registration
-        url = ::Registration::Helpers.registration_url
+        url = ::Registration::UrlHelpers.registration_url
         return :cancel if url == :cancel
         @registration = ::Registration::Registration.new(url)
       end

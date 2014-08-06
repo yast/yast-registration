@@ -35,6 +35,7 @@ require "registration/registration"
 require "registration/helpers"
 require "registration/connect_helpers"
 require "registration/ssl_certificate"
+require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 
 module Yast
@@ -231,7 +232,7 @@ module Yast
     # @retun [String,nil] URL of the server, nil on error
     def find_slp_server
       # do SLP query
-      slp_services = ::Registration::Helpers.slp_discovery_feedback
+      slp_services = ::Registration::UrlHelpers.slp_discovery_feedback
       slp_urls = slp_services.map(&:slp_url)
 
       # remove possible duplicates
@@ -248,7 +249,7 @@ module Yast
         # more than one server found: let the user select, we cannot automatically
         # decide which one to use, asking user in AutoYast mode is not nice
         # but better than aborting the installation...
-        return ::Registration::Helpers.slp_service_url
+        return ::Registration::UrlHelpers.slp_service_url
       end
 
     end
