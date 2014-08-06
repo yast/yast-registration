@@ -33,7 +33,7 @@ require "registration/ui/import_certificate_dialog"
 
 module Registration
 
-  class SccHelpers
+  class ConnectHelpers
     include Yast::Logger
     extend Yast::I18n
 

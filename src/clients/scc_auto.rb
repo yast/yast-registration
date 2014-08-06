@@ -159,7 +159,7 @@ module Yast
         import_certificate(@config.reg_server_cert)
       end
 
-      ret = ::Registration::SccHelpers.catch_registration_errors do
+      ret = ::Registration::ConnectHelpers.catch_registration_errors do
         base_product = ::Registration::SwMgmt.find_base_product
         distro_target = base_product["register_target"]
 

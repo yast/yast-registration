@@ -136,7 +136,7 @@ module Yast
 
           next if init_registration == :cancel
 
-          success = ::Registration::SccHelpers.catch_registration_errors do
+          success = ::Registration::ConnectHelpers.catch_registration_errors do
             base_product = ::Registration::SwMgmt.find_base_product
             distro_target = base_product["register_target"]
 
@@ -196,7 +196,7 @@ module Yast
     def refresh_base_product
       init_registration
 
-      upgraded = ::Registration::SccHelpers.catch_registration_errors(show_update_hint: true) do
+      upgraded = ::Registration::ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         # then register the product(s)
         base_product = ::Registration::SwMgmt.base_product_to_register
         product_services = Popup.Feedback(
@@ -227,7 +227,7 @@ module Yast
       addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
 
       failed_addons = addons_to_update.reject do |addon_to_update|
-        ::Registration::SccHelpers.catch_registration_errors do
+        ::Registration::ConnectHelpers.catch_registration_errors do
           # then register the product(s)
           product_services = Popup.Feedback(
             _(CONTACTING_MESSAGE),
@@ -419,7 +419,7 @@ module Yast
       init_registration
 
       product_succeed = registration_order.map do |product|
-        ::Registration::SccHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
+        ::Registration::ConnectHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product

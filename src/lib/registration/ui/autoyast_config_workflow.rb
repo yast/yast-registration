@@ -94,7 +94,7 @@ module Registration
 
         ret = nil
 
-        success = ::Registration::SccHelpers.catch_registration_errors do
+        success = ::Registration::ConnectHelpers.catch_registration_errors do
           ret = ::Registration::UI::AddonSelectionDialog.run(registration)
         end
 
