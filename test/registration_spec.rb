@@ -11,7 +11,7 @@ describe "Registration::Registration" do
     require "registration/registration"
 
     stub_const("Yast::WFM", yast_wfm)
-    yast_wfm.stub(:GetLanguage).and_return("en")
+    allow(yast_wfm).to receive(:GetLanguage).and_return("en")
     allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
   end
 
