@@ -55,10 +55,7 @@ module Registration
         Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 
         begin
-          Yast::UI.SetFocus(:cancel)
-          ui = Yast::UI.UserInput
-          log.info "User input: #{ui}"
-          return ui
+          handle_dialog
         ensure
           Yast::UI.CloseDialog
         end
@@ -99,6 +96,13 @@ module Registration
             )
           )
         )
+      end
+
+      def handle_dialog
+        Yast::UI.SetFocus(:cancel)
+        ui = Yast::UI.UserInput
+        log.info "User input: #{ui}"
+        ui
       end
 
       # render Richtext description with the certificate details
