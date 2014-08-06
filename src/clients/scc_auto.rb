@@ -57,7 +57,6 @@ module Yast
       Yast.import "Label"
       Yast.import "Report"
       Yast.import "Popup"
-      Yast.import "Sequencer"
 
       log.info "scc_auto started"
 

@@ -22,6 +22,7 @@ module Registration
 
       Yast.import "Pkg"
       Yast.import "Report"
+      Yast.import "Sequencer"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(config)
