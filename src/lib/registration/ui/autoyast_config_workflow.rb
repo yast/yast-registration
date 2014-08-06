@@ -1,6 +1,7 @@
 
 require "yast"
 require "registration/helpers"
+require "registration/connect_helpers"
 require "registration/url_helpers"
 
 require "registration/ui/autoyast_addon_dialog"
@@ -56,6 +57,7 @@ module Registration
             :download => "remote_addons"
           },
           "remote_addons" => {
+            :addons  => "addons",
             :abort   => :abort,
             :next    => "addons_eula"
           },
@@ -89,7 +91,14 @@ module Registration
 
         url = ::Registration::UrlHelpers.registration_url
         registration = ::Registration::Registration.new(url)
-        ::Registration::UI::AddonSelectionDialog.run(registration)
+
+        ret = nil
+
+        success = ::Registration::SccHelpers.catch_registration_errors do
+          ret = ::Registration::UI::AddonSelectionDialog.run(registration)
+        end
+
+        success ? ret : :addons
       end
 
       def addons_eula
