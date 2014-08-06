@@ -39,6 +39,6 @@ end
 
 def stub_yast_require
   # stub require "yast" only, leave the other requires
-  Object.any_instance.stub(:require).and_call_original
-  Object.any_instance.stub(:require).with("yast")
+  allow_any_instance_of(Object).to receive(:require).and_call_original
+  allow_any_instance_of(Object).to receive(:require).with("yast")
 end

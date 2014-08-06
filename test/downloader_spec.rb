@@ -17,7 +17,7 @@ describe "Registration::Downloader" do
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index).to receive(:body).and_return("response")
 
-      Net::HTTP.any_instance.should_receive(:request).
+      expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
       expect(Registration::Downloader.download(url)).to eq("response")
@@ -27,12 +27,12 @@ describe "Registration::Downloader" do
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index).to receive(:body).and_return("response")
 
-      Net::HTTP.any_instance.should_receive(:request).
+      expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
       # check for HTTPS setup
-      Net::HTTP.any_instance.should_receive(:use_ssl=).with(true)
-      Net::HTTP.any_instance.should_receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_PEER)
+      expect_any_instance_of(Net::HTTP).to receive(:use_ssl=).with(true)
+      expect_any_instance_of(Net::HTTP).to receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_PEER)
 
       https_url = "https://example.com"
       expect(Registration::Downloader.download(https_url)).to eq("response")
@@ -42,7 +42,7 @@ describe "Registration::Downloader" do
       index = Net::HTTPNotFound.new("1.1", 404, "Not Found")
       expect(index).to receive(:body).and_return("")
 
-      Net::HTTP.any_instance.should_receive(:request).
+      expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
       expect{Registration::Downloader.download(url)}.to raise_error RuntimeError,
