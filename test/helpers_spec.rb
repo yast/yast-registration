@@ -4,20 +4,21 @@ require_relative "spec_helper"
 require_relative "yast_stubs"
 
 describe "Registration::Helpers" do
+  let(:yast_wfm) { double("Yast::WFM") }
+
   before do
     stub_yast_require
     require "registration/helpers"
+    stub_const("Yast::WFM", yast_wfm)
   end
 
   describe ".registration_url" do
     let(:yast_mode) { double("Yast::Mode") }
     let(:yast_linuxrc) { double("Yast::Linuxrc") }
-    let(:yast_wfm) { double("Yast::WFM") }
 
     before do
       stub_const("Yast::Mode", yast_mode)
       stub_const("Yast::Linuxrc", yast_linuxrc)
-      stub_const("Yast::WFM", yast_wfm)
       # reset the cache befor each test
       ::Registration::Storage::Cache.instance.reg_url_cached = nil
     end
@@ -309,6 +310,42 @@ describe "Registration::Helpers" do
       expect(File).to receive(:unlink).with(credentials)
 
       expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+    end
+  end
+
+  describe ".render_erb_template" do
+    it "renders specified ERB template file" do
+      file = fixtures_file("template.erb")
+      # this is used in the template
+      @label = "FOO"
+      expect(Registration::Helpers.render_erb_template(file, binding)).to eq("<h1>FOO</h1>\n")
+    end
+  end
+
+  describe ".language" do
+    it "returns the current Yast language" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en")
+      expect(Registration::Helpers.language).to eq("en")
+    end
+
+    it "removes encoding suffix" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en.UTF-8")
+      expect(Registration::Helpers.language).to eq("en")
+    end
+
+    it "replaces _ separator by -" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en_US.UTF-8")
+      expect(Registration::Helpers.language).to eq("en-US")
+    end
+
+    it "returns nil for C locale" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("C")
+      expect(Registration::Helpers.language).to eq(nil)
+    end
+
+    it "returns nil for POSIX locale" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("POSIX")
+      expect(Registration::Helpers.language).to eq(nil)
     end
   end
 

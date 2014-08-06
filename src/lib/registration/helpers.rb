@@ -23,6 +23,7 @@
 
 require "yast"
 require "uri"
+require "erb"
 
 require "registration/registration"
 require "registration/storage"
@@ -301,6 +302,19 @@ module Registration
 
       log.info "Resetting registration status, removing #{file}"
       File.unlink(file)
+    end
+
+    def self.render_erb_template(file, binding)
+      # use erb template for rendering the richtext summary
+
+      erb_file = Pathname.new(file).absolute? ? file :
+        File.expand_path(File.join("../../../data/registration", file), __FILE__)
+
+      log.info "Loading ERB template #{erb_file}"
+      erb = ERB.new(File.read(erb_file))
+
+      # render the ERB template in the context of the requested object
+      erb.result(binding)
     end
 
   end

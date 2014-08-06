@@ -1,5 +1,4 @@
 
-require "erb"
 require "yast"
 
 require "yast/suse_connect"
@@ -103,14 +102,7 @@ module Registration
 
       # render Richtext description with the certificate details
       def certificate_description
-        # use erb template for rendering the richtext summary
-        erb_file = File.expand_path("../../../../data/registration/certificate_summary.erb", __FILE__)
-
-        log.info "Loading ERB template #{erb_file}"
-        erb = ERB.new(File.read(erb_file))
-
-        # render the ERB template in the context of the current object
-        erb.result(binding)
+        Helpers.render_erb_template("certificate_summary.erb", binding)
       end
 
       # inline help text displayed in the import dialog

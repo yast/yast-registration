@@ -129,14 +129,7 @@ module Yast
     # Create a textual summary
     # @return [String] summary of the current configuration
     def summary
-      # use erb template for rendering the richtext summary
-      erb_file = File.expand_path("../../data/registration/autoyast_summary.erb", __FILE__)
-
-      log.info "Loading ERB template #{erb_file}"
-      erb = ERB.new(File.read(erb_file))
-
-      # render the ERB template in the context of the current object
-      erb.result(binding)
+      ::Registration::Helpers.render_erb_template("autoyast_summary.erb", binding)
     end
 
     # register the system, base product and optional addons
