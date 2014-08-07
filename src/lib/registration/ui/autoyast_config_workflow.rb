@@ -24,7 +24,7 @@ module Registration
       Yast.import "Report"
       Yast.import "Sequencer"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # create a new dialog for accepting and importing a SSL certificate and run it
       def self.run(config)
         workflow = AutoyastConfigWorkflow.new(config)
         workflow.run

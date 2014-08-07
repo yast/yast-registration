@@ -45,12 +45,12 @@ describe Registration::Storage::Config do
   end
 
   describe "#export" do
-    it "does not export complete data when registration is disabled" do
+    it "exports only 'do_registration' key when registration is disabled" do
       subject.do_registration = false
       expect(subject.export).to eq("do_registration" => false)
     end
 
-    it "exports complete data when registration is enabled" do
+    it "exports complete data as a Hash when registration is enabled" do
       subject.do_registration = true
       subject.reg_server_cert_fingerprint_type = "SHA1"
       subject.reg_server_cert_fingerprint = "AB:CD:EF"
@@ -68,7 +68,7 @@ describe Registration::Storage::Config do
   end
 
   describe "#import" do
-    it "resets missing config items to default" do
+    it "resets the configuration before importing the data" do
       subject.reg_server = "http://example.com"
       subject.import({})
       expect(subject.reg_server).to eq("")
@@ -89,7 +89,7 @@ describe Registration::Storage::SSLErrors do
   subject { Registration::Storage::SSLErrors.instance }
 
   describe "#reset" do
-    it "resets missing config items to default" do
+    it "resets temporary SSL data to nil" do
       subject.ssl_error_code = 42
       subject.ssl_error_msg = "Error"
       subject.ssl_failed_cert = "failed"

@@ -145,7 +145,7 @@ describe "Registration::UrlHelpers" do
       end
     end
 
-    context "at unknown mode" do
+    context "in other modes" do
       before do
         allow(yast_mode).to receive(:mode).and_return("config")
       end
