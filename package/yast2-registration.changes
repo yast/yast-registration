@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Thu Aug  7 07:43:49 UTC 2014 - lslezak@suse.cz
+
+- Fixed AutoYast clonning in installed system: registration cannot
+  be clonned, skip it (bnc#888168)
+- AutoYast fixes and improvements:
+    - optionally register online extensions
+    - download and import SSL certificate from the specified URL
+    - automatically import the server SSL certificate if the
+      certificate fingerprint matches the specified value
+    - in the config mode allow downloading the list of extensions
+      from the server
+- Added HTTP redirection handling in the download code
+- 3.1.98
+
+-------------------------------------------------------------------
 Tue Aug  5 14:48:35 CEST 2014 - locilka@suse.com
 
 - Fixed handling while aborting an extension license confirmation
