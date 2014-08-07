@@ -108,8 +108,8 @@ module Registration
     def find_name_attribute(x509_name, attribute)
       # to_a returns an attribute list, e.g.:
       # [["CN", "linux", 19], ["emailAddress", "root@...", 22], ["O", "YaST", 19], ...]
-      attr_list = x509_name.to_a.find(Array.method(:new)) { |a| a.first == attribute }
-      attr_list[1]
+      attr, value, code = x509_name.to_a.find { |a| a.first == attribute }
+      value
     end
 
     def find_issuer_attribute(attribute)
