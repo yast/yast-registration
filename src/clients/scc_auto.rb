@@ -90,10 +90,10 @@ module Yast
         # Write given settings
         ret = write
       when "GetModified"
-        # TODO FIXME: check for changes
-        ret = true
+        ret = @config.modified
       when "SetModified"
-        # TODO FIXME: set modified status
+        @config.modified = true
+        ret = true
       else
         log.error "Unknown function: #{func}"
         raise "Unknown function parameter: #{func}"

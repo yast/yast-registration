@@ -77,7 +77,7 @@ module Registration
     class Config
       include Singleton
 
-      attr_accessor :do_registration, :reg_server, :reg_server_cert, :email,
+      attr_accessor :modified, :do_registration, :reg_server, :reg_server_cert, :email,
         :reg_code, :install_updates, :addons, :slp_discovery,
         :reg_server_cert_fingerprint_type, :reg_server_cert_fingerprint
 
@@ -86,6 +86,7 @@ module Registration
       end
 
       def reset
+        @modified = false
         @do_registration = false
         @reg_server = ""
         @reg_server_cert = ""
