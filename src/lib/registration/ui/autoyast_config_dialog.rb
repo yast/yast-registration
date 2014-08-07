@@ -15,6 +15,20 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Label"
 
+      # list of widget ID in the dialog, add the new widget ID here after
+      # adding a new widget to the dialog
+      ALL_WIDGETS = [ :addons, :do_registration, :email, :install_updates,
+        :reg_code, :reg_server, :reg_server_cert, :reg_server_cert_fingerprint,
+        :reg_server_cert_fingerprint_type, :slp_discovery ]
+
+      # widgets containing data (serialized to the exported Hash)
+      # (:addons belongs to a push button, it does not contain any data)
+      DATA_WIDGETS = ALL_WIDGETS - [ :addons ]
+
+      # widgets which should react on the global on/off state
+      # (exclude the the on/off checkbox itself)
+      STATUS_WIDGETS = ALL_WIDGETS - [ :do_registration ]
+
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(config)
         dialog = AutoyastConfigDialog.new(config)
@@ -91,7 +105,7 @@ module Registration
       def content_server_settings
         sha1   = ::Registration::SslCertificate::SHA1_SUM
         sha256 = ::Registration::SslCertificate::SHA256_SUM
-        fingerprint_type = config.reg_server_cert_fingerprint_type.upcase
+        fingerprint_type = (config.reg_server_cert_fingerprint_type || "").upcase
 
         VBox(
           # Translators: Text for UI Label - capitalized
@@ -162,14 +176,13 @@ module Registration
 
       def refresh_widget_state
         enabled = Yast::UI.QueryWidget(Id(:do_registration), :Value)
-        all_widgets = [ :reg_server_cert, :email, :reg_code, :slp_discovery,
-          :install_updates, :addons, :reg_server_cert_fingerprint_type,
-          :reg_server_cert_fingerprint ]
 
-        all_widgets.each do |w|
+        # global on/off handling
+        STATUS_WIDGETS.each do |w|
           Yast::UI.ChangeWidget(Id(w), :Enabled, enabled)
         end
 
+        # handle specific widgets
         slp_enabled = Yast::UI.QueryWidget(Id(:slp_discovery), :Value)
         Yast::UI.ChangeWidget(Id(:reg_server), :Enabled, !slp_enabled && enabled)
 
@@ -178,12 +191,7 @@ module Registration
       end
 
       def store_config
-        data_widgets = [ :do_registration, :reg_server, :reg_server_cert,
-          :email, :reg_code, :slp_discovery, :install_updates,
-          :reg_server_cert_fingerprint_type, :reg_server_cert_fingerprint
-        ]
-
-        data = data_widgets.map do |w|
+        data = DATA_WIDGETS.map do |w|
           [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
         end
 
