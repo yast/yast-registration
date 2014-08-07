@@ -89,6 +89,10 @@ module Registration
       end
 
       def content_server_settings
+        sha1   = ::Registration::SslCertificate::SHA1_SUM
+        sha256 = ::Registration::SslCertificate::SHA256_SUM
+        fingerprint_type = config.reg_server_cert_fingerprint_type.upcase
+
         VBox(
           # Translators: Text for UI Label - capitalized
           Frame(_("Server Settings"),
@@ -119,10 +123,9 @@ module Registration
                   _("Optional SSL Server Certificate Fingerprint"),
                   [
                     Item(Id(""), _("none"),
-                      config.reg_server_cert_fingerprint_type != "SHA1" &&
-                        config.reg_server_cert_fingerprint_type != "SHA256"),
-                    Item(Id("SHA1"), "SHA1", config.reg_server_cert_fingerprint_type == "SHA1"),
-                    Item(Id("SHA256"), "SHA256", config.reg_server_cert_fingerprint_type == "SHA256")
+                      fingerprint_type != sha1 && fingerprint_type != sha256),
+                    Item(Id(sha1), sha1, fingerprint_type == sha1),
+                    Item(Id(sha256), sha256, fingerprint_type == sha256)
                   ]
                 )
               ),

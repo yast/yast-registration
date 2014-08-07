@@ -157,8 +157,8 @@ module Registration
         ret = { "reg_server_cert" => reg_server_cert }
 
         if reg_server_cert_fingerprint_type &&
-            reg_server_cert_fingerprint_type.upcase == "SHA1" ||
-            reg_server_cert_fingerprint_type.upcase == "SHA256"
+            reg_server_cert_fingerprint_type.upcase == SslCertificate::SHA1_SUM ||
+            reg_server_cert_fingerprint_type.upcase == SslCertificate::SHA256_SUM
 
           ret["reg_server_cert_fingerprint_type"] = reg_server_cert_fingerprint_type
           ret["reg_server_cert_fingerprint"] = reg_server_cert_fingerprint

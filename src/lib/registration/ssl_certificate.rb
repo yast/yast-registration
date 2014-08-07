@@ -9,6 +9,9 @@ module Registration
   class SslCertificate
     attr_reader :x509_cert
 
+    SHA1_SUM   = "SHA1"
+    SHA256_SUM = "SHA256"
+
     def initialize(x509_cert)
       @x509_cert = x509_cert
     end
@@ -83,9 +86,9 @@ module Registration
     # check whether SSL certificate matches the expected fingerprint
     def fingerprint_match?(fingerprint_type, fingerprint)
       case fingerprint_type.upcase
-      when "SHA1"
+      when SHA1_SUM
         sha1_fingerprint.upcase == fingerprint.upcase
-      when "SHA256"
+      when SHA256_SUM
         sha256_fingerprint.upcase == fingerprint.upcase
       else
         false
