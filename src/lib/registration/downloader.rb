@@ -30,6 +30,7 @@ require "openssl"
 module Registration
 
   # HTTP/HTTPS download support
+  # TODO: move it to yast2 to share it
   class Downloader
     extend Yast::Logger
 

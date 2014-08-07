@@ -139,6 +139,7 @@ module Registration
       File.unlink(file)
     end
 
+    # TODO: move it to yast2 to share it
     def self.render_erb_template(file, binding)
       # use erb template for rendering the richtext summary
 
