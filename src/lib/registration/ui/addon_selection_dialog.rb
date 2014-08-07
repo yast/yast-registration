@@ -47,6 +47,7 @@ module Registration
             # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log"\
               "into the SUSE Customer Center and remove them manually there.</p>"),
+          # always enable Back/Next, the dialog cannot be the first in workflow
           true,
           true
         )
