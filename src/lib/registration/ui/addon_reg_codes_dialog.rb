@@ -75,6 +75,7 @@ module Registration
           )
         else
           box1 = addon_regcode_items(addons_with_regcode)
+          box2 = Empty()
         end
 
         [box1, box2]
@@ -96,18 +97,13 @@ module Registration
       end
 
       def content
-        box1, box2 = reg_code_boxes
-
         HBox(
           HSpacing(Opt(:hstretch), 3),
           VBox(
             VStretch(),
             *labels,
             VStretch(),
-            HBox(
-              box1,
-              box2 ? box2 : Empty()
-            ),
+            HBox(*reg_code_boxes),
             VStretch()
           ),
           HSpacing(Opt(:hstretch), 3)
