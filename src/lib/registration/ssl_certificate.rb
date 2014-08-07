@@ -14,8 +14,7 @@ module Registration
     end
 
     def self.load_file(file)
-      cert = OpenSSL::X509::Certificate.new(File.read(file))
-      SslCertificate.new(cert)
+      load(File.read(file))
     end
 
     def self.load(data)
