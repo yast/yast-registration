@@ -43,7 +43,7 @@ module Registration
             "to your SMT manual for further assistance.</p>"
         )
 
-        #FIXME
+        # FIXME the dialog should be created by external code before calling this
         Wizard.CreateDialog
         Wizard.SetContents(caption, content, help_text, false, true)
         Wizard.SetNextButton(:next, Label.FinishButton)
