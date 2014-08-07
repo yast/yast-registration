@@ -81,7 +81,7 @@ module Registration
       attr_reader :config
 
       def select_addons
-        ::Registration::UI::AutoyastAddonDialog.run(config.addons)
+        AutoyastAddonDialog.run(config.addons)
       end
 
       def select_remote_addons
@@ -96,14 +96,14 @@ module Registration
         ret = nil
 
         success = ::Registration::ConnectHelpers.catch_registration_errors do
-          ret = ::Registration::UI::AddonSelectionDialog.run(registration)
+          ret = AddonSelectionDialog.run(registration)
         end
 
         success ? ret : :addons
       end
 
       def addons_eula
-        ::Registration::UI::AddonEulaDialog.run(::Registration::Addon.selected)
+        AddonEulaDialog.run(::Registration::Addon.selected)
       end
 
       def collect_known_reg_codes
@@ -114,7 +114,7 @@ module Registration
         return :next if ::Registration::Addon.selected.all?(&:free)
 
         known_reg_codes = collect_known_reg_codes
-        ret = ::Registration::UI::AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
+        ret = AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
         return ret unless ret == :next
 
         update_addons(known_reg_codes)
@@ -152,7 +152,7 @@ module Registration
       end
 
       def configure_registration
-        ::Registration::UI::AutoyastConfigDialog.run(config)
+        AutoyastConfigDialog.run(config)
       end
 
     end
