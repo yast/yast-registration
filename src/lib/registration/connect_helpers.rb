@@ -55,6 +55,8 @@ module Registration
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
     def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
+      # import the SSL certificate just once to avoid an infinite loop
+      certificate_imported = false
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
@@ -146,8 +148,13 @@ module Registration
           if cert.fingerprint_match?(expected_cert_type,
               Storage::Config.instance.reg_server_cert_fingerprint)
 
-            # import the certificate and retry
-            retry if import_ssl_certificate(cert)
+            # import the certificate and retry (just once)
+            if !certificate_imported
+              import_ssl_certificate(cert)
+              certificate_imported = true
+              retry
+            end
+
             report_ssl_error(e.message)
           else
             # error message
