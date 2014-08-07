@@ -4,6 +4,7 @@ require "yast"
 require "yast/suse_connect"
 require "registration/storage"
 require "registration/helpers"
+require "registration/ssl_certificate_details"
 
 module Registration
   module UI
@@ -13,7 +14,6 @@ module Registration
       include Yast::I18n
       extend Yast::I18n
       include Yast::UIShortcuts
-      include ERB::Util
 
       attr_accessor :certificate
 
@@ -107,7 +107,8 @@ module Registration
 
       # render Richtext description with the certificate details
       def certificate_description
-        ::Registration::Helpers.render_erb_template("certificate_summary.erb", binding)
+        details = Registration::SslCertitificateDetails.new(certificate)
+        details.richtext_summary
       end
 
       # inline help text displayed in the import dialog

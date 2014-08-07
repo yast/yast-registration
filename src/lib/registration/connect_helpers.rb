@@ -28,6 +28,7 @@ require "registration/helpers"
 require "registration/exceptions"
 require "registration/storage"
 require "registration/ssl_certificate"
+require "registration/ssl_certificate_details"
 require "registration/url_helpers"
 require "registration/ui/import_certificate_dialog"
 
@@ -41,9 +42,6 @@ module Registration
     # for the other error codes just the error message is displayed
     # (importing the certificate would not help)
     IMPORT_ERROR_CODES = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES.keys
-
-    # indent size used in error popup
-    INDENT = " " * 3
 
     textdomain "registration"
 
@@ -155,13 +153,13 @@ module Registration
               retry
             end
 
-            report_ssl_error(e.message)
+            report_ssl_error(e.message, cert)
           else
             # error message
             Yast::Report.Error(_("Received SSL Certificate does not match the expected certificate."))
           end
         else
-          report_ssl_error(e.message)
+          report_ssl_error(e.message, cert)
         end
 
         false
@@ -188,51 +186,10 @@ module Registration
     end
 
     def self.ssl_error_details(cert)
-      # label follwed by a certificate description
-      details = []
+      return "" if cert.nil?
 
-      if cert
-        details << _("Certificate:")
-        details << _("Issued To")
-        details.concat(cert_subject_details(cert))
-        details << ""
-        details << _("Issued By")
-        details.concat(cert_issuer_details(cert))
-        details << ""
-        details << _("SHA1 Fingerprint: ")
-        details << INDENT + cert.sha1_fingerprint
-        details << _("SHA256 Fingerprint: ")
-
-        sha256 = cert.sha256_fingerprint
-        if Yast::UI.TextMode && Yast::UI.GetDisplayInfo["Width"] < 105
-          # split the long SHA256 digest to two lines in small text mode UI
-          details << INDENT + sha256[0..59]
-          details << INDENT + sha256[60..-1]
-        else
-          details << INDENT + sha256
-        end
-      end
-
-      details.empty? ? "" : ("\n\n" + details.join("\n"))
-    end
-
-    def self.cert_issuer_details(cert)
-      details = []
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Common Name (CN): ") + (cert.issuer_name || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization (O): ") + (cert.issuer_organization || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization Unit (OU): ") + (cert.issuer_organization_unit || "")
-    end
-
-    def self.cert_subject_details(cert)
-      details = []
-      details << INDENT + _("Common Name (CN): ") + (cert.subject_name || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization (O): ") + (cert.subject_organization || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization Unit (OU): ") + (cert.subject_organization_unit || "")
+      details = SslCertificateDetails.new(cert)
+      details.summary
     end
 
     def self.ask_import_ssl_certificate(cert)

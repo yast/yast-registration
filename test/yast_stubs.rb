@@ -24,6 +24,9 @@ module Yast
   module I18n
     def textdomain dom
     end
+    def _(str)
+      str
+    end
   end
   def self.import(mod)
     true

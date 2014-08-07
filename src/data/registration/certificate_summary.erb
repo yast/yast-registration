@@ -1,18 +1,6 @@
 <%
 textdomain "registration"
 %>
-
-<%# dialog heading %>
-<h2><%= _("Secure Connection Error") %></h2>
-
-<p>
-  <%# label followed by error details %>
-  <%= _("Details:") %> <%= _(OPENSSL_ERROR_MESSAGES[Storage::SSLErrors.instance.ssl_error_code]) %>
-</p>
-
-<%# dialog sub-heading %>
-<h3><%= _("Failed Certificate Details") %></h3>
-
 <h4><%= _("Issued To") %></h4>
 <blockquote>
   <p>
@@ -40,8 +28,7 @@ textdomain "registration"
       <%# warning added after the certificate issue date if the certificate is not valid yet %>
       <b><font color="red"><%= _("WARNING: The certificate is not valid yet!") %></font></b><br>
     <% end %>
-    <% # label followed by the certificate expiration date
-    %>
+    <%# label followed by the certificate expiration date %>
     <b><%= _("Expires On: ") %></b><%= h(certificate.expires_on) %><br>
     <% if certificate.expired? %>
       <%# warning added after the certificate expiration date if the certificate has expired %>

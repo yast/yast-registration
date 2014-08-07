@@ -1,0 +1,16 @@
+<%
+textdomain "registration"
+%>
+
+<%# dialog heading %>
+<h2><%= _("Secure Connection Error") %></h2>
+
+<p>
+  <%# label followed by error details %>
+  <%= _("Details:") %> <%= _(OPENSSL_ERROR_MESSAGES[Storage::SSLErrors.instance.ssl_error_code]) %>
+</p>
+
+<%# dialog sub-heading %>
+<h3><%= _("Failed Certificate Details") %></h3>
+
+<%= SslCertificateDetails.new(certificate).richtext_summary %>
