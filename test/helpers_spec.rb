@@ -178,4 +178,28 @@ describe "Registration::Helpers" do
     end
   end
 
+  describe ".write_config" do
+    it "wtites the current configuration" do
+      url = "https://example.com"
+      expect(Registration::UrlHelpers).to receive(:registration_url) \
+        .and_return(url)
+      expect(Registration::Helpers).to receive(:insecure_registration) \
+        .and_return(false)
+      expect(SUSE::Connect::YaST).to receive(:write_config).with(
+        :url => url,
+        :insecure => false
+      )
+
+      Registration::Helpers.write_config
+    end
+  end
+
+  describe ".run_network_configuration" do
+    it "runs 'inst_lan' Yast client" do
+      expect(yast_wfm).to receive(:call).with("inst_lan", anything)
+
+      Registration::Helpers.run_network_configuration
+    end
+  end
+
 end
