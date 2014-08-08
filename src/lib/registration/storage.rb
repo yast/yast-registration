@@ -101,6 +101,8 @@ module Registration
 
       def export
         ret = { "do_registration" => do_registration }
+        # export only the boolean flag when registration is disabled,
+        # all other config values are useless in that case
         return ret unless do_registration
 
         ret.merge!(
