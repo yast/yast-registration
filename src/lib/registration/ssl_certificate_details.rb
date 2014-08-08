@@ -39,10 +39,10 @@ module Registration
 #{_("Issued By")}
 #{issuer}
 #{_("SHA1 Fingerprint: ")}
-#{INDENT}#{certificate.sha1_fingerprint}
+#{INDENT}#{certificate.fingerprint(Fingerprint::SHA1).value}
 #{_("SHA256 Fingerprint: ")}
 EOS
-      sha256 = certificate.sha256_fingerprint
+      sha256 = certificate.fingerprint(Fingerprint::SHA256).value
       if small_space
         # split the long SHA256 digest to two lines in small text mode UI
         summary += INDENT + sha256[0..59] + "\n" + INDENT + sha256[60..-1]

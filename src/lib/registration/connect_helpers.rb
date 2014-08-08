@@ -143,9 +143,10 @@ module Registration
           # in AutoYast mode check whether the certificate fingerprint match
           # the configured value (if present)
         elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
-          if cert.fingerprint_match?(expected_cert_type,
-              Storage::Config.instance.reg_server_cert_fingerprint)
+          expected_fingerprint = Fingerprint.new(expected_cert_type,
+            Storage::Config.instance.reg_server_cert_fingerprint)
 
+          if cert.fingerprint(expected_cert_type) == expected_fingerprint
             # import the certificate and retry (just once)
             if !certificate_imported
               import_ssl_certificate(cert)

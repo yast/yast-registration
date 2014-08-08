@@ -1,6 +1,8 @@
 
 require "yast"
 
+require "registration/fingerprint"
+
 module Registration
   module UI
 
@@ -103,8 +105,8 @@ module Registration
       end
 
       def content_server_settings
-        sha1   = ::Registration::SslCertificate::SHA1_SUM
-        sha256 = ::Registration::SslCertificate::SHA256_SUM
+        sha1   = ::Registration::Fingerprint::SHA1
+        sha256 = ::Registration::Fingerprint::SHA256
         fingerprint_type = (config.reg_server_cert_fingerprint_type || "").upcase
 
         VBox(

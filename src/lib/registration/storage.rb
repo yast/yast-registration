@@ -156,10 +156,7 @@ module Registration
       def export_ssl_config
         ret = { "reg_server_cert" => reg_server_cert }
 
-        if reg_server_cert_fingerprint_type &&
-            reg_server_cert_fingerprint_type.upcase == SslCertificate::SHA1_SUM ||
-            reg_server_cert_fingerprint_type.upcase == SslCertificate::SHA256_SUM
-
+        if reg_server_cert_fingerprint_type
           ret["reg_server_cert_fingerprint_type"] = reg_server_cert_fingerprint_type
           ret["reg_server_cert_fingerprint"] = reg_server_cert_fingerprint
         end

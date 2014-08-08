@@ -2,6 +2,7 @@
 require "openssl"
 require "suse/connect"
 require "registration/downloader"
+require "registration/fingerprint"
 
 module Registration
 
@@ -9,9 +10,6 @@ module Registration
   # TODO move it to yast2 to share it?
   class SslCertificate
     attr_reader :x509_cert
-
-    SHA1_SUM   = "SHA1"
-    SHA256_SUM = "SHA256"
 
     def initialize(x509_cert)
       @x509_cert = x509_cert
@@ -29,14 +27,6 @@ module Registration
     def self.download(url, insecure: false)
       result = Downloader.download(url, insecure: insecure)
       load(result)
-    end
-
-    def sha1_fingerprint
-      ::SUSE::Connect::YaST.cert_sha1_fingerprint(x509_cert)
-    end
-
-    def sha256_fingerprint
-      ::SUSE::Connect::YaST.cert_sha256_fingerprint(x509_cert)
     end
 
     # certificate serial number (in HEX format, e.g. AB:CD:42:FF...)
@@ -84,15 +74,14 @@ module Registration
       find_issuer_attribute("OU")
     end
 
-    # check whether SSL certificate matches the expected fingerprint
-    def fingerprint_match?(fingerprint_type, fingerprint)
-      case fingerprint_type.upcase
-      when SHA1_SUM
-        sha1_fingerprint.upcase == fingerprint.upcase
-      when SHA256_SUM
-        sha256_fingerprint.upcase == fingerprint.upcase
+    def fingerprint(sum)
+      case sum.upcase
+      when Fingerprint::SHA1
+        sha1_fingerprint
+      when Fingerprint::SHA256
+        sha256_fingerprint
       else
-        false
+        raise "Unsupported checksum type '#{sum}'"
       end
     end
 
@@ -118,6 +107,20 @@ module Registration
 
     def find_subject_attribute(attribute)
       find_name_attribute(x509_cert.subject, attribute)
+    end
+
+    def sha1_fingerprint
+      Fingerprint.new(
+        Fingerprint::SHA1,
+        ::SUSE::Connect::YaST.cert_sha1_fingerprint(x509_cert)
+      )
+    end
+
+    def sha256_fingerprint
+      Fingerprint.new(
+        Fingerprint::SHA256,
+        ::SUSE::Connect::YaST.cert_sha256_fingerprint(x509_cert)
+      )
     end
 
   end

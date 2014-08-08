@@ -50,7 +50,8 @@ module Registration
       # @return [Symbol] user input (:import, :cancel)
       def run
         log.info "Certificate import dialog: issuer: #{certificate.issuer_name}, " \
-          "subject: #{certificate.subject_name}, SHA1: #{certificate.sha1_fingerprint}"
+          "subject: #{certificate.subject_name}, SHA1: " \
+          "#{certificate.fingerprint(Fingerprint::SHA1).value}"
 
         Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 

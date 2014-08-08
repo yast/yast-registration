@@ -42,15 +42,17 @@ describe "Registration::SslCertificate" do
     end
   end
 
-  describe "#sha1_fingerprint" do
-    it "returns SHA1 fingerptint in HEX format" do
-      expect(subject.sha1_fingerprint).to eq(sha1)
+  describe "#fingerprint" do
+    it "returns SHA1 fingerprint in HEX format" do
+      expect(subject.fingerprint(Registration::Fingerprint::SHA1).value).to eq(sha1)
     end
-  end
 
-  describe "#sha256_fingerprint" do
-    it "returns SHA256 fingerptint in HEX format" do
-      expect(subject.sha256_fingerprint).to eq(sha256)
+    it "returns SHA256 fingerprint in HEX format" do
+      expect(subject.fingerprint(Registration::Fingerprint::SHA256).value).to eq(sha256)
+    end
+
+    it "raises an exception when unsupported sum is requested" do
+      expect{ subject.fingerprint("SHA224") }.to raise_error(/Unsupported checksum type/)
     end
   end
 
@@ -159,28 +161,6 @@ describe "Registration::SslCertificate" do
   describe "#issuer_organization_unit" do
     it "returns issuer organization unit name" do
       expect(subject.issuer_organization_unit).to eq("WebYaST")
-    end
-  end
-
-  describe "#fingerprint_match?" do
-    it "returns true if SHA1 fingerprint matches" do
-      expect(subject.fingerprint_match?("SHA1", sha1)).to be_true
-    end
-
-    it "returns true if SHA256 fingerprint matches" do
-      expect(subject.fingerprint_match?("SHA256", sha256)).to be_true
-    end
-
-    it "is case insensitive" do
-      expect(subject.fingerprint_match?("sha256", sha256.downcase)).to be_true
-    end
-
-    it "returns false if fingerprint does not match" do
-      expect(subject.fingerprint_match?("SHA1", sha256)).to be_false
-    end
-
-    it "returns false for unsupported fingerprint type" do
-      expect(subject.fingerprint_match?("SHA224", sha224)).to be_false
     end
   end
 
