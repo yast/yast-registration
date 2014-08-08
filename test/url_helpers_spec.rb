@@ -68,19 +68,17 @@ describe "Registration::UrlHelpers" do
       before do
         allow(yast_mode).to receive(:mode).and_return("normal")
         allow(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-      end
-
-      it "ignores Linuxrc boot parameters" do
         # must not ask Linuxrc at all
         expect(yast_linuxrc).to receive(:InstallInf).never
+      end
+
+      it "return nil (default) if config file is not present" do
         # stub config file reading
         expect_any_instance_of(SUSE::Connect::Config).to receive(:url)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
 
       it "reads the URL from config file if present" do
-        # must not ask Linuxrc at all
-        expect(yast_linuxrc).to receive(:InstallInf).never
         # stub config file reading
         url = "https://example.com"
         expect_any_instance_of(SUSE::Connect::Config).to receive(:url).twice.and_return(url)
@@ -141,6 +139,11 @@ describe "Registration::UrlHelpers" do
           slp_url = "https://slp.example.com/register"
           expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
           expect(Registration::UrlHelpers.registration_url).to eq(slp_url)
+        end
+
+        it "returns nil (default URL) when no SLP server is available" do
+          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
+          expect(Registration::UrlHelpers.registration_url).to eq(nil)
         end
       end
     end
