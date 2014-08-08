@@ -108,22 +108,11 @@ module Registration
         if selected
           addon = addons.find{|a| a["name"] == selected}
 
-          ret = display_addon_popup(
-            name: selected,
-            version: addon["version"],
-            arch: addon["arch"],
-            # release_type can be nil
-            release_type: addon["release_type"] || "nil",
-            reg_code: addon["reg_code"]
-          )
+          ret = display_addon_popup(addon)
 
           if ret
-            addon["name"] = ret["name"]
-            addon["version"] = ret["version"]
-            addon["arch"] = ret["arch"]
-            # convert nil back
-            addon["release_type"] = ret["release_type"] == "nil" ? nil : ret["release_type"]
-            addon["reg_code"] = ret["reg_code"]
+            # replace the content
+            addon.merge!(ret)
             set_addon_table_content(addon["name"])
           end
         end
@@ -152,37 +141,42 @@ module Registration
         Yast::UI.ChangeWidget(Id(:addons_table), :CurrentItem, current) if current
       end
 
-      def display_addon_popup(name: "", version: "", arch: "", release_type: "",
-          reg_code: "")
-        content = VBox(
-          InputField(Id(:name), _("Extension or Module &Identifier"), name),
-          InputField(Id(:version), _("&Version"), version),
-          InputField(Id(:arch), _("&Architecture"), arch),
-          InputField(Id(:release_type), _("&Release Type"), release_type),
-          InputField(Id(:reg_code), _("Registration &Code"), reg_code),
+      def addon_popup_content(addon)
+        VBox(
+          InputField(Id(:name), _("Extension or Module &Identifier"), addon["name"] || ""),
+          InputField(Id(:version), _("&Version"), addon["version"] || ""),
+          InputField(Id(:arch), _("&Architecture"), addon["arch"] || ""),
+          InputField(Id(:release_type), _("&Release Type"),
+            addon.fetch("release_type", "") || "nil"),
+          InputField(Id(:reg_code), _("Registration &Code"), addon["reg_code"] || ""),
           VSpacing(1),
-          HBox(
-            PushButton(Id(:ok), Label.OKButton),
+          ButtonBox(
+            PushButton(Id(:ok), Opt(:default), Label.OKButton),
             PushButton(Id(:cancel), Label.CancelButton)
           )
         )
+      end
 
-        Yast::UI.OpenDialog(content)
+      def entered_addon
+        release_type = Yast::UI.QueryWidget(Id(:release_type), :Value)
+        release_type = nil if release_type == "nil"
+
+        {
+          "name" => Yast::UI.QueryWidget(Id(:name), :Value),
+          "version" => Yast::UI.QueryWidget(Id(:version), :Value),
+          "arch" => Yast::UI.QueryWidget(Id(:arch), :Value),
+          "release_type" => release_type,
+          "reg_code" => Yast::UI.QueryWidget(Id(:reg_code), :Value)
+        }
+      end
+
+      def display_addon_popup(addon = {})
+        Yast::UI.OpenDialog(addon_popup_content(addon))
 
         begin
           ui = Yast::UI.UserInput
 
-          if ui == :ok
-            return {
-              "name" => Yast::UI.QueryWidget(Id(:name), :Value),
-              "version" => Yast::UI.QueryWidget(Id(:version), :Value),
-              "arch" => Yast::UI.QueryWidget(Id(:arch), :Value),
-              "release_type" => Yast::UI.QueryWidget(Id(:release_type), :Value),
-              "reg_code" => Yast::UI.QueryWidget(Id(:reg_code), :Value)
-            }
-          else
-            return nil
-          end
+          ui == :ok ? entered_addon : nil
         ensure
           Yast::UI.CloseDialog
         end
