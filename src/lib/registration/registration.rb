@@ -25,6 +25,7 @@ require "suse/connect"
 require "registration/helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
+require "registration/ssl_certificate"
 
 module Registration
   class Registration
@@ -159,7 +160,8 @@ module Registration
             log.error "SSL verification failed: #{context.error}: #{context.error_string}"
             Storage::SSLErrors.instance.ssl_error_code = context.error
             Storage::SSLErrors.instance.ssl_error_msg = context.error_string
-            Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert
+            Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
+              SslCertitificate.load(context.current_cert) : nil
           end
           verify_ok
         end

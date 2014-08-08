@@ -130,9 +130,7 @@ module Registration
       rescue OpenSSL::SSL::SSLError => e
         log.error "OpenSSL error: #{e}"
 
-        cert = Storage::SSLErrors.instance.ssl_failed_cert ?
-          SslCertitificate.load(Storage::SSLErrors.instance.ssl_failed_cert) : nil
-
+        cert = Storage::SSLErrors.instance.ssl_failed_cert
         error_code = Storage::SSLErrors.instance.ssl_error_code
         expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
 
