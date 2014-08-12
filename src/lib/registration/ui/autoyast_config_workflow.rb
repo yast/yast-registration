@@ -73,7 +73,7 @@ module Registration
         }
 
         log.info "Starting scc_auto sequence"
-        Yast::Sequencer.Run(aliases, sequence)
+        Sequencer.Run(aliases, sequence)
       end
 
       private
@@ -85,17 +85,17 @@ module Registration
       end
 
       def select_remote_addons
-        if !::Registration::SwMgmt.init
+        if !SwMgmt.init
           Report.Error(Pkg.LastError)
           return :abort
         end
 
-        url = ::Registration::UrlHelpers.registration_url
+        url = UrlHelpers.registration_url
         registration = ::Registration::Registration.new(url)
 
         ret = nil
 
-        success = ::Registration::ConnectHelpers.catch_registration_errors do
+        success = ConnectHelpers.catch_registration_errors do
           ret = AddonSelectionDialog.run(registration)
         end
 
@@ -111,11 +111,12 @@ module Registration
       end
 
       def addons_reg_codes
-        return :next if ::Registration::Addon.selected.all?(&:free)
-
         known_reg_codes = collect_known_reg_codes
-        ret = AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
-        return ret unless ret == :next
+
+        if !::Registration::Addon.selected.all?(&:free)
+          ret = AddonRegCodesDialog.run(::Registration::Addon.selected, known_reg_codes)
+          return ret unless ret == :next
+        end
 
         update_addons(known_reg_codes)
         :next

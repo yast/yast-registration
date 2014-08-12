@@ -108,7 +108,7 @@ module Registration
 
       # render Richtext description with the certificate details
       def certificate_description
-        details = ::Registration::SslCertificateDetails.new(certificate)
+        details = SslCertificateDetails.new(certificate)
         details.richtext_summary
       end
 
