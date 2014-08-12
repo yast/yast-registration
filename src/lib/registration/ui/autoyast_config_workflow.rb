@@ -96,6 +96,16 @@ module Registration
         ret = nil
 
         success = ConnectHelpers.catch_registration_errors do
+          Popup.Feedback(
+            SccAutoClient::CONTACTING_MESSAGE,
+            _("Loading Available Extensions and Modules...")) do
+
+            ::Registration::Addon.find_all(registration).each do |addon|
+              # reset registration status to allow selecting all addons not only
+              addon.unregistered
+            end
+          end
+
           ret = AddonSelectionDialog.run(registration)
         end
 

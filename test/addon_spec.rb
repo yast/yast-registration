@@ -79,6 +79,20 @@ describe Registration::Addon do
     end
   end
 
+  describe "#unregistered" do
+    it "marks addon as unregistered" do
+      Registration::Addon.registered << addon
+      addon.unregistered
+      expect(Registration::Addon.registered).to_not include(addon)
+    end
+
+    it "do nothing if addon is not registered" do
+      expect(Registration::Addon.registered).to_not include(addon)
+      expect{addon.unregistered}.to_not raise_error
+    end
+  end
+
+
   describe "#selected?" do
     it "returns if addon is selected for installation" do
       expect(addon.selected?).to be_false

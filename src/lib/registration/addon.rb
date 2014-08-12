@@ -105,6 +105,10 @@ module Registration
       Addon.registered << self unless registered?
     end
 
+    def unregistered
+      Addon.registered.delete(self) if registered?
+    end
+
     # get a product printable name (long name if present, fallbacks to the short name)
     # @return [String] label usable in UI
     def label
