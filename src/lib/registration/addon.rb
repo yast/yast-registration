@@ -105,6 +105,7 @@ module Registration
       Addon.registered << self unless registered?
     end
 
+    # just internally mark the addon as NOT registered, no real unregistration
     def unregistered
       Addon.registered.delete(self) if registered?
     end
