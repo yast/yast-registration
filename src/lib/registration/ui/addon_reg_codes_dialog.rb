@@ -152,8 +152,7 @@ module Registration
           when :next
             collect_addon_regcodes
           when :cancel, :abort
-            ret = nil if Stage.initial && !Popup.ConfirmAbort(:painless)
-            ret = :abort if ret == :cancel
+            ret = Stage.initial && !Popup.ConfirmAbort(:painless) ? nil : :abort
           end
         end
 
