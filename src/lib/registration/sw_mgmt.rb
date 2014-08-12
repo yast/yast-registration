@@ -33,6 +33,7 @@ require "registration/url_helpers"
 module Registration
   Yast.import "AddOnProduct"
   Yast.import "Mode"
+  Yast.import "Stage"
   Yast.import "Pkg"
   Yast.import "PackageLock"
   Yast.import "Installation"
@@ -88,13 +89,14 @@ module Registration
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Mode.normal || Mode.config
+        if Stage.initial
+          # during installation the type is not valid yet yet
+          # (the base product is determined by /etc/products.d/baseproduct symlink)
+          # the base product comes from the first repository
+          p["source"] == 0
+        else
           # in installed system the base product has valid type
           p["status"] == :installed && p["type"] == "base"
-        else
-          # however during installation it's not set yet
-          # but the base product comes from the first repository
-          p["source"] == 0
         end
       end
 
