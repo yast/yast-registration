@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Aug 12 14:03:35 UTC 2014 - lslezak@suse.cz
+
+- report more details when registration fails (bnc#890873)
+- added some hints to the error message displayed when the base
+  product is not found (bnc#890863)
+- 3.1.99
+
+-------------------------------------------------------------------
 Thu Aug  7 07:43:49 UTC 2014 - lslezak@suse.cz
 
 - Fixed AutoYast clonning in installed system: registration cannot
