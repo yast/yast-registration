@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 12 15:32:51 UTC 2014 - lslezak@suse.cz
+
+- handle closing by window manager (:cancel event) (bnc#891550)
+- 3.1.100
+
+-------------------------------------------------------------------
 Tue Aug 12 14:03:35 UTC 2014 - lslezak@suse.cz
 
 - report more details when registration fails (bnc#890873)

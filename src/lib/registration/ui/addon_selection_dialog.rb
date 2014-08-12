@@ -138,7 +138,7 @@ module Registration
 
       def handle_dialog
         ret = nil
-        continue_buttons = [:next, :back, :close, :abort, :skip]
+        continue_buttons = [:next, :back, :abort, :skip]
 
         while !continue_buttons.include?(ret) do
           ret = Yast::UI.UserInput
@@ -147,9 +147,10 @@ module Registration
           when :next
             ret = handle_next_button
             # when canceled switch to old selection
-          when :close, :abort
+          when :cancel, :abort
             ret = nil if Stage.initial && !Popup.ConfirmAbort(:painless)
             Addon.selected.replace(@old_selection)
+            ret = :abort if ret == :cancel
           else
             handle_addon_selection(ret)
           end
