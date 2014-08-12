@@ -105,7 +105,7 @@ module Registration
 
       def selected_addon
         current = Yast::UI.QueryWidget(Id(:addons_table), :CurrentItem)
-        return nil if current.nil?
+        return nil unless current
 
         find_addon(current)
       end
