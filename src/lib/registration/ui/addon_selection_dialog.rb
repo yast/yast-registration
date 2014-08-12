@@ -149,8 +149,8 @@ module Registration
             # when canceled switch to old selection
           when :cancel, :abort
             ret = nil if Stage.initial && !Popup.ConfirmAbort(:painless)
-            Addon.selected.replace(@old_selection)
             ret = :abort if ret == :cancel
+            Addon.selected.replace(@old_selection) if ret == :abort
           else
             handle_addon_selection(ret)
           end
