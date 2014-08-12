@@ -162,6 +162,7 @@ module Registration
           InputField(Id(:version), _("&Version"), addon["version"] || ""),
           InputField(Id(:arch), _("&Architecture"), addon["arch"] || ""),
           InputField(Id(:release_type), _("&Release Type"),
+            # handle nil specifically, it cannot be stored in XML profile
             addon.fetch("release_type", "") || "nil"),
           InputField(Id(:reg_code), _("Registration &Code"), addon["reg_code"] || ""),
           VSpacing(1),

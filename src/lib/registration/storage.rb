@@ -140,7 +140,7 @@ module Registration
       def import_addons(settings)
         (settings["addons"] || []).map do |a|
           import_addon = a.dup
-          # handle "nil" release_type
+          # handle "nil" release_type, nil cannot be stored in XML profile
           import_addon["release_type"] = nil if a["release_type"] == "nil"
           import_addon
         end
@@ -149,7 +149,7 @@ module Registration
       def export_addons
         addons.map do |a|
           addon_export = a.dup
-          # handle nil release_type at export
+          # handle nil release_type at export, nil cannot be stored in XML profile
           addon_export["release_type"] = "nil" if addon_export["release_type"].nil?
           addon_export
         end
