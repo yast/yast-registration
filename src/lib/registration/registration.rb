@@ -25,6 +25,7 @@ require "suse/connect"
 require "registration/helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
+require "registration/ssl_certificate"
 
 module Registration
   class Registration
@@ -145,24 +146,31 @@ module Registration
       product_service
     end
 
+    # returns SSL verify callback
+    def verify_callback
+      lambda do |verify_ok, context|
+        # we cannot raise an exception with details here (all exceptions in
+        # verify_callback are caught and ignored), we need to store the error
+        # details in a global instance
+        if !verify_ok
+          log.error "SSL verification failed: #{context.error}: #{context.error_string}"
+          Storage::SSLErrors.instance.ssl_error_code = context.error
+          Storage::SSLErrors.instance.ssl_error_msg = context.error_string
+          Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
+            SslCertitificate.load(context.current_cert) : nil
+        end
+
+        verify_ok
+      end
+    end
+
     def connect_params(params)
       default_params = {
         :language => ::Registration::Helpers.language,
         :debug => ENV["SCCDEBUG"],
         :verbose => ENV["Y2DEBUG"] == "1",
         # pass a verify_callback to get details about failed SSL verification
-        :verify_callback => lambda do |verify_ok, context|
-          # we cannot raise an exception with details here (all exceptions in
-          # verify_callback are caught and ignored), we need to store the error
-          # details in a global instance
-          if !verify_ok
-            log.error "SSL verification failed: #{context.error}: #{context.error_string}"
-            Storage::SSLErrors.instance.ssl_error_code = context.error
-            Storage::SSLErrors.instance.ssl_error_msg = context.error_string
-            Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert
-          end
-          verify_ok
-        end
+        :verify_callback => verify_callback
       }
 
       if @url

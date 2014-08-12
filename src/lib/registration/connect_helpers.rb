@@ -27,11 +27,15 @@ require "suse/connect"
 require "registration/helpers"
 require "registration/exceptions"
 require "registration/storage"
+require "registration/ssl_certificate"
+require "registration/ssl_certificate_details"
+require "registration/url_helpers"
 require "registration/ui/import_certificate_dialog"
 
 module Registration
 
-  class SccHelpers
+  # TODO FIXME: change to a module and include it in the clients
+  class ConnectHelpers
     include Yast::Logger
     extend Yast::I18n
 
@@ -39,9 +43,6 @@ module Registration
     # for the other error codes just the error message is displayed
     # (importing the certificate would not help)
     IMPORT_ERROR_CODES = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES.keys
-
-    # indent size used in error popup
-    INDENT = " " * 3
 
     textdomain "registration"
 
@@ -53,6 +54,8 @@ module Registration
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
     def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
+      # import the SSL certificate just once to avoid an infinite loop
+      certificate_imported = false
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
@@ -87,7 +90,7 @@ module Registration
             msg = _("Check that this system is known to the registration server.")
 
             # probably missing NCC->SCC sync, display a hint unless SMT is used
-            if Helpers.registration_url.nil?
+            if UrlHelpers.registration_url.nil?
               msg += "\n\n"
               # TRANSLATORS: additional hint for an error message
               msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
@@ -130,22 +133,33 @@ module Registration
 
         cert = Storage::SSLErrors.instance.ssl_failed_cert
         error_code = Storage::SSLErrors.instance.ssl_error_code
+        expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
 
-        # in AutoYast mode just report an error without user interaction,
-        # otherwise check a certificate present and the error code
+        # in non-AutoYast mode ask the user to import the certificate
         if !Yast::Mode.autoinst && cert && IMPORT_ERROR_CODES.include?(error_code)
           # retry after successfull import
-          retry if import_ssl_certificate(cert)
-        else
-          # try to use a translatable message first, if not found then use
-          # the original error message from openSSL
-          msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
-          msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
-          msg = e.message if msg.nil? || msg.empty?
+          retry if ask_import_ssl_certificate(cert)
+          # in AutoYast mode check whether the certificate fingerprint match
+          # the configured value (if present)
+        elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
+          expected_fingerprint = Fingerprint.new(expected_cert_type,
+            Storage::Config.instance.reg_server_cert_fingerprint)
 
-          Yast::Report.Error(
-            error_with_details(_("Secure connection error: %s") % msg, ssl_error_details)
-          )
+          if cert.fingerprint(expected_cert_type) == expected_fingerprint
+            # import the certificate and retry (just once)
+            if !certificate_imported
+              import_ssl_certificate(cert)
+              certificate_imported = true
+              retry
+            end
+
+            report_ssl_error(e.message, cert)
+          else
+            # error message
+            Yast::Report.Error(_("Received SSL Certificate does not match the expected certificate."))
+          end
+        else
+          report_ssl_error(e.message, cert)
         end
 
         false
@@ -171,65 +185,49 @@ module Registration
       error + "\n\n" + (_("Details: %s") % details)
     end
 
-    def self.ssl_error_details()
-      # label follwed by a certificate description
-      details = []
+    def self.ssl_error_details(cert)
+      return "" if cert.nil?
 
-      cert = Storage::SSLErrors.instance.ssl_failed_cert
-      if cert
-        details << _("Certificate:")
-        details << _("Issued To")
-        details.concat(cert_name_details(cert.subject))
-        details << ""
-        details << _("Issued By")
-        details.concat(cert_name_details(cert.issuer))
-        details << ""
-        details << _("SHA1 Fingerprint: ")
-        details << INDENT + ::SUSE::Connect::YaST.cert_sha1_fingerprint(cert)
-        details << _("SHA256 Fingerprint: ")
-
-        sha256 = ::SUSE::Connect::YaST.cert_sha256_fingerprint(cert)
-        if Yast::UI.TextMode && Yast::UI.GetDisplayInfo["Width"] < 105
-          # split the long SHA256 digest to two lines in small text mode UI
-          details << INDENT + sha256[0..59]
-          details << INDENT + sha256[60..-1]
-        else
-          details << INDENT + sha256
-        end
-      end
-
-      details.empty? ? "" : ("\n\n" + details.join("\n"))
+      details = SslCertificateDetails.new(cert)
+      details.summary
     end
 
-    def self.cert_name_details(x509_name)
-      details = []
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Common Name (CN): ") + (Helpers.find_name_attribute(x509_name, "CN") || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization (O): ") + (Helpers.find_name_attribute(x509_name, "O") || "")
-      # label followed by the SSL certificate identification
-      details << INDENT + _("Organization Unit (OU): ") + (Helpers.find_name_attribute(x509_name, "OU") || "")
-    end
-
-    def self.import_ssl_certificate(cert)
+    def self.ask_import_ssl_certificate(cert)
       # run the import dialog, check the user selection
       if UI::ImportCertificateDialog.run(cert) != :import
         log.info "Certificate import rejected"
         return false
       end
 
-      cn = Helpers.find_name_attribute(cert.subject, "CN")
+      import_ssl_certificate(cert)
+    end
+
+    def self.import_ssl_certificate(cert)
+      cn = cert.subject_name
       log.info "Importing '#{cn}' certificate..."
 
       # progress label
       result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
         _("Importing '%s' certificate...") % cn) do
 
-        ::SUSE::Connect::YaST.import_certificate(cert)
+        cert.import_to_system
       end
 
       log.info "Certificate import result: #{result}"
       true
+    end
+
+    def self.report_ssl_error(message, cert)
+      # try to use a translatable message first, if not found then use
+      # the original error message from openSSL
+      error_code = Storage::SSLErrors.instance.ssl_error_code
+      msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
+      msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
+      msg = message if msg.nil? || msg.empty?
+
+      Yast::Report.Error(
+        error_with_details(_("Secure connection error: %s") % msg, ssl_error_details(cert))
+      )
     end
 
   end

@@ -104,7 +104,7 @@ describe "Registration::SwMgmt" do
       expect(yast_pkg).to receive(:SourceSaveAll).and_return(true).twice
       expect(yast_pkg).to receive(:ServiceRefresh).with(service_name).and_return(true)
       expect(yast_pkg).to receive(:ServiceSave).with(service_name).and_return(true)
-      SUSE::Connect::Credentials.any_instance.should_receive(:write)
+      expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
 
       allow(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|

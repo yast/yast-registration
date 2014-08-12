@@ -3,6 +3,7 @@
 require_relative "spec_helper"
 
 require "openssl"
+require "registration/ssl_certificate"
 require "registration/ui/import_certificate_dialog"
 
 describe Registration::UI::ImportCertificateDialog do
@@ -28,7 +29,7 @@ describe Registration::UI::ImportCertificateDialog do
         expect(arg2.to_s).to match(/Organization \(O\):.*WebYaST/)
       end
 
-      cert = OpenSSL::X509::Certificate.new(File.read(fixtures_file("test.pem")))
+      cert = Registration::SslCertificate.load_file(fixtures_file("test.pem"))
       expect(Registration::UI::ImportCertificateDialog.run(cert)).to eq(:import)
     end
   end

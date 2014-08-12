@@ -4,165 +4,12 @@ require_relative "spec_helper"
 require_relative "yast_stubs"
 
 describe "Registration::Helpers" do
+  let(:yast_wfm) { double("Yast::WFM") }
+
   before do
     stub_yast_require
     require "registration/helpers"
-  end
-
-  describe ".registration_url" do
-    let(:yast_mode) { double("Yast::Mode") }
-    let(:yast_linuxrc) { double("Yast::Linuxrc") }
-    let(:yast_wfm) { double("Yast::WFM") }
-
-    before do
-      stub_const("Yast::Mode", yast_mode)
-      stub_const("Yast::Linuxrc", yast_linuxrc)
-      stub_const("Yast::WFM", yast_wfm)
-      # reset the cache befor each test
-      ::Registration::Storage::Cache.instance.reg_url_cached = nil
-    end
-
-    context "at installation" do
-      before do
-        allow(yast_mode).to receive(:mode).and_return("installation")
-      end
-
-      context "no local registration server is announced via SLP" do
-        it "returns 'regurl' boot parameter from Linuxrc" do
-          url = "https://example.com/register"
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
-          # make sure no SLP discovery is executed, the boot parameter has higher priority
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").never
-          expect(Registration::Helpers.registration_url).to eq(url)
-        end
-
-        it "returns nil when no custom URL is required in Linuxrc" do
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-          expect(Registration::Helpers.registration_url).to be_nil
-        end
-      end
-
-      context "no boot parameter is used and a SLP server is announced" do
-        before do
-          # no boot parameter passed, it would have higher priority
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-        end
-
-        it "returns the SLP server selected by user" do
-          slp_url = "https://example.com/register"
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
-          expect(Registration::Helpers.registration_url).to eq(slp_url)
-        end
-
-        it "returns nil when the SLP dialog is canceled" do
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-          expect(Registration::Helpers.registration_url).to be_nil
-        end
-
-      end
-    end
-
-    context "at installed system" do
-      before do
-        allow(yast_mode).to receive(:mode).and_return("normal")
-        allow(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-      end
-
-      it "ignores Linuxrc boot parameters" do
-        # must not ask Linuxrc at all
-        expect(yast_linuxrc).to receive(:InstallInf).never
-        # stub config file reading
-        expect_any_instance_of(SUSE::Connect::Config).to receive(:url)
-        expect(Registration::Helpers.registration_url).to be_nil
-      end
-
-      it "reads the URL from config file if present" do
-        # must not ask Linuxrc at all
-        expect(yast_linuxrc).to receive(:InstallInf).never
-        # stub config file reading
-        url = "https://example.com"
-        expect_any_instance_of(SUSE::Connect::Config).to receive(:url).twice.and_return(url)
-        expect(Registration::Helpers.registration_url).to eq(url)
-      end
-    end
-
-    context "at upgrade" do
-      let(:yast_installation) { double("Yast::Instrallation") }
-      let(:suse_register) { "/mnt/etc/suseRegister.conf" }
-
-      before do
-        allow(yast_mode).to receive(:mode).and_return("update")
-        allow(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-
-        stub_const("Yast::Installation", yast_installation)
-        allow(yast_installation).to receive(:destdir).and_return("/mnt")
-      end
-
-      it "returns 'regurl' boot parameter from Linuxrc" do
-        url = "https://example.com/register"
-        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
-        # make sure no SLP discovery is executed, the boot parameter has higher priority
-        expect(yast_wfm).to receive(:call).with("discover_registration_services").never
-        expect(Registration::Helpers.registration_url).to eq(url)
-      end
-
-      context "the system has been already registered" do
-        before do
-          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-        end
-
-        it "return default when NCC registration server was used" do
-          expect(File).to receive(:exist?).with(suse_register).and_return(true)
-          expect(File).to receive(:readlines).with(suse_register).\
-            and_return(File.readlines(fixtures_file("old_conf_ncc/etc/suseRegister.conf")))
-
-          expect(Registration::Helpers.registration_url).to be_nil
-        end
-
-        it "return URL of SMT server when used" do
-          expect(File).to receive(:exist?).with(suse_register).and_return(true)
-          expect(File).to receive(:readlines).with(suse_register).\
-            and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
-
-          expect(Registration::Helpers.registration_url).to eq("https://myserver.com")
-        end
-      end
-
-      context "the system has not been registered" do
-        before do
-          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(false)
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-        end
-
-        it "calls SLP discovery" do
-          slp_url = "https://slp.example.com/register"
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
-          expect(Registration::Helpers.registration_url).to eq(slp_url)
-        end
-      end
-    end
-
-    context "at unknown mode" do
-      before do
-        allow(yast_mode).to receive(:mode).and_return("config")
-      end
-
-      it "returns nil (default URL)" do
-        expect(Registration::Helpers.registration_url).to be_nil
-      end
-    end
-  end
-
-  describe ".service_url" do
-    it "converts a SLP service to plain URL" do
-      url = "https://example.com/registration"
-      service1 = "service:registration.suse:manager:#{url}"
-      service2 = "service:registration.suse:smt:#{url}"
-      expect(Registration::Helpers.service_url(service1)).to eq(url)
-      expect(Registration::Helpers.service_url(service2)).to eq(url)
-    end
+    stub_const("Yast::WFM", yast_wfm)
   end
 
   describe ".service_description" do
@@ -184,23 +31,6 @@ describe "Registration::Helpers" do
     it "creates a label with url only when description is missing" do
       expect(slp_attributes).to receive(:to_h).and_return({})
       expect(Registration::Helpers.service_description(slp_service)).to eq(slp_url)
-    end
-  end
-
-  describe ".credentials_from_url" do
-    it "returns credentials parameter from URL" do
-      url = "https://scc.suse.com/service/repo/repoindex.xml?credentials=SLES_credentials"
-      expect(Registration::Helpers.credentials_from_url(url)).to eq("SLES_credentials")
-    end
-
-    it "returns nil if the URL misses credentials parameter" do
-      url = "https://scc.suse.com/service/repo/repoindex.xml?nocredentials=SLES_credentials"
-      expect(Registration::Helpers.credentials_from_url(url)).to eq(nil)
-    end
-
-    it "raises URI::InvalidURIError when URL is invalid" do
-      url = ":foo:"
-      expect{Registration::Helpers.credentials_from_url(url)}.to raise_error(URI::InvalidURIError)
     end
   end
 
@@ -309,6 +139,66 @@ describe "Registration::Helpers" do
       expect(File).to receive(:unlink).with(credentials)
 
       expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+    end
+  end
+
+  describe ".render_erb_template" do
+    it "renders specified ERB template file" do
+      file = fixtures_file("template.erb")
+      # this is used in the template
+      @label = "FOO"
+      expect(Registration::Helpers.render_erb_template(file, binding)).to eq("<h1>FOO</h1>\n")
+    end
+  end
+
+  describe ".language" do
+    it "returns the current Yast language" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en")
+      expect(Registration::Helpers.language).to eq("en")
+    end
+
+    it "removes encoding suffix" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en.UTF-8")
+      expect(Registration::Helpers.language).to eq("en")
+    end
+
+    it "replaces _ separator by -" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("en_US.UTF-8")
+      expect(Registration::Helpers.language).to eq("en-US")
+    end
+
+    it "returns nil for C locale" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("C")
+      expect(Registration::Helpers.language).to eq(nil)
+    end
+
+    it "returns nil for POSIX locale" do
+      expect(yast_wfm).to receive(:GetLanguage).and_return("POSIX")
+      expect(Registration::Helpers.language).to eq(nil)
+    end
+  end
+
+  describe ".write_config" do
+    it "writes the current configuration" do
+      url = "https://example.com"
+      expect(Registration::UrlHelpers).to receive(:registration_url) \
+        .and_return(url)
+      expect(Registration::Helpers).to receive(:insecure_registration) \
+        .and_return(false)
+      expect(SUSE::Connect::YaST).to receive(:write_config).with(
+        :url => url,
+        :insecure => false
+      )
+
+      Registration::Helpers.write_config
+    end
+  end
+
+  describe ".run_network_configuration" do
+    it "runs 'inst_lan' Yast client" do
+      expect(yast_wfm).to receive(:call).with("inst_lan", anything)
+
+      Registration::Helpers.run_network_configuration
     end
   end
 

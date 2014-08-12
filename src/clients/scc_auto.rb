@@ -30,14 +30,22 @@ require "yast/suse_connect"
 require "erb"
 
 require "registration/storage"
+require "registration/sw_mgmt"
 require "registration/registration"
 require "registration/helpers"
 require "registration/connect_helpers"
+require "registration/ssl_certificate"
+require "registration/url_helpers"
+require "registration/ui/autoyast_config_workflow"
 
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
     include ERB::Util
+    extend Yast::I18n
+
+    # popup message
+    CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
       Yast.import "UI"
@@ -49,7 +57,6 @@ module Yast
       Yast.import "Label"
       Yast.import "Report"
       Yast.import "Popup"
-      Yast.import "Sequencer"
 
       log.info "scc_auto started"
 
@@ -83,10 +90,10 @@ module Yast
         # Write given settings
         ret = write
       when "GetModified"
-        # TODO FIXME: check for changes
-        ret = true
+        ret = @config.modified
       when "SetModified"
-        # TODO FIXME: set modified status
+        @config.modified = true
+        ret = true
       else
         log.error "Unknown function: #{func}"
         raise "Unknown function parameter: #{func}"
@@ -122,14 +129,7 @@ module Yast
     # Create a textual summary
     # @return [String] summary of the current configuration
     def summary
-      # use erb template for rendering the richtext summary
-      erb_file = File.expand_path("../../data/registration/autoyast_summary.erb", __FILE__)
-
-      log.info "Loading ERB template #{erb_file}"
-      erb = ERB.new(File.read(erb_file))
-
-      # render the ERB template in the context of the current object
-      erb.result(binding)
+      ::Registration::Helpers.render_erb_template("autoyast_summary.erb", binding)
     end
 
     # register the system, base product and optional addons
@@ -154,56 +154,51 @@ module Yast
       # nil = use the default URL
       @registration = ::Registration::Registration.new(url)
 
-      # TODO FIXME: import the server certificate
-      if @config.reg_server_cert
-
+      if @config.reg_server_cert && !@config.reg_server_cert.empty?
+        import_certificate(@config.reg_server_cert)
       end
 
-      ret = ::Registration::SccHelpers.catch_registration_errors do
-        # register the system
-        Popup.Feedback(_("Registering the System..."),
-          _("Contacting the SUSE Customer Center server")) do
+      ret = ::Registration::ConnectHelpers.catch_registration_errors do
+        base_product = ::Registration::SwMgmt.find_base_product
+        distro_target = base_product["register_target"]
 
-          @registration.register(@config.email, @config.reg_code)
+        if !::Registration::Registration.is_registered?
+          log.info "Registering system, distro_target: #{distro_target}"
+
+          Popup.Feedback(_(CONTACTING_MESSAGE),
+            _("Registering the System...")) do
+
+            @registration.register(@config.email, @config.reg_code, distro_target)
+          end
         end
 
         # register the base product
-        products = ::Registration::SwMgmt.base_products_to_register
-        Popup.Feedback(
-          n_("Registering Product...", "Registering Products...", products.size),
-          _("Contacting the SUSE Customer Center server")) do
+        product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
+          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+        ) do
 
-          @registration.register_products(products)
+          base_product_data = ::Registration::SwMgmt.base_product_to_register
+          base_product_data["reg_code"] = @config.reg_code
+          @registration.register_product(base_product_data, @config.email)
         end
 
-        # register addons if configured
-        if !@config.addons.empty?
-          addon_products = @config.addons.map do |a|
-            {
-              "name" => a["name"],
-              "reg_code" => a["reg_code"],
-              # TODO FIXME: not handled by SCC yet
-              "arch" => nil,
-              "version" => nil
-            }
+        disable_update_repos(product_service) if !@config.install_updates
+
+        # register addons
+        @config.addons.each do |addon|
+          product_service = Popup.Feedback(
+            _(CONTACTING_MESSAGE),
+            # %s is name of given product
+            _("Registering %s ...") % addon["name"]) do
+
+            @registration.register_product(addon)
           end
 
-          # register addons
-          Popup.Feedback(
-            n_("Registering Product...", "Registering Products...", addon_products.size),
-            _("Contacting the SUSE Customer Center server")) do
-
-            @registration.register_products(addon_products)
-          end
+          disable_update_repos(product_service) if !@config.install_updates
         end
       end
 
       return false unless ret
-
-      # disable updates
-      if !@config.install_updates
-        # TODO FIXME: disable Update repositories
-      end
 
       # save the registered repositories
       Pkg.SourceSaveAll
@@ -211,7 +206,7 @@ module Yast
       if Mode.normal || Mode.config
         # popup message: registration finished properly
         Popup.Message(_("Registration was successfull."))
-      else
+      elsif Stage.initial
         # copy the SSL certificate to the target system
         ::Registration::Helpers.copy_certificate_to_target
       end
@@ -225,252 +220,18 @@ module Yast
       ret
     end
 
-    # ---------------------------------------------------------
-
-    def set_addon_table_content(current = nil)
-      content = @config.addons.map do |a|
-        Item(Id(a["name"]), a["name"], a["reg_code"])
-      end
-
-      UI.ChangeWidget(Id(:addons_table), :Items, content)
-      UI.ChangeWidget(Id(:addons_table), :CurrentItem, current) if current
-    end
-
-    def display_addon_popup(name = "", reg_code = "")
-      content = VBox(
-        InputField(Id(:name), _("Extension or Module &Name"), name),
-        InputField(Id(:reg_code), _("Registration &Code"), reg_code),
-        VSpacing(1),
-        HBox(
-          PushButton(Id(:ok), Label.OKButton),
-          PushButton(Id(:cancel), Label.CancelButton)
-        )
-      )
-
-      UI.OpenDialog(content)
-
-      begin
-        ui = UI.UserInput
-
-        if ui == :ok
-          return {
-            "name" => UI.QueryWidget(Id(:name), :Value),
-            "reg_code" => UI.QueryWidget(Id(:reg_code), :Value)
-          }
-        else
-          return nil
-        end
-      ensure
-        UI.CloseDialog
-      end
-    end
-
-    def delete_addon
-      selected = UI.QueryWidget(Id(:addons_table), :CurrentItem)
-      if selected && Popup.YesNo(_("Really delete '%s'?") % selected)
-        @config.addons.reject!{|a| a["name"] == selected}
-        set_addon_table_content
-      end
-    end
-
-    def edit_addon
-      selected = UI.QueryWidget(Id(:addons_table), :CurrentItem)
-      if selected
-        addon = @config.addons.find{|a| a["name"] == selected}
-
-        ret = display_addon_popup(selected, addon["reg_code"])
-        if ret
-          addon["name"] = ret["name"]
-          addon["reg_code"] = ret["reg_code"]
-          set_addon_table_content(addon["name"])
-        end
-      end
-    end
-
-    def add_addon
-      ret = display_addon_popup
-      if ret
-        addon = @config.addons.find{|a| a["name"] == ret["name"]}
-        if addon
-          addon["reg_code"] = ret["reg_code"]
-        else
-          @config.addons << ret
-        end
-        set_addon_table_content(ret["name"])
-      end
-    end
-
-    def select_addons
-      header = Header(_("Identifier"), _("Registration Code"))
-      contents = VBox(
-        Table(Id(:addons_table), header, []),
-        HBox(
-          PushButton(Id(:add), Label.AddButton),
-          PushButton(Id(:edit), Label.EditButton),
-          PushButton(Id(:delete), Label.DeleteButton)
-        )
-      )
-      # help text
-      help_text = _("<p>Here you can select which extensions or modules"\
-          "will be registered together with the base product.</p>")
-      Wizard.SetContents(_("Register Optional Extensions or Modules"), contents, help_text, true, true)
-      Wizard.SetNextButton(:next, Label.OKButton)
-      set_addon_table_content
-
-      begin
-        ret = UI.UserInput
-        log.info "ret: #{ret}"
-
-        case ret
-        when :add
-          add_addon
-        when :edit
-          edit_addon
-        when :delete
-          delete_addon
-        when :abort, :cancel
-          break if Popup.ReallyAbort(true)
-        end
-      end until ret == :next || ret == :back || ret == :addons
-
-      ret
-    end
-
-    def refresh_widget_state
-      enabled = UI.QueryWidget(Id(:do_registration), :Value)
-      all_widgets = [ :reg_server_cert, :email, :reg_code, :slp_discovery,
-        :install_updates, :addons ]
-
-      all_widgets.each do |w|
-        UI.ChangeWidget(Id(w), :Enabled, enabled)
-      end
-
-      slp_enabled = UI.QueryWidget(Id(:slp_discovery), :Value)
-      UI.ChangeWidget(Id(:reg_server), :Enabled, !slp_enabled && enabled)
-    end
-
-    def configure_registration
-      caption = _("Product Registration")
-      help_text = "<p><b>#{caption}</b></p>"
-      help_text += _(
-        "<p>Product registration includes your product in SUSE Customer Center database,\n"+
-          "enabling you to get online updates and technical support.\n"+
-          "To register while installing automatically, select <b>Run Product Registration</b>.</p>"
-      )
-      help_text += _(
-        "<p>If your network deploys a custom registration server, set the correct URL of the server\n" +
-          "and the location of the SMT certificate in <b>SMT Server Settings</b>. Refer\n" +
-          "to your SMT manual for further assistance.</p>"
-      )
-
-      regsettings = VBox(
-        Left(
-          CheckBox(Id(:do_registration), Opt(:notify), _("Register the Product"),
-            @config.do_registration)
-        )
-      )
-
-      reg_code_settings = VBox(
-        # Translators: Text for UI Label - capitalized
-        Frame(_("Registration"),
-          VBox(
-            MinWidth(32, InputField(Id(:email), _("&E-mail Address"), @config.email)),
-            VSpacing(0.4),
-            MinWidth(32, InputField(Id(:reg_code), _("Registration &Code"),
-                @config.reg_code)),
-            VSpacing(0.4),
-            Left(CheckBox(Id(:install_updates),
-                _("Install Available Updates from Update Repositories"),
-                @config.install_updates))
-          )
-        )
-      )
-
-      server_settings = VBox(
-        # Translators: Text for UI Label - capitalized
-        Frame(_("Server Settings"),
-          VBox(
-            VSpacing(0.2),
-            Left(CheckBox(Id(:slp_discovery), Opt(:notify),
-                _("Find Registration Server Using SLP Discovery"),
-                @config.slp_discovery)),
-            VSpacing(0.4),
-            # Translators: Text for UI Label - capitalized
-            InputField(Id(:reg_server), Opt(:hstretch),
-              _("Use Specific Server URL Instead of the Default"),
-              @config.reg_server),
-            VSpacing(0.4),
-            # Translators: Text for UI Label - capitalized
-            InputField(
-              Id(:reg_server_cert),
-              Opt(:hstretch),
-              _("Optional SSL Server Certificate URL"),
-              @config.reg_server_cert
-            )
-          )
-        )
-      )
-
-      contents = VBox(
-        VSpacing(1),
-        regsettings,
-        HBox(
-          HSpacing(2),
-          VBox(
-            VSpacing(1),
-            reg_code_settings,
-            VSpacing(1),
-            server_settings,
-            VSpacing(0.4),
-            PushButton(Id(:addons), _("Register Extensions or Modules...")),
-            VSpacing(0.4)
-          )
-        )
-      )
-
-      Wizard.CreateDialog
-      Wizard.SetContents(caption, contents, help_text, false, true)
-      Wizard.SetNextButton(:next, Label.FinishButton)
-
-      refresh_widget_state
-
-      begin
-        ret = UI.UserInput
-        log.info "ret: #{ret}"
-
-        case ret
-        when :do_registration, :slp_discovery
-          refresh_widget_state
-        when :abort, :cancel
-          break if Popup.ReallyAbort(true)
-        when :next
-          # TODO FIXME: input validation
-        end
-      end until ret == :next || ret == :back || ret == :addons
-
-      if ret == :next || ret == :addons
-        data_widgets = [ :do_registration, :reg_server, :reg_server_cert,
-          :email, :reg_code, :slp_discovery, :install_updates
-        ]
-
-        data = data_widgets.map do |w|
-          [w.to_s, UI.QueryWidget(Id(w), :Value)]
-        end
-
-        import_data = Hash[data]
-        # keep the current addons
-        import_data["addons"] = @config.addons
-        @config.import(import_data)
-      end
-
-      ret
+    # TODO: share this?
+    def disable_update_repos(product_service)
+      update_repos = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Disabling #{update_repos.size} update repositories: #{update_repos}"
+      ::Registration::SwMgmt.set_repos_state(update_repos, false)
     end
 
     # find registration server via SLP
     # @retun [String,nil] URL of the server, nil on error
     def find_slp_server
       # do SLP query
-      slp_services = ::Registration::Helpers.slp_discovery_feedback
+      slp_services = ::Registration::UrlHelpers.slp_discovery_feedback
       slp_urls = slp_services.map(&:slp_url)
 
       # remove possible duplicates
@@ -487,33 +248,26 @@ module Yast
         # more than one server found: let the user select, we cannot automatically
         # decide which one to use, asking user in AutoYast mode is not nice
         # but better than aborting the installation...
-        return ::Registration::Helpers.slp_service_url
+        return ::Registration::UrlHelpers.slp_service_url
       end
 
     end
 
+    def import_certificate(url)
+      log.info "Importing certificate from #{url}..."
+
+      cert = Popup.Feedback(_("Downloading SSL Certificate"), url) do
+        ::Registration::SslCertificate.download(url)
+      end
+
+      Popup.Feedback(_("Importing SSL Certificate"), cert.subject_name) do
+        cert.import_to_system
+      end
+    end
+
     # UI workflow definition
     def start_workflow
-      aliases = {
-        "general"  => lambda { configure_registration() },
-        "addons"   => [ lambda { select_addons() }, true ]
-      }
-
-      sequence = {
-        "ws_start" => "general",
-        "general"  => {
-          :abort   => :abort,
-          :next    => :next,
-          :addons  => "addons"
-        },
-        "addons" => {
-          :abort   => :abort,
-          :next    => "general"
-        }
-      }
-
-      log.info "Starting scc_auto sequence"
-      Sequencer.Run(aliases, sequence)
+      ::Registration::UI::AutoyastConfigWorkflow.run(@config)
     end
 
   end unless defined?(SccAutoClient)

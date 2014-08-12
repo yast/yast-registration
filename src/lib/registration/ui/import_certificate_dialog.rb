@@ -1,10 +1,10 @@
 
-require "erb"
 require "yast"
 
 require "yast/suse_connect"
-require "registration/helpers"
 require "registration/storage"
+require "registration/helpers"
+require "registration/ssl_certificate_details"
 
 module Registration
   module UI
@@ -14,7 +14,6 @@ module Registration
       include Yast::I18n
       extend Yast::I18n
       include Yast::UIShortcuts
-      include ERB::Util
 
       attr_accessor :certificate
 
@@ -41,7 +40,7 @@ module Registration
         dialog.run
       end
 
-      # @param cert [OpenSSL::X509::Certificate] certificate to display
+      # @param cert [SslCertitificate] certificate to display
       def initialize(cert)
         textdomain "registration"
         @certificate = cert
@@ -50,20 +49,14 @@ module Registration
       # display the dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
-        log.info "Displaying certificate import dialog:"
-        log.info " * Issuer: #{@certificate.issuer}"
-        log.info " * Subject: #{@certificate.subject}"
-        log.info " * SHA1: #{::SUSE::Connect::SSLCertificate.sha1_fingerprint(@certificate)}"
+        log.info "Certificate import dialog: issuer: #{certificate.issuer_name}, " \
+          "subject: #{certificate.subject_name}, SHA1: " \
+          "#{certificate.fingerprint(Fingerprint::SHA1).value}"
 
-        dialog_content = import_dialog_content
-        log.debug "Certificate import dialog: #{dialog_content}"
-        Yast::UI.OpenDialog(Opt(:decorated), dialog_content)
+        Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 
         begin
-          Yast::UI.SetFocus(:cancel)
-          ui = Yast::UI.UserInput
-          log.info "User input: #{ui}"
-          return ui
+          handle_dialog
         ensure
           Yast::UI.CloseDialog
         end
@@ -106,18 +99,17 @@ module Registration
         )
       end
 
+      def handle_dialog
+        Yast::UI.SetFocus(:cancel)
+        ui = Yast::UI.UserInput
+        log.info "User input: #{ui}"
+        ui
+      end
+
       # render Richtext description with the certificate details
       def certificate_description
-        # use erb template for rendering the richtext summary
-        erb_file = File.expand_path("../../../../data/registration/certificate_summary.erb", __FILE__)
-
-        log.info "Loading ERB template #{erb_file}"
-        erb = ERB.new(File.read(erb_file))
-
-        @issuer = @certificate.issuer
-        @subject = @certificate.subject
-        # render the ERB template in the context of the current object
-        erb.result(binding)
+        details = SslCertificateDetails.new(certificate)
+        details.richtext_summary
       end
 
       # inline help text displayed in the import dialog

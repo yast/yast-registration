@@ -1,33 +1,21 @@
 <%
 textdomain "registration"
 %>
-
-<%# dialog heading %>
-<h2><%= _("Secure Connection Error") %></h2>
-
-<p>
-  <%# label followed by error details %>
-  <%= _("Details:") %> <%= _(OPENSSL_ERROR_MESSAGES[Storage::SSLErrors.instance.ssl_error_code]) %>
-</p>
-
-<%# dialog sub-heading %>
-<h3><%= _("Failed Certificate Details") %></h3>
-
 <h4><%= _("Issued To") %></h4>
 <blockquote>
   <p>
-    <b><%= _("Common Name (CN): ") %></b><%= h(Helpers.find_name_attribute(@subject, "CN")) %><br>
-    <b><%= _("Organization (O): ") %></b><%= h(Helpers.find_name_attribute(@subject, "O")) %><br>
-    <b><%= _("Organization Unit (OU): ") %></b><%= h(Helpers.find_name_attribute(@subject, "OU")) %>
+    <b><%= _("Common Name (CN): ") %></b><%= h(certificate.subject_name) %><br>
+    <b><%= _("Organization (O): ") %></b><%= h(certificate.subject_organization) %><br>
+    <b><%= _("Organization Unit (OU): ") %></b><%= h(certificate.subject_organization_unit) %>
   </p>
 </blockquote>
 
 <h4><%= _("Issued By") %></h4>
 <blockquote>
   <p>
-    <b><%= _("Common Name (CN): ") %></b><%= h(Helpers.find_name_attribute(@issuer, "CN")) %><br>
-    <b><%= _("Organization (O): ") %></b><%= h(Helpers.find_name_attribute(@issuer, "O")) %><br>
-    <b><%= _("Organization Unit (OU): ") %></b><%= h(Helpers.find_name_attribute(@issuer, "OU")) %>
+    <b><%= _("Common Name (CN): ") %></b><%= h(certificate.issuer_name) %><br>
+    <b><%= _("Organization (O): ") %></b><%= h(certificate.issuer_organization) %><br>
+    <b><%= _("Organization Unit (OU): ") %></b><%= h(certificate.issuer_organization_unit) %>
   </p>
 </blockquote>
 
@@ -35,15 +23,14 @@ textdomain "registration"
 <blockquote>
   <p>
     <%# label followed by the certificate issue date %>
-    <b><%= _("Issued On: ") %></b><%= h(@certificate.not_before.localtime.strftime("%F")) %><br>
-    <% if Time.now < @certificate.not_before %>
+    <b><%= _("Issued On: ") %></b><%= h(certificate.issued_on) %><br>
+    <% if !certificate.valid_yet? %>
       <%# warning added after the certificate issue date if the certificate is not valid yet %>
       <b><font color="red"><%= _("WARNING: The certificate is not valid yet!") %></font></b><br>
     <% end %>
-    <% # label followed by the certificate expiration date
-    %>
-    <b><%= _("Expires On: ") %></b><%= h(@certificate.not_after.localtime.strftime("%F")) %><br>
-    <% if Time.now > @certificate.not_after %>
+    <%# label followed by the certificate expiration date %>
+    <b><%= _("Expires On: ") %></b><%= h(certificate.expires_on) %><br>
+    <% if certificate.expired? %>
       <%# warning added after the certificate expiration date if the certificate has expired %>
       <b><font color="red"><%= _("WARNING: The certificate has expired!") %></font></b>
     <% end %>
@@ -53,9 +40,9 @@ textdomain "registration"
 
 <p>
   <%# label followed by the certificate serial number (in HEX format, e.g. AB:CD:42:FF...) %>
-  <b><%= _("Serial Number: ") %></b><%= h(@certificate.serial.to_s(16).scan(/../).join(":")) %><br>
+  <b><%= _("Serial Number: ") %></b><%= h(certificate.serial) %><br>
   <b><%= _("SHA1 Fingerprint: ") %></b>
-  <%= h(::SUSE::Connect::SSLCertificate.sha1_fingerprint(@certificate)) %>
+  <%= h(certificate.fingerprint(::Registration::Fingerprint::SHA1).value) %>
   <b><%= _("SHA256 Fingerprint: ") %></b>
-  <%= h(::SUSE::Connect::SSLCertificate.sha256_fingerprint(@certificate)) %>
+  <%= h(certificate.fingerprint(::Registration::Fingerprint::SHA256).value) %>
 </p>
