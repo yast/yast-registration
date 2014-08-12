@@ -28,39 +28,35 @@ describe "Registration::UrlHelpers" do
         allow(yast_mode).to receive(:mode).and_return("installation")
       end
 
-      context "no local registration server is announced via SLP" do
-        it "returns 'regurl' boot parameter from Linuxrc" do
-          url = "https://example.com/register"
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
-          # make sure no SLP discovery is executed, the boot parameter has higher priority
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").never
-          expect(Registration::UrlHelpers.registration_url).to eq(url)
-        end
-
-        it "returns nil when no custom URL is required in Linuxrc" do
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-          expect(Registration::UrlHelpers.registration_url).to be_nil
-        end
+      it "returns 'regurl' boot parameter from Linuxrc" do
+        url = "https://example.com/register"
+        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
+        # make sure no SLP discovery is executed, the boot parameter has higher priority
+        expect(yast_wfm).to receive(:call).with("discover_registration_services").never
+        expect(Registration::UrlHelpers.registration_url).to eq(url)
       end
 
-      context "no boot parameter is used and a SLP server is announced" do
-        before do
-          # no boot parameter passed, it would have higher priority
-          expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-        end
+      it "returns the SLP server selected by user" do
+        # no boot parameter passed, it would have higher priority
+        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
 
-        it "returns the SLP server selected by user" do
-          slp_url = "https://example.com/register"
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
-          expect(Registration::UrlHelpers.registration_url).to eq(slp_url)
-        end
+        slp_url = "https://example.com/register"
+        expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(slp_url)
+        expect(Registration::UrlHelpers.registration_url).to eq(slp_url)
+      end
 
-        it "returns nil when the SLP dialog is canceled" do
-          expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
-          expect(Registration::UrlHelpers.registration_url).to be_nil
-        end
+      it "returns nil when the SLP dialog is canceled" do
+        # no boot parameter passed, it would have higher priority
+        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
 
+        expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
+        expect(Registration::UrlHelpers.registration_url).to be_nil
+      end
+
+      it "returns nil in other cases" do
+        expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
+        expect(yast_wfm).to receive(:call).with("discover_registration_services").and_return(nil)
+        expect(Registration::UrlHelpers.registration_url).to be_nil
       end
     end
 
