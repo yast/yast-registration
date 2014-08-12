@@ -75,8 +75,16 @@ module Registration
         Yast::UI.ChangeWidget(Id(:download), :Enabled, ::Registration::Registration.is_registered?)
       end
 
+      def refresh_buttons
+        enabled = !selected_addon.nil?
+        Yast::UI.ChangeWidget(Id(:edit), :Enabled, enabled)
+        Yast::UI.ChangeWidget(Id(:delete), :Enabled, enabled)
+      end
+
       def handle_dialog
         begin
+          refresh_buttons
+
           ret = Yast::UI.UserInput
           log.info "ret: #{ret}"
 
@@ -95,33 +103,40 @@ module Registration
         ret
       end
 
+      def selected_addon
+        current = Yast::UI.QueryWidget(Id(:addons_table), :CurrentItem)
+        return nil if current.nil?
+
+        find_addon(current)
+      end
+
+      def find_addon(name)
+        addons.find{|a| a["name"] == name}
+      end
+
       def delete_addon
-        selected = Yast::UI.QueryWidget(Id(:addons_table), :CurrentItem)
-        if selected && Popup.YesNo(_("Really delete '%s'?") % selected)
-          addons.reject!{|a| a["name"] == selected}
+        addon = selected_addon
+        if Popup.YesNo(_("Really delete '%s'?") % addon["name"])
+          addons.delete(addon)
           set_addon_table_content
         end
       end
 
       def edit_addon
-        selected = Yast::UI.QueryWidget(Id(:addons_table), :CurrentItem)
-        if selected
-          addon = addons.find{|a| a["name"] == selected}
+        addon = selected_addon
+        ret = display_addon_popup(addon)
 
-          ret = display_addon_popup(addon)
-
-          if ret
-            # replace the content
-            addon.merge!(ret)
-            set_addon_table_content(addon["name"])
-          end
+        if ret
+          # replace the content
+          addon.merge!(ret)
+          set_addon_table_content(addon["name"])
         end
       end
 
       def add_addon
         ret = display_addon_popup
         if ret
-          addon = addons.find{|a| a["name"] == ret["name"]}
+          addon = find_addon(ret["name"])
           if addon
             addon["reg_code"] = ret["reg_code"]
           else
