@@ -165,7 +165,7 @@ module Registration
         false
       rescue Exception => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
-        Yast::Report.Error(_("Registration failed."))
+        Yast::Report.Error(error_with_details(_("Registration failed."), e.message))
         false
       end
     end
