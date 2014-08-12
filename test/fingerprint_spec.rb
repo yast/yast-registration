@@ -40,6 +40,13 @@ describe Registration::Fingerprint do
       expect(fp1 == fp2).to be_true
     end
 
+    it "compares the sum types case insensitively" do
+      fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1.downcase, sha1)
+      fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1.upcase, sha1)
+      expect(fp1.sum).to_not eq(fp2.sum)
+      expect(fp1 == fp2).to be_true
+    end
+
     it "ignores optional colon separator in fingerprints" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1.tr(":", ""))
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
