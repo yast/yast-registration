@@ -32,16 +32,11 @@ module Registration
     end
     
     def summary(small_space: false)
-      summary = <<EOS
-#{_("Certificate:")}
-#{_("Issued To")}
-#{subject}
-#{_("Issued By")}
-#{issuer}
-#{_("SHA1 Fingerprint: ")}
-#{INDENT}#{certificate.fingerprint(Fingerprint::SHA1).value}
-#{_("SHA256 Fingerprint: ")}
-EOS
+      summary = _("Certificate:") + "\n" + _("Issued To") + "\n" + subject +
+        "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
+        "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
+        _("SHA256 Fingerprint: ")  + "\n"
+
       sha256 = certificate.fingerprint(Fingerprint::SHA256).value
       if small_space
         # split the long SHA256 digest to two lines in small text mode UI

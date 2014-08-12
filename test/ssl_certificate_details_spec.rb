@@ -58,48 +58,10 @@ EOS
   describe "#richtext_summary" do
     it "returns rich text summary of the whole certificate" do
       result = subject.richtext_summary
-      expect(result).to eq(<<EOS
-
-<h4>Issued To</h4>
-<blockquote>
-  <p>
-    <b>Common Name (CN): </b>linux-1hyn<br>
-    <b>Organization (O): </b>WebYaST<br>
-    <b>Organization Unit (OU): </b>WebYaST
-  </p>
-</blockquote>
-
-<h4>Issued By</h4>
-<blockquote>
-  <p>
-    <b>Common Name (CN): </b>linux-1hyn<br>
-    <b>Organization (O): </b>WebYaST<br>
-    <b>Organization Unit (OU): </b>WebYaST
-  </p>
-</blockquote>
-
-<h4>Validity</h4>
-<blockquote>
-  <p>
-    
-    <b>Issued On: </b>2014-04-24<br>
-    
-    
-    <b>Expires On: </b>2017-04-23<br>
-    
-  </p>
-</p>
-</blockquote>
-
-<p>
-  
-  <b>Serial Number: </b>B8:AB:F1:73:E4:1F:10:4D<br>
-  <b>SHA1 Fingerprint: </b>
-  A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9
-  <b>SHA256 Fingerprint: </b>
-  2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF
-</p>
-EOS
+      expect(result).to include("WebYaST")
+      expect(result).to include("A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9")
+      expect(result).to include(
+        "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF"
       )
     end
   end
