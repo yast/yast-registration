@@ -14,6 +14,7 @@ module Registration
       Yast.import "GetInstArgs"
       Yast.import "UI"
       Yast.import "Wizard"
+      Yast.import "Stage"
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(addons, known_reg_codes)
@@ -141,13 +142,18 @@ module Registration
       end
 
       def handle_dialog
-        continue_buttons = [:next, :back, :close, :abort]
+        continue_buttons = [:next, :back, :abort]
 
         ret = nil
         while !continue_buttons.include?(ret) do
           ret = Yast::UI.UserInput
 
-          collect_addon_regcodes if ret == :next
+          case ret
+          when :next
+            collect_addon_regcodes
+          when :cancel, :abort
+            ret = Stage.initial && !Popup.ConfirmAbort(:painless) ? nil : :abort
+          end
         end
 
         ret
