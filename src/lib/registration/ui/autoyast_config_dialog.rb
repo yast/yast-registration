@@ -158,15 +158,16 @@ module Registration
       end
 
       def content
+        extra_spacing = Yast::UI.TextMode ? 0 : 1
         VBox(
-          VSpacing(1),
+          VSpacing(extra_spacing),
           content_reg_settings,
           HBox(
             HSpacing(2),
             VBox(
-              VSpacing(1),
+              VSpacing(extra_spacing),
               content_reg_code_settings,
-              VSpacing(1),
+              VSpacing(extra_spacing),
               content_server_settings,
               VSpacing(0.4),
               PushButton(Id(:addons), _("Register Extensions or Modules...")),
