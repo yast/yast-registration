@@ -146,10 +146,9 @@ module Registration
           case ret
           when :next
             ret = handle_next_button
-            # when canceled switch to old selection
           when :cancel, :abort
-            ret = nil if Stage.initial && !Popup.ConfirmAbort(:painless)
-            ret = :abort if ret == :cancel
+            ret = Stage.initial && !Popup.ConfirmAbort(:painless) ? nil : :abort
+            # when canceled switch to old selection
             Addon.selected.replace(@old_selection) if ret == :abort
           else
             handle_addon_selection(ret)
