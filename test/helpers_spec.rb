@@ -179,7 +179,7 @@ describe "Registration::Helpers" do
   end
 
   describe ".write_config" do
-    it "wtites the current configuration" do
+    it "writes the current configuration" do
       url = "https://example.com"
       expect(Registration::UrlHelpers).to receive(:registration_url) \
         .and_return(url)
