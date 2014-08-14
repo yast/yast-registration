@@ -5,12 +5,7 @@
 textdomain "registration"
 
 NEW_TEXTS = [
-  # error message, %s is URL
-  _("Cannot download SSL certificate from\n%s"),
-  _("Import File..."),
   _("SSL Certificate"),
-  # progress message
-  _("Importing certificate..."),
   # checkbox: use SLP discovery later again in the installed system
   _("Use SLP Discovery Also Later in Installed System")
 ]
