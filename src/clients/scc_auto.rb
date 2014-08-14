@@ -154,11 +154,11 @@ module Yast
       # nil = use the default URL
       @registration = ::Registration::Registration.new(url)
 
-      if @config.reg_server_cert && !@config.reg_server_cert.empty?
-        import_certificate(@config.reg_server_cert)
-      end
-
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
+        if @config.reg_server_cert && !@config.reg_server_cert.empty?
+          import_certificate(@config.reg_server_cert)
+        end
+
         base_product = ::Registration::SwMgmt.find_base_product
         distro_target = base_product["register_target"]
 
