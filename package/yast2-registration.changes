@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug 14 10:57:03 UTC 2014 - lslezak@suse.cz
+
+- reset registration status on failure (bnc#889531)
+- removed (sometimes) confusing error message (bnc#889531)
+- 3.1.101
+
+-------------------------------------------------------------------
 Tue Aug 12 15:32:51 UTC 2014 - lslezak@suse.cz
 
 - handle closing by window manager (:cancel event) (bnc#891550)

@@ -105,13 +105,12 @@ module Registration
 
             # add the hint to the error details
             e.message << "\n\n\n" + msg
-            report_error(message_prefix + _("Registration failed."), e)
-          else
-            report_error(message_prefix + _("The e-mail address is not known or\nthe registration code is not valid."), e)
           end
+
+          report_error(message_prefix + _("Registration failed."), e)
         when 422
           # Error popup
-          report_error(message_prefix + _("The e-mail address is not known or\nthe registration code is not valid."), e)
+          report_error(message_prefix + _("Registration failed."), e)
         when 400..499
           report_error(message_prefix + _("Registration client error."), e)
         when 500..599

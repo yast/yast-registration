@@ -180,6 +180,7 @@ module Yast
             # reset the registration object and the cache to allow changing the URL
             @registration = nil
             ::Registration::UrlHelpers::reset_registration_url
+            ::Registration::Helpers.reset_registration_status
           end
         end
 
