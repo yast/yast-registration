@@ -111,4 +111,43 @@ describe "Registration::Registration" do
     end
   end
 
+  describe "#verify_callback" do
+    let(:registration) { Registration::Registration.new }
+    let(:callback) { registration.send(:verify_callback) }
+    let(:error_code) { 19 }
+    let(:error_string) { "self signed certificate in certificate chain" }
+    # SSL error context
+    let(:context) { double(:error => error_code, :error_string => error_string) }
+
+    it "stores the SSL error details" do
+      certificate = File.read(fixtures_file("test.pem"))
+      expect(context).to receive(:current_cert).and_return(certificate).twice
+
+      storage = Registration::Storage::SSLErrors.instance
+      expect(storage).to receive(:ssl_error_code=).with(error_code)
+      expect(storage).to receive(:ssl_error_msg=).with(error_string)
+      expect(storage).to receive(:ssl_failed_cert=).
+        with(an_instance_of(Registration::SslCertificate))
+
+      expect { callback.call(false, context) }.to_not raise_error
+    end
+
+    it "logs the exception raised inside" do
+      # set an invalid certificate to throw an exception in the callback
+      expect(context).to receive(:current_cert).
+        and_return("INVALID CERTIFICATE").twice
+
+      logger = double
+      expect(logger).to receive(:error).with(/SSL verification failed:/)
+      # the exception is logged
+      expect(logger).to receive(:error).with(
+        /Exception in SSL verify callback: OpenSSL::X509::CertificateError/)
+
+      allow(registration).to receive(:log).and_return(logger)
+
+      # the exception is re-raised
+      expect { callback.call(false, context) }.to raise_error OpenSSL::X509::CertificateError
+    end
+  end
+
 end

@@ -149,19 +149,27 @@ module Registration
     # returns SSL verify callback
     def verify_callback
       lambda do |verify_ok, context|
-        # we cannot raise an exception with details here (all exceptions in
-        # verify_callback are caught and ignored), we need to store the error
-        # details in a global instance
-        if !verify_ok
-          log.error "SSL verification failed: #{context.error}: #{context.error_string}"
-          Storage::SSLErrors.instance.ssl_error_code = context.error
-          Storage::SSLErrors.instance.ssl_error_msg = context.error_string
-          Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
-            SslCertitificate.load(context.current_cert) : nil
-        end
+        begin
+          # we cannot raise an exception with details here (all exceptions in
+          # verify_callback are caught and ignored), we need to store the error
+          # details in a global instance
+          store_ssl_error(context) unless verify_ok
 
-        verify_ok
+          verify_ok
+        rescue Exception => e
+          log.error "Exception in SSL verify callback: #{e.class}: #{e.message} : #{e.backtrace}"
+          # the exception will be ignored, but reraise anyway...
+          raise e
+        end
       end
+    end
+
+    def store_ssl_error(context)
+      log.error "SSL verification failed: #{context.error}: #{context.error_string}"
+      Storage::SSLErrors.instance.ssl_error_code = context.error
+      Storage::SSLErrors.instance.ssl_error_msg = context.error_string
+      Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
+        SslCertificate.load(context.current_cert) : nil
     end
 
     def connect_params(params)
