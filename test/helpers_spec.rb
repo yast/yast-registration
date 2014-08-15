@@ -234,4 +234,34 @@ describe "Registration::Helpers" do
     end
   end
 
+  describe ".hide_reg_codes" do
+    it "returns the original value if the input is not a Hash" do
+      test = "test"
+      expect(Registration::Helpers.hide_reg_codes(test)).to be(test)
+    end
+
+    it "it does not change anything if there is no registration code in the Hash" do
+      test = { "test" => "foo" }
+      expect(Registration::Helpers.hide_reg_codes(test)).to eq(test)
+    end
+
+    it "it replaces \"reg_code\" value by [FILTERED]" do
+      test = { "reg_code" => "foo" }
+      expect(Registration::Helpers.hide_reg_codes(test)).to eq("reg_code" => "[FILTERED]")
+    end
+
+    it "it replaces \"reg_code\" also in nested \"addons\" list" do
+      test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
+      expect(Registration::Helpers.hide_reg_codes(test)).to eq(
+        "addons" => [{ "reg_code"=>"[FILTERED]" }, { "reg_code"=>"[FILTERED]" }])
+    end
+
+    it "it does not modify the original input value" do
+      test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
+      Registration::Helpers.hide_reg_codes(test)
+      # make sure the copy is deep, i.e. the original value is unchanged
+      expect(test).to eq({ "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] })
+    end
+  end
+
 end

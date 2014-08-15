@@ -43,6 +43,9 @@ module Registration
     Yast.import "Mode"
     Yast.import "SlpService"
 
+    # reg. code replacement
+    FILTERED = "[FILTERED]"
+
     # Get the language for using in HTTP requests (in "Accept-Language" header)
     def self.language
       lang = Yast::WFM.GetLanguage
@@ -179,6 +182,31 @@ module Registration
       end
 
       configuration
+    end
+
+    # Hide registration codes in Autoyast data
+    # The result should be just logged, the result might not be a full duplicate
+    # of the input is all cases and therefore should NOT be modified.
+    # @param settings input value
+    # @return either the original value or a value with replaced "reg_code" entries
+    # TODO: move AutoYast settings to a separate class and override #to_s
+    def self.hide_reg_codes(settings)
+      return settings unless settings.is_a?(Hash)
+
+      # create a duplicate
+      filtered = settings.dup
+      filtered["reg_code"] = FILTERED if filtered["reg_code"]
+
+      return filtered unless filtered["addons"].is_a?(Array)
+
+      # duplicate the nested values
+      filtered["addons"] = filtered["addons"].map(&:dup)
+
+      filtered["addons"].each do |addon|
+        addon["reg_code"] = FILTERED if addon["reg_code"]
+      end
+
+      filtered
     end
 
   end
