@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug 18 13:34:05 UTC 2014 - lslezak@suse.cz
+
+- allow starting the module directly at the extension selection
+  screen when invoked from "repositories" Yast module (bnc#888566)
+- 3.1.105
+
+-------------------------------------------------------------------
 Mon Aug 18 13:49:45 CEST 2014 - schubi@suse.de
 
 - Autoyast: Moving registration to first stage of installation.
