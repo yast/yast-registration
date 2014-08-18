@@ -589,7 +589,7 @@ module Yast
       }
 
       sequence = {
-        "ws_start" => "check",
+        "ws_start" => workflow_start,
         "check" => {
           :auto       => :auto,
           :abort      => :abort,
@@ -628,6 +628,13 @@ module Yast
 
       log.info "Starting scc sequence"
       Sequencer.Run(aliases, sequence)
+    end
+
+    # which dialog should be displayed at start
+    def workflow_start
+      log.debug "WFM.Args: #{WFM.Args}"
+      WFM.Args.include?("select_extensions") && Registration::Registration.is_registered? ?
+        "select_addons" : "check"
     end
 
     def init_registration
