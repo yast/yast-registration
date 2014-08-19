@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 19 14:17:23 UTC 2014 - lslezak@suse.cz
+
+- check for old SMT server API when registration fails, display
+  error about outdated SMT server (bnc#889503)
+- 3.1.106
+
+-------------------------------------------------------------------
 Mon Aug 18 13:34:05 UTC 2014 - lslezak@suse.cz
 
 - allow starting the module directly at the extension selection

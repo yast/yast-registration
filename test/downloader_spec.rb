@@ -45,7 +45,7 @@ describe "Registration::Downloader" do
       expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
-      expect{Registration::Downloader.download(url)}.to raise_error RuntimeError,
+      expect{Registration::Downloader.download(url)}.to raise_error Registration::DownloadError,
         "Downloading #{url} failed: Not Found"
     end
 
