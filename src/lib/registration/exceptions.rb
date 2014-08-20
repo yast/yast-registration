@@ -33,4 +33,7 @@ module Registration
       @service = service
     end
   end
+
+  class DownloadError < RuntimeError
+  end
 end

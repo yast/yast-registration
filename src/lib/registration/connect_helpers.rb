@@ -27,6 +27,7 @@ require "suse/connect"
 require "registration/helpers"
 require "registration/exceptions"
 require "registration/storage"
+require "registration/smt_status"
 require "registration/ssl_certificate"
 require "registration/ssl_certificate_details"
 require "registration/url_helpers"
@@ -108,6 +109,11 @@ module Registration
           end
 
           report_error(message_prefix + _("Registration failed."), e)
+        when 404
+          # update the message when an old SMT server is found
+          check_smt_api(e)
+
+          report_error(message_prefix + _("Registration failed."), e)
         when 422
           # Error popup
           report_error(message_prefix + _("Registration failed."), e)
@@ -162,6 +168,11 @@ module Registration
         end
 
         false
+      rescue JSON::ParserError => e
+        # update the message when an old SMT server is found
+        check_smt_api(e)
+
+        report_error(message_prefix + _("Registration failed."), e)
       rescue Exception => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(error_with_details(_("Registration failed."), e.message))
@@ -227,6 +238,28 @@ module Registration
       Yast::Report.Error(
         error_with_details(_("Secure connection error: %s") % msg, ssl_error_details(cert))
       )
+    end
+
+    def self.check_smt_api(e)
+      url = UrlHelpers.registration_url
+      # no SMT/custom server used
+      return if url.nil?
+
+      # test old SMT instance
+      smt_status = SmtStatus.new(url, insecure: Helpers.insecure_registration)
+      return unless smt_status.ncc_api_present?
+
+      # display just the hostname in the server URL
+      display_url = URI(url)
+      display_url.path = ""
+      display_url.query = nil
+      # TRANSLATORS: error message, %s is a server URL,
+      # e.g. https://smt.example.com
+      msg = _("An old registration server was detected at\n%s.\n" \
+          "Make sure the latest product supporting the new registration\n" \
+          "protocol is installed at the server.") % display_url
+
+      e.message.replace(msg)
     end
 
   end
