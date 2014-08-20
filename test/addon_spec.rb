@@ -243,4 +243,13 @@ describe Registration::Addon do
     end
   end
 
+  describe "#to_h" do
+    it "returns a Hash representation" do
+      product = addon_generator
+
+      addon = Registration::Addon.new(product)
+      expect(addon.to_h).to be_a(Hash)
+    end
+  end
+
 end
