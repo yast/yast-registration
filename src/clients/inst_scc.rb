@@ -325,14 +325,14 @@ module Yast
         HSquash(
           VBox(
             MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-            VSpacing(0.5),
+            VSpacing(UI.TextMode ? 0 : 0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        VSpacing(1),
+        VSpacing(UI.TextMode ? 0 : 1),
         # button label
         PushButton(Id(:local_server), _("&Local Registration Server...")),
-        VSpacing(UI.TextMode ? 1 : 3),
+        VSpacing(UI.TextMode ? 0 : 3),
         # button label
         registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
