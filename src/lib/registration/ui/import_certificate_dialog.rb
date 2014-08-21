@@ -64,6 +64,22 @@ module Registration
 
       private
 
+      def certificate_box
+        VBox(
+          HSpacing(75),
+          MarginBox(0.4, 0.4, RichText(certificate_description)),
+          ButtonBox(
+            # push button
+            PushButton(Id(:import), Opt(:key_F10, :okButton), _("&Trust and Import")),
+            PushButton(
+              Id(:cancel),
+              Opt(:key_F9, :cancelButton),
+              Yast::Label.CancelButton
+            )
+          )
+        )
+      end
+
       # create dialog content
       def import_dialog_content
         displayinfo = Yast::UI.GetDisplayInfo
@@ -80,22 +96,7 @@ module Registration
             Empty() :
             HWeight(2, VBox(RichText(Opt(:disabled), warning_text))),
           HSpacing(1),
-          HWeight(
-            5,
-            VBox(
-              HSpacing(75),
-              MarginBox(0.4, 0.4, RichText(certificate_description)),
-              ButtonBox(
-                # push button
-                PushButton(Id(:import), Opt(:key_F10, :okButton), _("&Trust and Import")),
-                PushButton(
-                  Id(:cancel),
-                  Opt(:key_F9, :cancelButton),
-                  Yast::Label.CancelButton
-                )
-              )
-            )
-          )
+          HWeight(5, certificate_box)
         )
       end
 
