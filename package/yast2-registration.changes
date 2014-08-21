@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug 21 11:07:07 CEST 2014 - locilka@suse.com
+
+- Fixed aborting from the base product registration dialog in
+  installation - it needs user confirmation now (bnc#886662)
+- 3.1.107
+
+-------------------------------------------------------------------
 Tue Aug 19 14:17:23 UTC 2014 - lslezak@suse.cz
 
 - check for old SMT server API when registration fails, display
