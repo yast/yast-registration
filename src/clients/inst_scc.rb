@@ -182,6 +182,8 @@ module Yast
             ::Registration::UrlHelpers::reset_registration_url
             ::Registration::Helpers.reset_registration_status
           end
+        when :abort
+          ret = nil unless Popup.ConfirmAbort(:painless)
         end
 
         if ret == :skip && confirm_skipping
