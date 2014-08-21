@@ -40,26 +40,30 @@ module Registration
         Yast::UI.OpenDialog(Opt(:decorated), dialog_content)
 
         begin
-          ui = nil
-          while ![:ok, :cancel].include?(ui)
-            Yast::UI.SetFocus(:url)
-            ui = Yast::UI.UserInput
-            log.info "User input: #{ui}"
-
-            if ui == :ok && !valid_url?
-              # error message, the entered URL is not valid
-              Yast::Report.Error(_("Invalid URL."))
-              ui = nil
-            end
-          end
-
-          (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil
+          handle_dialog
         ensure
           Yast::UI.CloseDialog
         end
       end
 
       private
+
+      def handle_dialog
+        ui = nil
+        while ![:ok, :cancel].include?(ui)
+          Yast::UI.SetFocus(:url)
+          ui = Yast::UI.UserInput
+          log.info "User input: #{ui}"
+
+          if ui == :ok && !valid_url?
+            # error message, the entered URL is not valid
+            Yast::Report.Error(_("Invalid URL."))
+            ui = nil
+          end
+        end
+
+        (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil
+      end
 
       def valid_url?
         begin
@@ -70,6 +74,21 @@ module Registration
         end
       end
 
+      def button_box
+        [
+          PushButton(
+            Id(:ok),
+            Opt(:key_F10, :okButton, :default),
+            Yast::Label.OKButton
+          ),
+          PushButton(
+            Id(:cancel),
+            Opt(:key_F9, :cancelButton),
+            Yast::Label.CancelButton
+          )
+        ]
+      end
+
       # create dialog content
       def local_server_dialog_content
         MarginBox(1, 0.6,
@@ -77,18 +96,7 @@ module Registration
             # input field label
             InputField(Id(:url), _("&Local Registration Server URL"), local_url),
             VSpacing(0.6),
-            ButtonBox(
-              PushButton(
-                Id(:ok),
-                Opt(:key_F10, :okButton, :default),
-                Yast::Label.OKButton
-              ),
-              PushButton(
-                Id(:cancel),
-                Opt(:key_F9, :cancelButton),
-                Yast::Label.CancelButton
-              )
-            )
+            ButtonBox(*button_box)
           )
         )
       end
