@@ -131,6 +131,19 @@ module Registration
       return true
     end
 
+    # Convert to a Hash, exports only the basic Addon properties
+    # @param [Boolean] release_type_string if true the "release_type" atribute
+    #   will be always a String (nil will be converted to "nil")
+    # @return [Hash] Hash with basic Addon properties
+    def to_h(release_type_string: false)
+      {
+        "name" => identifier,
+        "arch" => arch,
+        "version" => version,
+        "release_type" => (release_type.nil? && release_type_string) ? "nil" : release_type
+      }
+    end
+
     # is the addon available? SMT may have mirrored only some extensions,
     # the not mirrored extensions are marked as not available
     # @return [Boolean] true if the addon is available to register

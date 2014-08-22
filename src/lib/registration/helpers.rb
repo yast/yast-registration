@@ -24,7 +24,9 @@
 require "yast"
 require "erb"
 
+require "registration/addon"
 require "registration/registration"
+require "registration/storage"
 require "registration/url_helpers"
 require "suse/connect"
 
@@ -151,6 +153,32 @@ module Registration
 
       # render the ERB template in the context of the requested object
       erb.result(binding)
+    end
+
+    def self.collect_autoyast_config(known_reg_codes)
+      options = Storage::InstallationOptions.instance
+      configuration = {
+        "do_registration" => true,
+        "email" => options.email,
+        "reg_code" => options.reg_code,
+        "install_updates" => options.install_updates
+      }
+
+      reg_server = UrlHelpers.registration_url
+      configuration["reg_server"] = reg_server if reg_server
+
+      if options.imported_cert_sha256_fingerprint
+        configuration["reg_server_cert_fingerprint_type"] = "SHA256"
+        configuration["reg_server_cert_fingerprint"] = options.imported_cert_sha256_fingerprint
+      end
+
+      configuration["addons"] = Addon.registered.map do |addon|
+        addon_hash = addon.to_h(release_type_string: true)
+        addon_hash["reg_code"] = known_reg_codes[addon.identifier] || ""
+        addon_hash
+      end
+
+      configuration
     end
 
   end

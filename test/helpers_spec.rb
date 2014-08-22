@@ -202,4 +202,36 @@ describe "Registration::Helpers" do
     end
   end
 
+  describe ".collect_autoyast_config" do
+    it "returns installation data as Autoyast hash" do
+      options = Registration::Storage::InstallationOptions.instance
+      options.email = "foo"
+      options.reg_code = "bar"
+      options.install_updates = true
+      options.imported_cert_sha256_fingerprint = "AB:CD:EF"
+
+      expect(Registration::UrlHelpers).to receive (:registration_url)
+
+      addon = Registration::Addon.new(addon_generator(
+          "zypper_name" => "sle-sdk",
+          "version" => "12",
+          "arch" => "x86_64",
+          "release_type" => nil
+        )
+      )
+      expect(Registration::Addon).to receive(:registered).and_return([addon])
+
+      expect(Registration::Helpers.collect_autoyast_config({})).to eq(
+        "do_registration" => true,
+        "email" => "foo",
+        "reg_code" => "bar",
+        "install_updates" => true,
+        "addons" => [{"name"=>"sle-sdk", "arch"=>"x86_64", "version"=>"12",
+            "release_type"=>"nil", "reg_code"=>""}],
+        "reg_server_cert_fingerprint" => "AB:CD:EF",
+        "reg_server_cert_fingerprint_type" => "SHA256"
+      )
+    end
+  end
+
 end

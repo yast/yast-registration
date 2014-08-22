@@ -143,13 +143,8 @@ module Registration
         ::Registration::Addon.selected.each do |addon|
           # TODO FIXME: use a separate class for handling Autoyast addons,
           # define == operator, etc...
-          new_addon = {
-            "name" => addon.identifier,
-            "version" => addon.version,
-            "arch" => addon.arch,
-            "release_type" => addon.release_type,
-            "reg_code" => known_reg_codes[addon.identifier] || ""
-          }
+          new_addon = addon.to_h
+          new_addon["reg_code"] = known_reg_codes[addon.identifier] || ""
 
           # already known?
           config_addon = find_addon(new_addon)

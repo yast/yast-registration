@@ -325,14 +325,14 @@ module Yast
         HSquash(
           VBox(
             MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-            VSpacing(0.5),
+            VSpacing(UI.TextMode ? 0 : 0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
           )
         ),
-        VSpacing(1),
+        VSpacing(UI.TextMode ? 0 : 1),
         # button label
         PushButton(Id(:local_server), _("&Local Registration Server...")),
-        VSpacing(UI.TextMode ? 1 : 3),
+        VSpacing(UI.TextMode ? 0 : 3),
         # button label
         registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
         VStretch()
@@ -578,6 +578,17 @@ module Yast
       ::Registration::UI::AddonEulaDialog.run(@selected_addons)
     end
 
+    def update_autoyast_config
+      options = ::Registration::Storage::InstallationOptions.instance
+      return :next unless Mode.installation && options.base_registered
+
+      log.info "Updating Autoyast config"
+      config = ::Registration::Storage::Config.instance
+      config.import(::Registration::Helpers.collect_autoyast_config(@known_reg_codes))
+      config.modified = true
+      :next
+    end
+
     # UI workflow definition
     def start_workflow
       aliases = {
@@ -587,7 +598,8 @@ module Yast
         "select_addons"   => lambda { select_addons() },
         "update"          => [ lambda { update_registration() }, true ],
         "addon_eula"      => lambda { addon_eula() },
-        "register_addons" => lambda { register_addons() }
+        "register_addons" => lambda { register_addons() },
+        "update_autoyast_config" => lambda { update_autoyast_config() }
       }
 
       sequence = {
@@ -624,6 +636,9 @@ module Yast
         },
         "register_addons" => {
           :abort    => :abort,
+          :next     => "update_autoyast_config"
+        },
+        "update_autoyast_config" => {
           :next     => :next
         }
       }

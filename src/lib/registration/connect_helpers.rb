@@ -223,6 +223,8 @@ module Registration
         cert.import_to_system
       end
 
+      # remember the imported certificate fingerprint for Autoyast export
+      Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint = cert.sha256_fingerprint
       log.info "Certificate import result: #{result}"
       true
     end

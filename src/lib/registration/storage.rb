@@ -35,11 +35,12 @@ module Registration
     end
 
     # remember the values entered by user
+    # TODO use Config instead to allow easy export at installation
     class InstallationOptions
       include Singleton
 
       attr_accessor :install_updates, :email, :reg_code, :selected_addons,
-        :base_registered, :custom_url
+        :base_registered, :custom_url, :imported_cert_sha256_fingerprint
 
       def initialize
         @email = ""
@@ -55,7 +56,6 @@ module Registration
       include Singleton
 
       def initialize
-        # TODO: handle registered addons in installed system
         self.registered_addons = []
         self.first_run = true
       end
@@ -158,7 +158,7 @@ module Registration
       def export_ssl_config
         ret = { "reg_server_cert" => reg_server_cert }
 
-        if reg_server_cert_fingerprint_type
+        if reg_server_cert_fingerprint_type && !reg_server_cert_fingerprint_type.empty?
           ret["reg_server_cert_fingerprint_type"] = reg_server_cert_fingerprint_type
           ret["reg_server_cert_fingerprint"] = reg_server_cert_fingerprint
         end
