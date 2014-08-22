@@ -131,6 +131,10 @@ module Registration
       return true
     end
 
+    # Convert to a Hash, exports only the basic Addon properties
+    # @param [Boolean] release_type_string if true the "release_type" atribute
+    #   will be always a String (nil will be converted to "nil")
+    # @return [Hash] Hash with basic Addon properties
     def to_h(release_type_string: false)
       {
         "name" => identifier,
