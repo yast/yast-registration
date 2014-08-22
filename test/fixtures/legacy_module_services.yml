@@ -1,0 +1,41 @@
+---
+- !ruby/object:SUSE::Connect::Remote::Service
+  table:
+    :id: 1140
+    :name: Legacy_Module_12_x86_64
+    :url: https://scc.suse.com/access/services/1140?credentials=Legacy_Module_12_x86_64
+    :product: !ruby/object:SUSE::Connect::Remote::Product
+      table:
+        :id: 1150
+        :name: Legacy Module
+        :identifier: sle-module-legacy
+        :former_identifier: sle-module-legacy
+        :version: '12'
+        :release_type: 
+        :arch: x86_64
+        :friendly_name: Legacy Module 12 x86_64
+        :product_class: 
+        :cpe: cpe:/o:suse:sle-module-legacy:12.0
+        :free: true
+        :description: "<p> The Legacy Module supports your migration from SUSE Linux
+          Enterprise 10 and 11 and other systems to SUSE Linux Enterprise 12, by providing
+          packages which are discontinued on SUSE Linux Enterprise Server, but which
+          you may rely on, such as: CyrusIMAP, BSD like ftp client, sendmail, IBM
+          Java6. </p> <p> Access to the Legacy Module is included in your SUSE Linux
+          Enterprise Server subscription. The module has a different lifecycle than
+          SUSE Linux Enterprise Server itself; please check the Release Notes for
+          further details. </p>"
+        :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1.license/
+        :enabled_repositories:
+        - 1491
+        :extensions: []
+        :repositories:
+        - id: 1491
+          name: SLE-MODULE-LEGACY12-Pool
+          distro_target: sle-12-x86_64
+          description: SLE-MODULE-LEGACY12-Pool for sle-12-x86_64
+          url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1
+          enabled: true
+          autorefresh: false
+      modifiable: true
+  modifiable: true

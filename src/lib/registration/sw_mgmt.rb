@@ -348,6 +348,32 @@ module Registration
       end
     end
 
+    # select products for new added extensions/modules
+    def self.select_addon_products
+      addon_services = ::Registration::Storage::Cache.instance.addon_services
+      log.info "New addon services: #{addon_services}"
+
+      new_repos = addon_services.reduce([]) do |acc, service|
+        acc.concat(::Registration::SwMgmt.service_repos(service))
+      end
+
+      return if new_repos.empty?
+
+      products = Pkg.ResolvableProperties("", :product, "")
+      products.select! do |product|
+        product["status"] == :available &&
+          new_repos.any?{|new_repo| product["source"] == new_repo["SrcId"]}
+      end
+      products.map!{|product| product["name"]}
+
+      log.info "Products to install: #{products}"
+
+      products.each do |product|
+        Pkg.ResolvableInstall(product, :product)
+      end
+    end
+
+
     private_class_method :each_repo
   end
 end
