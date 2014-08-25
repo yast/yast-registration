@@ -1,0 +1,16 @@
+---
+- alias: Legacy_Module_12_x86_64:SLE-MODULE-LEGACY12-Pool
+  autorefresh: false
+  base_urls:
+  - https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1?da6d
+  enabled: true
+  is_update_repo: false
+  keeppackages: false
+  mirror_list: ''
+  name: SLE-MODULE-LEGACY12-Pool
+  priority: 99
+  product_dir: ''
+  service: Legacy_Module_12_x86_64
+  type: YUM
+  url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1?da6d
+  SrcId: 5

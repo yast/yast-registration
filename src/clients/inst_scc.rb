@@ -441,6 +441,9 @@ module Yast
           # select repositories to use in installation (e.g. enable/disable Updates)
           select_repositories(product_service) if Mode.installation || Mode.update
 
+          # remember the added service
+          ::Registration::Storage::Cache.instance.addon_services << product_service
+
           # move from selected to registered
           product.registered
           @selected_addons.reject!{|selected| selected.identifier == product.identifier}
@@ -589,6 +592,16 @@ module Yast
       :next
     end
 
+    def pkg_manager
+      # during installation the products are installed together with the base
+      # product, run the package manager only in installed system
+      return :next unless Mode.normal
+
+      ::Registration::SwMgmt.select_addon_products
+
+      WFM.call("sw_single")
+    end
+
     # UI workflow definition
     def start_workflow
       aliases = {
@@ -599,7 +612,8 @@ module Yast
         "update"          => [ lambda { update_registration() }, true ],
         "addon_eula"      => lambda { addon_eula() },
         "register_addons" => lambda { register_addons() },
-        "update_autoyast_config" => lambda { update_autoyast_config() }
+        "update_autoyast_config" => lambda { update_autoyast_config() },
+        "pkg_manager" => lambda { pkg_manager() }
       }
 
       sequence = {
@@ -639,6 +653,11 @@ module Yast
           :next     => "update_autoyast_config"
         },
         "update_autoyast_config" => {
+          :abort    => :abort,
+          :next     => "pkg_manager"
+        },
+        "pkg_manager" => {
+          :abort    => :abort,
           :next     => :next
         }
       }

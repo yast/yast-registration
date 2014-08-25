@@ -4,6 +4,7 @@ require_relative "spec_helper"
 require_relative "yast_stubs"
 
 require "suse/connect"
+require "yaml"
 
 describe "Registration::SwMgmt" do
   let(:yast_pkg) { double("Yast::Pkg") }
@@ -187,6 +188,22 @@ describe "Registration::SwMgmt" do
       expect(addon_updates).to have(1).items
       expect(addon_updates.first.label).to \
         eq("SUSE Linux Enterprise Software Development Kit 12 x86_64")
+    end
+  end
+
+  describe ".select_addon_products" do
+    it "selects new addon products for installation" do
+      legacy_services = YAML.load_file(fixtures_file("legacy_module_services.yml"))
+
+      expect(::Registration::Storage::Cache).to receive(:instance).
+        and_return(double("addon_services" => legacy_services))
+      expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first).
+        and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
+      expect(yast_pkg).to receive(:ResolvableProperties).
+        and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+      expect(yast_pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
+
+      Registration::SwMgmt.select_addon_products
     end
   end
 
