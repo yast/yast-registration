@@ -197,7 +197,7 @@ module Yast
     end
 
     def refresh_base_product
-      init_registration
+      return false if init_registration == :cancel
 
       upgraded = ::Registration::ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         # then register the product(s)
@@ -225,6 +225,13 @@ module Yast
 
     def refresh_addons
       addons = get_available_addons
+      if addons == :cancel
+        # With the current code, this should never happen because
+        # #get_available_addons will not return :cancel if
+        # #refresh_base_product returned a positive value, but
+        # it's better to stay safe and abort nicely.
+        return :cancel
+      end
 
       # find addon updates
       addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
@@ -386,7 +393,8 @@ module Yast
 
     # run the addon selection dialog
     def select_addons
-      get_available_addons # FIXME just to fill cache with popup
+      # FIXME get_available_addons is called just to fill cache with popup
+      return :cancel if get_available_addons == :cancel
 
       # FIXME workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
@@ -401,7 +409,7 @@ module Yast
     # installation workflow
     def get_available_addons
       # cache the available addons
-      init_registration
+      return :cancel if init_registration == :cancel
 
       @available_addons = Popup.Feedback(
         _(CONTACTING_MESSAGE),
@@ -419,7 +427,7 @@ module Yast
       # create duplicate as array is modified in loop for registration order
       registration_order = @selected_addons.clone
 
-      init_registration
+      return false if init_registration == :cancel
 
       product_succeed = registration_order.map do |product|
         ::Registration::ConnectHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
@@ -642,6 +650,7 @@ module Yast
         "select_addons" => {
           :abort    => :abort,
           :skip     => :next,
+          :cancel   => "check",
           :next     => "addon_eula"
         },
         "addon_eula" => {

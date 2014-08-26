@@ -53,7 +53,8 @@ module Registration
     # Evaluate the registration URL to use
     # @see https://github.com/yast/yast-registration/wiki/Changing-the-Registration-Server
     # for details
-    # @return [String,nil] registration URL, nil means use the default
+    # @return [String,nil,Symbol] registration URL, nil means use the default,
+    #           :cancel means that the user aborted the selection
     def self.registration_url
       # cache the URL to use the same server for all operations
       cache = ::Registration::Storage::Cache.instance
