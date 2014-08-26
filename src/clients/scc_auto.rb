@@ -57,6 +57,7 @@ module Yast
       Yast.import "Label"
       Yast.import "Report"
       Yast.import "Popup"
+      Yast.import "Installation"
 
       log.info "scc_auto started"
 
@@ -135,6 +136,15 @@ module Yast
     # register the system, base product and optional addons
     # return true on success
     def write
+      # try updating the registratin in AutoUpgrade mode
+      if Mode.update
+        updated = update_registration
+        log.info "Registration updated: #{updated}"
+
+        # if update failed continue with the normal registration
+        return true if updated
+      end
+
       # registration disabled, nothing to do
       return true unless @config.do_registration
 
@@ -159,43 +169,8 @@ module Yast
           import_certificate(@config.reg_server_cert)
         end
 
-        base_product = ::Registration::SwMgmt.find_base_product
-        distro_target = base_product["register_target"]
-
-        if !::Registration::Registration.is_registered?
-          log.info "Registering system, distro_target: #{distro_target}"
-
-          Popup.Feedback(_(CONTACTING_MESSAGE),
-            _("Registering the System...")) do
-
-            @registration.register(@config.email, @config.reg_code, distro_target)
-          end
-        end
-
-        # register the base product
-        product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
-          _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
-        ) do
-
-          base_product_data = ::Registration::SwMgmt.base_product_to_register
-          base_product_data["reg_code"] = @config.reg_code
-          @registration.register_product(base_product_data, @config.email)
-        end
-
-        disable_update_repos(product_service) if !@config.install_updates
-
-        # register addons
-        @config.addons.each do |addon|
-          product_service = Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # %s is name of given product
-            _("Registering %s ...") % addon["name"]) do
-
-            @registration.register_product(addon)
-          end
-
-          disable_update_repos(product_service) if !@config.install_updates
-        end
+        register_base_product
+        register_addons
       end
 
       return false unless ret
@@ -269,6 +244,153 @@ module Yast
     def start_workflow
       ::Registration::UI::AutoyastConfigWorkflow.run(@config)
     end
+
+    def update_registration
+      url = ::Registration::UrlHelpers.registration_url
+      log.info "Updating registration using URL: #{url}"
+      @registration = ::Registration::Registration.new(url)
+
+      # the old system was not registered
+      return false unless prepare_update
+
+      return false unless update_base_product
+      return false unless update_addons
+
+      # register additional addons (e.g. originally not present in SLE11)
+      register_addons
+    end
+
+    # TODO FIXME: share these methods with inst_scc.rb
+
+    def register_base_product
+      base_product = ::Registration::SwMgmt.find_base_product
+      distro_target = base_product["register_target"]
+
+      if !::Registration::Registration.is_registered?
+        log.info "Registering system, distro_target: #{distro_target}"
+
+        Popup.Feedback(_(CONTACTING_MESSAGE),
+          _("Registering the System...")) do
+
+          @registration.register(@config.email, @config.reg_code, distro_target)
+        end
+      end
+
+      # register the base product
+      product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
+      ) do
+
+        base_product_data = ::Registration::SwMgmt.base_product_to_register
+        base_product_data["reg_code"] = @config.reg_code
+        @registration.register_product(base_product_data, @config.email)
+      end
+
+      disable_update_repos(product_service) if !@config.install_updates
+    end
+
+    def register_addons
+      # register addons
+      @config.addons.each do |addon|
+        product_service = Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # %s is name of given product
+          _("Registering %s ...") % addon["name"]) do
+
+          @registration.register_product(addon)
+        end
+
+        ::Registration::Storage::Cache.instance.addon_services << product_service
+
+
+        disable_update_repos(product_service) if !@config.install_updates
+      end
+
+      # install the new products
+      ::Registration::SwMgmt.select_addon_products
+    end
+
+    def prepare_update
+      ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
+
+      # update the registration using the old credentials
+      File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+    end
+
+    # @return [Boolean] true on success
+    def update_base_product
+      upgraded = ::Registration::ConnectHelpers.catch_registration_errors(show_update_hint: true) do
+        # then register the product(s)
+        base_product = ::Registration::SwMgmt.base_product_to_register
+        product_service = Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating base product registration, %s is a new base product name
+          _("Updating to %s ...") % ::Registration::SwMgmt.base_product_label(
+            ::Registration::SwMgmt.find_base_product)
+        ) do
+          @registration.upgrade_product(base_product)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        disable_update_repos(product_service) if !@config.install_updates
+      end
+
+      if !upgraded
+        log.info "Registration upgrade failed, removing the credentials to register from scratch"
+        ::Registration::Helpers.reset_registration_status
+      end
+
+      upgraded
+    end
+
+    # @return [Boolean] true on success
+    def update_addons
+      addons = get_available_addons
+
+      # find addon updates
+      addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
+
+      failed_addons = addons_to_update.reject do |addon_to_update|
+        ::Registration::ConnectHelpers.catch_registration_errors do
+          # then register the product(s)
+          product_service = Popup.Feedback(
+            _(CONTACTING_MESSAGE),
+            # updating registered addon/extension, %s is an extension name
+            _("Updating to %s ...") % addon_to_update.label
+          ) do
+            @registration.upgrade_product(addon_to_update)
+          end
+
+          ::Registration::Storage::Cache.instance.addon_services << product_service
+
+          # select repositories to use in installation (e.g. enable/disable Updates)
+          disable_update_repos(product_service) if !@config.install_updates
+        end
+      end
+
+      # install the new upgraded products
+      ::Registration::SwMgmt.select_addon_products
+
+      log.error "Failed addons: #{failed_addons}" unless failed_addons.empty?
+
+      failed_addons.empty?
+    end
+
+    # load available addons from SCC server
+    # the result is cached to avoid reloading when going back and forth in the
+    # installation workflow
+    def get_available_addons
+      available_addons = Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        _("Loading Available Extensions and Modules...")) do
+
+        Registration::Addon.find_all(@registration)
+      end
+
+      ::Registration::Storage::Cache.instance.available_addons = available_addons
+      available_addons
+    end
+
 
   end unless defined?(SccAutoClient)
 end
