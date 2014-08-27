@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 26 18:34:07 UTC 2014 - ancor@suse.com
+
+- Added proper handling for the user clicking the cancel button in
+  "Local Registration Servers" window (bnc#893462)
+- 3.1.111 
+
+-------------------------------------------------------------------
 Tue Aug 26 12:03:39 UTC 2014 - ancor@suse.com
 
 - Replaced call to private method SslCertificate#sha256_fingerprint
