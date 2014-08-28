@@ -19,6 +19,7 @@ describe "Registration::Downloader" do
 
       expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       expect(Registration::Downloader.download(url)).to eq("response")
     end
@@ -33,6 +34,7 @@ describe "Registration::Downloader" do
       # check for HTTPS setup
       expect_any_instance_of(Net::HTTP).to receive(:use_ssl=).with(true)
       expect_any_instance_of(Net::HTTP).to receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_PEER)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       https_url = "https://example.com"
       expect(Registration::Downloader.download(https_url)).to eq("response")
@@ -44,6 +46,7 @@ describe "Registration::Downloader" do
 
       expect_any_instance_of(Net::HTTP).to receive(:request).
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       expect{Registration::Downloader.download(url)}.to raise_error Registration::DownloadError,
         "Downloading #{url} failed: Not Found"
@@ -59,9 +62,27 @@ describe "Registration::Downloader" do
       http = double()
       expect(Net::HTTP).to receive(:new).twice.and_return(http)
       expect(http).to receive(:request).twice.and_return(index1, index2)
+      expect(http).to receive(:proxy?).twice.and_return(false)
 
       expect(Registration::Downloader.download(url)).to eq("response")
     end
-  end
 
+    it "reads proxy credentials when proxy is used" do
+      user = "proxy_user"
+      password = "proxy_password"
+      index = Net::HTTPSuccess.new("1.1", 200, "OK")
+      expect(index).to receive(:body).and_return("response")
+
+      expect_any_instance_of(Net::HTTP).to receive(:request).
+        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(true)
+      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:username).and_return(user)
+      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:password).and_return(password)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy_user=).with(user)
+      expect_any_instance_of(Net::HTTP).to receive(:proxy_pass=).with(password)
+
+      expect(Registration::Downloader.download(url)).to eq("response")
+    end
+
+  end
 end

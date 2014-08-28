@@ -27,6 +27,7 @@ require "net/http"
 require "uri"
 require "openssl"
 require "registration/exceptions"
+require "suse/toolkit/curlrc_dotfile"
 
 module Registration
 
@@ -46,6 +47,12 @@ module Registration
 
       file_url = URI(file_url) unless file_url.is_a?(URI)
       http = Net::HTTP.new(file_url.host, file_url.port)
+
+      if http.proxy?
+        log.info "Reading proxy credentials..."
+        http.proxy_user = SUSE::Toolkit::CurlrcDotfile.new.username
+        http.proxy_pass = SUSE::Toolkit::CurlrcDotfile.new.password
+      end
 
       # switch to HTTPS connection if needed
       if file_url.is_a? URI::HTTPS
