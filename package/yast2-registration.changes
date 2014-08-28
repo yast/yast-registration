@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug 28 14:06:14 UTC 2014 - lslezak@suse.cz
+
+- read proxy credentials from .curlrc file (bnc#885957)
+- do not ask for network configuration in Autoyast mode
+- 3.1.112
+
+-------------------------------------------------------------------
 Tue Aug 26 18:34:07 UTC 2014 - ancor@suse.com
 
 - Added proper handling for the user clicking the cancel button in
