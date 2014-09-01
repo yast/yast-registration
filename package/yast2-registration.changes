@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Sep  1 09:42:45 UTC 2014 - lslezak@suse.cz
+
+- select extension/module products to install in Autoyast mode
+  (bnc#893750)
+- upgrade registration in Autoyast autoupgrade mode
+- 3.1.113
+
+-------------------------------------------------------------------
 Thu Aug 28 14:06:14 UTC 2014 - lslezak@suse.cz
 
 - read proxy credentials from .curlrc file (bnc#885957)
