@@ -350,7 +350,7 @@ module Yast
       return :cancel if init_registration == :cancel
 
       registration_ui = ::Registration::RegistrationUI.new(@registration)
-      @available_addons = registration_ui.get_available_addons
+      registration_ui.get_available_addons
     end
 
     # register all selected addons

@@ -146,16 +146,14 @@ module Registration
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow
+    # @return [Array<Registration::Addon>] available addons
     def get_available_addons
-      available_addons = Yast::Popup.Feedback(
+      Yast::Popup.Feedback(
         _(CONTACTING_MESSAGE),
         _("Loading Available Extensions and Modules...")) do
 
         Addon.find_all(registration)
       end
-
-      Storage::Cache.instance.available_addons = available_addons
-      available_addons
     end
 
     def disable_update_repos(product_service)
