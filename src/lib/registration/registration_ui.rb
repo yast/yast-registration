@@ -47,8 +47,9 @@ module Registration
 
     # register the system and the base product
     # @return [Boolean] true on success
+    # TODO FIXME: split to two separate parts
     def register_system_and_base_product(email, reg_code,
-        register_base_product: true, enable_updates: true)
+        register_base_product: true, disable_updates: false)
 
       success = ConnectHelpers.catch_registration_errors do
         base_product = SwMgmt.find_base_product
@@ -76,7 +77,7 @@ module Registration
           end
 
           # select repositories to use in installation or update (e.g. enable/disable Updates)
-          disable_update_repos(product_service) if !enable_updates
+          disable_update_repos(product_service) if disable_updates
         end
       end
 

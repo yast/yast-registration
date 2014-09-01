@@ -140,7 +140,7 @@ module Yast
           # TODO FIXME use @registration_ui instead of @registration everywhere
           registration_ui = ::Registration::RegistrationUI.new(@registration)
           success = registration_ui.register_system_and_base_product(email, reg_code,
-            register_base_product: !options.base_registered, enable_updates: install_updates?)
+            register_base_product: !options.base_registered, disable_updates: !install_updates?)
 
           if success
             options.base_registered = true

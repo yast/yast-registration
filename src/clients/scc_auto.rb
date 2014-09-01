@@ -257,7 +257,7 @@ module Yast
 
     def register_base_product
       @registration_ui.register_system_and_base_product(@config.email, @config.reg_code,
-        enable_updates: @config.install_updates)
+        disable_updates: !@config.install_updates)
     end
 
     def register_addons
