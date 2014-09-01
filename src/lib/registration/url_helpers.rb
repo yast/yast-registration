@@ -191,14 +191,14 @@ module Registration
     end
 
     def self.slp_discovery
-      services = []
-
       log.info "Searching for #{SLP_SERVICE} SLP services"
-      services.concat(Yast::SlpService.all(SLP_SERVICE))
-
+      services = Yast::SlpService.all(SLP_SERVICE)
       log.debug "Found services: #{services.inspect}"
-      log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
 
+      # ignore SUSE manager registration servers (bnc#894470)
+      services.reject!{ |service| service.slp_url.start_with?("service:#{SLP_SERVICE}:manager:") }
+
+      log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
       services
     end
 
