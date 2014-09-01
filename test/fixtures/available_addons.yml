@@ -7,6 +7,7 @@
       :identifier: sle-we
       :version: '12'
       :release_type: 
+      :product_type: 'extension'
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise Workstation Extension 12 x86_64
       :product_class: 
@@ -54,6 +55,7 @@
       :identifier: sle-sdk
       :version: '12'
       :release_type: 
+      :product_type: 'extension'
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise Software Development Kit 12 x86_64
       :product_class: 
@@ -98,6 +100,7 @@
       :identifier: sle-hae
       :version: '12'
       :release_type: 
+      :product_type: 'extension'
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise High Availability Extension 12 x86_64
       :product_class: 
@@ -116,6 +119,7 @@
           :identifier: sle-ha-geo
           :version: '12'
           :release_type: 
+          :product_type: 'extension'
           :arch: x86_64
           :friendly_name: SUSE Linux Enterprise High Availability GEO Extension 12
             x86_64
@@ -175,6 +179,7 @@
       :identifier: sle-module-legacy
       :version: '12'
       :release_type: 
+      :product_type: 'module'
       :arch: x86_64
       :friendly_name: Legacy Module 12 x86_64
       :product_class: 
@@ -209,6 +214,7 @@
       :identifier: sle-module-adv-systems-management
       :version: '12'
       :release_type: 
+      :product_type: 'module'
       :arch: x86_64
       :friendly_name: Advanced Systems Management Module 12 x86_64
       :product_class: 
@@ -239,6 +245,7 @@
       :name: Web and Scripting Module
       :identifier: sle-module-web-scripting
       :version: '12'
+      :product_type: 'module'
       :release_type: 
       :arch: x86_64
       :friendly_name: Web and Scripting Module 12 x86_64
@@ -274,6 +281,7 @@
       :identifier: sle-module-public-cloud
       :version: '12'
       :release_type: 
+      :product_type: 'module'
       :arch: x86_64
       :friendly_name: Public Cloud Module 12 x86_64
       :product_class: 

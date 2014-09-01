@@ -77,6 +77,7 @@ module Registration
       :friendly_name,
       :identifier,
       :name,
+      :product_type,
       :release_type,
       :version
 
