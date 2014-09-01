@@ -53,9 +53,9 @@ module Registration
 
       success = ConnectHelpers.catch_registration_errors do
         base_product = SwMgmt.find_base_product
-        distro_target = base_product["register_target"]
 
         if !Registration.is_registered?
+          distro_target = base_product["register_target"]
           log.info "Registering system, distro_target: #{distro_target}"
 
           Yast::Popup.Feedback(_(CONTACTING_MESSAGE),

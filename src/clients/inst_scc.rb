@@ -137,8 +137,6 @@ module Yast
 
           next if init_registration == :cancel
 
-          # TODO FIXME use @registration_ui instead of @registration everywhere
-          registration_ui = ::Registration::RegistrationUI.new(@registration)
           success = registration_ui.register_system_and_base_product(email, reg_code,
             register_base_product: !options.base_registered, disable_updates: !install_updates?)
 
@@ -171,7 +169,6 @@ module Yast
     def refresh_base_product
       return false if init_registration == :cancel
 
-      registration_ui = ::Registration::RegistrationUI.new(@registration)
       registration_ui.update_base_product(enable_updates: install_updates?)
     end
 
@@ -185,7 +182,6 @@ module Yast
         return :cancel
       end
 
-      registration_ui = ::Registration::RegistrationUI.new(@registration)
       failed_addons = registration_ui.update_addons(addons, enable_updates: install_updates?)
 
       # if update fails preselest the addon for full registration
@@ -349,7 +345,6 @@ module Yast
       # cache the available addons
       return :cancel if init_registration == :cancel
 
-      registration_ui = ::Registration::RegistrationUI.new(@registration)
       registration_ui.get_available_addons
     end
 
@@ -539,6 +534,10 @@ module Yast
       ::Registration::SwMgmt.select_addon_products
 
       WFM.call("sw_single")
+    end
+
+    def registration_ui
+      ::Registration::RegistrationUI.new(@registration)
     end
 
     # UI workflow definition
