@@ -207,8 +207,10 @@ describe "Registration::UrlHelpers" do
       service2 = double(:slp_url => "service:registration.suse:manager:https://example.com/connect")
       expect(slpservice).to receive(:all).and_return([service1, service2])
 
+      result = Registration::UrlHelpers.slp_discovery
+      expect(result).to include(service1)
       # SUSE manager service (service2) is ignored
-      expect(Registration::UrlHelpers.slp_discovery).to eql([service1])
+      expect(result).to_not include(service2)
     end
   end
 
