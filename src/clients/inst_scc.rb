@@ -35,6 +35,7 @@ require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/url_helpers"
 require "registration/registration"
+require "registration/registration_ui"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
@@ -136,42 +137,11 @@ module Yast
 
           next if init_registration == :cancel
 
-          success = ::Registration::ConnectHelpers.catch_registration_errors do
-            base_product = ::Registration::SwMgmt.find_base_product
-            distro_target = base_product["register_target"]
-
-            if !::Registration::Registration.is_registered?
-              log.info "Registering system, distro_target: #{distro_target}"
-
-              Popup.Feedback(_(CONTACTING_MESSAGE),
-                _("Registering the System...")) do
-
-                @registration.register(email, reg_code, distro_target)
-              end
-            end
-
-            if !options.base_registered
-              # then register the product(s)
-              product_service = Popup.Feedback(_(CONTACTING_MESSAGE),
-                _("Registering %s ...") % ::Registration::SwMgmt.base_product_label(base_product)
-              ) do
-
-                base_product_data = ::Registration::SwMgmt.base_product_to_register
-                base_product_data["reg_code"] = reg_code
-                registered_service = @registration.register_product(base_product_data, email)
-                options.base_registered = true
-
-                registered_service
-              end
-
-              # select repositories to use in installation or update (e.g. enable/disable Updates)
-              select_repositories(product_service) if Mode.installation || Mode.update
-            end
-
-            return :next
-          end
+          success = registration_ui.register_system_and_base_product(email, reg_code,
+            register_base_product: !options.base_registered, disable_updates: !install_updates?)
 
           if success
+            options.base_registered = true
             # save the config if running in installed system
             # (in installation/upgrade it's written in _finish client)
             ::Registration::Helpers.write_config if Mode.normal
@@ -199,28 +169,7 @@ module Yast
     def refresh_base_product
       return false if init_registration == :cancel
 
-      upgraded = ::Registration::ConnectHelpers.catch_registration_errors(show_update_hint: true) do
-        # then register the product(s)
-        base_product = ::Registration::SwMgmt.base_product_to_register
-        product_services = Popup.Feedback(
-          _(CONTACTING_MESSAGE),
-          # updating base product registration, %s is a new base product name
-          _("Updating to %s ...") % ::Registration::SwMgmt.base_product_label(
-            ::Registration::SwMgmt.find_base_product)
-        ) do
-          @registration.upgrade_product(base_product)
-        end
-
-        # select repositories to use in installation (e.g. enable/disable Updates)
-        select_repositories(product_services)
-      end
-
-      if !upgraded
-        log.info "Registration upgrade failed, removing the credentials to register from scratch"
-        ::Registration::Helpers.reset_registration_status
-      end
-
-      upgraded
+      registration_ui.update_base_product(enable_updates: install_updates?)
     end
 
     def refresh_addons
@@ -233,32 +182,10 @@ module Yast
         return :cancel
       end
 
-      # find addon updates
-      addons_to_update = ::Registration::SwMgmt.find_addon_updates(addons)
+      failed_addons = registration_ui.update_addons(addons, enable_updates: install_updates?)
 
-      failed_addons = addons_to_update.reject do |addon_to_update|
-        ::Registration::ConnectHelpers.catch_registration_errors do
-          # then register the product(s)
-          product_services = Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # updating registered addon/extension, %s is an extension name
-            _("Updating to %s ...") % addon_to_update.label
-          ) do
-            @registration.upgrade_product(addon_to_update)
-          end
-
-          # mark as registered
-          addon_to_update.registered
-
-          select_repositories(product_services)
-        end
-      end
-
-      if !failed_addons.empty?
-        log.warn "Failed addons: #{failed_addons}"
-        # if update fails preselest the addon for full registration
-        failed_addons.each(&:selected)
-      end
+      # if update fails preselest the addon for full registration
+      failed_addons.each(&:selected)
 
       :next
     end
@@ -373,12 +300,11 @@ module Yast
       end
     end
 
-    def select_repositories(product_service)
-      options = ::Registration::Storage::InstallationOptions.instance
+    def install_updates?
+      # ask only at installation/update
+      return true unless Mode.installation || Mode.update
 
-      # added update repositories
-      updates = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
-      log.info "Found update repositories: #{updates.size}"
+      options = ::Registration::Storage::InstallationOptions.instance
 
       # not set yet?
       if options.install_updates.nil?
@@ -388,7 +314,15 @@ module Yast
               "on-line updates during installation?"))
       end
 
-      ::Registration::SwMgmt.set_repos_state(updates, options.install_updates)
+      options.install_updates
+    end
+
+    def select_repositories(product_service)
+      # added update repositories
+      updates = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Found update repositories: #{updates.size}"
+
+      ::Registration::SwMgmt.set_repos_state(updates, install_updates?)
     end
 
     # run the addon selection dialog
@@ -411,15 +345,7 @@ module Yast
       # cache the available addons
       return :cancel if init_registration == :cancel
 
-      @available_addons = Popup.Feedback(
-        _(CONTACTING_MESSAGE),
-        _("Loading Available Extensions and Modules...")) do
-
-        Registration::Addon.find_all(@registration)
-      end
-
-      ::Registration::Storage::Cache.instance.available_addons = @available_addons
-      @available_addons
+      registration_ui.get_available_addons
     end
 
     # register all selected addons
@@ -608,6 +534,10 @@ module Yast
       ::Registration::SwMgmt.select_addon_products
 
       WFM.call("sw_single")
+    end
+
+    def registration_ui
+      ::Registration::RegistrationUI.new(@registration)
     end
 
     # UI workflow definition

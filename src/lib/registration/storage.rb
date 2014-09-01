@@ -50,7 +50,7 @@ module Registration
       end
     end
 
-    class Cache < Struct.new(:available_addons, :first_run, :addon_services,
+    class Cache < Struct.new(:first_run, :addon_services,
         :reg_url, :reg_url_cached)
 
       include Singleton
