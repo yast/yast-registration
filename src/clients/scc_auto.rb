@@ -293,6 +293,7 @@ module Yast
     end
 
     # @return [Boolean] true on success
+    # TODO FIXME share with inst_scc.rb
     def update_addons
       addons = @registration_ui.get_available_addons
 
