@@ -195,4 +195,41 @@ describe "Registration::UrlHelpers" do
     end
   end
 
+  describe ".slp_discovery" do
+    let(:slpservice) { double("Yast::SlpService") }
+
+    before do
+      stub_const("Yast::SlpService", slpservice)
+    end
+
+    it "returns SLP services excluding SUSE Manager services" do
+      service1 = double(:slp_url => "service:registration.suse:smt:https://example.com/connect")
+      service2 = double(:slp_url => "service:registration.suse:manager:https://example.com/connect")
+      expect(slpservice).to receive(:all).and_return([service1, service2])
+
+      # SUSE manager service (service2) is ignored
+      expect(Registration::UrlHelpers.slp_discovery).to eql([service1])
+    end
+  end
+
+  describe ".slp_discovery_feedback" do
+    let(:slpservice) { double("Yast::SlpService") }
+    let(:popup) { double("Yast::Popup") }
+
+    before do
+      stub_const("Yast::SlpService", slpservice)
+      stub_const("Yast::Popup", popup)
+    end
+
+    it "runs SLP discovery with progress message" do
+      services = [ double(:slp_url => "service:registration.suse:smt:https://example.com/connect") ]
+      expect(slpservice).to receive(:all).and_return(services)
+
+      # stub Popup.Feedback call but yield the passed block
+      expect(popup).to receive(:Feedback).and_yield()
+
+      expect(Registration::UrlHelpers.slp_discovery_feedback).to eql(services)
+    end
+  end
+
 end
