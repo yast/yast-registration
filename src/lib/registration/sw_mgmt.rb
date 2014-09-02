@@ -166,8 +166,8 @@ module Registration
             credentials_file)
           log.info "Using #{credentials_file} credentials path in update mode"
         end
-        # TODO FIXME: SCC currenly does not return credentials for the service,
-        # just reuse the global credentials and save to a different file
+        # SCC uses the same credentials for all services, just save them to
+        # a different file
         service_credentials = credentials.dup
         service_credentials.file = credentials_file
         service_credentials.write
@@ -286,7 +286,7 @@ module Registration
 
         credentials = SUSE::Connect::Credentials.read(new_file)
         # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
-        log.info "Using previous NCC credentials: #{credentials.inspect}"
+        log.info "Using previous NCC credentials: #{credentials}"
       end
 
       if File.exist?(scc_file)
@@ -295,7 +295,7 @@ module Registration
         ::FileUtils.cp(scc_file, new_file)
         credentials = SUSE::Connect::Credentials.read(new_file)
         # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
-        log.info "Using previous SCC credentials: #{credentials.inspect}"
+        log.info "Using previous SCC credentials: #{credentials}"
       end
     end
 
