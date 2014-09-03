@@ -162,8 +162,10 @@ module Registration
       return custom_url if custom_url && !custom_url.empty?
 
       # check for previously saved config value
-      config = SUSE::Connect::Config.new
-      return config.url if config.url
+      if File.exist?(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+        config = SUSE::Connect::Config.new
+        return config.url
+      end
 
       # try SLP if not registered yet
       slp_url = slp_service_url
