@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep  2 15:30:07 UTC 2014 - lslezak@suse.cz
+
+- do not log the registration code or the credentials to y2log
+  (bnc#894670)
+- 3.1.115
+
+-------------------------------------------------------------------
 Mon Sep  1 17:21:41 UTC 2014 - lslezak@suse.cz
 
 - ignore SUSE Manager services in SLP discovery (bnc#894470)

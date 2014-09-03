@@ -65,7 +65,7 @@ module Yast
       func = WFM.Args[0]
       param = WFM.Args[1] || {}
 
-      log.info "func: #{func}, param: #{param}"
+      log.info "func: #{func}, param: #{::Registration::Helpers.hide_reg_codes(param)}"
 
       case func
       when "Summary"
@@ -100,7 +100,7 @@ module Yast
         raise "Unknown function parameter: #{func}"
       end
 
-      log.info "ret: #{ret}"
+      log.info "ret: #{::Registration::Helpers.hide_reg_codes(ret)}"
       log.info "scc_auto finished"
 
       ret
