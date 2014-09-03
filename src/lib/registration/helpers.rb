@@ -195,15 +195,15 @@ module Registration
 
       # create a duplicate
       filtered = settings.dup
-      filtered["reg_code"] = FILTERED if filtered["reg_code"]
+      filtered["reg_code"] &&= FILTERED
 
-      return filtered unless filtered["addons"].is_a?(Array)
+      return filtered unless filtered["addons"]
 
       # duplicate the nested values
       filtered["addons"] = filtered["addons"].map(&:dup)
 
       filtered["addons"].each do |addon|
-        addon["reg_code"] = FILTERED if addon["reg_code"]
+        addon["reg_code"] &&= FILTERED
       end
 
       filtered
