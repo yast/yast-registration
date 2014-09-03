@@ -63,55 +63,76 @@ module Registration
 
       private
 
+      # download the addon EULAs to a temp dir
+      # @param [SUSE::Connect::Product] addon the addon
+      # @param [String] tmpdir target where to download the files
+      def download_eula(addon, tmpdir)
+        begin
+          Yast::Popup.Feedback(
+            _("Downloading License Agreement..."),
+            addon.label
+          ) do
+            # download the license (with translations)
+            loader = EulaDownloader.new(addon.eula_url, tmpdir,
+              insecure: Helpers.insecure_registration)
+
+            loader.download
+          end
+          true
+        rescue Exception => e
+          log.error "Download failed: #{e.message}: #{e.backtrace}"
+          # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
+          Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
+          return false
+        end
+      end
+
+      # prepare data for displaying the EULA dialog
+      # @param [SUSE::Connect::Product] addon the addon
+      # @param [Hash<String,String>] eulas mapping { <locale> => <file_name> }
+      # @param [String] tmpdir target whith the downloaded files
+      def setup_eula_dialog(addon, eulas, tmpdir)
+        id = "#{addon.label} extension EULA"
+        Yast::ProductLicense.SetAcceptanceNeeded(id, true)
+        Yast::ProductLicense.license_file_print = addon.eula_url
+
+        # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
+        title = _("%s License Agreement") % addon.label
+        enable_back = true
+        Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
+          eula_lang(eulas.keys), arg_ref(eulas), id, title)
+
+        # display info file if present
+        display_optional_info(File.join(tmpdir, "info.txt"))
+
+        # display beta warning if present
+        display_optional_info(File.join(tmpdir, "README.BETA"))
+      end
+
+      # run the EULA agreement dialog
+      # @param [Hash<String,String>] eulas mapping { <locale> => <file_name> }
+      # @return [Symbol] :accepted, :back, :abort, :halt - user input
+      def run_eula_dialog(eulas)
+        base_product = false
+        action = "abort"
+        ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
+        log.debug "EULA dialog result: #{ret}"
+        ret
+      end
+
       # ask user to accept an addon EULA
-      # @param addon [SUSE::Connect::Product] the addon
+      # @param [SUSE::Connect::Product] addon the addon
       # @return [Symbol] :accepted, :back, :abort, :halt
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
-          begin
-            Yast::Popup.Feedback(
-              _("Downloading License Agreement..."),
-              addon.label
-            ) do
-              # download the license (with translations)
-              loader = EulaDownloader.new(addon.eula_url, tmpdir,
-                insecure: Helpers.insecure_registration)
-
-              loader.download
-            end
-          rescue Exception => e
-            log.error "Download failed: #{e.message}: #{e.backtrace}"
-            # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-            Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
-            return false
-          end
-
-          id = "#{addon.label} extension EULA"
-          Yast::ProductLicense.SetAcceptanceNeeded(id, true)
-          Yast::ProductLicense.license_file_print = addon.eula_url
-
-          # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-          title = _("%s License Agreement") % addon.label
+          return false unless download_eula(addon, tmpdir)
           eulas = read_downloaded_eulas(tmpdir)
-          enable_back = true
 
-          Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
-            eula_lang(eulas.keys), arg_ref(eulas), id, title)
-
-          # display info file if present
-          display_optional_info(File.join(tmpdir, "info.txt"))
-
-          # display beta warning if present
-          display_optional_info(File.join(tmpdir, "README.BETA"))
-
-          base_product = false
-          action = "abort"
-          ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
-          log.debug "EULA dialog result: #{ret}"
-          Yast::ProductLicense.CleanUp()
-
-          ret
+          setup_eula_dialog(addon, eulas, tmpdir)
+          run_eula_dialog(eulas)
         end
+      ensure
+        Yast::ProductLicense.CleanUp()
       end
 
       # get the EULA translation to display
