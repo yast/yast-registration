@@ -125,6 +125,9 @@ module Registration
 
     # get registration URL in upgrade mode
     def self.reg_url_at_upgrade
+      custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
+      return custom_url if custom_url && !custom_url.empty?
+
       # boot command line if present
       boot_url = boot_reg_url
       return boot_url if boot_url
