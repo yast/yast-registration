@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep  4 06:58:14 UTC 2014 - jreidinger@suse.com
+
+- avoid crash in autoinstallation with method called on nil
+  (bnc#894877)
+- 3.1.116
+
+-------------------------------------------------------------------
 Tue Sep  2 15:30:07 UTC 2014 - lslezak@suse.cz
 
 - do not log the registration code or the credentials to y2log
