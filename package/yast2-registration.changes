@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Sep  4 14:13:20 UTC 2014 - lslezak@suse.cz
+
+- sort displayed addons to have requested order (bnc#888567)
+- use the custom URL also in upgrade (bnc#894592)
+- don't run SLP discovery if the system has been registered
+  using the public SCC server
+- added missing "require" in Autoyast client (bnc#895147)
+- 3.1.118
+
+-------------------------------------------------------------------
 Thu Sep  4 12:24:30 UTC 2014 - mvidner@suse.com
 
 - Use a more flexible rubygem requirement syntax (bnc#895069)
