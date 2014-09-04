@@ -162,7 +162,7 @@ module Yast
       end
 
       # nil = use the default URL
-      @registration = ::Registration::Registration.new(url)
+      switch_registration(url)
 
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
         if @config.reg_server_cert && !@config.reg_server_cert.empty?
@@ -237,12 +237,28 @@ module Yast
       ::Registration::UI::AutoyastConfigWorkflow.run(@config)
     end
 
-    def update_registration
-      url = ::Registration::UrlHelpers.registration_url
-      log.info "Updating registration using URL: #{url}"
+    def switch_registration(url = nil)
       @registration = ::Registration::Registration.new(url)
-      @registration_ui = ::Registration::RegistrationUI.new(@registration)
+      #reset registration ui as it depends on registration
+      @registration_ui = nil
+      @registration
+    end
 
+    def registration
+      if !@registration
+        url = ::Registration::UrlHelpers.registration_url
+        log.info "Updating registration using URL: #{url}"
+        @registration = switch_registration(url)
+      end
+
+      @registration
+    end
+
+    def registration_ui
+      @registration_ui ||= ::Registration::RegistrationUI.new(registration)
+    end
+
+    def update_registration
       # the old system was not registered
       return false unless prepare_update
 
@@ -256,7 +272,7 @@ module Yast
     # TODO FIXME: share these methods with inst_scc.rb
 
     def register_base_product
-      @registration_ui.register_system_and_base_product(@config.email, @config.reg_code,
+      registration_ui.register_system_and_base_product(@config.email, @config.reg_code,
         disable_updates: !@config.install_updates)
     end
 
@@ -268,12 +284,12 @@ module Yast
           # %s is name of given product
           _("Registering %s ...") % addon["name"]) do
 
-          @registration.register_product(addon)
+          registration.register_product(addon)
         end
 
         ::Registration::Storage::Cache.instance.addon_services << product_service
 
-        @registration_ui.disable_update_repos(product_service) if !@config.install_updates
+        registration_ui.disable_update_repos(product_service) if !@config.install_updates
       end
 
       # install the new products
@@ -289,15 +305,15 @@ module Yast
 
     # @return [Boolean] true on success
     def update_base_product
-      @registration_ui.update_base_product(enable_updates: @config.install_updates)
+      registration_ui.update_base_product(enable_updates: @config.install_updates)
     end
 
     # @return [Boolean] true on success
     # TODO FIXME share with inst_scc.rb
     def update_addons
-      addons = @registration_ui.get_available_addons
+      addons = registration_ui.get_available_addons
 
-      failed_addons = @registration_ui.update_addons(addons, enable_updates: @config.install_updates)
+      failed_addons = registration_ui.update_addons(addons, enable_updates: @config.install_updates)
       failed_addons.empty?
     end
 
