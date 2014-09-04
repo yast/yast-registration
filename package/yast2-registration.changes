@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep  4 12:24:30 UTC 2014 - mvidner@suse.com
+
+- Use a more flexible rubygem requirement syntax (bnc#895069)
+- 3.1.117
+
+-------------------------------------------------------------------
 Thu Sep  4 06:58:14 UTC 2014 - jreidinger@suse.com
 
 - avoid crash in autoinstallation with method called on nil
