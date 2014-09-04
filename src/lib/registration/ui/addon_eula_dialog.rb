@@ -90,7 +90,7 @@ module Registration
       # prepare data for displaying the EULA dialog
       # @param [SUSE::Connect::Product] addon the addon
       # @param [Hash<String,String>] eulas mapping { <locale> => <file_name> }
-      # @param [String] tmpdir target whith the downloaded files
+      # @param [String] tmpdir target with the downloaded files
       def setup_eula_dialog(addon, eulas, tmpdir)
         id = "#{addon.label} extension EULA"
         Yast::ProductLicense.SetAcceptanceNeeded(id, true)
@@ -114,8 +114,9 @@ module Registration
       # @return [Symbol] :accepted, :back, :abort, :halt - user input
       def run_eula_dialog(eulas)
         base_product = false
-        action = "abort"
-        ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas), base_product, action)
+        cancel_action = "abort"
+        ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas),
+          base_product, cancel_action)
         log.debug "EULA dialog result: #{ret}"
         ret
       end
