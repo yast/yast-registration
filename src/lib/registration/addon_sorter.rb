@@ -6,9 +6,18 @@ module Registration
   # see https://bugzilla.novell.com/show_bug.cgi?id=888567#c21)
   ADDON_SORTER = Proc.new do |x, y|
     if x.product_type != y.product_type
-      # simplification: "extension" is lexicographically before "module"
-      # as requested in the display order so take advantage of this...
-      x.product_type.to_s <=> y.product_type.to_s
+      begin
+        # if empty or nil move at the end
+        if !x.product_type || x.product_type.empty?
+          1
+        elsif !y.product_type || y.product_type.empty?
+          -1
+        else
+          # simplification: "extension" is lexicographically before "module"
+          # as requested in the display order so take advantage of this...
+          x.product_type <=> y.product_type
+        end
+      end
     elsif x.free != y.free
       # paid (non-free) first
       x.free ? 1 : -1
