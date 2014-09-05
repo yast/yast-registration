@@ -1,6 +1,7 @@
 
 require "yast"
 require "registration/addon"
+require "registration/addon_sorter"
 
 module Registration
   module UI
@@ -28,6 +29,10 @@ module Registration
       def initialize(registration)
         textdomain "registration"
         @addons = Addon.find_all(registration)
+
+        # sort the addons
+        @addons.sort!(&::Registration::ADDON_SORTER)
+
         log.info "Available addons: #{@addons}"
       end
 

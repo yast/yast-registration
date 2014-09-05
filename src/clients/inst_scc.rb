@@ -95,6 +95,8 @@ module Yast
     end
 
     def register_base_system
+      log.info "The system is not registered, diplaying registration dialog"
+
       show_scc_credentials_dialog
 
       ret = nil
@@ -141,6 +143,7 @@ module Yast
             register_base_product: !options.base_registered, disable_updates: !install_updates?)
 
           if success
+            ret = :next
             options.base_registered = true
             # save the config if running in installed system
             # (in installation/upgrade it's written in _finish client)
@@ -438,6 +441,8 @@ module Yast
     end
 
     def display_registered_dialog
+      log.info "The system is already registered, displaying registered dialog"
+
       Wizard.SetContents(
         # dialog title
         _("Registration"),

@@ -70,14 +70,17 @@ describe "Registration::UrlHelpers" do
 
       it "return nil (default) if config file is not present" do
         # stub config file reading
-        expect_any_instance_of(SUSE::Connect::Config).to receive(:url)
+        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE).
+          and_return(false)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
 
       it "reads the URL from config file if present" do
         # stub config file reading
         url = "https://example.com"
-        expect_any_instance_of(SUSE::Connect::Config).to receive(:url).twice.and_return(url)
+        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE).
+          and_return(true).twice
+        expect(YAML).to receive(:load_file).and_return("url" => url, "insecure" => false)
         expect(Registration::UrlHelpers.registration_url).to eq(url)
       end
     end
