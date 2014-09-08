@@ -139,10 +139,11 @@ module Yast
 
           next if init_registration == :cancel
 
-          success = registration_ui.register_system_and_base_product(email, reg_code,
-            register_base_product: !options.base_registered, disable_updates: !install_updates?)
+          success, product_service = registration_ui.register_system_and_base_product(email, reg_code,
+            register_base_product: !options.base_registered)
 
           if success
+            registration_ui.disable_update_repos(product_service) unless install_updates?
             ret = :next
             options.base_registered = true
             # save the config if running in installed system

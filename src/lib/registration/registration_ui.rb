@@ -46,11 +46,11 @@ module Registration
     end
 
     # register the system and the base product
-    # @return [Boolean] true on success
+    # @return [Array<Boolean, SUSE::Connect::Remote::Service>] array with two
+    #   items: boolean (true on success), remote service (nil on failure)
     # TODO FIXME: split to two separate parts
-    def register_system_and_base_product(email, reg_code,
-        register_base_product: true, disable_updates: false)
-
+    def register_system_and_base_product(email, reg_code, register_base_product: true)
+      product_service = nil
       success = ConnectHelpers.catch_registration_errors do
         base_product = SwMgmt.find_base_product
 
@@ -75,14 +75,11 @@ module Registration
             base_product_data["reg_code"] = reg_code
             registration.register_product(base_product_data, email)
           end
-
-          # select repositories to use in installation or update (e.g. enable/disable Updates)
-          disable_update_repos(product_service) if disable_updates
         end
       end
 
       log.info "Registration suceeded: #{success}"
-      success
+      [success, product_service]
     end
 
 

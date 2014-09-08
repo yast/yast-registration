@@ -273,8 +273,13 @@ module Yast
     # TODO FIXME: share these methods with inst_scc.rb
 
     def register_base_product
-      registration_ui.register_system_and_base_product(@config.email, @config.reg_code,
-        disable_updates: !@config.install_updates)
+      success, product_service = registration_ui.register_system_and_base_product(@config.email, @config.reg_code)
+      return false unless success
+
+      # keep updates enabled?
+      return true if @config.install_updates
+
+      registration_ui.disable_update_repos(product_service)
     end
 
     def register_addons
