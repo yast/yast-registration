@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep  8 08:36:48 UTC 2014 - lslezak@suse.cz
+
+- ask for installing updates _after_ successfuly registering the
+  system (bnc#895000)
+- 3.1.119
+
+-------------------------------------------------------------------
 Thu Sep  4 14:13:20 UTC 2014 - lslezak@suse.cz
 
 - sort displayed addons to have requested order (bnc#888567)
