@@ -47,7 +47,7 @@ module Registration
 
     # register the system and the base product
     # @return [Array<Boolean, SUSE::Connect::Remote::Service>] array with two
-    #   items: boolean (true on success), remote service (nil on failure)
+    #   items: boolean (true on success), remote service (or nil)
     # TODO FIXME: split to two separate parts
     def register_system_and_base_product(email, reg_code, register_base_product: true)
       product_service = nil

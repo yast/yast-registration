@@ -143,7 +143,7 @@ module Yast
             register_base_product: !options.base_registered)
 
           if success
-            registration_ui.disable_update_repos(product_service) unless install_updates?
+            registration_ui.disable_update_repos(product_service) if product_service && !install_updates?
             ret = :next
             options.base_registered = true
             # save the config if running in installed system

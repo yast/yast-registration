@@ -277,7 +277,7 @@ module Yast
       return false unless success
 
       # keep updates enabled?
-      return true if @config.install_updates
+      return true if @config.install_updates || !product_service
 
       registration_ui.disable_update_repos(product_service)
     end
