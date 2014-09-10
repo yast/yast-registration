@@ -79,6 +79,15 @@ module Registration
       end
     end
 
+    # @param [String] target_distro new target distribution
+    # @return [OpenStruct] SCC response
+    def update_system(target_distro = nil)
+      log.info "Updating the system, new target distribution: #{target_distro}"
+      ret = SUSE::Connect::YaST.update_system(connect_params, target_distro)
+      log.info "Update result: #{ret}"
+      ret
+    end
+
     def get_addon_list
       # extensions for base product
       base_product = ::Registration::SwMgmt.base_product_to_register
@@ -92,7 +101,7 @@ module Registration
         :release_type => base_product["release_type"]
       )
 
-      params = connect_params({})
+      params = connect_params
       addons = SUSE::Connect::YaST.show_product(remote_product, params).extensions || []
       log.info "Available addons result: #{addons}"
 
@@ -105,7 +114,7 @@ module Registration
 
     def activated_products
       log.info "Reading activated products..."
-      activated = SUSE::Connect::YaST.status(connect_params({})).activated_products || []
+      activated = SUSE::Connect::YaST.status(connect_params).activated_products || []
       log.info "Activated products: #{activated.map(&:id)}"
       activated
     end
@@ -128,7 +137,7 @@ module Registration
 
       log.info "Using product: #{remote_product}"
 
-      params = connect_params({})
+      params = connect_params
 
       # use product specific reg. code (e.g. for addons)
       if (product.is_a?(Hash) && product["reg_code"])
@@ -173,7 +182,7 @@ module Registration
         SslCertificate.load(context.current_cert) : nil
     end
 
-    def connect_params(params)
+    def connect_params(params = {})
       default_params = {
         :language => ::Registration::Helpers.language,
         :debug => ENV["SCCDEBUG"],

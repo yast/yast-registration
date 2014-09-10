@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 10 08:37:34 UTC 2014 - lslezak@suse.cz
+
+- update the system registration in update mode, set the new target
+  distribution value (needed for update via SMT, bnc#889778)
+- 3.1.120
+
+-------------------------------------------------------------------
 Mon Sep  8 08:36:48 UTC 2014 - lslezak@suse.cz
 
 - ask for installing updates _after_ successfuly registering the

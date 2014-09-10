@@ -196,7 +196,7 @@ module Yast
     end
 
     # find registration server via SLP
-    # @retun [String,nil] URL of the server, nil on error
+    # @return [String,nil] URL of the server, nil on error
     def find_slp_server
       # do SLP query
       slp_services = ::Registration::UrlHelpers.slp_discovery_feedback
@@ -263,6 +263,7 @@ module Yast
       # the old system was not registered
       return false unless prepare_update
 
+      return false unless update_system_registration
       return false unless update_base_product
       return false unless update_addons
 
@@ -307,6 +308,11 @@ module Yast
 
       # update the registration using the old credentials
       File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+    end
+
+    # @return [Boolean] true on success
+    def update_system_registration
+      registration_ui.update_system
     end
 
     # @return [Boolean] true on success

@@ -170,6 +170,14 @@ module Yast
       return ret
     end
 
+    # update system registration, update the target distribution
+    # @return [Boolean] true on success
+    def update_system_registration
+      return false if init_registration == :cancel
+      registration_ui.update_system
+    end
+
+    # @return [Boolean] true on success
     def refresh_base_product
       return false if init_registration == :cancel
 
@@ -183,7 +191,7 @@ module Yast
         # #get_available_addons will not return :cancel if
         # #refresh_base_product returned a positive value, but
         # it's better to stay safe and abort nicely.
-        return :cancel
+        return false
       end
 
       failed_addons = registration_ui.update_addons(addons, enable_updates: install_updates?)
@@ -191,7 +199,7 @@ module Yast
       # if update fails preselest the addon for full registration
       failed_addons.each(&:selected)
 
-      :next
+      true
     end
 
     # display the registration update dialog
@@ -208,8 +216,9 @@ module Yast
     def update_registration
       show_registration_update_dialog
 
-      if refresh_base_product
-        return refresh_addons
+      if update_system_registration && refresh_base_product && refresh_addons
+        log.info "Registration update succeeded"
+        :next
       else
         # automatic registration refresh during system upgrade failed, register from scratch
         Report.Error(_("Automatic registration upgrade failed.\n" +
@@ -618,6 +627,8 @@ module Yast
         "select_addons" : "check"
     end
 
+    # initialize the Registration object
+    # @return [Symbol, nil] returns :cancel if the URL selection was canceled
     def init_registration
       if !@registration
         url = ::Registration::UrlHelpers.registration_url
