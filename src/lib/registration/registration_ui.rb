@@ -82,6 +82,29 @@ module Registration
       [success, product_service]
     end
 
+    # @return [Boolean] true on success
+    def update_system
+      updated = ConnectHelpers.catch_registration_errors(show_update_hint: true) do
+        base_product = SwMgmt.find_base_product
+        target_distro = base_product["register_target"]
+
+        Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # TODO FIXME: reused an existing message due to text freeze
+          # (later use a better text, it's system update actually...)
+          _("Registering the System...")
+        ) do
+          registration.update_system(target_distro)
+        end
+      end
+
+      if !updated
+        log.info "System update failed, removing the credentials to register from scratch"
+        Helpers.reset_registration_status
+      end
+
+      updated
+    end
 
     # @parama [Boolean] enable_updates Enable or disable added update repositories
     # @return [Boolean] true on success

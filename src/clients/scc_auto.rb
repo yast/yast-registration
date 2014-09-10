@@ -263,6 +263,7 @@ module Yast
       # the old system was not registered
       return false unless prepare_update
 
+      return false unless update_system
       return false unless update_base_product
       return false unless update_addons
 
@@ -307,6 +308,11 @@ module Yast
 
       # update the registration using the old credentials
       File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+    end
+
+    # @return [Boolean] true on success
+    def update_system
+      registration_ui.update_system
     end
 
     # @return [Boolean] true on success

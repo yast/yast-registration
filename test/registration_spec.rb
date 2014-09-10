@@ -15,7 +15,7 @@ describe "Registration::Registration" do
     allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
   end
 
-  describe ".register" do
+  describe "#register" do
     it "registers the system using the provided registration code" do
       username = "user"
       password = "password"
@@ -66,15 +66,23 @@ describe "Registration::Registration" do
     end
   end
 
-  describe ".register_product" do
+  describe "#register_product" do
     it_should_behave_like "add_product", :activate_product, :register_product
   end
 
-  describe ".upgrade_product" do
+  describe "#upgrade_product" do
     it_should_behave_like "add_product", :upgrade_product, :upgrade_product
   end
 
-  describe ".activated_products" do
+  describe "#update_system" do
+    it "updates the system registration with the new target distro" do
+      target_distro = "sles-12-x86_64"
+      expect(SUSE::Connect::YaST).to receive(:update_system).with(anything, target_distro)
+      Registration::Registration.new.update_system(target_distro)
+    end
+  end
+
+  describe "#activated_products" do
     it "returns list of activated products" do
       expect(SUSE::Connect::Status).to receive(:activated_products).and_return([])
 
