@@ -106,7 +106,7 @@ module Registration
       updated
     end
 
-    # @parama [Boolean] enable_updates Enable or disable added update repositories
+    # @param [Boolean] enable_updates Enable or disable added update repositories
     # @return [Boolean] true on success
     def update_base_product(enable_updates: true)
       upgraded = ConnectHelpers.catch_registration_errors(show_update_hint: true) do
