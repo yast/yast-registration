@@ -170,11 +170,14 @@ module Yast
       return ret
     end
 
-    def update_system
+    # update system registration, update the target distribution
+    # @return [Boolean] true on success
+    def update_system_registration
       return false if init_registration == :cancel
       registration_ui.update_system
     end
 
+    # @return [Boolean] true on success
     def refresh_base_product
       return false if init_registration == :cancel
 
@@ -213,7 +216,7 @@ module Yast
     def update_registration
       show_registration_update_dialog
 
-      if update_system && refresh_base_product && refresh_addons
+      if update_system_registration && refresh_base_product && refresh_addons
         log.info "Registration update succeeded"
         :next
       else
@@ -624,6 +627,8 @@ module Yast
         "select_addons" : "check"
     end
 
+    # initialize the Registration object
+    # @return [Symbol, nil] returns :cancel if the URL selection was canceled
     def init_registration
       if !@registration
         url = ::Registration::UrlHelpers.registration_url

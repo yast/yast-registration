@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Wed Sep 10 08:37:34 UTC 2014 - lslezak@suse.cz
 
-- update the system in update mode, set the new target distribution
-  value (bnc#889778)
+- update the system registration in update mode, set the new target
+  distribution value (needed for update via SMT, bnc#889778)
 - 3.1.120
 
 -------------------------------------------------------------------
