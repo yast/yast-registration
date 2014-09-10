@@ -21,6 +21,7 @@ config.sub
 configure
 configure.ac
 /coverage/
+/doc/
 install-sh
 libtool
 ltconfig
@@ -34,3 +35,4 @@ mkinstalldirs
 pluglib-bindings.ami
 /nbproject/
 test-driver
+.yardoc/
