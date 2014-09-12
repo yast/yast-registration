@@ -274,13 +274,7 @@ module Yast
     # TODO FIXME: share these methods with inst_scc.rb
 
     def register_base_product
-      success, product_service = registration_ui.register_system_and_base_product(@config.email, @config.reg_code)
-      return false unless success
-
-      # keep updates enabled?
-      return true if @config.install_updates || !product_service
-
-      registration_ui.disable_update_repos(product_service)
+      handle_product_service { registration_ui.register_system_and_base_product(@config.email, @config.reg_code) }
     end
 
     def register_addons
@@ -317,7 +311,19 @@ module Yast
 
     # @return [Boolean] true on success
     def update_base_product
-      registration_ui.update_base_product(enable_updates: @config.install_updates)
+      handle_product_service { registration_ui.update_base_product }
+    end
+
+    # @param block block returning [Boolean, SUSE::Connect::Remote::Product] pair
+    # @return [Boolean] true on success
+    def handle_product_service(&block)
+      success, product_service = yield
+      return false unless success
+
+      # keep updates enabled?
+      return true if @config.install_updates || !product_service
+
+      registration_ui.disable_update_repos(product_service)
     end
 
     # @return [Boolean] true on success

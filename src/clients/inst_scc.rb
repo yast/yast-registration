@@ -177,11 +177,18 @@ module Yast
       registration_ui.update_system
     end
 
+    # update base product registration
     # @return [Boolean] true on success
     def refresh_base_product
       return false if init_registration == :cancel
 
-      registration_ui.update_base_product(enable_updates: install_updates?)
+      success, product_service = registration_ui.update_base_product
+
+      if success && product_service && !install_updates?
+        return registration_ui.disable_update_repos(product_service)
+      end
+
+      success
     end
 
     def refresh_addons

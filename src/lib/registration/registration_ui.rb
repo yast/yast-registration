@@ -106,9 +106,10 @@ module Registration
       updated
     end
 
-    # @param [Boolean] enable_updates Enable or disable added update repositories
+    # update base product registration
     # @return [Boolean] true on success
-    def update_base_product(enable_updates: true)
+    def update_base_product
+      product_service = nil
       upgraded = ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         # then register the product(s)
         base_product = SwMgmt.base_product_to_register
@@ -120,9 +121,6 @@ module Registration
         ) do
           registration.upgrade_product(base_product)
         end
-
-        # select repositories to use in installation (e.g. enable/disable Updates)
-        disable_update_repos(product_service) if !enable_updates
       end
 
       if !upgraded
@@ -130,7 +128,7 @@ module Registration
         Helpers.reset_registration_status
       end
 
-      upgraded
+      [upgraded, product_service]
     end
 
     def update_addons(addons, enable_updates: true)
