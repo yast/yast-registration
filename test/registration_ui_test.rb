@@ -15,14 +15,20 @@ describe "Registration::RegistrationUI" do
       "flavor" => "DVD", "register_target" => target_distro
     }
   end
+  let(:base_product_to_register) do
+    {
+      "arch"=>"x86_64",
+      "name"=>"SLES",
+      "reg_code"=>"reg_code",
+      "release_type"=>"DVD",
+      "version"=>"12"
+    }
+  end
 
   describe "#register_system_and_base_product" do
     it "registers the system using the provided registration code" do
       email = "user@example.com"
       reg_code = "reg_code"
-
-      base_product_to_register = { "name"=>"SLES", "arch"=>"x86_64",
-        "version"=>"12", "release_type"=>"DVD", "reg_code"=>"reg_code" }
 
       expect(Registration::Registration).to receive(:is_registered?).and_return(false)
       expect(Registration::SwMgmt).to receive(:find_base_product).twice.and_return(base_product)
@@ -47,6 +53,18 @@ describe "Registration::RegistrationUI" do
       expect(registration).to receive(:update_system).with(target_distro)
 
       expect(registration_ui.update_system).to be_true
+    end
+  end
+
+  describe "#update_base_product" do
+    it "updates the base product registration" do
+      expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
+      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product_to_register)
+      remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
+      expect(registration).to receive(:upgrade_product).with(base_product_to_register).
+        and_return(remote_product)
+
+      expect(registration_ui.update_base_product).to eql([true, remote_product])
     end
   end
 
