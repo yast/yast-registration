@@ -22,6 +22,7 @@
 require "yast"
 require "suse/connect"
 
+require "registration/addon"
 require "registration/helpers"
 require "registration/sw_mgmt"
 require "registration/storage"
@@ -66,6 +67,8 @@ module Registration
 
         service = SUSE::Connect::YaST.activate_product(product_ident, params, email)
         log.info "Register product result: #{service}"
+        set_registered(product_ident)
+
         service
       end
     end
@@ -75,6 +78,8 @@ module Registration
         log.info "Upgrading product: #{product}"
         service = SUSE::Connect::YaST.upgrade_product(product_ident, params)
         log.info "Upgrade product result: #{service}"
+        set_registered(product_ident)
+
         service
       end
     end
@@ -125,6 +130,20 @@ module Registration
     end
 
     private
+
+    def set_registered(remote_product)
+      addon = Addon.find_all(self).find do |addon|
+        addon.arch == remote_product.arch &&
+          addon.identifier == remote_product.identifier &&
+          addon.version  == remote_product.version &&
+          addon.release_type == remote_product.release_type
+      end
+
+      if addon
+        log.info "Marking addon #{addon.identifier}-#{addon.version} as registered"
+        addon.registered
+      end
+    end
 
     def service_for_product(product, &block)
       remote_product = product.is_a?(Hash) ?

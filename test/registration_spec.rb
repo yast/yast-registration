@@ -2,6 +2,7 @@
 
 require_relative "spec_helper"
 require_relative "yast_stubs"
+require "yaml"
 
 describe "Registration::Registration" do
   let(:yast_wfm) { double("Yast::Wfm") }
@@ -36,12 +37,14 @@ describe "Registration::Registration" do
   # product registration and product upgrade behave the same, they only
   # call a different connect funtion internally
   shared_examples "add_product" do |connect_method, yast_method|
+    let(:available_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+
     it "adds the selected product and returns added zypp services" do
       product = {
         "arch" => "x86_64",
-        "name" => "SLES",
+        "name" => "sle-sdk",
         "version" => "12",
-        "release_type" => "DVD"
+        "release_type" => nil
       }
 
       service_data = {
@@ -55,6 +58,11 @@ describe "Registration::Registration" do
       expect(SUSE::Connect::YaST).to receive(connect_method).and_return(service)
 
       expect(Registration::SwMgmt).to receive(:add_service)
+
+      expect(Registration::Addon).to receive(:find_all).and_return(available_addons)
+      expect(available_addons.find { |addon| addon.identifier == "sle-sdk"}).to \
+        receive(:registered)
+
       allow(File).to receive(:exist?).with(
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
       allow(File).to receive(:read).with(
