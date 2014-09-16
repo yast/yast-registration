@@ -32,8 +32,12 @@ module Registration
 
         @cached_addons = pure_addons.reduce([]) do |res, addon|
           yast_addons = create_addon_with_deps(addon)
+
           # mark as registered if found in the status call
-          yast_addons.first.registered if activated_addon_ids.include?(addon.id)
+          yast_addons.each do |yast_addon|
+            yast_addon.registered if activated_addon_ids.include?(yast_addon.id)
+          end
+
           res.concat(yast_addons)
         end
       end
@@ -75,6 +79,7 @@ module Registration
       :eula_url,
       :free,
       :friendly_name,
+      :id,
       :identifier,
       :name,
       :product_type,

@@ -4,6 +4,7 @@ require_relative "spec_helper"
 
 require "registration/addon"
 require "suse/connect"
+require "yaml"
 
 describe Registration::Addon do
 
@@ -64,6 +65,21 @@ describe Registration::Addon do
 
       expect(addon1.registered?).to be_true
       expect(addon2.registered?).to be_false
+    end
+
+    it "sets the registration status for dependent addons" do
+      registration = double(
+        :activated_products => YAML.load_file(fixtures_file("activated_products.yml")),
+        :get_addon_list => YAML.load_file(fixtures_file("pure_addons.yml"))
+      )
+
+      addons = Registration::Addon.find_all(registration)
+
+      ha = addons.find{ |addon| addon.identifier == "sle-ha"}
+      ha_geo = ha.children.first
+
+      expect(ha.registered?).to be_true
+      expect(ha_geo.registered?).to be_true
     end
   end
 
