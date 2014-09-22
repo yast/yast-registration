@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Sep 22 12:09:53 UTC 2014 - lslezak@suse.cz
+
+- fixed crash at AutoYast export at the end of installation when
+  a SMT certificate has been imported (export the fingerprint value
+  instead of the Fingerprint object which cannot be serialized to
+  Autoyast XML) (bnc#897449)
+- 3.1.123
+
+-------------------------------------------------------------------
 Tue Sep 16 08:54:54 UTC 2014 - lslezak@suse.cz
 
 - properly mark children addons as registered when loading the
