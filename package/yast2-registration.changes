@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 24 19:00:11 UTC 2014 - lslezak@suse.cz
+
+- export registration settings also when no extension or module
+  has been registered (bnc#897755)
+- 3.1.124
+
+-------------------------------------------------------------------
 Mon Sep 22 12:09:53 UTC 2014 - lslezak@suse.cz
 
 - fixed crash at AutoYast export at the end of installation when
