@@ -601,7 +601,7 @@ module Yast
         },
         "select_addons" => {
           :abort    => :abort,
-          :skip     => :next,
+          :skip     => "update_autoyast_config",
           :cancel   => "check",
           :next     => "addon_eula"
         },
