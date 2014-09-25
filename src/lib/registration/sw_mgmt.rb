@@ -349,6 +349,7 @@ module Registration
     end
 
     # select products for new added extensions/modules
+    # @return [Boolean] true on success
     def self.select_addon_products
       addon_services = ::Registration::Storage::Cache.instance.addon_services
       log.info "New addon services: #{addon_services}"
@@ -357,7 +358,7 @@ module Registration
         acc.concat(::Registration::SwMgmt.service_repos(service))
       end
 
-      return if new_repos.empty?
+      return true if new_repos.empty?
 
       products = Pkg.ResolvableProperties("", :product, "")
       products.select! do |product|
@@ -368,11 +369,8 @@ module Registration
 
       log.info "Products to install: #{products}"
 
-      products.each do |product|
-        Pkg.ResolvableInstall(product, :product)
-      end
+      products.all?{|product| Pkg.ResolvableInstall(product, :product)}
     end
-
 
     private_class_method :each_repo
   end
