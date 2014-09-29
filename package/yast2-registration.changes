@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep 29 08:42:17 UTC 2014 - lslezak@suse.cz
+
+- fixed AutoYast autoupgrade - use the SMT server from the AutoYast
+  profile instead of the public SCC server (bnc#897040)
+- 3.1.125
+
+-------------------------------------------------------------------
 Wed Sep 24 19:00:11 UTC 2014 - lslezak@suse.cz
 
 - export registration settings also when no extension or module

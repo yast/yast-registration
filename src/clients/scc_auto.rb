@@ -137,15 +137,6 @@ module Yast
     # register the system, base product and optional addons
     # return true on success
     def write
-      # try updating the registratin in AutoUpgrade mode
-      if Mode.update
-        updated = update_registration
-        log.info "Registration updated: #{updated}"
-
-        # if update failed continue with the normal registration
-        return true if updated
-      end
-
       # registration disabled, nothing to do
       return true unless @config.do_registration
 
@@ -162,8 +153,18 @@ module Yast
         return false unless url
       end
 
+      url ||= ::Registration::UrlHelpers.registration_url
+      log.info "Registration URL: #{url}"
+
       # nil = use the default URL
       switch_registration(url)
+
+      # try updating the registration in AutoUpgrade mode
+      if Mode.update
+        updated = update_registration
+        log.info "Registration updated: #{updated}"
+        return updated
+      end
 
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
         if @config.reg_server_cert && !@config.reg_server_cert.empty?
