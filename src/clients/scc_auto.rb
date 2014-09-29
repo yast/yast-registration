@@ -159,7 +159,7 @@ module Yast
       # nil = use the default URL
       switch_registration(url)
 
-      # try updating the registratin in AutoUpgrade mode
+      # try updating the registration in AutoUpgrade mode
       if Mode.update
         updated = update_registration
         log.info "Registration updated: #{updated}"
