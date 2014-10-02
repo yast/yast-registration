@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Oct  2 15:06:22 UTC 2014 - lslezak@suse.cz
+
+- fixed failure in AutoYast autoupgrade mode when the upgraded
+  system was not registered (in that case the system is newly
+  registered) (bnc#899168)
+- 3.1.126
+
+-------------------------------------------------------------------
 Mon Sep 29 08:42:17 UTC 2014 - lslezak@suse.cz
 
 - fixed AutoYast autoupgrade - use the SMT server from the AutoYast

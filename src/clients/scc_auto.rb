@@ -159,8 +159,8 @@ module Yast
       # nil = use the default URL
       switch_registration(url)
 
-      # try updating the registration in AutoUpgrade mode
-      if Mode.update
+      # update the registration in AutoUpgrade mode if the old system was registered
+      if Mode.update && old_system_registered?
         updated = update_registration
         log.info "Registration updated: #{updated}"
         return updated
@@ -261,9 +261,6 @@ module Yast
     end
 
     def update_registration
-      # the old system was not registered
-      return false unless prepare_update
-
       return false unless update_system_registration
       return false unless update_base_product
       return false unless update_addons
@@ -298,7 +295,7 @@ module Yast
       ::Registration::SwMgmt.select_addon_products
     end
 
-    def prepare_update
+    def old_system_registered?
       ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
       # update the registration using the old credentials
