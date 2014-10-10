@@ -23,6 +23,10 @@ describe ::Registration::FinishDialog do
         stub_const("Yast::Installation", double(:destdir => "/mnt"))
       end
 
+      after(:each) do
+        Registration::RepoStateStorage.instance.repositories = []
+      end
+
       it "do nothing if system is not registered" do
         expect(Registration::Registration).to receive(:is_registered?).once.
           and_return(false)
@@ -57,8 +61,7 @@ describe ::Registration::FinishDialog do
 
         # changed repository with ID 42, originally enabled
         repo_state = Registration::RepoState.new(42, true)
-        expect(Registration::RepoStateStorage.instance).to receive(:repositories).
-          and_return([repo_state])
+        Registration::RepoStateStorage.instance.repositories = [repo_state]
         expect(Yast::Pkg).to receive(:SourceSetEnabled).with(42, true)
         expect(Yast::Pkg).to receive(:SourceSaveAll)
 
