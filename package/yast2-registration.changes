@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 10 11:23:07 UTC 2014 - lslezak@suse.cz
+
+- re-enable the update repositories in the installed system
+  when updates are disabled during installation (bnc#899999)
+- 3.1.127
+
+-------------------------------------------------------------------
 Thu Oct  2 15:06:22 UTC 2014 - lslezak@suse.cz
 
 - fixed failure in AutoYast autoupgrade mode when the upgraded
