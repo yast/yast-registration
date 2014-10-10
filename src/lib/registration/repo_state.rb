@@ -32,6 +32,7 @@ module Registration
   class RepoStateStorage
     include Singleton
 
+    # array of RepoState objects
     attr_accessor :repositories
 
     def initialize
@@ -50,7 +51,7 @@ module Registration
       @enabled = enabled
     end
 
-    def restore_state
+    def restore
       log.info "Restoring the original repository state: id: #{repo_id}, enabled: #{enabled}"
       Yast::Pkg.SourceSetEnabled(repo_id, enabled)
     end

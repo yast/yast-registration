@@ -72,7 +72,7 @@ module Registration
       return if changed_repos.empty?
 
       # activate the original repository states
-      changed_repos.each(&:restore_state)
+      changed_repos.each(&:restore)
 
       # save all repositories
       Yast::Pkg.SourceSaveAll
