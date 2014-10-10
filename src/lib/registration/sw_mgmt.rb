@@ -29,6 +29,7 @@ require "fileutils"
 require "registration/exceptions"
 require "registration/helpers"
 require "registration/url_helpers"
+require "registration/repo_state"
 
 module Registration
   Yast.import "AddOnProduct"
@@ -244,6 +245,8 @@ module Registration
     end
 
     # Set repository state (enabled/disabled)
+    # The original repository state is saved to RepoStateStorage to restore
+    # the original state later.
     # @param repos [Array<Hash>] list of repositories
     # @param repos [Boolean] true = enable, false = disable, nil = no change
     # @return [void]
@@ -253,6 +256,10 @@ module Registration
 
       repos.each do |repo|
         if repo["enabled"] != enabled
+          # remember the original state
+          repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
+          RepoStateStorage.instance.repositories << repo_state
+
           log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
           Pkg.SourceSetEnabled(repo["SrcId"], enabled)
         end
