@@ -101,6 +101,8 @@ module Registration
       if !updated
         log.info "System update failed, removing the credentials to register from scratch"
         Helpers.reset_registration_status
+        UrlHelpers.reset_registration_url
+        ::Registration::Storage::Cache.instance.upgrade_failed = true
       end
 
       updated
