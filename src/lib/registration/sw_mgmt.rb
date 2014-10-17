@@ -343,12 +343,12 @@ module Registration
 
       repo_aliases.each do |repo_alias|
         # find the repository with the alias
-        repo = all_repos.find do |repo|
+        repository = all_repos.find do |repo|
           Pkg.SourceGeneralData(repo)["alias"] == repo_alias
         end
 
-        if repo
-          yield(repo)
+        if repository
+          yield(repository)
         else
           log.warn "Repository '#{repo_alias}' was not found, skipping"
         end
