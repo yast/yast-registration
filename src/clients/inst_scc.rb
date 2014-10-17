@@ -227,6 +227,8 @@ module Yast
         log.info "Registration update succeeded"
         :next
       else
+        # force reinitialization to allow to use a different URL
+        @registration = nil
         # automatic registration refresh during system upgrade failed, register from scratch
         Report.Error(_("Automatic registration upgrade failed.\n" +
               "You can manually register the system from scratch."))
@@ -640,6 +642,7 @@ module Yast
       if !@registration
         url = ::Registration::UrlHelpers.registration_url
         return :cancel if url == :cancel
+        log.info "Initializing registration with URL: #{url.inspect}"
         @registration = ::Registration::Registration.new(url)
       end
     end

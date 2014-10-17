@@ -107,7 +107,7 @@ describe "Registration::UrlHelpers" do
 
       context "the system has been already registered" do
         before do
-          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
+          allow(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
           expect(yast_linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
         end
 
@@ -125,6 +125,11 @@ describe "Registration::UrlHelpers" do
             and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
 
           expect(Registration::UrlHelpers.registration_url).to eq("https://myserver.com")
+        end
+
+        it "returns default URL (nil) when the old URL failed at upgrade" do
+          expect(::Registration::Storage::Cache.instance).to receive(:upgrade_failed).and_return(true)
+          expect(Registration::UrlHelpers.registration_url).to be_nil
         end
       end
 

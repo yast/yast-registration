@@ -79,8 +79,8 @@ module Registration
       return url if url == :cancel
 
       # cache the URL
-      ::Registration::Storage::Cache.instance.reg_url = url
-      ::Registration::Storage::Cache.instance.reg_url_cached = true
+      cache.reg_url = url
+      cache.reg_url_cached = true
       url
     end
 
@@ -136,7 +136,9 @@ module Registration
       # (the config file exists even on a not registered system)
       dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
       ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
-      if File.exist?(ncc_creds)
+
+      # do not use the old URL when it has failed before
+      if !::Registration::Storage::Cache.instance.upgrade_failed && File.exist?(ncc_creds)
         # FIXME check at first new suseconnect conf
         old_conf = SuseRegister.new(Yast::Installation.destdir)
 

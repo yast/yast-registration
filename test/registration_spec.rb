@@ -92,9 +92,10 @@ describe "Registration::Registration" do
 
   describe "#activated_products" do
     it "returns list of activated products" do
-      expect(SUSE::Connect::Status).to receive(:activated_products).and_return([])
+      status = double(:activated_products => [])
+      expect(SUSE::Connect::YaST).to receive(:status).and_return(status)
 
-      expect(Registration::Registration.new.activated_products).to be_an(Array)
+      expect(Registration::Registration.new.activated_products).to eq([])
     end
   end
 

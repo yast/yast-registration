@@ -51,13 +51,14 @@ module Registration
     end
 
     class Cache < Struct.new(:first_run, :addon_services,
-        :reg_url, :reg_url_cached)
+        :reg_url, :reg_url_cached, :upgrade_failed)
 
       include Singleton
 
       def initialize
         self.addon_services = []
         self.first_run = true
+        self.upgrade_failed = false
       end
     end
 
