@@ -127,10 +127,9 @@ describe "Registration::UrlHelpers" do
           expect(Registration::UrlHelpers.registration_url).to eq("https://myserver.com")
         end
 
-        it "returns default URL when the old URL failed at upgrade" do
-          ::Registration::Storage::Cache.instance.upgrade_failed = true
+        it "returns default URL (nil) when the old URL failed at upgrade" do
+          expect(::Registration::Storage::Cache.instance).to receive(:upgrade_failed).and_return(true)
           expect(Registration::UrlHelpers.registration_url).to be_nil
-          ::Registration::Storage::Cache.instance.upgrade_failed = false
         end
       end
 
