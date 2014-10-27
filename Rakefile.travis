@@ -7,7 +7,7 @@ ENV["COVERAGE"] = "1"
 
 desc "Run tests"
 RSpec::Core::RakeTask.new("test") do |t|
-  t.pattern = "test/**/*_spec.rb"
+  t.pattern = "test/**/*_{spec,test}.rb"
 end
 
 task :default => :test

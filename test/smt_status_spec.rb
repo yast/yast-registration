@@ -1,14 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
+require "registration/smt_status"
 
 describe "Registration::SmtStatus" do
-  before do
-    stub_yast_require
-    require "registration/smt_status"
-  end
-
   let(:url) { "https://example.com" }
   subject { Registration::SmtStatus.new(url) }
 

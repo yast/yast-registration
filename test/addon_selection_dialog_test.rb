@@ -6,7 +6,6 @@ describe Registration::UI::AddonSelectionDialog do
 
   before(:each) do
     # generic UI stubs for the wizard dialog
-    stub_const("Yast::UI", double())
     allow(Yast::UI).to receive(:WizardCommand)
     allow(Yast::UI).to receive(:WidgetExists).and_return(true)
     allow(Yast::UI).to receive(:ChangeWidget)

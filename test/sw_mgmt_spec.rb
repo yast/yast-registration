@@ -1,14 +1,12 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
+require "registration/sw_mgmt"
 
 require "suse/connect"
 require "yaml"
 
 describe "Registration::SwMgmt" do
-  let(:yast_pkg) { double("Yast::Pkg") }
-
   let(:service_name) { "SLES" }
   let(:repos) do
     {
@@ -51,22 +49,15 @@ describe "Registration::SwMgmt" do
     }
   end
 
-  before do
-    stub_yast_require
-    require "registration/sw_mgmt"
-
-    stub_const("Yast::Pkg", yast_pkg)
-  end
-
   describe ".service_repos" do
     let(:service) { double }
 
     before do
       expect(service).to receive(:name).and_return(service_name)
 
-      expect(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
+      expect(Yast::Pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
-        expect(yast_pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
+        expect(Yast::Pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
       end
     end
 
@@ -99,33 +90,31 @@ describe "Registration::SwMgmt" do
         "product" => {}
       )
     end
-    let(:yast_mode) { double("Yast::Mode") }
 
     before do
-      expect(yast_pkg).to receive(:SourceSaveAll).and_return(true).twice
-      expect(yast_pkg).to receive(:ServiceRefresh).with(service_name).and_return(true)
-      expect(yast_pkg).to receive(:ServiceSave).with(service_name).and_return(true)
+      expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(true).twice
+      expect(Yast::Pkg).to receive(:ServiceRefresh).with(service_name).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceSave).with(service_name).and_return(true)
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
 
-      allow(yast_pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|
-        allow(yast_pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
+        allow(Yast::Pkg).to receive(:SourceGeneralData).with(id).and_return(repo)
       end
 
-      stub_const("Yast::Mode", yast_mode)
-      expect(yast_mode).to receive(:update).and_return(false)
+      expect(Yast::Mode).to receive(:update).and_return(false)
     end
 
     it "it creates a new service if the service does not exist yet" do
-      expect(yast_pkg).to receive(:ServiceAliases).and_return([])
-      expect(yast_pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
-      expect(yast_pkg).to receive(:ServiceSet).with(service_name, hash_including("autorefresh" => true)).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceAliases).and_return([])
+      expect(Yast::Pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceSet).with(service_name, hash_including("autorefresh" => true)).and_return(true)
       expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
 
     it "updates the existing service if the service already exists" do
-      expect(yast_pkg).to receive(:ServiceAliases).and_return([service_name])
-      expect(yast_pkg).to receive(:ServiceSet).with(
+      expect(Yast::Pkg).to receive(:ServiceAliases).and_return([service_name])
+      expect(Yast::Pkg).to receive(:ServiceSet).with(
         service_name, hash_including("url" => service_url)).and_return(true)
       expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
@@ -178,7 +167,7 @@ describe "Registration::SwMgmt" do
   describe ".find_addon_updates" do
     it "returns new available addons for installed addons" do
       # installed: SLES11-SP2 + SLE11-SP2-SDK + SLE11-SP2-Webyast
-      expect(yast_pkg).to receive(:ResolvableProperties).with("", :product, "") \
+      expect(Yast::Pkg).to receive(:ResolvableProperties).with("", :product, "") \
         .and_return(YAML.load_file(fixtures_file("products_sp2_update.yml")))
       # available: SDK, HA, HA-GEO, ...
       available_addons = YAML.load_file(fixtures_file("available_addons.yml"))
@@ -199,9 +188,9 @@ describe "Registration::SwMgmt" do
         and_return(double("addon_services" => legacy_services))
       expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first).
         and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
-      expect(yast_pkg).to receive(:ResolvableProperties).
+      expect(Yast::Pkg).to receive(:ResolvableProperties).
         and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
-      expect(yast_pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
+      expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
 
       Registration::SwMgmt.select_addon_products
     end

@@ -20,7 +20,7 @@ describe ::Registration::FinishDialog do
 
     describe "first parameter \"Write\"" do
       before(:each) do
-        stub_const("Yast::Installation", double(:destdir => "/mnt"))
+        allow(Yast::Installation).to receive(:destdir).and_return("/mnt")
       end
 
       after(:each) do
