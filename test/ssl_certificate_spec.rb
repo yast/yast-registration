@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/ssl_certificate"
 
 describe "Registration::SslCertificate" do
   subject { Registration::SslCertificate.load_file(fixtures_file("test.pem")) }

@@ -1,10 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-
 require "yaml"
-require "registration/addon"
-require "registration/addon_sorter"
 
 describe "Registration::ADDON_SORTER" do
   let(:available_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }

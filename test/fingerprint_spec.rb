@@ -2,8 +2,6 @@
 
 require_relative "spec_helper"
 
-require "registration/fingerprint"
-
 describe Registration::Fingerprint do
   # checksum examples
   let(:sha1)   { "A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9" }

@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/helpers"
 
 describe "Registration::Helpers" do
   describe ".service_description" do

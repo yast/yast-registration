@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/ui/local_server_dialog"
 
 describe Registration::UI::LocalServerDialog do
   let(:url) { "https://example.com/register" }

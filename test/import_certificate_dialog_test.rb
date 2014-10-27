@@ -2,10 +2,6 @@
 
 require_relative "spec_helper"
 
-require "openssl"
-require "registration/ssl_certificate"
-require "registration/ui/import_certificate_dialog"
-
 describe Registration::UI::ImportCertificateDialog do
 
   describe ".run" do

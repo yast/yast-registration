@@ -2,8 +2,6 @@
 
 require_relative "./spec_helper"
 
-require "registration/finish_dialog"
-
 describe ::Registration::FinishDialog do
 
   subject { ::Registration::FinishDialog.new }

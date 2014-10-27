@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/registration"
 require "yaml"
 
 describe "Registration::Registration" do

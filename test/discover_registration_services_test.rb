@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-
 require "yast"
 
 describe "discover_registration_services client" do
