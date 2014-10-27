@@ -1,14 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
+require "registration/ssl_certificate_details"
 
 describe "Registration::SslCertificateDetails" do
-  before do
-    stub_yast_require
-    require "registration/ssl_certificate_details"
-  end
-
   subject { Registration::SslCertificateDetails.new(
       Registration::SslCertificate.load_file(fixtures_file("test.pem"))) }
   
