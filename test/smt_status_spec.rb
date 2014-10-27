@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/smt_status"
 
 describe "Registration::SmtStatus" do
   let(:url) { "https://example.com" }

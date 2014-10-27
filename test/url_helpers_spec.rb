@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/url_helpers"
 
 describe "Registration::UrlHelpers" do
   describe ".registration_url" do

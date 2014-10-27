@@ -1,9 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/sw_mgmt"
-
-require "suse/connect"
 require "yaml"
 
 describe "Registration::SwMgmt" do

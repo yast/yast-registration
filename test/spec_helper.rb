@@ -34,3 +34,8 @@ end
 
 # load data generators
 require_relative "factories"
+
+# force loading all files to report proper code coverage
+Dir["src/lib/**/*.rb"].each do |file|
+  require "./#{file}"
+end

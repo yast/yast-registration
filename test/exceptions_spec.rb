@@ -2,8 +2,6 @@
 
 require_relative "spec_helper"
 
-require "registration/exceptions"
-
 describe Registration::ServiceError do
 
   it "is a PkgError exception" do

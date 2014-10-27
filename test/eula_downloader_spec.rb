@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/eula_downloader"
 require 'tmpdir'
 
 describe "Registration::EulaDownloader" do

@@ -2,8 +2,6 @@
 
 require_relative "spec_helper"
 
-require "registration/storage"
-
 describe Registration::Storage::Config do
   subject { Registration::Storage::Config.instance }
   let(:addon) {

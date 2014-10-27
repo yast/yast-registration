@@ -1,5 +1,4 @@
 require_relative "spec_helper"
-require "registration/ui/addon_selection_dialog"
 
 describe Registration::UI::AddonSelectionDialog do
   subject { Registration::UI::AddonSelectionDialog }

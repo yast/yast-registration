@@ -1,7 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/ssl_certificate_details"
 
 describe "Registration::SslCertificateDetails" do
   subject { Registration::SslCertificateDetails.new(

@@ -1,9 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-
 require "yast"
-require "registration/registration"
 
 describe "inst_scc client" do
 
