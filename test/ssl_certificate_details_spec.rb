@@ -3,8 +3,10 @@
 require_relative "spec_helper"
 
 describe "Registration::SslCertificateDetails" do
-  subject { Registration::SslCertificateDetails.new(
-      Registration::SslCertificate.load_file(fixtures_file("test.pem"))) }
+  subject do
+    Registration::SslCertificateDetails.new(
+      Registration::SslCertificate.load_file(fixtures_file("test.pem")))
+  end
   
   let(:identity) do
     <<EOS
