@@ -36,6 +36,4 @@ end
 require_relative "factories"
 
 # force loading all files to report proper code coverage
-Dir["src/lib/**/*.rb"].each do |file|
-  require "./#{file}"
-end
+Dir.chdir("src/lib") { Dir["**/*.rb"].each { |f| require f } }
