@@ -6,7 +6,7 @@ gem "suse-connect", :github => "SUSE/connect", :branch => "v0.2.14"
 group :test do
   gem "rake"
   gem "yard"
-  gem "yast-rake"
+  gem "yast-rake", ">= 0.1.9"
   gem "rspec", "~> 2.14.0"
   gem "simplecov", :require => false
   gem "coveralls", :require => false if ENV["TRAVIS"]

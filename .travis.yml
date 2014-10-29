@@ -9,5 +9,5 @@ before_install:
     - sudo gem install bundler
 script:
     - yardoc
-    - bundle exec rake -f Rakefile.travis
+    - COVERAGE=1 bundle exec rake test:unit
     - sudo rake install
