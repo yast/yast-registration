@@ -1,12 +1,10 @@
 require_relative "spec_helper"
-require "registration/ui/addon_selection_dialog"
 
 describe Registration::UI::AddonSelectionDialog do
   subject { Registration::UI::AddonSelectionDialog }
 
   before(:each) do
     # generic UI stubs for the wizard dialog
-    stub_const("Yast::UI", double())
     allow(Yast::UI).to receive(:WizardCommand)
     allow(Yast::UI).to receive(:WidgetExists).and_return(true)
     allow(Yast::UI).to receive(:ChangeWidget)

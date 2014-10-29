@@ -1,16 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
 require 'tmpdir'
 
 describe "Registration::EulaDownloader" do
-
-  before do
-    stub_yast_require
-    require "registration/eula_downloader"
-  end
-
   describe ".download" do
     it "downloads the license with translations" do
       en_eula = "English EULA"

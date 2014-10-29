@@ -1,4 +1,13 @@
 language: ruby
-rvm:
-  - "2.1.0"
-script: bundle exec rake -f Rakefile.travis
+before_install:
+    - curl http://download.opensuse.org/repositories/YaST:/Head:/Travis/xUbuntu_12.04/Release.key | sudo apt-key add -
+    - echo "deb http://download.opensuse.org/repositories/YaST:/Head:/Travis/xUbuntu_12.04/ ./" | sudo tee -a /etc/apt/sources.list
+    - sudo apt-get update -q
+    - sudo apt-get install --no-install-recommends -y yast2 yast2-slp yast2-add-on
+    # disable rvm, use system Ruby
+    - rvm reset
+    - sudo gem install bundler
+script:
+    - yardoc
+    - COVERAGE=1 bundle exec rake test:unit
+    - sudo rake install

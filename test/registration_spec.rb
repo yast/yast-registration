@@ -1,18 +1,13 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
 require "yaml"
 
 describe "Registration::Registration" do
   let(:yast_wfm) { double("Yast::Wfm") }
 
   before do
-    stub_yast_require
-    require "registration/registration"
-
-    stub_const("Yast::WFM", yast_wfm)
-    allow(yast_wfm).to receive(:GetLanguage).and_return("en")
+    allow(Yast::WFM).to receive(:GetLanguage).and_return("en")
     allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
   end
 

@@ -34,3 +34,6 @@ end
 
 # load data generators
 require_relative "factories"
+
+# force loading all files to report proper code coverage
+Dir.chdir("src/lib") { Dir["**/*.rb"].each { |f| require f } }

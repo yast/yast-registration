@@ -2,9 +2,6 @@
 
 require_relative "spec_helper"
 
-require "registration/registration"
-require "registration/registration_ui"
-
 describe "Registration::RegistrationUI" do
   let(:registration) { Registration::Registration.new }
   let(:registration_ui) { Registration::RegistrationUI.new(registration) }

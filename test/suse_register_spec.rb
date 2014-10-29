@@ -2,8 +2,6 @@
 
 require_relative "spec_helper"
 
-require "registration/suse_register"
-
 describe Registration::SuseRegister do
   subject { Registration::SuseRegister }
 

@@ -2,8 +2,6 @@
 
 require_relative "./spec_helper"
 
-require "registration/finish_dialog"
-
 describe ::Registration::FinishDialog do
 
   subject { ::Registration::FinishDialog.new }
@@ -20,7 +18,7 @@ describe ::Registration::FinishDialog do
 
     describe "first parameter \"Write\"" do
       before(:each) do
-        stub_const("Yast::Installation", double(:destdir => "/mnt"))
+        allow(Yast::Installation).to receive(:destdir).and_return("/mnt")
       end
 
       after(:each) do

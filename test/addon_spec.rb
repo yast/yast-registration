@@ -1,9 +1,6 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-
-require "registration/addon"
-require "suse/connect"
 require "yaml"
 
 describe Registration::Addon do

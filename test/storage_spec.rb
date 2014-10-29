@@ -2,11 +2,9 @@
 
 require_relative "spec_helper"
 
-require "registration/storage"
-
 describe Registration::Storage::Config do
   subject { Registration::Storage::Config.instance }
-  let(:addon) {
+  let(:addon) do
     {
       "arch" => "x86_64",
       "name" => "sle-module-legacy",
@@ -14,8 +12,8 @@ describe Registration::Storage::Config do
       "release_type" => "nil",
       "version" => "12"
     }
-  }
-  let(:config) {
+  end
+  let(:config) do
     {
       "addons" => [{"arch"=>"x86_64", "name"=>"sle-module-legacy", "reg_code"=>"",
           "release_type"=>"nil", "version"=>"12"}],
@@ -29,7 +27,7 @@ describe Registration::Storage::Config do
       "reg_server_cert_fingerprint_type" => "SHA1",
       "slp_discovery" => false
     }
-  }
+  end
 
   before do
     # start each test with empty config

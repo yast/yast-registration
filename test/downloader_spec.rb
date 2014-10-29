@@ -1,15 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require_relative "yast_stubs"
 require 'tmpdir'
 
 describe "Registration::Downloader" do
-  before do
-    stub_yast_require
-    require "registration/downloader"
-  end
-
   let(:url) { "http://example.com" }
 
   describe ".download" do
