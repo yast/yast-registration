@@ -136,7 +136,10 @@ module Registration
         Yast::ProductLicense.CleanUp()
       end
 
-      # get the EULA translation to display
+      # Get the EULA translation to display. Selects the most suitable language
+      # from the list according to the current locale setting.
+      # @param [Array<String>] eula_langs available EULA translation
+      # @return [String] a language from the input array
       def eula_lang(eula_langs)
         current_language = Helpers.language || "en_US"
         current_language.tr!("-", "_")
@@ -146,8 +149,18 @@ module Registration
           return current_language
         end
 
-        # partial match or English fallback
-        eula_langs.find { |eula_lang| remove_country_suffix(eula_lang) == current_language } || "en_US"
+        # partial match
+        eula_lang = eula_langs.find { |eula_lang| eula_lang == remove_country_suffix(current_language) }
+        return eula_lang if eula_lang
+
+        # use English fallback when present
+        return "en_US" if eula_langs.include?("en_US")
+        return "en" if eula_langs.include?("en")
+
+        # we cannot find any suitable language, just pick any from the list
+        # (return the first item from alphabetically sorted list to have
+        # consistent results and not to be completely random)
+        eula_langs.sort.first
       end
 
       # read downloaded EULAs
@@ -161,7 +174,7 @@ module Registration
 
           case file
           when "license.txt"
-            eulas["en_US"] = license
+            eulas["en_US"] = license unless eulas["en_US"]
           when /\Alicense\.(.*)\.txt\z/
             eulas[$1] = license
           else
