@@ -43,8 +43,7 @@ module Registration
     # from the available translations according to the current locale setting.
     # @return [String] a language name
     def current_language
-      current_language = Helpers.language || "en_US"
-      current_language.tr!("-", "_")
+      current_language = Helpers.current_language || "en_US"
 
       # exact match
       return current_language if languages.include?(current_language)
