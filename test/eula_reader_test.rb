@@ -4,6 +4,7 @@ require_relative "spec_helper"
 require "registration/eula_reader"
 
 describe Registration::EulaReader do
+  # trick: "" is used to avoid mocking license reading, it does not read anything
   subject { Registration::EulaReader.new("") }
 
   describe "#current_language" do
@@ -35,9 +36,9 @@ describe Registration::EulaReader do
       license_langs = ["de", "es", "fr"]
       allow(subject).to receive(:languages).and_return(license_langs)
 
-      # the actual returned translation is undefined, just make sure
-      # the returned language is in the list of available translations
-      expect(license_langs).to include(subject.current_language)
+      # the current implementation returns the first item from the sorted list
+      # which is "de" in this case
+      expect(subject.current_language).to eq("de")
     end
   end
 end

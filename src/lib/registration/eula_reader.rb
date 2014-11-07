@@ -35,7 +35,6 @@ module Registration
 
     def initialize(base_dir)
       @base_dir = base_dir
-      @licenses = {}
       read_licenses
     end
 
@@ -46,11 +45,11 @@ module Registration
       current_language = Helpers.current_language || "en_US"
 
       # exact match
-      return current_language if languages.include?(current_language)
+      return current_language if licenses[current_language]
 
       # try partial match, remove the country suffix
       current_language = remove_country_suffix(current_language)
-      return current_language if languages.include?(current_language)
+      return current_language if licenses[current_language]
 
       # find a fallback if no translation was found
       fallback_language
@@ -65,6 +64,7 @@ module Registration
     # read downloaded EULAs
     # @param dir [String] directory with EULA files
     def read_licenses
+      @licenses = {}
       Dir["#{base_dir}/license.*"].each { |license| add_license_file(license) }
       log.info "EULA files in #{base_dir}: #{licenses}"
     end
@@ -76,7 +76,7 @@ module Registration
 
       case file
       when "license.txt"
-        @licenses["en_US"] = license_file unless licenses["en_US"]
+        @licenses["en_US"] ||= license_file
       when /\Alicense\.(.*)\.txt\z/
         @licenses[$1] = license_file
       else

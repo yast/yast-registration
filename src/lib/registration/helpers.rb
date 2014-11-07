@@ -53,7 +53,7 @@ module Registration
       log.info "Current language: #{lang}"
 
       if lang == "POSIX" || lang == "C"
-        log.warn "Ignoring #{lang.inspect} language"
+        log.info "Ignoring #{lang.inspect} language"
         return nil
       end
 
