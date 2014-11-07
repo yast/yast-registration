@@ -46,18 +46,27 @@ module Registration
     # reg. code replacement
     FILTERED = "[FILTERED]"
 
-    # Get the language for using in HTTP requests (in "Accept-Language" header)
-    def self.language
+    # Get the current language (without encoding suffix)
+    # @return [String,nil] the current language or nil if set to "POSIX" or "C"
+    def self.current_language
       lang = Yast::WFM.GetLanguage
       log.info "Current language: #{lang}"
 
       if lang == "POSIX" || lang == "C"
-        log.warn "Ignoring #{lang.inspect} language for HTTP requests"
+        log.info "Ignoring #{lang.inspect} language"
         return nil
       end
 
       # remove the encoding (e.g. ".UTF-8")
-      lang.sub!(/\..*$/, "")
+      lang.sub(/\..*$/, "")
+    end
+
+    # Get the language for using in HTTP requests (in "Accept-Language" header)
+    # @return [String,nil] the language or nil if set to "POSIX" or "C"
+    def self.http_language
+      lang = current_language
+      return nil unless lang
+
       # replace lang/country separator "_" -> "-"
       # see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
       lang.tr!("_", "-")

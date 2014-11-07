@@ -127,30 +127,30 @@ describe "Registration::Helpers" do
     end
   end
 
-  describe ".language" do
+  describe ".http_language" do
     it "returns the current Yast language" do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("en")
-      expect(Registration::Helpers.language).to eq("en")
+      expect(Registration::Helpers.http_language).to eq("en")
     end
 
     it "removes encoding suffix" do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("en.UTF-8")
-      expect(Registration::Helpers.language).to eq("en")
+      expect(Registration::Helpers.http_language).to eq("en")
     end
 
     it "replaces _ separator by -" do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("en_US.UTF-8")
-      expect(Registration::Helpers.language).to eq("en-US")
+      expect(Registration::Helpers.http_language).to eq("en-US")
     end
 
     it "returns nil for C locale" do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("C")
-      expect(Registration::Helpers.language).to eq(nil)
+      expect(Registration::Helpers.http_language).to eq(nil)
     end
 
     it "returns nil for POSIX locale" do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("POSIX")
-      expect(Registration::Helpers.language).to eq(nil)
+      expect(Registration::Helpers.http_language).to eq(nil)
     end
   end
 

@@ -115,12 +115,8 @@ module Registration
       boot_url = boot_reg_url
       return boot_url if boot_url
 
-      # SLP discovery
-      slp_url = slp_service_url
-      return slp_url if slp_url
-
-      # use the default
-      nil
+      # if no SLP is selected nil is returned which means the default URL
+      slp_service_url
     end
 
     # get registration URL in upgrade mode
@@ -150,12 +146,8 @@ module Registration
         end
       end
 
-      # try SLP if not registered
-      slp_url = slp_service_url
-      return slp_url if slp_url
-
-      # use the default
-      nil
+      # if no SLP is selected nil is returned which means the default URL
+      slp_service_url
     end
 
     # get registration URL in running system
@@ -169,12 +161,8 @@ module Registration
         return config.url
       end
 
-      # try SLP if not registered yet
-      slp_url = slp_service_url
-      return slp_url if slp_url
-
-      # use the default
-      nil
+      # if no SLP is selected nil is returned which means the default URL
+      slp_service_url
     end
 
 

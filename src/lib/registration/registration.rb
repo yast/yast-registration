@@ -203,7 +203,7 @@ module Registration
 
     def connect_params(params = {})
       default_params = {
-        :language => ::Registration::Helpers.language,
+        :language => ::Registration::Helpers.http_language,
         :debug => ENV["SCCDEBUG"],
         :verbose => ENV["Y2DEBUG"] == "1",
         # pass a verify_callback to get details about failed SSL verification
