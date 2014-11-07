@@ -13,28 +13,27 @@ describe Registration::EulaReader do
     end
     
     it "returns the current language if there is a license for it" do
-      allow(subject).to receive(:languages).and_return(["cs_CZ", "de", "en"])
+      allow(subject).to receive(:licenses).and_return("cs_CZ" => "", "de" => "", "en" => "")
       expect(subject.current_language).to eq("cs_CZ")
     end
 
     it "returns the country fallback if the current language is missing" do
-      allow(subject).to receive(:languages).and_return(["cs", "de", "en"])
+      allow(subject).to receive(:licenses).and_return("cs" => "", "de" => "", "en" => "")
       expect(subject.current_language).to eq("cs")
     end
 
     it "returns 'en_US' fallback if the current language and country is missing" do
-      allow(subject).to receive(:languages).and_return(["de", "en_US", "en"])
+      allow(subject).to receive(:licenses).and_return("de" => "", "en_US" => "", "en" => "")
       expect(subject.current_language).to eq("en_US")
     end
 
     it "returns 'en' fallback if 'en_US' fallback is missing" do
-      allow(subject).to receive(:languages).and_return(["de", "en"])
+      allow(subject).to receive(:licenses).and_return("de" => "", "en" => "")
       expect(subject.current_language).to eq("en")
     end
 
     it "returns any present translation when no English fallback is found" do
-      license_langs = ["de", "es", "fr"]
-      allow(subject).to receive(:languages).and_return(license_langs)
+      allow(subject).to receive(:licenses).and_return("de" => "", "es" => "", "fr" => "")
 
       # the current implementation returns the first item from the sorted list
       # which is "de" in this case
