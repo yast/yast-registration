@@ -1,6 +1,7 @@
 
 require "yast"
 require "registration/eula_downloader"
+require "registration/eula_reader"
 require "registration/helpers"
 
 module Registration
@@ -89,9 +90,9 @@ module Registration
 
       # prepare data for displaying the EULA dialog
       # @param [SUSE::Connect::Product] addon the addon
-      # @param [Hash<String,String>] eulas mapping { <locale> => <file_name> }
+      # @param [EulaReader] eula_reader read eulas
       # @param [String] tmpdir target with the downloaded files
-      def setup_eula_dialog(addon, eulas, tmpdir)
+      def setup_eula_dialog(addon, eula_reader, tmpdir)
         id = "#{addon.label} extension EULA"
         Yast::ProductLicense.SetAcceptanceNeeded(id, true)
         Yast::ProductLicense.license_file_print = addon.eula_url
@@ -99,8 +100,8 @@ module Registration
         # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
         title = _("%s License Agreement") % addon.label
         enable_back = true
-        Yast::ProductLicense.DisplayLicenseDialogWithTitle(eulas.keys, enable_back,
-          eula_lang(eulas.keys), arg_ref(eulas), id, title)
+        Yast::ProductLicense.DisplayLicenseDialogWithTitle(eula_reader.languages, enable_back,
+          eula_reader.current_language, arg_ref(eula_reader.licenses), id, title)
 
         # display info file if present
         display_optional_info(File.join(tmpdir, "info.txt"))
@@ -110,12 +111,12 @@ module Registration
       end
 
       # run the EULA agreement dialog
-      # @param [Hash<String,String>] eulas mapping { <locale> => <file_name> }
+      # @param [EulaReader] eula_reader read EULAs
       # @return [Symbol] :accepted, :back, :abort, :halt - user input
-      def run_eula_dialog(eulas)
+      def run_eula_dialog(eula_reader)
         base_product = false
         cancel_action = "abort"
-        ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eulas),
+        ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eula_reader.licenses),
           base_product, cancel_action)
         log.debug "EULA dialog result: #{ret}"
         ret
@@ -127,57 +128,13 @@ module Registration
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           return false unless download_eula(addon, tmpdir)
-          eulas = read_downloaded_eulas(tmpdir)
+          eula_reader = EulaReader.new(tmpdir)
 
-          setup_eula_dialog(addon, eulas, tmpdir)
-          run_eula_dialog(eulas)
+          setup_eula_dialog(addon, eula_reader, tmpdir)
+          run_eula_dialog(eula_reader)
         end
       ensure
         Yast::ProductLicense.CleanUp()
-      end
-
-      # get the EULA translation to display
-      def eula_lang(eula_langs)
-        current_language = Helpers.language || "en_US"
-        current_language.tr!("-", "_")
-
-        # exact match
-        if eula_langs.include?(current_language)
-          return current_language
-        end
-
-        # partial match or English fallback
-        eula_langs.find { |eula_lang| remove_country_suffix(eula_lang) == current_language } || "en_US"
-      end
-
-      # read downloaded EULAs
-      # @param dir [String] directly with EULA files
-      # @return [Hash<String,String>] mapping { <locale> => <file_name> }
-      def read_downloaded_eulas(dir)
-        eulas = {}
-
-        Dir["#{dir}/license.*"].each do |license|
-          file = File.basename(license)
-
-          case file
-          when "license.txt"
-            eulas["en_US"] = license
-          when /\Alicense\.(.*)\.txt\z/
-            eulas[$1] = license
-          else
-            log.warn "Ignoring unknown file: #{file}"
-          end
-        end
-
-        log.info "EULA files in #{dir}: #{eulas}"
-        eulas
-      end
-
-      # helper for removing the country suffix, e.g. "de_DE" => "de"
-      # @param code [String] input locale name
-      # @return [String] result locale name
-      def remove_country_suffix(code)
-        code.sub(/_.*\z/, "")
       end
 
       # read a file if it exists and display it in a popup

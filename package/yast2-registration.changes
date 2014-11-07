@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov  6 08:32:36 UTC 2014 - lslezak@suse.cz
+
+- display correct default EULA translation for extensions/modules
+  (bnc#894460)
+- 3.1.129
+
+-------------------------------------------------------------------
 Fri Oct 17 13:01:54 UTC 2014 - lslezak@suse.cz
 
 - reset registration URL when registration upgrade fails to allow
