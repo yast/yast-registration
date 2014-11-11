@@ -1,10 +1,10 @@
 YaST - Registration Module
 ========================
 
-[![Travis Build](https://travis-ci.org/yast/yast-registration.svg?branch=master)](https://travis-ci.org/yast/yast-registration)
-[![Coverage Status](https://img.shields.io/coveralls/yast/yast-registration.svg)](https://coveralls.io/r/yast/yast-registration?branch=master)
+[![Travis Build](https://travis-ci.org/yast/yast-registration.svg?branch=SLE-12-GA)](https://travis-ci.org/yast/yast-registration)
+[![Coverage Status](https://img.shields.io/coveralls/yast/yast-registration.svg)](https://coveralls.io/r/yast/yast-registration?branch=SLE-12-GA)
 [![Code Climate](https://codeclimate.com/github/yast/yast-registration/badges/gpa.svg)](https://codeclimate.com/github/yast/yast-registration)
-[![Inline docs](http://inch-ci.org/github/yast/yast-registration.svg?branch=master)](http://inch-ci.org/github/yast/yast-registration)
+[![Inline docs](http://inch-ci.org/github/yast/yast-registration.svg?branch=SLE-12-GA)](http://inch-ci.org/github/yast/yast-registration)
 
 
 This is a YaST module for registering a SUSE Linux Enterprise (SLE) product to
