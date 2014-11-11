@@ -2,7 +2,7 @@ language: ruby
 before_install:
     # disable rvm, use system Ruby
     - rvm reset
-    - wget https://raw.githubusercontent.com/yast/yast-devtools/master/travis-tools/travis_setup.sh
+    - wget https://raw.githubusercontent.com/yast/yast-devtools/SLE-12-GA/travis-tools/travis_setup.sh
     - sh ./travis_setup.sh -p "yast2 yast2-slp yast2-add-on" -g bundler
 script:
     - yardoc
