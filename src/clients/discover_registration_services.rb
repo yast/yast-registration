@@ -83,7 +83,7 @@ module Yast
       url = ::Registration::UrlHelpers.service_url(selected_service.slp_url)
       log.info "Selected service URL: #{url}"
 
-      return url
+      url
     end
 
     def select_registration_service

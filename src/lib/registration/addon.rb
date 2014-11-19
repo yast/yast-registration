@@ -63,7 +63,7 @@ module Registration
           root_addon.children << child.first
         end
 
-        return result
+        result
       end
     end
 
@@ -134,7 +134,7 @@ module Registration
       # Do not allow to unselect parent if any children is selected
       return false if children.any?(&:selected?)
 
-      return true
+      true
     end
 
     # Convert to a Hash, exports only the basic Addon properties

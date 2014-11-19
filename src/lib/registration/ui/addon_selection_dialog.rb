@@ -127,7 +127,7 @@ module Registration
         # add extra spacing when there are just few addons, in GUI always
         res << VSpacing(0.7) if extra_spacing
 
-        return res
+        res
       end
 
       def addon_checkbox_element(addon)
@@ -216,7 +216,7 @@ module Registration
           return false
         end
 
-        return true
+        true
       end
     end
   end

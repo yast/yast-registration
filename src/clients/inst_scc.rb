@@ -167,7 +167,7 @@ module Yast
         end
       end
 
-      return ret
+      ret
     end
 
     # update system registration, update the target distribution
@@ -405,7 +405,7 @@ module Yast
         end
       end
 
-      return !product_succeed.include?(false) # succeed only if noone failed
+      !product_succeed.include?(false) # succeed only if noone failed
     end
 
     # run the addon reg codes dialog
@@ -486,7 +486,7 @@ module Yast
 
       Wizard.RestoreNextButton
 
-      return ret
+      ret
     end
 
     def registration_check

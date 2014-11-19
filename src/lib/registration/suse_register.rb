@@ -40,7 +40,7 @@ module Registration
 
       url_s = url_line[/^\s*url\s*=\s*(\S*)/, 1]
       @url = URI.parse(url_s)
-      return true
+      true
     end
   end
 end

@@ -185,7 +185,7 @@ module Yast
         ::Registration::Helpers.copy_certificate_to_target
       end
 
-      return true
+      true
     end
 
     def auto_packages
