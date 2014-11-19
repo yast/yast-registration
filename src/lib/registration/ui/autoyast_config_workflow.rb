@@ -37,11 +37,11 @@ module Registration
 
       def run
         aliases = {
-          "general"         => lambda { configure_registration() },
-          "addons"          => [ lambda { select_addons() }, true ],
-          "remote_addons"   => [ lambda { select_remote_addons() }, true ],
-          "addons_eula"     => [ lambda { addons_eula() }, true ],
-          "addons_regcodes" => [ lambda { addons_reg_codes() }, true ]
+          "general"         => lambda { configure_registration },
+          "addons"          => [ lambda { select_addons }, true ],
+          "remote_addons"   => [ lambda { select_remote_addons }, true ],
+          "addons_eula"     => [ lambda { addons_eula }, true ],
+          "addons_regcodes" => [ lambda { addons_reg_codes }, true ]
         }
 
         sequence = {

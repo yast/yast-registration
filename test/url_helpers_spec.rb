@@ -207,7 +207,7 @@ describe "Registration::UrlHelpers" do
       expect(Yast::SlpService).to receive(:all).and_return(services)
 
       # stub Popup.Feedback call but yield the passed block
-      expect(Yast::Popup).to receive(:Feedback).and_yield()
+      expect(Yast::Popup).to receive(:Feedback).and_yield
 
       expect(Registration::UrlHelpers.slp_discovery_feedback).to eql(services)
     end

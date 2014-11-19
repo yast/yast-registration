@@ -53,7 +53,7 @@ describe "Registration::Downloader" do
       index2 = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index2).to receive(:body).and_return("response")
 
-      http = double()
+      http = double
       expect(Net::HTTP).to receive(:new).twice.and_return(http)
       expect(http).to receive(:request).twice.and_return(index1, index2)
       expect(http).to receive(:proxy?).twice.and_return(false)
