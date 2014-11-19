@@ -1,7 +1,7 @@
 require "registration/addon"
 require "suse/connect"
 
-def suse_connect_product_generator(attrs={})
+def suse_connect_product_generator(attrs = {})
     params = {}
     params["available"] = attrs["available"] if attrs.has_key?("available")
     params["name"] = attrs["name"] || "Product#{rand(100000)}"
@@ -19,11 +19,11 @@ def suse_connect_product_generator(attrs={})
     params
 end
 
-def addon_generator(params={})
+def addon_generator(params = {})
   SUSE::Connect::Remote::Product.new(suse_connect_product_generator(params))
 end
 
-def addon_with_child_generator(parent_params={})
+def addon_with_child_generator(parent_params = {})
   prod_child = suse_connect_product_generator
   SUSE::Connect::Remote::Product.new(suse_connect_product_generator(parent_params.merge("extensions" => [prod_child])))
 end

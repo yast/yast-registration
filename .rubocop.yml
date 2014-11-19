@@ -304,12 +304,6 @@ Style/SignalException:
 Style/SpaceAfterComma:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
 # Offense count: 74
 # Cop supports --auto-correct.
 Style/SpaceAroundOperators:
