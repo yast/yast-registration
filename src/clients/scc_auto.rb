@@ -241,7 +241,7 @@ module Yast
 
     def switch_registration(url = nil)
       @registration = ::Registration::Registration.new(url)
-      #reset registration ui as it depends on registration
+      # reset registration ui as it depends on registration
       @registration_ui = nil
       @registration
     end

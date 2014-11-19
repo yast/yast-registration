@@ -205,11 +205,6 @@ Style/IndentationWidth:
 Style/Lambda:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/LeadingCommentSpace:
-  Enabled: false
-
 # Offense count: 16
 # Cop supports --auto-correct.
 Style/LineEndConcatenation:
