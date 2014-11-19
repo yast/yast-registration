@@ -382,4 +382,3 @@ module Registration
     private_class_method :each_repo
   end
 end
-

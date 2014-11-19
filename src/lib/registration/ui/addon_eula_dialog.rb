@@ -144,4 +144,3 @@ module Registration
     end
   end
 end
-
