@@ -592,7 +592,7 @@ module Yast
           :abort   => :abort,
           :cancel   => :abort,
           :next => "select_addons",
-          :register => "register",
+          :register => "register"
         },
         "register" => {
           :abort    => :abort,

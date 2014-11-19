@@ -74,7 +74,7 @@ module Registration
           Left(Label(_("Details"))),
           MinHeight(8,
             VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                  _("Select an extension or a module to show details here") + "</small>")),
+                  _("Select an extension or a module to show details here") + "</small>"))
           ),
           VStretch()
         )

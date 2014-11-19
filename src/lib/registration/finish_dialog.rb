@@ -14,7 +14,7 @@ module Registration
       :installation,
       :live_installation,
       :autoinst,
-      :update,
+      :update
     ]
 
     def initialize

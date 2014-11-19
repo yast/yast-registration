@@ -184,7 +184,7 @@ module Registration
               "name" => service_name,
               "url" => product_service.url.to_s,
               "enabled" => true,
-              "autorefresh" => true,
+              "autorefresh" => true
             })
 
           ## error message

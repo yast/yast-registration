@@ -41,7 +41,7 @@ module Yast
         cmdline_description = {
           "id" => "scc",
           # Command line help text for the repository module, %1 is "SUSEconnect"
-          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect",
+          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
         }
 
         CommandLine.Run(cmdline_description)
