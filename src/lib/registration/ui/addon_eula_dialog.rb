@@ -68,24 +68,22 @@ module Registration
       # @param [SUSE::Connect::Product] addon the addon
       # @param [String] tmpdir target where to download the files
       def download_eula(addon, tmpdir)
-        begin
-          Yast::Popup.Feedback(
-            _("Downloading License Agreement..."),
-            addon.label
-          ) do
-            # download the license (with translations)
-            loader = EulaDownloader.new(addon.eula_url, tmpdir,
-              insecure: Helpers.insecure_registration)
+        Yast::Popup.Feedback(
+          _("Downloading License Agreement..."),
+          addon.label
+        ) do
+          # download the license (with translations)
+          loader = EulaDownloader.new(addon.eula_url, tmpdir,
+            insecure: Helpers.insecure_registration)
 
-            loader.download
-          end
-          true
-        rescue Exception => e
-          log.error "Download failed: #{e.message}: #{e.backtrace}"
-          # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-          Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
-          return false
+          loader.download
         end
+        true
+      rescue Exception => e
+        log.error "Download failed: #{e.message}: #{e.backtrace}"
+        # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
+        Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
+        return false
       end
 
       # prepare data for displaying the EULA dialog

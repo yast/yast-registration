@@ -66,12 +66,10 @@ module Registration
       end
 
       def valid_url?
-        begin
-          uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
-          (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
-        rescue URI::InvalidURIError
-          false
-        end
+        uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
+        (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
+      rescue URI::InvalidURIError
+        false
       end
 
       def button_box
