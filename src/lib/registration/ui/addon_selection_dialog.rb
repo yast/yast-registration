@@ -46,10 +46,10 @@ module Registration
           # help text (1/3)
           _("<p>Here you can select available extensions and modules for your"\
               "system.</p>") +
-            # help text (2/3)
+          # help text (2/3)
           _("<p>Please note, that some extensions or modules might need "\
               "specific registration code.</p>") +
-            # help text (3/3)
+          # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log"\
               "into the SUSE Customer Center and remove them manually there.</p>"),
           # always enable Back/Next, the dialog cannot be the first in workflow
