@@ -78,7 +78,7 @@ module Registration
       when "license.txt"
         @licenses["en_US"] ||= license_file
       when /\Alicense\.(.*)\.txt\z/
-        @licenses[$1] = license_file
+        @licenses[Regexp.last_match[1]] = license_file
       else
         log.warn "Ignoring unknown file: #{file}"
       end
