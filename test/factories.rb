@@ -4,11 +4,11 @@ require "suse/connect"
 def suse_connect_product_generator(attrs = {})
     params = {}
     params["available"] = attrs["available"] if attrs.has_key?("available")
-    params["name"] = attrs["name"] || "Product#{rand(100000)}"
+    params["name"] = attrs["name"] || "Product#{rand(100_000)}"
     params["friendly_name"] = attrs["friendly_name"] || "The best cool #{params["name"]}"
     params["description"] = attrs["description"] || "Bla bla bla bla!"
     params["id"] = attrs["id"] || "#{rand(10000)}"
-    params["identifier"] = attrs["zypper_name"] || "prod#{rand(100000)}"
+    params["identifier"] = attrs["zypper_name"] || "prod#{rand(100_000)}"
     params["version"] = attrs["version"] || "#{rand(13)}"
     params["arch"] = attrs["arch"] || "x86_64"
     params["free"] = attrs.fetch("free", true)
