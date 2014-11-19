@@ -86,7 +86,7 @@ module Registration
       :release_type,
       :version
 
-    def initialize pure_addon
+    def initialize(pure_addon)
       @pure_addon = pure_addon
       @children = []
     end
