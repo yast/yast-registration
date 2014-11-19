@@ -270,11 +270,6 @@ Style/RedundantReturn:
 Style/SignalException:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/SpaceAfterComma:
-  Enabled: false
-
 # Offense count: 74
 # Cop supports --auto-correct.
 Style/SpaceAroundOperators:
