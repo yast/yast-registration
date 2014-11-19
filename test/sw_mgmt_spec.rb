@@ -9,39 +9,39 @@ describe "Registration::SwMgmt" do
     {
       # installation repository, not from registration
       0 => {
-        "alias"=>"SLES12", "autorefresh"=>false,
-        "base_urls"=>["cd:///"],
-        "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12", "priority"=>99, "product_dir"=>"",
-        "service"=>"", "type"=>"SUSE",
-        "url"=>"cd:///"
+        "alias" => "SLES12", "autorefresh" => false,
+        "base_urls" => ["cd:///"],
+        "enabled" => true, "is_update_repo" => false, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12", "priority" => 99, "product_dir" => "",
+        "service" => "", "type" => "SUSE",
+        "url" => "cd:///"
       },
       # pool repo from service
       1 => {
-        "alias"=>"SLES:SLES12-Pool", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"],
-        "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Pool", "priority"=>99, "product_dir"=>"",
-        "service"=>service_name, "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"
+        "alias" => "SLES:SLES12-Pool", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"],
+        "enabled" => true, "is_update_repo" => false, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Pool", "priority" => 99, "product_dir" => "",
+        "service" => service_name, "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"
       },
       # update repo from service
       2 => {
-        "alias"=>"SLES:SLES12-Updates", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-        "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
-        "service"=>service_name, "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
+        "alias" => "SLES:SLES12-Updates", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
+        "enabled" => true, "is_update_repo" => true, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Updates", "priority" => 99, "product_dir" => "",
+        "service" => service_name, "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
       },
       # update repo from a different service
       3 => {
-        "alias"=>"Another:SLES12-Updates", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-        "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
-        "service"=> "Another", "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
+        "alias" => "Another:SLES12-Updates", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
+        "enabled" => true, "is_update_repo" => true, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Updates", "priority" => 99, "product_dir" => "",
+        "service" => "Another", "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
       }
     }
   end

@@ -202,8 +202,8 @@ describe "Registration::Helpers" do
         "email" => "foo",
         "reg_code" => "bar",
         "install_updates" => true,
-        "addons" => [{"name"=>"sle-sdk", "arch"=>"x86_64", "version"=>"12",
-            "release_type"=>"nil", "reg_code"=>""}],
+        "addons" => [{"name" => "sle-sdk", "arch" => "x86_64", "version" => "12",
+            "release_type" => "nil", "reg_code" => ""}],
         "reg_server_cert_fingerprint" => "AB:CD:EF",
         "reg_server_cert_fingerprint_type" => "SHA256"
       )
@@ -229,7 +229,7 @@ describe "Registration::Helpers" do
     it "it replaces \"reg_code\" also in nested \"addons\" list" do
       test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
       expect(Registration::Helpers.hide_reg_codes(test)).to eq(
-        "addons" => [{ "reg_code"=>"[FILTERED]" }, { "reg_code"=>"[FILTERED]" }])
+        "addons" => [{ "reg_code" => "[FILTERED]" }, { "reg_code" => "[FILTERED]" }])
     end
 
     it "it does not modify the original input value" do

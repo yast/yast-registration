@@ -14,11 +14,11 @@ describe "Registration::RegistrationUI" do
   end
   let(:base_product_to_register) do
     {
-      "arch"=>"x86_64",
-      "name"=>"SLES",
-      "reg_code"=>"reg_code",
-      "release_type"=>"DVD",
-      "version"=>"12"
+      "arch" => "x86_64",
+      "name" => "SLES",
+      "reg_code" => "reg_code",
+      "release_type" => "DVD",
+      "version" => "12"
     }
   end
 

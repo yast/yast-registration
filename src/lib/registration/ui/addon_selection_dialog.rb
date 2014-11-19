@@ -85,7 +85,7 @@ module Registration
         if @addons.size <= lines
           content = addon_selection_items(@addons)
         else
-          box2 = addon_selection_items(@addons[lines..(2*lines - 1)])
+          box2 = addon_selection_items(@addons[lines..(2 * lines - 1)])
           box2.params << VStretch() # just UI tweak
           content = HBox(
             addon_selection_items(@addons[0..(lines - 1)]),
@@ -208,7 +208,7 @@ module Registration
       def supported_addon_count?
         need_regcode = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout
-        max_supported = 2*MAX_REGCODES_PER_COLUMN
+        max_supported = 2 * MAX_REGCODES_PER_COLUMN
 
         # check the addons requiring a reg. code
         if need_regcode.size > max_supported

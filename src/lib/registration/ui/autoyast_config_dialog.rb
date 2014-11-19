@@ -49,8 +49,8 @@ module Registration
         caption = _("Product Registration")
         help_text = "<p><b>#{caption}</b></p>"
         help_text += _(
-          "<p>Product registration includes your product in SUSE Customer Center database,\n"+
-            "enabling you to get online updates and technical support.\n"+
+          "<p>Product registration includes your product in SUSE Customer Center database,\n" +
+            "enabling you to get online updates and technical support.\n" +
             "To register while installing automatically, select <b>Run Product Registration</b>.</p>"
         )
         help_text += _(

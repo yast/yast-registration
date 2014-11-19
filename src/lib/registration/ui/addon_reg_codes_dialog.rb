@@ -64,7 +64,7 @@ module Registration
         # display the second column if needed
         if addons_with_regcode.size > MAX_REGCODES_PER_COLUMN
           # display only the addons which fit two column layout
-          display_addons = addons_with_regcode[0..2*MAX_REGCODES_PER_COLUMN - 1]
+          display_addons = addons_with_regcode[0..2 * MAX_REGCODES_PER_COLUMN - 1]
 
           # round the half up (more items in the first column for odd number of items)
           half = (display_addons.size + 1) / 2
