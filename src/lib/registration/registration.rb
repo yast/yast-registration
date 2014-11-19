@@ -159,7 +159,7 @@ module Registration
       params = connect_params
 
       # use product specific reg. code (e.g. for addons)
-      if (product.is_a?(Hash) && product["reg_code"])
+      if product.is_a?(Hash) && product["reg_code"]
         params[:token] = product["reg_code"]
       end
 

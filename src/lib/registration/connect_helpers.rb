@@ -189,7 +189,7 @@ module Registration
     end
 
     def self.error_with_details(error, details)
-      return error if (!details || details.empty?)
+      return error if !details || details.empty?
 
       # %s are error details
       error + "\n\n" + (_("Details: %s") % details)

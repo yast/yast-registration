@@ -248,12 +248,6 @@ Style/NilComparison:
 Style/NumericLiterals:
   MinDigits: 6
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AllowSafeAssignment.
-Style/ParenthesesAroundCondition:
-  Enabled: false
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/PerlBackrefs:
