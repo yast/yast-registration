@@ -343,11 +343,8 @@ Style/SpaceInsideHashLiteralBraces:
 Style/SpecialGlobalVars:
   Enabled: false
 
-# Offense count: 1706
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/StringLiterals:
-  Enabled: false
+  EnforcedStyle: double_quotes
 
 # Offense count: 6
 # Cop supports --auto-correct.

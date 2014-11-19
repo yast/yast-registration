@@ -1,7 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require 'tmpdir'
+require "tmpdir"
 
 describe "Registration::Downloader" do
   let(:url) { "http://example.com" }

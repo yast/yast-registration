@@ -3,9 +3,9 @@ require "registration/helpers"
 require "registration/url_helpers"
 
 module Yast
-  import 'UI'
-  import 'Label'
-  import 'Report'
+  import "UI"
+  import "Label"
+  import "Report"
 
   class DiscoverRegistrationServicesClient < Client
     include Yast::Logger
@@ -37,7 +37,7 @@ module Yast
       MarginBox(2, 0.5,
         VBox(
           # popup heading (in bold)
-          Heading(_('Local Registration Servers')),
+          Heading(_("Local Registration Servers")),
           VSpacing(0.5),
           Label(_("Select a detected registration server from the list\n" +
                 "or the default SUSE registration server.")),
