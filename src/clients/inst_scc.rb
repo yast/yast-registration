@@ -522,7 +522,7 @@ module Yast
 
         ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
-        if File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+        if File.exist?(::Registration::Registration::SCC_CREDENTIALS)
           # update the registration using the old credentials
           return :update
         end

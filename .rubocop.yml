@@ -6,11 +6,6 @@
 # versions of RuboCop, may require this file to be generated again.
 
 # Offense count: 2
-# Cop supports --auto-correct.
-Lint/DeprecatedClassMethods:
-  Enabled: false
-
-# Offense count: 2
 Lint/Loop:
   Enabled: false
 
