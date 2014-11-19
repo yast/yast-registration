@@ -99,10 +99,8 @@ module Registration
             SccAutoClient::CONTACTING_MESSAGE,
             _("Loading Available Extensions and Modules...")) do
 
-            ::Registration::Addon.find_all(registration).each do |addon|
-              # reset registration status to allow selecting all addons not only
-              addon.unregistered
-            end
+            # reset registration status to allow selecting all addons
+            ::Registration::Addon.find_all(registration).each(&:unregistered)
           end
 
           ret = AddonSelectionDialog.run(registration)
