@@ -121,11 +121,6 @@ Style/CommentAnnotation:
 Style/CommentIndentation:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/DeprecatedHashMethods:
-  Enabled: false
-
 # Offense count: 29
 Style/Documentation:
   Enabled: false

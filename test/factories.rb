@@ -3,7 +3,7 @@ require "suse/connect"
 
 def suse_connect_product_generator(attrs = {})
     params = {}
-    params["available"] = attrs["available"] if attrs.has_key?("available")
+    params["available"] = attrs["available"] if attrs.key?("available")
     params["name"] = attrs["name"] || "Product#{rand(100_000)}"
     params["friendly_name"] = attrs["friendly_name"] || "The best cool #{params["name"]}"
     params["description"] = attrs["description"] || "Bla bla bla bla!"
