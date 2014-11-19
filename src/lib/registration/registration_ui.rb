@@ -163,7 +163,6 @@ module Registration
       failed_addons
     end
 
-
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow

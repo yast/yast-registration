@@ -105,7 +105,6 @@ describe Registration::Addon do
     end
   end
 
-
   describe "#selected?" do
     it "returns if addon is selected for installation" do
       expect(addon.selected?).to be_false

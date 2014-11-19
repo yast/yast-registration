@@ -10,7 +10,6 @@ require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 
-
 module Registration
   module UI
 

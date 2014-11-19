@@ -85,5 +85,4 @@ module Registration
 
   end
 
-
 end

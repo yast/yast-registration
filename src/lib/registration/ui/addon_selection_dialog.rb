@@ -187,14 +187,12 @@ module Registration
         reactivate_dependencies
       end
 
-
       # update addon details after changing the current addon in the UI
       def show_addon_details(addon)
         # addon description is a rich text
         Yast::UI.ChangeWidget(Id(:details), :Value, addon.description)
         Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
-
 
       def reactivate_dependencies
         @addons.each do |addon|

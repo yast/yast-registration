@@ -165,7 +165,6 @@ module Registration
       slp_service_url
     end
 
-
     # return the boot command line parameter
     def self.boot_reg_url
       reg_url = Yast::Linuxrc.InstallInf("regurl")

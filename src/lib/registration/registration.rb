@@ -58,7 +58,6 @@ module Registration
       credentials.write
     end
 
-
     def register_product(product, email = nil)
       service_for_product(product) do |product_ident, params|
         log_product = product.dup

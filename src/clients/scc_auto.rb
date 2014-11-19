@@ -117,7 +117,6 @@ module Yast
       @config.import(settings)
     end
 
-
     # Export the settings to a single Hash
     # (For use by autoinstallation.)
     # @return [Hash] AutoYast configuration
@@ -126,7 +125,6 @@ module Yast
       log.debug "Exported config: #{ret}"
       ret
     end
-
 
     # Create a textual summary
     # @return [String] summary of the current configuration

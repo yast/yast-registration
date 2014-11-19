@@ -359,7 +359,6 @@ module Yast
       Registration::UI::AddonSelectionDialog.run(@registration)
     end
 
-
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow

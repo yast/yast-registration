@@ -135,7 +135,6 @@ module Registration
         @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"] || ""
       end
 
-
       private
 
       def import_addons(settings)
