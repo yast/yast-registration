@@ -20,7 +20,7 @@ describe Registration::UI::ImportCertificateDialog do
       expect(Yast::UI).to receive(:UserInput).and_return(:import)
 
       # check the displayed content
-      expect(Yast::UI).to receive(:OpenDialog) do |arg1, arg2|
+      expect(Yast::UI).to receive(:OpenDialog) do |_arg1, arg2|
         # do a simple check: convert the term to String and use a RegExp
         expect(arg2.to_s).to match(/Organization \(O\):.*WebYaST/)
       end
