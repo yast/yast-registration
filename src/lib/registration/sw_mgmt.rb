@@ -83,7 +83,7 @@ module Registration
     def self.find_base_product
       # just for debugging:
       if ENV["FAKE_BASE_PRODUCT"]
-        return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
           "release_type" => "DVD"
         }
       end
@@ -123,7 +123,7 @@ module Registration
     def self.base_product_to_register
       # just for debugging:
       if ENV["FAKE_BASE_PRODUCT"]
-        return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
           "release_type" => "DVD"
         }
       end

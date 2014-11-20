@@ -79,12 +79,6 @@ Style/DotPosition:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/IndentHash:
-  Enabled: false
-
 # Offense count: 13
 Style/Lambda:
   Enabled: false
@@ -125,12 +119,6 @@ Style/SignalException:
 # Offense count: 24
 # Cop supports --auto-correct.
 Style/SpaceInsideBrackets:
-  Enabled: false
-
-# Offense count: 16
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SupportedStyles.
-Style/SpaceInsideHashLiteralBraces:
   Enabled: false
 
 Style/StringLiterals:
