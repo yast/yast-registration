@@ -54,10 +54,9 @@ Style/AlignHash:
 Style/AlignParameters:
   Enabled: false
 
-# Offense count: 3
-# Configuration parameters: IndentWhenRelativeTo, SupportedStyles, IndentOneStep.
+# no extra indentation for case
 Style/CaseIndentation:
-  Enabled: false
+  IndentWhenRelativeTo: end
 
 # Offense count: 16
 # Configuration parameters: Keywords.
