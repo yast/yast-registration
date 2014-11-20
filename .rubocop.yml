@@ -111,10 +111,6 @@ Style/Lambda:
 Style/MultilineOperationIndentation:
   Enabled: false
 
-# Offense count: 6
-Style/MultilineTernaryOperator:
-  Enabled: false
-
 # Offense count: 22
 # Cop supports --auto-correct.
 Style/NegatedIf:

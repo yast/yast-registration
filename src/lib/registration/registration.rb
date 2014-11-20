@@ -145,13 +145,16 @@ module Registration
     end
 
     def service_for_product(product, &_block)
-      remote_product = product.is_a?(Hash) ?
-        SUSE::Connect::Remote::Product.new(
-        arch: product["arch"],
-        identifier: product["name"],
-        version: product["version"],
-        release_type: product["release_type"]
-      ) : product
+      if product.is_a?(Hash)
+        remote_product =  SUSE::Connect::Remote::Product.new(
+          arch: product["arch"],
+          identifier: product["name"],
+          version: product["version"],
+          release_type: product["release_type"]
+        )
+      else
+        remote_product = product
+      end
 
       log.info "Using product: #{remote_product}"
 
@@ -196,8 +199,8 @@ module Registration
       log.error "SSL verification failed: #{context.error}: #{context.error_string}"
       Storage::SSLErrors.instance.ssl_error_code = context.error
       Storage::SSLErrors.instance.ssl_error_msg = context.error_string
-      Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
-        SslCertificate.load(context.current_cert) : nil
+      Storage::SSLErrors.instance.ssl_failed_cert =
+        context.current_cert ? SslCertificate.load(context.current_cert) : nil
     end
 
     def connect_params(params = {})

@@ -91,9 +91,7 @@ module Registration
         HBox(
           VSpacing(window_height),
           # left-side help
-          hide_help ?
-            Empty() :
-            HWeight(2, VBox(RichText(Opt(:disabled), warning_text))),
+          hide_help ? Empty() : HWeight(2, VBox(RichText(Opt(:disabled), warning_text))),
           HSpacing(1),
           HWeight(5, certificate_box)
         )

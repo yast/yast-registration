@@ -263,18 +263,14 @@ module Yast
       registered = ::Registration::Registration.is_registered?
 
       VBox(
-        Mode.installation || Mode.update ?
-          Right(PushButton(Id(:network), _("Network Configuration..."))) :
-          Empty(),
+        Mode.installation || Mode.update ? Right(PushButton(Id(:network), _("Network Configuration..."))) : Empty(),
         VStretch(),
         HSquash(
           VBox(
             VSpacing(1),
             Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
             VSpacing(1),
-            registered ?
-              Heading(_("The system is already registered.")) :
-              Label(info)
+            registered ? Heading(_("The system is already registered.")) : Label(info)
           )
         ),
         VSpacing(UI.TextMode ? 1 : 2),
@@ -630,8 +626,12 @@ module Yast
     # which dialog should be displayed at start
     def workflow_start
       log.debug "WFM.Args: #{WFM.Args}"
-      WFM.Args.include?("select_extensions") && Registration::Registration.is_registered? ?
-        "select_addons" : "check"
+
+      if WFM.Args.include?("select_extensions") && Registration::Registration.is_registered?
+        "select_addons"
+      else
+        "check"
+      end
     end
 
     # initialize the Registration object
