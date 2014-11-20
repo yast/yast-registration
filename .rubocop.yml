@@ -42,14 +42,11 @@ Metrics/PerceivedComplexity:
 Style/AccessorMethodName:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
+# no extra indentation for multiline arrays
 Style/AlignArray:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle, SupportedLastArgumentHashStyles.
+# no extra indentation for multiline hashes
 Style/AlignHash:
   Enabled: false
 
