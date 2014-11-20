@@ -13,11 +13,6 @@ Lint/Loop:
 Lint/RescueException:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Lint/UnusedMethodArgument:
-  Enabled: false
-
 # Offense count: 2
 Lint/UselessAccessModifier:
   Enabled: false

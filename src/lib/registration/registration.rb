@@ -144,7 +144,7 @@ module Registration
       end
     end
 
-    def service_for_product(product, &block)
+    def service_for_product(product, &_block)
       remote_product = product.is_a?(Hash) ?
         SUSE::Connect::Remote::Product.new(
         :arch         => product["arch"],
