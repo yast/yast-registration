@@ -9,8 +9,9 @@ describe Registration::Fingerprint do
 
   describe "== operator" do
     it "returns true when comparing self" do
-      fp = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
-      expect(fp == fp).to be_true
+      fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
+      fp2 = fp1
+      expect(fp1 == fp2).to be_true
     end
 
     it "returns true when comparing to the identical fingerprint" do
