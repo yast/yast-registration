@@ -29,7 +29,7 @@ describe "discover_registration_services client" do
       # stub the SLP service discovery
       slp_service = double
       slp_attributes = double
-      allow(slp_attributes).to receive(:to_h).and_return({:description => "Description"})
+      allow(slp_attributes).to receive(:to_h).and_return({description: "Description"})
       allow(slp_service).to receive(:attributes).and_return(slp_attributes)
       allow(slp_service).to receive(:slp_url).and_return("service:registration.suse:smt:#{slp_url}")
       allow(Yast::SlpService).to receive(:all).and_return([slp_service])

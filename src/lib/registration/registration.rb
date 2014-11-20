@@ -42,8 +42,8 @@ module Registration
 
     def register(email, reg_code, distro_target)
       settings = connect_params(
-        :token => reg_code,
-        :email => email
+        token: reg_code,
+        email: email
       )
 
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
@@ -99,10 +99,10 @@ module Registration
       log.info "Reading available addons for product: #{base_product["name"]}"
 
       remote_product = SUSE::Connect::Remote::Product.new(
-        :arch         => base_product["arch"],
-        :identifier   => base_product["name"],
-        :version      => base_product["version"],
-        :release_type => base_product["release_type"]
+        arch: base_product["arch"],
+        identifier: base_product["name"],
+        version: base_product["version"],
+        release_type: base_product["release_type"]
       )
 
       params = connect_params
@@ -147,10 +147,10 @@ module Registration
     def service_for_product(product, &_block)
       remote_product = product.is_a?(Hash) ?
         SUSE::Connect::Remote::Product.new(
-        :arch         => product["arch"],
-        :identifier   => product["name"],
-        :version      => product["version"],
-        :release_type => product["release_type"]
+        arch: product["arch"],
+        identifier: product["name"],
+        version: product["version"],
+        release_type: product["release_type"]
       ) : product
 
       log.info "Using product: #{remote_product}"
@@ -202,11 +202,11 @@ module Registration
 
     def connect_params(params = {})
       default_params = {
-        :language => ::Registration::Helpers.http_language,
-        :debug => ENV["SCCDEBUG"],
-        :verbose => ENV["Y2DEBUG"] == "1",
+        language: ::Registration::Helpers.http_language,
+        debug: ENV["SCCDEBUG"],
+        verbose: ENV["Y2DEBUG"] == "1",
         # pass a verify_callback to get details about failed SSL verification
-        :verify_callback => verify_callback
+        verify_callback: verify_callback
       }
 
       if @url

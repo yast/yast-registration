@@ -90,12 +90,6 @@ Style/Documentation:
 Style/DotPosition:
   Enabled: false
 
-# Offense count: 91
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/HashSyntax:
-  Enabled: false
-
 # Offense count: 2
 # Configuration parameters: MaxLineLength.
 Style/IfUnlessModifier:

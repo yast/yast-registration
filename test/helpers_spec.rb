@@ -15,7 +15,7 @@ describe "Registration::Helpers" do
 
     it "creates a label with description and url" do
       description = "Description"
-      expect(slp_attributes).to receive(:to_h).and_return({:description => description})
+      expect(slp_attributes).to receive(:to_h).and_return({description: description})
       expect(Registration::Helpers.service_description(slp_service)).to eq("#{description} (#{slp_url})")
     end
 
@@ -162,8 +162,8 @@ describe "Registration::Helpers" do
       expect(Registration::Helpers).to receive(:insecure_registration) \
         .and_return(false)
       expect(SUSE::Connect::YaST).to receive(:write_config).with(
-        :url => url,
-        :insecure => false
+        url: url,
+        insecure: false
       )
 
       Registration::Helpers.write_config

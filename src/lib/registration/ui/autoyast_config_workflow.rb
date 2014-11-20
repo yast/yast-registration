@@ -46,27 +46,27 @@ module Registration
         sequence = {
           "ws_start" => "general",
           "general"  => {
-            :abort   => :abort,
-            :next    => :next,
-            :addons  => "addons"
+            abort: :abort,
+            next: :next,
+            addons: "addons"
           },
           "addons" => {
-            :abort   => :abort,
-            :next    => "general",
-            :download => "remote_addons"
+            abort: :abort,
+            next: "general",
+            download: "remote_addons"
           },
           "remote_addons" => {
-            :addons  => "addons",
-            :abort   => :abort,
-            :next    => "addons_eula"
+            addons: "addons",
+            abort: :abort,
+            next: "addons_eula"
           },
           "addons_eula" => {
-            :abort   => :abort,
-            :next    => "addons_regcodes"
+            abort: :abort,
+            next: "addons_regcodes"
           },
           "addons_regcodes" => {
-            :abort   => :abort,
-            :next    => "addons"
+            abort: :abort,
+            next: "addons"
           }
         }
 

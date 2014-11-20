@@ -18,8 +18,8 @@ describe Registration::Addon do
       prod1 = addon_generator
       prod2 = addon_generator
       registration = double(
-        :activated_products => [],
-        :get_addon_list => [prod1, prod2]
+        activated_products: [],
+        get_addon_list: [prod1, prod2]
       )
 
       expect(Registration::Addon.find_all(registration).size).to be 2
@@ -28,8 +28,8 @@ describe Registration::Addon do
     it "find even dependend products" do
       prod1 = addon_with_child_generator
       registration = double(
-        :activated_products => [],
-        :get_addon_list => [prod1]
+        activated_products: [],
+        get_addon_list: [prod1]
       )
 
       expect(Registration::Addon.find_all(registration).size).to be 2
@@ -38,8 +38,8 @@ describe Registration::Addon do
     it "sets properly dependencies between addons" do
       prod1 = addon_with_child_generator
       registration = double(
-        :activated_products => [],
-        :get_addon_list => [prod1]
+        activated_products: [],
+        get_addon_list: [prod1]
       )
 
       addons = Registration::Addon.find_all(registration)
@@ -51,8 +51,8 @@ describe Registration::Addon do
       prod1 = addon_generator("name" => "prod1")
       prod2 = addon_generator("name" => "prod2")
       registration = double(
-        :activated_products => [prod1],
-        :get_addon_list => [prod1, prod2]
+        activated_products: [prod1],
+        get_addon_list: [prod1, prod2]
       )
 
       addons = Registration::Addon.find_all(registration)
@@ -66,8 +66,8 @@ describe Registration::Addon do
 
     it "sets the registration status for dependent addons" do
       registration = double(
-        :activated_products => YAML.load_file(fixtures_file("activated_products.yml")),
-        :get_addon_list => YAML.load_file(fixtures_file("pure_addons.yml"))
+        activated_products: YAML.load_file(fixtures_file("activated_products.yml")),
+        get_addon_list: YAML.load_file(fixtures_file("pure_addons.yml"))
       )
 
       addons = Registration::Addon.find_all(registration)
@@ -171,8 +171,8 @@ describe Registration::Addon do
   describe "#selectable?" do
     let(:addons) do
       Registration::Addon.find_all(double(
-          :get_addon_list => [addon_with_child_generator],
-          :activated_products => []
+          get_addon_list: [addon_with_child_generator],
+          activated_products: []
         ))
     end
 

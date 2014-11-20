@@ -21,7 +21,7 @@ describe "Registration::Registration" do
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
-        .with(hash_including(:token => reg_code), target_distro)
+        .with(hash_including(token: reg_code), target_distro)
         .and_return([username, password])
       )
 
@@ -87,7 +87,7 @@ describe "Registration::Registration" do
 
   describe "#activated_products" do
     it "returns list of activated products" do
-      status = double(:activated_products => [])
+      status = double(activated_products: [])
       expect(SUSE::Connect::YaST).to receive(:status).and_return(status)
 
       expect(Registration::Registration.new.activated_products).to eq([])
@@ -129,7 +129,7 @@ describe "Registration::Registration" do
     let(:error_code) { 19 }
     let(:error_string) { "self signed certificate in certificate chain" }
     # SSL error context
-    let(:context) { double(:error => error_code, :error_string => error_string) }
+    let(:context) { double(error: error_code, error_string: error_string) }
 
     it "stores the SSL error details" do
       certificate = File.read(fixtures_file("test.pem"))
