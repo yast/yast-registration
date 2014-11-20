@@ -68,7 +68,7 @@ module Registration
         if (Yast::Mode.installation || Yast::Mode.update) && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
           if Yast::Popup.YesNo(
               # Error popup
-              _("Network is not configured, the registration server cannot be reached.\n" +
+              _("Network is not configured, the registration server cannot be reached.\n" \
                   "Do you want to configure the network now?"))
 
             ::Registration::Helpers.run_network_configuration

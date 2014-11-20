@@ -39,7 +39,7 @@ module Yast
           # popup heading (in bold)
           Heading(_("Local Registration Servers")),
           VSpacing(0.5),
-          Label(_("Select a detected registration server from the list\n" +
+          Label(_("Select a detected registration server from the list\n" \
                 "or the default SUSE registration server.")),
           VSpacing(0.5),
           RadioButtonGroup(

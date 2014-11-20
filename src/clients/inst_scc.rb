@@ -230,7 +230,7 @@ module Yast
         # force reinitialization to allow to use a different URL
         @registration = nil
         # automatic registration refresh during system upgrade failed, register from scratch
-        Report.Error(_("Automatic registration upgrade failed.\n" +
+        Report.Error(_("Automatic registration upgrade failed.\n" \
               "You can manually register the system from scratch."))
         return :register
       end
@@ -244,9 +244,9 @@ module Yast
 
       # label text describing the registration (1/2)
       # use \n to split to more lines if needed (use max. 76 chars/line)
-      info = _("Please enter a registration or evaluation code for this product and your\n" +
-          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" +
-          "Access to security and general software updates is only possible on\n" +
+      info = _("Please enter a registration or evaluation code for this product and your\n" \
+          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
+          "Access to security and general software updates is only possible on\n" \
           "a registered system.")
 
       if !Mode.normal
@@ -330,8 +330,8 @@ module Yast
       # not set yet?
       if options.install_updates.nil?
         options.install_updates = Popup.YesNo(
-          _("Registration added some update repositories.\n\n" +
-              "Do you want to install the latest available\n" +
+          _("Registration added some update repositories.\n\n" \
+              "Do you want to install the latest available\n" \
               "on-line updates during installation?"))
       end
 
@@ -436,10 +436,10 @@ module Yast
 
     def confirm_skipping
       # Popup question: confirm skipping the registration
-      confirmation = _("If you do not register your system we will not be able\n" +
-          "to grant you access to the update repositories.\n\n" +
-          "You can register after the installation or visit our\n" +
-          "Customer Center for online registration.\n\n" +
+      confirmation = _("If you do not register your system we will not be able\n" \
+          "to grant you access to the update repositories.\n\n" \
+          "You can register after the installation or visit our\n" \
+          "Customer Center for online registration.\n\n" \
           "Really skip the registration now?")
 
       Popup.YesNo(confirmation)
