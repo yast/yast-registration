@@ -233,11 +233,11 @@ Style/StringLiteralsInInterpolation:
 Style/TrailingWhitespace:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
+# def foo?
+#   @foo
+# end
 Style/TrivialAccessors:
-  Enabled: false
+  AllowPredicates: true
 
 # Offense count: 4
 # Cop supports --auto-correct.
