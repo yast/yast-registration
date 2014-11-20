@@ -475,9 +475,7 @@ module Yast
       continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
 
       ret = nil
-      while !continue_buttons.include?(ret) do
-        ret = UI.UserInput
-      end
+      ret = UI.UserInput while !continue_buttons.include?(ret)
 
       Wizard.RestoreNextButton
 
