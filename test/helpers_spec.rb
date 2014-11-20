@@ -15,7 +15,7 @@ describe "Registration::Helpers" do
 
     it "creates a label with description and url" do
       description = "Description"
-      expect(slp_attributes).to receive(:to_h).and_return({description: description})
+      expect(slp_attributes).to receive(:to_h).and_return(description: description)
       expect(Registration::Helpers.service_description(slp_service)).to eq("#{description} (#{slp_url})")
     end
 
@@ -236,7 +236,7 @@ describe "Registration::Helpers" do
       test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
       Registration::Helpers.hide_reg_codes(test)
       # make sure the copy is deep, i.e. the original value is unchanged
-      expect(test).to eq({ "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] })
+      expect(test).to eq("addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }])
     end
   end
 

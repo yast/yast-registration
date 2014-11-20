@@ -70,10 +70,10 @@ describe "Registration::SwMgmt" do
   describe ".base_product_to_register" do
     it "returns base product base version and release_type" do
       expect(Registration::SwMgmt).to(receive(:find_base_product)
-        .and_return({"name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47", "flavor" => "DVD"}))
+        .and_return("name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47", "flavor" => "DVD"))
 
-      expect(Registration::SwMgmt.base_product_to_register).to eq({"name" => "SLES",
-          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD"})
+      expect(Registration::SwMgmt.base_product_to_register).to eq("name" => "SLES",
+          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD")
     end
   end
 

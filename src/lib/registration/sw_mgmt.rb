@@ -179,13 +179,13 @@ module Registration
       # add a new service or update the existing service
       if Pkg.ServiceAliases.include?(service_name)
         log.info "Updating existing service: #{service_name}"
-        if !Pkg.ServiceSet(service_name, {
+        if !Pkg.ServiceSet(service_name,
               "alias" => service_name,
               "name" => service_name,
               "url" => product_service.url.to_s,
               "enabled" => true,
               "autorefresh" => true
-            })
+            )
 
           ## error message
           raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
