@@ -59,20 +59,20 @@ describe "Registration::Helpers" do
       end
 
       it "returns false when reg_ssl_verify option is not used at boot commandline" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return(nil)
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return(nil)
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns false when reg_ssl_verify=1 boot option is used" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return("1")
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return("1")
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns true when reg_ssl_verify=0 boot option is used" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return("0")
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return("0")
         expect(Registration::Helpers.insecure_registration).to eq(true)
       end
     end

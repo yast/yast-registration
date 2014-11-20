@@ -11,8 +11,8 @@ describe "Registration::Downloader" do
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index).to receive(:body).and_return("response")
 
-      expect_any_instance_of(Net::HTTP).to receive(:request).
-        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:request)
+        .with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       expect(Registration::Downloader.download(url)).to eq("response")
@@ -22,8 +22,8 @@ describe "Registration::Downloader" do
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index).to receive(:body).and_return("response")
 
-      expect_any_instance_of(Net::HTTP).to receive(:request).
-        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:request)
+        .with(an_instance_of(Net::HTTP::Get)).and_return(index)
 
       # check for HTTPS setup
       expect_any_instance_of(Net::HTTP).to receive(:use_ssl=).with(true)
@@ -38,8 +38,8 @@ describe "Registration::Downloader" do
       index = Net::HTTPNotFound.new("1.1", 404, "Not Found")
       expect(index).to receive(:body).and_return("")
 
-      expect_any_instance_of(Net::HTTP).to receive(:request).
-        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:request)
+        .with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       expect { Registration::Downloader.download(url) }.to raise_error Registration::DownloadError,
@@ -67,8 +67,8 @@ describe "Registration::Downloader" do
       index = Net::HTTPSuccess.new("1.1", 200, "OK")
       expect(index).to receive(:body).and_return("response")
 
-      expect_any_instance_of(Net::HTTP).to receive(:request).
-        with(an_instance_of(Net::HTTP::Get)).and_return(index)
+      expect_any_instance_of(Net::HTTP).to receive(:request)
+        .with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(true)
       expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:username).and_return(user)
       expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:password).and_return(password)

@@ -57,16 +57,16 @@ describe "Registration::UrlHelpers" do
 
       it "return nil (default) if config file is not present" do
         # stub config file reading
-        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE).
-          and_return(false)
+        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+          .and_return(false)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
 
       it "reads the URL from config file if present" do
         # stub config file reading
         url = "https://example.com"
-        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE).
-          and_return(true).twice
+        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+          .and_return(true).twice
         expect(YAML).to receive(:load_file).and_return("url" => url, "insecure" => false)
         expect(Registration::UrlHelpers.registration_url).to eq(url)
       end
@@ -98,16 +98,16 @@ describe "Registration::UrlHelpers" do
 
         it "return default when NCC registration server was used" do
           expect(File).to receive(:exist?).with(suse_register).and_return(true)
-          expect(File).to receive(:readlines).with(suse_register).\
-            and_return(File.readlines(fixtures_file("old_conf_ncc/etc/suseRegister.conf")))
+          expect(File).to receive(:readlines).with(suse_register)\
+            .and_return(File.readlines(fixtures_file("old_conf_ncc/etc/suseRegister.conf")))
 
           expect(Registration::UrlHelpers.registration_url).to be_nil
         end
 
         it "return URL of SMT server when used" do
           expect(File).to receive(:exist?).with(suse_register).and_return(true)
-          expect(File).to receive(:readlines).with(suse_register).\
-            and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
+          expect(File).to receive(:readlines).with(suse_register)\
+            .and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
 
           expect(Registration::UrlHelpers.registration_url).to eq("https://myserver.com")
         end

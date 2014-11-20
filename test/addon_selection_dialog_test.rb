@@ -32,9 +32,9 @@ describe Registration::UI::AddonSelectionDialog do
       test_addon = addon_generator
       expect(Yast::UI).to receive(:UserInput).and_return(test_addon.identifier, :next)
       # mock that widget is selected
-      expect(Yast::UI).to receive(:QueryWidget).
-        with(Yast::Term.new(:id, test_addon.identifier), :Value).
-        and_return(true)
+      expect(Yast::UI).to receive(:QueryWidget)
+        .with(Yast::Term.new(:id, test_addon.identifier), :Value)
+        .and_return(true)
       registration = double(activated_products: [], get_addon_list: [test_addon])
       expect(subject.run(registration)).to eq :next
     end

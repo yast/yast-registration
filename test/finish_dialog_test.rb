@@ -26,8 +26,8 @@ describe ::Registration::FinishDialog do
       end
 
       it "do nothing if system is not registered" do
-        expect(Registration::Registration).to receive(:is_registered?).once.
-          and_return(false)
+        expect(Registration::Registration).to receive(:is_registered?).once
+          .and_return(false)
         expect_any_instance_of(SUSE::Connect::Config).to_not receive(:write)
         expect(Yast::Pkg).to_not receive(:SourceSetEnabled)
 
@@ -35,23 +35,23 @@ describe ::Registration::FinishDialog do
       end
 
       it "creates at target system configuration for suse connect" do
-        expect(Registration::Registration).to receive(:is_registered?).once.
-          and_return(true)
+        expect(Registration::Registration).to receive(:is_registered?).once
+          .and_return(true)
         expect(Yast::WFM).to receive(:Execute)
 
         expect(Registration::Helpers).to receive(:write_config)
         expect(Registration::Helpers).to receive(:copy_certificate_to_target)
 
-        expect(Registration::RepoStateStorage.instance).to receive(:repositories).
-          and_return([])
+        expect(Registration::RepoStateStorage.instance).to receive(:repositories)
+          .and_return([])
         expect(Yast::Pkg).to_not receive(:SourceSetEnabled)
 
         subject.run("Write")
       end
 
       it "restores the repository setup" do
-        expect(Registration::Registration).to receive(:is_registered?).once.
-          and_return(true)
+        expect(Registration::Registration).to receive(:is_registered?).once
+          .and_return(true)
         expect(Yast::WFM).to receive(:Execute)
 
         expect(Registration::Helpers).to receive(:write_config)

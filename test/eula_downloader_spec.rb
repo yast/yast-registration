@@ -10,8 +10,8 @@ describe "Registration::EulaDownloader" do
       de_eula = "Deutsch EULA"
       index = "directory.yast\nlicense.txt\nlicense.de.txt"
 
-      expect(Registration::Downloader).to receive(:download).\
-        and_return(index, en_eula, de_eula)
+      expect(Registration::Downloader).to receive(:download)\
+        .and_return(index, en_eula, de_eula)
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
@@ -27,8 +27,8 @@ describe "Registration::EulaDownloader" do
     end
 
     it "it raises an exception when download fails" do
-      expect(Registration::Downloader).to receive(:download).\
-        and_raise("Downloading failed")
+      expect(Registration::Downloader).to receive(:download)\
+        .and_raise("Downloading failed")
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)

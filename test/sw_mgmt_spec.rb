@@ -181,12 +181,12 @@ describe "Registration::SwMgmt" do
     it "selects new addon products for installation" do
       legacy_services = YAML.load_file(fixtures_file("legacy_module_services.yml"))
 
-      expect(::Registration::Storage::Cache).to receive(:instance).
-        and_return(double("addon_services" => legacy_services))
-      expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first).
-        and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
-      expect(Yast::Pkg).to receive(:ResolvableProperties).
-        and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+      expect(::Registration::Storage::Cache).to receive(:instance)
+        .and_return(double("addon_services" => legacy_services))
+      expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first)
+        .and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
+      expect(Yast::Pkg).to receive(:ResolvableProperties)
+        .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
       expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
 
       Registration::SwMgmt.select_addon_products

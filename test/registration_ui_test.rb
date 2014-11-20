@@ -58,8 +58,8 @@ describe "Registration::RegistrationUI" do
       expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product_to_register)
       remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
-      expect(registration).to receive(:upgrade_product).with(base_product_to_register).
-        and_return(remote_product)
+      expect(registration).to receive(:upgrade_product).with(base_product_to_register)
+        .and_return(remote_product)
 
       expect(registration_ui.update_base_product).to eql([true, remote_product])
     end

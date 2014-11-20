@@ -138,16 +138,16 @@ describe "Registration::Registration" do
       storage = Registration::Storage::SSLErrors.instance
       expect(storage).to receive(:ssl_error_code=).with(error_code)
       expect(storage).to receive(:ssl_error_msg=).with(error_string)
-      expect(storage).to receive(:ssl_failed_cert=).
-        with(an_instance_of(Registration::SslCertificate))
+      expect(storage).to receive(:ssl_failed_cert=)
+        .with(an_instance_of(Registration::SslCertificate))
 
       expect { callback.call(false, context) }.to_not raise_error
     end
 
     it "logs the exception raised inside" do
       # set an invalid certificate to throw an exception in the callback
-      expect(context).to receive(:current_cert).
-        and_return("INVALID CERTIFICATE").twice
+      expect(context).to receive(:current_cert)
+        .and_return("INVALID CERTIFICATE").twice
 
       logger = double
       expect(logger).to receive(:error).with(/SSL verification failed:/)

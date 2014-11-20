@@ -27,8 +27,8 @@ describe "Registration::SslCertificate" do
 
   describe ".download" do
     it "downloads a SSL certificate from server" do
-      expect(Registration::Downloader).to receive(:download).\
-        and_return(File.read(fixtures_file("test.pem")))
+      expect(Registration::Downloader).to receive(:download)\
+        .and_return(File.read(fixtures_file("test.pem")))
 
       expect(Registration::SslCertificate.download("http://example.com/smt.crt")).to \
         be_a(Registration::SslCertificate)
