@@ -4,7 +4,6 @@ require "uri"
 
 module Registration
   module UI
-
     class LocalServerDialog
       include Yast::Logger
       include Yast::I18n
@@ -98,7 +97,6 @@ module Registration
           )
         )
       end
-
     end
   end
 end

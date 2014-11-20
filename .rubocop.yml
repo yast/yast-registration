@@ -124,23 +124,6 @@ Style/Documentation:
 Style/DotPosition:
   Enabled: false
 
-# Offense count: 22
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/EmptyLinesAroundClassBody:
-  Enabled: false
-
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/EmptyLinesAroundMethodBody:
-  Enabled: false
-
-# Offense count: 26
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/EmptyLinesAroundModuleBody:
-  Enabled: false
-
 # Offense count: 7
 # Configuration parameters: MinBodyLength.
 Style/GuardClause:

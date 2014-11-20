@@ -29,7 +29,6 @@ require "registration/suse_register"
 require "suse/connect"
 
 module Registration
-
   class UrlHelpers
     include Yast::Logger
     extend Yast::I18n
@@ -201,6 +200,5 @@ module Registration
         slp_discovery
       end
     end
-
   end
 end

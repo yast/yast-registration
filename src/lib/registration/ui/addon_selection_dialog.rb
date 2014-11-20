@@ -5,7 +5,6 @@ require "registration/addon_sorter"
 
 module Registration
   module UI
-
     class AddonSelectionDialog
       include Yast::Logger
       include Yast::I18n

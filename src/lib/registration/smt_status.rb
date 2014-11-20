@@ -5,7 +5,6 @@ require "yast"
 require "registration/downloader"
 
 module Registration
-
   # Check SMT server status, check supported API
   class SmtStatus
     include Yast::Logger
@@ -46,5 +45,4 @@ module Registration
       ncc_url
     end
   end
-
 end

@@ -34,7 +34,6 @@ module Yast
     Yast.import "Wizard"
 
     def main
-
       textdomain "registration"
 
       if WFM.Args.include?("help")

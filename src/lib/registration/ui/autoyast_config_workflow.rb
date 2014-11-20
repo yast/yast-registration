@@ -12,7 +12,6 @@ require "registration/ui/addon_reg_codes_dialog"
 
 module Registration
   module UI
-
     class AutoyastConfigWorkflow
       include Yast::Logger
       include Yast::I18n
@@ -153,13 +152,11 @@ module Registration
             config.addons << new_addon
           end
         end
-
       end
 
       def configure_registration
         AutoyastConfigDialog.run(config)
       end
-
     end
   end
 end

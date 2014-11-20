@@ -3,7 +3,6 @@ require "yast"
 
 module Registration
   module UI
-
     class AddonRegCodesDialog
       include Yast::Logger
       include Yast::I18n
@@ -158,7 +157,6 @@ module Registration
 
         ret
       end
-
     end
   end
 end

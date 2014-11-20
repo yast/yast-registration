@@ -1,6 +1,5 @@
 
 module Registration
-
   # Sorter for sorting Addons in required display order
   # (first paid extensions, then free extensions, modules at the end
   # see https://bugzilla.novell.com/show_bug.cgi?id=888567#c21)
@@ -26,5 +25,4 @@ module Registration
       x.name <=> y.name
     end
   end
-
 end

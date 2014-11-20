@@ -27,7 +27,6 @@ require "registration/sw_mgmt"
 require "registration/storage"
 
 module Registration
-
   # Registration functions with errror handling, progress messages, etc...
   # This is a high level APi above Registration::Registration class
   class RegistrationUI
@@ -185,6 +184,5 @@ module Registration
     private
 
     attr_accessor :registration
-
   end
 end

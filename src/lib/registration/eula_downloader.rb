@@ -26,7 +26,6 @@ require "yast"
 require "registration/downloader"
 
 module Registration
-
   # class for downloading addon EULAs from the registration server
   class EulaDownloader
     attr_reader :base_url, :target_dir, :insecure
@@ -82,7 +81,5 @@ module Registration
 
       licenses
     end
-
   end
-
 end

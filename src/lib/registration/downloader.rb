@@ -30,7 +30,6 @@ require "registration/exceptions"
 require "suse/toolkit/curlrc_dotfile"
 
 module Registration
-
   # HTTP/HTTPS download support
   # TODO: move it to yast2 to share it
   class Downloader
@@ -80,6 +79,5 @@ module Registration
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end
     end
-
   end
 end

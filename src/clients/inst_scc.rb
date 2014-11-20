@@ -304,7 +304,6 @@ module Yast
 
     # display the main registration dialog
     def show_scc_credentials_dialog
-
       Wizard.SetContents(
         # dialog title
         _("Registration"),
@@ -655,7 +654,6 @@ module Yast
         end
       end
     end
-
   end unless defined?(InstSccClient)
 end
 

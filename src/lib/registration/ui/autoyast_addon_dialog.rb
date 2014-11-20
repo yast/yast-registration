@@ -3,7 +3,6 @@ require "yast"
 
 module Registration
   module UI
-
     class AutoyastAddonDialog
       include Yast::Logger
       include Yast::I18n
@@ -197,7 +196,6 @@ module Registration
           Yast::UI.CloseDialog
         end
       end
-
     end
   end
 end

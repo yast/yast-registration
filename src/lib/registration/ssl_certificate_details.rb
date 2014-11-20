@@ -6,7 +6,6 @@ require "registration/ssl_certificate"
 require "registration/helpers"
 
 module Registration
-
   # class handling SSL certificate
   # TODO move it to yast2 to share it?
   class SslCertificateDetails
@@ -64,7 +63,5 @@ module Registration
       # label followed by the SSL certificate identification
       details += _("Organization Unit (OU): ") + (ou || "") + "\n"
     end
-
   end
-
 end

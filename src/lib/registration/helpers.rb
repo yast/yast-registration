@@ -31,7 +31,6 @@ require "registration/url_helpers"
 require "suse/connect"
 
 module Registration
-
   class Helpers
     include Yast::Logger
     extend Yast::I18n
@@ -217,6 +216,5 @@ module Registration
 
       filtered
     end
-
   end
 end

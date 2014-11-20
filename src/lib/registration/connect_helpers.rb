@@ -34,7 +34,6 @@ require "registration/url_helpers"
 require "registration/ui/import_certificate_dialog"
 
 module Registration
-
   # TODO FIXME: change to a module and include it in the clients
   class ConnectHelpers
     include Yast::Logger
@@ -263,7 +262,5 @@ module Registration
 
       e.message.replace(msg)
     end
-
   end
-
 end

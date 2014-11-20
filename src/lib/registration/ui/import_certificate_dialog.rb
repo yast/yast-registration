@@ -8,7 +8,6 @@ require "registration/ssl_certificate_details"
 
 module Registration
   module UI
-
     class ImportCertificateDialog
       include Yast::Logger
       include Yast::I18n
@@ -137,7 +136,6 @@ module Registration
         _("<p><b>Importing an unknown certificate without " \
             "verification is a big security risk.</b></p>")
       end
-
     end
   end
 end

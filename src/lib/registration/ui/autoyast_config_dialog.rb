@@ -5,7 +5,6 @@ require "registration/fingerprint"
 
 module Registration
   module UI
-
     class AutoyastConfigDialog
       include Yast::Logger
       include Yast::I18n
@@ -223,7 +222,6 @@ module Registration
 
         ret
       end
-
     end
   end
 end

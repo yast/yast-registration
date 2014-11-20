@@ -77,6 +77,5 @@ module Registration
       # save all repositories
       Yast::Pkg.SourceSaveAll
     end
-
   end
 end

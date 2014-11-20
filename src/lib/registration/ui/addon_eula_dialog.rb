@@ -6,7 +6,6 @@ require "registration/helpers"
 
 module Registration
   module UI
-
     class AddonEulaDialog
       include Yast::Logger
       include Yast::I18n
@@ -140,7 +139,6 @@ module Registration
       def display_optional_info(info_file)
         Yast::InstShowInfo.show_info_txt(info_file) if File.exist?(info_file)
       end
-
     end
   end
 end

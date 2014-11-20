@@ -112,7 +112,6 @@ module Yast
             _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
             true)))
     end
-
   end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main
 end

@@ -25,10 +25,8 @@
 require "singleton"
 
 module Registration
-
   # a module holding data needed during (auto)installation
   module Storage
-
     # storage for changed repositories
     class RegCodes < Struct.new(:reg_codes)
       include Singleton
@@ -165,7 +163,6 @@ module Registration
 
         ret
       end
-
     end
   end
 end

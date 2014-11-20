@@ -217,7 +217,6 @@ module Yast
         # but better than aborting the installation...
         return ::Registration::UrlHelpers.slp_service_url
       end
-
     end
 
     def import_certificate(url)
@@ -331,7 +330,6 @@ module Yast
       failed_addons = registration_ui.update_addons(addons, enable_updates: @config.install_updates)
       failed_addons.empty?
     end
-
   end unless defined?(SccAutoClient)
 end
 

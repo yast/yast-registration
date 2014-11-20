@@ -5,7 +5,6 @@ require "registration/downloader"
 require "registration/fingerprint"
 
 module Registration
-
   # class handling SSL certificate
   # TODO move it to yast2 to share it?
   class SslCertificate
@@ -122,7 +121,5 @@ module Registration
         ::SUSE::Connect::YaST.cert_sha256_fingerprint(x509_cert)
       )
     end
-
   end
-
 end
