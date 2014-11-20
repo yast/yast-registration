@@ -39,8 +39,6 @@ module Registration
       download_file(file_url, insecure: insecure)
     end
 
-    private
-
     def self.download_file(file_url, insecure: false, redirection_count: 10)
       raise "Redirection limit reached, download aborted" if redirection_count <= 0
 
@@ -79,5 +77,7 @@ module Registration
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end
     end
+
+    private_class_method :download_file
   end
 end

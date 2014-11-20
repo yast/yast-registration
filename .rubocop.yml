@@ -13,10 +13,6 @@ Lint/Loop:
 Lint/RescueException:
   Enabled: false
 
-# Offense count: 2
-Lint/UselessAccessModifier:
-  Enabled: false
-
 # Offense count: 3
 Lint/UselessAssignment:
   Enabled: false

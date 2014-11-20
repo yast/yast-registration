@@ -179,8 +179,6 @@ module Registration
       end
     end
 
-    private
-
     def self.report_error(msg, api_error)
       localized_error = api_error.message
 
@@ -262,5 +260,8 @@ module Registration
 
       e.message.replace(msg)
     end
+
+    private_class_method :report_error, :error_with_details, :ssl_error_details,
+      :import_ssl_certificate, :report_ssl_error, :check_smt_api
   end
 end
