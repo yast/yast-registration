@@ -29,12 +29,14 @@ def addon_with_child_generator(parent_params = {})
 end
 
 # add cache reset, which is not needed in runtime, but for test it is critical
-class Registration::Addon
-  class << self
-    def reset_cache
-      @cached_addons = nil
-      @registered = nil
-      @selected = nil
+module Registration
+  class Addon
+    class << self
+      def reset_cache
+        @cached_addons = nil
+        @registered = nil
+        @selected = nil
+      end
     end
   end
 end

@@ -70,11 +70,6 @@ Style/BracesAroundHashParameters:
 Style/CaseIndentation:
   Enabled: false
 
-# Offense count: 1
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/ClassAndModuleChildren:
-  Enabled: false
-
 # Offense count: 16
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:
