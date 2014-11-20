@@ -73,10 +73,6 @@ Style/Documentation:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Offense count: 13
-Style/Lambda:
-  Enabled: false
-
 # Offense count: 12
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.

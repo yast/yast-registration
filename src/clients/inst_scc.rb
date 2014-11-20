@@ -562,14 +562,14 @@ module Yast
     def start_workflow
       aliases = {
         # skip this when going back
-        "check"           => [ lambda { registration_check }, true ],
-        "register"        => lambda { register_base_system },
-        "select_addons"   => lambda { select_addons },
-        "update"          => [ lambda { update_registration }, true ],
-        "addon_eula"      => lambda { addon_eula },
-        "register_addons" => lambda { register_addons },
-        "update_autoyast_config" => lambda { update_autoyast_config },
-        "pkg_manager" => lambda { pkg_manager }
+        "check"           => [ ->() { registration_check }, true ],
+        "register"        => ->() { register_base_system },
+        "select_addons"   => ->() { select_addons },
+        "update"          => [ ->() { update_registration }, true ],
+        "addon_eula"      => ->() { addon_eula },
+        "register_addons" => ->() { register_addons },
+        "update_autoyast_config" => ->() { update_autoyast_config },
+        "pkg_manager" => ->() { pkg_manager }
       }
 
       sequence = {
