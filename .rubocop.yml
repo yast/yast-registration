@@ -13,10 +13,6 @@ Lint/Loop:
 Lint/RescueException:
   Enabled: false
 
-# Offense count: 2
-Lint/ShadowingOuterLocalVariable:
-  Enabled: false
-
 # Offense count: 4
 # Cop supports --auto-correct.
 Lint/UnusedMethodArgument:

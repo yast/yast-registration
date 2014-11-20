@@ -131,11 +131,11 @@ module Registration
     private
 
     def set_registered(remote_product)
-      addon = Addon.find_all(self).find do |addon|
-        addon.arch == remote_product.arch &&
-          addon.identifier == remote_product.identifier &&
-          addon.version  == remote_product.version &&
-          addon.release_type == remote_product.release_type
+      addon = Addon.find_all(self).find do |a|
+        a.arch == remote_product.arch &&
+          a.identifier == remote_product.identifier &&
+          a.version  == remote_product.version &&
+          a.release_type == remote_product.release_type
       end
 
       if addon
