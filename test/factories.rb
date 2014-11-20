@@ -2,21 +2,21 @@ require "registration/addon"
 require "suse/connect"
 
 def suse_connect_product_generator(attrs = {})
-    params = {}
-    params["available"] = attrs["available"] if attrs.key?("available")
-    params["name"] = attrs["name"] || "Product#{rand(100_000)}"
-    params["friendly_name"] = attrs["friendly_name"] || "The best cool #{params["name"]}"
-    params["description"] = attrs["description"] || "Bla bla bla bla!"
-    params["id"] = attrs["id"] || "#{rand(10000)}"
-    params["identifier"] = attrs["zypper_name"] || "prod#{rand(100_000)}"
-    params["version"] = attrs["version"] || "#{rand(13)}"
-    params["arch"] = attrs["arch"] || "x86_64"
-    params["free"] = attrs.fetch("free", true)
-    params["eula_url"] = attrs["eula_url"]
-    params["extensions"] = attrs["extensions"] || []
-    params["former_identifier"] = attrs["former_identifier"]
+  params = {}
+  params["available"] = attrs["available"] if attrs.key?("available")
+  params["name"] = attrs["name"] || "Product#{rand(100_000)}"
+  params["friendly_name"] = attrs["friendly_name"] || "The best cool #{params["name"]}"
+  params["description"] = attrs["description"] || "Bla bla bla bla!"
+  params["id"] = attrs["id"] || "#{rand(10000)}"
+  params["identifier"] = attrs["zypper_name"] || "prod#{rand(100_000)}"
+  params["version"] = attrs["version"] || "#{rand(13)}"
+  params["arch"] = attrs["arch"] || "x86_64"
+  params["free"] = attrs.fetch("free", true)
+  params["eula_url"] = attrs["eula_url"]
+  params["extensions"] = attrs["extensions"] || []
+  params["former_identifier"] = attrs["former_identifier"]
 
-    params
+  params
 end
 
 def addon_generator(params = {})
