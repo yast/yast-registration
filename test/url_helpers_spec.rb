@@ -171,7 +171,7 @@ describe "Registration::UrlHelpers" do
 
     it "raises URI::InvalidURIError when URL is invalid" do
       url = ":foo:"
-      expect{Registration::UrlHelpers.credentials_from_url(url)}.to raise_error(URI::InvalidURIError)
+      expect {Registration::UrlHelpers.credentials_from_url(url)}.to raise_error(URI::InvalidURIError)
     end
   end
 

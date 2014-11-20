@@ -110,7 +110,7 @@ module Registration
       end
 
       def find_addon(name)
-        addons.find{|a| a["name"] == name}
+        addons.find {|a| a["name"] == name}
       end
 
       def delete_addon

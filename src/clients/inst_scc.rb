@@ -396,7 +396,7 @@ module Yast
 
           # move from selected to registered
           product.registered
-          @selected_addons.reject!{|selected| selected.identifier == product.identifier}
+          @selected_addons.reject! {|selected| selected.identifier == product.identifier}
         end
       end
 

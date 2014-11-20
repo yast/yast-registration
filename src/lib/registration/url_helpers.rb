@@ -189,7 +189,7 @@ module Registration
       log.debug "Found services: #{services.inspect}"
 
       # ignore SUSE manager registration servers (bnc#894470)
-      services.reject!{ |service| service.slp_url.start_with?("service:#{SLP_SERVICE}:manager:") }
+      services.reject! { |service| service.slp_url.start_with?("service:#{SLP_SERVICE}:manager:") }
 
       log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
       services

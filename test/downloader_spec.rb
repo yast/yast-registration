@@ -42,7 +42,7 @@ describe "Registration::Downloader" do
         with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
-      expect{Registration::Downloader.download(url)}.to raise_error Registration::DownloadError,
+      expect {Registration::Downloader.download(url)}.to raise_error Registration::DownloadError,
         "Downloading #{url} failed: Not Found"
     end
 

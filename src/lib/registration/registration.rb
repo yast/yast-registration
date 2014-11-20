@@ -113,7 +113,7 @@ module Registration
       ::Registration::SwMgmt.update_product_renames(renames)
 
       # ignore the base product "addon"
-      addons.reject{ |a| a.identifier == base_product["name"] }
+      addons.reject { |a| a.identifier == base_product["name"] }
     end
 
     def activated_products

@@ -174,7 +174,7 @@ module Registration
 
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @addons.find{|a| a.identifier == id}
+        addon = @addons.find {|a| a.identifier == id}
         return unless addon
 
         show_addon_details(addon)

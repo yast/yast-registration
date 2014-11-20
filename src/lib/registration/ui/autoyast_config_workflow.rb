@@ -113,7 +113,7 @@ module Registration
       end
 
       def collect_known_reg_codes
-        Hash[config.addons.map{|a| [a["name"], a["reg_code"]]}]
+        Hash[config.addons.map {|a| [a["name"], a["reg_code"]]}]
       end
 
       def addons_reg_codes

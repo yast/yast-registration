@@ -45,7 +45,7 @@ describe "Registration::SslCertificate" do
     end
 
     it "raises an exception when unsupported sum is requested" do
-      expect{ subject.fingerprint("SHA224") }.to raise_error(/Unsupported checksum type/)
+      expect { subject.fingerprint("SHA224") }.to raise_error(/Unsupported checksum type/)
     end
   end
 
