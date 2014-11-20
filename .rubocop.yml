@@ -144,11 +144,9 @@ Style/NumericLiterals:
 Style/PredicateName:
   Enabled: false
 
-# Offense count: 11
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
+# use "raise" instead of "fail"
 Style/SignalException:
-  Enabled: false
+  EnforcedStyle: only_raise
 
 # Offense count: 24
 # Cop supports --auto-correct.
