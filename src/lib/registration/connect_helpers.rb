@@ -71,7 +71,7 @@ module Registration
               _("Network is not configured, the registration server cannot be reached.\n" +
                   "Do you want to configure the network now?"))
 
-            ::Registration::Helpers::run_network_configuration
+            ::Registration::Helpers.run_network_configuration
           end
         else
           Yast::Report.Error(_("Network error, check the network configuration."))

@@ -108,7 +108,7 @@ module Yast
 
         case ret
         when :network
-          ::Registration::Helpers::run_network_configuration
+          ::Registration::Helpers.run_network_configuration
         when :local_server
           options = ::Registration::Storage::InstallationOptions.instance
           current_url = options.custom_url || SUSE::Connect::Config.new.url
@@ -153,7 +153,7 @@ module Yast
             log.info "registration failed, resetting the registration URL"
             # reset the registration object and the cache to allow changing the URL
             @registration = nil
-            ::Registration::UrlHelpers::reset_registration_url
+            ::Registration::UrlHelpers.reset_registration_url
             ::Registration::Helpers.reset_registration_status
           end
         when :abort
