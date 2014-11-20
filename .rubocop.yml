@@ -186,11 +186,6 @@ Style/NegatedWhile:
 Style/Next:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/NilComparison:
-  Enabled: false
-
 Style/NumericLiterals:
   MinDigits: 6
 
