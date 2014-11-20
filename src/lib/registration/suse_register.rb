@@ -28,6 +28,7 @@ module Registration
     end
 
     private
+
     attr_reader :url
 
     def read_conf(root)
