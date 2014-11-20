@@ -172,7 +172,7 @@ module Registration
         check_smt_api(e)
 
         report_error(message_prefix + _("Registration failed."), e)
-      rescue Exception => e
+      rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(error_with_details(_("Registration failed."), e.message))
         false

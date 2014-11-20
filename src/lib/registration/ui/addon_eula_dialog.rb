@@ -78,7 +78,7 @@ module Registration
           loader.download
         end
         true
-      rescue Exception => e
+      rescue StandardError => e
         log.error "Download failed: #{e.message}: #{e.backtrace}"
         # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
         Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)

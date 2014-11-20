@@ -184,7 +184,7 @@ module Registration
           store_ssl_error(context) unless verify_ok
 
           verify_ok
-        rescue Exception => e
+        rescue StandardError => e
           log.error "Exception in SSL verify callback: #{e.class}: #{e.message} : #{e.backtrace}"
           # the exception will be ignored, but reraise anyway...
           raise e

@@ -9,10 +9,6 @@
 Lint/Loop:
   Enabled: false
 
-# Offense count: 3
-Lint/RescueException:
-  Enabled: false
-
 # Offense count: 49
 Metrics/AbcSize:
   Max: 111
