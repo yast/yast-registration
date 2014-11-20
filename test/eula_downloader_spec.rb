@@ -16,7 +16,7 @@ describe "Registration::EulaDownloader" do
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
 
-        expect {loader.download}.not_to raise_error
+        expect { loader.download }.not_to raise_error
 
         # the index file is not saved
         expect(Dir.entries(tmpdir)).to match_array([".", "..", "license.txt", "license.de.txt"])
@@ -33,7 +33,7 @@ describe "Registration::EulaDownloader" do
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
 
-        expect {loader.download}.to raise_error RuntimeError, "Downloading failed"
+        expect { loader.download }.to raise_error RuntimeError, "Downloading failed"
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])

@@ -85,7 +85,7 @@ describe "Registration::Helpers" do
       expect(File).to receive(:exist?).with(cert_file).and_return(false)
       expect(FileUtils).to receive(:cp).never
 
-      expect {Registration::Helpers.copy_certificate_to_target}.to_not raise_error
+      expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
 
     it "copies the certificate and updates all certificate links" do
@@ -96,7 +96,7 @@ describe "Registration::Helpers" do
       expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash"),
         SUSE::Connect::SSLCertificate::UPDATE_CERTIFICATES)
 
-      expect {Registration::Helpers.copy_certificate_to_target}.to_not raise_error
+      expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
   end
 
@@ -107,14 +107,14 @@ describe "Registration::Helpers" do
       expect(File).to receive(:exist?).with(credentials).and_return(false)
       expect(File).to receive(:unlink).never
 
-      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+      expect { Registration::Helpers.reset_registration_status }.to_not raise_error
     end
 
     it "removes system credentials if present" do
       expect(File).to receive(:exist?).with(credentials).and_return(true)
       expect(File).to receive(:unlink).with(credentials)
 
-      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+      expect { Registration::Helpers.reset_registration_status }.to_not raise_error
     end
   end
 

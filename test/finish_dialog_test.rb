@@ -68,7 +68,7 @@ describe ::Registration::FinishDialog do
     end
 
     it "raises RuntimeError if unknown action passed as first parameter" do
-      expect {subject.run("non_existing_action")}.to(
+      expect { subject.run("non_existing_action") }.to(
         raise_error(RuntimeError)
       )
     end

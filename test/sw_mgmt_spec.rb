@@ -119,7 +119,7 @@ describe "Registration::SwMgmt" do
 
   describe ".copy_old_credentials" do
     let(:root_dir) { "/mnt" }
-    let(:target_dir) {SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR}
+    let(:target_dir) { SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR }
 
     before do
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)

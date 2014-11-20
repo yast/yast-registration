@@ -43,7 +43,7 @@ describe Registration::Addon do
       )
 
       addons = Registration::Addon.find_all(registration)
-      expect(addons.any? {|addon| addon.children.size == 1}).to be_true
+      expect(addons.any? { |addon| addon.children.size == 1 }).to be_true
       expect(addons.any?(&:depends_on)).to be_true
     end
 
@@ -57,8 +57,8 @@ describe Registration::Addon do
 
       addons = Registration::Addon.find_all(registration)
 
-      addon1 = addons.find { |addon| addon.name == "prod1"}
-      addon2 = addons.find { |addon| addon.name == "prod2"}
+      addon1 = addons.find { |addon| addon.name == "prod1" }
+      addon2 = addons.find { |addon| addon.name == "prod2" }
 
       expect(addon1.registered?).to be_true
       expect(addon2.registered?).to be_false
@@ -72,7 +72,7 @@ describe Registration::Addon do
 
       addons = Registration::Addon.find_all(registration)
 
-      ha = addons.find { |addon| addon.identifier == "sle-ha"}
+      ha = addons.find { |addon| addon.identifier == "sle-ha" }
       ha_geo = ha.children.first
 
       expect(ha.registered?).to be_true
@@ -101,7 +101,7 @@ describe Registration::Addon do
 
     it "do nothing if addon is not registered" do
       expect(Registration::Addon.registered).to_not include(addon)
-      expect {addon.unregistered}.to_not raise_error
+      expect { addon.unregistered }.to_not raise_error
     end
   end
 
@@ -135,7 +135,7 @@ describe Registration::Addon do
     end
 
     it "do nothing if addon is not selected" do
-      expect {addon.unselected}.to_not raise_error
+      expect { addon.unselected }.to_not raise_error
     end
   end
 

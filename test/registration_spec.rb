@@ -55,7 +55,7 @@ describe "Registration::Registration" do
       expect(Registration::SwMgmt).to receive(:add_service)
 
       expect(Registration::Addon).to receive(:find_all).and_return(available_addons)
-      expect(available_addons.find { |addon| addon.identifier == "sle-sdk"}).to \
+      expect(available_addons.find { |addon| addon.identifier == "sle-sdk" }).to \
         receive(:registered)
 
       allow(File).to receive(:exist?).with(
