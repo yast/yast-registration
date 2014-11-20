@@ -50,9 +50,7 @@ Style/AlignArray:
 Style/AlignHash:
   Enabled: false
 
-# Offense count: 57
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
+# no extra indentation for multiline function calls
 Style/AlignParameters:
   Enabled: false
 
