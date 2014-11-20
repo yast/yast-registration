@@ -57,11 +57,11 @@ module Registration
     
     def identity_details(cn, o, ou)
       # label followed by the SSL certificate identification
-      details = _("Common Name (CN): ") + (cn || "") + "\n"
+      _("Common Name (CN): ") + (cn || "") + "\n" +
       # label followed by the SSL certificate identification
-      details += _("Organization (O): ") + (o || "") + "\n"
+      _("Organization (O): ") + (o || "") + "\n" +
       # label followed by the SSL certificate identification
-      details += _("Organization Unit (OU): ") + (ou || "") + "\n"
+      _("Organization Unit (OU): ") + (ou || "") + "\n"
     end
   end
 end

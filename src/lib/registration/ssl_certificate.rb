@@ -96,7 +96,7 @@ module Registration
     def find_name_attribute(x509_name, attribute)
       # to_a returns an attribute list, e.g.:
       # [["CN", "linux", 19], ["emailAddress", "root@...", 22], ["O", "YaST", 19], ...]
-      attr, value, code = x509_name.to_a.find { |a| a.first == attribute }
+      _attr, value, _code = x509_name.to_a.find { |a| a.first == attribute }
       value
     end
 
