@@ -11,7 +11,7 @@ module Registration
   class SslCertificateDetails
     include Yast::I18n
     include ERB::Util
-    
+
     # indent size used in summary text
     INDENT = " " * 3
 
@@ -29,7 +29,7 @@ module Registration
       identity_details(certificate.issuer_name, certificate.issuer_organization,
         certificate.issuer_organization_unit)
     end
-    
+
     def summary(small_space: false)
       summary = _("Certificate:") + "\n" + _("Issued To") + "\n" + subject +
         "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
@@ -46,15 +46,15 @@ module Registration
 
       summary
     end
-    
+
     def richtext_summary
       Helpers.render_erb_template("certificate_summary.erb", binding)
     end
-    
+
     private
 
     attr_reader :certificate
-    
+
     def identity_details(cn, o, ou)
       # label followed by the SSL certificate identification
       _("Common Name (CN): ") + (cn || "") + "\n" +

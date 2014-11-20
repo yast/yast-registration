@@ -39,7 +39,7 @@ describe "Registration::RegistrationUI" do
   describe "#get_available_addons" do
     it "returns available addons" do
       expect(Registration::Addon).to receive(:find_all).with(registration).and_return([])
-      
+
       expect(registration_ui.get_available_addons).to eql([])
     end
   end

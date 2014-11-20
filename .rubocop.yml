@@ -127,11 +127,6 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
-# Offense count: 13
-# Cop supports --auto-correct.
-Style/TrailingWhitespace:
-  Enabled: false
-
 # def foo?
 #   @foo
 # end

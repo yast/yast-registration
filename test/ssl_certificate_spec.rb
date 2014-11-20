@@ -71,7 +71,7 @@ describe "Registration::SslCertificate" do
     before do
       expect(Time).to receive(:now).and_return(Time.new(2010, 1, 1))
     end
-    
+
     describe "#expired?" do
       it "returns false" do
         expect(subject.expired?).to be_false
