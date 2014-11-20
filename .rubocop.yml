@@ -9,10 +9,6 @@
 Lint/Loop:
   Enabled: false
 
-# Offense count: 1
-Lint/ParenthesesAsGroupedExpression:
-  Enabled: false
-
 # Offense count: 3
 Lint/RescueException:
   Enabled: false

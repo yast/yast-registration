@@ -186,7 +186,7 @@ describe "Registration::Helpers" do
       options.install_updates = true
       options.imported_cert_sha256_fingerprint = "AB:CD:EF"
 
-      expect(Registration::UrlHelpers).to receive (:registration_url)
+      expect(Registration::UrlHelpers).to receive(:registration_url)
 
       addon = Registration::Addon.new(addon_generator(
           "zypper_name" => "sle-sdk",
