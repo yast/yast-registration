@@ -138,10 +138,10 @@ module Registration
           a.release_type == remote_product.release_type
       end
 
-      if addon
-        log.info "Marking addon #{addon.identifier}-#{addon.version} as registered"
-        addon.registered
-      end
+      return unless addon
+
+      log.info "Marking addon #{addon.identifier}-#{addon.version} as registered"
+      addon.registered
     end
 
     def service_for_product(product, &_block)

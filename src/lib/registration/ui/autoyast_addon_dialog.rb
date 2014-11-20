@@ -115,34 +115,35 @@ module Registration
 
       def delete_addon
         addon = selected_addon
-        if Popup.YesNo(_("Really delete '%s'?") % addon["name"])
-          addons.delete(addon)
-          set_addon_table_content
-        end
+        return unless Popup.YesNo(_("Really delete '%s'?") % addon["name"])
+
+        addons.delete(addon)
+        set_addon_table_content
       end
 
       def edit_addon
         addon = selected_addon
         ret = display_addon_popup(addon)
+        return unless ret
 
-        if ret
-          # replace the content
-          addon.merge!(ret)
-          set_addon_table_content(addon["name"])
-        end
+        # replace the content
+        addon.merge!(ret)
+        set_addon_table_content(addon["name"])
       end
 
       def add_addon
         ret = display_addon_popup
-        if ret
-          addon = find_addon(ret["name"])
-          if addon
-            addon["reg_code"] = ret["reg_code"]
-          else
-            addons << ret
-          end
-          set_addon_table_content(ret["name"])
+        return unless ret
+
+        addon = find_addon(ret["name"])
+
+        if addon
+          addon["reg_code"] = ret["reg_code"]
+        else
+          addons << ret
         end
+
+        set_addon_table_content(ret["name"])
       end
 
       def set_addon_table_content(current = nil)

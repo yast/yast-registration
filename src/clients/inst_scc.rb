@@ -315,10 +315,10 @@ module Yast
 
       registered = ::Registration::Registration.is_registered?
       # disable the input fields when already registered
-      if registered && !Mode.normal
-        UI.ChangeWidget(Id(:email), :Enabled, false)
-        UI.ChangeWidget(Id(:reg_code), :Enabled, false)
-      end
+      return unless registered && !Mode.normal
+
+      UI.ChangeWidget(Id(:email), :Enabled, false)
+      UI.ChangeWidget(Id(:reg_code), :Enabled, false)
     end
 
     def install_updates?
@@ -637,22 +637,22 @@ module Yast
     # initialize the Registration object
     # @return [Symbol, nil] returns :cancel if the URL selection was canceled
     def init_registration
-      if !@registration
-        url = ::Registration::UrlHelpers.registration_url
-        return :cancel if url == :cancel
-        log.info "Initializing registration with URL: #{url.inspect}"
-        @registration = ::Registration::Registration.new(url)
-      end
+      return if @registration
+
+      url = ::Registration::UrlHelpers.registration_url
+      return :cancel if url == :cancel
+      log.info "Initializing registration with URL: #{url.inspect}"
+      @registration = ::Registration::Registration.new(url)
     end
 
     def first_run
-      if ::Registration::Storage::Cache.instance.first_run
-        ::Registration::Storage::Cache.instance.first_run = false
+      return unless ::Registration::Storage::Cache.instance.first_run
 
-        if Stage.initial && ::Registration::Registration.is_registered?
-          ::Registration::Helpers.reset_registration_status
-        end
-      end
+      ::Registration::Storage::Cache.instance.first_run = false
+
+      return unless Stage.initial && ::Registration::Registration.is_registered?
+
+      ::Registration::Helpers.reset_registration_status
     end
   end unless defined?(InstSccClient)
 end
