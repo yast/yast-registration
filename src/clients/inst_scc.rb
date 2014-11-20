@@ -103,7 +103,7 @@ module Yast
       @registration_skipped = false
 
       continue_buttons = [:next, :back, :cancel, :abort]
-      while !continue_buttons.include?(ret) do
+      while !continue_buttons.include?(ret)
         ret = UI.UserInput
 
         case ret

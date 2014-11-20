@@ -122,8 +122,3 @@ Style/StringLiteralsInInterpolation:
 Style/TrivialAccessors:
   AllowPredicates: true
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/WhileUntilDo:
-  Enabled: false
-
