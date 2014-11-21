@@ -49,7 +49,7 @@ module Registration
 
       def handle_dialog
         ui = nil
-        while ![:ok, :cancel].include?(ui)
+        until [:ok, :cancel].include?(ui)
           Yast::UI.SetFocus(:url)
           ui = Yast::UI.UserInput
           log.info "User input: #{ui}"

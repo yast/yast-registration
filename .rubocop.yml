@@ -77,11 +77,6 @@ Style/MultilineOperationIndentation:
 Style/NegatedIf:
   Enabled: false
 
-# Offense count: 5
-# Cop supports --auto-correct.
-Style/NegatedWhile:
-  Enabled: false
-
 # Offense count: 4
 # Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
 Style/Next:

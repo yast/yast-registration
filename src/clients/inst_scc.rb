@@ -103,7 +103,7 @@ module Yast
       @registration_skipped = false
 
       continue_buttons = [:next, :back, :cancel, :abort]
-      while !continue_buttons.include?(ret)
+      until continue_buttons.include?(ret)
         ret = UI.UserInput
 
         case ret
@@ -475,7 +475,7 @@ module Yast
       continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
 
       ret = nil
-      ret = UI.UserInput while !continue_buttons.include?(ret)
+      ret = UI.UserInput until continue_buttons.include?(ret)
 
       Wizard.RestoreNextButton
 

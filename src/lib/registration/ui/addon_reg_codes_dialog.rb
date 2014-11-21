@@ -144,7 +144,7 @@ module Registration
         continue_buttons = [:next, :back, :abort]
 
         ret = nil
-        while !continue_buttons.include?(ret)
+        until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
 
           case ret
