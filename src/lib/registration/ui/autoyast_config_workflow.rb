@@ -37,10 +37,10 @@ module Registration
       def run
         aliases = {
           "general"         => ->() { configure_registration },
-          "addons"          => [ ->() { select_addons }, true ],
-          "remote_addons"   => [ ->() { select_remote_addons }, true ],
-          "addons_eula"     => [ ->() { addons_eula }, true ],
-          "addons_regcodes" => [ ->() { addons_reg_codes }, true ]
+          "addons"          => [->() { select_addons }, true],
+          "remote_addons"   => [->() { select_remote_addons }, true],
+          "addons_eula"     => [->() { addons_eula }, true],
+          "addons_regcodes" => [->() { addons_reg_codes }, true]
         }
 
         sequence = {

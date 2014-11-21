@@ -18,17 +18,17 @@ module Registration
 
       # list of widget ID in the dialog, add the new widget ID here after
       # adding a new widget to the dialog
-      ALL_WIDGETS = [ :addons, :do_registration, :email, :install_updates,
+      ALL_WIDGETS = [:addons, :do_registration, :email, :install_updates,
         :reg_code, :reg_server, :reg_server_cert, :reg_server_cert_fingerprint,
-        :reg_server_cert_fingerprint_type, :slp_discovery ]
+        :reg_server_cert_fingerprint_type, :slp_discovery]
 
       # widgets containing data (serialized to the exported Hash)
       # (:addons belongs to a push button, it does not contain any data)
-      DATA_WIDGETS = ALL_WIDGETS - [ :addons ]
+      DATA_WIDGETS = ALL_WIDGETS - [:addons]
 
       # widgets which should react on the global on/off state
       # (exclude the the on/off checkbox itself)
-      STATUS_WIDGETS = ALL_WIDGETS - [ :do_registration ]
+      STATUS_WIDGETS = ALL_WIDGETS - [:do_registration]
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(config)

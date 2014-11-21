@@ -97,7 +97,7 @@ module Registration
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
           end
-        end until [ :next, :back, :download ].include?(ret)
+        end until [:next, :back, :download].include?(ret)
 
         ret
       end

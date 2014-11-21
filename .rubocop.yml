@@ -105,11 +105,6 @@ Style/PredicateName:
 Style/SignalException:
   EnforcedStyle: only_raise
 
-# Offense count: 24
-# Cop supports --auto-correct.
-Style/SpaceInsideBrackets:
-  Enabled: false
-
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 

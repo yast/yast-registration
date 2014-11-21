@@ -203,7 +203,7 @@ describe "Registration::UrlHelpers" do
 
   describe ".slp_discovery_feedback" do
     it "runs SLP discovery with progress message" do
-      services = [ double(slp_url: "service:registration.suse:smt:https://example.com/connect") ]
+      services = [double(slp_url: "service:registration.suse:smt:https://example.com/connect")]
       expect(Yast::SlpService).to receive(:all).and_return(services)
 
       # stub Popup.Feedback call but yield the passed block

@@ -560,10 +560,10 @@ module Yast
     def start_workflow
       aliases = {
         # skip this when going back
-        "check"           => [ ->() { registration_check }, true ],
+        "check"           => [->() { registration_check }, true],
         "register"        => ->() { register_base_system },
         "select_addons"   => ->() { select_addons },
-        "update"          => [ ->() { update_registration }, true ],
+        "update"          => [->() { update_registration }, true],
         "addon_eula"      => ->() { addon_eula },
         "register_addons" => ->() { register_addons },
         "update_autoyast_config" => ->() { update_autoyast_config },

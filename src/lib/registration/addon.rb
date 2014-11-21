@@ -54,7 +54,7 @@ module Registration
 
       def create_addon_with_deps(root)
         root_addon = Addon.new(root)
-        result = [ root_addon ]
+        result = [root_addon]
 
         (root.extensions || []).each do |ext|
           child = create_addon_with_deps(ext)
