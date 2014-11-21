@@ -204,7 +204,7 @@ module Registration
       end
 
       def handle_dialog
-        begin
+        loop do
           ret = Yast::UI.UserInput
           log.info "ret: #{ret}"
 
@@ -215,8 +215,11 @@ module Registration
             break if Popup.ReallyAbort(true)
           when :next
             # FIXME: input validation
+            break
+          when :back, :addons
+            break
           end
-        end until ret == :next || ret == :back || ret == :addons
+        end
 
         store_config if ret == :next || ret == :addons
 

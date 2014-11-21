@@ -81,7 +81,7 @@ module Registration
       end
 
       def handle_dialog
-        begin
+        loop do
           refresh_buttons
 
           ret = Yast::UI.UserInput
@@ -96,8 +96,10 @@ module Registration
             delete_addon
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
+          when :next, :back, :download
+            break
           end
-        end until [:next, :back, :download].include?(ret)
+        end
 
         ret
       end
