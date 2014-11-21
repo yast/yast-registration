@@ -54,11 +54,11 @@ module Registration
           ui = Yast::UI.UserInput
           log.info "User input: #{ui}"
 
-          if ui == :ok && !valid_url?
-            # error message, the entered URL is not valid
-            Yast::Report.Error(_("Invalid URL."))
-            ui = nil
-          end
+          next unless ui == :ok && !valid_url?
+
+          # error message, the entered URL is not valid
+          Yast::Report.Error(_("Invalid URL."))
+          ui = nil
         end
 
         (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil

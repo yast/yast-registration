@@ -48,12 +48,13 @@ module Registration
         eula_ret = :accepted
 
         addons.each do |addon|
-          if addon.eula_url && !addon.eula_url.empty?
-            log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
-            eula_ret = accept_eula(addon)
-            # any declined license needs to be handled separately
-            break if eula_ret != :accepted
-          end
+          next unless addon.eula_url && !addon.eula_url.empty?
+
+          log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
+          eula_ret = accept_eula(addon)
+
+          # any declined license needs to be handled separately
+          break if eula_ret != :accepted
         end
 
         # go back or abort if any EULA has not been accepted, let the user

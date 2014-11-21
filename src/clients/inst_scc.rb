@@ -160,11 +160,11 @@ module Yast
           ret = nil unless Popup.ConfirmAbort(:painless)
         end
 
-        if ret == :skip && confirm_skipping
-          log.info "Skipping registration on user request"
-          @registration_skipped = true
-          return ret
-        end
+        next unless ret == :skip && confirm_skipping
+
+        log.info "Skipping registration on user request"
+        @registration_skipped = true
+        return ret
       end
 
       ret

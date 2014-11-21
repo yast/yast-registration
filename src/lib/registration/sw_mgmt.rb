@@ -255,14 +255,14 @@ module Registration
       return if enabled.nil?
 
       repos.each do |repo|
-        if repo["enabled"] != enabled
-          # remember the original state
-          repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
-          RepoStateStorage.instance.repositories << repo_state
+        next if repo["enabled"] == enabled
 
-          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
-          Pkg.SourceSetEnabled(repo["SrcId"], enabled)
-        end
+        # remember the original state
+        repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
+        RepoStateStorage.instance.repositories << repo_state
+
+        log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
+        Pkg.SourceSetEnabled(repo["SrcId"], enabled)
       end
     end
 
