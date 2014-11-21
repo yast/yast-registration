@@ -119,9 +119,8 @@ module Registration
 
         # usability help. If addon depends on something, then we get it
         # immediatelly after parent, so indent it slightly, so it is easier visible
-        if addon.depends_on
-          checkbox = HBox(HSpacing(2.5), checkbox)
-        end
+        checkbox = HBox(HSpacing(2.5), checkbox) if addon.depends_on
+
         res = [checkbox]
         # add extra spacing when there are just few addons, in GUI always
         res << VSpacing(0.7) if extra_spacing
@@ -163,9 +162,7 @@ module Registration
       end
 
       def handle_next_button
-        if !supported_addon_count?
-          return nil
-        end
+        return nil unless supported_addon_count?
 
         log.info "Selected addons: #{Addon.selected.map(&:name)}"
 
