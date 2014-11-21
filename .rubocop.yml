@@ -9,34 +9,32 @@
 Lint/Loop:
   Enabled: false
 
-# Offense count: 49
+# TODO: this need some non-trivial refactoring...
 Metrics/AbcSize:
   Max: 111
 
-# Offense count: 7
+# TODO: this need some non-trivial refactoring...
 Metrics/BlockNesting:
   Max: 5
 
-# Offense count: 12
-# Configuration parameters: CountComments.
+# TODO: this need some non-trivial refactoring...
 Metrics/ClassLength:
-  Max: 431
+  Max: 450
 
-# Offense count: 14
+# TODO: this need some non-trivial refactoring...
 Metrics/CyclomaticComplexity:
-  Max: 24
+  Max: 25
 
 Metrics/LineLength:
   Max: 140
 
-# Offense count: 70
-# Configuration parameters: CountComments.
+# TODO: this need some non-trivial refactoring...
 Metrics/MethodLength:
-  Max: 93
+  Max: 95
 
-# Offense count: 9
+# TODO: this need some non-trivial refactoring...
 Metrics/PerceivedComplexity:
-  Max: 24
+  Max: 25
 
 # Offense count: 5
 Style/AccessorMethodName:
