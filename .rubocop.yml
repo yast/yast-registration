@@ -58,11 +58,6 @@ Style/AlignParameters:
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 
-# Offense count: 16
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: false
-
 # Offense count: 29
 Style/Documentation:
   Enabled: false

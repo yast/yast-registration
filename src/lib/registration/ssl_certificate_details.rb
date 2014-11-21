@@ -7,7 +7,7 @@ require "registration/helpers"
 
 module Registration
   # class handling SSL certificate
-  # TODO move it to yast2 to share it?
+  # TODO: move it to yast2 to share it?
   class SslCertificateDetails
     include Yast::I18n
     include ERB::Util

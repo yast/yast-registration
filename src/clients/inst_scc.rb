@@ -344,10 +344,10 @@ module Yast
 
     # run the addon selection dialog
     def select_addons
-      # FIXME get_available_addons is called just to fill cache with popup
+      # FIXME: available_addons is called just to fill cache with popup
       return :cancel if get_available_addons == :cancel
 
-      # FIXME workaround to reference between old way and new storage in Addon metaclass
+      # FIXME: workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 

@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-# TODO FIXME: use a correct branch here...
+# FIXME: use a correct branch here...
 gem "suse-connect", github: "SUSE/connect", branch: "v0.2.14"
 
 group :test do

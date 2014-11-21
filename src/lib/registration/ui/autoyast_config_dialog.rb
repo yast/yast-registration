@@ -58,7 +58,7 @@ module Registration
             "to your SMT manual for further assistance.</p>"
         )
 
-        # FIXME the dialog should be created by external code before calling this
+        # FIXME: the dialog should be created by external code before calling this
         Wizard.CreateDialog
         Wizard.SetContents(caption, content, help_text, false, true)
         Wizard.SetNextButton(:next, Label.FinishButton)
@@ -214,7 +214,7 @@ module Registration
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
           when :next
-            # TODO FIXME: input validation
+            # FIXME: input validation
           end
         end until ret == :next || ret == :back || ret == :addons
 

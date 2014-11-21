@@ -59,7 +59,7 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
-      # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
+      # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
       # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
       url = case Yast::Mode.mode
       when "installation"
@@ -134,7 +134,7 @@ module Registration
 
       # do not use the old URL when it has failed before
       if !::Registration::Storage::Cache.instance.upgrade_failed && File.exist?(ncc_creds)
-        # FIXME check at first new suseconnect conf
+        # FIXME: check at first new suseconnect conf
         old_conf = SuseRegister.new(Yast::Installation.destdir)
 
         if old_conf.found?

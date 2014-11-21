@@ -266,7 +266,7 @@ module Yast
       register_addons
     end
 
-    # TODO FIXME: share these methods with inst_scc.rb
+    # FIXME: share these methods with inst_scc.rb
 
     def register_base_product
       handle_product_service { registration_ui.register_system_and_base_product(@config.email, @config.reg_code) }
@@ -323,7 +323,7 @@ module Yast
     end
 
     # @return [Boolean] true on success
-    # TODO FIXME share with inst_scc.rb
+    # FIXME: share with inst_scc.rb
     def update_addons
       addons = registration_ui.get_available_addons
 

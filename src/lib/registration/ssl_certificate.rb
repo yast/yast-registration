@@ -6,7 +6,7 @@ require "registration/fingerprint"
 
 module Registration
   # class handling SSL certificate
-  # TODO move it to yast2 to share it?
+  # TODO: move it to yast2 to share it?
   class SslCertificate
     attr_reader :x509_cert
 

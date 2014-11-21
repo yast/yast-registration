@@ -137,7 +137,7 @@ module Registration
 
       def update_addons(known_reg_codes)
         ::Registration::Addon.selected.each do |addon|
-          # TODO FIXME: use a separate class for handling Autoyast addons,
+          # FIXME: use a separate class for handling Autoyast addons,
           # define == operator, etc...
           new_addon = addon.to_h
           new_addon["reg_code"] = known_reg_codes[addon.identifier] || ""

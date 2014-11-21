@@ -33,7 +33,7 @@ module Registration
     end
 
     # remember the values entered by user
-    # TODO use Config instead to allow easy export at installation
+    # TODO: use Config instead to allow easy export at installation
     class InstallationOptions
       include Singleton
 
