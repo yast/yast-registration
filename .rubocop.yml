@@ -78,8 +78,7 @@ Style/IfUnlessModifier:
 Style/MultilineOperationIndentation:
   Enabled: false
 
-# Offense count: 22
-# Cop supports --auto-correct.
+# disabled, unless should be used only in trailing form
 Style/NegatedIf:
   Enabled: false
 
