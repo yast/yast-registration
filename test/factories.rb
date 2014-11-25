@@ -25,7 +25,8 @@ end
 
 def addon_with_child_generator(parent_params = {})
   prod_child = suse_connect_product_generator
-  SUSE::Connect::Remote::Product.new(suse_connect_product_generator(parent_params.merge("extensions" => [prod_child])))
+  SUSE::Connect::Remote::Product.new(
+    suse_connect_product_generator(parent_params.merge("extensions" => [prod_child])))
 end
 
 # add cache reset, which is not needed in runtime, but for test it is critical

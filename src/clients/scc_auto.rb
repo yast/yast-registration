@@ -269,7 +269,10 @@ module Yast
     # FIXME: share these methods with inst_scc.rb
 
     def register_base_product
-      handle_product_service { registration_ui.register_system_and_base_product(@config.email, @config.reg_code) }
+      handle_product_service do
+        registration_ui.register_system_and_base_product(
+          @config.email, @config.reg_code)
+      end
     end
 
     def register_addons

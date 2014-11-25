@@ -28,7 +28,8 @@ describe "Registration::UrlHelpers" do
         expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
 
         slp_url = "https://example.com/register"
-        expect(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(slp_url)
+        expect(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(slp_url)
         expect(Registration::UrlHelpers.registration_url).to eq(slp_url)
       end
 
@@ -36,13 +37,15 @@ describe "Registration::UrlHelpers" do
         # no boot parameter passed, it would have higher priority
         expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
 
-        expect(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(nil)
+        expect(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(nil)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
 
       it "returns nil in other cases" do
         expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
-        expect(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(nil)
+        expect(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(nil)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
     end
@@ -50,7 +53,8 @@ describe "Registration::UrlHelpers" do
     context "at installed system" do
       before do
         allow(Yast::Mode).to receive(:mode).and_return("normal")
-        allow(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(nil)
+        allow(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(nil)
         # must not ask Linuxrc at all
         expect(Yast::Linuxrc).to receive(:InstallInf).never
       end
@@ -77,7 +81,8 @@ describe "Registration::UrlHelpers" do
 
       before do
         allow(Yast::Mode).to receive(:mode).and_return("update")
-        allow(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(nil)
+        allow(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(nil)
 
         allow(Yast::Installation).to receive(:destdir).and_return("/mnt")
       end
@@ -92,7 +97,8 @@ describe "Registration::UrlHelpers" do
 
       context "the system has been already registered" do
         before do
-          allow(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
+          allow(File).to receive(:exist?)
+            .with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
           expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
         end
 
@@ -113,25 +119,29 @@ describe "Registration::UrlHelpers" do
         end
 
         it "returns default URL (nil) when the old URL failed at upgrade" do
-          expect(::Registration::Storage::Cache.instance).to receive(:upgrade_failed).and_return(true)
+          expect(::Registration::Storage::Cache.instance).to receive(:upgrade_failed)
+            .and_return(true)
           expect(Registration::UrlHelpers.registration_url).to be_nil
         end
       end
 
       context "the system has not been registered" do
         before do
-          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(false)
+          expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials")
+            .and_return(false)
           expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
         end
 
         it "calls SLP discovery" do
           slp_url = "https://slp.example.com/register"
-          expect(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(slp_url)
+          expect(Yast::WFM).to receive(:call)
+            .with("discover_registration_services").and_return(slp_url)
           expect(Registration::UrlHelpers.registration_url).to eq(slp_url)
         end
 
         it "returns nil (default URL) when no SLP server is available" do
-          expect(Yast::WFM).to receive(:call).with("discover_registration_services").and_return(nil)
+          expect(Yast::WFM).to receive(:call)
+            .with("discover_registration_services").and_return(nil)
           expect(Registration::UrlHelpers.registration_url).to eq(nil)
         end
       end
@@ -171,7 +181,8 @@ describe "Registration::UrlHelpers" do
 
     it "raises URI::InvalidURIError when URL is invalid" do
       url = ":foo:"
-      expect { Registration::UrlHelpers.credentials_from_url(url) }.to raise_error(URI::InvalidURIError)
+      expect { Registration::UrlHelpers.credentials_from_url(url) }.to \
+        raise_error(URI::InvalidURIError)
     end
   end
 

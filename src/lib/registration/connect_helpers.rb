@@ -65,7 +65,9 @@ module Registration
         true
       rescue SocketError, Errno::ENETUNREACH => e
         log.error "Network error: #{e.class}: #{e.message}"
-        if (Yast::Mode.installation || Yast::Mode.update) && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+        if (Yast::Mode.installation || Yast::Mode.update) &&
+           !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+
           if Yast::Popup.YesNo(
               # Error popup
               _("Network is not configured, the registration server cannot be reached.\n" \
@@ -119,7 +121,8 @@ module Registration
         when 400..499
           report_error(message_prefix + _("Registration client error."), e)
         when 500..599
-          report_error(message_prefix + _("Registration server error.\nRetry registration later."), e)
+          report_error(message_prefix + _("Registration server error.\n" \
+                "Retry registration later."), e)
         else
           report_error(message_prefix + _("Registration failed."), e)
         end
@@ -160,7 +163,8 @@ module Registration
             report_ssl_error(e.message, cert)
           else
             # error message
-            Yast::Report.Error(_("Received SSL Certificate does not match the expected certificate."))
+            Yast::Report.Error(_("Received SSL Certificate does not match " \
+                  "the expected certificate."))
           end
         else
           report_ssl_error(e.message, cert)
@@ -221,7 +225,9 @@ module Registration
       end
 
       # remember the imported certificate fingerprint for Autoyast export
-      Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint = cert.fingerprint(Fingerprint::SHA256).value
+      Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint =
+        cert.fingerprint(Fingerprint::SHA256).value
+
       log.info "Certificate import result: #{result}"
       true
     end

@@ -50,14 +50,16 @@ module Registration
         caption = _("Product Registration")
         help_text = "<p><b>#{caption}</b></p>"
         help_text += _(
-          "<p>Product registration includes your product in SUSE Customer Center database,\n" \
-            "enabling you to get online updates and technical support.\n" \
-            "To register while installing automatically, select <b>Run Product Registration</b>.</p>"
+          "<p>Product registration includes your product in SUSE Customer " \
+            "Center database,\nenabling you to get online updates and " \
+            "technical support.\nTo register while installing automatically, " \
+            "select <b>Run Product Registration</b>.</p>"
         )
         help_text += _(
-          "<p>If your network deploys a custom registration server, set the correct URL of the server\n" \
-            "and the location of the SMT certificate in <b>SMT Server Settings</b>. Refer\n" \
-            "to your SMT manual for further assistance.</p>"
+          "<p>If your network deploys a custom registration server, set the " \
+          "correct URL of the server\nand the location of the SMT " \
+          "certificate in <b>SMT Server Settings</b>. Refer\nto your SMT " \
+          "manual for further assistance.</p>"
         )
 
         # FIXME: the dialog should be created by external code before calling this
@@ -190,8 +192,11 @@ module Registration
         slp_enabled = Yast::UI.QueryWidget(Id(:slp_discovery), :Value)
         Yast::UI.ChangeWidget(Id(:reg_server), :Enabled, !slp_enabled && enabled)
 
-        fingeprint_enabled = Yast::UI.QueryWidget(Id(:reg_server_cert_fingerprint_type), :Value) != :none
-        Yast::UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled, fingeprint_enabled && enabled)
+        fingeprint_enabled = Yast::UI.QueryWidget(Id(:reg_server_cert_fingerprint_type),
+          :Value) != :none
+
+        Yast::UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled,
+          fingeprint_enabled && enabled)
       end
 
       def store_config

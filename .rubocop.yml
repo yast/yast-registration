@@ -15,11 +15,11 @@ Metrics/CyclomaticComplexity:
   Max: 25
 
 Metrics/LineLength:
-  Max: 140
+  Max: 100
 
 # TODO: this need some non-trivial refactoring...
 Metrics/MethodLength:
-  Max: 95
+  Max: 96
 
 # TODO: this need some non-trivial refactoring...
 Metrics/PerceivedComplexity:

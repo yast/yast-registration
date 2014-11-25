@@ -5,7 +5,10 @@ require_relative "spec_helper"
 describe Registration::Fingerprint do
   # checksum examples
   let(:sha1)   { "A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9" }
-  let(:sha256) { "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF" }
+  let(:sha256) do
+    "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:" \
+      "60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF"
+  end
 
   describe "== operator" do
     it "returns true when comparing self" do

@@ -27,7 +27,8 @@ describe "Registration::Downloader" do
 
       # check for HTTPS setup
       expect_any_instance_of(Net::HTTP).to receive(:use_ssl=).with(true)
-      expect_any_instance_of(Net::HTTP).to receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_PEER)
+      expect_any_instance_of(Net::HTTP).to receive(:verify_mode=)
+        .with(OpenSSL::SSL::VERIFY_PEER)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       https_url = "https://example.com"
@@ -42,8 +43,8 @@ describe "Registration::Downloader" do
         .with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
-      expect { Registration::Downloader.download(url) }.to raise_error Registration::DownloadError,
-        "Downloading #{url} failed: Not Found"
+      expect { Registration::Downloader.download(url) }.to raise_error(
+        Registration::DownloadError, "Downloading #{url} failed: Not Found")
     end
 
     it "handles HTTP redirection" do
@@ -70,8 +71,10 @@ describe "Registration::Downloader" do
       expect_any_instance_of(Net::HTTP).to receive(:request)
         .with(an_instance_of(Net::HTTP::Get)).and_return(index)
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(true)
-      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:username).and_return(user)
-      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:password).and_return(password)
+      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:username)
+        .and_return(user)
+      expect_any_instance_of(SUSE::Toolkit::CurlrcDotfile).to receive(:password)
+        .and_return(password)
       expect_any_instance_of(Net::HTTP).to receive(:proxy_user=).with(user)
       expect_any_instance_of(Net::HTTP).to receive(:proxy_pass=).with(password)
 

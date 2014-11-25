@@ -10,13 +10,15 @@ describe "Registration::Helpers" do
 
     before do
       expect(slp_service).to receive(:attributes).and_return(slp_attributes)
-      expect(slp_service).to receive(:slp_url).and_return("service:registration.suse:manager:#{slp_url}")
+      expect(slp_service).to receive(:slp_url)
+        .and_return("service:registration.suse:manager:#{slp_url}")
     end
 
     it "creates a label with description and url" do
       description = "Description"
       expect(slp_attributes).to receive(:to_h).and_return(description: description)
-      expect(Registration::Helpers.service_description(slp_service)).to eq("#{description} (#{slp_url})")
+      expect(Registration::Helpers.service_description(slp_service)).to \
+        eq("#{description} (#{slp_url})")
     end
 
     it "creates a label with url only when description is missing" do
@@ -202,7 +204,8 @@ describe "Registration::Helpers" do
         "email"                            => "foo",
         "reg_code"                         => "bar",
         "install_updates"                  => true,
-        "addons"                           => [{ "name" => "sle-sdk", "arch" => "x86_64", "version" => "12",
+        "addons"                           => [{
+          "name" => "sle-sdk", "arch" => "x86_64", "version" => "12",
             "release_type" => "nil", "reg_code" => "" }],
         "reg_server_cert_fingerprint"      => "AB:CD:EF",
         "reg_server_cert_fingerprint_type" => "SHA256"

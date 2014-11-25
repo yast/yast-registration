@@ -139,11 +139,15 @@ module Yast
 
           next if init_registration == :cancel
 
-          success, product_service = registration_ui.register_system_and_base_product(email, reg_code,
-            register_base_product: !options.base_registered)
+          success, product_service =
+            registration_ui.register_system_and_base_product(email, reg_code,
+              register_base_product: !options.base_registered)
 
           if success
-            registration_ui.disable_update_repos(product_service) if product_service && !install_updates?
+            if product_service && !install_updates?
+              registration_ui.disable_update_repos(product_service)
+            end
+
             ret = :next
             options.base_registered = true
             # save the config if running in installed system
@@ -261,9 +265,10 @@ module Yast
       end
 
       registered = ::Registration::Registration.is_registered?
+      network_button = Right(PushButton(Id(:network), _("Network Configuration...")))
 
       VBox(
-        Mode.installation || Mode.update ? Right(PushButton(Id(:network), _("Network Configuration..."))) : Empty(),
+        Mode.installation || Mode.update ? network_button : Empty(),
         VStretch(),
         HSquash(
           VBox(
@@ -278,7 +283,8 @@ module Yast
           VBox(
             MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
             VSpacing(UI.TextMode ? 0 : 0.5),
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"), options.reg_code))
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
+              options.reg_code))
           )
         ),
         VSpacing(UI.TextMode ? 0 : 1),
@@ -372,7 +378,9 @@ module Yast
       return false if init_registration == :cancel
 
       product_succeed = registration_order.map do |product|
-        ::Registration::ConnectHelpers.catch_registration_errors(message_prefix: "#{product.label}\n") do
+        ::Registration::ConnectHelpers.catch_registration_errors(
+          message_prefix: "#{product.label}\n") do
+
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product

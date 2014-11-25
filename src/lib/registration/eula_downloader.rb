@@ -52,7 +52,8 @@ module Registration
 
         log.info "Downloading license from #{license_file_url}..."
         license_text = Downloader.download(license_file_url, insecure: insecure)
-        log.info "Downloaded license: #{license_text[0..32].inspect}... (#{license_text.bytesize} bytes)"
+        log.info "Downloaded license: #{license_text[0..32].inspect}... " \
+          "(#{license_text.bytesize} bytes)"
 
         license_file_name = File.join(target_dir, license)
 

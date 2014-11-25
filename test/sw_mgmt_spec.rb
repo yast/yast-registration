@@ -70,7 +70,8 @@ describe "Registration::SwMgmt" do
   describe ".base_product_to_register" do
     it "returns base product base version and release_type" do
       expect(Registration::SwMgmt).to(receive(:find_base_product)
-        .and_return("name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47", "flavor" => "DVD"))
+        .and_return("name" => "SLES", "arch" => "x86_64",
+          "version" => "12.1-1.47", "flavor" => "DVD"))
 
       expect(Registration::SwMgmt.base_product_to_register).to eq("name" => "SLES",
           "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD")
@@ -105,7 +106,8 @@ describe "Registration::SwMgmt" do
     it "it creates a new service if the service does not exist yet" do
       expect(Yast::Pkg).to receive(:ServiceAliases).and_return([])
       expect(Yast::Pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
-      expect(Yast::Pkg).to receive(:ServiceSet).with(service_name, hash_including("autorefresh" => true)).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceSet).with(
+        service_name, hash_including("autorefresh" => true)).and_return(true)
       expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
 
@@ -129,8 +131,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "does not fail when the old credentials are missing" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(false)
 
       # no copy
       expect(FileUtils).to receive(:cp).never
@@ -139,8 +143,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "copies old NCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(true)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(true)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(false)
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
         File.join(target_dir, "SCCcredentials"))
@@ -150,8 +156,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "copies old SCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(true)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(true)
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
         File.join(target_dir, "SCCcredentials"))

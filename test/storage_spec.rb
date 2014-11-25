@@ -15,7 +15,8 @@ describe Registration::Storage::Config do
   end
   let(:config) do
     {
-      "addons"                           => [{ "arch" => "x86_64", "name" => "sle-module-legacy", "reg_code" => "",
+      "addons"                           => [{
+        "arch" => "x86_64", "name" => "sle-module-legacy", "reg_code" => "",
           "release_type" => "nil", "version" => "12" }],
       "do_registration"                  => true,
       "email"                            => "foo@example.com",

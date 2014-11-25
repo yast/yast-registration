@@ -9,8 +9,14 @@ describe "Registration::SslCertificate" do
   #   "sha224sum test.der" and "sha256sum test.der" to get SHA224 and SHA256
   let(:serial) { "B8:AB:F1:73:E4:1F:10:4D" }
   let(:sha1)   { "A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9" }
-  let(:sha224) { "CA:F3:9F:48:18:93:52:19:78:5B:08:C7:36:CE:8A:7C:18:5D:33:0E:E3:9A:E9:44:51:EB:F8:5A" }
-  let(:sha256) { "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF" }
+  let(:sha224) do
+    "CA:F3:9F:48:18:93:52:19:78:5B:08:C7:36:CE:8A:7C:18:5D:33:0E:E3:9A:" \
+      "E9:44:51:EB:F8:5A"
+  end
+  let(:sha256) do
+    "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:" \
+      "18:48:CA:84:81:48:60:F3:CB:BF"
+  end
 
   describe ".load_file" do
     it "loads SSL certificate from a file" do

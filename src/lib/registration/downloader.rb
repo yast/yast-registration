@@ -73,7 +73,9 @@ module Registration
         # retry recursively with redirected URL, decrease redirection counter
         download_file(location, insecure: insecure, redirection_count: redirection_count - 1)
       else
-        log.error "HTTP request failed: Error #{response.code}:#{response.message}: #{response.body}"
+        log.error "HTTP request failed: Error #{response.code}:" \
+          "#{response.message}: #{response.body}"
+
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end
     end
