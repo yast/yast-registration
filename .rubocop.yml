@@ -51,10 +51,6 @@ Style/CaseIndentation:
 Style/Documentation:
   Enabled: false
 
-# no extra indentation for multiline operations
-Style/MultilineOperationIndentation:
-  Enabled: false
-
 # disabled, unless should be used only in trailing form
 Style/NegatedIf:
   Enabled: false

@@ -122,7 +122,7 @@ module Yast
 
           # do not re-register during installation
           if !Mode.normal && ::Registration::Registration.is_registered? &&
-              options.base_registered
+             options.base_registered
 
             return :next
           end

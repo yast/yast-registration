@@ -32,9 +32,9 @@ module Registration
 
     def summary(small_space: false)
       summary = _("Certificate:") + "\n" + _("Issued To") + "\n" + subject +
-        "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
-        "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
-        _("SHA256 Fingerprint: ")  + "\n"
+                "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
+                "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
+                _("SHA256 Fingerprint: ")  + "\n"
 
       sha256 = certificate.fingerprint(Fingerprint::SHA256).value
       if small_space
@@ -58,10 +58,10 @@ module Registration
     def identity_details(cn, o, ou)
       # label followed by the SSL certificate identification
       _("Common Name (CN): ") + (cn || "") + "\n" +
-      # label followed by the SSL certificate identification
-      _("Organization (O): ") + (o || "") + "\n" +
-      # label followed by the SSL certificate identification
-      _("Organization Unit (OU): ") + (ou || "") + "\n"
+        # label followed by the SSL certificate identification
+        _("Organization (O): ") + (o || "") + "\n" +
+        # label followed by the SSL certificate identification
+        _("Organization Unit (OU): ") + (ou || "") + "\n"
     end
   end
 end
