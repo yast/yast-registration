@@ -82,8 +82,8 @@ describe "Registration::SwMgmt" do
     let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
     let(:product_service) do
       SUSE::Connect::Remote::Service.new(
-        "name" => service_name,
-        "url" => service_url,
+        "name"    => service_name,
+        "url"     => service_url,
         "product" => {}
       )
     end

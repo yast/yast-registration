@@ -143,9 +143,9 @@ module Registration
     # @return [Hash] Hash with basic Addon properties
     def to_h(release_type_string: false)
       {
-        "name" => identifier,
-        "arch" => arch,
-        "version" => version,
+        "name"         => identifier,
+        "arch"         => arch,
+        "version"      => version,
         "release_type" => (release_type.nil? && release_type_string) ? "nil" : release_type
       }
     end

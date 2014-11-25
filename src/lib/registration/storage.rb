@@ -105,10 +105,10 @@ module Registration
         return ret unless do_registration
 
         ret.merge!(
-          "reg_server" => reg_server,
-          "slp_discovery" => slp_discovery,
-          "email" => email,
-          "reg_code" => reg_code,
+          "reg_server"      => reg_server,
+          "slp_discovery"   => slp_discovery,
+          "email"           => email,
+          "reg_code"        => reg_code,
           "install_updates" => install_updates
         )
 

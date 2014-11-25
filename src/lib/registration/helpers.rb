@@ -170,8 +170,8 @@ module Registration
       options = Storage::InstallationOptions.instance
       configuration = {
         "do_registration" => true,
-        "email" => options.email,
-        "reg_code" => options.reg_code,
+        "email"           => options.email,
+        "reg_code"        => options.reg_code,
         "install_updates" => options.install_updates
       }
 

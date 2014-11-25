@@ -44,23 +44,23 @@ module Registration
         }
 
         sequence = {
-          "ws_start" => "general",
-          "general"  => {
+          "ws_start"        => "general",
+          "general"         => {
             abort: :abort,
             next: :next,
             addons: "addons"
           },
-          "addons" => {
+          "addons"          => {
             abort: :abort,
             next: "general",
             download: "remote_addons"
           },
-          "remote_addons" => {
+          "remote_addons"   => {
             addons: "addons",
             abort: :abort,
             next: "addons_eula"
           },
-          "addons_eula" => {
+          "addons_eula"     => {
             abort: :abort,
             next: "addons_regcodes"
           },

@@ -180,11 +180,11 @@ module Registration
         release_type = nil if release_type == "nil"
 
         {
-          "name" => Yast::UI.QueryWidget(Id(:name), :Value),
-          "version" => Yast::UI.QueryWidget(Id(:version), :Value),
-          "arch" => Yast::UI.QueryWidget(Id(:arch), :Value),
+          "name"         => Yast::UI.QueryWidget(Id(:name), :Value),
+          "version"      => Yast::UI.QueryWidget(Id(:version), :Value),
+          "arch"         => Yast::UI.QueryWidget(Id(:arch), :Value),
           "release_type" => release_type,
-          "reg_code" => Yast::UI.QueryWidget(Id(:reg_code), :Value)
+          "reg_code"     => Yast::UI.QueryWidget(Id(:reg_code), :Value)
         }
       end
 

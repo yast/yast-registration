@@ -38,7 +38,7 @@ module Yast
 
       if WFM.Args.include?("help")
         cmdline_description = {
-          "id" => "scc",
+          "id"   => "scc",
           # Command line help text for the repository module, %1 is "SUSEconnect"
           "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
         }

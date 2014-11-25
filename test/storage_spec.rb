@@ -6,26 +6,26 @@ describe Registration::Storage::Config do
   subject { Registration::Storage::Config.instance }
   let(:addon) do
     {
-      "arch" => "x86_64",
-      "name" => "sle-module-legacy",
-      "reg_code" => "",
+      "arch"         => "x86_64",
+      "name"         => "sle-module-legacy",
+      "reg_code"     => "",
       "release_type" => "nil",
-      "version" => "12"
+      "version"      => "12"
     }
   end
   let(:config) do
     {
-      "addons" => [{ "arch" => "x86_64", "name" => "sle-module-legacy", "reg_code" => "",
+      "addons"                           => [{ "arch" => "x86_64", "name" => "sle-module-legacy", "reg_code" => "",
           "release_type" => "nil", "version" => "12" }],
-      "do_registration" => true,
-      "email" => "foo@example.com",
-      "install_updates" => false,
-      "reg_code" => "FOOBAR42",
-      "reg_server" => "",
-      "reg_server_cert" => "",
-      "reg_server_cert_fingerprint" => "AB:CD:EF",
+      "do_registration"                  => true,
+      "email"                            => "foo@example.com",
+      "install_updates"                  => false,
+      "reg_code"                         => "FOOBAR42",
+      "reg_server"                       => "",
+      "reg_server_cert"                  => "",
+      "reg_server_cert_fingerprint"      => "AB:CD:EF",
       "reg_server_cert_fingerprint_type" => "SHA1",
-      "slp_discovery" => false
+      "slp_discovery"                    => false
     }
   end
 

@@ -379,10 +379,10 @@ module Yast
             _("Registering %s ...") % product.label) do
 
             product_data = {
-              "name" => product.identifier,
+              "name"     => product.identifier,
               "reg_code" => @known_reg_codes[product.identifier],
-              "arch" => product.arch,
-              "version" => product.version
+              "arch"     => product.arch,
+              "version"  => product.version
             }
 
             @registration.register_product(product_data)
@@ -560,19 +560,19 @@ module Yast
     def start_workflow
       aliases = {
         # skip this when going back
-        "check"           => [->() { registration_check }, true],
-        "register"        => ->() { register_base_system },
-        "select_addons"   => ->() { select_addons },
-        "update"          => [->() { update_registration }, true],
-        "addon_eula"      => ->() { addon_eula },
-        "register_addons" => ->() { register_addons },
+        "check"                  => [->() { registration_check }, true],
+        "register"               => ->() { register_base_system },
+        "select_addons"          => ->() { select_addons },
+        "update"                 => [->() { update_registration }, true],
+        "addon_eula"             => ->() { addon_eula },
+        "register_addons"        => ->() { register_addons },
         "update_autoyast_config" => ->() { update_autoyast_config },
-        "pkg_manager" => ->() { pkg_manager }
+        "pkg_manager"            => ->() { pkg_manager }
       }
 
       sequence = {
-        "ws_start" => workflow_start,
-        "check" => {
+        "ws_start"               => workflow_start,
+        "check"                  => {
           auto: :auto,
           abort: :abort,
           cancel: :abort,
@@ -581,29 +581,29 @@ module Yast
           update: "update",
           next: :next
         },
-        "update" => {
+        "update"                 => {
           abort: :abort,
           cancel: :abort,
           next: "select_addons",
           register: "register"
         },
-        "register" => {
+        "register"               => {
           abort: :abort,
           cancel: :abort,
           skip: :next,
           next: "select_addons"
         },
-        "select_addons" => {
+        "select_addons"          => {
           abort: :abort,
           skip: "update_autoyast_config",
           cancel: "check",
           next: "addon_eula"
         },
-        "addon_eula" => {
+        "addon_eula"             => {
           abort: :abort,
           next: "register_addons"
         },
-        "register_addons" => {
+        "register_addons"        => {
           abort: :abort,
           next: "update_autoyast_config"
         },
@@ -611,7 +611,7 @@ module Yast
           abort: :abort,
           next: "pkg_manager"
         },
-        "pkg_manager" => {
+        "pkg_manager"            => {
           abort: :abort,
           next: :next
         }

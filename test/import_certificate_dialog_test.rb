@@ -12,8 +12,8 @@ describe Registration::UI::ImportCertificateDialog do
       expect(Yast::UI).to receive(:SetFocus).with(:cancel)
       allow(Yast::UI).to receive(:GetDisplayInfo).and_return(
           "TextMode" => false,
-          "Width" => 1024,
-          "Height" => 768
+          "Width"    => 1024,
+          "Height"   => 768
       )
 
       # user pressed the "Import" button

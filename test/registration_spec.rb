@@ -36,15 +36,15 @@ describe "Registration::Registration" do
 
     it "adds the selected product and returns added zypp services" do
       product = {
-        "arch" => "x86_64",
-        "name" => "sle-sdk",
-        "version" => "12",
+        "arch"         => "x86_64",
+        "name"         => "sle-sdk",
+        "version"      => "12",
         "release_type" => nil
       }
 
       service_data = {
-        "name" => "service",
-        "url" => "https://example.com",
+        "name"    => "service",
+        "url"     => "https://example.com",
         "product" => product
       }
 
@@ -97,9 +97,9 @@ describe "Registration::Registration" do
   describe "#get_addon_list" do
     let(:base_product) do
       {
-        "name" => "SLES",
-        "version" => "12",
-        "arch" => "x86_64",
+        "name"         => "SLES",
+        "version"      => "12",
+        "arch"         => "x86_64",
         "release_type" => "DVD"
       }
     end

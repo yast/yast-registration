@@ -33,9 +33,11 @@ Style/AccessorMethodName:
 Style/AlignArray:
   Enabled: false
 
-# no extra indentation for multiline hashes
+# align arrows:
+# "foo"     => true
+# "foo_bar" => false
 Style/AlignHash:
-  Enabled: false
+  EnforcedHashRocketStyle: table
 
 # no extra indentation for multiline function calls
 Style/AlignParameters:
