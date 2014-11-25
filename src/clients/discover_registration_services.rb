@@ -108,9 +108,9 @@ module Yast
       end
 
       widgets.unshift(Left(RadioButton(Id("scc"),
-            # %s is the default SCC URL
-            _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
-            true)))
+        # %s is the default SCC URL
+        _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
+        true)))
     end
   end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main

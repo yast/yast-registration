@@ -95,11 +95,11 @@ module Registration
               MinWidth(32, InputField(Id(:email), _("&E-mail Address"), config.email)),
               VSpacing(0.4),
               MinWidth(32, InputField(Id(:reg_code), _("Registration &Code"),
-                  config.reg_code)),
+                config.reg_code)),
               VSpacing(0.4),
               Left(CheckBox(Id(:install_updates),
-                  _("Install Available Updates from Update Repositories"),
-                  config.install_updates))
+                _("Install Available Updates from Update Repositories"),
+                config.install_updates))
             )
           )
         )
@@ -116,8 +116,8 @@ module Registration
             VBox(
               VSpacing(0.2),
               Left(CheckBox(Id(:slp_discovery), Opt(:notify),
-                  _("Find Registration Server Using SLP Discovery"),
-                  config.slp_discovery)),
+                _("Find Registration Server Using SLP Discovery"),
+                config.slp_discovery)),
               VSpacing(0.4),
               # Translators: Text for UI Label - capitalized
               InputField(Id(:reg_server), Opt(:hstretch),

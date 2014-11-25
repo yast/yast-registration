@@ -37,7 +37,7 @@ Style/AlignHash:
 
 # no extra indentation for multiline function calls
 Style/AlignParameters:
-  Enabled: false
+  EnforcedStyle: with_fixed_indentation
 
 # no extra indentation for case
 Style/CaseIndentation:
