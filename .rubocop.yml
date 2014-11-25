@@ -29,10 +29,6 @@ Metrics/PerceivedComplexity:
 Style/AccessorMethodName:
   Enabled: false
 
-# no extra indentation for multiline arrays
-Style/AlignArray:
-  Enabled: false
-
 # align arrows:
 # "foo"     => true
 # "foo_bar" => false

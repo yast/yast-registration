@@ -18,9 +18,11 @@ module Registration
 
       # list of widget ID in the dialog, add the new widget ID here after
       # adding a new widget to the dialog
-      ALL_WIDGETS = [:addons, :do_registration, :email, :install_updates,
+      ALL_WIDGETS = [
+        :addons, :do_registration, :email, :install_updates,
         :reg_code, :reg_server, :reg_server_cert, :reg_server_cert_fingerprint,
-        :reg_server_cert_fingerprint_type, :slp_discovery]
+        :reg_server_cert_fingerprint_type, :slp_discovery
+      ]
 
       # widgets containing data (serialized to the exported Hash)
       # (:addons belongs to a push button, it does not contain any data)
