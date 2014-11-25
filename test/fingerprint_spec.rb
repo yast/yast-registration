@@ -11,7 +11,7 @@ describe Registration::Fingerprint do
     it "returns true when comparing self" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
       fp2 = fp1
-      expect(fp1 == fp2).to be_true
+      expect(fp1).to eq(fp2)
     end
 
     it "returns true when comparing to the identical fingerprint" do
