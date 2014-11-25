@@ -55,8 +55,7 @@ describe Registration::Fingerprint do
 
     it "returns false when compared to nil" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
-      fp2 = nil
-      expect(fp1 == fp2).to be_false
+      expect(fp1).to_not eq(nil)
     end
   end
 
