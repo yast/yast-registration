@@ -338,7 +338,7 @@ module Registration
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository
-    def self.each_repo(repo_aliases, &_block)
+    def self.each_repo(repo_aliases, &block)
       all_repos = Pkg.SourceGetCurrent(false)
 
       repo_aliases.each do |repo_alias|
@@ -348,7 +348,7 @@ module Registration
         end
 
         if repository
-          yield(repository)
+          block.call(repository)
         else
           log.warn "Repository '#{repo_alias}' was not found, skipping"
         end

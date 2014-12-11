@@ -315,8 +315,8 @@ module Yast
     # @yieldreturn [Boolean, SUSE::Connect::Remote::Product] success flag and
     #   remote product pair
     # @return [Boolean] true on success
-    def handle_product_service(&_block)
-      success, product_service = yield
+    def handle_product_service(&block)
+      success, product_service = block.call
       return false unless success
 
       # keep updates enabled?

@@ -50,17 +50,20 @@ module Registration
     Yast.import "Popup"
     Yast.import "Report"
 
+    # Call a block, rescuing various exceptions including StandardError.
+    # Return a boolean success value instead.
     # @param message_prefix [String] Prefix before error like affected product or addon
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
-    def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &_block)
+    # @return [Boolean] success
+    def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
       # import the SSL certificate just once to avoid an infinite loop
       certificate_imported = false
       begin
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
 
-        yield
+        block.call
 
         true
       rescue SocketError, Errno::ENETUNREACH => e

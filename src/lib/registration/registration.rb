@@ -144,7 +144,7 @@ module Registration
       addon.registered
     end
 
-    def service_for_product(product, &_block)
+    def service_for_product(product, &block)
       if product.is_a?(Hash)
         remote_product =  SUSE::Connect::Remote::Product.new(
           arch: product["arch"],
@@ -165,7 +165,7 @@ module Registration
         params[:token] = product["reg_code"]
       end
 
-      product_service = yield(remote_product, params)
+      product_service = block.call(remote_product, params)
 
       log.info "registration result: #{product_service}"
 
