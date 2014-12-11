@@ -20,9 +20,9 @@ describe Registration::UI::ImportCertificateDialog do
       expect(Yast::UI).to receive(:UserInput).and_return(:import)
 
       # check the displayed content
-      expect(Yast::UI).to receive(:OpenDialog) do |_arg1, arg2|
+      expect(Yast::UI).to receive(:OpenDialog) do |_opt, content|
         # do a simple check: convert the term to String and use a RegExp
-        expect(arg2.to_s).to match(/Organization \(O\):.*WebYaST/)
+        expect(content.to_s).to match(/Organization \(O\):.*WebYaST/)
       end
 
       cert = Registration::SslCertificate.load_file(fixtures_file("test.pem"))
