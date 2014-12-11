@@ -31,7 +31,6 @@ require "registration/url_helpers"
 require "suse/connect"
 
 module Registration
-
   class Helpers
     include Yast::Logger
     extend Yast::I18n
@@ -88,7 +87,7 @@ module Registration
 
     def self.run_network_configuration
       log.info "Running network configuration..."
-      Yast::WFM.call("inst_lan", [{"skip_detection" => true}])
+      Yast::WFM.call("inst_lan", [{ "skip_detection" => true }])
     end
 
     # return base version
@@ -136,8 +135,8 @@ module Registration
     # write the current configuration to the configuration file
     def self.write_config
       config_params = {
-        :url      => UrlHelpers.registration_url,
-        :insecure => insecure_registration
+        url: UrlHelpers.registration_url,
+        insecure: insecure_registration
       }
 
       log.info "writing registration config: #{config_params}"
@@ -171,8 +170,8 @@ module Registration
       options = Storage::InstallationOptions.instance
       configuration = {
         "do_registration" => true,
-        "email" => options.email,
-        "reg_code" => options.reg_code,
+        "email"           => options.email,
+        "reg_code"        => options.reg_code,
         "install_updates" => options.install_updates
       }
 
@@ -217,6 +216,5 @@ module Registration
 
       filtered
     end
-
   end
 end

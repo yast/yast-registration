@@ -27,7 +27,6 @@ require "registration/sw_mgmt"
 require "registration/storage"
 
 module Registration
-
   # Registration functions with errror handling, progress messages, etc...
   # This is a high level APi above Registration::Registration class
   class RegistrationUI
@@ -48,7 +47,7 @@ module Registration
     # register the system and the base product
     # @return [Array<Boolean, SUSE::Connect::Remote::Service>] array with two
     #   items: boolean (true on success), remote service (or nil)
-    # TODO FIXME: split to two separate parts
+    # FIXME: split to two separate parts
     def register_system_and_base_product(email, reg_code, register_base_product: true)
       product_service = nil
       success = ConnectHelpers.catch_registration_errors do
@@ -90,7 +89,7 @@ module Registration
 
         Yast::Popup.Feedback(
           _(CONTACTING_MESSAGE),
-          # TODO FIXME: reused an existing message due to text freeze
+          # FIXME: reused an existing message due to text freeze
           # (later use a better text, it's system update actually...)
           _("Registering the System...")
         ) do
@@ -163,7 +162,6 @@ module Registration
       failed_addons
     end
 
-
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow
@@ -186,6 +184,5 @@ module Registration
     private
 
     attr_accessor :registration
-
   end
 end

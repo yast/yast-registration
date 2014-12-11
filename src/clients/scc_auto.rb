@@ -117,7 +117,6 @@ module Yast
       @config.import(settings)
     end
 
-
     # Export the settings to a single Hash
     # (For use by autoinstallation.)
     # @return [Hash] AutoYast configuration
@@ -126,7 +125,6 @@ module Yast
       log.debug "Exported config: #{ret}"
       ret
     end
-
 
     # Create a textual summary
     # @return [String] summary of the current configuration
@@ -187,7 +185,7 @@ module Yast
         ::Registration::Helpers.copy_certificate_to_target
       end
 
-      return true
+      true
     end
 
     def auto_packages
@@ -219,7 +217,6 @@ module Yast
         # but better than aborting the installation...
         return ::Registration::UrlHelpers.slp_service_url
       end
-
     end
 
     def import_certificate(url)
@@ -241,7 +238,7 @@ module Yast
 
     def switch_registration(url = nil)
       @registration = ::Registration::Registration.new(url)
-      #reset registration ui as it depends on registration
+      # reset registration ui as it depends on registration
       @registration_ui = nil
       @registration
     end
@@ -269,10 +266,13 @@ module Yast
       register_addons
     end
 
-    # TODO FIXME: share these methods with inst_scc.rb
+    # FIXME: share these methods with inst_scc.rb
 
     def register_base_product
-      handle_product_service { registration_ui.register_system_and_base_product(@config.email, @config.reg_code) }
+      handle_product_service do
+        registration_ui.register_system_and_base_product(
+          @config.email, @config.reg_code)
+      end
     end
 
     def register_addons
@@ -299,7 +299,7 @@ module Yast
       ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
       # update the registration using the old credentials
-      File.exists?(::Registration::Registration::SCC_CREDENTIALS)
+      File.exist?(::Registration::Registration::SCC_CREDENTIALS)
     end
 
     # @return [Boolean] true on success
@@ -316,7 +316,7 @@ module Yast
     #   remote product pair
     # @return [Boolean] true on success
     def handle_product_service(&block)
-      success, product_service = yield
+      success, product_service = block.call
       return false unless success
 
       # keep updates enabled?
@@ -326,14 +326,13 @@ module Yast
     end
 
     # @return [Boolean] true on success
-    # TODO FIXME share with inst_scc.rb
+    # FIXME: share with inst_scc.rb
     def update_addons
       addons = registration_ui.get_available_addons
 
       failed_addons = registration_ui.update_addons(addons, enable_updates: @config.install_updates)
       failed_addons.empty?
     end
-
   end unless defined?(SccAutoClient)
 end
 

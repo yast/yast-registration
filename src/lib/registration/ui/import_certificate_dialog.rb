@@ -8,7 +8,6 @@ require "registration/ssl_certificate_details"
 
 module Registration
   module UI
-
     class ImportCertificateDialog
       include Yast::Logger
       include Yast::I18n
@@ -92,9 +91,7 @@ module Registration
         HBox(
           VSpacing(window_height),
           # left-side help
-          hide_help ?
-            Empty() :
-            HWeight(2, VBox(RichText(Opt(:disabled), warning_text))),
+          hide_help ? Empty() : HWeight(2, VBox(RichText(Opt(:disabled), warning_text))),
           HSpacing(1),
           HWeight(5, certificate_box)
         )
@@ -120,25 +117,23 @@ module Registration
             "authenticity of the server and for encrypting the transferred data.</p>") +
 
           # help text (RichText) for importing a SSL certificate (2/5)
-        _("<p>You can choose to import the certificate it into the list of known " \
-            "certificate autohorities (CA), meaning that you trust the subject " \
-            "and the issuer of the unknown certificate.</p>") +
+          _("<p>You can choose to import the certificate it into the list of known " \
+              "certificate autohorities (CA), meaning that you trust the subject " \
+              "and the issuer of the unknown certificate.</p>") +
 
           # help text (RichText) for importing a SSL certificate (3/5)
-        _("<p>Importing a certificate will allow to use for example a " \
-            "self-signed certificate.</p>") +
+          _("<p>Importing a certificate will allow to use for example a " \
+              "self-signed certificate.</p>") +
 
           # help text (RichText) for importing a SSL certificate (4/5)
-        _("<p><b>Important:</b> You should verify the fingerprint of the " \
-            "certificate to be sure you import the genuine certificate from " \
-            "the requested server.</p>") +
+          _("<p><b>Important:</b> You should verify the fingerprint of the " \
+              "certificate to be sure you import the genuine certificate from " \
+              "the requested server.</p>") +
 
           # help text (RichText) for importing a SSL certificate (5/5)
-        _("<p><b>Importing an unknown certificate without " \
-            "verification is a big security risk.</b></p>")
+          _("<p><b>Importing an unknown certificate without " \
+              "verification is a big security risk.</b></p>")
       end
-
     end
   end
 end
-

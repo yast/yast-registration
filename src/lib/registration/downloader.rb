@@ -30,7 +30,6 @@ require "registration/exceptions"
 require "suse/toolkit/curlrc_dotfile"
 
 module Registration
-
   # HTTP/HTTPS download support
   # TODO: move it to yast2 to share it
   class Downloader
@@ -39,8 +38,6 @@ module Registration
     def self.download(file_url, insecure: false)
       download_file(file_url, insecure: insecure)
     end
-
-    private
 
     def self.download_file(file_url, insecure: false, redirection_count: 10)
       raise "Redirection limit reached, download aborted" if redirection_count <= 0
@@ -76,10 +73,13 @@ module Registration
         # retry recursively with redirected URL, decrease redirection counter
         download_file(location, insecure: insecure, redirection_count: redirection_count - 1)
       else
-        log.error "HTTP request failed: Error #{response.code}:#{response.message}: #{response.body}"
+        log.error "HTTP request failed: Error #{response.code}:" \
+          "#{response.message}: #{response.body}"
+
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end
     end
 
+    private_class_method :download_file
   end
 end

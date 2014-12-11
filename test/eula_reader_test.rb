@@ -11,7 +11,7 @@ describe Registration::EulaReader do
     before do
       expect(Yast::WFM).to receive(:GetLanguage).and_return("cs_CZ.utf8")
     end
-    
+
     it "returns the current language if there is a license for it" do
       allow(subject).to receive(:licenses).and_return("cs_CZ" => "", "de" => "", "en" => "")
       expect(subject.current_language).to eq("cs_CZ")

@@ -1,0 +1,49 @@
+inherit_from:
+  .rubocop_yast_style.yml
+
+# TODO: this need some non-trivial refactoring...
+Metrics/AbcSize:
+  Max: 111
+
+# TODO: this need some non-trivial refactoring...
+Metrics/BlockNesting:
+  Max: 5
+
+# TODO: this need some non-trivial refactoring...
+Metrics/ClassLength:
+  Max: 450
+
+# TODO: this need some non-trivial refactoring...
+Metrics/CyclomaticComplexity:
+  Max: 25
+
+Metrics/LineLength:
+  Max: 100
+
+# TODO: this need some non-trivial refactoring...
+Metrics/MethodLength:
+  Max: 96
+
+# TODO: this need some non-trivial refactoring...
+Metrics/PerceivedComplexity:
+  Max: 25
+
+# Offense count: 5
+Style/AccessorMethodName:
+  Enabled: false
+
+# Offense count: 29
+Style/Documentation:
+  Enabled: false
+
+# Offense count: 1
+# Configuration parameters: NamePrefix, NamePrefixBlacklist.
+Style/PredicateName:
+  Enabled: false
+
+# def foo?
+#   @foo
+# end
+Style/TrivialAccessors:
+  AllowPredicates: true
+

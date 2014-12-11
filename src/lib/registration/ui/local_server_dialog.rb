@@ -4,7 +4,6 @@ require "uri"
 
 module Registration
   module UI
-
     class LocalServerDialog
       include Yast::Logger
       include Yast::I18n
@@ -50,28 +49,26 @@ module Registration
 
       def handle_dialog
         ui = nil
-        while ![:ok, :cancel].include?(ui)
+        until [:ok, :cancel].include?(ui)
           Yast::UI.SetFocus(:url)
           ui = Yast::UI.UserInput
           log.info "User input: #{ui}"
 
-          if ui == :ok && !valid_url?
-            # error message, the entered URL is not valid
-            Yast::Report.Error(_("Invalid URL."))
-            ui = nil
-          end
+          next unless ui == :ok && !valid_url?
+
+          # error message, the entered URL is not valid
+          Yast::Report.Error(_("Invalid URL."))
+          ui = nil
         end
 
         (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil
       end
 
       def valid_url?
-        begin
-          uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
-          (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
-        rescue URI::InvalidURIError
-          false
-        end
+        uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
+        (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
+      rescue URI::InvalidURIError
+        false
       end
 
       def button_box
@@ -100,8 +97,6 @@ module Registration
           )
         )
       end
-
     end
   end
 end
-

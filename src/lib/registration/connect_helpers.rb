@@ -34,8 +34,7 @@ require "registration/url_helpers"
 require "registration/ui/import_certificate_dialog"
 
 module Registration
-
-  # TODO FIXME: change to a module and include it in the clients
+  # FIXME: change to a module and include it in the clients
   class ConnectHelpers
     include Yast::Logger
     extend Yast::I18n
@@ -51,9 +50,12 @@ module Registration
     Yast.import "Popup"
     Yast.import "Report"
 
+    # Call a block, rescuing various exceptions including StandardError.
+    # Return a boolean success value instead.
     # @param message_prefix [String] Prefix before error like affected product or addon
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
+    # @return [Boolean] success
     def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
       # import the SSL certificate just once to avoid an infinite loop
       certificate_imported = false
@@ -61,18 +63,20 @@ module Registration
         # reset the previous SSL errors
         Storage::SSLErrors.instance.reset
 
-        yield
+        block.call
 
         true
       rescue SocketError, Errno::ENETUNREACH => e
         log.error "Network error: #{e.class}: #{e.message}"
-        if (Yast::Mode.installation || Yast::Mode.update) && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+        if (Yast::Mode.installation || Yast::Mode.update) &&
+           !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+
           if Yast::Popup.YesNo(
               # Error popup
-              _("Network is not configured, the registration server cannot be reached.\n" +
+              _("Network is not configured, the registration server cannot be reached.\n" \
                   "Do you want to configure the network now?"))
 
-            ::Registration::Helpers::run_network_configuration
+            ::Registration::Helpers.run_network_configuration
           end
         else
           Yast::Report.Error(_("Network error, check the network configuration."))
@@ -101,7 +105,7 @@ module Registration
                   "%s to speed up the synchronization process.\n" \
                   "Just wait several minutes after logging in and then retry \n" \
                   "the upgrade again.") % \
-                SUSE::Connect::Client::DEFAULT_URL
+                     SUSE::Connect::Client::DEFAULT_URL
             end
 
             # add the hint to the error details
@@ -120,7 +124,8 @@ module Registration
         when 400..499
           report_error(message_prefix + _("Registration client error."), e)
         when 500..599
-          report_error(message_prefix + _("Registration server error.\nRetry registration later."), e)
+          report_error(message_prefix + _("Registration server error.\n" \
+                "Retry registration later."), e)
         else
           report_error(message_prefix + _("Registration failed."), e)
         end
@@ -161,7 +166,8 @@ module Registration
             report_ssl_error(e.message, cert)
           else
             # error message
-            Yast::Report.Error(_("Received SSL Certificate does not match the expected certificate."))
+            Yast::Report.Error(_("Received SSL Certificate does not match " \
+                  "the expected certificate."))
           end
         else
           report_ssl_error(e.message, cert)
@@ -173,14 +179,12 @@ module Registration
         check_smt_api(e)
 
         report_error(message_prefix + _("Registration failed."), e)
-      rescue Exception => e
+      rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(error_with_details(_("Registration failed."), e.message))
         false
       end
     end
-
-    private
 
     def self.report_error(msg, api_error)
       localized_error = api_error.message
@@ -189,7 +193,7 @@ module Registration
     end
 
     def self.error_with_details(error, details)
-      return error if (!details || details.empty?)
+      return error if !details || details.empty?
 
       # %s are error details
       error + "\n\n" + (_("Details: %s") % details)
@@ -224,7 +228,9 @@ module Registration
       end
 
       # remember the imported certificate fingerprint for Autoyast export
-      Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint = cert.fingerprint(Fingerprint::SHA256).value
+      Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint =
+        cert.fingerprint(Fingerprint::SHA256).value
+
       log.info "Certificate import result: #{result}"
       true
     end
@@ -264,6 +270,7 @@ module Registration
       e.message.replace(msg)
     end
 
+    private_class_method :report_error, :error_with_details, :ssl_error_details,
+      :import_ssl_certificate, :report_ssl_error, :check_smt_api
   end
-
 end

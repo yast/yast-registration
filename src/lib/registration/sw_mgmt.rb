@@ -83,7 +83,7 @@ module Registration
     def self.find_base_product
       # just for debugging:
       if ENV["FAKE_BASE_PRODUCT"]
-        return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
           "release_type" => "DVD"
         }
       end
@@ -104,7 +104,7 @@ module Registration
       end
 
       log.debug "Found base products: #{products}"
-      log.info "Found base products: #{products.map{|p| p["name"]}}"
+      log.info "Found base products: #{products.map { |p| p["name"] }}"
       log.warn "More than one base product found!" if products.size > 1
 
       products.first
@@ -123,7 +123,7 @@ module Registration
     def self.base_product_to_register
       # just for debugging:
       if ENV["FAKE_BASE_PRODUCT"]
-        return {"name" => "SLES", "arch" => "x86_64", "version" => "12",
+        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
           "release_type" => "DVD"
         }
       end
@@ -179,13 +179,13 @@ module Registration
       # add a new service or update the existing service
       if Pkg.ServiceAliases.include?(service_name)
         log.info "Updating existing service: #{service_name}"
-        if !Pkg.ServiceSet(service_name, {
-              "alias" => service_name,
-              "name" => service_name,
-              "url" => product_service.url.to_s,
-              "enabled" => true,
-              "autorefresh" => true,
-            })
+        if !Pkg.ServiceSet(service_name,
+          "alias"       => service_name,
+          "name"        => service_name,
+          "url"         => product_service.url.to_s,
+          "enabled"     => true,
+          "autorefresh" => true
+            )
 
           ## error message
           raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
@@ -232,12 +232,12 @@ module Registration
       log.info "Added service: #{service_name.inspect}"
 
       # select only repositories belonging to the product services
-      repos = repo_data.select{|repo| service_name == repo["service"]}
+      repos = repo_data.select { |repo| service_name == repo["service"] }
       log.info "Service repositories: #{repos}"
 
       if only_updates
         # leave only update repositories
-        repos.select!{|repo| repo["is_update_repo"]}
+        repos.select! { |repo| repo["is_update_repo"] }
         log.info "Found update repositories: #{repos}"
       end
 
@@ -255,14 +255,14 @@ module Registration
       return if enabled.nil?
 
       repos.each do |repo|
-        if repo["enabled"] != enabled
-          # remember the original state
-          repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
-          RepoStateStorage.instance.repositories << repo_state
+        next if repo["enabled"] == enabled
 
-          log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
-          Pkg.SourceSetEnabled(repo["SrcId"], enabled)
-        end
+        # remember the original state
+        repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
+        RepoStateStorage.instance.repositories << repo_state
+
+        log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
+        Pkg.SourceSetEnabled(repo["SrcId"], enabled)
       end
     end
 
@@ -315,7 +315,7 @@ module Registration
         product["status"] == :installed && product["type"] != "base"
       end
 
-      product_names = installed_addons.map{|a| "#{a["name"]}-#{a["version"]}-#{a["release"]}"}
+      product_names = installed_addons.map { |a| "#{a["name"]}-#{a["version"]}-#{a["release"]}" }
       log.info "Installed addons: #{product_names}"
 
       ret = addons.select do |addon|
@@ -348,7 +348,7 @@ module Registration
         end
 
         if repository
-          yield(repository)
+          block.call(repository)
         else
           log.warn "Repository '#{repo_alias}' was not found, skipping"
         end
@@ -370,16 +370,15 @@ module Registration
       products = Pkg.ResolvableProperties("", :product, "")
       products.select! do |product|
         product["status"] == :available &&
-          new_repos.any?{|new_repo| product["source"] == new_repo["SrcId"]}
+          new_repos.any? { |new_repo| product["source"] == new_repo["SrcId"] }
       end
-      products.map!{|product| product["name"]}
+      products.map! { |product| product["name"] }
 
       log.info "Products to install: #{products}"
 
-      products.all?{|product| Pkg.ResolvableInstall(product, :product)}
+      products.all? { |product| Pkg.ResolvableInstall(product, :product) }
     end
 
     private_class_method :each_repo
   end
 end
-

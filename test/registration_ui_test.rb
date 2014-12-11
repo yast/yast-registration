@@ -14,11 +14,11 @@ describe "Registration::RegistrationUI" do
   end
   let(:base_product_to_register) do
     {
-      "arch"=>"x86_64",
-      "name"=>"SLES",
-      "reg_code"=>"reg_code",
-      "release_type"=>"DVD",
-      "version"=>"12"
+      "arch"         => "x86_64",
+      "name"         => "SLES",
+      "reg_code"     => "reg_code",
+      "release_type" => "DVD",
+      "version"      => "12"
     }
   end
 
@@ -30,7 +30,8 @@ describe "Registration::RegistrationUI" do
       expect(Registration::Registration).to receive(:is_registered?).and_return(false)
       expect(Registration::SwMgmt).to receive(:find_base_product).twice.and_return(base_product)
       expect(registration).to receive(:register).with(email, reg_code, target_distro)
-      expect(registration).to receive(:register_product).with(base_product_to_register, email).and_return([])
+      expect(registration).to receive(:register_product).with(base_product_to_register, email)
+        .and_return([])
 
       expect(registration_ui.register_system_and_base_product(email, reg_code)).to be_true
     end
@@ -39,7 +40,7 @@ describe "Registration::RegistrationUI" do
   describe "#get_available_addons" do
     it "returns available addons" do
       expect(Registration::Addon).to receive(:find_all).with(registration).and_return([])
-      
+
       expect(registration_ui.get_available_addons).to eql([])
     end
   end
@@ -56,10 +57,11 @@ describe "Registration::RegistrationUI" do
   describe "#update_base_product" do
     it "updates the base product registration" do
       expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
-      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product_to_register)
+      expect(Registration::SwMgmt).to receive(:base_product_to_register)
+        .and_return(base_product_to_register)
       remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
-      expect(registration).to receive(:upgrade_product).with(base_product_to_register).
-        and_return(remote_product)
+      expect(registration).to receive(:upgrade_product).with(base_product_to_register)
+        .and_return(remote_product)
 
       expect(registration_ui.update_base_product).to eql([true, remote_product])
     end

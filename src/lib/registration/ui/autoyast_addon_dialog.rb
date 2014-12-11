@@ -3,7 +3,6 @@ require "yast"
 
 module Registration
   module UI
-
     class AutoyastAddonDialog
       include Yast::Logger
       include Yast::I18n
@@ -63,7 +62,7 @@ module Registration
             HSpacing(0.5),
             # button label
             PushButton(Id(:download),  _("Download Available Extensions...")
-            ),
+            )
           )
         )
       end
@@ -82,7 +81,7 @@ module Registration
       end
 
       def handle_dialog
-        begin
+        loop do
           refresh_buttons
 
           ret = Yast::UI.UserInput
@@ -97,8 +96,10 @@ module Registration
             delete_addon
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
+          when :next, :back, :download
+            break
           end
-        end until [ :next, :back, :download ].include?(ret)
+        end
 
         ret
       end
@@ -111,39 +112,40 @@ module Registration
       end
 
       def find_addon(name)
-        addons.find{|a| a["name"] == name}
+        addons.find { |a| a["name"] == name }
       end
 
       def delete_addon
         addon = selected_addon
-        if Popup.YesNo(_("Really delete '%s'?") % addon["name"])
-          addons.delete(addon)
-          set_addon_table_content
-        end
+        return unless Popup.YesNo(_("Really delete '%s'?") % addon["name"])
+
+        addons.delete(addon)
+        set_addon_table_content
       end
 
       def edit_addon
         addon = selected_addon
         ret = display_addon_popup(addon)
+        return unless ret
 
-        if ret
-          # replace the content
-          addon.merge!(ret)
-          set_addon_table_content(addon["name"])
-        end
+        # replace the content
+        addon.merge!(ret)
+        set_addon_table_content(addon["name"])
       end
 
       def add_addon
         ret = display_addon_popup
-        if ret
-          addon = find_addon(ret["name"])
-          if addon
-            addon["reg_code"] = ret["reg_code"]
-          else
-            addons << ret
-          end
-          set_addon_table_content(ret["name"])
+        return unless ret
+
+        addon = find_addon(ret["name"])
+
+        if addon
+          addon["reg_code"] = ret["reg_code"]
+        else
+          addons << ret
         end
+
+        set_addon_table_content(ret["name"])
       end
 
       def set_addon_table_content(current = nil)
@@ -178,11 +180,11 @@ module Registration
         release_type = nil if release_type == "nil"
 
         {
-          "name" => Yast::UI.QueryWidget(Id(:name), :Value),
-          "version" => Yast::UI.QueryWidget(Id(:version), :Value),
-          "arch" => Yast::UI.QueryWidget(Id(:arch), :Value),
+          "name"         => Yast::UI.QueryWidget(Id(:name), :Value),
+          "version"      => Yast::UI.QueryWidget(Id(:version), :Value),
+          "arch"         => Yast::UI.QueryWidget(Id(:arch), :Value),
           "release_type" => release_type,
-          "reg_code" => Yast::UI.QueryWidget(Id(:reg_code), :Value)
+          "reg_code"     => Yast::UI.QueryWidget(Id(:reg_code), :Value)
         }
       end
 
@@ -197,8 +199,6 @@ module Registration
           Yast::UI.CloseDialog
         end
       end
-
     end
   end
 end
-

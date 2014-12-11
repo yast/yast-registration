@@ -9,39 +9,39 @@ describe "Registration::SwMgmt" do
     {
       # installation repository, not from registration
       0 => {
-        "alias"=>"SLES12", "autorefresh"=>false,
-        "base_urls"=>["cd:///"],
-        "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12", "priority"=>99, "product_dir"=>"",
-        "service"=>"", "type"=>"SUSE",
-        "url"=>"cd:///"
+        "alias" => "SLES12", "autorefresh" => false,
+        "base_urls" => ["cd:///"],
+        "enabled" => true, "is_update_repo" => false, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12", "priority" => 99, "product_dir" => "",
+        "service" => "", "type" => "SUSE",
+        "url" => "cd:///"
       },
       # pool repo from service
       1 => {
-        "alias"=>"SLES:SLES12-Pool", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"],
-        "enabled"=>true, "is_update_repo"=>false, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Pool", "priority"=>99, "product_dir"=>"",
-        "service"=>service_name, "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"
+        "alias" => "SLES:SLES12-Pool", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"],
+        "enabled" => true, "is_update_repo" => false, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Pool", "priority" => 99, "product_dir" => "",
+        "service" => service_name, "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12-POOL"
       },
       # update repo from service
       2 => {
-        "alias"=>"SLES:SLES12-Updates", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-        "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
-        "service"=>service_name, "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
+        "alias" => "SLES:SLES12-Updates", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
+        "enabled" => true, "is_update_repo" => true, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Updates", "priority" => 99, "product_dir" => "",
+        "service" => service_name, "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
       },
       # update repo from a different service
       3 => {
-        "alias"=>"Another:SLES12-Updates", "autorefresh"=>true,
-        "base_urls"=>["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
-        "enabled"=>true, "is_update_repo"=>true, "keeppackages"=>false,
-        "mirror_list"=>"", "name"=>"SLES12-Updates", "priority"=>99, "product_dir"=> "",
-        "service"=> "Another", "type"=>"YUM",
-        "url"=>"https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
+        "alias" => "Another:SLES12-Updates", "autorefresh" => true,
+        "base_urls" => ["https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"],
+        "enabled" => true, "is_update_repo" => true, "keeppackages" => false,
+        "mirror_list" => "", "name" => "SLES12-Updates", "priority" => 99, "product_dir" => "",
+        "service" => "Another", "type" => "YUM",
+        "url" => "https://nu.novell.com/suse/x86_64/update/SLE-SERVER/12"
       }
     }
   end
@@ -70,10 +70,11 @@ describe "Registration::SwMgmt" do
   describe ".base_product_to_register" do
     it "returns base product base version and release_type" do
       expect(Registration::SwMgmt).to(receive(:find_base_product)
-        .and_return({"name" => "SLES", "arch" => "x86_64", "version" => "12.1-1.47", "flavor" => "DVD"}))
+        .and_return("name" => "SLES", "arch" => "x86_64",
+          "version" => "12.1-1.47", "flavor" => "DVD"))
 
-      expect(Registration::SwMgmt.base_product_to_register).to eq({"name" => "SLES",
-          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD"})
+      expect(Registration::SwMgmt.base_product_to_register).to eq("name" => "SLES",
+          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD")
     end
   end
 
@@ -82,8 +83,8 @@ describe "Registration::SwMgmt" do
     let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
     let(:product_service) do
       SUSE::Connect::Remote::Service.new(
-        "name" => service_name,
-        "url" => service_url,
+        "name"    => service_name,
+        "url"     => service_url,
         "product" => {}
       )
     end
@@ -105,7 +106,8 @@ describe "Registration::SwMgmt" do
     it "it creates a new service if the service does not exist yet" do
       expect(Yast::Pkg).to receive(:ServiceAliases).and_return([])
       expect(Yast::Pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
-      expect(Yast::Pkg).to receive(:ServiceSet).with(service_name, hash_including("autorefresh" => true)).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceSet).with(
+        service_name, hash_including("autorefresh" => true)).and_return(true)
       expect { Registration::SwMgmt.add_service(product_service, credentials) }.to_not raise_error
     end
 
@@ -119,7 +121,7 @@ describe "Registration::SwMgmt" do
 
   describe ".copy_old_credentials" do
     let(:root_dir) { "/mnt" }
-    let(:target_dir) {SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR}
+    let(:target_dir) { SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR }
 
     before do
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
@@ -129,8 +131,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "does not fail when the old credentials are missing" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(false)
 
       # no copy
       expect(FileUtils).to receive(:cp).never
@@ -139,8 +143,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "copies old NCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(true)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(true)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(false)
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
         File.join(target_dir, "SCCcredentials"))
@@ -150,8 +156,10 @@ describe "Registration::SwMgmt" do
     end
 
     it "copies old SCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials")).and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials")).and_return(true)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
+        .and_return(false)
+      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
+        .and_return(true)
 
       expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
         File.join(target_dir, "SCCcredentials"))
@@ -181,12 +189,12 @@ describe "Registration::SwMgmt" do
     it "selects new addon products for installation" do
       legacy_services = YAML.load_file(fixtures_file("legacy_module_services.yml"))
 
-      expect(::Registration::Storage::Cache).to receive(:instance).
-        and_return(double("addon_services" => legacy_services))
-      expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first).
-        and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
-      expect(Yast::Pkg).to receive(:ResolvableProperties).
-        and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+      expect(::Registration::Storage::Cache).to receive(:instance)
+        .and_return(double("addon_services" => legacy_services))
+      expect(::Registration::SwMgmt).to receive(:service_repos).with(legacy_services.first)
+        .and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
+      expect(Yast::Pkg).to receive(:ResolvableProperties)
+        .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
       expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
 
       Registration::SwMgmt.select_addon_products

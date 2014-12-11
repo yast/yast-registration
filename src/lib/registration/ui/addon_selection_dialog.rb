@@ -5,7 +5,6 @@ require "registration/addon_sorter"
 
 module Registration
   module UI
-
     class AddonSelectionDialog
       include Yast::Logger
       include Yast::I18n
@@ -46,10 +45,10 @@ module Registration
           # help text (1/3)
           _("<p>Here you can select available extensions and modules for your"\
               "system.</p>") +
-            # help text (2/3)
+          # help text (2/3)
           _("<p>Please note, that some extensions or modules might need "\
               "specific registration code.</p>") +
-            # help text (3/3)
+          # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log"\
               "into the SUSE Customer Center and remove them manually there.</p>"),
           # always enable Back/Next, the dialog cannot be the first in workflow
@@ -74,7 +73,7 @@ module Registration
           Left(Label(_("Details"))),
           MinHeight(8,
             VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                  _("Select an extension or a module to show details here") + "</small>")),
+                  _("Select an extension or a module to show details here") + "</small>"))
           ),
           VStretch()
         )
@@ -85,7 +84,7 @@ module Registration
         if @addons.size <= lines
           content = addon_selection_items(@addons)
         else
-          box2 = addon_selection_items(@addons[lines..(2*lines - 1)])
+          box2 = addon_selection_items(@addons[lines..(2 * lines - 1)])
           box2.params << VStretch() # just UI tweak
           content = HBox(
             addon_selection_items(@addons[0..(lines - 1)]),
@@ -120,14 +119,13 @@ module Registration
 
         # usability help. If addon depends on something, then we get it
         # immediatelly after parent, so indent it slightly, so it is easier visible
-        if addon.depends_on
-          checkbox = HBox(HSpacing(2.5), checkbox)
-        end
+        checkbox = HBox(HSpacing(2.5), checkbox) if addon.depends_on
+
         res = [checkbox]
         # add extra spacing when there are just few addons, in GUI always
         res << VSpacing(0.7) if extra_spacing
 
-        return res
+        res
       end
 
       def addon_checkbox_element(addon)
@@ -145,7 +143,7 @@ module Registration
         ret = nil
         continue_buttons = [:next, :back, :abort, :skip]
 
-        while !continue_buttons.include?(ret) do
+        until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
 
           case ret
@@ -164,9 +162,7 @@ module Registration
       end
 
       def handle_next_button
-        if !supported_addon_count?
-          return nil
-        end
+        return nil unless supported_addon_count?
 
         log.info "Selected addons: #{Addon.selected.map(&:name)}"
 
@@ -175,7 +171,7 @@ module Registration
 
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @addons.find{|addon| addon.identifier == id}
+        addon = @addons.find { |a| a.identifier == id }
         return unless addon
 
         show_addon_details(addon)
@@ -187,14 +183,12 @@ module Registration
         reactivate_dependencies
       end
 
-
       # update addon details after changing the current addon in the UI
       def show_addon_details(addon)
         # addon description is a rich text
         Yast::UI.ChangeWidget(Id(:details), :Value, addon.description)
         Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
-
 
       def reactivate_dependencies
         @addons.each do |addon|
@@ -210,7 +204,7 @@ module Registration
       def supported_addon_count?
         need_regcode = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout
-        max_supported = 2*MAX_REGCODES_PER_COLUMN
+        max_supported = 2 * MAX_REGCODES_PER_COLUMN
 
         # check the addons requiring a reg. code
         if need_regcode.size > max_supported
@@ -218,9 +212,8 @@ module Registration
           return false
         end
 
-        return true
+        true
       end
     end
   end
 end
-

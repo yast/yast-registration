@@ -25,17 +25,15 @@
 require "singleton"
 
 module Registration
-
   # a module holding data needed during (auto)installation
   module Storage
-
     # storage for changed repositories
     class RegCodes < Struct.new(:reg_codes)
       include Singleton
     end
 
     # remember the values entered by user
-    # TODO use Config instead to allow easy export at installation
+    # TODO: use Config instead to allow easy export at installation
     class InstallationOptions
       include Singleton
 
@@ -51,7 +49,7 @@ module Registration
     end
 
     class Cache < Struct.new(:first_run, :addon_services,
-        :reg_url, :reg_url_cached, :upgrade_failed)
+      :reg_url, :reg_url_cached, :upgrade_failed)
 
       include Singleton
 
@@ -107,10 +105,10 @@ module Registration
         return ret unless do_registration
 
         ret.merge!(
-          "reg_server" => reg_server,
-          "slp_discovery" => slp_discovery,
-          "email" => email,
-          "reg_code" => reg_code,
+          "reg_server"      => reg_server,
+          "slp_discovery"   => slp_discovery,
+          "email"           => email,
+          "reg_code"        => reg_code,
           "install_updates" => install_updates
         )
 
@@ -134,7 +132,6 @@ module Registration
         @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""
         @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"] || ""
       end
-
 
       private
 
@@ -166,7 +163,6 @@ module Registration
 
         ret
       end
-
     end
   end
 end
