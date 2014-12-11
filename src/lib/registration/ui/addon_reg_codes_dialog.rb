@@ -3,7 +3,6 @@ require "yast"
 
 module Registration
   module UI
-
     class AddonRegCodesDialog
       include Yast::Logger
       include Yast::I18n
@@ -64,7 +63,7 @@ module Registration
         # display the second column if needed
         if addons_with_regcode.size > MAX_REGCODES_PER_COLUMN
           # display only the addons which fit two column layout
-          display_addons = addons_with_regcode[0..2*MAX_REGCODES_PER_COLUMN - 1]
+          display_addons = addons_with_regcode[0..2 * MAX_REGCODES_PER_COLUMN - 1]
 
           # round the half up (more items in the first column for odd number of items)
           half = (display_addons.size + 1) / 2
@@ -85,14 +84,14 @@ module Registration
       def labels
         [
           Left(Label(n_(
-                "The extension you selected needs a separate registration code.",
-                "The extensions you selected need separate registration codes.",
-                addons_with_regcode.size
+            "The extension you selected needs a separate registration code.",
+            "The extensions you selected need separate registration codes.",
+            addons_with_regcode.size
               ))),
           Left(Label(n_(
-                "Enter the registration code into the field below.",
-                "Enter the registration codes into the fields below.",
-                addons_with_regcode.size
+            "Enter the registration code into the field below.",
+            "Enter the registration codes into the fields below.",
+            addons_with_regcode.size
               )))
         ]
       end
@@ -113,7 +112,7 @@ module Registration
 
       def addon_regcode_item(addon)
         MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
-            addon.label, known_reg_codes.fetch(addon.identifier, "")))
+          addon.label, known_reg_codes.fetch(addon.identifier, "")))
       end
 
       def addon_regcode_items(addons)
@@ -145,7 +144,7 @@ module Registration
         continue_buttons = [:next, :back, :abort]
 
         ret = nil
-        while !continue_buttons.include?(ret) do
+        until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
 
           case ret
@@ -158,8 +157,6 @@ module Registration
 
         ret
       end
-
     end
   end
 end
-

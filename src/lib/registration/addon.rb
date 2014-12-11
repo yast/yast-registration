@@ -54,7 +54,7 @@ module Registration
 
       def create_addon_with_deps(root)
         root_addon = Addon.new(root)
-        result = [ root_addon ]
+        result = [root_addon]
 
         (root.extensions || []).each do |ext|
           child = create_addon_with_deps(ext)
@@ -63,7 +63,7 @@ module Registration
           root_addon.children << child.first
         end
 
-        return result
+        result
       end
     end
 
@@ -86,7 +86,7 @@ module Registration
       :release_type,
       :version
 
-    def initialize pure_addon
+    def initialize(pure_addon)
       @pure_addon = pure_addon
       @children = []
     end
@@ -134,7 +134,7 @@ module Registration
       # Do not allow to unselect parent if any children is selected
       return false if children.any?(&:selected?)
 
-      return true
+      true
     end
 
     # Convert to a Hash, exports only the basic Addon properties
@@ -143,9 +143,9 @@ module Registration
     # @return [Hash] Hash with basic Addon properties
     def to_h(release_type_string: false)
       {
-        "name" => identifier,
-        "arch" => arch,
-        "version" => version,
+        "name"         => identifier,
+        "arch"         => arch,
+        "version"      => version,
         "release_type" => (release_type.nil? && release_type_string) ? "nil" : release_type
       }
     end
@@ -165,6 +165,5 @@ module Registration
     def updates_addon?(old_addon)
       old_addon["name"] == identifier || old_addon["name"] == @pure_addon.former_identifier
     end
-
   end
 end

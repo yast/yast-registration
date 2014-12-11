@@ -1,7 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require 'tmpdir'
+require "tmpdir"
 
 describe "Registration::EulaDownloader" do
   describe ".download" do
@@ -10,13 +10,13 @@ describe "Registration::EulaDownloader" do
       de_eula = "Deutsch EULA"
       index = "directory.yast\nlicense.txt\nlicense.de.txt"
 
-      expect(Registration::Downloader).to receive(:download).\
-        and_return(index, en_eula, de_eula)
+      expect(Registration::Downloader).to receive(:download)\
+        .and_return(index, en_eula, de_eula)
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("https://example.com/eula", tmpdir)
 
-        expect{loader.download}.not_to raise_error
+        expect { loader.download }.not_to raise_error
 
         # the index file is not saved
         expect(Dir.entries(tmpdir)).to match_array([".", "..", "license.txt", "license.de.txt"])
@@ -27,13 +27,13 @@ describe "Registration::EulaDownloader" do
     end
 
     it "it raises an exception when download fails" do
-      expect(Registration::Downloader).to receive(:download).\
-        and_raise("Downloading failed")
+      expect(Registration::Downloader).to receive(:download)\
+        .and_raise("Downloading failed")
 
       Dir.mktmpdir do |tmpdir|
         loader = Registration::EulaDownloader.new("http://example.com/eula", tmpdir)
 
-        expect{loader.download}.to raise_error RuntimeError, "Downloading failed"
+        expect { loader.download }.to raise_error RuntimeError, "Downloading failed"
 
         # nothing saved
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])

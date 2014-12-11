@@ -10,19 +10,19 @@ describe Registration::UI::ImportCertificateDialog do
       expect(Yast::UI).to receive(:CloseDialog)
       # "Cancel" button must be the default
       expect(Yast::UI).to receive(:SetFocus).with(:cancel)
-      allow(Yast::UI).to receive(:GetDisplayInfo).and_return({
+      allow(Yast::UI).to receive(:GetDisplayInfo).and_return(
           "TextMode" => false,
-          "Width" => 1024,
-          "Height" => 768
-      })
+          "Width"    => 1024,
+          "Height"   => 768
+      )
 
       # user pressed the "Import" button
       expect(Yast::UI).to receive(:UserInput).and_return(:import)
 
       # check the displayed content
-      expect(Yast::UI).to receive(:OpenDialog) do |arg1, arg2|
+      expect(Yast::UI).to receive(:OpenDialog) do |_opt, content|
         # do a simple check: convert the term to String and use a RegExp
-        expect(arg2.to_s).to match(/Organization \(O\):.*WebYaST/)
+        expect(content.to_s).to match(/Organization \(O\):.*WebYaST/)
       end
 
       cert = Registration::SslCertificate.load_file(fixtures_file("test.pem"))

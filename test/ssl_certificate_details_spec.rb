@@ -7,7 +7,7 @@ describe "Registration::SslCertificateDetails" do
     Registration::SslCertificateDetails.new(
       Registration::SslCertificate.load_file(fixtures_file("test.pem")))
   end
-  
+
   let(:identity) do
     <<EOS
 Common Name (CN): linux-1hyn
@@ -15,6 +15,12 @@ Organization (O): WebYaST
 Organization Unit (OU): WebYaST
 EOS
   end
+
+  let(:sha256sum) do
+    "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:" \
+      "F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF"
+  end
+  let(:sha1sum) { "A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9" }
 
   describe ".#subject" do
     it "returns textual summary of the certificate subject" do
@@ -30,6 +36,7 @@ EOS
 
   describe "#summary" do
     it "returns textual summary of the whole certificate" do
+      # rubocop:disable Style/TrailingWhitespace
       expect(subject.summary).to eq(<<EOS.chomp
 Certificate:
 Issued To
@@ -37,10 +44,11 @@ Issued To
 Issued By
 #{identity}
 SHA1 Fingerprint: 
-   A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9
+   #{sha1sum}
 SHA256 Fingerprint: 
-   2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF
+   #{sha256sum}
 EOS
+      # rubocop:enable Style/TrailingWhitespace
       )
     end
 
@@ -49,18 +57,14 @@ EOS
       expect(subject.summary(small_space: true).split("\n").map(&:size).max).to be < 80
     end
   end
-  
-  
+
   describe "#richtext_summary" do
     it "returns rich text summary of the whole certificate" do
       result = subject.richtext_summary
       expect(result).to include("WebYaST")
-      expect(result).to include("A8:DE:08:B1:57:52:FE:70:DF:D5:31:EA:E3:53:BB:39:EE:01:FF:B9")
-      expect(result).to include(
-        "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:18:48:CA:84:81:48:60:F3:CB:BF"
-      )
+      expect(result).to include(sha1sum)
+      expect(result).to include(sha256sum)
     end
   end
-
 
 end

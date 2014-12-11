@@ -29,7 +29,6 @@ require "registration/suse_register"
 require "suse/connect"
 
 module Registration
-
   class UrlHelpers
     include Yast::Logger
     extend Yast::I18n
@@ -60,7 +59,7 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
-      # TODO FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
+      # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
       # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
       url = case Yast::Mode.mode
       when "installation"
@@ -135,7 +134,7 @@ module Registration
 
       # do not use the old URL when it has failed before
       if !::Registration::Storage::Cache.instance.upgrade_failed && File.exist?(ncc_creds)
-        # FIXME check at first new suseconnect conf
+        # FIXME: check at first new suseconnect conf
         old_conf = SuseRegister.new(Yast::Installation.destdir)
 
         if old_conf.found?
@@ -165,7 +164,6 @@ module Registration
       slp_service_url
     end
 
-
     # return the boot command line parameter
     def self.boot_reg_url
       reg_url = Yast::Linuxrc.InstallInf("regurl")
@@ -191,7 +189,7 @@ module Registration
       log.debug "Found services: #{services.inspect}"
 
       # ignore SUSE manager registration servers (bnc#894470)
-      services.reject!{ |service| service.slp_url.start_with?("service:#{SLP_SERVICE}:manager:") }
+      services.reject! { |service| service.slp_url.start_with?("service:#{SLP_SERVICE}:manager:") }
 
       log.info "Found #{services.size} services: #{services.map(&:slp_url).inspect}"
       services
@@ -202,6 +200,5 @@ module Registration
         slp_discovery
       end
     end
-
   end
 end

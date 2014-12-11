@@ -10,13 +10,15 @@ describe "Registration::Helpers" do
 
     before do
       expect(slp_service).to receive(:attributes).and_return(slp_attributes)
-      expect(slp_service).to receive(:slp_url).and_return("service:registration.suse:manager:#{slp_url}")
+      expect(slp_service).to receive(:slp_url)
+        .and_return("service:registration.suse:manager:#{slp_url}")
     end
 
     it "creates a label with description and url" do
       description = "Description"
-      expect(slp_attributes).to receive(:to_h).and_return({:description => description})
-      expect(Registration::Helpers.service_description(slp_service)).to eq("#{description} (#{slp_url})")
+      expect(slp_attributes).to receive(:to_h).and_return(description: description)
+      expect(Registration::Helpers.service_description(slp_service)).to \
+        eq("#{description} (#{slp_url})")
     end
 
     it "creates a label with url only when description is missing" do
@@ -59,20 +61,20 @@ describe "Registration::Helpers" do
       end
 
       it "returns false when reg_ssl_verify option is not used at boot commandline" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return(nil)
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return(nil)
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns false when reg_ssl_verify=1 boot option is used" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return("1")
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return("1")
         expect(Registration::Helpers.insecure_registration).to eq(false)
       end
 
       it "returns true when reg_ssl_verify=0 boot option is used" do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify").
-          and_return("0")
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("reg_ssl_verify")
+          .and_return("0")
         expect(Registration::Helpers.insecure_registration).to eq(true)
       end
     end
@@ -85,7 +87,7 @@ describe "Registration::Helpers" do
       expect(File).to receive(:exist?).with(cert_file).and_return(false)
       expect(FileUtils).to receive(:cp).never
 
-      expect {Registration::Helpers.copy_certificate_to_target}.to_not raise_error
+      expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
 
     it "copies the certificate and updates all certificate links" do
@@ -96,7 +98,7 @@ describe "Registration::Helpers" do
       expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash"),
         SUSE::Connect::SSLCertificate::UPDATE_CERTIFICATES)
 
-      expect {Registration::Helpers.copy_certificate_to_target}.to_not raise_error
+      expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
   end
 
@@ -107,14 +109,14 @@ describe "Registration::Helpers" do
       expect(File).to receive(:exist?).with(credentials).and_return(false)
       expect(File).to receive(:unlink).never
 
-      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+      expect { Registration::Helpers.reset_registration_status }.to_not raise_error
     end
 
     it "removes system credentials if present" do
       expect(File).to receive(:exist?).with(credentials).and_return(true)
       expect(File).to receive(:unlink).with(credentials)
 
-      expect {Registration::Helpers.reset_registration_status}.to_not raise_error
+      expect { Registration::Helpers.reset_registration_status }.to_not raise_error
     end
   end
 
@@ -162,8 +164,8 @@ describe "Registration::Helpers" do
       expect(Registration::Helpers).to receive(:insecure_registration) \
         .and_return(false)
       expect(SUSE::Connect::YaST).to receive(:write_config).with(
-        :url => url,
-        :insecure => false
+        url: url,
+        insecure: false
       )
 
       Registration::Helpers.write_config
@@ -186,25 +188,26 @@ describe "Registration::Helpers" do
       options.install_updates = true
       options.imported_cert_sha256_fingerprint = "AB:CD:EF"
 
-      expect(Registration::UrlHelpers).to receive (:registration_url)
+      expect(Registration::UrlHelpers).to receive(:registration_url)
 
       addon = Registration::Addon.new(addon_generator(
-          "zypper_name" => "sle-sdk",
-          "version" => "12",
-          "arch" => "x86_64",
+          "zypper_name"  => "sle-sdk",
+          "version"      => "12",
+          "arch"         => "x86_64",
           "release_type" => nil
         )
       )
       expect(Registration::Addon).to receive(:registered).and_return([addon])
 
       expect(Registration::Helpers.collect_autoyast_config({})).to eq(
-        "do_registration" => true,
-        "email" => "foo",
-        "reg_code" => "bar",
-        "install_updates" => true,
-        "addons" => [{"name"=>"sle-sdk", "arch"=>"x86_64", "version"=>"12",
-            "release_type"=>"nil", "reg_code"=>""}],
-        "reg_server_cert_fingerprint" => "AB:CD:EF",
+        "do_registration"                  => true,
+        "email"                            => "foo",
+        "reg_code"                         => "bar",
+        "install_updates"                  => true,
+        "addons"                           => [{
+          "name" => "sle-sdk", "arch" => "x86_64", "version" => "12",
+            "release_type" => "nil", "reg_code" => "" }],
+        "reg_server_cert_fingerprint"      => "AB:CD:EF",
         "reg_server_cert_fingerprint_type" => "SHA256"
       )
     end
@@ -229,14 +232,14 @@ describe "Registration::Helpers" do
     it "it replaces \"reg_code\" also in nested \"addons\" list" do
       test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
       expect(Registration::Helpers.hide_reg_codes(test)).to eq(
-        "addons" => [{ "reg_code"=>"[FILTERED]" }, { "reg_code"=>"[FILTERED]" }])
+        "addons" => [{ "reg_code" => "[FILTERED]" }, { "reg_code" => "[FILTERED]" }])
     end
 
     it "it does not modify the original input value" do
       test = { "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] }
       Registration::Helpers.hide_reg_codes(test)
       # make sure the copy is deep, i.e. the original value is unchanged
-      expect(test).to eq({ "addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }] })
+      expect(test).to eq("addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }])
     end
   end
 

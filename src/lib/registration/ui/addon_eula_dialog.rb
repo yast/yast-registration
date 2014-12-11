@@ -6,7 +6,6 @@ require "registration/helpers"
 
 module Registration
   module UI
-
     class AddonEulaDialog
       include Yast::Logger
       include Yast::I18n
@@ -49,12 +48,13 @@ module Registration
         eula_ret = :accepted
 
         addons.each do |addon|
-          if addon.eula_url && !addon.eula_url.empty?
-            log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
-            eula_ret = accept_eula(addon)
-            # any declined license needs to be handled separately
-            break if eula_ret != :accepted
-          end
+          next unless addon.eula_url && !addon.eula_url.empty?
+
+          log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
+          eula_ret = accept_eula(addon)
+
+          # any declined license needs to be handled separately
+          break if eula_ret != :accepted
         end
 
         # go back or abort if any EULA has not been accepted, let the user
@@ -68,24 +68,22 @@ module Registration
       # @param [SUSE::Connect::Product] addon the addon
       # @param [String] tmpdir target where to download the files
       def download_eula(addon, tmpdir)
-        begin
-          Yast::Popup.Feedback(
-            _("Downloading License Agreement..."),
-            addon.label
-          ) do
-            # download the license (with translations)
-            loader = EulaDownloader.new(addon.eula_url, tmpdir,
-              insecure: Helpers.insecure_registration)
+        Yast::Popup.Feedback(
+          _("Downloading License Agreement..."),
+          addon.label
+        ) do
+          # download the license (with translations)
+          loader = EulaDownloader.new(addon.eula_url, tmpdir,
+            insecure: Helpers.insecure_registration)
 
-            loader.download
-          end
-          true
-        rescue Exception => e
-          log.error "Download failed: #{e.message}: #{e.backtrace}"
-          # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
-          Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
-          return false
+          loader.download
         end
+        true
+      rescue StandardError => e
+        log.error "Download failed: #{e.message}: #{e.backtrace}"
+        # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
+        Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
+        return false
       end
 
       # prepare data for displaying the EULA dialog
@@ -142,8 +140,6 @@ module Registration
       def display_optional_info(info_file)
         Yast::InstShowInfo.show_info_txt(info_file) if File.exist?(info_file)
       end
-
     end
   end
 end
-

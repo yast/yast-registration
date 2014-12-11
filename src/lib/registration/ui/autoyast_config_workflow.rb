@@ -10,10 +10,8 @@ require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 
-
 module Registration
   module UI
-
     class AutoyastConfigWorkflow
       include Yast::Logger
       include Yast::I18n
@@ -38,37 +36,37 @@ module Registration
 
       def run
         aliases = {
-          "general"         => lambda { configure_registration() },
-          "addons"          => [ lambda { select_addons() }, true ],
-          "remote_addons"   => [ lambda { select_remote_addons() }, true ],
-          "addons_eula"     => [ lambda { addons_eula() }, true ],
-          "addons_regcodes" => [ lambda { addons_reg_codes() }, true ]
+          "general"         => ->() { configure_registration },
+          "addons"          => [->() { select_addons }, true],
+          "remote_addons"   => [->() { select_remote_addons }, true],
+          "addons_eula"     => [->() { addons_eula }, true],
+          "addons_regcodes" => [->() { addons_reg_codes }, true]
         }
 
         sequence = {
-          "ws_start" => "general",
-          "general"  => {
-            :abort   => :abort,
-            :next    => :next,
-            :addons  => "addons"
+          "ws_start"        => "general",
+          "general"         => {
+            abort: :abort,
+            next: :next,
+            addons: "addons"
           },
-          "addons" => {
-            :abort   => :abort,
-            :next    => "general",
-            :download => "remote_addons"
+          "addons"          => {
+            abort: :abort,
+            next: "general",
+            download: "remote_addons"
           },
-          "remote_addons" => {
-            :addons  => "addons",
-            :abort   => :abort,
-            :next    => "addons_eula"
+          "remote_addons"   => {
+            addons: "addons",
+            abort: :abort,
+            next: "addons_eula"
           },
-          "addons_eula" => {
-            :abort   => :abort,
-            :next    => "addons_regcodes"
+          "addons_eula"     => {
+            abort: :abort,
+            next: "addons_regcodes"
           },
           "addons_regcodes" => {
-            :abort   => :abort,
-            :next    => "addons"
+            abort: :abort,
+            next: "addons"
           }
         }
 
@@ -100,10 +98,8 @@ module Registration
             SccAutoClient::CONTACTING_MESSAGE,
             _("Loading Available Extensions and Modules...")) do
 
-            ::Registration::Addon.find_all(registration).each do |addon|
-              # reset registration status to allow selecting all addons not only
-              addon.unregistered
-            end
+            # reset registration status to allow selecting all addons
+            ::Registration::Addon.find_all(registration).each(&:unregistered)
           end
 
           ret = AddonSelectionDialog.run(registration)
@@ -117,7 +113,7 @@ module Registration
       end
 
       def collect_known_reg_codes
-        Hash[config.addons.map{|a| [a["name"], a["reg_code"]]}]
+        Hash[config.addons.map { |a| [a["name"], a["reg_code"]] }]
       end
 
       def addons_reg_codes
@@ -141,7 +137,7 @@ module Registration
 
       def update_addons(known_reg_codes)
         ::Registration::Addon.selected.each do |addon|
-          # TODO FIXME: use a separate class for handling Autoyast addons,
+          # FIXME: use a separate class for handling Autoyast addons,
           # define == operator, etc...
           new_addon = addon.to_h
           new_addon["reg_code"] = known_reg_codes[addon.identifier] || ""
@@ -156,14 +152,11 @@ module Registration
             config.addons << new_addon
           end
         end
-
       end
 
       def configure_registration
         AutoyastConfigDialog.run(config)
       end
-
     end
   end
 end
-

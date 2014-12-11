@@ -42,8 +42,8 @@ module Registration
 
     def register(email, reg_code, distro_target)
       settings = connect_params(
-        :token => reg_code,
-        :email => email
+        token: reg_code,
+        email: email
       )
 
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
@@ -57,7 +57,6 @@ module Registration
       # write the global credentials
       credentials.write
     end
-
 
     def register_product(product, email = nil)
       service_for_product(product) do |product_ident, params|
@@ -100,10 +99,10 @@ module Registration
       log.info "Reading available addons for product: #{base_product["name"]}"
 
       remote_product = SUSE::Connect::Remote::Product.new(
-        :arch         => base_product["arch"],
-        :identifier   => base_product["name"],
-        :version      => base_product["version"],
-        :release_type => base_product["release_type"]
+        arch: base_product["arch"],
+        identifier: base_product["name"],
+        version: base_product["version"],
+        release_type: base_product["release_type"]
       )
 
       params = connect_params
@@ -114,7 +113,7 @@ module Registration
       ::Registration::SwMgmt.update_product_renames(renames)
 
       # ignore the base product "addon"
-      addons.reject{ |a| a.identifier == base_product["name"] }
+      addons.reject { |a| a.identifier == base_product["name"] }
     end
 
     def activated_products
@@ -132,38 +131,41 @@ module Registration
     private
 
     def set_registered(remote_product)
-      addon = Addon.find_all(self).find do |addon|
-        addon.arch == remote_product.arch &&
-          addon.identifier == remote_product.identifier &&
-          addon.version  == remote_product.version &&
-          addon.release_type == remote_product.release_type
+      addon = Addon.find_all(self).find do |a|
+        a.arch == remote_product.arch &&
+        a.identifier == remote_product.identifier &&
+        a.version  == remote_product.version &&
+        a.release_type == remote_product.release_type
       end
 
-      if addon
-        log.info "Marking addon #{addon.identifier}-#{addon.version} as registered"
-        addon.registered
-      end
+      return unless addon
+
+      log.info "Marking addon #{addon.identifier}-#{addon.version} as registered"
+      addon.registered
     end
 
     def service_for_product(product, &block)
-      remote_product = product.is_a?(Hash) ?
-        SUSE::Connect::Remote::Product.new(
-        :arch         => product["arch"],
-        :identifier   => product["name"],
-        :version      => product["version"],
-        :release_type => product["release_type"]
-      ) : product
+      if product.is_a?(Hash)
+        remote_product =  SUSE::Connect::Remote::Product.new(
+          arch: product["arch"],
+          identifier: product["name"],
+          version: product["version"],
+          release_type: product["release_type"]
+        )
+      else
+        remote_product = product
+      end
 
       log.info "Using product: #{remote_product}"
 
       params = connect_params
 
       # use product specific reg. code (e.g. for addons)
-      if (product.is_a?(Hash) && product["reg_code"])
+      if product.is_a?(Hash) && product["reg_code"]
         params[:token] = product["reg_code"]
       end
 
-      product_service = yield(remote_product, params)
+      product_service = block.call(remote_product, params)
 
       log.info "registration result: #{product_service}"
 
@@ -185,7 +187,7 @@ module Registration
           store_ssl_error(context) unless verify_ok
 
           verify_ok
-        rescue Exception => e
+        rescue StandardError => e
           log.error "Exception in SSL verify callback: #{e.class}: #{e.message} : #{e.backtrace}"
           # the exception will be ignored, but reraise anyway...
           raise e
@@ -197,17 +199,17 @@ module Registration
       log.error "SSL verification failed: #{context.error}: #{context.error_string}"
       Storage::SSLErrors.instance.ssl_error_code = context.error
       Storage::SSLErrors.instance.ssl_error_msg = context.error_string
-      Storage::SSLErrors.instance.ssl_failed_cert = context.current_cert ?
-        SslCertificate.load(context.current_cert) : nil
+      Storage::SSLErrors.instance.ssl_failed_cert =
+        context.current_cert ? SslCertificate.load(context.current_cert) : nil
     end
 
     def connect_params(params = {})
       default_params = {
-        :language => ::Registration::Helpers.http_language,
-        :debug => ENV["SCCDEBUG"],
-        :verbose => ENV["Y2DEBUG"] == "1",
+        language: ::Registration::Helpers.http_language,
+        debug: ENV["SCCDEBUG"],
+        verbose: ENV["Y2DEBUG"] == "1",
         # pass a verify_callback to get details about failed SSL verification
-        :verify_callback => verify_callback
+        verify_callback: verify_callback
       }
 
       if @url

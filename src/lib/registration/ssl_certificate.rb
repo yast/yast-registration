@@ -5,9 +5,8 @@ require "registration/downloader"
 require "registration/fingerprint"
 
 module Registration
-
   # class handling SSL certificate
-  # TODO move it to yast2 to share it?
+  # TODO: move it to yast2 to share it?
   class SslCertificate
     attr_reader :x509_cert
 
@@ -97,7 +96,7 @@ module Registration
     def find_name_attribute(x509_name, attribute)
       # to_a returns an attribute list, e.g.:
       # [["CN", "linux", 19], ["emailAddress", "root@...", 22], ["O", "YaST", 19], ...]
-      attr, value, code = x509_name.to_a.find { |a| a.first == attribute }
+      _attr, value, _code = x509_name.to_a.find { |a| a.first == attribute }
       value
     end
 
@@ -122,7 +121,5 @@ module Registration
         ::SUSE::Connect::YaST.cert_sha256_fingerprint(x509_cert)
       )
     end
-
   end
-
 end

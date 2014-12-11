@@ -28,6 +28,7 @@ module Registration
     end
 
     private
+
     attr_reader :url
 
     def read_conf(root)
@@ -38,9 +39,9 @@ module Registration
       url_line = lines.grep(/^\s*url\s*=/).last
       return false unless url_line
 
-      url_s = url_line[/^\s*url\s*=\s*(\S*)/,1]
+      url_s = url_line[/^\s*url\s*=\s*(\S*)/, 1]
       @url = URI.parse(url_s)
-      return true
+      true
     end
   end
 end

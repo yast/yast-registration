@@ -3,9 +3,9 @@ require "registration/helpers"
 require "registration/url_helpers"
 
 module Yast
-  import 'UI'
-  import 'Label'
-  import 'Report'
+  import "UI"
+  import "Label"
+  import "Report"
 
   class DiscoverRegistrationServicesClient < Client
     include Yast::Logger
@@ -37,9 +37,9 @@ module Yast
       MarginBox(2, 0.5,
         VBox(
           # popup heading (in bold)
-          Heading(_('Local Registration Servers')),
+          Heading(_("Local Registration Servers")),
           VSpacing(0.5),
-          Label(_("Select a detected registration server from the list\n" +
+          Label(_("Select a detected registration server from the list\n" \
                 "or the default SUSE registration server.")),
           VSpacing(0.5),
           RadioButtonGroup(
@@ -83,7 +83,7 @@ module Yast
       url = ::Registration::UrlHelpers.service_url(selected_service.slp_url)
       log.info "Selected service URL: #{url}"
 
-      return url
+      url
     end
 
     def select_registration_service
@@ -108,11 +108,10 @@ module Yast
       end
 
       widgets.unshift(Left(RadioButton(Id("scc"),
-            # %s is the default SCC URL
-            _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
-            true)))
+        # %s is the default SCC URL
+        _("SUSE Customer Center (%s)") % SUSE::Connect::Client::DEFAULT_URL,
+        true)))
     end
-
   end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main
 end

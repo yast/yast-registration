@@ -5,7 +5,6 @@ require "registration/fingerprint"
 
 module Registration
   module UI
-
     class AutoyastConfigDialog
       include Yast::Logger
       include Yast::I18n
@@ -19,17 +18,19 @@ module Registration
 
       # list of widget ID in the dialog, add the new widget ID here after
       # adding a new widget to the dialog
-      ALL_WIDGETS = [ :addons, :do_registration, :email, :install_updates,
+      ALL_WIDGETS = [
+        :addons, :do_registration, :email, :install_updates,
         :reg_code, :reg_server, :reg_server_cert, :reg_server_cert_fingerprint,
-        :reg_server_cert_fingerprint_type, :slp_discovery ]
+        :reg_server_cert_fingerprint_type, :slp_discovery
+      ]
 
       # widgets containing data (serialized to the exported Hash)
       # (:addons belongs to a push button, it does not contain any data)
-      DATA_WIDGETS = ALL_WIDGETS - [ :addons ]
+      DATA_WIDGETS = ALL_WIDGETS - [:addons]
 
       # widgets which should react on the global on/off state
       # (exclude the the on/off checkbox itself)
-      STATUS_WIDGETS = ALL_WIDGETS - [ :do_registration ]
+      STATUS_WIDGETS = ALL_WIDGETS - [:do_registration]
 
       # create a new dialog for accepting importing a SSL certificate and run it
       def self.run(config)
@@ -49,17 +50,19 @@ module Registration
         caption = _("Product Registration")
         help_text = "<p><b>#{caption}</b></p>"
         help_text += _(
-          "<p>Product registration includes your product in SUSE Customer Center database,\n"+
-            "enabling you to get online updates and technical support.\n"+
-            "To register while installing automatically, select <b>Run Product Registration</b>.</p>"
+          "<p>Product registration includes your product in SUSE Customer " \
+            "Center database,\nenabling you to get online updates and " \
+            "technical support.\nTo register while installing automatically, " \
+            "select <b>Run Product Registration</b>.</p>"
         )
         help_text += _(
-          "<p>If your network deploys a custom registration server, set the correct URL of the server\n" +
-            "and the location of the SMT certificate in <b>SMT Server Settings</b>. Refer\n" +
-            "to your SMT manual for further assistance.</p>"
+          "<p>If your network deploys a custom registration server, set the " \
+          "correct URL of the server\nand the location of the SMT " \
+          "certificate in <b>SMT Server Settings</b>. Refer\nto your SMT " \
+          "manual for further assistance.</p>"
         )
 
-        # FIXME the dialog should be created by external code before calling this
+        # FIXME: the dialog should be created by external code before calling this
         Wizard.CreateDialog
         Wizard.SetContents(caption, content, help_text, false, true)
         Wizard.SetNextButton(:next, Label.FinishButton)
@@ -94,11 +97,11 @@ module Registration
               MinWidth(32, InputField(Id(:email), _("&E-mail Address"), config.email)),
               VSpacing(0.4),
               MinWidth(32, InputField(Id(:reg_code), _("Registration &Code"),
-                  config.reg_code)),
+                config.reg_code)),
               VSpacing(0.4),
               Left(CheckBox(Id(:install_updates),
-                  _("Install Available Updates from Update Repositories"),
-                  config.install_updates))
+                _("Install Available Updates from Update Repositories"),
+                config.install_updates))
             )
           )
         )
@@ -115,8 +118,8 @@ module Registration
             VBox(
               VSpacing(0.2),
               Left(CheckBox(Id(:slp_discovery), Opt(:notify),
-                  _("Find Registration Server Using SLP Discovery"),
-                  config.slp_discovery)),
+                _("Find Registration Server Using SLP Discovery"),
+                config.slp_discovery)),
               VSpacing(0.4),
               # Translators: Text for UI Label - capitalized
               InputField(Id(:reg_server), Opt(:hstretch),
@@ -189,8 +192,11 @@ module Registration
         slp_enabled = Yast::UI.QueryWidget(Id(:slp_discovery), :Value)
         Yast::UI.ChangeWidget(Id(:reg_server), :Enabled, !slp_enabled && enabled)
 
-        fingeprint_enabled = Yast::UI.QueryWidget(Id(:reg_server_cert_fingerprint_type), :Value) != :none
-        Yast::UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled, fingeprint_enabled && enabled)
+        fingeprint_enabled = Yast::UI.QueryWidget(Id(:reg_server_cert_fingerprint_type),
+          :Value) != :none
+
+        Yast::UI.ChangeWidget(Id(:reg_server_cert_fingerprint), :Enabled,
+          fingeprint_enabled && enabled)
       end
 
       def store_config
@@ -205,7 +211,7 @@ module Registration
       end
 
       def handle_dialog
-        begin
+        loop do
           ret = Yast::UI.UserInput
           log.info "ret: #{ret}"
 
@@ -215,16 +221,17 @@ module Registration
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
           when :next
-            # TODO FIXME: input validation
+            # FIXME: input validation
+            break
+          when :back, :addons
+            break
           end
-        end until ret == :next || ret == :back || ret == :addons
+        end
 
         store_config if ret == :next || ret == :addons
 
         ret
       end
-
     end
   end
 end
-

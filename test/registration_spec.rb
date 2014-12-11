@@ -21,7 +21,7 @@ describe "Registration::Registration" do
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
-        .with(hash_including(:token => reg_code), target_distro)
+        .with(hash_including(token: reg_code), target_distro)
         .and_return([username, password])
       )
 
@@ -36,15 +36,15 @@ describe "Registration::Registration" do
 
     it "adds the selected product and returns added zypp services" do
       product = {
-        "arch" => "x86_64",
-        "name" => "sle-sdk",
-        "version" => "12",
+        "arch"         => "x86_64",
+        "name"         => "sle-sdk",
+        "version"      => "12",
         "release_type" => nil
       }
 
       service_data = {
-        "name" => "service",
-        "url" => "https://example.com",
+        "name"    => "service",
+        "url"     => "https://example.com",
         "product" => product
       }
 
@@ -55,7 +55,7 @@ describe "Registration::Registration" do
       expect(Registration::SwMgmt).to receive(:add_service)
 
       expect(Registration::Addon).to receive(:find_all).and_return(available_addons)
-      expect(available_addons.find { |addon| addon.identifier == "sle-sdk"}).to \
+      expect(available_addons.find { |addon| addon.identifier == "sle-sdk" }).to \
         receive(:registered)
 
       allow(File).to receive(:exist?).with(
@@ -87,7 +87,7 @@ describe "Registration::Registration" do
 
   describe "#activated_products" do
     it "returns list of activated products" do
-      status = double(:activated_products => [])
+      status = double(activated_products: [])
       expect(SUSE::Connect::YaST).to receive(:status).and_return(status)
 
       expect(Registration::Registration.new.activated_products).to eq([])
@@ -97,9 +97,9 @@ describe "Registration::Registration" do
   describe "#get_addon_list" do
     let(:base_product) do
       {
-        "name" => "SLES",
-        "version" => "12",
-        "arch" => "x86_64",
+        "name"         => "SLES",
+        "version"      => "12",
+        "arch"         => "x86_64",
         "release_type" => "DVD"
       }
     end
@@ -129,7 +129,7 @@ describe "Registration::Registration" do
     let(:error_code) { 19 }
     let(:error_string) { "self signed certificate in certificate chain" }
     # SSL error context
-    let(:context) { double(:error => error_code, :error_string => error_string) }
+    let(:context) { double(error: error_code, error_string: error_string) }
 
     it "stores the SSL error details" do
       certificate = File.read(fixtures_file("test.pem"))
@@ -138,16 +138,16 @@ describe "Registration::Registration" do
       storage = Registration::Storage::SSLErrors.instance
       expect(storage).to receive(:ssl_error_code=).with(error_code)
       expect(storage).to receive(:ssl_error_msg=).with(error_string)
-      expect(storage).to receive(:ssl_failed_cert=).
-        with(an_instance_of(Registration::SslCertificate))
+      expect(storage).to receive(:ssl_failed_cert=)
+        .with(an_instance_of(Registration::SslCertificate))
 
       expect { callback.call(false, context) }.to_not raise_error
     end
 
     it "logs the exception raised inside" do
       # set an invalid certificate to throw an exception in the callback
-      expect(context).to receive(:current_cert).
-        and_return("INVALID CERTIFICATE").twice
+      expect(context).to receive(:current_cert)
+        .and_return("INVALID CERTIFICATE").twice
 
       logger = double
       expect(logger).to receive(:error).with(/SSL verification failed:/)

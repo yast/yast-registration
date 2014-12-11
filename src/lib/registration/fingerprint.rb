@@ -18,6 +18,5 @@ module Registration
       # (ignore optional colon separators)
       sum.casecmp(other.sum) == 0 && value.tr(":", "").casecmp(other.value.tr(":", "")) == 0
     end
-
   end
 end

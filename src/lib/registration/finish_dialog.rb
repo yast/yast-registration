@@ -14,7 +14,7 @@ module Registration
       :installation,
       :live_installation,
       :autoinst,
-      :update,
+      :update
     ]
 
     def initialize
@@ -77,6 +77,5 @@ module Registration
       # save all repositories
       Yast::Pkg.SourceSaveAll
     end
-
   end
 end

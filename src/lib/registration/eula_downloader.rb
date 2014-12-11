@@ -26,7 +26,6 @@ require "yast"
 require "registration/downloader"
 
 module Registration
-
   # class for downloading addon EULAs from the registration server
   class EulaDownloader
     attr_reader :base_url, :target_dir, :insecure
@@ -53,7 +52,8 @@ module Registration
 
         log.info "Downloading license from #{license_file_url}..."
         license_text = Downloader.download(license_file_url, insecure: insecure)
-        log.info "Downloaded license: #{license_text[0..32].inspect}... (#{license_text.bytesize} bytes)"
+        log.info "Downloaded license: #{license_text[0..32].inspect}... " \
+          "(#{license_text.bytesize} bytes)"
 
         license_file_name = File.join(target_dir, license)
 
@@ -82,8 +82,5 @@ module Registration
 
       licenses
     end
-
   end
-
-
 end

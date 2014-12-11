@@ -24,7 +24,7 @@ RSpec.configure do |config|
   end
 end
 
-$:.unshift(File.expand_path("../../src/lib", __FILE__))
+$LOAD_PATH.unshift(File.expand_path("../../src/lib", __FILE__))
 
 ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 
