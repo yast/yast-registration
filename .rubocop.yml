@@ -1,3 +1,6 @@
+inherit_from:
+  .rubocop_yast_style.yml
+
 # TODO: this need some non-trivial refactoring...
 Metrics/AbcSize:
   Max: 111
@@ -29,42 +32,14 @@ Metrics/PerceivedComplexity:
 Style/AccessorMethodName:
   Enabled: false
 
-# align arrows:
-# "foo"     => true
-# "foo_bar" => false
-Style/AlignHash:
-  EnforcedHashRocketStyle: table
-
-# no extra indentation for multiline function calls
-Style/AlignParameters:
-  EnforcedStyle: with_fixed_indentation
-
-# no extra indentation for case
-Style/CaseIndentation:
-  IndentWhenRelativeTo: end
-
 # Offense count: 29
 Style/Documentation:
-  Enabled: false
-
-# disabled, unless should be used only in trailing form
-Style/NegatedIf:
   Enabled: false
 
 # Offense count: 1
 # Configuration parameters: NamePrefix, NamePrefixBlacklist.
 Style/PredicateName:
   Enabled: false
-
-# use "raise" instead of "fail"
-Style/SignalException:
-  EnforcedStyle: only_raise
-
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
-Style/StringLiteralsInInterpolation:
-  EnforcedStyle: double_quotes
 
 # def foo?
 #   @foo

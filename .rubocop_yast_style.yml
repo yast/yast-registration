@@ -1,0 +1,41 @@
+# Rubocop style configuration
+#
+# Following
+# https://github.com/SUSE/style-guides/blob/master/Ruby.md
+
+# https://github.com/SUSE/style-guides/blob/master/Ruby.md#strings
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+# Is there any justification for "aligned" which is the default?
+Style/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+# https://github.com/SUSE/style-guides/blob/master/Ruby.md#arrays
+Style/WordArray:
+  Enabled: false
+
+# align arrows:
+# "foo"     => true
+# "foo_bar" => false
+Style/AlignHash:
+  EnforcedHashRocketStyle: table
+
+# no extra indentation for multiline function calls
+Style/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+# no extra indentation for case
+Style/CaseIndentation:
+  IndentWhenRelativeTo: end
+
+# "unless" has a different connotation than "if not"
+Style/NegatedIf:
+  Enabled: false
+
+# use "raise" instead of "fail"
+Style/SignalException:
+  EnforcedStyle: only_raise
