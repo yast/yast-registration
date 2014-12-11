@@ -9,7 +9,7 @@ group :test do
   gem "yast-rake", ">= 0.1.9"
   gem "rspec", "~> 2.14.0"
   gem "gettext", require: false
-  gem "rubocop", require: false
+  gem "rubocop", "~> 0.27.0", require: false
   gem "simplecov", require: false
   gem "coveralls", require: false if ENV["TRAVIS"]
 end
