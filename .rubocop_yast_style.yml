@@ -10,10 +10,6 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
-# Is there any justification for "aligned" which is the default?
-Style/MultilineOperationIndentation:
-  EnforcedStyle: indented
-
 # https://github.com/SUSE/style-guides/blob/master/Ruby.md#arrays
 Style/WordArray:
   Enabled: false
