@@ -1,5 +1,6 @@
+# use the shared Yast defaults
 inherit_from:
-  .rubocop_yast_style.yml
+  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml
 
 # TODO: this need some non-trivial refactoring...
 Metrics/AbcSize:

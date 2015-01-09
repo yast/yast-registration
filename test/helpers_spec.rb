@@ -164,7 +164,7 @@ describe "Registration::Helpers" do
       expect(Registration::Helpers).to receive(:insecure_registration) \
         .and_return(false)
       expect(SUSE::Connect::YaST).to receive(:write_config).with(
-        url: url,
+        url:      url,
         insecure: false
       )
 

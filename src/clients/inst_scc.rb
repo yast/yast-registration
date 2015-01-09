@@ -122,7 +122,7 @@ module Yast
 
           # do not re-register during installation
           if !Mode.normal && ::Registration::Registration.is_registered? &&
-             options.base_registered
+              options.base_registered
 
             return :next
           end
@@ -581,47 +581,47 @@ module Yast
       sequence = {
         "ws_start"               => workflow_start,
         "check"                  => {
-          auto: :auto,
-          abort: :abort,
-          cancel: :abort,
-          register: "register",
+          auto:       :auto,
+          abort:      :abort,
+          cancel:     :abort,
+          register:   "register",
           extensions: "select_addons",
-          update: "update",
-          next: :next
+          update:     "update",
+          next:       :next
         },
         "update"                 => {
-          abort: :abort,
-          cancel: :abort,
-          next: "select_addons",
+          abort:    :abort,
+          cancel:   :abort,
+          next:     "select_addons",
           register: "register"
         },
         "register"               => {
-          abort: :abort,
+          abort:  :abort,
           cancel: :abort,
-          skip: :next,
-          next: "select_addons"
+          skip:   :next,
+          next:   "select_addons"
         },
         "select_addons"          => {
-          abort: :abort,
-          skip: "update_autoyast_config",
+          abort:  :abort,
+          skip:   "update_autoyast_config",
           cancel: "check",
-          next: "addon_eula"
+          next:   "addon_eula"
         },
         "addon_eula"             => {
           abort: :abort,
-          next: "register_addons"
+          next:  "register_addons"
         },
         "register_addons"        => {
           abort: :abort,
-          next: "update_autoyast_config"
+          next:  "update_autoyast_config"
         },
         "update_autoyast_config" => {
           abort: :abort,
-          next: "pkg_manager"
+          next:  "pkg_manager"
         },
         "pkg_manager"            => {
           abort: :abort,
-          next: :next
+          next:  :next
         }
       }
 

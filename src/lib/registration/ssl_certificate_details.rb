@@ -32,9 +32,9 @@ module Registration
 
     def summary(small_space: false)
       summary = _("Certificate:") + "\n" + _("Issued To") + "\n" + subject +
-                "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
-                "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
-                _("SHA256 Fingerprint: ")  + "\n"
+        "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
+        "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
+        _("SHA256 Fingerprint: ")  + "\n"
 
       sha256 = certificate.fingerprint(Fingerprint::SHA256).value
       if small_space

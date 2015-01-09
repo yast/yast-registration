@@ -135,7 +135,7 @@ module Registration
     # write the current configuration to the configuration file
     def self.write_config
       config_params = {
-        url: UrlHelpers.registration_url,
+        url:      UrlHelpers.registration_url,
         insecure: insecure_registration
       }
 
