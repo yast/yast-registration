@@ -69,7 +69,7 @@ module Registration
       rescue SocketError, Errno::ENETUNREACH => e
         log.error "Network error: #{e.class}: #{e.message}"
         if (Yast::Mode.installation || Yast::Mode.update) &&
-           !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+            !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
 
           if Yast::Popup.YesNo(
               # Error popup
@@ -105,7 +105,7 @@ module Registration
                   "%s to speed up the synchronization process.\n" \
                   "Just wait several minutes after logging in and then retry \n" \
                   "the upgrade again.") % \
-                     SUSE::Connect::Client::DEFAULT_URL
+                SUSE::Connect::Client::DEFAULT_URL
             end
 
             # add the hint to the error details

@@ -99,9 +99,9 @@ module Registration
       log.info "Reading available addons for product: #{base_product["name"]}"
 
       remote_product = SUSE::Connect::Remote::Product.new(
-        arch: base_product["arch"],
-        identifier: base_product["name"],
-        version: base_product["version"],
+        arch:         base_product["arch"],
+        identifier:   base_product["name"],
+        version:      base_product["version"],
         release_type: base_product["release_type"]
       )
 
@@ -133,9 +133,9 @@ module Registration
     def set_registered(remote_product)
       addon = Addon.find_all(self).find do |a|
         a.arch == remote_product.arch &&
-        a.identifier == remote_product.identifier &&
-        a.version  == remote_product.version &&
-        a.release_type == remote_product.release_type
+          a.identifier == remote_product.identifier &&
+          a.version  == remote_product.version &&
+          a.release_type == remote_product.release_type
       end
 
       return unless addon
@@ -147,9 +147,9 @@ module Registration
     def service_for_product(product, &block)
       if product.is_a?(Hash)
         remote_product =  SUSE::Connect::Remote::Product.new(
-          arch: product["arch"],
-          identifier: product["name"],
-          version: product["version"],
+          arch:         product["arch"],
+          identifier:   product["name"],
+          version:      product["version"],
           release_type: product["release_type"]
         )
       else
@@ -205,9 +205,9 @@ module Registration
 
     def connect_params(params = {})
       default_params = {
-        language: ::Registration::Helpers.http_language,
-        debug: ENV["SCCDEBUG"],
-        verbose: ENV["Y2DEBUG"] == "1",
+        language:        ::Registration::Helpers.http_language,
+        debug:           ENV["SCCDEBUG"],
+        verbose:         ENV["Y2DEBUG"] == "1",
         # pass a verify_callback to get details about failed SSL verification
         verify_callback: verify_callback
       }
