@@ -190,11 +190,12 @@ describe "Registration::Helpers" do
 
       expect(Registration::UrlHelpers).to receive(:registration_url)
 
-      addon = Registration::Addon.new(addon_generator(
-                                        "zypper_name"  => "sle-sdk",
-                                        "version"      => "12",
-                                        "arch"         => "x86_64",
-                                        "release_type" => nil
+      addon = Registration::Addon.new(
+        addon_generator(
+          "zypper_name"  => "sle-sdk",
+          "version"      => "12",
+          "arch"         => "x86_64",
+          "release_type" => nil
         )
       )
       expect(Registration::Addon).to receive(:registered).and_return([addon])

@@ -169,10 +169,12 @@ describe Registration::Addon do
 
   describe "#selectable?" do
     let(:addons) do
-      Registration::Addon.find_all(double(
-                                     get_addon_list:     [addon_with_child_generator],
-                                     activated_products: []
-        ))
+      Registration::Addon.find_all(
+        double(
+          get_addon_list:     [addon_with_child_generator],
+          activated_products: []
+        )
+      )
     end
 
     let(:parent) { addons.first }
