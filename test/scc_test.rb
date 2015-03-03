@@ -4,7 +4,6 @@ require_relative "spec_helper"
 require "yast"
 
 describe "scc client" do
-
   before do
     # generic UI stubs for the wizard dialog
     Yast.import "UI"
@@ -32,5 +31,4 @@ describe "scc client" do
       expect(Yast::WFM.call("scc")).to eq(:abort)
     end
   end
-
 end

@@ -52,5 +52,4 @@ describe "discover_registration_services client" do
       expect(Yast::WFM.call("discover_registration_services")).to be_nil
     end
   end
-
 end

@@ -200,5 +200,4 @@ describe "Registration::SwMgmt" do
       Registration::SwMgmt.select_addon_products
     end
   end
-
 end

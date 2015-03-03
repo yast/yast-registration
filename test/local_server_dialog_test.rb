@@ -38,5 +38,4 @@ describe Registration::UI::LocalServerDialog do
     expect(Yast::Report).to receive(:Error)
     expect(Registration::UI::LocalServerDialog.run(url)).to be_nil
   end
-
 end

@@ -4,7 +4,6 @@ require_relative "spec_helper"
 
 describe "Registration::UrlHelpers" do
   describe ".registration_url" do
-
     before do
       # reset the cache before each test
       ::Registration::Storage::Cache.instance.reg_url_cached = nil
@@ -223,5 +222,4 @@ describe "Registration::UrlHelpers" do
       expect(Registration::UrlHelpers.slp_discovery_feedback).to eql(services)
     end
   end
-
 end

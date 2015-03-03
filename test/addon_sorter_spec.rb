@@ -27,5 +27,4 @@ describe "Registration::ADDON_SORTER" do
 
     expect(unknown_addons.sort(&Registration::ADDON_SORTER).map(&:identifier)).to eql(expected)
   end
-
 end

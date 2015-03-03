@@ -171,5 +171,4 @@ describe "Registration::SslCertificate" do
       subject.import_to_system
     end
   end
-
 end

@@ -62,7 +62,7 @@ describe "Registration::Registration" do
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
       allow(File).to receive(:read).with(
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(
-        "username=SCC_foo\npassword=bar")
+          "username=SCC_foo\npassword=bar")
 
       registered_service = Registration::Registration.new.send(yast_method, product)
       expect(registered_service).to eq(service)
@@ -161,5 +161,4 @@ describe "Registration::Registration" do
       expect { callback.call(false, context) }.to raise_error OpenSSL::X509::CertificateError
     end
   end
-
 end

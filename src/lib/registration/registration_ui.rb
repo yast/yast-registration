@@ -59,7 +59,6 @@ module Registration
 
           Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
             _("Registering the System...")) do
-
             registration.register(email, reg_code, distro_target)
           end
         end
@@ -69,7 +68,6 @@ module Registration
           product_service = Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
             _("Registering %s ...") % SwMgmt.base_product_label(base_product)
           ) do
-
             base_product_data = SwMgmt.base_product_to_register
             base_product_data["reg_code"] = reg_code
             registration.register_product(base_product_data, email)
@@ -170,7 +168,6 @@ module Registration
       Yast::Popup.Feedback(
         _(CONTACTING_MESSAGE),
         _("Loading Available Extensions and Modules...")) do
-
         Addon.find_all(registration)
       end
     end

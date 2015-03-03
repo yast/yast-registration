@@ -72,9 +72,9 @@ module Registration
             !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
 
           if Yast::Popup.YesNo(
-              # Error popup
-              _("Network is not configured, the registration server cannot be reached.\n" \
-                  "Do you want to configure the network now?"))
+            # Error popup
+            _("Network is not configured, the registration server cannot be reached.\n" \
+                "Do you want to configure the network now?"))
 
             ::Registration::Helpers.run_network_configuration
           end
@@ -223,7 +223,6 @@ module Registration
       # progress label
       result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
         _("Importing '%s' certificate...") % cn) do
-
         cert.import_to_system
       end
 

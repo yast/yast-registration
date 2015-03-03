@@ -48,3 +48,6 @@ Style/PredicateName:
 Style/TrivialAccessors:
   AllowPredicates: true
 
+# Let lslezak decide what to do with it. In general jreidinger does not see it as such big violence of style
+Style/StructInheritance:
+  Enabled: false
