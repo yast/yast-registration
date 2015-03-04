@@ -3,7 +3,6 @@
 require_relative "./spec_helper"
 
 describe ::Registration::FinishDialog do
-
   subject { ::Registration::FinishDialog.new }
 
   describe "#run" do
@@ -13,7 +12,6 @@ describe ::Registration::FinishDialog do
 
         expect(result["when"]).to_not be_empty
       end
-
     end
 
     describe "first parameter \"Write\"" do

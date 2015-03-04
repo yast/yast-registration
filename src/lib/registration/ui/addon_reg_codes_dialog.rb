@@ -83,16 +83,24 @@ module Registration
 
       def labels
         [
-          Left(Label(n_(
-            "The extension you selected needs a separate registration code.",
-            "The extensions you selected need separate registration codes.",
-            addons_with_regcode.size
-              ))),
-          Left(Label(n_(
-            "Enter the registration code into the field below.",
-            "Enter the registration codes into the fields below.",
-            addons_with_regcode.size
-              )))
+          Left(
+            Label(
+              n_(
+                "The extension you selected needs a separate registration code.",
+                "The extensions you selected need separate registration codes.",
+                addons_with_regcode.size
+              )
+            )
+          ),
+          Left(
+            Label(
+              n_(
+                "Enter the registration code into the field below.",
+                "Enter the registration codes into the fields below.",
+                addons_with_regcode.size
+              )
+            )
+          )
         ]
       end
 

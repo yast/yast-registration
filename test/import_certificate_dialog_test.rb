@@ -3,7 +3,6 @@
 require_relative "spec_helper"
 
 describe Registration::UI::ImportCertificateDialog do
-
   describe ".run" do
     it "displays the certificate details and returns the user input" do
       # generic UI mocks
@@ -11,9 +10,9 @@ describe Registration::UI::ImportCertificateDialog do
       # "Cancel" button must be the default
       expect(Yast::UI).to receive(:SetFocus).with(:cancel)
       allow(Yast::UI).to receive(:GetDisplayInfo).and_return(
-          "TextMode" => false,
-          "Width"    => 1024,
-          "Height"   => 768
+        "TextMode" => false,
+        "Width"    => 1024,
+        "Height"   => 768
       )
 
       # user pressed the "Import" button
@@ -29,5 +28,4 @@ describe Registration::UI::ImportCertificateDialog do
       expect(Registration::UI::ImportCertificateDialog.run(cert)).to eq(:import)
     end
   end
-
 end

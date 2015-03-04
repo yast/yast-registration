@@ -61,5 +61,4 @@ describe Registration::Fingerprint do
       expect(fp1).to_not eq(nil)
     end
   end
-
 end

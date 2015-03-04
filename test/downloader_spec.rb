@@ -80,6 +80,5 @@ describe "Registration::Downloader" do
 
       expect(Registration::Downloader.download(url)).to eq("response")
     end
-
   end
 end

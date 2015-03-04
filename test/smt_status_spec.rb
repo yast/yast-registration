@@ -25,5 +25,4 @@ describe "Registration::SmtStatus" do
       expect(subject.ncc_api_present?).to be_false
     end
   end
-
 end

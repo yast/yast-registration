@@ -4,7 +4,6 @@ require_relative "spec_helper"
 require "yaml"
 
 describe Registration::Addon do
-
   before(:each) do
     addon_reset_cache
   end
@@ -170,10 +169,12 @@ describe Registration::Addon do
 
   describe "#selectable?" do
     let(:addons) do
-      Registration::Addon.find_all(double(
+      Registration::Addon.find_all(
+        double(
           get_addon_list:     [addon_with_child_generator],
           activated_products: []
-        ))
+        )
+      )
     end
 
     let(:parent) { addons.first }
@@ -263,5 +264,4 @@ describe Registration::Addon do
       expect(addon.to_h).to be_a(Hash)
     end
   end
-
 end

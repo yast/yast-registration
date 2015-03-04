@@ -39,7 +39,5 @@ describe "Registration::EulaDownloader" do
         expect(Dir.entries(tmpdir)).to match_array([".", ".."])
       end
     end
-
   end
-
 end

@@ -66,5 +66,4 @@ EOS
       expect(result).to include(sha256sum)
     end
   end
-
 end

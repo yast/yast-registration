@@ -190,7 +190,8 @@ describe "Registration::Helpers" do
 
       expect(Registration::UrlHelpers).to receive(:registration_url)
 
-      addon = Registration::Addon.new(addon_generator(
+      addon = Registration::Addon.new(
+        addon_generator(
           "zypper_name"  => "sle-sdk",
           "version"      => "12",
           "arch"         => "x86_64",
@@ -242,5 +243,4 @@ describe "Registration::Helpers" do
       expect(test).to eq("addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }])
     end
   end
-
 end

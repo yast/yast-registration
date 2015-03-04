@@ -380,12 +380,10 @@ module Yast
       product_succeed = registration_order.map do |product|
         ::Registration::ConnectHelpers.catch_registration_errors(
           message_prefix: "#{product.label}\n") do
-
           product_service = Popup.Feedback(
             _(CONTACTING_MESSAGE),
             # %s is name of given product
             _("Registering %s ...") % product.label) do
-
             product_data = {
               "name"     => product.identifier,
               "reg_code" => @known_reg_codes[product.identifier],

@@ -66,5 +66,4 @@ describe "Registration::RegistrationUI" do
       expect(registration_ui.update_base_product).to eql([true, remote_product])
     end
   end
-
 end
