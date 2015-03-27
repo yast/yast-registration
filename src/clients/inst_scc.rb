@@ -41,6 +41,7 @@ require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/local_server_dialog"
 require "registration/ui/registered_system_dialog"
+require "registration/ui/media_addon_workflow"
 
 module Yast
   class InstSccClient < Client
@@ -74,7 +75,12 @@ module Yast
 
       initialize_regcodes
 
-      start_workflow
+      # started from the add-on module?
+      if WFM.Args[0] == "register_media_addon" && WFM.Args[1].to_i > 0
+        ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1].to_i)
+      else
+        start_workflow
+      end
     end
 
     private

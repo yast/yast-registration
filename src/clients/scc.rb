@@ -53,6 +53,9 @@ module Yast
             return :abort
           end
 
+          # FIXME: just for testing, remove this
+          return WFM.call("inst_scc", ["register_media_addon", 12]) if ENV["MEDIA_ADDON"]
+
           return WFM.call("inst_scc")
         ensure
           Wizard.CloseDialog
