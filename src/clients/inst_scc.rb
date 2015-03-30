@@ -144,7 +144,7 @@ module Yast
               register_base_product: !options.base_registered)
 
           if success
-            if product_service && !install_updates?
+            if product_service && !registration_ui.install_updates?
               registration_ui.disable_update_repos(product_service)
             end
 
@@ -188,7 +188,7 @@ module Yast
 
       success, product_service = registration_ui.update_base_product
 
-      if success && product_service && !install_updates?
+      if success && product_service && !registration_ui.install_updates?
         return registration_ui.disable_update_repos(product_service)
       end
 
@@ -205,7 +205,8 @@ module Yast
         return false
       end
 
-      failed_addons = registration_ui.update_addons(addons, enable_updates: install_updates?)
+      failed_addons = registration_ui.update_addons(addons,
+        enable_updates: registration_ui.install_updates?)
 
       # if update fails preselest the addon for full registration
       failed_addons.each(&:selected)
@@ -323,31 +324,6 @@ module Yast
       UI.ChangeWidget(Id(:reg_code), :Enabled, false)
     end
 
-    def install_updates?
-      # ask only at installation/update
-      return true unless Mode.installation || Mode.update
-
-      options = ::Registration::Storage::InstallationOptions.instance
-
-      # not set yet?
-      if options.install_updates.nil?
-        options.install_updates = Popup.YesNo(
-          _("Registration added some update repositories.\n\n" \
-              "Do you want to install the latest available\n" \
-              "on-line updates during installation?"))
-      end
-
-      options.install_updates
-    end
-
-    def select_repositories(product_service)
-      # added update repositories
-      updates = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
-      log.info "Found update repositories: #{updates.size}"
-
-      ::Registration::SwMgmt.set_repos_state(updates, install_updates?)
-    end
-
     # run the addon selection dialog
     def select_addons
       # FIXME: available_addons is called just to fill cache with popup
@@ -371,69 +347,9 @@ module Yast
     end
 
     # register all selected addons
-    def register_selected_addons
-      # create duplicate as array is modified in loop for registration order
-      registration_order = @selected_addons.clone
-
-      return false if init_registration == :cancel
-
-      product_succeed = registration_order.map do |product|
-        ::Registration::ConnectHelpers.catch_registration_errors(
-          message_prefix: "#{product.label}\n") do
-          product_service = Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # %s is name of given product
-            _("Registering %s ...") % product.label) do
-            product_data = {
-              "name"     => product.identifier,
-              "reg_code" => @known_reg_codes[product.identifier],
-              "arch"     => product.arch,
-              "version"  => product.version
-            }
-
-            @registration.register_product(product_data)
-          end
-
-          # select repositories to use in installation (e.g. enable/disable Updates)
-          select_repositories(product_service) if Mode.installation || Mode.update
-
-          # remember the added service
-          ::Registration::Storage::Cache.instance.addon_services << product_service
-
-          # move from selected to registered
-          product.registered
-          @selected_addons.reject! { |selected| selected.identifier == product.identifier }
-        end
-      end
-
-      !product_succeed.include?(false) # succeed only if noone failed
-    end
-
-    # run the addon reg codes dialog
     def register_addons
-      # if registering only add-ons which do not need a reg. code (like SDK)
-      # then simply start the registration
-      if @selected_addons.all?(&:free)
-        Wizard.SetContents(
-          # dialog title
-          _("Register Extensions and Modules"),
-          # display only the products which need a registration code
-          Empty(),
-          # help text
-          _("<p>Extensions and Modules are being registered.</p>"),
-          false,
-          false
-        )
-        # when registration fails go back
-        return register_selected_addons ? :next : :back
-      else
-        loop do
-          ret = ::Registration::UI::AddonRegCodesDialog.run(@selected_addons, @known_reg_codes)
-          return ret unless ret == :next
-
-          return :next if register_selected_addons
-        end
-      end
+      return false if init_registration == :cancel
+      registration_ui.register_addons(@selected_addons, @known_reg_codes)
     end
 
     def confirm_skipping
