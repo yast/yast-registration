@@ -40,6 +40,7 @@ require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/local_server_dialog"
+require "registration/ui/registered_system_dialog"
 
 module Yast
   class InstSccClient < Client
@@ -361,47 +362,6 @@ module Yast
       Popup.YesNo(confirmation)
     end
 
-    def registered_dialog
-      VBox(
-        Heading(_("The system is already registered.")),
-        VSpacing(2),
-        # button label
-        PushButton(Id(:register), _("Register Again")),
-        VSpacing(1),
-        # button label
-        PushButton(Id(:extensions), _("Select Extensions"))
-      )
-    end
-
-    def display_registered_dialog
-      log.info "The system is already registered, displaying registered dialog"
-
-      Wizard.SetContents(
-        # dialog title
-        _("Registration"),
-        registered_dialog,
-        # help text
-        _("<p>The system is already registered.</p>") +
-          _("<p>You can re-register it again or you can register additional "\
-            "extension or modules to enhance the functionality of the system.</p>") +
-          _("<p>If you want to deregister your system you need to log "\
-            "into the SUSE Customer Center and remove the system manually there.</p>"),
-        GetInstArgs.enable_back || Mode.normal,
-        GetInstArgs.enable_back || Mode.normal
-      )
-
-      Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
-
-      continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
-
-      ret = nil
-      ret = UI.UserInput until continue_buttons.include?(ret)
-
-      Wizard.RestoreNextButton
-
-      ret
-    end
-
     def registration_check
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
@@ -441,7 +401,7 @@ module Yast
       end
 
       if Mode.normal && ::Registration::Registration.is_registered?
-        return display_registered_dialog
+        return ::Registration::UI::RegisteredSystemDialog.run
       else
         return :register
       end
