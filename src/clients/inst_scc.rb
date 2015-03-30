@@ -66,8 +66,6 @@ module Yast
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
-      Yast.import "ProductControl"
-      Yast.import "SourceDialogs"
 
       first_run
 
