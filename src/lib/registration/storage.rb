@@ -30,6 +30,10 @@ module Registration
     # storage for changed repositories
     class RegCodes < Struct.new(:reg_codes)
       include Singleton
+
+      def initialize
+        self.reg_codes = {}
+      end
     end
 
     # remember the values entered by user

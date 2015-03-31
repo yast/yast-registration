@@ -1,8 +1,12 @@
 
 require "yast"
-# require "registration/helpers"
-# require "registration/connect_helpers"
-# require "registration/url_helpers"
+
+require "registration/addon"
+require "registration/registration"
+require "registration/registration_ui"
+require "registration/storage"
+require "registration/sw_mgmt"
+require "registration/url_helpers"
 #
 # require "registration/ui/autoyast_addon_dialog"
 # require "registration/ui/autoyast_config_dialog"
@@ -32,6 +36,10 @@ module Registration
         textdomain "registration"
 
         @repo_id = repo_id
+
+        url = UrlHelpers.registration_url
+        @registration = Registration.new(url)
+        @registration_ui = RegistrationUI.new(registration)
       end
 
       # The media add-on workflow is:
@@ -88,7 +96,7 @@ module Registration
 
       private
 
-      attr_accessor :addons, :repo_id, :products
+      attr_accessor :repo_id, :products, :registration, :registration_ui
 
       def find_products
         if !SwMgmt.init
@@ -104,8 +112,6 @@ module Registration
           product["source"] == @repo_id
         end
 
-        log.info "Found: #{products.size} product(s): #{products.inspect}"
-
         if products.empty?
           repo_data = Pkg.SourceGeneralData(@repo_id)
           log.warn "Repository #{repo_data["name"]} (#{repo_data["alias"]}) " \
@@ -118,7 +124,7 @@ module Registration
       end
 
       def register_base
-        if !::Registration::Registration.is_registered?
+        if !Registration.is_registered?
           # TODO: register the base system if not already registered
         end
 
@@ -126,27 +132,27 @@ module Registration
       end
 
       def register_addons
-        :next
+        known_reg_codes = Storage::RegCodes.instance.reg_codes
+        registration_ui.register_addons(Addon.selected, known_reg_codes)
       end
 
       def load_remote_addons
-        url = UrlHelpers.registration_url
-        registration = ::Registration::Registration.new(url)
-        registration_ui = ::Registration::RegistrationUI.new(registration)
+        ret = registration_ui.get_available_addons
 
-        self.addons = registration_ui.get_available_addons
-
-        return :cancel if addons == :cancel
-
+        return :cancel if ret == :cancel
         :next
       end
 
       def select_media_addons
+        Addon.find_all(registration).each do |addon|
+          log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
+        end
+
         # select a remote addon for each product
         products.each do |product|
-          remote_addon = addons.find do |addon|
-            product["name"] == addon.name &&
-              product["version"] == addon.version &&
+          remote_addon = Addon.find_all(registration).find do |addon|
+            product["name"] == addon.identifier &&
+              product["version_version"] == addon.version &&
               product["arch"] == addon.arch
           end
 
@@ -154,7 +160,7 @@ module Registration
             remote_addon.selected
           else
             product_label = "#{product["display_name"]} (#{product["name"]}" \
-              "-#{product["version"]}-#{product["arch"]})"
+              "-#{product["version_version"]}-#{product["arch"]})"
 
             # TRANSLATORS: %s is a product name
             Report.Error(_("Cannot find remote product %s.\n" \
@@ -163,10 +169,7 @@ module Registration
           end
         end
 
-        # FIXME: remove this
-        return :next if ENV["MEDIA_ADDON"]
-
-        # no add-on => no registration
+        # no SCC add-on selected => no registration
         Addon.selected.empty? ? :finish : :next
       end
     end

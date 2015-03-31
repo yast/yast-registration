@@ -76,8 +76,8 @@ module Yast
       initialize_regcodes
 
       # started from the add-on module?
-      if WFM.Args[0] == "register_media_addon" && WFM.Args[1].to_i > 0
-        ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1].to_i)
+      if WFM.Args[0] == "register_media_addon" && WFM.Args[1].is_a?(Fixnum)
+        ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
       else
         start_workflow
       end
