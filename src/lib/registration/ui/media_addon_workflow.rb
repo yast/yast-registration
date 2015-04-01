@@ -7,15 +7,10 @@ require "registration/registration_ui"
 require "registration/storage"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
-#
-# require "registration/ui/autoyast_addon_dialog"
-# require "registration/ui/autoyast_config_dialog"
-# require "registration/ui/addon_selection_dialog"
-# require "registration/ui/addon_eula_dialog"
-# require "registration/ui/addon_reg_codes_dialog"
 
 module Registration
   module UI
+    # This class handles registering media add-ons.
     class MediaAddonWorkflow
       include Yast::Logger
       include Yast::I18n
@@ -26,7 +21,7 @@ module Registration
       Yast.import "Report"
       Yast.import "Sequencer"
 
-      # run workflow for registering a media add-on
+      # run workflow for registering a media add-on from repositry repo_id.
       def self.run(repo_id)
         workflow = MediaAddonWorkflow.new(repo_id)
         workflow.run
@@ -79,18 +74,13 @@ module Registration
             finish: :finish,
             next:   "register_addons"
           },
-          # TODO: do we need to accept the EULA again?
-          #          "addons_eula"     => {
-          #            abort: :abort,
-          #            next:  "addons_regcodes"
-          #          },
           "register_addons"     => {
             abort: :abort,
             next:  :next
           }
         }
 
-        log.info "Starting scc_auto sequence"
+        log.info "Starting registering media add-on sequence"
         Sequencer.Run(aliases, sequence)
       end
 
@@ -137,10 +127,7 @@ module Registration
       end
 
       def load_remote_addons
-        ret = registration_ui.get_available_addons
-
-        return :cancel if ret == :cancel
-        :next
+        registration_ui.get_available_addons == :cancel ? :cancel : :next
       end
 
       def select_media_addons
