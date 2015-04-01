@@ -112,7 +112,7 @@ module Registration
     end
 
     # create UI label for a base product
-    # @param [Hash] Product (hash from pkg-bindings)
+    # @param base_product [Hash] Product (hash from pkg-bindings)
     # @return [String] UI Label
     def self.base_product_label(base_product)
       base_product["display_name"] ||
@@ -219,7 +219,7 @@ module Registration
     end
 
     # get list of repositories belonging to registered services
-    # @param product_services [SUSE::Connect::Remote::Service] added service
+    # @param product_service [SUSE::Connect::Remote::Service] added service
     # @param only_updates [Boolean] return only update repositories
     # @return [Array<Hash>] list of repositories
     def self.service_repos(product_service, only_updates: false)
@@ -249,7 +249,7 @@ module Registration
     # The original repository state is saved to RepoStateStorage to restore
     # the original state later.
     # @param repos [Array<Hash>] list of repositories
-    # @param repos [Boolean] true = enable, false = disable, nil = no change
+    # @param enabled [Boolean] true = enable, false = disable, nil = no change
     # @return [void]
     def self.set_repos_state(repos, enabled)
       # keep the defaults when not defined
