@@ -96,14 +96,10 @@ module Registration
 
         Pkg.SourceLoad
 
-        # find the products from the media addo-on
-        # TODO: only installed products??
-        self.products = Pkg.ResolvableProperties("", :product, "").select do |product|
-          product["source"] == @repo_id
-        end
+        self.products = SwMgmt.products_from_repo(repo_id)
 
         if products.empty?
-          repo_data = Pkg.SourceGeneralData(@repo_id)
+          repo_data = Pkg.SourceGeneralData(repo_id)
           log.warn "Repository #{repo_data["name"]} (#{repo_data["alias"]}) " \
             "does not provide any product resolvable"
           log.warn "Skipping add-on registration"
@@ -131,30 +127,7 @@ module Registration
       end
 
       def select_media_addons
-        Addon.find_all(registration).each do |addon|
-          log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
-        end
-
-        # select a remote addon for each product
-        products.each do |product|
-          remote_addon = Addon.find_all(registration).find do |addon|
-            product["name"] == addon.identifier &&
-              product["version_version"] == addon.version &&
-              product["arch"] == addon.arch
-          end
-
-          if remote_addon
-            remote_addon.selected
-          else
-            product_label = "#{product["display_name"]} (#{product["name"]}" \
-              "-#{product["version_version"]}-#{product["arch"]})"
-
-            # TRANSLATORS: %s is a product name
-            Report.Error(_("Cannot find remote product %s.\n" \
-                  "The product cannot be registered.") % product_label
-            )
-          end
-        end
+        SwMgmt.select_product_addons(products, Addon.find_all(registration))
 
         # no SCC add-on selected => no registration
         Addon.selected.empty? ? :finish : :next

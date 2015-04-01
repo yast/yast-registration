@@ -200,4 +200,40 @@ describe "Registration::SwMgmt" do
       Registration::SwMgmt.select_addon_products
     end
   end
+
+  describe ".products_from_repo" do
+    before do
+      expect(Yast::Pkg).to receive(:ResolvableProperties)
+        .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+    end
+
+    it "Returns product resolvables from the specified repository" do
+      expect(Registration::SwMgmt.products_from_repo(5)).to have(1).item
+    end
+
+    it "Returns empty list if not product is found" do
+      expect(Registration::SwMgmt.products_from_repo(255)).to be_empty
+    end
+  end
+
+  describe ".select_product_addons" do
+    # just the sle-module-legacy product
+    let(:products) { [YAML.load_file(fixtures_file("products_legacy_installation.yml")).first] }
+
+    it "selects remote addons matching the product resolvables" do
+      available_addons = YAML.load_file(fixtures_file("available_addons.yml"))
+
+      # expect the sle-module-legacy product to be selected
+      expect(available_addons[4]).to receive(:selected)
+      Registration::SwMgmt.select_product_addons(products, available_addons)
+    end
+
+    it "reports an error when the matching remote addon is not found" do
+      available_addons = []
+
+      # expect the sle-module-legacy product to be selected
+      expect(Yast::Report).to receive(:Error).with(/Cannot find remote product/)
+      Registration::SwMgmt.select_product_addons(products, available_addons)
+    end
+  end
 end

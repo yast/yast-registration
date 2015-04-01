@@ -36,6 +36,7 @@ module Registration
   Yast.import "Mode"
   Yast.import "Stage"
   Yast.import "Pkg"
+  Yast.import "Report"
   Yast.import "PackageLock"
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
@@ -185,7 +186,7 @@ module Registration
           "url"         => product_service.url.to_s,
           "enabled"     => true,
           "autorefresh" => true
-            )
+          )
 
           ## error message
           raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
@@ -377,6 +378,42 @@ module Registration
       log.info "Products to install: #{products}"
 
       products.all? { |product| Pkg.ResolvableInstall(product, :product) }
+    end
+
+    # select remote addons matching the product resolvables
+    def self.select_product_addons(products, addons)
+      addons.each do |addon|
+        log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # select a remote addon for each product
+      products.each do |product|
+        remote_addon = addons.find do |addon|
+          product["name"] == addon.identifier &&
+            product["version_version"] == addon.version &&
+            product["arch"] == addon.arch
+        end
+
+        if remote_addon
+          remote_addon.selected
+        else
+          product_label = "#{product["display_name"]} (#{product["name"]}" \
+            "-#{product["version_version"]}-#{product["arch"]})"
+
+          # TRANSLATORS: %s is a product name
+          Report.Error(_("Cannot find remote product %s.\n" \
+                "The product cannot be registered.") % product_label
+          )
+        end
+      end
+    end
+
+    # find the product resolvables from the specified repository
+    def self.products_from_repo(repo_id)
+      # TODO: only installed products??
+      Pkg.ResolvableProperties("", :product, "").select do |product|
+        product["source"] == repo_id
+      end
     end
 
     private_class_method :each_repo
