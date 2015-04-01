@@ -46,6 +46,24 @@ describe "Registration::SwMgmt" do
     }
   end
 
+  describe ".init" do
+    it "initializes package management and returns true" do
+      expect(Yast::PackageLock).to receive(:Connect).with(false).and_return("connected" => true)
+
+      expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
+      expect(Yast::Pkg).to receive(:TargetInitialize)
+      expect(Yast::Pkg).to receive(:TargetLoad)
+      expect(Yast::Pkg).to receive(:SourceRestore).and_return(true)
+
+      expect(Registration::SwMgmt.init).to eq(true)
+    end
+
+    it "returns false when cannot obtain libzypp lock" do
+      expect(Yast::PackageLock).to receive(:Connect).with(false).and_return("connected" => false)
+      expect(Registration::SwMgmt.init).to eq(false)
+    end
+  end
+
   describe ".service_repos" do
     let(:service) { double }
 

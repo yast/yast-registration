@@ -117,11 +117,6 @@ module Registration
         :next
       end
 
-      def register_addons
-        known_reg_codes = Storage::RegCodes.instance.reg_codes
-        registration_ui.register_addons(Addon.selected, known_reg_codes)
-      end
-
       def load_remote_addons
         registration_ui.get_available_addons == :cancel ? :cancel : :next
       end
@@ -131,6 +126,11 @@ module Registration
 
         # no SCC add-on selected => no registration
         Addon.selected.empty? ? :finish : :next
+      end
+
+      def register_addons
+        known_reg_codes = Storage::RegCodes.instance.reg_codes
+        registration_ui.register_addons(Addon.selected, known_reg_codes)
       end
     end
   end
