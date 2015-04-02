@@ -64,38 +64,16 @@ module Registration
 
       # content for the main registration dialog
       def content
-        base_product = SwMgmt.find_base_product
-
         options = Storage::InstallationOptions.instance
-
-        # label text describing the registration (1/2)
-        # use \n to split to more lines if needed (use max. 76 chars/line)
-        info = _("Please enter a registration or evaluation code for this product and your\n" \
-            "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
-            "Access to security and general software updates is only possible on\n" \
-            "a registered system.")
-
-        if !Yast::Mode.normal
-          # add a paragraph separator
-          info += "\n\n"
-
-          # label text describing the registration (2/2),
-          # not displayed in installed system
-          # use \n to split to more lines if needed (use max. 76 chars/line)
-          info += _("If you skip product registration now, remember to register after\n" \
-              "installation has completed.")
-        end
-
         registered = Registration.is_registered?
-        network_button = Right(PushButton(Id(:network), _("Network Configuration...")))
 
         VBox(
-          Yast::Mode.installation || Yast::Mode.update ? network_button : Empty(),
+          network_button,
           VStretch(),
           HSquash(
             VBox(
               VSpacing(1),
-              Left(Heading(SwMgmt.base_product_label(base_product))),
+              Left(Heading(SwMgmt.base_product_label(SwMgmt.find_base_product))),
               VSpacing(1),
               registered ? Heading(_("The system is already registered.")) : Label(info)
             )
@@ -139,13 +117,7 @@ module Registration
           when :network
             Helpers.run_network_configuration
           when :local_server
-            options = Storage::InstallationOptions.instance
-            current_url = options.custom_url || SUSE::Connect::Config.new.url
-            url = LocalServerDialog.run(current_url)
-            if url
-              log.info "Entered custom URL: #{url}"
-              options.custom_url = url
-            end
+            handle_local_server
           when :next
             options = Storage::InstallationOptions.instance
 
@@ -156,12 +128,9 @@ module Registration
               return :next
             end
 
-            email = Yast::UI.QueryWidget(:email, :Value)
-            reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
-
             # remember the entered values in case user goes back
-            options.email = email
-            options.reg_code = reg_code
+            options.email = Yast::UI.QueryWidget(:email, :Value)
+            options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
 
             # reset the user input in case an exception is raised
             ret = nil
@@ -170,8 +139,8 @@ module Registration
 
             registration_ui = RegistrationUI.new(registration)
             success, product_service =
-              registration_ui.register_system_and_base_product(email, reg_code,
-                register_base_product: !options.base_registered)
+              registration_ui.register_system_and_base_product(options.email,
+                options.reg_code, register_base_product: !options.base_registered)
 
             if success
               if product_service && !registration_ui.install_updates?
@@ -213,6 +182,45 @@ module Registration
             "Really skip the registration now?")
 
         Yast::Popup.YesNo(confirmation)
+      end
+
+      def info
+        # label text describing the registration (1/2)
+        # use \n to split to more lines if needed (use max. 76 chars/line)
+        info = _("Please enter a registration or evaluation code for this product and your\n" \
+            "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
+            "Access to security and general software updates is only possible on\n" \
+            "a registered system.")
+
+        if !Yast::Mode.normal
+          # add a paragraph separator
+          info += "\n\n"
+
+          # label text describing the registration (2/2),
+          # not displayed in installed system
+          # use \n to split to more lines if needed (use max. 76 chars/line)
+          info += _("If you skip product registration now, remember to register after\n" \
+              "installation has completed.")
+        end
+
+        info
+      end
+
+      def network_button
+        return Empty() unless Yast::Mode.installation || Yast::Mode.update
+
+        Right(PushButton(Id(:network), _("Network Configuration...")))
+      end
+
+      # handle pressing the "Local Registration Server" button
+      def handle_local_server
+        options = Storage::InstallationOptions.instance
+        current_url = options.custom_url || SUSE::Connect::Config.new.url
+        url = LocalServerDialog.run(current_url)
+        return unless url
+
+        log.info "Entered custom URL: #{url}"
+        options.custom_url = url
       end
 
       # initialize the Registration object

@@ -36,6 +36,10 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
         expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:email=)
         expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:reg_code=)
+        expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:email)
+          .twice.and_return(email)
+        expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:reg_code)
+          .twice.and_return(reg_code)
 
         # FIXME: should be 'expect', but it fails (expects 2 calls, huh???)
         allow_any_instance_of(Registration::RegistrationUI).to receive(
