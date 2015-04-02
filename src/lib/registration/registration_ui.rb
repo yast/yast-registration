@@ -124,28 +124,13 @@ module Registration
       addons_to_update = SwMgmt.find_addon_updates(addons)
 
       failed_addons = addons_to_update.reject do |addon_to_update|
-        ConnectHelpers.catch_registration_errors do
-          # then register the product(s)
-          product_service = Yast::Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # updating registered addon/extension, %s is an extension name
-            _("Updating to %s ...") % addon_to_update.label
-          ) do
-            registration.upgrade_product(addon_to_update)
-          end
-
-          Storage::Cache.instance.addon_services << product_service
-
-          # select repositories to use in installation (e.g. enable/disable Updates)
-          disable_update_repos(product_service) if !enable_updates
-        end
+        update_addon(addon_to_update, enable_updates)
       end
 
       # install the new upgraded products
       SwMgmt.select_addon_products
 
       log.error "Failed addons: #{failed_addons}" unless failed_addons.empty?
-
       failed_addons
     end
 
@@ -287,6 +272,24 @@ module Registration
       log.info "Found update repositories: #{updates.size}"
 
       SwMgmt.set_repos_state(updates, install_updates?)
+    end
+
+    def update_addon(addon, enable_updates)
+      ConnectHelpers.catch_registration_errors do
+        # then register the product(s)
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating registered addon/extension, %s is an extension name
+          _("Updating to %s ...") % addon.label
+        ) do
+          registration.upgrade_product(addon)
+        end
+
+        Storage::Cache.instance.addon_services << product_service
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        disable_update_repos(product_service) if !enable_updates
+      end
     end
   end
 end
