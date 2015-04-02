@@ -54,28 +54,13 @@ module Registration
     # FIXME: split to two separate parts
     def register_system_and_base_product(email, reg_code, register_base_product: true)
       product_service = nil
+
       success = ConnectHelpers.catch_registration_errors do
-        base_product = SwMgmt.find_base_product
-
-        if !Registration.is_registered?
-          distro_target = base_product["register_target"]
-          log.info "Registering system, distro_target: #{distro_target}"
-
-          Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-            _("Registering the System...")) do
-            registration.register(email, reg_code, distro_target)
-          end
-        end
+        register_system(email, reg_code) if !Registration.is_registered?
 
         if register_base_product
           # then register the product(s)
-          product_service = Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-            _("Registering %s ...") % SwMgmt.base_product_label(base_product)
-          ) do
-            base_product_data = SwMgmt.base_product_to_register
-            base_product_data["reg_code"] = reg_code
-            registration.register_product(base_product_data, email)
-          end
+          product_service = register_base_product(email, reg_code)
         end
       end
 
@@ -234,6 +219,30 @@ module Registration
     private
 
     attr_accessor :registration
+
+    def register_system(email, reg_code)
+      base_product = SwMgmt.find_base_product
+      distro_target = base_product["register_target"]
+      log.info "Registering system, distro_target: #{distro_target}"
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering the System...")) do
+        registration.register(email, reg_code, distro_target)
+      end
+    end
+
+    def register_base_product(email, reg_code)
+      # then register the product(s)
+      base_product = SwMgmt.find_base_product
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering %s ...") % SwMgmt.base_product_label(base_product)
+      ) do
+        base_product_data = SwMgmt.base_product_to_register
+        base_product_data["reg_code"] = reg_code
+        registration.register_product(base_product_data, email)
+      end
+    end
 
     # register all selected addons
     def register_selected_addons(selected_addons, known_reg_codes)
