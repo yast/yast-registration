@@ -39,17 +39,14 @@ require "registration/registration_ui"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
-require "registration/ui/local_server_dialog"
 require "registration/ui/registered_system_dialog"
+require "registration/ui/base_system_registration_dialog"
 require "registration/ui/media_addon_workflow"
 
 module Yast
   class InstSccClient < Client
     include Yast::Logger
     extend Yast::I18n
-
-    # width of reg code input field widget
-    REG_CODE_WIDTH = 33
 
     # popup message
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
@@ -100,81 +97,11 @@ module Yast
     end
 
     def register_base_system
-      log.info "The system is not registered, diplaying registration dialog"
+      base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
+      ret = base_reg_dialog.run
 
-      show_scc_credentials_dialog
-
-      ret = nil
-      @registration_skipped = false
-
-      continue_buttons = [:next, :back, :cancel, :abort]
-      until continue_buttons.include?(ret)
-        ret = UI.UserInput
-
-        case ret
-        when :network
-          ::Registration::Helpers.run_network_configuration
-        when :local_server
-          options = ::Registration::Storage::InstallationOptions.instance
-          current_url = options.custom_url || SUSE::Connect::Config.new.url
-          url = ::Registration::UI::LocalServerDialog.run(current_url)
-          if url
-            log.info "Entered custom URL: #{url}"
-            options.custom_url = url
-          end
-        when :next
-          options = ::Registration::Storage::InstallationOptions.instance
-
-          # do not re-register during installation
-          if !Mode.normal && ::Registration::Registration.is_registered? &&
-              options.base_registered
-
-            return :next
-          end
-
-          email = UI.QueryWidget(:email, :Value)
-          reg_code = UI.QueryWidget(:reg_code, :Value)
-
-          # remember the entered values in case user goes back
-          options.email = email
-          options.reg_code = reg_code
-
-          # reset the user input in case an exception is raised
-          ret = nil
-
-          next if init_registration == :cancel
-
-          success, product_service =
-            registration_ui.register_system_and_base_product(email, reg_code,
-              register_base_product: !options.base_registered)
-
-          if success
-            if product_service && !registration_ui.install_updates?
-              registration_ui.disable_update_repos(product_service)
-            end
-
-            ret = :next
-            options.base_registered = true
-            # save the config if running in installed system
-            # (in installation/upgrade it's written in _finish client)
-            ::Registration::Helpers.write_config if Mode.normal
-          else
-            log.info "registration failed, resetting the registration URL"
-            # reset the registration object and the cache to allow changing the URL
-            @registration = nil
-            ::Registration::UrlHelpers.reset_registration_url
-            ::Registration::Helpers.reset_registration_status
-          end
-        when :abort
-          ret = nil unless Popup.ConfirmAbort(:painless)
-        end
-
-        next unless ret == :skip && confirm_skipping
-
-        log.info "Skipping registration on user request"
-        @registration_skipped = true
-        return ret
-      end
+      # remember the created registration object for later use
+      @registration = base_reg_dialog.registration if ret == :next
 
       ret
     end
@@ -246,70 +173,6 @@ module Yast
       end
     end
 
-    # content for the main registration dialog
-    def scc_credentials_dialog
-      base_product = ::Registration::SwMgmt.find_base_product
-
-      options = ::Registration::Storage::InstallationOptions.instance
-
-      # label text describing the registration (1/2)
-      # use \n to split to more lines if needed (use max. 76 chars/line)
-      info = _("Please enter a registration or evaluation code for this product and your\n" \
-          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
-          "Access to security and general software updates is only possible on\n" \
-          "a registered system.")
-
-      if !Mode.normal
-        # add a paragraph separator
-        info += "\n\n"
-
-        # label text describing the registration (2/2),
-        # not displayed in installed system
-        # use \n to split to more lines if needed (use max. 76 chars/line)
-        info += _("If you skip product registration now, remember to register after\n" \
-            "installation has completed.")
-      end
-
-      registered = ::Registration::Registration.is_registered?
-      network_button = Right(PushButton(Id(:network), _("Network Configuration...")))
-
-      VBox(
-        Mode.installation || Mode.update ? network_button : Empty(),
-        VStretch(),
-        HSquash(
-          VBox(
-            VSpacing(1),
-            Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
-            VSpacing(1),
-            registered ? Heading(_("The system is already registered.")) : Label(info)
-          )
-        ),
-        VSpacing(UI.TextMode ? 1 : 2),
-        HSquash(
-          VBox(
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-            VSpacing(UI.TextMode ? 0 : 0.5),
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-              options.reg_code))
-          )
-        ),
-        VSpacing(UI.TextMode ? 0 : 1),
-        # button label
-        PushButton(Id(:local_server), _("&Local Registration Server...")),
-        VSpacing(UI.TextMode ? 0 : 3),
-        # button label
-        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
-        VStretch()
-      )
-    end
-
-    # help text for the main registration dialog
-    def scc_help_text
-      # help text
-      _("Enter SUSE Customer Center credentials here to register the system to " \
-          "get updates and extensions.")
-    end
-
     # display the main registration dialog
     def show_scc_credentials_dialog
       Wizard.SetContents(
@@ -355,17 +218,6 @@ module Yast
     def register_addons
       return false if init_registration == :cancel
       registration_ui.register_addons(@selected_addons, @known_reg_codes)
-    end
-
-    def confirm_skipping
-      # Popup question: confirm skipping the registration
-      confirmation = _("If you do not register your system we will not be able\n" \
-          "to grant you access to the update repositories.\n\n" \
-          "You can register after the installation or visit our\n" \
-          "Customer Center for online registration.\n\n" \
-          "Really skip the registration now?")
-
-      Popup.YesNo(confirmation)
     end
 
     def registration_check

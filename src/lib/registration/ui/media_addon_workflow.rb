@@ -7,6 +7,7 @@ require "registration/registration_ui"
 require "registration/storage"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
+require "registration/ui/base_system_registration_dialog"
 
 module Registration
   module UI
@@ -63,6 +64,7 @@ module Registration
           },
           "register_base"       => {
             abort: :abort,
+            skip:  :skip,
             next:  "load_remote_addons"
           },
           "load_remote_addons"  => {
@@ -94,6 +96,7 @@ module Registration
           return :abort
         end
 
+        # load the resolvables from the repositories
         Pkg.SourceLoad
 
         self.products = SwMgmt.products_from_repo(repo_id)
@@ -110,8 +113,22 @@ module Registration
       end
 
       def register_base
-        if !Registration.is_registered?
-          # TODO: register the base system if not already registered
+        until Registration.is_registered?
+          # register the base system if not already registered
+          base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
+          ret = base_reg_dialog.run
+
+          if !Registration.is_registered? &&
+              Yast::Popup.YesNo(_("The base system has to be registered " \
+                  "in order to register the '%s' add-on.\nSkip the base system " \
+                  "and the add-on registration?") %
+                Pkg.SourceGeneralData(repo_id)["name"])
+
+            return :skip
+          end
+
+          # remember the created registration object for later use
+          @registration = base_reg_dialog.registration if ret == :next
         end
 
         :next
