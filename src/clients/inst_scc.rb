@@ -181,25 +181,6 @@ module Yast
       end
     end
 
-    # display the main registration dialog
-    def show_scc_credentials_dialog
-      Wizard.SetContents(
-        # dialog title
-        _("Registration"),
-        scc_credentials_dialog,
-        scc_help_text,
-        GetInstArgs.enable_back,
-        GetInstArgs.enable_next || Mode.normal
-      )
-
-      registered = ::Registration::Registration.is_registered?
-      # disable the input fields when already registered
-      return unless registered && !Mode.normal
-
-      UI.ChangeWidget(Id(:email), :Enabled, false)
-      UI.ChangeWidget(Id(:reg_code), :Enabled, false)
-    end
-
     # run the addon selection dialog
     def select_addons
       # FIXME: available_addons is called just to fill cache with popup
