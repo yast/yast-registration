@@ -45,5 +45,48 @@ describe "Registration::UI::MediaAddonWorkflow" do
 
       expect(Registration::UI::MediaAddonWorkflow.run(repo)).to eq(:finish)
     end
+
+    it "registeres the base system if it is not registered yet" do
+      expect(Registration::SwMgmt).to receive(:init).and_return(true)
+      expect(Yast::Pkg).to receive(:SourceLoad)
+      expect(Registration::SwMgmt).to receive(:products_from_repo).with(repo).and_return(products)
+
+      # the base system registration skipped then registered (to cover more paths)
+      expect(Registration::Registration).to receive(:is_registered?).exactly(3).times
+        .and_return(false, false, true)
+      allow_any_instance_of(Registration::UI::BaseSystemRegistrationDialog).to receive(
+        :run).and_return(:skip, :next)
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(repo).and_return({})
+      expect(Yast::Popup).to receive(:YesNo).and_return(false)
+
+      expect_any_instance_of(Registration::RegistrationUI).to receive(:get_available_addons)
+        .and_return(remote_addons)
+      expect(Registration::SwMgmt).to receive(:select_product_addons).with(products, remote_addons)
+      expect(Registration::Addon).to receive(:selected).twice.and_return([remote_addons.first])
+      expect(Registration::Addon).to receive(:find_all).and_return(remote_addons)
+      expect_any_instance_of(Registration::RegistrationUI).to receive(:register_addons)
+        .and_return(:next)
+
+      expect(Registration::UI::MediaAddonWorkflow.run(repo)).to eq(:next)
+    end
+
+    it "skips addon product registration if base product registration is skipped" do
+      expect(Registration::SwMgmt).to receive(:init).and_return(true)
+      expect(Yast::Pkg).to receive(:SourceLoad)
+      expect(Registration::SwMgmt).to receive(:products_from_repo).with(repo).and_return(products)
+
+      # skip base system registration
+      expect(Registration::Registration).to receive(:is_registered?).twice.times
+        .and_return(false)
+      expect_any_instance_of(Registration::UI::BaseSystemRegistrationDialog).to receive(
+        :run).and_return(:skip)
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(repo).and_return({})
+      expect(Yast::Popup).to receive(:YesNo).and_return(true)
+
+      # no addon is registered
+      expect_any_instance_of(Registration::RegistrationUI).to_not receive(:register_addons)
+
+      expect(Registration::UI::MediaAddonWorkflow.run(repo)).to eq(:skip)
+    end
   end
 end
