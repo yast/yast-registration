@@ -237,33 +237,39 @@ module Registration
       product_succeed = registration_order.map do |product|
         ConnectHelpers.catch_registration_errors(
           message_prefix: "#{product.label}\n") do
-          product_service = Yast::Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # %s is name of given product
-            _("Registering %s ...") % product.label) do
-            product_data = {
-              "name"     => product.identifier,
-              "reg_code" => known_reg_codes[product.identifier],
-              "arch"     => product.arch,
-              "version"  => product.version
-            }
-
-            registration.register_product(product_data)
-          end
-
-          # select repositories to use in installation (e.g. enable/disable Updates)
-          select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
-
-          # remember the added service
-          Storage::Cache.instance.addon_services << product_service
-
-          # move from selected to registered
-          product.registered
-          selected_addons.reject! { |selected| selected.identifier == product.identifier }
+          register_selected_addon(product, known_reg_codes[product.identifier])
         end
+
+        # remove from selected after successful registration
+        selected_addons.reject! { |selected| selected.identifier == product.identifier }
       end
 
       !product_succeed.include?(false) # succeed only if noone failed
+    end
+
+    def register_selected_addon(product, reg_code)
+      product_service = Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        # %s is name of given product
+        _("Registering %s ...") % product.label) do
+        product_data = {
+          "name"     => product.identifier,
+          "reg_code" => reg_code,
+          "arch"     => product.arch,
+          "version"  => product.version
+        }
+
+        registration.register_product(product_data)
+      end
+
+      # select repositories to use in installation (e.g. enable/disable Updates)
+      select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+      # remember the added service
+      Storage::Cache.instance.addon_services << product_service
+
+      # mark as registered
+      product.registered
     end
 
     def select_repositories(product_service)

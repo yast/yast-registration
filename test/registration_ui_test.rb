@@ -21,6 +21,7 @@ describe "Registration::RegistrationUI" do
       "version"      => "12"
     }
   end
+  let(:remote_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
 
   describe "#register_system_and_base_product" do
     it "registers the system using the provided registration code" do
@@ -65,6 +66,56 @@ describe "Registration::RegistrationUI" do
         .and_return(remote_product)
 
       expect(registration_ui.update_base_product).to eql([true, remote_product])
+    end
+  end
+
+  describe "#register_addons" do
+    before do
+      # installation mode
+      allow(Yast::Mode).to receive(:installation).and_return(true)
+      allow(Yast::Mode).to receive(:normal).and_return(false)
+      allow(Yast::Mode).to receive(:update).and_return(false)
+
+      # Popup.Feedback
+      allow(Yast::UI).to receive(:OpenDialog)
+      allow(Yast::UI).to receive(:CloseDialog)
+
+      # stub the registration call
+      expect(registration).to receive(:register_product).twice.and_return([])
+
+      # stub service processing
+      expect(Registration::SwMgmt).to receive(:service_repos)
+        .with([], only_updates: true).twice.and_return([])
+      expect(Registration::SwMgmt).to receive(:set_repos_state)
+        .with([], true).twice
+      expect(registration_ui).to receive(:install_updates?).twice.and_return(true)
+    end
+
+    it "registeres free addons without asking for a reg. code" do
+      # Legacy module + SDK
+      selected_addons = [remote_addons[4], remote_addons[7]]
+
+      expect(Yast::Wizard).to receive(:SetContents)
+
+      # user is not asked for any reg. code
+      expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
+
+      # UI returns :next and all selected addons are marked as registered
+      expect(registration_ui.register_addons(selected_addons, {})).to eq(:next)
+      expect(selected_addons.all?(&:registered?)).to eq(true)
+    end
+
+    it "registeres paid addons after asking for a reg. code" do
+      # HA + HA-GEO addons
+      selected_addons = [remote_addons[0], remote_addons[1]]
+
+      # user is asked for reg. codes
+      expect(Registration::UI::AddonRegCodesDialog).to receive(:run)
+        .with(selected_addons, {}).and_return(:next)
+
+      # UI returns :next and all selected addons are marked as registered
+      expect(registration_ui.register_addons(selected_addons, {})).to eq(:next)
+      expect(selected_addons.all?(&:registered?)).to eq(true)
     end
   end
 end
