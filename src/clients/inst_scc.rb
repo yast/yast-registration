@@ -52,19 +52,8 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
-      Yast.import "UI"
-
       textdomain "registration"
-
-      Yast.import "Popup"
-      Yast.import "GetInstArgs"
-      Yast.import "Wizard"
-      Yast.import "Report"
-      Yast.import "Mode"
-      Yast.import "Stage"
-      Yast.import "Label"
-      Yast.import "Sequencer"
-      Yast.import "Installation"
+      import_modules
 
       first_run
 
@@ -87,6 +76,19 @@ module Yast
     end
 
     private
+
+    def import_modules
+      Yast.import "UI"
+      Yast.import "Popup"
+      Yast.import "GetInstArgs"
+      Yast.import "Wizard"
+      Yast.import "Report"
+      Yast.import "Mode"
+      Yast.import "Stage"
+      Yast.import "Label"
+      Yast.import "Sequencer"
+      Yast.import "Installation"
+    end
 
     # initialize known reg. codes
     def initialize_regcodes
@@ -226,23 +228,26 @@ module Yast
       registration_ui.register_addons(@selected_addons, @known_reg_codes)
     end
 
+    def report_no_base_product
+      # error message
+      msg = _("The base product was not found,\ncheck your system.") + "\n\n"
+
+      if Stage.initial
+        # TRANSLATORS: %s = bugzilla URL
+        msg += _("The installation medium or the installer itself is seriously broken.\n" \
+            "Report a bug at %s.") % "https://bugzilla.suse.com"
+      else
+        msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
+            "is a symlink pointing to the base product .prod file.")
+      end
+
+      Report.Error(msg)
+    end
+
     def registration_check
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
-        # error message
-        msg = _("The base product was not found,\ncheck your system.") + "\n\n"
-
-        if Stage.initial
-          # TRANSLATORS: %s = bugzilla URL
-          msg += _("The installation medium or the installer itself is seriously broken.\n" \
-              "Report a bug at %s.") % "https://bugzilla.suse.com"
-        else
-          msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
-              "is a symlink pointing to the base product .prod file.")
-        end
-
-        Report.Error(msg)
-
+        report_no_base_product
         return Mode.normal ? :abort : :auto
       end
 
@@ -301,9 +306,8 @@ module Yast
       ::Registration::RegistrationUI.new(@registration)
     end
 
-    # UI workflow definition
-    def start_workflow
-      aliases = {
+    def workflow_aliases
+      {
         # skip this when going back
         "check"                  => [->() { registration_check }, true],
         "register"               => ->() { register_base_system },
@@ -314,7 +318,10 @@ module Yast
         "update_autoyast_config" => ->() { update_autoyast_config },
         "pkg_manager"            => ->() { pkg_manager }
       }
+    end
 
+    # UI workflow definition
+    def start_workflow
       sequence = {
         "ws_start"               => workflow_start,
         "check"                  => {
@@ -363,7 +370,7 @@ module Yast
       }
 
       log.info "Starting scc sequence"
-      Sequencer.Run(aliases, sequence)
+      Sequencer.Run(workflow_aliases, sequence)
     end
 
     # which dialog should be displayed at start
