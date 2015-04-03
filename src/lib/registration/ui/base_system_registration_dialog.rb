@@ -119,46 +119,16 @@ module Registration
           when :local_server
             handle_local_server
           when :next
-            options = Storage::InstallationOptions.instance
-
             # do not re-register during installation
             if !Yast::Mode.normal && Registration.is_registered? &&
-                options.base_registered
+                Storage::InstallationOptions.instance.base_registered
 
               return :next
             end
 
-            # remember the entered values in case user goes back
-            options.email = Yast::UI.QueryWidget(:email, :Value)
-            options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
-
-            # reset the user input in case an exception is raised
-            ret = nil
-
             next if init_registration == :cancel
 
-            registration_ui = RegistrationUI.new(registration)
-            success, product_service =
-              registration_ui.register_system_and_base_product(options.email,
-                options.reg_code, register_base_product: !options.base_registered)
-
-            if success
-              if product_service && !registration_ui.install_updates?
-                registration_ui.disable_update_repos(product_service)
-              end
-
-              ret = :next
-              options.base_registered = true
-              # save the config if running in installed system
-              # (in installation/upgrade it's written in _finish client)
-              Helpers.write_config if Yast::Mode.normal
-            else
-              log.info "registration failed, resetting the registration URL"
-              # reset the registration object and the cache to allow changing the URL
-              self.registration = nil
-              UrlHelpers.reset_registration_url
-              Helpers.reset_registration_status
-            end
+            ret = handle_registration
           when :abort
             ret = nil unless Yast::Popup.ConfirmAbort(:painless)
           end
@@ -221,6 +191,42 @@ module Registration
 
         log.info "Entered custom URL: #{url}"
         options.custom_url = url
+      end
+
+      def handle_registration
+        options = Storage::InstallationOptions.instance
+
+        # remember the entered values in case user goes back
+        options.email = Yast::UI.QueryWidget(:email, :Value)
+        options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+
+        # reset the user input in case an exception is raised
+        ret = nil
+
+        registration_ui = RegistrationUI.new(registration)
+        success, product_service =
+          registration_ui.register_system_and_base_product(options.email,
+            options.reg_code, register_base_product: !options.base_registered)
+
+        if success
+          if product_service && !registration_ui.install_updates?
+            registration_ui.disable_update_repos(product_service)
+          end
+
+          ret = :next
+          options.base_registered = true
+          # save the config if running in installed system
+          # (in installation/upgrade it's written in _finish client)
+          Helpers.write_config if Yast::Mode.normal
+        else
+          log.info "registration failed, resetting the registration URL"
+          # reset the registration object and the cache to allow changing the URL
+          self.registration = nil
+          UrlHelpers.reset_registration_url
+          Helpers.reset_registration_status
+        end
+
+        ret
       end
 
       # initialize the Registration object
