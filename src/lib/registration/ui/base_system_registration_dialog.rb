@@ -37,6 +37,8 @@ module Registration
       # display the extension selection dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
+        log.info "Diplaying registration dialog"
+
         Yast::Wizard.SetContents(
           # dialog title
           _("Registration"),
@@ -105,11 +107,9 @@ module Registration
       end
 
       def handle_dialog
-        log.info "The system is not registered, diplaying registration dialog"
-
         ret = nil
-
         continue_buttons = [:next, :back, :cancel, :abort, :skip]
+
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
 
@@ -194,39 +194,50 @@ module Registration
       end
 
       def handle_registration
-        options = Storage::InstallationOptions.instance
+        if register_system_and_base_product
+          store_registration_status
+          return :next
+        else
+          reset_registration
+          return nil
+        end
+      end
 
-        # remember the entered values in case user goes back
-        options.email = Yast::UI.QueryWidget(:email, :Value)
-        options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
-
-        # reset the user input in case an exception is raised
-        ret = nil
-
+      def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
+        options = Storage::InstallationOptions.instance
+        store_credentials(options)
+
         success, product_service =
           registration_ui.register_system_and_base_product(options.email,
             options.reg_code, register_base_product: !options.base_registered)
 
-        if success
-          if product_service && !registration_ui.install_updates?
-            registration_ui.disable_update_repos(product_service)
-          end
-
-          ret = :next
-          options.base_registered = true
-          # save the config if running in installed system
-          # (in installation/upgrade it's written in _finish client)
-          Helpers.write_config if Yast::Mode.normal
-        else
-          log.info "registration failed, resetting the registration URL"
-          # reset the registration object and the cache to allow changing the URL
-          self.registration = nil
-          UrlHelpers.reset_registration_url
-          Helpers.reset_registration_status
+        if product_service && !registration_ui.install_updates?
+          registration_ui.disable_update_repos(product_service)
         end
 
-        ret
+        success
+      end
+
+      # remember the entered values in case user goes back
+      def store_credentials(options)
+        options.email = Yast::UI.QueryWidget(:email, :Value)
+        options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+      end
+
+      def store_registration_status
+        Storage::InstallationOptions.instance.base_registered = true
+        # save the config if running in installed system
+        # (in installation/upgrade it's written in _finish client)
+        Helpers.write_config if Yast::Mode.normal
+      end
+
+      def reset_registration
+        log.info "registration failed, resetting the registration URL"
+        # reset the registration object and the cache to allow changing the URL
+        self.registration = nil
+        UrlHelpers.reset_registration_url
+        Helpers.reset_registration_status
       end
 
       # initialize the Registration object
