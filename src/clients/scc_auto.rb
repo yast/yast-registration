@@ -49,24 +49,36 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
-      Yast.import "UI"
-      Yast.import "Pkg"
-
       textdomain "registration"
-
-      Yast.import "Wizard"
-      Yast.import "Label"
-      Yast.import "Report"
-      Yast.import "Popup"
-      Yast.import "Installation"
+      import_modules
 
       log.info "scc_auto started"
 
       @config = ::Registration::Storage::Config.instance
       func = WFM.Args[0]
       param = WFM.Args[1] || {}
-
       log.info "func: #{func}, param: #{::Registration::Helpers.hide_reg_codes(param)}"
+
+      ret = handle_autoyast(func, param)
+
+      log.info "scc_auto finished"
+      ret
+    end
+
+    private
+
+    def import_modules
+      Yast.import "UI"
+      Yast.import "Pkg"
+      Yast.import "Wizard"
+      Yast.import "Label"
+      Yast.import "Report"
+      Yast.import "Popup"
+      Yast.import "Installation"
+    end
+
+    def handle_autoyast(func, param)
+      ret = nil
 
       case func
       when "Summary"
@@ -102,12 +114,9 @@ module Yast
       end
 
       log.info "ret: #{::Registration::Helpers.hide_reg_codes(ret)}"
-      log.info "scc_auto finished"
 
       ret
     end
-
-    private
 
     # Get all settings from the first parameter
     # (For use by autoinstallation.)
@@ -132,16 +141,9 @@ module Yast
       ::Registration::Helpers.render_erb_template("autoyast_summary.erb", binding)
     end
 
-    # register the system, base product and optional addons
-    # return true on success
-    def write
-      # registration disabled, nothing to do
-      return true unless @config.do_registration
-
-      # initialize libzypp if applying settings in installed system or
-      # in AutoYast configuration mode ("Apply to System")
-      ::Registration::SwMgmt.init if Mode.normal || Mode.config
-
+    # set the registration URL from the profile or use the default
+    # @return [Boolean] true on success
+    def set_registration_url
       # set the registration URL
       url = @config.reg_server if @config.reg_server && !@config.reg_server.empty?
 
@@ -157,6 +159,21 @@ module Yast
       # nil = use the default URL
       switch_registration(url)
 
+      true
+    end
+
+    # register the system, base product and optional addons
+    # return true on success
+    def write
+      # registration disabled, nothing to do
+      return true unless @config.do_registration
+
+      # initialize libzypp if applying settings in installed system or
+      # in AutoYast configuration mode ("Apply to System")
+      ::Registration::SwMgmt.init if Mode.normal || Mode.config
+
+      return false unless set_registration_url
+
       # update the registration in AutoUpgrade mode if the old system was registered
       if Mode.update && old_system_registered?
         updated = update_registration
@@ -165,15 +182,18 @@ module Yast
       end
 
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
-        if @config.reg_server_cert && !@config.reg_server_cert.empty?
-          import_certificate(@config.reg_server_cert)
-        end
-
+        import_certificate(@config.reg_server_cert)
         register_base_product && register_addons
       end
 
       return false unless ret
 
+      finish_registration
+
+      true
+    end
+
+    def finish_registration
       # save the registered repositories
       Pkg.SourceSaveAll
 
@@ -184,8 +204,6 @@ module Yast
         # copy the SSL certificate to the target system
         ::Registration::Helpers.copy_certificate_to_target
       end
-
-      true
     end
 
     def auto_packages
@@ -220,6 +238,7 @@ module Yast
     end
 
     def import_certificate(url)
+      return unless url && !url.empty?
       log.info "Importing certificate from #{url}..."
 
       cert = Popup.Feedback(_("Downloading SSL Certificate"), url) do
@@ -278,12 +297,7 @@ module Yast
     def register_addons
       # register addons
       @config.addons.each do |addon|
-        product_service = Popup.Feedback(
-          _(CONTACTING_MESSAGE),
-          # %s is name of given product
-          _("Registering %s ...") % addon["name"]) do
-          registration.register_product(addon)
-        end
+        product_service = register_addon(addon)
 
         ::Registration::Storage::Cache.instance.addon_services << product_service
 
@@ -292,6 +306,15 @@ module Yast
 
       # install the new products
       ::Registration::SwMgmt.select_addon_products
+    end
+
+    def register_addon(addon)
+      Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        # %s is name of given product
+        _("Registering %s ...") % addon["name"]) do
+        registration.register_product(addon)
+      end
     end
 
     def old_system_registered?
