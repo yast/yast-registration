@@ -119,15 +119,6 @@ module Registration
           when :local_server
             handle_local_server
           when :next
-            # do not re-register during installation
-            if !Yast::Mode.normal && Registration.is_registered? &&
-                Storage::InstallationOptions.instance.base_registered
-
-              return :next
-            end
-
-            next if init_registration == :cancel
-
             ret = handle_registration
           when :abort
             ret = nil unless Yast::Popup.ConfirmAbort(:painless)
@@ -194,6 +185,15 @@ module Registration
       end
 
       def handle_registration
+        # do not re-register during installation
+        if !Yast::Mode.normal && Registration.is_registered? &&
+            Storage::InstallationOptions.instance.base_registered
+
+          return :next
+        end
+
+        return nil if init_registration == :cancel
+
         if register_system_and_base_product
           store_registration_status
           return :next
