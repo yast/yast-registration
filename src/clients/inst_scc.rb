@@ -41,6 +41,7 @@ require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/registered_system_dialog"
 require "registration/ui/base_system_registration_dialog"
+require "registration/ui/registration_update_dialog"
 require "registration/ui/media_addon_workflow"
 
 module Yast
@@ -114,71 +115,14 @@ module Yast
       ret
     end
 
-    # update system registration, update the target distribution
-    # @return [Boolean] true on success
-    def update_system_registration
-      return false if init_registration == :cancel
-      registration_ui.update_system
-    end
-
-    # update base product registration
-    # @return [Boolean] true on success
-    def refresh_base_product
-      return false if init_registration == :cancel
-
-      success, product_service = registration_ui.update_base_product
-
-      if success && product_service && !registration_ui.install_updates?
-        return registration_ui.disable_update_repos(product_service)
-      end
-
-      success
-    end
-
-    def refresh_addons
-      addons = get_available_addons
-      if addons == :cancel
-        # With the current code, this should never happen because
-        # #get_available_addons will not return :cancel if
-        # #refresh_base_product returned a positive value, but
-        # it's better to stay safe and abort nicely.
-        return false
-      end
-
-      failed_addons = registration_ui.update_addons(addons,
-        enable_updates: registration_ui.install_updates?)
-
-      # if update fails preselest the addon for full registration
-      failed_addons.each(&:selected)
-
-      true
-    end
-
-    # display the registration update dialog
-    def show_registration_update_dialog
-      Wizard.SetContents(
-        _("Registration"),
-        Label(_("Registration is being updated...")),
-        _("The previous registration is being updated."),
-        GetInstArgs.enable_back,
-        GetInstArgs.enable_next || Mode.normal
-      )
-    end
-
     def update_registration
-      show_registration_update_dialog
+      update_dialog = ::Registration::UI::RegistrationUpdateDialog.new
+      ret = update_dialog.run
 
-      if update_system_registration && refresh_base_product && refresh_addons
-        log.info "Registration update succeeded"
-        :next
-      else
-        # force reinitialization to allow to use a different URL
-        @registration = nil
-        # automatic registration refresh during system upgrade failed, register from scratch
-        Report.Error(_("Automatic registration upgrade failed.\n" \
-              "You can manually register the system from scratch."))
-        return :register
-      end
+      # remeber the user Registration object to reuse it if needed
+      @registration = update_dialog.registration
+
+      ret
     end
 
     # run the addon selection dialog
