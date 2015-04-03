@@ -109,7 +109,7 @@ module Registration
 
         ret = nil
 
-        continue_buttons = [:next, :back, :cancel, :abort]
+        continue_buttons = [:next, :back, :cancel, :abort, :skip]
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
 
@@ -131,12 +131,9 @@ module Registration
             ret = handle_registration
           when :abort
             ret = nil unless Yast::Popup.ConfirmAbort(:painless)
+          when :skip
+            ret = nil unless confirm_skipping
           end
-
-          next unless ret == :skip && confirm_skipping
-
-          log.info "Skipping registration on user request"
-          return ret
         end
 
         log.info "Registration result: #{ret}"
@@ -151,7 +148,10 @@ module Registration
             "Customer Center for online registration.\n\n" \
             "Really skip the registration now?")
 
-        Yast::Popup.YesNo(confirmation)
+        ret = Yast::Popup.YesNo(confirmation)
+        log.info "Skipping registration on user request" if ret
+
+        ret
       end
 
       def info
