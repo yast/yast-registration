@@ -28,9 +28,6 @@ require "registration/sw_mgmt"
 
 module Yast
   class SccClient < Client
-    # FIXME: just for testing, remove this
-    include Yast::Logger
-
     Yast.import "CommandLine"
     Yast.import "Pkg"
     Yast.import "Report"
