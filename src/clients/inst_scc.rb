@@ -497,7 +497,7 @@ module Yast
         if Stage.initial
           # TRANSLATORS: %s = bugzilla URL
           msg += _("The installation medium or the installer itself is seriously broken.\n" \
-              "Report a bug at %s.") % "https://bugzilla.novell.com"
+              "Report a bug at %s.") % "https://bugzilla.suse.com"
         else
           msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
               "is a symlink pointing to the base product .prod file.")
