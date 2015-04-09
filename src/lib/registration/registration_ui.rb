@@ -25,12 +25,14 @@ require "registration/connect_helpers"
 require "registration/registration"
 require "registration/sw_mgmt"
 require "registration/storage"
+require "registration/ui/addon_reg_codes_dialog"
 
 module Registration
   # Registration functions with errror handling, progress messages, etc...
-  # This is a high level APi above Registration::Registration class
+  # This is a high level API above Registration::Registration class
   class RegistrationUI
     include Yast::Logger
+    include Yast::UIShortcuts
     include Yast::I18n
     extend Yast::I18n
 
@@ -41,7 +43,9 @@ module Registration
       textdomain "registration"
       @registration = registration
 
+      Yast.import "Mode"
       Yast.import "Popup"
+      Yast.import "Wizard"
     end
 
     # register the system and the base product
@@ -99,7 +103,7 @@ module Registration
         log.info "System update failed, removing the credentials to register from scratch"
         Helpers.reset_registration_status
         UrlHelpers.reset_registration_url
-        ::Registration::Storage::Cache.instance.upgrade_failed = true
+        Storage::Cache.instance.upgrade_failed = true
       end
 
       updated
@@ -178,8 +182,102 @@ module Registration
       SwMgmt.set_repos_state(update_repos, false)
     end
 
+    # Register the selected addons, asks for reg. codes if required, known_reg_codes
+    # @param selected_addons [Array<Addon>] list of addons selected for registration,
+    #   successfully registered addons are removed from the list
+    # @param known_reg_codes [Hash] remembered reg. code, it's updated with the
+    #   user entered values
+    # @return [Symbol]
+    def register_addons(selected_addons, known_reg_codes)
+      # if registering only add-ons which do not need a reg. code (like SDK)
+      # then simply start the registration
+      if selected_addons.all?(&:free)
+        Yast::Wizard.SetContents(
+          # dialog title
+          _("Register Extensions and Modules"),
+          # display only the products which need a registration code
+          Empty(),
+          # help text
+          _("<p>Extensions and Modules are being registered.</p>"),
+          false,
+          false
+        )
+        # when registration fails go back
+        return register_selected_addons(selected_addons, known_reg_codes) ? :next : :back
+      else
+        loop do
+          ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
+          return ret unless ret == :next
+
+          return :next if register_selected_addons(selected_addons, known_reg_codes)
+        end
+      end
+    end
+
+    def install_updates?
+      # ask only at installation/update
+      return true unless Yast::Mode.installation || Yast::Mode.update
+
+      options = Storage::InstallationOptions.instance
+
+      # not set yet?
+      if options.install_updates.nil?
+        options.install_updates = Yast::Popup.YesNo(
+          _("Registration added some update repositories.\n\n" \
+              "Do you want to install the latest available\n" \
+              "on-line updates during installation?"))
+      end
+
+      options.install_updates
+    end
+
     private
 
     attr_accessor :registration
+
+    # register all selected addons
+    def register_selected_addons(selected_addons, known_reg_codes)
+      # create duplicate as array is modified in loop for registration order
+      registration_order = selected_addons.clone
+
+      product_succeed = registration_order.map do |product|
+        ConnectHelpers.catch_registration_errors(
+          message_prefix: "#{product.label}\n") do
+          product_service = Yast::Popup.Feedback(
+            _(CONTACTING_MESSAGE),
+            # %s is name of given product
+            _("Registering %s ...") % product.label) do
+            product_data = {
+              "name"     => product.identifier,
+              "reg_code" => known_reg_codes[product.identifier],
+              "arch"     => product.arch,
+              "version"  => product.version
+            }
+
+            registration.register_product(product_data)
+          end
+
+          # select repositories to use in installation (e.g. enable/disable Updates)
+          select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+          # remember the added service
+          Storage::Cache.instance.addon_services << product_service
+
+          # move from selected to registered
+          product.registered
+          selected_addons.reject! { |selected| selected.identifier == product.identifier }
+        end
+      end
+
+      !product_succeed.include?(false) # succeed only if noone failed
+    end
+
+    def select_repositories(product_service)
+      # added update repositories
+      updates = SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Found update repositories: #{updates.size}"
+
+      SwMgmt.set_repos_state(updates, install_updates?)
+    end
   end
 end

@@ -1,4 +1,6 @@
 
+require "yast/suse_connect"
+
 require "registration/helpers"
 require "registration/url_helpers"
 

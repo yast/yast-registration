@@ -36,6 +36,7 @@ module Registration
   Yast.import "Mode"
   Yast.import "Stage"
   Yast.import "Pkg"
+  Yast.import "Report"
   Yast.import "PackageLock"
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
@@ -48,6 +49,9 @@ module Registration
     textdomain "registration"
 
     ZYPP_DIR = "/etc/zypp"
+
+    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12",
+      "release_type" => "DVD" }
 
     def self.init
       # false = do not allow continuing without the libzypp lock
@@ -82,11 +86,7 @@ module Registration
 
     def self.find_base_product
       # just for debugging:
-      if ENV["FAKE_BASE_PRODUCT"]
-        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-          "release_type" => "DVD"
-        }
-      end
+      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       # during installation the products are :selected,
       # on a running system the products are :installed
@@ -111,7 +111,7 @@ module Registration
     end
 
     # create UI label for a base product
-    # @param [Hash] Product (hash from pkg-bindings)
+    # @param base_product [Hash] Product (hash from pkg-bindings)
     # @return [String] UI Label
     def self.base_product_label(base_product)
       base_product["display_name"] ||
@@ -122,11 +122,7 @@ module Registration
 
     def self.base_product_to_register
       # just for debugging:
-      if ENV["FAKE_BASE_PRODUCT"]
-        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-          "release_type" => "DVD"
-        }
-      end
+      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       base_product = find_base_product
 
@@ -185,7 +181,7 @@ module Registration
           "url"         => product_service.url.to_s,
           "enabled"     => true,
           "autorefresh" => true
-            )
+          )
 
           ## error message
           raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
@@ -218,7 +214,7 @@ module Registration
     end
 
     # get list of repositories belonging to registered services
-    # @param product_services [SUSE::Connect::Remote::Service] added service
+    # @param product_service [SUSE::Connect::Remote::Service] added service
     # @param only_updates [Boolean] return only update repositories
     # @return [Array<Hash>] list of repositories
     def self.service_repos(product_service, only_updates: false)
@@ -248,7 +244,7 @@ module Registration
     # The original repository state is saved to RepoStateStorage to restore
     # the original state later.
     # @param repos [Array<Hash>] list of repositories
-    # @param repos [Boolean] true = enable, false = disable, nil = no change
+    # @param enabled [Boolean] true = enable, false = disable, nil = no change
     # @return [void]
     def self.set_repos_state(repos, enabled)
       # keep the defaults when not defined
@@ -377,6 +373,42 @@ module Registration
       log.info "Products to install: #{products}"
 
       products.all? { |product| Pkg.ResolvableInstall(product, :product) }
+    end
+
+    # select remote addons matching the product resolvables
+    def self.select_product_addons(products, addons)
+      addons.each do |addon|
+        log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # select a remote addon for each product
+      products.each do |product|
+        remote_addon = addons.find do |addon|
+          product["name"] == addon.identifier &&
+            product["version_version"] == addon.version &&
+            product["arch"] == addon.arch
+        end
+
+        if remote_addon
+          remote_addon.selected
+        else
+          product_label = "#{product["display_name"]} (#{product["name"]}" \
+            "-#{product["version_version"]}-#{product["arch"]})"
+
+          # TRANSLATORS: %s is a product name
+          Report.Error(_("Cannot find remote product %s.\n" \
+                "The product cannot be registered.") % product_label
+          )
+        end
+      end
+    end
+
+    # find the product resolvables from the specified repository
+    def self.products_from_repo(repo_id)
+      # TODO: only installed products??
+      Pkg.ResolvableProperties("", :product, "").select do |product|
+        product["source"] == repo_id
+      end
     end
 
     private_class_method :each_repo

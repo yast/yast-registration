@@ -39,15 +39,14 @@ require "registration/registration_ui"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
-require "registration/ui/local_server_dialog"
+require "registration/ui/registered_system_dialog"
+require "registration/ui/base_system_registration_dialog"
+require "registration/ui/media_addon_workflow"
 
 module Yast
   class InstSccClient < Client
     include Yast::Logger
     extend Yast::I18n
-
-    # width of reg code input field widget
-    REG_CODE_WIDTH = 33
 
     # popup message
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
@@ -66,8 +65,6 @@ module Yast
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
-      Yast.import "ProductControl"
-      Yast.import "SourceDialogs"
 
       first_run
 
@@ -75,7 +72,18 @@ module Yast
 
       initialize_regcodes
 
-      start_workflow
+      # started from the add-on module?
+      if WFM.Args[0] == "register_media_addon"
+        if WFM.Args[1].is_a?(Fixnum)
+          ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
+        else
+          log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
+          log.warn "Starting the standard workflow"
+          start_workflow
+        end
+      else
+        start_workflow
+      end
     end
 
     private
@@ -95,81 +103,11 @@ module Yast
     end
 
     def register_base_system
-      log.info "The system is not registered, diplaying registration dialog"
+      base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
+      ret = base_reg_dialog.run
 
-      show_scc_credentials_dialog
-
-      ret = nil
-      @registration_skipped = false
-
-      continue_buttons = [:next, :back, :cancel, :abort]
-      until continue_buttons.include?(ret)
-        ret = UI.UserInput
-
-        case ret
-        when :network
-          ::Registration::Helpers.run_network_configuration
-        when :local_server
-          options = ::Registration::Storage::InstallationOptions.instance
-          current_url = options.custom_url || SUSE::Connect::Config.new.url
-          url = ::Registration::UI::LocalServerDialog.run(current_url)
-          if url
-            log.info "Entered custom URL: #{url}"
-            options.custom_url = url
-          end
-        when :next
-          options = ::Registration::Storage::InstallationOptions.instance
-
-          # do not re-register during installation
-          if !Mode.normal && ::Registration::Registration.is_registered? &&
-              options.base_registered
-
-            return :next
-          end
-
-          email = UI.QueryWidget(:email, :Value)
-          reg_code = UI.QueryWidget(:reg_code, :Value)
-
-          # remember the entered values in case user goes back
-          options.email = email
-          options.reg_code = reg_code
-
-          # reset the user input in case an exception is raised
-          ret = nil
-
-          next if init_registration == :cancel
-
-          success, product_service =
-            registration_ui.register_system_and_base_product(email, reg_code,
-              register_base_product: !options.base_registered)
-
-          if success
-            if product_service && !install_updates?
-              registration_ui.disable_update_repos(product_service)
-            end
-
-            ret = :next
-            options.base_registered = true
-            # save the config if running in installed system
-            # (in installation/upgrade it's written in _finish client)
-            ::Registration::Helpers.write_config if Mode.normal
-          else
-            log.info "registration failed, resetting the registration URL"
-            # reset the registration object and the cache to allow changing the URL
-            @registration = nil
-            ::Registration::UrlHelpers.reset_registration_url
-            ::Registration::Helpers.reset_registration_status
-          end
-        when :abort
-          ret = nil unless Popup.ConfirmAbort(:painless)
-        end
-
-        next unless ret == :skip && confirm_skipping
-
-        log.info "Skipping registration on user request"
-        @registration_skipped = true
-        return ret
-      end
+      # remember the created registration object for later use
+      @registration = base_reg_dialog.registration if ret == :next
 
       ret
     end
@@ -188,7 +126,7 @@ module Yast
 
       success, product_service = registration_ui.update_base_product
 
-      if success && product_service && !install_updates?
+      if success && product_service && !registration_ui.install_updates?
         return registration_ui.disable_update_repos(product_service)
       end
 
@@ -205,7 +143,8 @@ module Yast
         return false
       end
 
-      failed_addons = registration_ui.update_addons(addons, enable_updates: install_updates?)
+      failed_addons = registration_ui.update_addons(addons,
+        enable_updates: registration_ui.install_updates?)
 
       # if update fails preselest the addon for full registration
       failed_addons.each(&:selected)
@@ -240,70 +179,6 @@ module Yast
       end
     end
 
-    # content for the main registration dialog
-    def scc_credentials_dialog
-      base_product = ::Registration::SwMgmt.find_base_product
-
-      options = ::Registration::Storage::InstallationOptions.instance
-
-      # label text describing the registration (1/2)
-      # use \n to split to more lines if needed (use max. 76 chars/line)
-      info = _("Please enter a registration or evaluation code for this product and your\n" \
-          "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
-          "Access to security and general software updates is only possible on\n" \
-          "a registered system.")
-
-      if !Mode.normal
-        # add a paragraph separator
-        info += "\n\n"
-
-        # label text describing the registration (2/2),
-        # not displayed in installed system
-        # use \n to split to more lines if needed (use max. 76 chars/line)
-        info += _("If you skip product registration now, remember to register after\n" \
-            "installation has completed.")
-      end
-
-      registered = ::Registration::Registration.is_registered?
-      network_button = Right(PushButton(Id(:network), _("Network Configuration...")))
-
-      VBox(
-        Mode.installation || Mode.update ? network_button : Empty(),
-        VStretch(),
-        HSquash(
-          VBox(
-            VSpacing(1),
-            Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
-            VSpacing(1),
-            registered ? Heading(_("The system is already registered.")) : Label(info)
-          )
-        ),
-        VSpacing(UI.TextMode ? 1 : 2),
-        HSquash(
-          VBox(
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-            VSpacing(UI.TextMode ? 0 : 0.5),
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-              options.reg_code))
-          )
-        ),
-        VSpacing(UI.TextMode ? 0 : 1),
-        # button label
-        PushButton(Id(:local_server), _("&Local Registration Server...")),
-        VSpacing(UI.TextMode ? 0 : 3),
-        # button label
-        registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
-        VStretch()
-      )
-    end
-
-    # help text for the main registration dialog
-    def scc_help_text
-      # help text
-      _("Enter SUSE Customer Center credentials here to register the system to " \
-          "get updates and extensions.")
-    end
-
     # display the main registration dialog
     def show_scc_credentials_dialog
       Wizard.SetContents(
@@ -321,31 +196,6 @@ module Yast
 
       UI.ChangeWidget(Id(:email), :Enabled, false)
       UI.ChangeWidget(Id(:reg_code), :Enabled, false)
-    end
-
-    def install_updates?
-      # ask only at installation/update
-      return true unless Mode.installation || Mode.update
-
-      options = ::Registration::Storage::InstallationOptions.instance
-
-      # not set yet?
-      if options.install_updates.nil?
-        options.install_updates = Popup.YesNo(
-          _("Registration added some update repositories.\n\n" \
-              "Do you want to install the latest available\n" \
-              "on-line updates during installation?"))
-      end
-
-      options.install_updates
-    end
-
-    def select_repositories(product_service)
-      # added update repositories
-      updates = ::Registration::SwMgmt.service_repos(product_service, only_updates: true)
-      log.info "Found update repositories: #{updates.size}"
-
-      ::Registration::SwMgmt.set_repos_state(updates, install_updates?)
     end
 
     # run the addon selection dialog
@@ -371,121 +221,9 @@ module Yast
     end
 
     # register all selected addons
-    def register_selected_addons
-      # create duplicate as array is modified in loop for registration order
-      registration_order = @selected_addons.clone
-
-      return false if init_registration == :cancel
-
-      product_succeed = registration_order.map do |product|
-        ::Registration::ConnectHelpers.catch_registration_errors(
-          message_prefix: "#{product.label}\n") do
-          product_service = Popup.Feedback(
-            _(CONTACTING_MESSAGE),
-            # %s is name of given product
-            _("Registering %s ...") % product.label) do
-            product_data = {
-              "name"     => product.identifier,
-              "reg_code" => @known_reg_codes[product.identifier],
-              "arch"     => product.arch,
-              "version"  => product.version
-            }
-
-            @registration.register_product(product_data)
-          end
-
-          # select repositories to use in installation (e.g. enable/disable Updates)
-          select_repositories(product_service) if Mode.installation || Mode.update
-
-          # remember the added service
-          ::Registration::Storage::Cache.instance.addon_services << product_service
-
-          # move from selected to registered
-          product.registered
-          @selected_addons.reject! { |selected| selected.identifier == product.identifier }
-        end
-      end
-
-      !product_succeed.include?(false) # succeed only if noone failed
-    end
-
-    # run the addon reg codes dialog
     def register_addons
-      # if registering only add-ons which do not need a reg. code (like SDK)
-      # then simply start the registration
-      if @selected_addons.all?(&:free)
-        Wizard.SetContents(
-          # dialog title
-          _("Register Extensions and Modules"),
-          # display only the products which need a registration code
-          Empty(),
-          # help text
-          _("<p>Extensions and Modules are being registered.</p>"),
-          false,
-          false
-        )
-        # when registration fails go back
-        return register_selected_addons ? :next : :back
-      else
-        loop do
-          ret = ::Registration::UI::AddonRegCodesDialog.run(@selected_addons, @known_reg_codes)
-          return ret unless ret == :next
-
-          return :next if register_selected_addons
-        end
-      end
-    end
-
-    def confirm_skipping
-      # Popup question: confirm skipping the registration
-      confirmation = _("If you do not register your system we will not be able\n" \
-          "to grant you access to the update repositories.\n\n" \
-          "You can register after the installation or visit our\n" \
-          "Customer Center for online registration.\n\n" \
-          "Really skip the registration now?")
-
-      Popup.YesNo(confirmation)
-    end
-
-    def registered_dialog
-      VBox(
-        Heading(_("The system is already registered.")),
-        VSpacing(2),
-        # button label
-        PushButton(Id(:register), _("Register Again")),
-        VSpacing(1),
-        # button label
-        PushButton(Id(:extensions), _("Select Extensions"))
-      )
-    end
-
-    def display_registered_dialog
-      log.info "The system is already registered, displaying registered dialog"
-
-      Wizard.SetContents(
-        # dialog title
-        _("Registration"),
-        registered_dialog,
-        # help text
-        _("<p>The system is already registered.</p>") +
-          _("<p>You can re-register it again or you can register additional "\
-            "extension or modules to enhance the functionality of the system.</p>") +
-          _("<p>If you want to deregister your system you need to log "\
-            "into the SUSE Customer Center and remove the system manually there.</p>"),
-        GetInstArgs.enable_back || Mode.normal,
-        GetInstArgs.enable_back || Mode.normal
-      )
-
-      Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
-
-      continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
-
-      ret = nil
-      ret = UI.UserInput until continue_buttons.include?(ret)
-
-      Wizard.RestoreNextButton
-
-      ret
+      return false if init_registration == :cancel
+      registration_ui.register_addons(@selected_addons, @known_reg_codes)
     end
 
     def registration_check
@@ -527,7 +265,8 @@ module Yast
       end
 
       if Mode.normal && ::Registration::Registration.is_registered?
-        return display_registered_dialog
+        log.info "The system is already registered, displaying registered dialog"
+        return ::Registration::UI::RegisteredSystemDialog.run
       else
         return :register
       end
