@@ -78,36 +78,34 @@ module Yast
     end
 
     def handle_autoyast(func, param)
-      ret = nil
-
-      case func
+      ret = case func
       when "Summary"
         # Create a summary
-        ret = summary
+        summary
       when "Reset"
         # Reset configuration
         @config.reset
-        ret = {}
+        {}
       when "Change"
         # Change configuration
-        ret = start_workflow
+        start_workflow
       when "Import"
         # import configuration
-        ret = import(param)
+        import(param)
       when "Export"
         # Return the current config
-        ret = export
+        export
       when "Packages"
         # Return needed packages
-        ret = auto_packages
+        auto_packages
       when "Write"
         # Write given settings
-        ret = write
+        write
       when "GetModified"
-        ret = @config.modified
+        @config.modified
       when "SetModified"
         @config.modified = true
-        ret = true
+        true
       else
         log.error "Unknown function: #{func}"
         raise "Unknown function parameter: #{func}"
