@@ -193,6 +193,7 @@ module Yast
       true
     end
 
+    # finish the registration process
     def finish_registration
       # save the registered repositories
       Pkg.SourceSaveAll
@@ -206,6 +207,8 @@ module Yast
       end
     end
 
+    # return extra packages needed by this module (none so far)
+    # @return [Hash] required packages
     def auto_packages
       ret = { "install" => [], "remove" => [] }
       log.info "Registration needs these packages: #{ret}"
@@ -237,6 +240,8 @@ module Yast
       end
     end
 
+    # download and install the specified SSL certificate to the system
+    # @param url [String] URL of the certificate
     def import_certificate(url)
       return unless url && !url.empty?
       log.info "Importing certificate from #{url}..."
@@ -255,6 +260,7 @@ module Yast
       ::Registration::UI::AutoyastConfigWorkflow.run(@config)
     end
 
+    # update the internal Registration object after changing the registration URL
     def switch_registration(url = nil)
       @registration = ::Registration::Registration.new(url)
       # reset registration ui as it depends on registration
@@ -262,6 +268,7 @@ module Yast
       @registration
     end
 
+    # initialize the internal Registration object
     def registration
       if !@registration
         url = ::Registration::UrlHelpers.registration_url
@@ -272,10 +279,12 @@ module Yast
       @registration
     end
 
+    # initialize the internal RegistrationUI object
     def registration_ui
       @registration_ui ||= ::Registration::RegistrationUI.new(registration)
     end
 
+    # update the registration (system, the base product, the installed extensions)
     def update_registration
       return false unless update_system_registration
       return false unless update_base_product
@@ -294,6 +303,7 @@ module Yast
       end
     end
 
+    # register the addons specified in the profile
     def register_addons
       # register addons
       @config.addons.each do |addon|
@@ -317,6 +327,8 @@ module Yast
       end
     end
 
+    # was the system already registered?
+    # @return [Boolean] true if the system was alreay registered
     def old_system_registered?
       ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
@@ -324,11 +336,13 @@ module Yast
       File.exist?(::Registration::Registration::SCC_CREDENTIALS)
     end
 
+    # update the system registration
     # @return [Boolean] true on success
     def update_system_registration
       registration_ui.update_system
     end
 
+    # update the base product registration
     # @return [Boolean] true on success
     def update_base_product
       handle_product_service { registration_ui.update_base_product }

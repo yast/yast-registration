@@ -105,6 +105,8 @@ module Yast
       ::Registration::Storage::RegCodes.instance.reg_codes = @known_reg_codes
     end
 
+    # run the dialog for registering the base system
+    # @return [Symbol] the user action
     def register_base_system
       base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
       ret = base_reg_dialog.run
@@ -115,6 +117,8 @@ module Yast
       ret
     end
 
+    # run the dialog for updating the registration
+    # @return [Symbol] the user action
     def update_registration
       update_dialog = ::Registration::UI::RegistrationUpdateDialog.new
       ret = update_dialog.run
@@ -169,6 +173,8 @@ module Yast
       Report.Error(msg)
     end
 
+    # do some sanity checks and decide which workflow will be used
+    # return [Symbol] :update
     def registration_check
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
@@ -202,10 +208,13 @@ module Yast
       end
     end
 
+    # display EULAs for the selected addons
     def addon_eula
       ::Registration::UI::AddonEulaDialog.run(@selected_addons)
     end
 
+    # remember the user entered values so they can be stored to the AutoYast
+    # profile generated at the end of installation
     def update_autoyast_config
       options = ::Registration::Storage::InstallationOptions.instance
       return :next unless Mode.installation && options.base_registered
@@ -217,6 +226,7 @@ module Yast
       :next
     end
 
+    # preselect the addon products and run the package manager (only in installed system)
     def pkg_manager
       # during installation the products are installed together with the base
       # product, run the package manager only in installed system
@@ -231,6 +241,7 @@ module Yast
       ::Registration::RegistrationUI.new(@registration)
     end
 
+    # define Sequencer aliases
     def workflow_aliases
       {
         # skip this when going back
@@ -245,7 +256,7 @@ module Yast
       }
     end
 
-    # UI workflow definition
+    # define the Sequence workflow
     def start_workflow
       sequence = {
         "ws_start"               => workflow_start,
@@ -320,6 +331,7 @@ module Yast
       @registration = ::Registration::Registration.new(url)
     end
 
+    # do some additional initialization at the first run
     def first_run
       return unless ::Registration::Storage::Cache.instance.first_run
 
