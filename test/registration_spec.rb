@@ -36,10 +36,12 @@ describe "Registration::Registration" do
 
     it "adds the selected product and returns added zypp services" do
       product = {
-        "arch"         => "x86_64",
-        "name"         => "sle-sdk",
-        "version"      => "12",
-        "release_type" => nil
+        "arch"              => "x86_64",
+        "name"              => "sle-sdk",
+        "version"           => "12",
+        "release_type"      => nil,
+        "identifier"        => "SLES_SAP",
+        "former_identifier" => "SUSE_SLES_SAP"
       }
 
       service_data = {
@@ -57,6 +59,10 @@ describe "Registration::Registration" do
       expect(Registration::Addon).to receive(:find_all).and_return(available_addons)
       expect(available_addons.find { |addon| addon.identifier == "sle-sdk" }).to \
         receive(:registered)
+
+      # the received product renames are passed to the software management
+      expect(Registration::SwMgmt).to receive(:update_product_renames)
+        .with("SUSE_SLES_SAP" => "SLES_SAP")
 
       allow(File).to receive(:exist?).with(
         SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
