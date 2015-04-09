@@ -65,37 +65,57 @@ module Registration
       REG_CODE_WIDTH = 33
 
       # content for the main registration dialog
+      # @return [Yast::Term]  UI term
       def content
-        options = Storage::InstallationOptions.instance
-        registered = Registration.is_registered?
-
         VBox(
           network_button,
           VStretch(),
-          HSquash(
-            VBox(
-              VSpacing(1),
-              Left(Heading(SwMgmt.base_product_label(SwMgmt.find_base_product))),
-              VSpacing(1),
-              registered ? Heading(_("The system is already registered.")) : Label(info)
-            )
-          ),
+          product_details_widgets,
           VSpacing(Yast::UI.TextMode ? 1 : 2),
-          HSquash(
-            VBox(
-              MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-              VSpacing(Yast::UI.TextMode ? 0 : 0.5),
-              MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-                options.reg_code))
-            )
-          ),
+          input_widgets,
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # button label
           PushButton(Id(:local_server), _("&Local Registration Server...")),
           VSpacing(Yast::UI.TextMode ? 0 : 3),
-          # button label
-          registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
+          skip_button,
           VStretch()
+        )
+      end
+
+      # part of the main dialog definition - display the "skip" skip button only
+      # when the system is not registered yet
+      # @return [Yast::Term] UI term
+      def skip_button
+        # button label
+        Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
+      end
+      
+      # part of the main dialog definition - the base product details
+      # @return [Yast::Term]  UI term
+      def product_details_widgets
+        HSquash(
+          VBox(
+            VSpacing(1),
+            Left(Heading(SwMgmt.base_product_label(SwMgmt.find_base_product))),
+            VSpacing(1),
+            Registration.is_registered? ? Heading(_("The system is already registered.")) :
+              Label(info)
+          )
+        )
+      end
+
+      # part of the main dialog definition - the input fields
+      # @return [Yast::Term] UI term
+      def input_widgets
+        options = Storage::InstallationOptions.instance
+
+        HSquash(
+          VBox(
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
+            VSpacing(Yast::UI.TextMode ? 0 : 0.5),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
+                options.reg_code))
+          )
         )
       end
 
@@ -210,7 +230,7 @@ module Registration
 
         success, product_service =
           registration_ui.register_system_and_base_product(options.email,
-            options.reg_code, register_base_product: !options.base_registered)
+          options.reg_code, register_base_product: !options.base_registered)
 
         if product_service && !registration_ui.install_updates?
           registration_ui.disable_update_repos(product_service)
