@@ -68,6 +68,9 @@ module Registration
         log.info "Register product result: #{service}"
         set_registered(product_ident)
 
+        renames = collect_renames([service.product])
+        SwMgmt.update_product_renames(renames)
+
         service
       end
     end
@@ -78,6 +81,9 @@ module Registration
         service = SUSE::Connect::YaST.upgrade_product(product_ident, params)
         log.info "Upgrade product result: #{service}"
         set_registered(product_ident)
+
+        renames = collect_renames([service.product])
+        SwMgmt.update_product_renames(renames)
 
         service
       end
@@ -225,12 +231,15 @@ module Registration
       default_params.merge(params)
     end
 
-    def collect_renames(addons)
+    # collect product renames
+    # @param products [Array<SUSE::Connect::Remote::Product>] remote products received from SCC
+    # @return [Hash] hash with product renames: { old_name => new_name }
+    def collect_renames(products)
       renames = {}
 
-      addons.each do |addon|
-        if addon.former_identifier && addon.identifier != addon.former_identifier
-          renames[addon.former_identifier] = addon.identifier
+      products.each do |product|
+        if product.former_identifier && product.identifier != product.former_identifier
+          renames[product.former_identifier] = product.identifier
         end
       end
 
