@@ -73,8 +73,14 @@ module Yast
       initialize_regcodes
 
       # started from the add-on module?
-      if WFM.Args[0] == "register_media_addon" && WFM.Args[1].is_a?(Fixnum)
-        ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
+      if WFM.Args[0] == "register_media_addon"
+        if WFM.Args[1].is_a?(Fixnum)
+          ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
+        else
+          log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
+          log.warn "Starting the standard workflow"
+          start_workflow
+        end
       else
         start_workflow
       end
@@ -259,6 +265,7 @@ module Yast
       end
 
       if Mode.normal && ::Registration::Registration.is_registered?
+        log.info "The system is already registered, displaying registered dialog"
         return ::Registration::UI::RegisteredSystemDialog.run
       else
         return :register

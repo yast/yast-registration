@@ -30,8 +30,6 @@ module Registration
       # display the EULA for each dialog and wait for a button click
       # @return [Symbol] user input (:next, :back, :abort, :halt)
       def run
-        log.info "The system is already registered, displaying registered dialog"
-
         Wizard.SetContents(
           # dialog title
           _("Registration"),

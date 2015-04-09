@@ -182,9 +182,11 @@ module Registration
       SwMgmt.set_repos_state(update_repos, false)
     end
 
-    # Register the selected addons, asks for reg. codes if required
-    # @param selected_addons
-    # @param known_reg_codes [Hash]
+    # Register the selected addons, asks for reg. codes if required, known_reg_codes
+    # @param selected_addons [Array<Addon>] list of addons selected for registration,
+    #   successfully registered addons are removed from the list
+    # @param known_reg_codes [Hash] remembered reg. code, it's updated with the
+    #   user entered values
     # @return [Symbol]
     def register_addons(selected_addons, known_reg_codes)
       # if registering only add-ons which do not need a reg. code (like SDK)
