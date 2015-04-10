@@ -14,7 +14,7 @@ describe "Registration::SmtStatus" do
         .with(expected_url, insecure: false)
         .and_return(true)
 
-      expect(subject.ncc_api_present?).to be_true
+      expect(subject.ncc_api_present?).to eq(true)
     end
 
     it "returns false otherwise" do
@@ -22,7 +22,7 @@ describe "Registration::SmtStatus" do
         .with(expected_url, insecure: false)
         .and_raise(Registration::DownloadError)
 
-      expect(subject.ncc_api_present?).to be_false
+      expect(subject.ncc_api_present?).to eq(false)
     end
   end
 end

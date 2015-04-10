@@ -35,7 +35,7 @@ describe "Registration::RegistrationUI" do
       expect(registration).to receive(:register_product).with(base_product_to_register, email)
         .and_return([])
 
-      expect(registration_ui.register_system_and_base_product(email, reg_code)).to be_true
+      expect(registration_ui.register_system_and_base_product(email, reg_code)).to eq([true, []])
     end
   end
 
@@ -52,7 +52,7 @@ describe "Registration::RegistrationUI" do
       expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       expect(registration).to receive(:update_system).with(target_distro)
 
-      expect(registration_ui.update_system).to be_true
+      expect(registration_ui.update_system).to eq(true)
     end
   end
 

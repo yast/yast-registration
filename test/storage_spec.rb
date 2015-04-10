@@ -39,7 +39,7 @@ describe Registration::Storage::Config do
     it "resets the current configuration" do
       subject.do_registration = true
       subject.reset
-      expect(subject.do_registration).to be_false
+      expect(subject.do_registration).to eq(false)
     end
   end
 

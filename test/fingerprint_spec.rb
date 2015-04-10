@@ -20,40 +20,40 @@ describe Registration::Fingerprint do
     it "returns true when comparing to the identical fingerprint" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
-      expect(fp1 == fp2).to be_true
+      expect(fp1 == fp2).to eq(true)
     end
 
     it "returns false when sum type does not match" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA256, sha1)
-      expect(fp1 == fp2).to be_false
+      expect(fp1 == fp2).to eq(false)
     end
 
     it "returns false when fingerprint value does not match" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha256)
-      expect(fp1 == fp2).to be_false
+      expect(fp1 == fp2).to eq(false)
     end
 
     it "compares the fingerprints case insensitively" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1.downcase)
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1.upcase)
       expect(fp1.value).to_not eq(fp2.value)
-      expect(fp1 == fp2).to be_true
+      expect(fp1 == fp2).to eq(true)
     end
 
     it "compares the sum types case insensitively" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1.downcase, sha1)
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1.upcase, sha1)
       expect(fp1.sum).to_not eq(fp2.sum)
-      expect(fp1 == fp2).to be_true
+      expect(fp1 == fp2).to eq(true)
     end
 
     it "ignores optional colon separator in fingerprints" do
       fp1 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1.tr(":", ""))
       fp2 = Registration::Fingerprint.new(Registration::Fingerprint::SHA1, sha1)
       expect(fp1.value).to_not eq(fp2.value)
-      expect(fp1 == fp2).to be_true
+      expect(fp1 == fp2).to eq(true)
     end
 
     it "returns false when compared to nil" do
