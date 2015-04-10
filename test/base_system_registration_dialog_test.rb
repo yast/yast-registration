@@ -25,7 +25,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         allow(Registration::Registration).to receive(:is_registered?).and_return(false)
       end
 
-      it "registeres the base system with provided email and reg. code" do
+      it "registers the base system with provided email and reg. code" do
         expect(Registration::SwMgmt).to receive(:find_base_product).and_return(
           Registration::SwMgmt::FAKE_BASE_PRODUCT)
 

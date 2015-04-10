@@ -91,7 +91,7 @@ describe "Registration::RegistrationUI" do
       expect(registration_ui).to receive(:install_updates?).twice.and_return(true)
     end
 
-    it "registeres free addons without asking for a reg. code" do
+    it "registers free addons without asking for a reg. code" do
       # Legacy module + SDK
       selected_addons = [remote_addons[4], remote_addons[7]]
 
@@ -105,7 +105,7 @@ describe "Registration::RegistrationUI" do
       expect(selected_addons.all?(&:registered?)).to eq(true)
     end
 
-    it "registeres paid addons after asking for a reg. code" do
+    it "registers paid addons after asking for a reg. code" do
       # HA + HA-GEO addons
       selected_addons = [remote_addons[0], remote_addons[1]]
 

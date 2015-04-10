@@ -14,7 +14,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
       expect(Registration::UrlHelpers).to receive(:registration_url)
     end
 
-    it "registeres the addon from media" do
+    it "registers the addon from media" do
       expect(Registration::SwMgmt).to receive(:init).and_return(true)
       expect(Yast::Pkg).to receive(:SourceLoad)
       expect(Registration::SwMgmt).to receive(:products_from_repo).with(repo).and_return(products)
@@ -46,7 +46,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
       expect(Registration::UI::MediaAddonWorkflow.run(repo)).to eq(:finish)
     end
 
-    it "registeres the base system if it is not registered yet" do
+    it "registers the base system if it is not registered yet" do
       expect(Registration::SwMgmt).to receive(:init).and_return(true)
       expect(Yast::Pkg).to receive(:SourceLoad)
       expect(Registration::SwMgmt).to receive(:products_from_repo).with(repo).and_return(products)
