@@ -62,18 +62,7 @@ module Yast
 
       initialize_regcodes
 
-      # started from the add-on module?
-      if WFM.Args[0] == "register_media_addon"
-        if WFM.Args[1].is_a?(Fixnum)
-          ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
-        else
-          log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
-          log.warn "Starting the standard workflow"
-          start_workflow
-        end
-      else
-        start_workflow
-      end
+      media_workflow? ? ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1]) : start_workflow
     end
 
     private
@@ -89,6 +78,17 @@ module Yast
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
+    end
+
+    # started from the add-on module?
+    # @return [Boolean] true if the media add-on worklow should be started
+    def media_workflow?
+      return false if WFM.Args[0] != "register_media_addon"
+      return true if WFM.Args[1].is_a?(Fixnum)
+
+      log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
+      log.warn "Starting the standard workflow"
+      false
     end
 
     # initialize known reg. codes

@@ -89,7 +89,7 @@ module Registration
         # button label
         Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
       end
-      
+
       # part of the main dialog definition - the base product details
       # @return [Yast::Term]  UI term
       def product_details_widgets
@@ -114,7 +114,7 @@ module Registration
             MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
             VSpacing(Yast::UI.TextMode ? 0 : 0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-                options.reg_code))
+              options.reg_code))
           )
         )
       end
@@ -230,7 +230,7 @@ module Registration
 
         success, product_service =
           registration_ui.register_system_and_base_product(options.email,
-          options.reg_code, register_base_product: !options.base_registered)
+            options.reg_code, register_base_product: !options.base_registered)
 
         if product_service && !registration_ui.install_updates?
           registration_ui.disable_update_repos(product_service)
