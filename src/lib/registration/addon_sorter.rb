@@ -3,6 +3,8 @@ module Registration
   # Sorter for sorting Addons in required display order
   # (first paid extensions, then free extensions, modules at the end
   # see https://bugzilla.novell.com/show_bug.cgi?id=888567#c21)
+  # @param x [Registration::Addon] the first item to compare
+  # @param y [Registration::Addon] the second item to compare
   ADDON_SORTER = proc do |x, y|
     if x.product_type != y.product_type
       begin

@@ -1,14 +1,9 @@
 
 require "yast"
-require "yast/suse_connect"
 
 require "registration/registration"
 require "registration/registration_ui"
-require "registration/storage"
-require "registration/sw_mgmt"
-require "registration/helpers"
 require "registration/url_helpers"
-require "registration/ui/local_server_dialog"
 
 module Registration
   module UI
