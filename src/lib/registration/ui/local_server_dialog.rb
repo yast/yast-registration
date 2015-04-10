@@ -4,6 +4,8 @@ require "uri"
 
 module Registration
   module UI
+    # this class displays a popup for entering the URL of the local registration
+    # server (usually SMT)
     class LocalServerDialog
       include Yast::Logger
       include Yast::I18n
@@ -23,6 +25,7 @@ module Registration
         dialog.run
       end
 
+      # the constructor
       # @param url [String] current server URL
       def initialize(url)
         textdomain "registration"
@@ -30,6 +33,7 @@ module Registration
       end
 
       # display the dialog and wait for a button click
+      # FIXME: return a symbol like the other dialogs
       # @return [String,nil] entered URL or nil when canceled
       def run
         log.info "Displaying local server URL: #{local_url}"
@@ -47,6 +51,9 @@ module Registration
 
       private
 
+      # the main UI event loop
+      # FIXME: return a symbol like the other dialogs
+      # @return [Symbol] the user input
       def handle_dialog
         ui = nil
         until [:ok, :cancel].include?(ui)
@@ -64,6 +71,8 @@ module Registration
         (ui == :ok) ? Yast::UI.QueryWidget(Id(:url), :Value) : nil
       end
 
+      # validate the entered URL
+      # @return [Boolean] true if the URL is valid
       def valid_url?
         uri = URI(Yast::UI.QueryWidget(Id(:url), :Value))
         (uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)) && uri.host
@@ -71,6 +80,8 @@ module Registration
         false
       end
 
+      # the button box part of the dialog
+      # @return [Yast::Term] UI term
       def button_box
         [
           PushButton(
@@ -86,7 +97,8 @@ module Registration
         ]
       end
 
-      # create dialog content
+      # the main dialog content
+      # @return [Yast::Term] UI term
       def local_server_dialog_content
         MarginBox(1, 0.6,
           VBox(

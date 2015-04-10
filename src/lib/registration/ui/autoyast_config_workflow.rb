@@ -12,6 +12,7 @@ require "registration/ui/addon_reg_codes_dialog"
 
 module Registration
   module UI
+    # this class runs the AutoYast configuration workflow
     class AutoyastConfigWorkflow
       include Yast::Logger
       include Yast::I18n
@@ -22,18 +23,23 @@ module Registration
       Yast.import "Report"
       Yast.import "Sequencer"
 
-      # create a new dialog for accepting and importing a SSL certificate and run it
+      # run the AutoYast configuration workflow
+      # @param config [Registration::Storage::Config] AutoYaST configuration
       def self.run(config)
         workflow = AutoyastConfigWorkflow.new(config)
         workflow.run
       end
 
+      # constructor
+      # @param config [Registration::Storage::Config] AutoYaST configuration
       def initialize(config)
         textdomain "registration"
 
         @config = config
       end
 
+      # run the workflow
+      # @return [Symbol] the user input
       def run
         aliases = {
           "general"         => ->() { configure_registration },
@@ -78,10 +84,14 @@ module Registration
 
       attr_reader :config
 
+      # run the dialog configuring the AutoYaST addons
+      # @return [Symbol] the user input
       def select_addons
         AutoyastAddonDialog.run(config.addons)
       end
 
+      # download the addons from SCC, let the user select addons to install
+      # @return [Symbol] the user input
       def select_remote_addons
         if !SwMgmt.init
           Report.Error(Pkg.LastError)
@@ -107,14 +117,20 @@ module Registration
         success ? ret : :addons
       end
 
+      # display the EULAs for the selected addons
+      # @return [Symbol] the user input
       def addons_eula
         AddonEulaDialog.run(::Registration::Addon.selected)
       end
 
+      # collect the known reg. codes from the current configuration
+      # @return [Hash] reg. codes hash
       def collect_known_reg_codes
         Hash[config.addons.map { |a| [a["name"], a["reg_code"]] }]
       end
 
+      # add for reg. codes for selected paid extensions
+      # @return [Symbol] the user input
       def addons_reg_codes
         known_reg_codes = collect_known_reg_codes
 
@@ -127,6 +143,9 @@ module Registration
         :next
       end
 
+      # find the addon in the current config
+      # @param addon [Hash] addon to find
+      # @return [Hash, nil] found addon or nil
       def find_addon(addon)
         config.addons.find do |a|
           a["name"] == addon["name"] &&  a["version"] == addon["version"] &&
@@ -134,6 +153,7 @@ module Registration
         end
       end
 
+      # update the reg. codes config
       def update_addons(known_reg_codes)
         ::Registration::Addon.selected.each do |addon|
           # FIXME: use a separate class for handling Autoyast addons,
@@ -153,6 +173,8 @@ module Registration
         end
       end
 
+      # run the main AutoYaST configuration dialog
+      # @return [Symbol] the user input
       def configure_registration
         AutoyastConfigDialog.run(config)
       end
