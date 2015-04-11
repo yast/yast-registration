@@ -33,6 +33,8 @@ module Registration
 
     include Yast::Logger
 
+    # the constructor
+    # @param base_dir [String] the base directory with EULA translations
     def initialize(base_dir)
       @base_dir = base_dir
       read_licenses
@@ -55,6 +57,8 @@ module Registration
       fallback_language
     end
 
+    # list EULA traslations
+    # @return [Array<String>] list of languages (locales)
     def languages
       licenses.keys
     end
@@ -85,6 +89,7 @@ module Registration
     end
 
     # find a fallback language
+    # @return [String] the fallback language
     def fallback_language
       # use English fallback when present
       return "en_US" if languages.include?("en_US")

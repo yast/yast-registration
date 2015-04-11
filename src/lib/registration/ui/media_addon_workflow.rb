@@ -11,7 +11,7 @@ require "registration/ui/base_system_registration_dialog"
 
 module Registration
   module UI
-    # This class handles registering media add-ons.
+    # This class handles workflow for registering media add-ons.
     class MediaAddonWorkflow
       include Yast::Logger
       include Yast::I18n
@@ -23,11 +23,14 @@ module Registration
       Yast.import "Sequencer"
 
       # run workflow for registering a media add-on from repositry repo_id.
+      # @param repo_id [Fixnum] the repository ID with the media add-on
       def self.run(repo_id)
         workflow = MediaAddonWorkflow.new(repo_id)
         workflow.run
       end
 
+      # the constructor
+      # @param repo_id [Fixnum] the repository ID with the media add-on
       def initialize(repo_id)
         textdomain "registration"
 
@@ -90,6 +93,8 @@ module Registration
 
       attr_accessor :repo_id, :products, :registration, :registration_ui
 
+      # check if the add-on repository provides a product resolvable
+      # @return [Symbol] workflow symbol (:next, :finish or :abort)
       def find_products
         if !SwMgmt.init
           Report.Error(Pkg.LastError)
@@ -112,6 +117,9 @@ module Registration
         :next
       end
 
+      # register the base product if it's not registered yet
+      # (an add-on can be registered without the base product registration)
+      # @return [Symbol] workflow symbol
       def register_base
         until Registration.is_registered?
           # register the base system if not already registered
@@ -122,7 +130,7 @@ module Registration
               Yast::Popup.YesNo(_("The base system has to be registered " \
                   "in order to register the '%s' add-on.\nSkip the base system " \
                   "and the add-on registration?") %
-                Pkg.SourceGeneralData(repo_id)["name"])
+              Pkg.SourceGeneralData(repo_id)["name"])
 
             return :skip
           end
@@ -134,10 +142,14 @@ module Registration
         :next
       end
 
+      # load remote addons from the registration server
+      # @return [Symbol] workflow symbol
       def load_remote_addons
         registration_ui.get_available_addons == :cancel ? :cancel : :next
       end
 
+      # select the remote addons matching the media add-on product resolvables
+      # @return [Symbol] workflow symbol
       def select_media_addons
         SwMgmt.select_product_addons(products, Addon.find_all(registration))
 
@@ -145,6 +157,8 @@ module Registration
         Addon.selected.empty? ? :finish : :next
       end
 
+      # register the add-ons (asks for reg. code for paid add-ons)
+      # @return [Symbol] workflow symbol
       def register_addons
         known_reg_codes = Storage::RegCodes.instance.reg_codes
         registration_ui.register_addons(Addon.selected, known_reg_codes)

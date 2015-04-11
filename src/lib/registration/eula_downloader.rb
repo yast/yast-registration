@@ -36,13 +36,17 @@ module Registration
     # name of the directory index file with list of available files
     INDEX_FILE = "directory.yast"
 
+    # the constructor
+    # @param base_url [String] the base URL for EULAs
+    # @param target_dir [String] where to save the downloaded files
+    # @param insecure [Boolean] if true the SSL verification errors are ignored
     def initialize(base_url, target_dir, insecure: false)
       @base_url = base_url
       @target_dir = target_dir
       @insecure = insecure
     end
 
-    # start the download
+    # start the download, downloads the EULAS to the target directory
     def download
       licenses = available_licenses
 
@@ -66,6 +70,7 @@ module Registration
     private
 
     # returns list of available files in a remote location
+    # @return [Array<String>] the list of the remote EULAs
     def available_licenses
       # download the index file (directory.yast)
       index_url = URI(base_url)

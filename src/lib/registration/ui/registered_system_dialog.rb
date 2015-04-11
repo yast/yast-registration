@@ -3,6 +3,7 @@ require "yast"
 
 module Registration
   module UI
+    # this class displays and runs the status dialog for an already registered system
     class RegisteredSystemDialog
       include Yast::Logger
       include Yast::I18n
@@ -16,18 +17,20 @@ module Registration
       Yast.import "Label"
       Yast.import "UI"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # displays and run the status dialog for an already registered system
+      # @return [Symbol] user input
       def self.run
         dialog = RegisteredSystemDialog.new
         dialog.run
       end
 
+      # the constructor
       def initialize
         textdomain "registration"
       end
 
-      # display the EULA for each dialog and wait for a button click
-      # @return [Symbol] user input (:next, :back, :abort, :halt)
+      # display and run the dialog
+      # @return [Symbol] user input
       def run
         Wizard.SetContents(
           # dialog title
@@ -57,6 +60,8 @@ module Registration
 
       private
 
+      # the main dialog content
+      # @return [Yast::Term>] UI term
       def dialog_content
         VBox(
           Heading(_("The system is already registered.")),
