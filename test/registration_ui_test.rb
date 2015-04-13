@@ -3,8 +3,9 @@
 require_relative "spec_helper"
 
 describe "Registration::RegistrationUI" do
+  subject(:registration_ui) { Registration::RegistrationUI.new(registration) }
+
   let(:registration) { Registration::Registration.new }
-  let(:registration_ui) { Registration::RegistrationUI.new(registration) }
   let(:target_distro) { "sles-12-x86_64" }
   let(:base_product) do
     {
@@ -22,6 +23,10 @@ describe "Registration::RegistrationUI" do
     }
   end
   let(:remote_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+  let(:addon_HA) { remote_addons[0] }
+  let(:addon_HA_GEO) { remote_addons[1] }
+  let(:addon_legacy) { remote_addons[4] }
+  let(:addon_SDK) { remote_addons[7] }
 
   describe "#register_system_and_base_product" do
     it "registers the system using the provided registration code" do
@@ -76,46 +81,55 @@ describe "Registration::RegistrationUI" do
       allow(Yast::Mode).to receive(:normal).and_return(false)
       allow(Yast::Mode).to receive(:update).and_return(false)
 
-      # Popup.Feedback
+      # Stub Popup.Feedback and other messages to user
       allow(Yast::UI).to receive(:OpenDialog)
       allow(Yast::UI).to receive(:CloseDialog)
+      allow(Yast::Wizard).to receive(:SetContents)
 
-      # stub the registration call
-      expect(registration).to receive(:register_product).twice.and_return([])
-
-      # stub service processing
-      expect(Registration::SwMgmt).to receive(:service_repos)
-        .with([], only_updates: true).twice.and_return([])
-      expect(Registration::SwMgmt).to receive(:set_repos_state)
-        .with([], true).twice
-      expect(registration_ui).to receive(:install_updates?).twice.and_return(true)
+      # stub the registration
+      allow(registration).to receive(:register_product)
+      allow(registration).to receive(:select_repositories)
     end
 
-    it "registers free addons without asking for a reg. code" do
-      # Legacy module + SDK
-      selected_addons = [remote_addons[4], remote_addons[7]]
-
-      expect(Yast::Wizard).to receive(:SetContents)
-
+    it "does not ask for reg. code if all addons are free" do
       # user is not asked for any reg. code
       expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
 
-      # UI returns :next and all selected addons are marked as registered
-      expect(registration_ui.register_addons(selected_addons, {})).to eq(:next)
+      # Register Legacy module
+      registration_ui.register_addons([addon_legacy], {})
+    end
+
+    it "asks for a reg. code if there is some paid addon" do
+      # User is asked for reg. codes
+      expect(Registration::UI::AddonRegCodesDialog).to receive(:run)
+        .with([addon_HA], {}).and_return(:next)
+
+      # Register High Availability module
+      registration_ui.register_addons([addon_HA], {})
+    end
+
+    it "registers all addons" do
+      # Stub user interaction for reg codes
+      allow(Registration::UI::AddonRegCodesDialog).to receive(:run).and_return(:next)
+
+      # Register HA-GEO + SDK addons
+      selected_addons = [addon_HA_GEO, addon_SDK]
+      registration_ui.register_addons(selected_addons, {})
+
+      # All selected addons are marked as registered
       expect(selected_addons.all?(&:registered?)).to eq(true)
     end
 
-    it "registers paid addons after asking for a reg. code" do
-      # HA + HA-GEO addons
-      selected_addons = [remote_addons[0], remote_addons[1]]
+    it "returns :next if everything goes fine" do
+      expect(registration_ui.register_addons([addon_legacy], {})).to eq :next
+    end
 
-      # user is asked for reg. codes
-      expect(Registration::UI::AddonRegCodesDialog).to receive(:run)
-        .with(selected_addons, {}).and_return(:next)
+    it "returns :back if some registration failed" do
+      # FIXME: Since the code is not functional, there is currently no cleaner
+      # way to mock a registration failure
+      allow(registration_ui).to receive(:register_selected_addons).and_return false
 
-      # UI returns :next and all selected addons are marked as registered
-      expect(registration_ui.register_addons(selected_addons, {})).to eq(:next)
-      expect(selected_addons.all?(&:registered?)).to eq(true)
+      expect(registration_ui.register_addons([addon_legacy], {})).to eq :back
     end
   end
 end
