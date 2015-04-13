@@ -209,7 +209,7 @@ describe Registration::SwMgmt do
 
       addon_updates = subject.find_addon_updates(available_addons)
       # an update only for SDK addon is available
-      expect(addon_updates).to have(1).items
+      expect(addon_updates.size).to eq 1
       expect(addon_updates.first.label).to \
         eq("SUSE Linux Enterprise Software Development Kit 12 x86_64")
     end
@@ -238,7 +238,7 @@ describe Registration::SwMgmt do
     end
 
     it "Returns product resolvables from the specified repository" do
-      expect(subject.products_from_repo(5)).to have(1).item
+      expect(subject.products_from_repo(5).size).to eq 1
     end
 
     it "Returns empty list if not product is found" do

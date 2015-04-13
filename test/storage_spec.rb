@@ -79,7 +79,7 @@ describe Registration::Storage::Config do
       expect(subject.reg_server).to eq("")
       expect(subject.email).to eq("foo@example.com")
       expect(subject.reg_code).to eq("FOOBAR42")
-      expect(subject.addons).to have(1).item
+      expect(subject.addons.size).to eq 1
     end
   end
 end
