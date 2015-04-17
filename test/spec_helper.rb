@@ -2,7 +2,7 @@ if ENV["COVERAGE"]
   require "simplecov"
 
   # use coveralls for on-line code coverage reporting at Travis CI
-  if ENV["TRAVIS"]
+  if ENV["TRAVIS"] || ENV["COVERALLS_REPO_TOKEN"]
     require "coveralls"
 
     SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[

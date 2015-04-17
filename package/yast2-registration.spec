@@ -56,6 +56,14 @@ BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.26
 BuildRequires:  yast2-update >= 3.1.19
 
+# Install extra packages for running additional tests at the Jenkins CI builds.
+# run manually: osc build --define "run_ci_tests 1"
+# from sources: rake osc:build['--define "run_ci_tests 1"']
+%if 0%{?run_ci_tests}
+BuildRequires:  rubygem(yast-rake-ci)
+%endif
+
+
 BuildArch:      noarch
 
 Summary:        YaST2 - Registration Module
@@ -76,7 +84,25 @@ Authors:
 %build
 
 %check
-rake test:unit
+%if 0%{?run_ci_tests}
+  LC_ALL=en_US.UTF-8 \
+    COVERALLS_REPO_TOKEN='%{coveralls_repo_token}' \
+    CI_PULL_REQUEST='%{ci_pull_request}' \
+    JENKINS_URL='%{jenkins_url}' \
+    BUILD_URL='%{build_url}' \
+    GIT_BRANCH='%{git_branch}' \
+    GIT_COMMIT='%{git_commit}' \
+    GIT_ID='%{git_commit}' \
+    GIT_AUTHOR_NAME='%{git_author_name}' \
+    GIT_AUTHOR_EMAIL='%{git_author_email}' \
+    GIT_COMMITTER_NAME='%{git_commiter_name}' \
+    GIT_COMMITTER_EMAIL='%{git_commiter_email}' \
+    GIT_MESSAGE='%{git_message}' \
+    COVERAGE=1 CI=1 \
+    rake --verbose --trace check:ci
+%else
+  rake test:unit
+%endif
 
 %install
 rake install DESTDIR="%{buildroot}"
