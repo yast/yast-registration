@@ -13,6 +13,6 @@ This is a YaST module for registering a SUSE Linux Enterprise (SLE) product to
 The module is a part of SLE product installation or upgrade workflow.
 
 A registered system will receive security updates and the functionality of the
-system can be extented via online extensions or modules.
+system can be extended via online extensions or modules.
 
 See the wiki pages (https://github.com/yast/yast-registration/wiki) for more details.
