@@ -266,7 +266,7 @@ module Yast
       @registration
     end
 
-    # initialize the internal Registration object
+    # returns the internal Registration object
     def registration
       if !@registration
         url = ::Registration::UrlHelpers.registration_url
@@ -277,7 +277,7 @@ module Yast
       @registration
     end
 
-    # initialize the internal RegistrationUI object
+    # returns the internal RegistrationUI object
     def registration_ui
       @registration_ui ||= ::Registration::RegistrationUI.new(registration)
     end
