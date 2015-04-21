@@ -296,8 +296,11 @@ module Yast
 
     def register_base_product
       handle_product_service do
-        registration_ui.register_system_and_base_product(
-          @config.email, @config.reg_code)
+        options = Storage::InstallationOptions.instance
+        options.email = @config.email
+        options.reg_code = @config.reg_code
+
+        registration_ui.register_system_and_base_product
       end
     end
 

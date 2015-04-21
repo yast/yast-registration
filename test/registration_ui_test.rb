@@ -40,7 +40,12 @@ describe "Registration::RegistrationUI" do
       expect(registration).to receive(:register_product).with(base_product_to_register, email)
         .and_return([])
 
-      expect(registration_ui.register_system_and_base_product(email, reg_code)).to eq([true, []])
+      options = Registration::Storage::InstallationOptions.instance
+      allow(options).to receive(:email).twice.and_return(email)
+      allow(options).to receive(:reg_code).and_return(reg_code)
+      allow(options).to receive(:base_registered).and_return(false)
+
+      expect(registration_ui.register_system_and_base_product).to eq([true, []])
     end
   end
 

@@ -225,12 +225,9 @@ module Registration
 
       def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
-        options = Storage::InstallationOptions.instance
-        store_credentials(options)
+        store_credentials
 
-        success, product_service =
-          registration_ui.register_system_and_base_product(options.email,
-            options.reg_code, register_base_product: !options.base_registered)
+        success, product_service = registration_ui.register_system_and_base_product
 
         if product_service && !registration_ui.install_updates?
           registration_ui.disable_update_repos(product_service)
@@ -240,7 +237,8 @@ module Registration
       end
 
       # remember the entered values in case user goes back
-      def store_credentials(options)
+      def store_credentials
+        options = Storage::InstallationOptions.instance
         options.email = Yast::UI.QueryWidget(:email, :Value)
         options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
       end

@@ -49,19 +49,17 @@ module Registration
     end
 
     # register the system and the base product
+    # the registration parameters are read from Storage::InstallationOptions
     # @return [Array<Boolean, SUSE::Connect::Remote::Service>] array with two
     #   items: boolean (true on success), remote service (or nil)
-    # FIXME: split to two separate parts
-    def register_system_and_base_product(email, reg_code, register_base_product: true)
+    def register_system_and_base_product
       product_service = nil
 
       success = ConnectHelpers.catch_registration_errors do
-        register_system(email, reg_code) if !Registration.is_registered?
+        register_system if !Registration.is_registered?
 
-        if register_base_product
-          # then register the product(s)
-          product_service = register_base_product(email, reg_code)
-        end
+        # then register the product(s)
+        product_service = register_base_product
       end
 
       log.info "Registration suceeded: #{success}"
@@ -205,18 +203,24 @@ module Registration
 
     attr_accessor :registration
 
-    def register_system(email, reg_code)
+    def register_system
+      options = Storage::InstallationOptions.instance
       base_product = SwMgmt.find_base_product
       distro_target = base_product["register_target"]
+
       log.info "Registering system, distro_target: #{distro_target}"
 
       Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
         _("Registering the System...")) do
-        registration.register(email, reg_code, distro_target)
+        registration.register(options.email, options.reg_code, distro_target)
       end
     end
 
-    def register_base_product(email, reg_code)
+    # the credentials are read from Storage::InstallationOptions
+    def register_base_product
+      options = Storage::InstallationOptions.instance
+      return if options.base_registered
+
       # then register the product(s)
       base_product = SwMgmt.find_base_product
 
@@ -224,8 +228,8 @@ module Registration
         _("Registering %s ...") % SwMgmt.base_product_label(base_product)
       ) do
         base_product_data = SwMgmt.base_product_to_register
-        base_product_data["reg_code"] = reg_code
-        registration.register_product(base_product_data, email)
+        base_product_data["reg_code"] = options.reg_code
+        registration.register_product(base_product_data, options.email)
       end
     end
 
