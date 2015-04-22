@@ -9,7 +9,9 @@ describe "Registration::UI::MediaAddonWorkflow" do
 
     let(:repo) { 42 }
     # sle-module-legacy product
-    let(:legacy_module_products) { [YAML.load_file(fixtures_file("products_legacy_installation.yml")).first] }
+    let(:legacy_module_products) do
+      [YAML.load_file(fixtures_file("products_legacy_installation.yml")).first]
+    end
     let(:remote_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
     let(:products_from_repo) { legacy_module_products }
 
@@ -29,7 +31,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
         expect(run).to eq(:abort)
       end
     end
-  
+
     context "if package management initialization success" do
       let(:swmgmt_init) { true }
 
@@ -55,7 +57,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
           # Three calls to mock the selection of addons
           allow(Registration::SwMgmt).to receive(:select_product_addons)
           allow(Registration::Addon).to receive(:find_all).and_return(remote_addons)
-          allow(Registration::Addon).to receive(:selected).and_return(remote_addons[0,1])
+          allow(Registration::Addon).to receive(:selected).and_return(remote_addons[0, 1])
           # List of available addons
           allow_any_instance_of(Registration::RegistrationUI).to receive(:get_available_addons)
             .and_return(remote_addons)
@@ -63,14 +65,15 @@ describe "Registration::UI::MediaAddonWorkflow" do
 
         it "registers the base system and the addons" do
           # False before calling the Base registration dialog. True afterwards
-          allow(Registration::Registration).to receive(:is_registered?).and_return(false, true, true)
+          allow(Registration::Registration).to receive(:is_registered?)
+            .and_return(false, true, true)
 
           # Base system is registered
           expect_any_instance_of(Registration::UI::BaseSystemRegistrationDialog)
-          .to receive(:run).and_return(:next)
+            .to receive(:run).and_return(:next)
           # Addons are registered
           expect_any_instance_of(Registration::RegistrationUI).to receive(:register_addons)
-          .and_return(:next)
+            .and_return(:next)
           expect(run).to eq(:next)
         end
 
@@ -94,7 +97,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
 
           # Skipped attempt to register base system
           expect_any_instance_of(Registration::UI::BaseSystemRegistrationDialog)
-          .to receive(:run).and_return(:skip)
+            .to receive(:run).and_return(:skip)
           # no addon is registered
           expect_any_instance_of(Registration::RegistrationUI).to_not receive(:register_addons)
           expect(run).to eq(:skip)
