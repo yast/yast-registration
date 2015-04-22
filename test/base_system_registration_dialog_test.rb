@@ -25,7 +25,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         allow(Registration::Registration).to receive(:is_registered?).and_return(false)
       end
 
-      it "registeres the base system with provided email and reg. code" do
+      it "registers the base system with provided email and reg. code" do
         expect(Registration::SwMgmt).to receive(:find_base_product).and_return(
           Registration::SwMgmt::FAKE_BASE_PRODUCT)
 
@@ -34,13 +34,14 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         expect(Yast::UI).to receive(:QueryWidget).with(:email, :Value).and_return(email)
         expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value).and_return(reg_code)
 
-        expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:email=)
-        expect_any_instance_of(Registration::Storage::InstallationOptions).to receive(:reg_code=)
+        options = Registration::Storage::InstallationOptions.instance
+        expect(options).to receive(:email=).with(email)
+        expect(options).to receive(:email).and_return(email)
+        expect(options).to receive(:reg_code=).with(reg_code)
+        expect(options).to receive(:reg_code).and_return(reg_code)
 
-        # FIXME: should be 'expect', but it fails (expects 2 calls, huh???)
-        allow_any_instance_of(Registration::RegistrationUI).to receive(
-          :register_system_and_base_product).with(email, reg_code,
-            register_base_product: true).and_return(true, nil)
+        expect_any_instance_of(Registration::RegistrationUI).to receive(
+          :register_system_and_base_product).and_return([true, nil])
 
         expect(subject.run).to eq(:next)
       end

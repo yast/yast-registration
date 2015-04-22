@@ -49,65 +49,72 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
-      Yast.import "UI"
-      Yast.import "Pkg"
-
       textdomain "registration"
-
-      Yast.import "Wizard"
-      Yast.import "Label"
-      Yast.import "Report"
-      Yast.import "Popup"
-      Yast.import "Installation"
+      import_modules
 
       log.info "scc_auto started"
 
       @config = ::Registration::Storage::Config.instance
       func = WFM.Args[0]
       param = WFM.Args[1] || {}
-
       log.info "func: #{func}, param: #{::Registration::Helpers.hide_reg_codes(param)}"
 
-      case func
+      ret = handle_autoyast(func, param)
+
+      log.info "scc_auto finished"
+      ret
+    end
+
+    private
+
+    def import_modules
+      Yast.import "UI"
+      Yast.import "Pkg"
+      Yast.import "Wizard"
+      Yast.import "Label"
+      Yast.import "Report"
+      Yast.import "Popup"
+      Yast.import "Installation"
+    end
+
+    def handle_autoyast(func, param)
+      ret = case func
       when "Summary"
         # Create a summary
-        ret = summary
+        summary
       when "Reset"
         # Reset configuration
         @config.reset
-        ret = {}
+        {}
       when "Change"
         # Change configuration
-        ret = start_workflow
+        start_workflow
       when "Import"
         # import configuration
-        ret = import(param)
+        import(param)
       when "Export"
         # Return the current config
-        ret = export
+        export
       when "Packages"
         # Return needed packages
-        ret = auto_packages
+        auto_packages
       when "Write"
         # Write given settings
-        ret = write
+        write
       when "GetModified"
-        ret = @config.modified
+        @config.modified
       when "SetModified"
         @config.modified = true
-        ret = true
+        true
       else
         log.error "Unknown function: #{func}"
         raise "Unknown function parameter: #{func}"
       end
 
       log.info "ret: #{::Registration::Helpers.hide_reg_codes(ret)}"
-      log.info "scc_auto finished"
 
       ret
     end
-
-    private
 
     # Get all settings from the first parameter
     # (For use by autoinstallation.)
@@ -132,16 +139,9 @@ module Yast
       ::Registration::Helpers.render_erb_template("autoyast_summary.erb", binding)
     end
 
-    # register the system, base product and optional addons
-    # return true on success
-    def write
-      # registration disabled, nothing to do
-      return true unless @config.do_registration
-
-      # initialize libzypp if applying settings in installed system or
-      # in AutoYast configuration mode ("Apply to System")
-      ::Registration::SwMgmt.init if Mode.normal || Mode.config
-
+    # set the registration URL from the profile or use the default
+    # @return [Boolean] true on success
+    def set_registration_url
       # set the registration URL
       url = @config.reg_server if @config.reg_server && !@config.reg_server.empty?
 
@@ -157,6 +157,21 @@ module Yast
       # nil = use the default URL
       switch_registration(url)
 
+      true
+    end
+
+    # register the system, base product and optional addons
+    # return true on success
+    def write
+      # registration disabled, nothing to do
+      return true unless @config.do_registration
+
+      # initialize libzypp if applying settings in installed system or
+      # in AutoYast configuration mode ("Apply to System")
+      ::Registration::SwMgmt.init if Mode.normal || Mode.config
+
+      return false unless set_registration_url
+
       # update the registration in AutoUpgrade mode if the old system was registered
       if Mode.update && old_system_registered?
         updated = update_registration
@@ -165,15 +180,19 @@ module Yast
       end
 
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
-        if @config.reg_server_cert && !@config.reg_server_cert.empty?
-          import_certificate(@config.reg_server_cert)
-        end
-
+        import_certificate(@config.reg_server_cert)
         register_base_product && register_addons
       end
 
       return false unless ret
 
+      finish_registration
+
+      true
+    end
+
+    # finish the registration process
+    def finish_registration
       # save the registered repositories
       Pkg.SourceSaveAll
 
@@ -184,10 +203,10 @@ module Yast
         # copy the SSL certificate to the target system
         ::Registration::Helpers.copy_certificate_to_target
       end
-
-      true
     end
 
+    # return extra packages needed by this module (none so far)
+    # @return [Hash] required packages
     def auto_packages
       ret = { "install" => [], "remove" => [] }
       log.info "Registration needs these packages: #{ret}"
@@ -219,7 +238,10 @@ module Yast
       end
     end
 
+    # download and install the specified SSL certificate to the system
+    # @param url [String] URL of the certificate
     def import_certificate(url)
+      return unless url && !url.empty?
       log.info "Importing certificate from #{url}..."
 
       cert = Popup.Feedback(_("Downloading SSL Certificate"), url) do
@@ -236,6 +258,7 @@ module Yast
       ::Registration::UI::AutoyastConfigWorkflow.run(@config)
     end
 
+    # update the internal Registration object after changing the registration URL
     def switch_registration(url = nil)
       @registration = ::Registration::Registration.new(url)
       # reset registration ui as it depends on registration
@@ -243,6 +266,7 @@ module Yast
       @registration
     end
 
+    # returns the internal Registration object
     def registration
       if !@registration
         url = ::Registration::UrlHelpers.registration_url
@@ -253,10 +277,12 @@ module Yast
       @registration
     end
 
+    # returns the internal RegistrationUI object
     def registration_ui
       @registration_ui ||= ::Registration::RegistrationUI.new(registration)
     end
 
+    # update the registration (system, the base product, the installed extensions)
     def update_registration
       return false unless update_system_registration
       return false unless update_base_product
@@ -270,20 +296,19 @@ module Yast
 
     def register_base_product
       handle_product_service do
-        registration_ui.register_system_and_base_product(
-          @config.email, @config.reg_code)
+        options = Storage::InstallationOptions.instance
+        options.email = @config.email
+        options.reg_code = @config.reg_code
+
+        registration_ui.register_system_and_base_product
       end
     end
 
+    # register the addons specified in the profile
     def register_addons
       # register addons
       @config.addons.each do |addon|
-        product_service = Popup.Feedback(
-          _(CONTACTING_MESSAGE),
-          # %s is name of given product
-          _("Registering %s ...") % addon["name"]) do
-          registration.register_product(addon)
-        end
+        product_service = register_addon(addon)
 
         ::Registration::Storage::Cache.instance.addon_services << product_service
 
@@ -294,6 +319,17 @@ module Yast
       ::Registration::SwMgmt.select_addon_products
     end
 
+    def register_addon(addon)
+      Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        # %s is name of given product
+        _("Registering %s ...") % addon["name"]) do
+        registration.register_product(addon)
+      end
+    end
+
+    # was the system already registered?
+    # @return [Boolean] true if the system was alreay registered
     def old_system_registered?
       ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
@@ -301,11 +337,13 @@ module Yast
       File.exist?(::Registration::Registration::SCC_CREDENTIALS)
     end
 
+    # update the system registration
     # @return [Boolean] true on success
     def update_system_registration
       registration_ui.update_system
     end
 
+    # update the base product registration
     # @return [Boolean] true on success
     def update_base_product
       handle_product_service { registration_ui.update_base_product }

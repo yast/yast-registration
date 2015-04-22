@@ -5,6 +5,7 @@ require "registration/addon_sorter"
 
 module Registration
   module UI
+    # this class displays and runs the dialog with addon selection
     class AddonSelectionDialog
       include Yast::Logger
       include Yast::I18n
@@ -19,12 +20,18 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Stage"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # display and run the dialog with addon selection
+      # @param registration [Registration::Registration] use this Registration object for
+      #   communication with SCC
+      # @return [Symbol] user input symbol
       def self.run(registration)
         dialog = AddonSelectionDialog.new(registration)
         dialog.run
       end
 
+      # constructor
+      # @param registration [Registration::Registration] use this Registration object for
+      #   communication with SCC
       def initialize(registration)
         textdomain "registration"
         @addons = Addon.find_all(registration)
@@ -65,6 +72,8 @@ module Registration
 
       private
 
+      # create the main dialog definition
+      # @return [Yast::Term] the main UI dialog term
       def content
         VBox(
           VStretch(),
@@ -79,6 +88,9 @@ module Registration
         )
       end
 
+      # create UI box with addon check boxes, if the number of the addons is too big
+      # the UI uses two column layout
+      # @return [Yast::Term] the main UI dialog term
       def addons_box
         lines = Yast::UI.TextMode ? 9 : 14
         if @addons.size <= lines
@@ -96,6 +108,8 @@ module Registration
         VWeight(75, MarginBox(2, 1, content))
       end
 
+      # create a single UI column with addon checkboxes
+      # @return [Yast::Term] addon column
       def addon_selection_items(addons)
         box = VBox()
 
@@ -113,7 +127,10 @@ module Registration
         box
       end
 
-      # @return [Array] Return array with one or two elements for VBox
+      # create spacing around the addon checkbox so the layout looks better
+      # @param addon [Registration::Addon]
+      # @param extra_spacing [Boolean] add extra spacing (indicates enough space in UI)
+      # @return [Array<Yast::Term>] Return array with one or two elements for VBox
       def addon_checkbox(addon, extra_spacing)
         checkbox = Left(addon_checkbox_element(addon))
 
@@ -128,6 +145,9 @@ module Registration
         res
       end
 
+      # create the UI checkbox element for the addon
+      # @param addon [Registration::Addon] the addon
+      # @return [Yast::Term] checkbox term
       def addon_checkbox_element(addon)
         # checkbox label for an unavailable extension
         # (%s is an extension name)
@@ -139,6 +159,8 @@ module Registration
           addon.selected? || addon.registered?)
       end
 
+      # the main event loop - handle the user in put in the dialog
+      # @return [Symbol] the user input
       def handle_dialog
         ret = nil
         continue_buttons = [:next, :back, :abort, :skip]
@@ -161,6 +183,7 @@ module Registration
         ret
       end
 
+      # handler for the :next button in the main loop
       def handle_next_button
         return nil unless supported_addon_count?
 
@@ -169,6 +192,8 @@ module Registration
         Addon.selected.empty? ? :skip : :next
       end
 
+      # handler for changing the addon status in the main loop
+      # @param id [String] addon identifier
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
         addon = @addons.find { |a| a.identifier == id }
@@ -184,12 +209,14 @@ module Registration
       end
 
       # update addon details after changing the current addon in the UI
+      # @param addon []
       def show_addon_details(addon)
         # addon description is a rich text
         Yast::UI.ChangeWidget(Id(:details), :Value, addon.description)
         Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
 
+      # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
         @addons.each do |addon|
           Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, addon.selectable?)
@@ -200,7 +227,9 @@ module Registration
       # this is the limit for 80x25 textmode UI
       MAX_REGCODES_PER_COLUMN = 8
 
-      # check for the maximum amount of reg. codes supported by Yast
+      # check the number of required reg. codes
+      # @return [Boolean] true if the number of the required reg. codes fits
+      #  the maximum limit
       def supported_addon_count?
         need_regcode = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout

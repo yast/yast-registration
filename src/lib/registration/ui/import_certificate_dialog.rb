@@ -1,9 +1,7 @@
 
 require "yast"
 
-require "yast/suse_connect"
-require "registration/storage"
-require "registration/helpers"
+require "registration/fingerprint"
 require "registration/ssl_certificate_details"
 
 module Registration

@@ -3,6 +3,7 @@ require "yast"
 
 module Registration
   module UI
+    # this class displays and runs the dialog for asking the user for the reg. codes
     class AddonRegCodesDialog
       include Yast::Logger
       include Yast::I18n
@@ -15,7 +16,11 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Stage"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # display and run the dialog for entering registration codes
+      # @param addons [Array<SUSE::Connect::Product] the selecte addons to register
+      # @param known_reg_codes [Hash] already entered reg. code, new reg. codes
+      #   added by user will be added to the Hash
+      # @return [Symbol] symbol of the pressed button
       def self.run(addons, known_reg_codes)
         dialog = AddonRegCodesDialog.new(addons, known_reg_codes)
         dialog.run
@@ -81,6 +86,8 @@ module Registration
         [box1, box2]
       end
 
+      # part of the UI - labels in the dialog
+      # @return [Array<Yast::Term>] UI definition
       def labels
         [
           Left(
@@ -104,6 +111,8 @@ module Registration
         ]
       end
 
+      # the complete dialog content
+      # @return [Array<Yast::Term>] UI definition
       def content
         HBox(
           HSpacing(Opt(:hstretch), 3),
@@ -118,11 +127,17 @@ module Registration
         )
       end
 
+      # create a reg. code input field for the addon
+      # @param addon [SUSE::Connect::Product] the SCC addon
+      # @return [Yast::Term] UI definition
       def addon_regcode_item(addon)
         MinWidth(REG_CODE_WIDTH, InputField(Id(addon.identifier),
           addon.label, known_reg_codes.fetch(addon.identifier, "")))
       end
 
+      # create reg. code input fields for all paid addons
+      # @param addons [Array<SUSE::Connect::Product>] the selected addons
+      # @return [Yast::Term] UI definition
       def addon_regcode_items(addons)
         # add extra spacing when there are just few addons, in GUI always
         extra_spacing = (addons.size < 5) || !Yast::UI.TextMode
@@ -136,6 +151,8 @@ module Registration
         box
       end
 
+      # return extensions which require a reg. code (i.e. the paid extensions)
+      # @return [Array<SUSE::Connect::Product>] list of extensions
       def addons_with_regcode
         addons.reject(&:free)
       end
@@ -148,6 +165,8 @@ module Registration
         known_reg_codes.merge!(Hash[pairs])
       end
 
+      # the main event loop - handle the user in put in the dialog
+      # @return [Symbol] the user input
       def handle_dialog
         continue_buttons = [:next, :back, :abort]
 

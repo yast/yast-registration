@@ -22,6 +22,7 @@
 #
 
 require "yast"
+require "uri"
 
 require "registration/downloader"
 

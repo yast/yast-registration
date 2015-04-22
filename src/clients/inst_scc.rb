@@ -41,6 +41,7 @@ require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/registered_system_dialog"
 require "registration/ui/base_system_registration_dialog"
+require "registration/ui/registration_update_dialog"
 require "registration/ui/media_addon_workflow"
 
 module Yast
@@ -52,10 +53,22 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
-      Yast.import "UI"
-
       textdomain "registration"
+      import_modules
 
+      first_run
+
+      @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
+
+      initialize_regcodes
+
+      media_workflow? ? ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1]) : start_workflow
+    end
+
+    private
+
+    def import_modules
+      Yast.import "UI"
       Yast.import "Popup"
       Yast.import "GetInstArgs"
       Yast.import "Wizard"
@@ -65,28 +78,18 @@ module Yast
       Yast.import "Label"
       Yast.import "Sequencer"
       Yast.import "Installation"
-
-      first_run
-
-      @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
-
-      initialize_regcodes
-
-      # started from the add-on module?
-      if WFM.Args[0] == "register_media_addon"
-        if WFM.Args[1].is_a?(Fixnum)
-          ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1])
-        else
-          log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
-          log.warn "Starting the standard workflow"
-          start_workflow
-        end
-      else
-        start_workflow
-      end
     end
 
-    private
+    # started from the add-on module?
+    # @return [Boolean] true if the media add-on worklow should be started
+    def media_workflow?
+      return false if WFM.Args[0] != "register_media_addon"
+      return true if WFM.Args[1].is_a?(Fixnum)
+
+      log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
+      log.warn "Starting the standard workflow"
+      false
+    end
 
     # initialize known reg. codes
     def initialize_regcodes
@@ -102,6 +105,8 @@ module Yast
       ::Registration::Storage::RegCodes.instance.reg_codes = @known_reg_codes
     end
 
+    # run the dialog for registering the base system
+    # @return [Symbol] the user action
     def register_base_system
       base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
       ret = base_reg_dialog.run
@@ -112,90 +117,16 @@ module Yast
       ret
     end
 
-    # update system registration, update the target distribution
-    # @return [Boolean] true on success
-    def update_system_registration
-      return false if init_registration == :cancel
-      registration_ui.update_system
-    end
-
-    # update base product registration
-    # @return [Boolean] true on success
-    def refresh_base_product
-      return false if init_registration == :cancel
-
-      success, product_service = registration_ui.update_base_product
-
-      if success && product_service && !registration_ui.install_updates?
-        return registration_ui.disable_update_repos(product_service)
-      end
-
-      success
-    end
-
-    def refresh_addons
-      addons = get_available_addons
-      if addons == :cancel
-        # With the current code, this should never happen because
-        # #get_available_addons will not return :cancel if
-        # #refresh_base_product returned a positive value, but
-        # it's better to stay safe and abort nicely.
-        return false
-      end
-
-      failed_addons = registration_ui.update_addons(addons,
-        enable_updates: registration_ui.install_updates?)
-
-      # if update fails preselest the addon for full registration
-      failed_addons.each(&:selected)
-
-      true
-    end
-
-    # display the registration update dialog
-    def show_registration_update_dialog
-      Wizard.SetContents(
-        _("Registration"),
-        Label(_("Registration is being updated...")),
-        _("The previous registration is being updated."),
-        GetInstArgs.enable_back,
-        GetInstArgs.enable_next || Mode.normal
-      )
-    end
-
+    # run the dialog for updating the registration
+    # @return [Symbol] the user action
     def update_registration
-      show_registration_update_dialog
+      update_dialog = ::Registration::UI::RegistrationUpdateDialog.new
+      ret = update_dialog.run
 
-      if update_system_registration && refresh_base_product && refresh_addons
-        log.info "Registration update succeeded"
-        :next
-      else
-        # force reinitialization to allow to use a different URL
-        @registration = nil
-        # automatic registration refresh during system upgrade failed, register from scratch
-        Report.Error(_("Automatic registration upgrade failed.\n" \
-              "You can manually register the system from scratch."))
-        return :register
-      end
-    end
+      # remeber the user Registration object to reuse it if needed
+      @registration = update_dialog.registration
 
-    # display the main registration dialog
-    def show_scc_credentials_dialog
-      Wizard.SetContents(
-        # dialog title
-        _("Registration"),
-        scc_credentials_dialog,
-        scc_help_text,
-        GetInstArgs.enable_back,
-        GetInstArgs.enable_next || Mode.normal
-      )
-
-      registered = ::Registration::Registration.is_registered?
-      # disable the input fields when already registered
-      return unless registered && !Mode.normal
-
-      UI.ChangeWidget(Id(:email), :Enabled, false)
-      UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+      ret
     end
 
     # run the addon selection dialog
@@ -226,23 +157,28 @@ module Yast
       registration_ui.register_addons(@selected_addons, @known_reg_codes)
     end
 
+    def report_no_base_product
+      # error message
+      msg = _("The base product was not found,\ncheck your system.") + "\n\n"
+
+      if Stage.initial
+        # TRANSLATORS: %s = bugzilla URL
+        msg += _("The installation medium or the installer itself is seriously broken.\n" \
+            "Report a bug at %s.") % "https://bugzilla.suse.com"
+      else
+        msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
+            "is a symlink pointing to the base product .prod file.")
+      end
+
+      Report.Error(msg)
+    end
+
+    # do some sanity checks and decide which workflow will be used
+    # return [Symbol] :update
     def registration_check
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
-        # error message
-        msg = _("The base product was not found,\ncheck your system.") + "\n\n"
-
-        if Stage.initial
-          # TRANSLATORS: %s = bugzilla URL
-          msg += _("The installation medium or the installer itself is seriously broken.\n" \
-              "Report a bug at %s.") % "https://bugzilla.suse.com"
-        else
-          msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
-              "is a symlink pointing to the base product .prod file.")
-        end
-
-        Report.Error(msg)
-
+        report_no_base_product
         return Mode.normal ? :abort : :auto
       end
 
@@ -272,10 +208,13 @@ module Yast
       end
     end
 
+    # display EULAs for the selected addons
     def addon_eula
       ::Registration::UI::AddonEulaDialog.run(@selected_addons)
     end
 
+    # remember the user entered values so they can be stored to the AutoYast
+    # profile generated at the end of installation
     def update_autoyast_config
       options = ::Registration::Storage::InstallationOptions.instance
       return :next unless Mode.installation && options.base_registered
@@ -287,6 +226,7 @@ module Yast
       :next
     end
 
+    # preselect the addon products and run the package manager (only in installed system)
     def pkg_manager
       # during installation the products are installed together with the base
       # product, run the package manager only in installed system
@@ -301,9 +241,9 @@ module Yast
       ::Registration::RegistrationUI.new(@registration)
     end
 
-    # UI workflow definition
-    def start_workflow
-      aliases = {
+    # define Sequencer aliases
+    def workflow_aliases
+      {
         # skip this when going back
         "check"                  => [->() { registration_check }, true],
         "register"               => ->() { register_base_system },
@@ -314,7 +254,10 @@ module Yast
         "update_autoyast_config" => ->() { update_autoyast_config },
         "pkg_manager"            => ->() { pkg_manager }
       }
+    end
 
+    # define the Sequence workflow
+    def start_workflow
       sequence = {
         "ws_start"               => workflow_start,
         "check"                  => {
@@ -363,7 +306,7 @@ module Yast
       }
 
       log.info "Starting scc sequence"
-      Sequencer.Run(aliases, sequence)
+      Sequencer.Run(workflow_aliases, sequence)
     end
 
     # which dialog should be displayed at start
@@ -388,6 +331,7 @@ module Yast
       @registration = ::Registration::Registration.new(url)
     end
 
+    # do some additional initialization at the first run
     def first_run
       return unless ::Registration::Storage::Cache.instance.first_run
 

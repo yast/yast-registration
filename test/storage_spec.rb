@@ -39,7 +39,7 @@ describe Registration::Storage::Config do
     it "resets the current configuration" do
       subject.do_registration = true
       subject.reset
-      expect(subject.do_registration).to be_false
+      expect(subject.do_registration).to eq(false)
     end
   end
 
@@ -79,7 +79,7 @@ describe Registration::Storage::Config do
       expect(subject.reg_server).to eq("")
       expect(subject.email).to eq("foo@example.com")
       expect(subject.reg_code).to eq("FOOBAR42")
-      expect(subject.addons).to have(1).item
+      expect(subject.addons.size).to eq 1
     end
   end
 end

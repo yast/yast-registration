@@ -20,19 +20,21 @@ module Registration
       Yast.import "Wizard"
       Yast.import "InstShowInfo"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # display and run the dialog for accepting the extensions EULAs
+      # @param selected_addons [Array<SUSE::Connect::Product]
       def self.run(selected_addons)
         dialog = AddonEulaDialog.new(selected_addons)
         dialog.run
       end
 
-      # @param selected_addons
+      # constructor
+      # @param selected_addons [Array<SUSE::Connect::Product]
       def initialize(selected_addons)
         textdomain "registration"
         @addons = selected_addons
       end
 
-      # display the EULA for each dialog and wait for a button click
+      # display the EULA for each extension and wait for a button click
       # @return [Symbol] user input (:next, :back, :abort, :halt)
       def run
         Yast::Wizard.SetContents(

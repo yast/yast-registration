@@ -76,13 +76,13 @@ describe "Registration::SslCertificate" do
 
     describe "#expired?" do
       it "returns false" do
-        expect(subject.expired?).to be_false
+        expect(subject.expired?).to eq(false)
       end
     end
 
     describe "#valid_yet?" do
       it "returns false" do
-        expect(subject.valid_yet?).to be_false
+        expect(subject.valid_yet?).to eq(false)
       end
     end
   end
@@ -94,13 +94,13 @@ describe "Registration::SslCertificate" do
 
     describe "#expired?" do
       it "returns true" do
-        expect(subject.expired?).to be_true
+        expect(subject.expired?).to eq(true)
       end
     end
 
     describe "#valid_yet?" do
       it "returns true" do
-        expect(subject.valid_yet?).to be_true
+        expect(subject.valid_yet?).to eq(true)
       end
     end
   end
@@ -112,13 +112,13 @@ describe "Registration::SslCertificate" do
 
     describe "#expired?" do
       it "returns false" do
-        expect(subject.expired?).to be_false
+        expect(subject.expired?).to eq(false)
       end
     end
 
     describe "#valid_yet?" do
       it "returns true" do
-        expect(subject.valid_yet?).to be_true
+        expect(subject.valid_yet?).to eq(true)
       end
     end
   end

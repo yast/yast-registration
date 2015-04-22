@@ -194,7 +194,7 @@ describe "Registration::UrlHelpers" do
       Registration::UrlHelpers.reset_registration_url
 
       expect(::Registration::Storage::Cache.instance.reg_url).to be_nil
-      expect(::Registration::Storage::Cache.instance.reg_url_cached).to be_false
+      expect(::Registration::Storage::Cache.instance.reg_url_cached).to eq(false)
     end
   end
 

@@ -37,6 +37,8 @@ module Registration
       # display the extension selection dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
+        log.info "Diplaying registration dialog"
+
         Yast::Wizard.SetContents(
           # dialog title
           _("Registration"),
@@ -63,11 +65,107 @@ module Registration
       REG_CODE_WIDTH = 33
 
       # content for the main registration dialog
+      # @return [Yast::Term]  UI term
       def content
-        base_product = SwMgmt.find_base_product
+        VBox(
+          network_button,
+          VStretch(),
+          product_details_widgets,
+          VSpacing(Yast::UI.TextMode ? 1 : 2),
+          input_widgets,
+          VSpacing(Yast::UI.TextMode ? 0 : 1),
+          # button label
+          PushButton(Id(:local_server), _("&Local Registration Server...")),
+          VSpacing(Yast::UI.TextMode ? 0 : 3),
+          skip_button,
+          VStretch()
+        )
+      end
 
+      # part of the main dialog definition - display the "skip" skip button only
+      # when the system is not registered yet
+      # @return [Yast::Term] UI term
+      def skip_button
+        # button label
+        Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
+      end
+
+      # part of the main dialog definition - the base product details
+      # @return [Yast::Term]  UI term
+      def product_details_widgets
+        HSquash(
+          VBox(
+            VSpacing(1),
+            Left(Heading(SwMgmt.base_product_label(SwMgmt.find_base_product))),
+            VSpacing(1),
+            Registration.is_registered? ? Heading(_("The system is already registered.")) :
+              Label(info)
+          )
+        )
+      end
+
+      # part of the main dialog definition - the input fields
+      # @return [Yast::Term] UI term
+      def input_widgets
         options = Storage::InstallationOptions.instance
 
+        HSquash(
+          VBox(
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
+            VSpacing(Yast::UI.TextMode ? 0 : 0.5),
+            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
+              options.reg_code))
+          )
+        )
+      end
+
+      # help text for the main registration dialog
+      def help_text
+        # help text
+        _("Enter SUSE Customer Center credentials here to register the system to " \
+            "get updates and extensions.")
+      end
+
+      def handle_dialog
+        ret = nil
+        continue_buttons = [:next, :back, :cancel, :abort, :skip]
+
+        until continue_buttons.include?(ret)
+          ret = Yast::UI.UserInput
+
+          case ret
+          when :network
+            Helpers.run_network_configuration
+          when :local_server
+            handle_local_server
+          when :next
+            ret = handle_registration
+          when :abort
+            ret = nil unless Yast::Popup.ConfirmAbort(:painless)
+          when :skip
+            ret = nil unless confirm_skipping
+          end
+        end
+
+        log.info "Registration result: #{ret}"
+        ret
+      end
+
+      def confirm_skipping
+        # Popup question: confirm skipping the registration
+        confirmation = _("If you do not register your system we will not be able\n" \
+            "to grant you access to the update repositories.\n\n" \
+            "You can register after the installation or visit our\n" \
+            "Customer Center for online registration.\n\n" \
+            "Really skip the registration now?")
+
+        ret = Yast::Popup.YesNo(confirmation)
+        log.info "Skipping registration on user request" if ret
+
+        ret
+      end
+
+      def info
         # label text describing the registration (1/2)
         # use \n to split to more lines if needed (use max. 76 chars/line)
         info = _("Please enter a registration or evaluation code for this product and your\n" \
@@ -86,133 +184,78 @@ module Registration
               "installation has completed.")
         end
 
-        registered = Registration.is_registered?
-        network_button = Right(PushButton(Id(:network), _("Network Configuration...")))
-
-        VBox(
-          Yast::Mode.installation || Yast::Mode.update ? network_button : Empty(),
-          VStretch(),
-          HSquash(
-            VBox(
-              VSpacing(1),
-              Left(Heading(SwMgmt.base_product_label(base_product))),
-              VSpacing(1),
-              registered ? Heading(_("The system is already registered.")) : Label(info)
-            )
-          ),
-          VSpacing(Yast::UI.TextMode ? 1 : 2),
-          HSquash(
-            VBox(
-              MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-              VSpacing(Yast::UI.TextMode ? 0 : 0.5),
-              MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-                options.reg_code))
-            )
-          ),
-          VSpacing(Yast::UI.TextMode ? 0 : 1),
-          # button label
-          PushButton(Id(:local_server), _("&Local Registration Server...")),
-          VSpacing(Yast::UI.TextMode ? 0 : 3),
-          # button label
-          registered ? Empty() : PushButton(Id(:skip), _("&Skip Registration")),
-          VStretch()
-        )
+        info
       end
 
-      # help text for the main registration dialog
-      def help_text
-        # help text
-        _("Enter SUSE Customer Center credentials here to register the system to " \
-            "get updates and extensions.")
+      def network_button
+        return Empty() unless Yast::Mode.installation || Yast::Mode.update
+
+        Right(PushButton(Id(:network), _("Network Configuration...")))
       end
 
-      def handle_dialog
-        log.info "The system is not registered, diplaying registration dialog"
+      # handle pressing the "Local Registration Server" button
+      def handle_local_server
+        options = Storage::InstallationOptions.instance
+        current_url = options.custom_url || SUSE::Connect::Config.new.url
+        url = LocalServerDialog.run(current_url)
+        return unless url
 
-        ret = nil
+        log.info "Entered custom URL: #{url}"
+        options.custom_url = url
+      end
 
-        continue_buttons = [:next, :back, :cancel, :abort]
-        until continue_buttons.include?(ret)
-          ret = Yast::UI.UserInput
+      def handle_registration
+        # do not re-register during installation
+        if !Yast::Mode.normal && Registration.is_registered? &&
+            Storage::InstallationOptions.instance.base_registered
 
-          case ret
-          when :network
-            Helpers.run_network_configuration
-          when :local_server
-            options = Storage::InstallationOptions.instance
-            current_url = options.custom_url || SUSE::Connect::Config.new.url
-            url = LocalServerDialog.run(current_url)
-            if url
-              log.info "Entered custom URL: #{url}"
-              options.custom_url = url
-            end
-          when :next
-            options = Storage::InstallationOptions.instance
-
-            # do not re-register during installation
-            if !Yast::Mode.normal && Registration.is_registered? &&
-                options.base_registered
-
-              return :next
-            end
-
-            email = Yast::UI.QueryWidget(:email, :Value)
-            reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
-
-            # remember the entered values in case user goes back
-            options.email = email
-            options.reg_code = reg_code
-
-            # reset the user input in case an exception is raised
-            ret = nil
-
-            next if init_registration == :cancel
-
-            registration_ui = RegistrationUI.new(registration)
-            success, product_service =
-              registration_ui.register_system_and_base_product(email, reg_code,
-                register_base_product: !options.base_registered)
-
-            if success
-              if product_service && !registration_ui.install_updates?
-                registration_ui.disable_update_repos(product_service)
-              end
-
-              ret = :next
-              options.base_registered = true
-              # save the config if running in installed system
-              # (in installation/upgrade it's written in _finish client)
-              Helpers.write_config if Yast::Mode.normal
-            else
-              log.info "registration failed, resetting the registration URL"
-              # reset the registration object and the cache to allow changing the URL
-              self.registration = nil
-              UrlHelpers.reset_registration_url
-              Helpers.reset_registration_status
-            end
-          when :abort
-            ret = nil unless Yast::Popup.ConfirmAbort(:painless)
-          end
-
-          next unless ret == :skip && confirm_skipping
-
-          log.info "Skipping registration on user request"
-          return ret
+          return :next
         end
 
-        log.info "Registration result: #{ret}"
-        ret
+        return nil if init_registration == :cancel
+
+        if register_system_and_base_product
+          store_registration_status
+          return :next
+        else
+          reset_registration
+          return nil
+        end
       end
 
-      def confirm_skipping
-        # Popup question: confirm skipping the registration
-        confirmation = _("If you do not register your system we will not be able\n" \
-            "to grant you access to the update repositories.\n\n" \
-            "You can register after the installation or visit our\n" \
-            "Customer Center for online registration.\n\n" \
-            "Really skip the registration now?")
+      def register_system_and_base_product
+        registration_ui = RegistrationUI.new(registration)
+        store_credentials
 
-        Yast::Popup.YesNo(confirmation)
+        success, product_service = registration_ui.register_system_and_base_product
+
+        if product_service && !registration_ui.install_updates?
+          registration_ui.disable_update_repos(product_service)
+        end
+
+        success
+      end
+
+      # remember the entered values in case user goes back
+      def store_credentials
+        options = Storage::InstallationOptions.instance
+        options.email = Yast::UI.QueryWidget(:email, :Value)
+        options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+      end
+
+      def store_registration_status
+        Storage::InstallationOptions.instance.base_registered = true
+        # save the config if running in installed system
+        # (in installation/upgrade it's written in _finish client)
+        Helpers.write_config if Yast::Mode.normal
+      end
+
+      def reset_registration
+        log.info "registration failed, resetting the registration URL"
+        # reset the registration object and the cache to allow changing the URL
+        self.registration = nil
+        UrlHelpers.reset_registration_url
+        Helpers.reset_registration_status
       end
 
       # initialize the Registration object

@@ -42,8 +42,8 @@ describe Registration::Addon do
       )
 
       addons = Registration::Addon.find_all(registration)
-      expect(addons.any? { |addon| addon.children.size == 1 }).to be_true
-      expect(addons.any?(&:depends_on)).to be_true
+      expect(addons.any? { |addon| addon.children.size == 1 }).to eq(true)
+      expect(addons.any?(&:depends_on)).to eq(true)
     end
 
     it "sets the registration status from status call" do
@@ -59,8 +59,8 @@ describe Registration::Addon do
       addon1 = addons.find { |addon| addon.name == "prod1" }
       addon2 = addons.find { |addon| addon.name == "prod2" }
 
-      expect(addon1.registered?).to be_true
-      expect(addon2.registered?).to be_false
+      expect(addon1.registered?).to eq(true)
+      expect(addon2.registered?).to eq(false)
     end
 
     it "sets the registration status for dependent addons" do
@@ -74,8 +74,8 @@ describe Registration::Addon do
       ha = addons.find { |addon| addon.identifier == "sle-ha" }
       ha_geo = ha.children.first
 
-      expect(ha.registered?).to be_true
-      expect(ha_geo.registered?).to be_true
+      expect(ha.registered?).to eq(true)
+      expect(ha_geo.registered?).to eq(true)
     end
   end
 
@@ -106,17 +106,17 @@ describe Registration::Addon do
 
   describe "#selected?" do
     it "returns if addon is selected for installation" do
-      expect(addon.selected?).to be_false
+      expect(addon.selected?).to eq(false)
       Registration::Addon.selected << addon
-      expect(addon.selected?).to be_true
+      expect(addon.selected?).to eq(true)
     end
   end
 
   describe "#selected" do
     it "marks addon as selected" do
-      expect(Registration::Addon.selected.include?(addon)).to be_false
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
       addon.selected
-      expect(Registration::Addon.selected.include?(addon)).to be_true
+      expect(Registration::Addon.selected.include?(addon)).to eq(true)
     end
 
     it "adds to list of selected only one" do
@@ -130,7 +130,7 @@ describe Registration::Addon do
     it "marks addon as unselected" do
       Registration::Addon.selected << addon
       addon.unselected
-      expect(Registration::Addon.selected.include?(addon)).to be_false
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
     end
 
     it "do nothing if addon is not selected" do
@@ -140,9 +140,9 @@ describe Registration::Addon do
 
   describe "#registered?" do
     it "returns if addon is already registered" do
-      expect(addon.registered?).to be_false
+      expect(addon.registered?).to eq(false)
       Registration::Addon.registered << addon
-      expect(addon.registered?).to be_true
+      expect(addon.registered?).to eq(true)
     end
   end
 
@@ -182,46 +182,46 @@ describe Registration::Addon do
 
     it "returns false when the addon has been already registered" do
       addon.registered
-      expect(addon.selectable?).to be_false
+      expect(addon.selectable?).to eq(false)
     end
 
     it "returns true when the addon has not been already registered" do
-      expect(addon.selectable?).to be_true
+      expect(addon.selectable?).to eq(true)
     end
 
     it "returns false when the parent is not selected or registered" do
-      expect(child.selectable?).to be_false
+      expect(child.selectable?).to eq(false)
     end
 
     it "returns true when the parent is selected" do
       parent.selected
-      expect(child.selectable?).to be_true
+      expect(child.selectable?).to eq(true)
     end
 
     it "returns true when the parent is registered" do
       parent.registered
-      expect(child.selectable?).to be_true
+      expect(child.selectable?).to eq(true)
     end
 
     it "returns false when any child is selected" do
       child.selected
-      expect(parent.selectable?).to be_false
+      expect(parent.selectable?).to eq(false)
     end
 
     it "returns false when the addon is not available" do
       product = addon_generator("available" => false)
       addon = Registration::Addon.new(product)
-      expect(addon.selectable?).to be_false
+      expect(addon.selectable?).to eq(false)
     end
 
     it "returns true when the addon is available" do
       product = addon_generator("available" => true)
       addon = Registration::Addon.new(product)
-      expect(addon.selectable?).to be_true
+      expect(addon.selectable?).to eq(true)
     end
 
     it "returns true when the addon availability is not set" do
-      expect(addon.selectable?).to be_true
+      expect(addon.selectable?).to eq(true)
     end
   end
 
@@ -232,7 +232,7 @@ describe Registration::Addon do
       new_addon = Registration::Addon.new(product)
       old_addon = { "name" => "sle-sdk", "version" => "12", "arch" => "x86_64" }
 
-      expect(new_addon.updates_addon?(old_addon)).to be_true
+      expect(new_addon.updates_addon?(old_addon)).to eq(true)
     end
 
     it "returns true if the old addon is a predecessor" do
@@ -243,7 +243,7 @@ describe Registration::Addon do
       new_addon = Registration::Addon.new(product)
       old_addon = { "name" => "sle-haegeo", "version" => "12", "arch" => "x86_64" }
 
-      expect(new_addon.updates_addon?(old_addon)).to be_true
+      expect(new_addon.updates_addon?(old_addon)).to eq(true)
     end
 
     it "returns false if the old addon is different" do
@@ -252,7 +252,7 @@ describe Registration::Addon do
       new_addon = Registration::Addon.new(product)
       old_addon = { "name" => "sle-hae", "version" => "12", "arch" => "x86_64" }
 
-      expect(new_addon.updates_addon?(old_addon)).to be_false
+      expect(new_addon.updates_addon?(old_addon)).to eq(false)
     end
   end
 

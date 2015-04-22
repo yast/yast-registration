@@ -1,6 +1,5 @@
 
 require "yast"
-require "registration/helpers"
 
 module Registration
   module UI
