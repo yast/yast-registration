@@ -66,7 +66,6 @@ module Registration
     private
 
     # read downloaded EULAs
-    # @param dir [String] directory with EULA files
     def read_licenses
       @licenses = {}
       Dir["#{base_dir}/license.*"].each { |license| add_license_file(license) }
