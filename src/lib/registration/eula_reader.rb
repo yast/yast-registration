@@ -27,7 +27,7 @@ require "registration/helpers"
 
 module Registration
   # class for loading addon EULA translation mapping from a directory,
-  # the licenses attribute contains translations mapping { <locale> => <file_name> }
+  # the licenses attribute contains translations mapping { locale => file_name }
   class EulaReader
     attr_reader :base_dir, :licenses
 

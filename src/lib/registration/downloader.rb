@@ -39,7 +39,7 @@ module Registration
     # is reached the download fails with RuntimeError exception
     # @param file_url [String, URI] URL of the file to download
     # @param insecure [Boolean] if true the SSL verification errors are ignored
-    # @return [String] the downloaded file
+    # @return [String] the contents of the downloaded file
     def self.download(file_url, insecure: false)
       download_file(file_url, insecure: insecure)
     end
@@ -49,7 +49,7 @@ module Registration
     # @param insecure [Boolean] if true the SSL verification errors are ignored
     # @param redirection_count [Numeric] current redirection count, when zero
     #   the download fails with RuntimeError exception
-    # @return [String] the downloaded file
+    # @return [String] the contents of the downloaded file
     def self.download_file(file_url, insecure: false, redirection_count: 10)
       raise "Redirection limit reached, download aborted" if redirection_count <= 0
 

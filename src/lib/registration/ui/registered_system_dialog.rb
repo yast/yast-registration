@@ -61,7 +61,7 @@ module Registration
       private
 
       # the main dialog content
-      # @return [Yast::Term>] UI term
+      # @return [Yast::Term] UI term
       def dialog_content
         VBox(
           Heading(_("The system is already registered.")),

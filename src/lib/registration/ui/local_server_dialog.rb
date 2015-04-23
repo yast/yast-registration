@@ -53,7 +53,7 @@ module Registration
 
       # the main UI event loop
       # FIXME: return a symbol like the other dialogs
-      # @return [Symbol] the user input
+      # @return [Symbol,nil] the user input or `nil` if canceled
       def handle_dialog
         ui = nil
         until [:ok, :cancel].include?(ui)
