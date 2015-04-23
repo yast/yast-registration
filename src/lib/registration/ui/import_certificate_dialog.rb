@@ -6,6 +6,7 @@ require "registration/ssl_certificate_details"
 
 module Registration
   module UI
+    # this class displays and runs the dialog for importing a SSL certificate
     class ImportCertificateDialog
       include Yast::Logger
       include Yast::I18n
@@ -30,14 +31,15 @@ module Registration
       Yast.import "Label"
 
       # create a new dialog for importing a SSL certificate and run it
-      # @param cert [OpenSSL::X509::Certificate] certificate to display
+      # @param cert [Registration::SslCertitificate] certificate to display
       # @return [Symbol] user input (:import, :cancel)
       def self.run(cert)
         dialog = ImportCertificateDialog.new(cert)
         dialog.run
       end
 
-      # @param cert [SslCertitificate] certificate to display
+      # the constructor
+      # @param cert [Registration::SslCertitificate] certificate to display
       def initialize(cert)
         textdomain "registration"
         @certificate = cert
@@ -61,6 +63,8 @@ module Registration
 
       private
 
+      # UI widgets with the certificate description
+      # @return [Yast::Term] UI term
       def certificate_box
         VBox(
           HSpacing(75),
@@ -77,7 +81,8 @@ module Registration
         )
       end
 
-      # create dialog content
+      # the main dialog content
+      # @return [Yast::Term] UI term
       def import_dialog_content
         displayinfo = Yast::UI.GetDisplayInfo
         # hide additional help text in narrow terminals
@@ -95,6 +100,8 @@ module Registration
         )
       end
 
+      # the main UI event loop
+      # @return [Symbol] the user input
       def handle_dialog
         Yast::UI.SetFocus(:cancel)
         ui = Yast::UI.UserInput
@@ -109,6 +116,7 @@ module Registration
       end
 
       # inline help text displayed in the import dialog
+      # @return [String] translated help text
       def warning_text
         # help text (RichText) for importing a SSL certificate (1/5)
         _("<p>Secure connection (HTTPS) uses SSL certificates for verifying the " \

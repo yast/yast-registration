@@ -25,6 +25,7 @@ module Registration
   class PkgError < RuntimeError
   end
 
+  # Exception class for handling service errors
   class ServiceError < PkgError
     attr_reader :service
 
@@ -34,6 +35,7 @@ module Registration
     end
   end
 
+  # generic download error
   class DownloadError < RuntimeError
   end
 end

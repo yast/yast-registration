@@ -22,8 +22,12 @@
 require "forwardable"
 
 module Registration
+  # this is a wrapper class around SUSE::Connect::Product object
   class Addon
     class << self
+      # read the remote add-on from the registration server
+      # @param registration [Registration::Registration] use this object for
+      #  reading the remote add-ons
       def find_all(registration)
         return @cached_addons if @cached_addons
         pure_addons = registration.get_addon_list
@@ -42,16 +46,23 @@ module Registration
         end
       end
 
+      # list of registered add-ons
+      # @return [Array<Addon>] registered add-ons
       def registered
         @registered ||= []
       end
 
+      # list of selected add-ons
+      # @return [Array<Addon>] selected add-ons
       def selected
         @selected ||= []
       end
 
       private
 
+      # create an Addon from a SUSE::Connect::Product
+      # @param root [SUSE::Connect::Product] the root add-on object
+      # @return [Addon] created Addon object
       def create_addon_with_deps(root)
         root_addon = Addon.new(root)
         result = [root_addon]
@@ -86,32 +97,41 @@ module Registration
       :release_type,
       :version
 
+    # the constructor
+    # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
       @children = []
     end
 
+    # is the add-on selected
+    # @return [Boolean] true if the add-on is selectec
     def selected?
       Addon.selected.include?(self)
     end
 
+    # select the add-on
     def selected
       Addon.selected << self unless selected?
     end
 
+    # unselect the add-on
     def unselected
       Addon.selected.delete(self) if selected?
     end
 
+    # has beem the add-on registered?
+    # @return [Boolean] true if the add-on has been registered
     def registered?
       Addon.registered.include?(self)
     end
 
+    # mark the add-on as registered
     def registered
       Addon.registered << self unless registered?
     end
 
-    # just internally mark the addon as NOT registered, no real unregistration
+    # just internally mark the addon as NOT registered, not a real unregistration
     def unregistered
       Addon.registered.delete(self) if registered?
     end

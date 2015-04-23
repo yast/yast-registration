@@ -12,6 +12,7 @@ require "registration/ui/local_server_dialog"
 
 module Registration
   module UI
+    # this class displays and runs the dialog for registering the base system
     class BaseSystemRegistrationDialog
       include Yast::Logger
       include Yast::I18n
@@ -24,12 +25,14 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Popup"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # create and run the dialog for registering the base system
+      # @return [Symbol] the user input
       def self.run
         dialog = BaseSystemRegistrationDialog.new
         dialog.run
       end
 
+      # the constructor
       def initialize
         textdomain "registration"
       end
@@ -126,6 +129,8 @@ module Registration
             "get updates and extensions.")
       end
 
+      # the main UI event loop
+      # @return [Symbol] the user input
       def handle_dialog
         ret = nil
         continue_buttons = [:next, :back, :cancel, :abort, :skip]
@@ -151,6 +156,8 @@ module Registration
         ret
       end
 
+      # ask the user to confirm skipping the registration
+      # @return [Boolean] true when skipping has been confirmed
       def confirm_skipping
         # Popup question: confirm skipping the registration
         confirmation = _("If you do not register your system we will not be able\n" \
@@ -165,6 +172,8 @@ module Registration
         ret
       end
 
+      # description text displayed in the main dialog (kind of help text)
+      # @return [String] translated description text
       def info
         # label text describing the registration (1/2)
         # use \n to split to more lines if needed (use max. 76 chars/line)
@@ -187,6 +196,8 @@ module Registration
         info
       end
 
+      # UI term for the network configuration button (or empty if not needed)
+      # @return [Yast::Term] UI term
       def network_button
         return Empty() unless Yast::Mode.installation || Yast::Mode.update
 
@@ -204,6 +215,8 @@ module Registration
         options.custom_url = url
       end
 
+      # run the registration
+      # @return [Symbol] symbol for the next workflow step (depending on the registration result)
       def handle_registration
         # do not re-register during installation
         if !Yast::Mode.normal && Registration.is_registered? &&
@@ -223,6 +236,8 @@ module Registration
         end
       end
 
+      # run the system and the base product registration
+      # @return [Boolean] true on success
       def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
         store_credentials
@@ -243,6 +258,7 @@ module Registration
         options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
       end
 
+      # store the successful registration
       def store_registration_status
         Storage::InstallationOptions.instance.base_registered = true
         # save the config if running in installed system
@@ -250,6 +266,7 @@ module Registration
         Helpers.write_config if Yast::Mode.normal
       end
 
+      # reset the registration status when registration fails
       def reset_registration
         log.info "registration failed, resetting the registration URL"
         # reset the registration object and the cache to allow changing the URL

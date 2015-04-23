@@ -7,6 +7,7 @@ require "registration/url_helpers"
 
 module Registration
   module UI
+    # this class handles updating an already registered system
     class RegistrationUpdateDialog
       include Yast::Logger
       include Yast::I18n
@@ -19,18 +20,20 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Report"
 
-      # run new dialog for updating the current registration
+      # display and run a dialog for updating the current registration
+      # @return [Symbol] user input
       def self.run
         dialog = RegistrationUpdateDialog.new
         dialog.run
       end
 
+      # the constructor
       def initialize
         textdomain "registration"
       end
 
-      # display the extension selection dialog and wait for a button click
-      # @return [Symbol] user input (:import, :cancel)
+      # display and run a dialog for updating the current registration
+      # @return [Symbol] user input
       def run
         log.info "Diplaying registration update dialog"
 
@@ -49,6 +52,8 @@ module Registration
 
       private
 
+      # handle the dialog
+      # @return [Symbol] workflow symbol
       def handle_dialog
         if update_system_registration && refresh_base_product && refresh_addons
           log.info "Registration update succeeded"
@@ -84,6 +89,8 @@ module Registration
         success
       end
 
+      # update all installed add-ons
+      # @return [Boolean] true on success
       def refresh_addons
         addons = registration_ui.get_available_addons
 

@@ -6,6 +6,7 @@ require "registration/helpers"
 
 module Registration
   module UI
+    # class for displaying and handling the add-on EULA dialog
     class AddonEulaDialog
       include Yast::Logger
       include Yast::I18n
@@ -21,14 +22,14 @@ module Registration
       Yast.import "InstShowInfo"
 
       # display and run the dialog for accepting the extensions EULAs
-      # @param selected_addons [Array<SUSE::Connect::Product]
+      # @param selected_addons [Array<Addon>]
       def self.run(selected_addons)
         dialog = AddonEulaDialog.new(selected_addons)
         dialog.run
       end
 
       # constructor
-      # @param selected_addons [Array<SUSE::Connect::Product]
+      # @param selected_addons [Array<Addon>]
       def initialize(selected_addons)
         textdomain "registration"
         @addons = selected_addons
@@ -67,7 +68,7 @@ module Registration
       private
 
       # download the addon EULAs to a temp dir
-      # @param [SUSE::Connect::Product] addon the addon
+      # @param [Addon] addon the addon
       # @param [String] tmpdir target where to download the files
       def download_eula(addon, tmpdir)
         Yast::Popup.Feedback(
@@ -89,7 +90,7 @@ module Registration
       end
 
       # prepare data for displaying the EULA dialog
-      # @param [SUSE::Connect::Product] addon the addon
+      # @param [Addon] addon the addon
       # @param [EulaReader] eula_reader read eulas
       # @param [String] tmpdir target with the downloaded files
       def setup_eula_dialog(addon, eula_reader, tmpdir)
@@ -123,7 +124,7 @@ module Registration
       end
 
       # ask user to accept an addon EULA
-      # @param [SUSE::Connect::Product] addon the addon
+      # @param [Addon] addon the addon
       # @return [Symbol] :accepted, :back, :abort, :halt
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|

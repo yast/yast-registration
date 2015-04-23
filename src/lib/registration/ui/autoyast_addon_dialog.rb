@@ -3,6 +3,8 @@ require "yast"
 
 module Registration
   module UI
+    # this class displays and runs the dialog for cofiguring addons in AutoYast mode
+    # FIXME: use a specific class instead of Hash for AutoYast addons
     class AutoyastAddonDialog
       include Yast::Logger
       include Yast::I18n
@@ -13,12 +15,16 @@ module Registration
       Yast.import "UI"
       Yast.import "Wizard"
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # display and run the dialog for configuring AutoYaST addons
+      # @param addons [Hash] list of configured addons
+      # @return [Symbol] the user input
       def self.run(addons)
         dialog = AutoyastAddonDialog.new(addons)
         dialog.run
       end
 
+      # the constructor
+      # @param addons [Hash] list of configured addons
       def initialize(addons)
         textdomain "registration"
 
@@ -44,6 +50,8 @@ module Registration
 
       attr_reader :addons
 
+      # create the main dialog content
+      # @return [Yast::Term] UI definition
       def content
         header = Header(
           _("Identifier"),
@@ -67,6 +75,7 @@ module Registration
         )
       end
 
+      # fill the displayed dialog with data
       def load_data
         set_addon_table_content
 
@@ -74,12 +83,15 @@ module Registration
         Yast::UI.ChangeWidget(Id(:download), :Enabled, ::Registration::Registration.is_registered?)
       end
 
+      # enable Edit/Delete buttons if an addon is selected
       def refresh_buttons
         enabled = !selected_addon.nil?
         Yast::UI.ChangeWidget(Id(:edit), :Enabled, enabled)
         Yast::UI.ChangeWidget(Id(:delete), :Enabled, enabled)
       end
 
+      # the main event loop
+      # @return [Symbol] the user input
       def handle_dialog
         loop do
           refresh_buttons
@@ -104,6 +116,7 @@ module Registration
         ret
       end
 
+      # find the selected addon in the table
       def selected_addon
         current = Yast::UI.QueryWidget(Id(:addons_table), :CurrentItem)
         return nil unless current
@@ -111,10 +124,14 @@ module Registration
         find_addon(current)
       end
 
+      # find addon by name
+      # @param name [String] addon name
+      # @return [Hash,nil] the addon or nil if not found
       def find_addon(name)
         addons.find { |a| a["name"] == name }
       end
 
+      # remove the selected addon after user confirms the removal
       def delete_addon
         addon = selected_addon
         return unless Popup.YesNo(_("Really delete '%s'?") % addon["name"])
@@ -123,6 +140,7 @@ module Registration
         set_addon_table_content
       end
 
+      # display edit dialog and update the addon
       def edit_addon
         addon = selected_addon
         ret = display_addon_popup(addon)
@@ -133,6 +151,7 @@ module Registration
         set_addon_table_content(addon["name"])
       end
 
+      # display add addon popup, add the user added addon
       def add_addon
         ret = display_addon_popup
         return unless ret
@@ -148,6 +167,7 @@ module Registration
         set_addon_table_content(ret["name"])
       end
 
+      # update addons in the table
       def set_addon_table_content(current = nil)
         content = addons.map do |a|
           Item(Id(a["name"]), a["name"], a["version"], a["arch"],
@@ -158,6 +178,8 @@ module Registration
         Yast::UI.ChangeWidget(Id(:addons_table), :CurrentItem, current) if current
       end
 
+      # dialog definition for adding/editing an addon
+      # @return [Yast::Term] popup definition
       def addon_popup_content(addon)
         VBox(
           InputField(Id(:name), _("Extension or Module &Identifier"), addon["name"] || ""),
@@ -175,6 +197,9 @@ module Registration
         )
       end
 
+      # read the user values from popup and create a addon config
+      # @see #addon_popup_content
+      # @return [Hash] addon config
       def entered_addon
         release_type = Yast::UI.QueryWidget(Id(:release_type), :Value)
         release_type = nil if release_type == "nil"
@@ -188,6 +213,8 @@ module Registration
         }
       end
 
+      # display popup with the specified addon
+      # @return [Hash,nil] the addon entered by user or nil if canceled
       def display_addon_popup(addon = {})
         Yast::UI.OpenDialog(addon_popup_content(addon))
 

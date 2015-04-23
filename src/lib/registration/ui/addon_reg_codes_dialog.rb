@@ -17,7 +17,7 @@ module Registration
       Yast.import "Stage"
 
       # display and run the dialog for entering registration codes
-      # @param addons [Array<SUSE::Connect::Product] the selecte addons to register
+      # @param addons [Array<Addon>] the selecte addons to register
       # @param known_reg_codes [Hash] already entered reg. code, new reg. codes
       #   added by user will be added to the Hash
       # @return [Symbol] symbol of the pressed button
@@ -26,6 +26,10 @@ module Registration
         dialog.run
       end
 
+      # the constructor
+      # @param addons [Array<Addon>] the selecte addons to register
+      # @param known_reg_codes [Hash] already entered reg. code, new reg. codes
+      #   added by user will be added to the Hash
       def initialize(addons, known_reg_codes)
         textdomain "registration"
 
@@ -64,6 +68,8 @@ module Registration
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
 
+      # part of the UI - boxes with reg. code widgets
+      # @return [Array<Yast::Term>] UI definition
       def reg_code_boxes
         # display the second column if needed
         if addons_with_regcode.size > MAX_REGCODES_PER_COLUMN
@@ -157,7 +163,8 @@ module Registration
         addons.reject(&:free)
       end
 
-      # collect and update the entered reg codes from UI
+      # collect and update the entered reg codes from UI,
+      # updates the known reg. codes
       def collect_addon_regcodes
         pairs = addons_with_regcode.map do |a|
           [a.identifier, Yast::UI.QueryWidget(Id(a.identifier), :Value)]

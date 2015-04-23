@@ -5,6 +5,7 @@ require "registration/fingerprint"
 
 module Registration
   module UI
+    # this class displays and runs the main dialog for AutoYaST configuration
     class AutoyastConfigDialog
       include Yast::Logger
       include Yast::I18n
@@ -32,12 +33,16 @@ module Registration
       # (exclude the the on/off checkbox itself)
       STATUS_WIDGETS = ALL_WIDGETS - [:do_registration]
 
-      # create a new dialog for accepting importing a SSL certificate and run it
+      # display and run the dialog for configuring AutoYaST registration
+      # @param config [Registration::Storage::Config] AutoYaST configuration
+      # @return [Symbol] the user input
       def self.run(config)
         dialog = AutoyastConfigDialog.new(config)
         dialog.run
       end
 
+      # the constructor
+      # @param config [Registration::Storage::Config] AutoYaST configuration
       def initialize(config)
         textdomain "registration"
 
@@ -80,6 +85,8 @@ module Registration
 
       attr_reader :config
 
+      # the UI defition for the global registration status
+      # @return [Yast::Term] UI term
       def content_reg_settings
         VBox(
           Left(
@@ -89,6 +96,8 @@ module Registration
         )
       end
 
+      # the UI defition for the system registration credentials
+      # @return [Yast::Term] UI term
       def content_reg_code_settings
         VBox(
           # Translators: Text for UI Label - capitalized
@@ -107,6 +116,8 @@ module Registration
         )
       end
 
+      # the UI defition for the registration server options
+      # @return [Yast::Term] UI term
       def content_server_settings
         sha1   = ::Registration::Fingerprint::SHA1
         sha256 = ::Registration::Fingerprint::SHA256
@@ -160,6 +171,8 @@ module Registration
         )
       end
 
+      # the UI defition for the main dialog
+      # @return [Yast::Term] UI term
       def content
         extra_spacing = Yast::UI.TextMode ? 0 : 1
         VBox(
@@ -180,6 +193,7 @@ module Registration
         )
       end
 
+      # update widget states (enabled/disabled) according to the current status
       def refresh_widget_state
         enabled = Yast::UI.QueryWidget(Id(:do_registration), :Value)
 
@@ -199,6 +213,7 @@ module Registration
           fingeprint_enabled && enabled)
       end
 
+      # store the config data
       def store_config
         data = DATA_WIDGETS.map do |w|
           [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
@@ -210,6 +225,8 @@ module Registration
         config.import(import_data)
       end
 
+      # the main UI even loop
+      # @return [Symbol] the user input
       def handle_dialog
         loop do
           ret = Yast::UI.UserInput

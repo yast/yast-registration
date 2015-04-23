@@ -27,12 +27,14 @@ require "registration/helpers"
 
 module Registration
   # class for loading addon EULA translation mapping from a directory,
-  # the licenses attribute contains translations mapping { <locale> => <file_name> }
+  # the licenses attribute contains translations mapping { locale => file_name }
   class EulaReader
     attr_reader :base_dir, :licenses
 
     include Yast::Logger
 
+    # the constructor
+    # @param base_dir [String] the base directory with EULA translations
     def initialize(base_dir)
       @base_dir = base_dir
       read_licenses
@@ -55,6 +57,8 @@ module Registration
       fallback_language
     end
 
+    # list EULA traslations
+    # @return [Array<String>] list of languages (locales)
     def languages
       licenses.keys
     end
@@ -62,7 +66,6 @@ module Registration
     private
 
     # read downloaded EULAs
-    # @param dir [String] directory with EULA files
     def read_licenses
       @licenses = {}
       Dir["#{base_dir}/license.*"].each { |license| add_license_file(license) }
@@ -85,6 +88,7 @@ module Registration
     end
 
     # find a fallback language
+    # @return [String] the fallback language
     def fallback_language
       # use English fallback when present
       return "en_US" if languages.include?("en_US")
