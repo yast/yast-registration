@@ -85,9 +85,16 @@ module Registration
       (descr && !descr.empty?) ? "#{descr} (#{url})" : url
     end
 
+    # run the network configuration module
     def self.run_network_configuration
       log.info "Running network configuration..."
       Yast::WFM.call("inst_lan", [{ "skip_detection" => true }])
+    end
+
+    # check if the network configuration module is present
+    # @return [Boolean] true if the network configuration client is present
+    def self.network_configurable
+      Yast::WFM.ClientExists("inst_lan")
     end
 
     # return base version
