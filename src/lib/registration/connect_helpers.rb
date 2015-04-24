@@ -68,15 +68,13 @@ module Registration
         true
       rescue SocketError, Errno::ENETUNREACH => e
         log.error "Network error: #{e.class}: #{e.message}"
-        if (Yast::Mode.installation || Yast::Mode.update) &&
-            !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
-
+        if Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
           if Yast::Popup.YesNo(
             # Error popup
             _("Network is not configured, the registration server cannot be reached.\n" \
                 "Do you want to configure the network now?"))
 
-            ::Registration::Helpers.run_network_configuration
+            Helpers.run_network_configuration
           end
         else
           Yast::Report.Error(_("Network error, check the network configuration."))

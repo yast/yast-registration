@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Apr 24 06:56:06 UTC 2015 - lslezak@suse.cz
+
+- allow registering add-ons installed from media (fate#318505)
+- allow network configuration also in installed system
+- refactoring/cleanup
+- 3.1.130
+
+-------------------------------------------------------------------
 Wed Apr  8 15:31:18 UTC 2015 - lslezak@suse.cz
 
 - collect product rename also for the base product (the internal

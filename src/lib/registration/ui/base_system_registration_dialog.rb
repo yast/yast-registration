@@ -199,7 +199,7 @@ module Registration
       # UI term for the network configuration button (or empty if not needed)
       # @return [Yast::Term] UI term
       def network_button
-        return Empty() unless Yast::Mode.installation || Yast::Mode.update
+        return Empty() unless Helpers.network_configurable
 
         Right(PushButton(Id(:network), _("Network Configuration...")))
       end
