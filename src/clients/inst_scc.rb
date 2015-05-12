@@ -37,7 +37,8 @@ require "registration/url_helpers"
 require "registration/registration"
 require "registration/registration_ui"
 require "registration/ui/addon_eula_dialog"
-require "registration/ui/addon_selection_dialog"
+require "registration/ui/addon_selection_registration_dialog"
+require "registration/ui/addon_selection_reregistration_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/registered_system_dialog"
 require "registration/ui/base_system_registration_dialog"
@@ -138,7 +139,7 @@ module Yast
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
 
-      Registration::UI::AddonSelectionDialog.run(@registration)
+      Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
     end
 
     # load available addons from SCC server

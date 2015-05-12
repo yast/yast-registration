@@ -6,7 +6,7 @@ require "registration/addon_sorter"
 module Registration
   module UI
     # this class displays and runs the dialog with addon selection
-    class AddonSelectionDialog
+    class AddonSelectionBaseDialog
       include Yast::Logger
       include Yast::I18n
       include Yast::UIShortcuts
@@ -20,15 +20,6 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Stage"
 
-      # display and run the dialog with addon selection
-      # @param registration [Registration::Registration] use this Registration object for
-      #   communication with SCC
-      # @return [Symbol] user input symbol
-      def self.run(registration)
-        dialog = AddonSelectionDialog.new(registration)
-        dialog.run
-      end
-
       # constructor
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
@@ -38,6 +29,8 @@ module Registration
 
         # sort the addons
         @addons.sort!(&::Registration::ADDON_SORTER)
+        
+        @old_selection = Addon.selected.dup
 
         log.info "Available addons: #{@addons}"
       end
@@ -45,39 +38,21 @@ module Registration
       # display the extension selection dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
-        Wizard.SetContents(
-          # dialog title
-          _("Extension and Module Selection"),
-          content,
-          # help text (1/3)
-          _("<p>Here you can select available extensions and modules for your"\
-              "system.</p>") +
-          # help text (2/3)
-          _("<p>Please note, that some extensions or modules might need "\
-              "specific registration code.</p>") +
-          # help text (3/3)
-          _("<p>If you want to remove any extension or module you need to log"\
-              "into the SUSE Customer Center and remove them manually there.</p>"),
-          # always enable Back/Next, the dialog cannot be the first in workflow
-          true,
-          true
-        )
-
-        @old_selection = Addon.selected.dup
-
-        reactivate_dependencies
-
-        handle_dialog
+        raise "Not implented"
       end
 
       private
+
+      def heading
+        raise "Not implented"
+      end
 
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
         VBox(
           VStretch(),
-          Left(Heading(_("Available Extensions and Modules"))),
+          Left(Heading(heading)),
           addons_box,
           Left(Label(_("Details"))),
           MinHeight(8,
