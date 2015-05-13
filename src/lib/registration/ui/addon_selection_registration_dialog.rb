@@ -49,6 +49,10 @@ module Registration
         _("Available Extensions and Modules")
       end
 
+      def addon_selected?(addon)
+        addon.selected? || addon.registered?
+      end
+
       # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
         @addons.each do |addon|

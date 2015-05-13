@@ -81,6 +81,7 @@ module Registration
           PushButton(Id(:local_server), _("&Local Registration Server...")),
           VSpacing(Yast::UI.TextMode ? 0 : 3),
           skip_button,
+          reregister_extensions_button,
           VStretch()
         )
       end
@@ -91,6 +92,16 @@ module Registration
       def skip_button
         # button label
         Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
+      end
+
+      def reregister_extensions_button
+        # display the addon re-registration button only in registered installed system
+        return Empty() unless Registration.is_registered? && Yast::Mode.normal
+
+        VBox(
+          VSpacing(Yast::UI.TextMode ? 1 : 4),
+          PushButton(Id(:reregister_addons), _("&Register Extensions or Modules Again"))
+        )
       end
 
       # part of the main dialog definition - the base product details
@@ -133,7 +144,7 @@ module Registration
       # @return [Symbol] the user input
       def handle_dialog
         ret = nil
-        continue_buttons = [:next, :back, :cancel, :abort, :skip]
+        continue_buttons = [:next, :back, :cancel, :abort, :skip, :reregister_addons]
 
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput

@@ -47,6 +47,10 @@ module Registration
         raise "Not implented"
       end
 
+      def addon_selected?(_addon)
+        raise "Not implented"
+      end
+
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
@@ -128,10 +132,7 @@ module Registration
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
-        CheckBox(Id(addon.identifier),
-          Opt(:notify),
-          label,
-          addon.selected? || addon.registered?)
+        CheckBox(Id(addon.identifier), Opt(:notify), label, addon_selected?(addon))
       end
 
       # the main event loop - handle the user in put in the dialog

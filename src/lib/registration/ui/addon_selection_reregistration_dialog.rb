@@ -21,7 +21,7 @@ module Registration
         super(registration)
 
         # filter out the unregistered addons
-        @addons.select!(&:registered)
+        @addons.select!(&:registered?)
 
         log.info "Registered addons: #{@addons}"
       end
@@ -55,6 +55,10 @@ module Registration
       # @return [String] the main dialog label
       def heading
         _("Registered Extensions and Modules")
+      end
+
+      def addon_selected?(addon)
+        addon.selected?
       end
 
       # empty implementation, allow reregistration of a dependant addon
