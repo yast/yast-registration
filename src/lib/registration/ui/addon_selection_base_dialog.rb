@@ -29,7 +29,7 @@ module Registration
 
         # sort the addons
         @addons.sort!(&::Registration::ADDON_SORTER)
-        
+
         @old_selection = Addon.selected.dup
 
         log.info "Available addons: #{@addons}"

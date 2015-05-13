@@ -5,7 +5,6 @@ module Registration
   module UI
     # this class displays and runs the dialog with addon selection
     class AddonSelectionRegistrationDialog < AddonSelectionBaseDialog
-
       # display and run the dialog with addon selection
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
@@ -44,10 +43,10 @@ module Registration
       end
 
       private
-      
+
       # @return [String] the main dialog label
       def heading
-          _("Available Extensions and Modules")
+        _("Available Extensions and Modules")
       end
 
       # update the enabled/disabled status in UI for dependent addons
@@ -56,7 +55,6 @@ module Registration
           Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, addon.selectable?)
         end
       end
-
     end
   end
 end

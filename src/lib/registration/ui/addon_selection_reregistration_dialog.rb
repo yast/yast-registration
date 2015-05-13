@@ -5,7 +5,6 @@ module Registration
   module UI
     # this class displays and runs the dialog with addon selection
     class AddonSelectionReregistrationDialog < AddonSelectionBaseDialog
-
       # display and run the dialog with addon selection
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
@@ -52,17 +51,16 @@ module Registration
       end
 
       private
-      
+
       # @return [String] the main dialog label
       def heading
-          _("Registered Extensions and Modules")
+        _("Registered Extensions and Modules")
       end
 
       # empty implementation, allow reregistration of a dependant addon
       # without reregistering its parent
       def reactivate_dependencies
       end
-
     end
   end
 end
