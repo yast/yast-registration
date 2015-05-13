@@ -1,7 +1,7 @@
 require_relative "spec_helper"
 
-describe Registration::UI::AddonSelectionDialog do
-  subject { Registration::UI::AddonSelectionDialog }
+describe Registration::UI::AddonSelectionRegistrationDialog do
+  subject { Registration::UI::AddonSelectionRegistrationDialog }
 
   before(:each) do
     # generic UI stubs for the wizard dialog
