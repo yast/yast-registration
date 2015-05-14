@@ -1,3 +1,4 @@
+# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 
 require "registration/ui/addon_selection_base_dialog"
 
@@ -12,6 +13,14 @@ module Registration
       def self.run(registration)
         dialog = AddonSelectionRegistrationDialog.new(registration)
         dialog.run
+      end
+
+      # constructor
+      # @param registration [Registration::Registration] use this Registration object for
+      #   communication with SCC
+      def initialize(registration)
+        textdomain "registration"
+        super(registration)
       end
 
       # display the extension selection dialog and wait for a button click

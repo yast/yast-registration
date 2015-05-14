@@ -1,3 +1,4 @@
+# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 
 require "yast"
 require "registration/addon"

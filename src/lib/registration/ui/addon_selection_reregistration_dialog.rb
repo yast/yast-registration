@@ -1,3 +1,4 @@
+# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 
 require "registration/ui/addon_selection_base_dialog"
 
@@ -18,6 +19,8 @@ module Registration
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
       def initialize(registration)
+        textdomain "registration"
+
         super(registration)
 
         # filter out the unregistered addons
