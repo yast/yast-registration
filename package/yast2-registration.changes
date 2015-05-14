@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 14 13:31:12 UTC 2015 - lslezak@suse.cz
+
+- added support for re-registering extensions and modules
+  (FATE#318800)
+- 3.1.131
+
+-------------------------------------------------------------------
 Fri Apr 24 06:56:06 UTC 2015 - lslezak@suse.cz
 
 - allow registering add-ons installed from media (fate#318505)
