@@ -67,10 +67,10 @@ module Registration
           Heading(_("The system is already registered.")),
           VSpacing(2),
           # button label
-          PushButton(Id(:register), _("Register Again")),
+          PushButton(Id(:extensions), _("Select Extensions")),
           VSpacing(1),
           # button label
-          PushButton(Id(:extensions), _("Select Extensions"))
+          PushButton(Id(:register), _("Register Again"))
         )
       end
     end
