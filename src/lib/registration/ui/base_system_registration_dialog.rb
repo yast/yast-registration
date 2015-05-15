@@ -52,10 +52,7 @@ module Registration
         )
 
         # disable the input fields when already registered
-        if Registration.is_registered? && !Yast::Mode.normal
-          Yast::UI.ChangeWidget(Id(:email), :Enabled, false)
-          Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, false)
-        end
+        disable_widgets if Registration.is_registered? && !Yast::Mode.normal
 
         handle_dialog
       end
@@ -66,6 +63,11 @@ module Registration
 
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
+
+      def disable_widgets
+        Yast::UI.ChangeWidget(Id(:email), :Enabled, false)
+        Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+      end
 
       # content for the main registration dialog
       # @return [Yast::Term]  UI term

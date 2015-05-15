@@ -65,11 +65,17 @@ module Registration
           Left(Heading(heading)),
           addons_box,
           Left(Label(_("Details"))),
-          MinHeight(8,
-            VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                  _("Select an extension or a module to show details here") + "</small>"))
-          ),
+          details_widget,
           VStretch()
+        )
+      end
+
+      # addon description widget
+      # @return [Yast::Term] the addon details widget
+      def details_widget
+        MinHeight(8,
+          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
+                _("Select an extension or a module to show details here") + "</small>"))
         )
       end
 
@@ -81,16 +87,25 @@ module Registration
         if @addons.size <= lines
           content = addon_selection_items(@addons)
         else
-          box2 = addon_selection_items(@addons[lines..(2 * lines - 1)])
-          box2.params << VStretch() # just UI tweak
-          content = HBox(
-            addon_selection_items(@addons[0..(lines - 1)]),
-            HSpacing(1),
-            box2
-          )
+          content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
         end
 
         VWeight(75, MarginBox(2, 1, content))
+      end
+
+      # display the addon checkboxes in two columns
+      # @param col1 [Array<Addon>] the addons displayed in the first column
+      # @param col2 [Array<Addon>] the addons displayed in the second column
+      # @return [Yast::Term] the addon cheboxes
+      def two_column_layout(col1, col2)
+        box2 = addon_selection_items(col1)
+        box2.params << VStretch() # just UI tweak
+
+        HBox(
+          addon_selection_items(col2),
+          HSpacing(1),
+          box2
+        )
       end
 
       # create a single UI column with addon checkboxes
@@ -213,12 +228,11 @@ module Registration
       # @return [Boolean] true if the number of the required reg. codes fits
       #  the maximum limit
       def supported_addon_count?
-        need_regcode = Addon.selected.reject(&:registered?).reject(&:free)
         # maximum number or reg codes which can be displayed in two column layout
         max_supported = 2 * MAX_REGCODES_PER_COLUMN
 
-        # check the addons requiring a reg. code
-        if need_regcode.size > max_supported
+        # check if the count of addons requiring a reg. code fits two columns
+        if Addon.selected.count { |a| a.registered? && a.free } > max_supported
           Report.Error(_("YaST allows to select at most %s extensions or modules.") % max_supported)
           return false
         end
