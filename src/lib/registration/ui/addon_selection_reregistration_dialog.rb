@@ -38,13 +38,7 @@ module Registration
           content,
           # help text (1/3)
           _("<p>Here you can select extensions and modules which will be "\
-              "registered again.</p>") +
-          # help text (2/3)
-          _("<p>Please note, that some extensions or modules might need "\
-              "specific registration code.</p>") +
-          # help text (3/3)
-          _("<p>If you want to remove any extension or module you need to log"\
-              "into the SUSE Customer Center and remove them manually there.</p>"),
+              "registered again.</p>") + generic_help_text,
           # always enable Back/Next, the dialog cannot be the first in workflow
           true,
           true

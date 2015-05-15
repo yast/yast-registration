@@ -250,7 +250,7 @@ module Yast
     def workflow_aliases
       {
         # skip this when going back
-        "check"                  => [->() { registration_check }, true],
+        "check"                  => ->() { registration_check },
         "register"               => ->() { register_base_system },
         "select_addons"          => ->() { select_addons },
         "select_addons_rereg"    => ->() { select_addons(reregistration: true) },
@@ -298,6 +298,7 @@ module Yast
         },
         "select_addons_rereg"    => {
           abort:  :abort,
+          skip:   "check",
           cancel: "check",
           next:   "reregister_addons"
         },

@@ -47,7 +47,7 @@ module Registration
           _("Registration"),
           content,
           help_text,
-          Yast::GetInstArgs.enable_back,
+          Yast::GetInstArgs.enable_back || (Yast::Mode.normal && Registration.is_registered?),
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
@@ -157,7 +157,7 @@ module Registration
           when :next
             ret = handle_registration
           when :abort
-            ret = nil unless Yast::Popup.ConfirmAbort(:painless)
+            ret = nil unless Yast::Mode.normal || Yast::Popup.ConfirmAbort(:painless)
           when :skip
             ret = nil unless confirm_skipping
           end

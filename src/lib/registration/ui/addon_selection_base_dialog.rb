@@ -225,6 +225,17 @@ module Registration
 
         true
       end
+
+      # shared part of the help text
+      # @return [String] translated help text
+      def generic_help_text
+        # help text (2/3)
+        _("<p>Please note, that some extensions or modules might need "\
+            "specific registration code.</p>") +
+          # help text (3/3)
+          _("<p>If you want to remove any extension or module you need to log"\
+              "into the SUSE Customer Center and remove them manually there.</p>")
+      end
     end
   end
 end
