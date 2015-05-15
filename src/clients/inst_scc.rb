@@ -73,7 +73,6 @@ module Yast
       Yast.import "Popup"
       Yast.import "GetInstArgs"
       Yast.import "Wizard"
-      Yast.import "Report"
       Yast.import "Mode"
       Yast.import "Stage"
       Yast.import "Label"
@@ -162,28 +161,12 @@ module Yast
       registration_ui.register_addons(@selected_addons, @known_reg_codes)
     end
 
-    def report_no_base_product
-      # error message
-      msg = _("The base product was not found,\ncheck your system.") + "\n\n"
-
-      if Stage.initial
-        # TRANSLATORS: %s = bugzilla URL
-        msg += _("The installation medium or the installer itself is seriously broken.\n" \
-            "Report a bug at %s.") % "https://bugzilla.suse.com"
-      else
-        msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
-            "is a symlink pointing to the base product .prod file.")
-      end
-
-      Report.Error(msg)
-    end
-
     # do some sanity checks and decide which workflow will be used
     # return [Symbol] :update
     def registration_check
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
-        report_no_base_product
+        ::Registration::Helpers.report_no_base_product
         return Mode.normal ? :abort : :auto
       end
 

@@ -40,6 +40,8 @@ module Registration
     Yast.import "Installation"
     Yast.import "Linuxrc"
     Yast.import "Mode"
+    Yast.import "Stage"
+    Yast.import "Report"
     Yast.import "SlpService"
 
     # reg. code replacement
@@ -222,6 +224,22 @@ module Registration
       end
 
       filtered
+    end
+
+    def self.report_no_base_product
+      # error message
+      msg = _("The base product was not found,\ncheck your system.") + "\n\n"
+
+      if Yast::Stage.initial
+        # TRANSLATORS: %s = bugzilla URL
+        msg += _("The installation medium or the installer itself is seriously broken.\n" \
+            "Report a bug at %s.") % "https://bugzilla.suse.com"
+      else
+        msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
+            "is a symlink pointing to the base product .prod file.")
+      end
+
+      Yast::Report.Error(msg)
     end
   end
 end
