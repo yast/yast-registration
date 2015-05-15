@@ -24,7 +24,7 @@ module Registration
       end
 
       # display the extension selection dialog and wait for a button click
-      # @return [Symbol] user input (:import, :cancel)
+      # @return [Symbol] user input
       def run
         Wizard.SetContents(
           # dialog title
@@ -58,6 +58,7 @@ module Registration
         _("Available Extensions and Modules")
       end
 
+      # @return [Boolean] is the addon selected?
       def addon_selected?(addon)
         addon.selected? || addon.registered?
       end

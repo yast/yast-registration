@@ -36,20 +36,25 @@ module Registration
         log.info "Available addons: #{@addons}"
       end
 
+      # reimplement this in a subclass
       # display the extension selection dialog and wait for a button click
-      # @return [Symbol] user input (:import, :cancel)
+      # @return [Symbol] user input
       def run
-        raise "Not implented"
+        raise "Not implemented"
       end
 
       private
 
+      # reimplement this in a subclass
+      # @return [String] dialog head
       def heading
-        raise "Not implented"
+        raise "Not implemented"
       end
 
+      # reimplement this in a subclass
+      # @return [Boolean] is the addon selected?
       def addon_selected?(_addon)
-        raise "Not implented"
+        raise "Not implemented"
       end
 
       # create the main dialog definition
