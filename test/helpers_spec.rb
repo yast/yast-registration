@@ -243,4 +243,28 @@ describe "Registration::Helpers" do
       expect(test).to eq("addons" => [{ "reg_code" => "foo" }, { "reg_code" => "bar" }])
     end
   end
+
+  describe ".report_no_base_product" do
+    context "in installation" do
+      before do
+        allow(Yast::Stage).to receive(:initial).and_return(true)
+      end
+
+      it "Reports an error about broken medium" do
+        expect(Yast::Report).to receive(:Error).with(/base product was not found/)
+        Registration::Helpers.report_no_base_product
+      end
+    end
+
+    context "in installed system" do
+      before do
+        allow(Yast::Stage).to receive(:initial).and_return(false)
+      end
+
+      it "Reports an error about missing base product" do
+        expect(Yast::Report).to receive(:Error).with(/Make sure a product is installed/)
+        Registration::Helpers.report_no_base_product
+      end
+    end
+  end
 end

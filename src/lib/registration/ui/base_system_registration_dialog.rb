@@ -47,15 +47,12 @@ module Registration
           _("Registration"),
           content,
           help_text,
-          Yast::GetInstArgs.enable_back,
+          Yast::GetInstArgs.enable_back || (Yast::Mode.normal && Registration.is_registered?),
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
         # disable the input fields when already registered
-        if Registration.is_registered? && !Yast::Mode.normal
-          Yast::UI.ChangeWidget(Id(:email), :Enabled, false)
-          Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, false)
-        end
+        disable_widgets if Registration.is_registered? && !Yast::Mode.normal
 
         handle_dialog
       end
@@ -66,6 +63,11 @@ module Registration
 
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
+
+      def disable_widgets
+        Yast::UI.ChangeWidget(Id(:email), :Enabled, false)
+        Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+      end
 
       # content for the main registration dialog
       # @return [Yast::Term]  UI term
@@ -81,6 +83,7 @@ module Registration
           PushButton(Id(:local_server), _("&Local Registration Server...")),
           VSpacing(Yast::UI.TextMode ? 0 : 3),
           skip_button,
+          reregister_extensions_button,
           VStretch()
         )
       end
@@ -91,6 +94,16 @@ module Registration
       def skip_button
         # button label
         Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
+      end
+
+      def reregister_extensions_button
+        # display the addon re-registration button only in registered installed system
+        return Empty() unless Registration.is_registered? && Yast::Mode.normal
+
+        VBox(
+          VSpacing(Yast::UI.TextMode ? 1 : 4),
+          PushButton(Id(:reregister_addons), _("&Register Extensions or Modules Again"))
+        )
       end
 
       # part of the main dialog definition - the base product details
@@ -133,7 +146,7 @@ module Registration
       # @return [Symbol] the user input
       def handle_dialog
         ret = nil
-        continue_buttons = [:next, :back, :cancel, :abort, :skip]
+        continue_buttons = [:next, :back, :cancel, :abort, :skip, :reregister_addons]
 
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
@@ -146,7 +159,7 @@ module Registration
           when :next
             ret = handle_registration
           when :abort
-            ret = nil unless Yast::Popup.ConfirmAbort(:painless)
+            ret = nil unless Yast::Mode.normal || Yast::Popup.ConfirmAbort(:painless)
           when :skip
             ret = nil unless confirm_skipping
           end
