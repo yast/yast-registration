@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun  2 13:03:10 UTC 2015 - gs@suse.de
+
+- Renamed the module from "SUSE Customer Center Configuration" to
+  "Product Registration" (FATE#318800).
+- 3.1.132
+
+-------------------------------------------------------------------
 Thu May 14 13:31:12 UTC 2015 - lslezak@suse.cz
 
 - added support for re-registering extensions and modules
