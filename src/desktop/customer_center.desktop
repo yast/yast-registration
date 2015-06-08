@@ -15,6 +15,6 @@ X-SuSE-YaST-AutoInstResource=suse_register
 Icon=yast-product-registration
 Exec=/sbin/yast2 scc
 
-Name=Product Registration
-GenericName=Product Registration
+Name=System Registration
+GenericName=System Registration
 StartupNotify=true
