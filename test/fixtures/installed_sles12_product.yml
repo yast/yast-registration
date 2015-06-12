@@ -1,0 +1,7 @@
+---
+- !ruby/object:SUSE::Connect::Remote::Product
+  table:
+    :arch: x86_64
+    :identifier: SLES
+    :version: '12'
+    :release_type: DVD

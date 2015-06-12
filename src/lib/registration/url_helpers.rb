@@ -59,6 +59,7 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
+      log.info "Evaluating the registration URL in #{Yast::Mode.mode.inspect} mode"
       # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
       # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
       url = case Yast::Mode.mode
@@ -120,6 +121,9 @@ module Registration
 
     # get registration URL in upgrade mode
     def self.reg_url_at_upgrade
+      # in online upgrade mode behave like in installed system
+      return reg_url_at_runnig_system if Yast::Installation.destdir == "/"
+
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 

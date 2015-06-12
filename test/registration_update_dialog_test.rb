@@ -16,7 +16,7 @@ describe Registration::UI::RegistrationUpdateDialog do
         :update_system).and_return(true)
       allow_any_instance_of(Registration::RegistrationUI).to receive(
         :update_base_product).and_return(
-          [true, YAML.load_file(fixtures_file("remote_product.yml"))])
+          [true, load_yaml_fixture("remote_product.yml")])
       allow_any_instance_of(Registration::RegistrationUI).to receive(
         :install_updates?).and_return(false)
       allow_any_instance_of(Registration::RegistrationUI).to receive(
