@@ -28,7 +28,8 @@ License:        GPL-2.0
 
 # Popup.Feedback
 Requires:       yast2 >= 3.1.26
-Requires:       yast2-pkg-bindings >= 2.17.20
+# fixed service removal
+Requires:       yast2-pkg-bindings >= 3.1.20.1
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem(suse-connect) >= 0.2.18

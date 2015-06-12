@@ -32,6 +32,7 @@ module Registration
   class RegistrationUI
     include Yast::Logger
     include Yast::I18n
+    include Yast::UIShortcuts
     extend Yast::I18n
 
     # popup message
@@ -179,6 +180,63 @@ module Registration
       update_repos = SwMgmt.service_repos(product_service, only_updates: true)
       log.info "Disabling #{update_repos.size} update repositories: #{update_repos}"
       SwMgmt.set_repos_state(update_repos, false)
+    end
+
+    def migration_products(products)
+      Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        _("Loading Migration Products...")) do
+        registration.migration_products(products)
+      end
+    end
+
+    # Register the selected addons, asks for reg. codes if required, known_reg_codes
+    # @param selected_addons [Array<Addon>] list of addons selected for registration,
+    #   successfully registered addons are removed from the list
+    # @param known_reg_codes [Hash] remembered reg. code, it's updated with the
+    #   user entered values
+    # @return [Symbol]
+    def register_addons(selected_addons, known_reg_codes)
+      # if registering only add-ons which do not need a reg. code (like SDK)
+      # then simply start the registration
+      if selected_addons.all?(&:free)
+        Yast::Wizard.SetContents(
+          # dialog title
+          _("Register Extensions and Modules"),
+          # display only the products which need a registration code
+          Empty(),
+          # help text
+          _("<p>Extensions and Modules are being registered.</p>"),
+          false,
+          false
+        )
+        # when registration fails go back
+        return register_selected_addons(selected_addons, known_reg_codes) ? :next : :back
+      else
+        loop do
+          ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
+          return ret unless ret == :next
+
+          return :next if register_selected_addons(selected_addons, known_reg_codes)
+        end
+      end
+    end
+
+    def install_updates?
+      # ask only at installation/update
+      return true unless Yast::Mode.installation || Yast::Mode.update
+
+      options = Storage::InstallationOptions.instance
+
+      # not set yet?
+      if options.install_updates.nil?
+        options.install_updates = Yast::Popup.YesNo(
+          _("Registration added some update repositories.\n\n" \
+              "Do you want to install the latest available\n" \
+              "on-line updates during installation?"))
+      end
+
+      options.install_updates
     end
 
     private

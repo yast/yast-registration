@@ -4,8 +4,8 @@ require_relative "spec_helper"
 require "yaml"
 
 describe "Registration::ADDON_SORTER" do
-  let(:available_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
-  let(:unknown_addons) { YAML.load_file(fixtures_file("available_unknown_addons.yml")) }
+  let(:available_addons) { load_yaml_fixture("available_addons.yml") }
+  let(:unknown_addons) { load_yaml_fixture("available_unknown_addons.yml") }
 
   it "sorts the addons in display order" do
     expected = [

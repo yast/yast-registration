@@ -165,5 +165,12 @@ module Registration
     def updates_addon?(old_addon)
       old_addon["name"] == identifier || old_addon["name"] == @pure_addon.former_identifier
     end
+
+    def matches_remote_product?(remote_product)
+      arch == remote_product.arch &&
+        identifier == remote_product.identifier &&
+        version  == remote_product.version &&
+        release_type == remote_product.release_type
+    end
   end
 end
