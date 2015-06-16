@@ -105,7 +105,7 @@ module Registration
                   "%s to speed up the synchronization process.\n" \
                   "Just wait several minutes after logging in and then retry \n" \
                   "the upgrade again.") % \
-                SUSE::Connect::Client::DEFAULT_URL
+                SUSE::Connect::Config::DEFAULT_URL
             end
 
             # add the hint to the error details
