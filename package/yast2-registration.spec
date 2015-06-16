@@ -31,12 +31,7 @@ Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 2.17.20
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
-# Connect in 0.2.14.42 from Updates is the very same as the 0.2.14 version
-# from SLE-12-GA, the version is just used to distinguish between the original
-# unpatched registration from GA and the registration with a fix for
-# bsc#949424. (The Connect version is included in the request header and
-# the SCC server then can handle the GA registration differently).
-Requires:       rubygem(suse-connect) >= 0.2.14.42
+Requires:       rubygem(suse-connect) >= 0.2.18
 Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.26
@@ -46,7 +41,7 @@ BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem(yast-rake) >= 0.1.8
 BuildRequires:  rubygem(rspec)
-BuildRequires:  rubygem(suse-connect) >= 0.2.0
+BuildRequires:  rubygem(suse-connect) >= 0.2.18
 BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.26
 
