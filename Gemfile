@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # FIXME: use a correct branch here...
-gem "suse-connect", github: "SUSE/connect", branch: "v0.2.14"
+gem "suse-connect", github: "SUSE/connect", branch: "v0.2.18"
 
 group :test do
   gem "rake"
