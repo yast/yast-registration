@@ -74,6 +74,22 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run).to eq(:next)
       end
 
+      it "does not install updates if required" do
+        set_success_expectations
+
+        # an update available
+        expect_any_instance_of(Registration::MigrationRepositories).to \
+          receive(:has_update_repo?).and_return(true)
+        # user requestes skipping updates
+        expect_any_instance_of(Registration::RegistrationUI).to receive(:install_updates?)
+          .and_return(false)
+
+        # make sure the updates are disabled
+        expect_any_instance_of(Registration::MigrationRepositories).to \
+          receive(:install_updates=).with(false)
+        expect(subject.run).to eq(:next)
+      end
+
       it "reports error and aborts when no installed product is found" do
         expect(Registration::SwMgmt).to receive(:installed_products)
           .and_return([])

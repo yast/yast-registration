@@ -17,7 +17,7 @@ require "yast"
 require "registration/sw_mgmt"
 
 module Registration
-  # this class displays and runs the dialog with addon selection
+  # this class activates the migration repositories
   class MigrationRepositories
     include Yast::Logger
 
@@ -37,7 +37,9 @@ module Registration
     attr_accessor :repositories, :install_updates
 
     def initialize
-      self.repositories = []
+      @repositories = []
+      # install updates by default
+      @install_updates = true
     end
 
     def add_service(service_name)
@@ -45,19 +47,41 @@ module Registration
       repositories.concat(service_repos)
     end
 
-    def activate
-      # be compatible with "zypper dup --from"
-      log.info "Disabling recommended packages for already installed packages"
-      Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true)
+    # is any migration repo an update repo?
+    # @return [Boolean] true if at least one migration repository is an update
+    #   repository
+    def has_update_repo?
+      repositories.any? { |repo| repo["is_update_repo"] }
+    end
 
-      log.info "Adding upgrade repos: #{repositories.map { |repo| repo["alias"] }}"
-      repositories.each { |repo| Yast::Pkg.AddUpgradeRepo(repo["SrcId"]) }
+    # activate the migration repositories to install the updates
+    def activate
+      set_solver
+
+      repositories.each do |repo|
+        if repo["is_update_repo"] && !install_updates
+          log.info "Skipping update repository: #{repo["alias"]}"
+        else
+          log.info "Adding upgrade repo: #{repo["alias"]}"
+          Yast::Pkg.AddUpgradeRepo(repo["SrcId"])
+        end
+      end
 
       Yast::Pkg.PkgSolve(false)
 
-      return unless install_updates
+      select_patches if install_updates
+    end
 
-      # preselect all applicable patches (except optional ones)
+    private
+
+    # set some solver flags to be compatible with "zypper dup --from"
+    def set_solver
+      log.info "Disabling recommended packages for already installed packages"
+      Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true)
+    end
+
+    # preselect all applicable patches (except optional ones)
+    def select_patches
       patches_count = Yast::Pkg.ResolvablePreselectPatches(:all)
       log.info "Preselected patches: #{patches_count}"
     end

@@ -47,5 +47,13 @@ describe Registration::MigrationRepositories do
 
       subject.activate
     end
+
+    it "skips update repositories if updates should not be installed" do
+      subject.install_updates = false
+      subject.repositories << { "SrcId" => 44, "is_update_repo" => true }
+      expect(Yast::Pkg).to_not receive(:AddUpgradeRepo).with(44)
+
+      subject.activate
+    end
   end
 end
