@@ -248,9 +248,12 @@ module Registration
       def activate_migration_repos
         log.info "Activating the migration repositories"
         migration_repos = ::Registration::MigrationRepositories.new
-
         registered_services.each do |service|
           migration_repos.add_service(service)
+        end
+
+        if migration_repos.has_update_repo?
+          migration_repos.install_updates = registration_ui.install_updates?
         end
 
         migration_repos.activate
