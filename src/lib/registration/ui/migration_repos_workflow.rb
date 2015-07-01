@@ -207,8 +207,8 @@ module Registration
           Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
             # TRANSLATORS: Progress label
             _("Registering Migration Products...")) do
-            selected_migration.each do |product|
-              return :abort unless register_migration_product(product)
+            if !selected_migration.all? { |product| register_migration_product(product) }
+              return :abort
             end
           end
         ensure
