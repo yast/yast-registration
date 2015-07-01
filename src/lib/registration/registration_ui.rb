@@ -150,6 +150,14 @@ module Registration
       SwMgmt.set_repos_state(update_repos, false)
     end
 
+    def migration_products(products)
+      Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        _("Loading Migration Products...")) do
+        registration.migration_products(products)
+      end
+    end
+
     # Register the selected addons, asks for reg. codes if required, known_reg_codes
     # @param selected_addons [Array<Addon>] list of addons selected for registration,
     #   successfully registered addons are removed from the list

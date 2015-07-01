@@ -22,7 +22,7 @@ describe "Registration::RegistrationUI" do
       "version"      => "12"
     }
   end
-  let(:remote_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+  let(:remote_addons) { load_yaml_fixture("available_addons.yml") }
   let(:addon_HA) { remote_addons[0] }
   let(:addon_HA_GEO) { remote_addons[1] }
   let(:addon_legacy) { remote_addons[4] }
@@ -71,7 +71,7 @@ describe "Registration::RegistrationUI" do
       expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       expect(Registration::SwMgmt).to receive(:base_product_to_register)
         .and_return(base_product_to_register)
-      remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
+      remote_product = load_yaml_fixture("remote_product.yml")
       expect(registration).to receive(:upgrade_product).with(base_product_to_register)
         .and_return(remote_product)
 
@@ -135,6 +135,22 @@ describe "Registration::RegistrationUI" do
       allow(registration_ui).to receive(:register_selected_addons).and_return false
 
       expect(registration_ui.register_addons([addon_legacy], {})).to eq :back
+    end
+  end
+
+  describe "#migration_products" do
+    let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
+    let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }
+
+    it "returns migration products from the server with UI feedback" do
+      allow(Yast::UI).to receive(:OpenDialog)
+      allow(Yast::UI).to receive(:CloseDialog)
+
+      expect(registration).to receive(:migration_products)
+        .with(installed_products)
+        .and_return(migration_products)
+
+      expect(registration_ui.migration_products(installed_products)).to eq(migration_products)
     end
   end
 end

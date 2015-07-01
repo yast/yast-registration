@@ -32,7 +32,7 @@ describe "Registration::Registration" do
   # product registration and product upgrade behave the same, they only
   # call a different connect funtion internally
   shared_examples "add_product" do |connect_method, yast_method|
-    let(:available_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+    let(:available_addons) { load_yaml_fixture("available_addons.yml") }
 
     it "adds the selected product and returns added zypp services" do
       product = {
@@ -114,7 +114,7 @@ describe "Registration::Registration" do
     end
 
     it "downloads available extensions" do
-      remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
+      remote_product = load_yaml_fixture("remote_product.yml")
       expect(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
       # no product renames defined
       expect(Registration::SwMgmt).to receive(:update_product_renames).with({})
@@ -165,6 +165,19 @@ describe "Registration::Registration" do
 
       # the exception is re-raised
       expect { callback.call(false, context) }.to raise_error OpenSSL::X509::CertificateError
+    end
+  end
+
+  describe "#migration_products" do
+    let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
+    let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }
+
+    it "returns migration products from the server" do
+      expect(SUSE::Connect::YaST).to receive(:system_migrations)
+        .with(installed_products)
+        .and_return(migration_products)
+      result = Registration::Registration.new.migration_products(installed_products)
+      expect(result).to eq(migration_products)
     end
   end
 end

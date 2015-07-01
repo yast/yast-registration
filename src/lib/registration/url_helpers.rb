@@ -59,13 +59,14 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
+      log.info "Evaluating the registration URL in #{Yast::Mode.mode.inspect} mode"
       # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
       # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
       url = case Yast::Mode.mode
       when "installation"
         reg_url_at_installation
       when "normal"
-        reg_url_at_runnig_system
+        reg_url_at_running_system
       when "update"
         reg_url_at_upgrade
       else
@@ -120,6 +121,9 @@ module Registration
 
     # get registration URL in upgrade mode
     def self.reg_url_at_upgrade
+      # in online upgrade mode behave like in installed system
+      return reg_url_at_running_system if Yast::Installation.destdir == "/"
+
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
@@ -150,7 +154,7 @@ module Registration
     end
 
     # get registration URL in running system
-    def self.reg_url_at_runnig_system
+    def self.reg_url_at_running_system
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
@@ -172,7 +176,7 @@ module Registration
       reg_url
     end
 
-    private_class_method :reg_url_at_runnig_system, :reg_url_at_upgrade,
+    private_class_method :reg_url_at_running_system, :reg_url_at_upgrade,
       :reg_url_at_installation, :boot_reg_url
 
     def self.slp_service_url

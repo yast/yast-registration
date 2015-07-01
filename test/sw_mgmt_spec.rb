@@ -203,9 +203,9 @@ describe Registration::SwMgmt do
     it "returns new available addons for installed addons" do
       # installed: SLES11-SP2 + SLE11-SP2-SDK + SLE11-SP2-Webyast
       expect(Yast::Pkg).to receive(:ResolvableProperties).with("", :product, "") \
-        .and_return(YAML.load_file(fixtures_file("products_sp2_update.yml")))
+        .and_return(load_yaml_fixture("products_sp2_update.yml"))
       # available: SDK, HA, HA-GEO, ...
-      available_addons = YAML.load_file(fixtures_file("available_addons.yml"))
+      available_addons = load_yaml_fixture("available_addons.yml")
 
       addon_updates = subject.find_addon_updates(available_addons)
       # an update only for SDK addon is available
@@ -217,14 +217,14 @@ describe Registration::SwMgmt do
 
   describe ".select_addon_products" do
     it "selects new addon products for installation" do
-      legacy_services = YAML.load_file(fixtures_file("legacy_module_services.yml"))
+      legacy_services = load_yaml_fixture("legacy_module_services.yml")
 
       expect(::Registration::Storage::Cache).to receive(:instance)
         .and_return(double("addon_services" => legacy_services))
       expect(subject).to receive(:service_repos).with(legacy_services.first)
-        .and_return(YAML.load_file(fixtures_file("legacy_module_repositories.yml")))
+        .and_return(load_yaml_fixture("legacy_module_repositories.yml"))
       expect(Yast::Pkg).to receive(:ResolvableProperties)
-        .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+        .and_return(load_yaml_fixture("products_legacy_installation.yml"))
       expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
 
       subject.select_addon_products
@@ -234,7 +234,7 @@ describe Registration::SwMgmt do
   describe ".products_from_repo" do
     before do
       expect(Yast::Pkg).to receive(:ResolvableProperties)
-        .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
+        .and_return(load_yaml_fixture("products_legacy_installation.yml"))
     end
 
     it "Returns product resolvables from the specified repository" do
@@ -248,10 +248,10 @@ describe Registration::SwMgmt do
 
   describe ".select_product_addons" do
     # just the sle-module-legacy product
-    let(:products) { [YAML.load_file(fixtures_file("products_legacy_installation.yml")).first] }
+    let(:products) { [load_yaml_fixture("products_legacy_installation.yml").first] }
 
     it "selects remote addons matching the product resolvables" do
-      available_addons = YAML.load_file(fixtures_file("available_addons.yml"))
+      available_addons = load_yaml_fixture("available_addons.yml")
 
       # expect the sle-module-legacy product to be selected
       expect(available_addons[4]).to receive(:selected)
@@ -263,6 +263,58 @@ describe Registration::SwMgmt do
 
       expect(Yast::Report).to receive(:Error).with(/Cannot find remote product/)
       subject.select_product_addons(products, available_addons)
+    end
+  end
+
+  describe ".installed_products" do
+    let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+
+    it "returns installed products" do
+      expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+      # only the SLES product in the list is installed
+      expect(subject.installed_products).to eq([products[1]])
+    end
+  end
+
+  describe ".find_base_product" do
+    context "in installed system" do
+      let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+      it "returns installed products" do
+        allow(Yast::Stage).to receive(:initial).and_return(false)
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        # the SLES product in the list is installed
+        expect(subject.find_base_product).to eq(products[1])
+      end
+    end
+
+    context "at installation" do
+      let(:products) { load_yaml_fixture("products_sp2_update.yml") }
+      it "returns the product from the installation medium" do
+        allow(Yast::Stage).to receive(:initial).and_return(true)
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        # the SLES product in the list is installed
+        expect(subject.find_base_product).to eq(products[3])
+      end
+    end
+  end
+
+  describe ".remove_service" do
+    let(:service) { "service" }
+
+    before do
+      expect(Yast::Pkg).to receive(:ServiceDelete).with(service).and_return(true)
+    end
+
+    it "removes the service and saves the repository configuration" do
+      expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(true)
+
+      expect { subject.remove_service(service) }.to_not raise_error
+    end
+
+    it "raises an exception when saving failes after service removal" do
+      expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(false)
+
+      expect { subject.remove_service(service) }.to raise_error(::Registration::PkgError)
     end
   end
 end

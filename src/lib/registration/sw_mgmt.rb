@@ -110,6 +110,30 @@ module Registration
       products.first
     end
 
+    def self.installed_products
+      # just for testing/debugging
+      return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
+
+      products = Pkg.ResolvableProperties("", :product, "").select do |p|
+        p["status"] == :installed
+      end
+
+      log.info "Found installed products: #{products.map { |p| p["name"] }}"
+      products
+    end
+
+    # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
+    # @param product [Hash] product Hash obtained from pkg-bindings
+    # @return [SUSE::Connect::Remote::Product] the remote product
+    def self.remote_product(product)
+      SUSE::Connect::Remote::Product.new(
+        arch:         product["arch"],
+        identifier:   product["name"],
+        version:      product["version"],
+        release_type: product["release_type"]
+      )
+    end
+
     # create UI label for a base product
     # @param base_product [Hash] Product (hash from pkg-bindings)
     # @return [String] UI Label
@@ -213,19 +237,26 @@ module Registration
       Pkg.SourceSaveAll
     end
 
+    # remove a libzypp service and save the repository configuration
+    # @param [String] name name of the service to remove
+    def self.remove_service(name)
+      log.info "Removing service #{name}"
+
+      if Pkg.ServiceDelete(name) && !Pkg.SourceSaveAll
+        # error message
+        raise ::Registration::PkgError, N_("Saving repository configuration failed.")
+      end
+    end
+
     # get list of repositories belonging to registered services
     # @param product_service [SUSE::Connect::Remote::Service] added service
     # @param only_updates [Boolean] return only update repositories
     # @return [Array<Hash>] list of repositories
     def self.service_repos(product_service, only_updates: false)
-      repo_data = Pkg.SourceGetCurrent(false).map do |repo|
-        data = Pkg.SourceGeneralData(repo)
-        data["SrcId"] = repo
-        data
-      end
+      repo_data = Pkg.SourceGetCurrent(false).map { |repo| repository_data(repo) }
 
       service_name = product_service.name
-      log.info "Added service: #{service_name.inspect}"
+      log.info "Service name: #{service_name.inspect}"
 
       # select only repositories belonging to the product services
       repos = repo_data.select { |repo| service_name == repo["service"] }
@@ -238,6 +269,15 @@ module Registration
       end
 
       repos
+    end
+
+    # get repository data
+    # @param [Fixnum] repo repository ID
+    # @return [Hash] repository properties, including the repository ID ("SrcId" key)
+    def self.repository_data(repo)
+      data = Pkg.SourceGeneralData(repo)
+      data["SrcId"] = repo
+      data
     end
 
     # Set repository state (enabled/disabled)
@@ -267,40 +307,38 @@ module Registration
     def self.copy_old_credentials(source_dir)
       log.info "Searching registration credentials in #{source_dir}..."
 
-      # check for NCC credentials
-      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
-      ncc_file = File.join(source_dir, dir, "NCCcredentials")
-      scc_file = File.join(source_dir, SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
-      new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
-
       # ensure the zypp directory is writable in inst-sys
       zypp_config_writable!
 
+      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
       # create the target directory if missing
       if !File.exist?(dir)
         log.info "Creating directory #{dir}"
         ::FileUtils.mkdir_p(dir)
       end
 
-      if File.exist?(ncc_file)
-        log.info "Copying the old NCC credentials from previous installation"
-        log.info "Copying #{ncc_file} to #{new_file}"
-        ::FileUtils.cp(ncc_file, new_file)
+      # check for NCC credentials
+      ncc_file = File.join(source_dir, dir, "NCCcredentials")
+      copy_old_credentials_file(ncc_file)
 
-        credentials = SUSE::Connect::Credentials.read(new_file)
-        # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
-        log.info "Using previous NCC credentials: #{credentials}"
-      end
-
-      if File.exist?(scc_file)
-        log.info "Copying the old SCC credentials from previous installation"
-        log.info "Copying #{scc_file} to #{new_file}"
-        ::FileUtils.cp(scc_file, new_file)
-        credentials = SUSE::Connect::Credentials.read(new_file)
-        # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
-        log.info "Using previous SCC credentials: #{credentials}"
-      end
+      scc_file = File.join(source_dir, SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
+      copy_old_credentials_file(scc_file)
     end
+
+    def self.copy_old_credentials_file(file)
+      return unless File.exist?(file)
+
+      new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
+      log.info "Copying the old credentials from previous installation"
+      log.info "Copying #{file} to #{new_file}"
+      ::FileUtils.cp(file, new_file)
+
+      credentials = SUSE::Connect::Credentials.read(new_file)
+      # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
+      log.info "Using previous credentials: #{credentials}"
+    end
+
+    private_class_method :copy_old_credentials_file
 
     def self.find_addon_updates(addons)
       log.info "Available addons: #{addons.map(&:identifier)}"

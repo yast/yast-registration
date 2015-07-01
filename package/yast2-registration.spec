@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.134
+Version:        3.1.135
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -28,8 +28,8 @@ License:        GPL-2.0
 
 # Popup.Feedback
 Requires:       yast2 >= 3.1.26
-# "version_version" in Pkg.ResolvableProperties()
-Requires:       yast2-pkg-bindings >= 3.1.23
+# fixed service removal
+Requires:       yast2-pkg-bindings >= 3.1.25
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem(suse-connect) >= 0.2.18

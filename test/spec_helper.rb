@@ -11,7 +11,9 @@ if ENV["COVERAGE"]
     ]
   end
 
-  SimpleCov.start
+  SimpleCov.start do
+    add_filter "/test/"
+  end
 end
 
 # allow only the new "expect" RSpec syntax
@@ -30,6 +32,11 @@ ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 
 def fixtures_file(file)
   File.expand_path(File.join("../fixtures", file), __FILE__)
+end
+
+require "yaml"
+def load_yaml_fixture(file)
+  YAML.load_file(fixtures_file(file))
 end
 
 # load data generators

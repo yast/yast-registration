@@ -10,9 +10,9 @@ describe "Registration::UI::MediaAddonWorkflow" do
     let(:repo) { 42 }
     # sle-module-legacy product
     let(:legacy_module_products) do
-      [YAML.load_file(fixtures_file("products_legacy_installation.yml")).first]
+      [load_yaml_fixture("products_legacy_installation.yml").first]
     end
-    let(:remote_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+    let(:remote_addons) { load_yaml_fixture("available_addons.yml") }
     let(:products_from_repo) { legacy_module_products }
 
     before do

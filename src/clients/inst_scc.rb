@@ -153,6 +153,8 @@ module Yast
       return :cancel if init_registration == :cancel
 
       registration_ui.get_available_addons
+
+      @addons_registered_orig = Registration::Addon.registered.dup
     end
 
     # register all selected addons
@@ -219,6 +221,9 @@ module Yast
       # during installation the products are installed together with the base
       # product, run the package manager only in installed system
       return :next unless Mode.normal
+
+      # skip the package management if no new addon was registered
+      return :next if Registration::Addon.registered == @addons_registered_orig
 
       ::Registration::SwMgmt.select_addon_products
 

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jun 30 14:28:43 UTC 2015 - lslezak@suse.cz
+
+- added support for online migration, the registration part handles
+  the service upgrade and migration repository management
+  (fate#315161)
+- 3.1.135
+
+-------------------------------------------------------------------
 Tue Jun 16 08:37:02 UTC 2015 - jreidinger@suse.com
 
 - Adapt module to new version of SUSEConnect (FATE#318800)

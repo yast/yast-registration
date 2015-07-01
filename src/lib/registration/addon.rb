@@ -185,5 +185,11 @@ module Registration
     def updates_addon?(old_addon)
       old_addon["name"] == identifier || old_addon["name"] == @pure_addon.former_identifier
     end
+
+    def matches_remote_product?(remote_product)
+      [:arch, :identifier, :version, :release_type].all? do |attr|
+        send(attr) == remote_product.send(attr)
+      end
+    end
   end
 end

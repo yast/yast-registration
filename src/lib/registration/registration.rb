@@ -104,15 +104,8 @@ module Registration
 
       log.info "Reading available addons for product: #{base_product["name"]}"
 
-      remote_product = SUSE::Connect::Remote::Product.new(
-        arch:         base_product["arch"],
-        identifier:   base_product["name"],
-        version:      base_product["version"],
-        release_type: base_product["release_type"]
-      )
-
-      params = connect_params
-      addons = SUSE::Connect::YaST.show_product(remote_product, params).extensions || []
+      remote_product = SwMgmt.remote_product(base_product)
+      addons = SUSE::Connect::YaST.show_product(remote_product, connect_params).extensions || []
       log.info "Available addons result: #{addons}"
 
       renames = collect_renames(addons)
@@ -129,6 +122,22 @@ module Registration
       activated
     end
 
+    # get the list of migration products
+    # @param [Array<SUSE::Connect::Remote::Product>] installed_products
+    # @return [Array<Array<SUSE::Connect::Remote::Product>>] list of possible migrations,
+    #   each migration contains a list of target products
+    def migration_products(installed_products)
+      log.info "Loading migration products for: #{installed_products}"
+      migrations = []
+
+      ConnectHelpers.catch_registration_errors do
+        migrations = SUSE::Connect::YaST.system_migrations(installed_products)
+      end
+
+      log.info "Received system migrations: #{migrations}"
+      migrations
+    end
+
     def self.is_registered?
       # just a simple file check without connection to SCC
       File.exist?(SCC_CREDENTIALS)
@@ -138,10 +147,7 @@ module Registration
 
     def set_registered(remote_product)
       addon = Addon.find_all(self).find do |a|
-        a.arch == remote_product.arch &&
-          a.identifier == remote_product.identifier &&
-          a.version  == remote_product.version &&
-          a.release_type == remote_product.release_type
+        a.matches_remote_product?(remote_product)
       end
 
       return unless addon
@@ -152,12 +158,7 @@ module Registration
 
     def service_for_product(product, &block)
       if product.is_a?(Hash)
-        remote_product =  SUSE::Connect::Remote::Product.new(
-          arch:         product["arch"],
-          identifier:   product["name"],
-          version:      product["version"],
-          release_type: product["release_type"]
-        )
+        remote_product = SwMgmt.remote_product(product)
       else
         remote_product = product
       end
@@ -172,15 +173,23 @@ module Registration
       end
 
       product_service = block.call(remote_product, params)
-
       log.info "registration result: #{product_service}"
-
-      if product_service
-        credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
-        ::Registration::SwMgmt.add_service(product_service, credentials)
-      end
+      update_services(product_service) if product_service
 
       product_service
+    end
+
+    # add/remove services for the registered product
+    def update_services(product_service)
+      old_service = product_service.obsoleted_service_name
+      # sanity check
+      if old_service && !old_service.empty? && old_service != product_service.name
+        log.info "Found obsoleted service: #{old_service}"
+        ::Registration::SwMgmt.remove_service(old_service)
+      end
+
+      credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
+      ::Registration::SwMgmt.add_service(product_service, credentials)
     end
 
     # returns SSL verify callback
