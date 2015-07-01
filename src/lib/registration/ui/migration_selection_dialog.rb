@@ -52,9 +52,14 @@ module Registration
           # TRANSLATORS: dialog title
           _("Select the Migration Target"),
           dialog_content,
-          # TRANSLATORS: help text
-          # FIXME: help text
-          _("FIXME"),
+          # TRANSLATORS: help text (1/3)
+          _("<p>Here you can select the migration target products. The registration" \
+              "server may offer several possible migration to new products.</p>") +
+          # TRANSLATORS: help text (2/3)
+          _("<p>Only one migration target from the list can be selected.</p>") +
+            # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
+            (_("<p>Use the <b>%s</b> check box to manually select the migration " \
+                  "repositories later.</p>") % _("Manually Select Migration Repositories")),
           true,
           true
         )
@@ -88,7 +93,7 @@ module Registration
 
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # TRANSLATORS: check button label
-          CheckBox(Id(:manual_repos), _("Manually Select Migration Repositoreis")),
+          CheckBox(Id(:manual_repos), _("Manually Select Migration Repositories")),
           VSpacing(1)
         )
       end
