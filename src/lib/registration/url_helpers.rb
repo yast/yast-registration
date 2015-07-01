@@ -66,7 +66,7 @@ module Registration
       when "installation"
         reg_url_at_installation
       when "normal"
-        reg_url_at_runnig_system
+        reg_url_at_running_system
       when "update"
         reg_url_at_upgrade
       else
@@ -122,7 +122,7 @@ module Registration
     # get registration URL in upgrade mode
     def self.reg_url_at_upgrade
       # in online upgrade mode behave like in installed system
-      return reg_url_at_runnig_system if Yast::Installation.destdir == "/"
+      return reg_url_at_running_system if Yast::Installation.destdir == "/"
 
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
@@ -154,7 +154,7 @@ module Registration
     end
 
     # get registration URL in running system
-    def self.reg_url_at_runnig_system
+    def self.reg_url_at_running_system
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
@@ -176,7 +176,7 @@ module Registration
       reg_url
     end
 
-    private_class_method :reg_url_at_runnig_system, :reg_url_at_upgrade,
+    private_class_method :reg_url_at_running_system, :reg_url_at_upgrade,
       :reg_url_at_installation, :boot_reg_url
 
     def self.slp_service_url

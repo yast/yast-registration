@@ -11,7 +11,9 @@ if ENV["COVERAGE"]
     ]
   end
 
-  SimpleCov.start
+  SimpleCov.start do
+    add_filter "/test/"
+  end
 end
 
 # allow only the new "expect" RSpec syntax

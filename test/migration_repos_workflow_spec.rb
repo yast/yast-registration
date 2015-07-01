@@ -62,7 +62,7 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run).to eq(:next)
       end
 
-      it "displays the custome repository selection if required" do
+      it "displays the custom repository selection if required" do
         set_success_expectations
 
         # repository selection dialog
