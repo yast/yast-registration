@@ -30,7 +30,7 @@ module Yast
         Wizard.CloseDialog
       end
     end
-  end
-end unless defined?(YaST::MigrationReposClient)
+  end unless defined?(YaST::MigrationReposClient)
+end
 
 Yast::MigrationReposClient.new.main

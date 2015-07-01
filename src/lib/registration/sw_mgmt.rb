@@ -237,7 +237,8 @@ module Registration
       Pkg.SourceSaveAll
     end
 
-    # add the services to libzypp and load (refresh) them
+    # remove a libzypp service and save the repository configuration
+    # @param [String] name name of the service to remove
     def self.remove_service(name)
       log.info "Removing service #{name}"
 

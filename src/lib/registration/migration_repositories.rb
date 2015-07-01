@@ -32,8 +32,6 @@ module Registration
       Yast::Pkg.PkgReset
     end
 
-    Yast.import "Pkg"
-
     attr_accessor :repositories, :install_updates
 
     def initialize
@@ -42,6 +40,8 @@ module Registration
       @install_updates = true
     end
 
+    # use the repositories from a libzypp service for the migration
+    # @param [String] service_name name of the service
     def add_service(service_name)
       service_repos = SwMgmt.service_repos(service_name)
       repositories.concat(service_repos)
