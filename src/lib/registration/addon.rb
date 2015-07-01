@@ -167,10 +167,9 @@ module Registration
     end
 
     def matches_remote_product?(remote_product)
-      arch == remote_product.arch &&
-        identifier == remote_product.identifier &&
-        version  == remote_product.version &&
-        release_type == remote_product.release_type
+      [:arch, :identifier, :version, :release_type].all? do |attr|
+        send(attr) == remote_product.send(attr)
+      end
     end
   end
 end
