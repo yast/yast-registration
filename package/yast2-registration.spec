@@ -28,8 +28,8 @@ License:        GPL-2.0
 
 # Popup.Feedback
 Requires:       yast2 >= 3.1.26
-# fixed service removal
-Requires:       yast2-pkg-bindings >= 3.1.25
+# "allowVendorChange" option in Pkg.SetSolverFlags()
+Requires:       yast2-pkg-bindings >= 3.1.26
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       rubygem(suse-connect) >= 0.2.18
