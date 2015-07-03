@@ -58,7 +58,9 @@ module Registration
       #   are added to the system
       # - (optionally) user manually selects the migration repositories
       # - user is asked to install also the latest updates (or to migrate to the GA version)
-      # - the migration repositories are marked as active for distribution upgrade (DUP)
+      # - "Update from ALL" is set in libzypp (uses all enabled repositories)
+      # - (optional step) user can manually set the migration repositories,
+      #   the selected repositories are enabled or disabled
       # - return the user input symbol (:next or :abort) to the caller
       # @return [Symbol] the UI symbol
       #
@@ -126,8 +128,8 @@ module Registration
           "find_products"               => [->() { find_products }, true],
           "load_migration_products"     => [->() { load_migration_products }, true],
           "select_migration_products"   => ->() { select_migration_products },
-          "register_migration_products" => ->() { register_migration_products },
-          "activate_migration_repos"    => ->() { activate_migration_repos },
+          "register_migration_products" => [->() { register_migration_products }, true],
+          "activate_migration_repos"    => [->() { activate_migration_repos }, true],
           "select_migration_repos"      => ->() { select_migration_repos }
         }
 
@@ -249,14 +251,14 @@ module Registration
         log.info "Activating the migration repositories"
         migration_repos = ::Registration::MigrationRepositories.new
         registered_services.each do |service|
-          migration_repos.add_service(service)
+          migration_repos.services << service
         end
 
-        if migration_repos.has_update_repo?
+        if migration_repos.service_update_repo?
           migration_repos.install_updates = registration_ui.install_updates?
         end
 
-        migration_repos.activate
+        migration_repos.activate_services
 
         manual_repo_selection ? :repo_selection : :next
       end
