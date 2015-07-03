@@ -31,7 +31,8 @@ describe Registration::MigrationRepositories do
     before do
       subject.repositories << { "SrcId" => 42 }
 
-      allow(Yast::Pkg).to receive(:SetSolverFlags)
+      expect(Yast::Pkg).to receive(:SetSolverFlags).with("ignoreAlreadyRecommended" => true,
+                                                         "allowVendorChange"        => false)
       allow(Yast::Pkg).to receive(:PkgSolve)
       expect(Yast::Pkg).to receive(:AddUpgradeRepo).with(42)
     end

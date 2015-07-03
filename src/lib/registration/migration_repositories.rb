@@ -74,10 +74,12 @@ module Registration
 
     private
 
-    # set some solver flags to be compatible with "zypper dup --from"
+    # set the solver flags for online migration
+    # @see https://fate.suse.com/319138
     def set_solver
-      log.info "Disabling recommended packages for already installed packages"
-      Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true)
+      log.info "Setting the solver flag for online migration"
+      Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true,
+                               "allowVendorChange"        => false)
     end
 
     # preselect all applicable patches (except optional ones)
