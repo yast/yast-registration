@@ -44,7 +44,7 @@ module Registration
     # does any configured service contain an update repo?
     # @return [Boolean] true if at least one service repository is an update
     #   repository
-    def service_update_repo?
+    def service_with_update_repo?
       services_repositories.any? { |repo| repo["is_update_repo"] }
     end
 
