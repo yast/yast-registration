@@ -54,7 +54,7 @@ describe Registration::UI::MigrationReposWorkflow do
         expect_any_instance_of(Registration::Registration).to receive(:upgrade_product)
           .and_return(migration_service)
 
-        expect_any_instance_of(Registration::MigrationRepositories).to receive(:activate)
+        expect_any_instance_of(Registration::MigrationRepositories).to receive(:activate_services)
       end
 
       it "registers the selected migration products" do
@@ -74,12 +74,12 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run).to eq(:next)
       end
 
-      it "does not install updates if required" do
+      it "does not install updates if not required" do
         set_success_expectations
 
         # an update available
         expect_any_instance_of(Registration::MigrationRepositories).to \
-          receive(:has_update_repo?).and_return(true)
+          receive(:service_with_update_repo?).and_return(true)
         # user requestes skipping updates
         expect_any_instance_of(Registration::RegistrationUI).to receive(:install_updates?)
           .and_return(false)
@@ -105,6 +105,26 @@ describe Registration::UI::MigrationReposWorkflow do
         expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)
           .and_return([])
         expect(Yast::Report).to receive(:Error)
+
+        expect(subject.run).to eq(:abort)
+      end
+
+      it "reports error and aborts when registering the migration products fails" do
+        # installed SLES12
+        expect(Registration::SwMgmt).to receive(:installed_products)
+          .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
+
+        expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)
+          .and_return(migrations)
+
+        # user selected a migration and pressed [Next]
+        expect_any_instance_of(Registration::UI::MigrationSelectionDialog).to receive(:run)
+          .and_return(:next)
+        expect_any_instance_of(Registration::UI::MigrationSelectionDialog).to \
+          receive(:selected_migration).and_return(migrations.first)
+
+        expect_any_instance_of(Registration::Registration).to receive(:upgrade_product)
+          .and_raise("Registration failed")
 
         expect(subject.run).to eq(:abort)
       end

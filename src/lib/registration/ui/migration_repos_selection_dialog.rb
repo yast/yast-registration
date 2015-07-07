@@ -83,9 +83,8 @@ module Registration
       # list of repository items
       # @return [Array<Yast::Term>] content for a MultiSelectionBox widget
       def repo_items
-        upgrade_repos = Yast::Pkg.GetUpgradeRepos
-        # only enabled repositories
-        repos = Yast::Pkg.SourceGetCurrent(true)
+        # all repositories
+        repos = Yast::Pkg.SourceGetCurrent(false)
 
         # sort the repositories by name
         repos.sort! do |x, y|
@@ -95,7 +94,7 @@ module Registration
         end
 
         repos.map do |repo|
-          Item(Id(repo), repo_label(repo), upgrade_repos.include?(repo))
+          Item(Id(repo), repo_label(repo), Yast::Pkg.SourceGeneralData(repo)["enabled"])
         end
       end
 
@@ -117,8 +116,8 @@ module Registration
 
         # activate the new settings
         migration_repos = MigrationRepositories.new
-        migration_repos.repositories = selected.map { |repo| SwMgmt.repository_data(repo) }
-        migration_repos.activate
+        migration_repos.repositories = selected
+        migration_repos.activate_repositories
       end
 
       # run the repository management, refresh the dialog content if it
@@ -127,9 +126,6 @@ module Registration
         # refresh enabled repositories so they are up-to-date
         ret = Yast::WFM.call("repositories", ["refresh-enabled"])
         return :abort if ret == :abort
-
-        # load objects from the new or enabled repositories
-        Yast::Pkg.SourceLoad
 
         # refresh the dialog content
         Yast::UI.ChangeWidget(:repos, :Items, repo_items)
