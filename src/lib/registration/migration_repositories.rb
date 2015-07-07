@@ -71,9 +71,10 @@ module Registration
         # the status if it is different than expected
         next if repositories.include?(repo) == repo_data["enabled"]
 
-        new_state_msg = repo_data["enabled"] ? "Disabling" : "Enabling"
-        log.info "#{new_state_msg} repository #{repo_data["alias"]}"
-        Yast::Pkg.SourceSetEnabled(repo, !repo_data["enabled"])
+        # switch the repository state
+        new_state = !repo_data["enabled"]
+        log.info "#{new_state ? "Enabling" : "Disabling"} repository #{repo_data["alias"]}"
+        Yast::Pkg.SourceSetEnabled(repo, new_state)
       end
 
       activate_solver
