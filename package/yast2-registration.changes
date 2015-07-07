@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jul  7 13:02:23 UTC 2015 - lslezak@suse.cz
+
+- Use "zypper dup --no-vendor-change" equivalent for online
+  migration (FATE#319138)
+- 3.1.136
+
+-------------------------------------------------------------------
 Tue Jun 30 14:28:43 UTC 2015 - lslezak@suse.cz
 
 - added support for online migration, the registration part handles
