@@ -79,7 +79,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
         # an update available
         expect_any_instance_of(Registration::MigrationRepositories).to \
-          receive(:service_update_repo?).and_return(true)
+          receive(:service_with_update_repo?).and_return(true)
         # user requestes skipping updates
         expect_any_instance_of(Registration::RegistrationUI).to receive(:install_updates?)
           .and_return(false)

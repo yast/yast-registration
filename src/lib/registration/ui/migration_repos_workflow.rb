@@ -254,7 +254,7 @@ module Registration
           migration_repos.services << service
         end
 
-        if migration_repos.service_update_repo?
+        if migration_repos.service_with_update_repo?
           migration_repos.install_updates = registration_ui.install_updates?
         end
 
