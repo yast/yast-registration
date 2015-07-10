@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Jul  7 13:02:23 UTC 2015 - lslezak@suse.cz
+
+- Use "zypper dup --no-vendor-change" equivalent for online
+  migration (FATE#319138)
+- added support for online migration, the registration part handles
+  the service upgrade and migration repository management
+  (fate#315161)
+
+-------------------------------------------------------------------
 Tue Jun 16 08:37:02 UTC 2015 - jreidinger@suse.com
 
 - Adapt module to new version of SUSEConnect (FATE#318800)

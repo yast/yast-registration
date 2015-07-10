@@ -28,7 +28,7 @@ License:        GPL-2.0
 
 # Popup.Feedback
 Requires:       yast2 >= 3.1.26
-# "allowVendorChange" option in Pkg.SetSolverFlags()
+# "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.20.1
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
