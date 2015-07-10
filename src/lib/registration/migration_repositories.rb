@@ -101,7 +101,7 @@ module Registration
     def set_solver
       log.info "Setting the solver flags for online migration"
       Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true,
-                               "allowVendorChange"        => false)
+                               "dupAllowVendorChange"     => false)
     end
 
     # preselect all applicable patches (except optional ones)

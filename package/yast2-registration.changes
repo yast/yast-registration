@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jul 10 14:45:02 UTC 2015 - lslezak@suse.cz
+
+- set the correct vendor change flag (for the DUP mode instead of
+  the normal mode) (FATE#319128)
+- 3.1.137
+
+-------------------------------------------------------------------
 Tue Jul  7 13:02:23 UTC 2015 - lslezak@suse.cz
 
 - Use "zypper dup --no-vendor-change" equivalent for online
