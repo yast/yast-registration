@@ -125,7 +125,7 @@ module Registration
 
     # copy the imported SSL certificate to the target system (if exists)
     def self.copy_certificate_to_target
-      cert_file = SUSE::Connect::SSLCertificate::SERVER_CERT_FILE
+      cert_file = SUSE::Connect::YaST::SERVER_CERT_FILE
       # any certificate imported?
       if File.exist?(cert_file)
         # copy the imported certificate
@@ -135,7 +135,7 @@ module Registration
         ::FileUtils.cp(cert_file, cert_target_file)
 
         # update the certificate links
-        cmd = SUSE::Connect::SSLCertificate::UPDATE_CERTIFICATES
+        cmd = SUSE::Connect::YaST::UPDATE_CERTIFICATES
         log.info "Updating certificate links (#{cmd})..."
         Yast::SCR.Execute(Yast::Path.new(".target.bash"), cmd)
       end

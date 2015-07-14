@@ -51,7 +51,7 @@ module Registration
         Helpers.write_config
 
         # copy it to the target system
-        source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
+        source_path = SUSE::Connect::YaST::DEFAULT_CONFIG_FILE
         target_path = Yast::Installation.destdir + source_path
 
         Yast::WFM.Execute(Yast::Path.new(".local.bash"), "mv '#{source_path}' '#{target_path}'")

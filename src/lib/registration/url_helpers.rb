@@ -141,7 +141,7 @@ module Registration
 
       # check for suse_register config only when NCC credentials file exists
       # (the config file exists even on a not registered system)
-      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
+      dir = SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR
       ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
 
       # do not use the old URL when it has failed before
@@ -167,7 +167,7 @@ module Registration
       return custom_url if custom_url && !custom_url.empty?
 
       # check for previously saved config value
-      if File.exist?(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+      if File.exist?(SUSE::Connect::YaST::DEFAULT_CONFIG_FILE)
         config = SUSE::Connect::Config.new
         return config.url
       end
