@@ -228,7 +228,7 @@ module Registration
           # at update libzypp is already switched to /mnt target,
           # update the path accordingly
           credentials_file = File.join(Installation.destdir,
-            ::SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR,
+            ::SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR,
             credentials_file)
           log.info "Using #{credentials_file} credentials path in update mode"
         end
@@ -355,7 +355,7 @@ module Registration
       # ensure the zypp directory is writable in inst-sys
       zypp_config_writable!
 
-      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
+      dir = SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR
       # create the target directory if missing
       if !File.exist?(dir)
         log.info "Creating directory #{dir}"
