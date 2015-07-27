@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 27 15:49:32 UTC 2015 - lslezak@suse.cz
+
+- 3.1.129.2
+
+-------------------------------------------------------------------
 Tue Jul  7 13:02:23 UTC 2015 - lslezak@suse.cz
 
 - Use "zypper dup --no-vendor-change" equivalent for online
