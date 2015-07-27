@@ -14,15 +14,8 @@ describe Registration::UI::MigrationSelectionDialog do
 
       # check the displayed content
       expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
-        expected_list_item = Item(Id(0), "SLES-12.1-x86_64")
-
-        term = content.nested_find do |t|
-          t.respond_to?(:value) && t.value == :MinHeight &&
-            t.params[1].params[1].value == :SelectionBox &&
-            t.params[1].params[1].params[3].include?(expected_list_item)
-        end
-
-        expect(term).to_not eq(nil)
+        # do a simple check: convert the term to a String
+        expect(content.to_s).to include("`item (`id (0), \"SLES-12.1-x86_64\")")
       end
 
       expect(subject.run(migration_products)).to eq(:abort)

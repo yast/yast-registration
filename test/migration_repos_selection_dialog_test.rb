@@ -2,8 +2,6 @@
 
 require_relative "spec_helper"
 
-include Yast::UIShortcuts
-
 describe Registration::UI::MigrationReposSelectionDialog do
   describe ".run" do
     before do
@@ -15,13 +13,12 @@ describe Registration::UI::MigrationReposSelectionDialog do
 
       # check the displayed content
       expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
-        term = content.nested_find do |t|
-          t.respond_to?(:value) && t.value == :MultiSelectionBox &&
-            t.params[3].include?(Item(Id(0), "name (https://example.com)", false)) &&
-            t.params[3].include?(Item(Id(1), "name2 (https://example2.com)", true))
-        end
 
-        expect(term).to_not eq(nil)
+        # do a simple check: convert the term to a String
+        # an unselected repository
+        expect(content.to_s).to include("item (`id (0), \"name (https://example.com)\", false)")
+        # a selected repository
+        expect(content.to_s).to include("`item (`id (1), \"name2 (https://example2.com)\", true)")
       end
     end
 
