@@ -51,7 +51,7 @@ module Registration
     ZYPP_DIR = "/etc/zypp"
 
     FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-      "release_type" => "DVD" }
+      "release_type" => "DVD", "version_version" => "12" }
 
     def self.init
       # false = do not allow continuing without the libzypp lock
