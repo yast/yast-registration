@@ -187,7 +187,10 @@ module Registration
       # @return [Symbol] workflow symbol (:next or :abort)
       def select_migration_products
         log.info "Displaying migration target selection dialog"
-        dialog = MigrationSelectionDialog.new(migrations)
+        installed_products = SwMgmt.installed_products
+        log.warn "installed_products: #{installed_products.inspect}"
+        log.warn "installed_products: #{installed_products.map { |p| p["name"] }.inspect}"
+        dialog = MigrationSelectionDialog.new(migrations, installed_products)
         ret = dialog.run
 
         if ret == :next

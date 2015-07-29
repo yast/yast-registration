@@ -49,6 +49,9 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp"
 
+    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12",
+      "release_type" => "DVD", "version_version" => "12" }
+
     def self.init
       # false = do not allow continuing without the libzypp lock
       lock = PackageLock.Connect(false)
@@ -82,11 +85,7 @@ module Registration
 
     def self.find_base_product
       # just for debugging:
-      if ENV["FAKE_BASE_PRODUCT"]
-        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-          "release_type" => "DVD"
-        }
-      end
+      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       # during installation the products are :selected,
       # on a running system the products are :installed
@@ -146,11 +145,7 @@ module Registration
 
     def self.base_product_to_register
       # just for debugging:
-      if ENV["FAKE_BASE_PRODUCT"]
-        return { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-          "release_type" => "DVD"
-        }
-      end
+      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       base_product = find_base_product
 
