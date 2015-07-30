@@ -20,6 +20,7 @@
 #
 
 require "forwardable"
+require "registration/sw_mgmt"
 
 module Registration
   # this is a wrapper class around SUSE::Connect::Product object
@@ -56,6 +57,16 @@ module Registration
       # @return [Array<Addon>] selected add-ons
       def selected
         @selected ||= []
+      end
+
+      def registered_not_installed
+        registered.select do |addon|
+          !SwMgmt.installed_products.find do |product|
+            product["name"] == addon.identifier &&
+              product["version_version"] == addon.version &&
+              product["arch"] == addon.arch
+          end
+        end
       end
 
       private
