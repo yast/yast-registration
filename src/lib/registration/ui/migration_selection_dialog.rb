@@ -15,7 +15,8 @@
 require "cgi/util"
 
 require "yast"
-require "registration/addon_sorter"
+require "registration/migration_sorter"
+require "registration/sw_mgmt"
 
 module Registration
   module UI
@@ -151,8 +152,6 @@ module Registration
       end
 
       def product_summary(product, installed_product)
-        log.info "creating summary for: #{product}, installed_product: #{installed_product}"
-
         product_name = CGI.escapeHTML(product.friendly_name)
 
         if !installed_product
@@ -162,18 +161,18 @@ module Registration
           return _("%s <b>will be installed.</b>") % product_name
         end
 
-        if installed_product["version_version"] == product.version
+        installed_version = installed_product["version_version"]
+
+        if installed_version == product.version
           # TRANSLATORS: Summary message, rich text format
           # %s is a product name, e.g. "SUSE Linux Enterprise Server 12"
           return _("%s <b>stays unchanged.</b>") % product_name
         end
 
-        installed_version = Gem::Version.new(installed_product["version_version"])
-        migrated_version = Gem::Version.new(product.version)
-        old_product_name = installed_product["display_name"] || installed_product["summary"] ||
-          installed_product["short_name"] || installed_product["name"]
+        old_product_name = SwMgmt.product_label(installed_product)
 
-        if installed_version < migrated_version
+        # use Gem::Version for version compare
+        if Gem::Version.new(installed_version) < Gem::Version.new(product.version)
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} is a product name, e.g. "SUSE Linux Enterprise Server 12"
           # %{new_product} is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"

@@ -118,7 +118,7 @@ module Registration
         product_service = Yast::Popup.Feedback(
           _(CONTACTING_MESSAGE),
           # updating base product registration, %s is a new base product name
-          _("Updating to %s ...") % SwMgmt.base_product_label(
+          _("Updating to %s ...") % SwMgmt.product_label(
             SwMgmt.find_base_product)
         ) do
           registration.upgrade_product(base_product)
@@ -242,5 +242,104 @@ module Registration
     private
 
     attr_accessor :registration
+
+    def register_system
+      options = Storage::InstallationOptions.instance
+      base_product = SwMgmt.find_base_product
+      distro_target = base_product["register_target"]
+
+      log.info "Registering system, distro_target: #{distro_target}"
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering the System...")) do
+        registration.register(options.email, options.reg_code, distro_target)
+      end
+    end
+
+    # the credentials are read from Storage::InstallationOptions
+    def register_base_product
+      options = Storage::InstallationOptions.instance
+      return if options.base_registered
+
+      # then register the product(s)
+      base_product = SwMgmt.find_base_product
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering %s ...") % SwMgmt.product_label(base_product)
+      ) do
+        base_product_data = SwMgmt.base_product_to_register
+        base_product_data["reg_code"] = options.reg_code
+        registration.register_product(base_product_data, options.email)
+      end
+    end
+
+    # register all selected addons
+    def register_selected_addons(selected_addons, known_reg_codes)
+      # create duplicate as array is modified in loop for registration order
+      registration_order = selected_addons.clone
+
+      product_succeed = registration_order.map do |product|
+        ConnectHelpers.catch_registration_errors(
+          message_prefix: "#{product.label}\n") do
+          register_selected_addon(product, known_reg_codes[product.identifier])
+        end
+
+        # remove from selected after successful registration
+        selected_addons.reject! { |selected| selected.identifier == product.identifier }
+      end
+
+      !product_succeed.include?(false) # succeed only if noone failed
+    end
+
+    def register_selected_addon(product, reg_code)
+      product_service = Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        # %s is name of given product
+        _("Registering %s ...") % product.label) do
+        product_data = {
+          "name"     => product.identifier,
+          "reg_code" => reg_code,
+          "arch"     => product.arch,
+          "version"  => product.version
+        }
+
+        registration.register_product(product_data)
+      end
+
+      # select repositories to use in installation (e.g. enable/disable Updates)
+      select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+      # remember the added service
+      Storage::Cache.instance.addon_services << product_service
+
+      # mark as registered
+      product.registered
+    end
+
+    def select_repositories(product_service)
+      # added update repositories
+      updates = SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Found update repositories: #{updates.size}"
+
+      SwMgmt.set_repos_state(updates, install_updates?)
+    end
+
+    def update_addon(addon, enable_updates)
+      ConnectHelpers.catch_registration_errors do
+        # then register the product(s)
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating registered addon/extension, %s is an extension name
+          _("Updating to %s ...") % addon.label
+        ) do
+          registration.upgrade_product(addon)
+        end
+
+        Storage::Cache.instance.addon_services << product_service
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        disable_update_repos(product_service) if !enable_updates
+      end
+    end
   end
 end

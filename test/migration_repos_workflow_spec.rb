@@ -39,7 +39,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
       let(:set_success_expectations) do
         # installed SLES12
-        expect(Registration::SwMgmt).to receive(:installed_products)
+        allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
 
         expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)
@@ -111,7 +111,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
       it "reports error and aborts when registering the migration products fails" do
         # installed SLES12
-        expect(Registration::SwMgmt).to receive(:installed_products)
+        allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
 
         expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)

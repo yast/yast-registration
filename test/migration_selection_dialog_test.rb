@@ -18,7 +18,7 @@ describe Registration::UI::MigrationSelectionDialog do
         expect(content.to_s).to include("`item (`id (0), \"SLES-12.1-x86_64\")")
       end
 
-      expect(subject.run(migration_products)).to eq(:abort)
+      expect(subject.run(migration_products, [])).to eq(:abort)
     end
 
     it "saves the entered values when clicking Next" do
@@ -28,7 +28,7 @@ describe Registration::UI::MigrationSelectionDialog do
         .and_return(0).twice
       expect(Yast::UI).to receive(:QueryWidget).with(:manual_repos, :Value).and_return(true)
 
-      dialog = subject.new(migration_products)
+      dialog = subject.new(migration_products, [])
       expect(dialog.run).to eq(:next)
 
       # check the saved values

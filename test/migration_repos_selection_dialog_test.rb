@@ -10,6 +10,7 @@ describe Registration::UI::MigrationReposSelectionDialog do
         "name" => "name", "url" => "https://example.com", "enabled" => false)
       allow(Yast::Pkg).to receive(:SourceGeneralData).with(1).and_return(
         "name" => "name2", "url" => "https://example2.com", "enabled" => true)
+      allow(Yast::UI).to receive(:QueryWidget).with(:repos, :CurrentItem).and_return(0)
 
       # check the displayed content
       expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
@@ -46,7 +47,7 @@ describe Registration::UI::MigrationReposSelectionDialog do
       expect(Yast::WFM).to receive(:call).with("repositories", ["refresh-enabled"])
         .and_return(:next)
 
-      expect(Yast::UI).to receive(:ChangeWidget)
+      expect(Yast::UI).to receive(:ChangeWidget).twice
 
       expect(subject.run).to eq(:abort)
     end
