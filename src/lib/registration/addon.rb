@@ -20,6 +20,7 @@
 #
 
 require "forwardable"
+require "registration/sw_mgmt"
 
 module Registration
   class Addon
@@ -48,6 +49,16 @@ module Registration
 
       def selected
         @selected ||= []
+      end
+
+      def registered_not_installed
+        registered.select do |addon|
+          !SwMgmt.installed_products.find do |product|
+            product["name"] == addon.identifier &&
+              product["version_version"] == addon.version &&
+              product["arch"] == addon.arch
+          end
+        end
       end
 
       private

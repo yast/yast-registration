@@ -84,6 +84,11 @@ module Registration
 
       attr_accessor :migrations
 
+      def add_registered_addons
+        extra = Addon.registered_not_installed.map { |addon| SwMgmt.remote_product(addon) }
+        installed_products.concat(extra)
+      end
+
       # the main dialog content
       # @return [Yast::Term] UI term
       def dialog_content
