@@ -52,6 +52,7 @@ module Registration
       # The repositories migration workflow is:
       #
       # - find all installed products
+      # - TODO: add the registered products
       # - ask the registration server for the available product migrations
       # - user selects the migration target
       # - the registered products are upgraded and new services/repositories
@@ -188,17 +189,16 @@ module Registration
       def select_migration_products
         log.info "Displaying migration target selection dialog"
         installed_products = SwMgmt.installed_products
-        log.warn "installed_products: #{installed_products.inspect}"
-        log.warn "installed_products: #{installed_products.map { |p| p["name"] }.inspect}"
+        log.info "installed_products: #{installed_products}"
         dialog = MigrationSelectionDialog.new(migrations, installed_products)
         ret = dialog.run
 
         if ret == :next
           self.selected_migration = dialog.selected_migration
           self.manual_repo_selection = dialog.manual_repo_selection
+          log.info "Selected migration: #{selected_migration}"
         end
 
-        log.info "Selected migration: #{selected_migration}"
         ret
       end
 

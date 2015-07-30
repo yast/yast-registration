@@ -137,7 +137,7 @@ module Registration
     # create UI label for a base product
     # @param base_product [Hash] Product (hash from pkg-bindings)
     # @return [String] UI Label
-    def self.base_product_label(base_product)
+    def self.product_label(base_product)
       base_product["display_name"] ||
         base_product["short_name"] ||
         base_product["name"] ||

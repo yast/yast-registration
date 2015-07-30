@@ -112,7 +112,7 @@ module Registration
         HSquash(
           VBox(
             VSpacing(1),
-            Left(Heading(SwMgmt.base_product_label(SwMgmt.find_base_product))),
+            Left(Heading(SwMgmt.product_label(SwMgmt.find_base_product))),
             VSpacing(1),
             Registration.is_registered? ? Heading(_("The system is already registered.")) :
               Label(info)
