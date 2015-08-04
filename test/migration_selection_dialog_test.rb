@@ -14,7 +14,7 @@ describe Registration::UI::MigrationSelectionDialog do
 
       # check the displayed content
       expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
-        expected_list_item = Item(Id(0), "SLES-12.1-x86_64")
+        expected_list_item = Item(Id(0), "SLES-12.1")
 
         term = content.nested_find do |t|
           t.respond_to?(:value) && t.value == :MinHeight &&
@@ -25,7 +25,7 @@ describe Registration::UI::MigrationSelectionDialog do
         expect(term).to_not eq(nil)
       end
 
-      expect(subject.run(migration_products)).to eq(:abort)
+      expect(subject.run(migration_products, [])).to eq(:abort)
     end
 
     it "saves the entered values when clicking Next" do
@@ -35,7 +35,7 @@ describe Registration::UI::MigrationSelectionDialog do
         .and_return(0).twice
       expect(Yast::UI).to receive(:QueryWidget).with(:manual_repos, :Value).and_return(true)
 
-      dialog = subject.new(migration_products)
+      dialog = subject.new(migration_products, [])
       expect(dialog.run).to eq(:next)
 
       # check the saved values

@@ -102,7 +102,7 @@ module Registration
         product_service = Yast::Popup.Feedback(
           _(CONTACTING_MESSAGE),
           # updating base product registration, %s is a new base product name
-          _("Updating to %s ...") % SwMgmt.base_product_label(
+          _("Updating to %s ...") % SwMgmt.product_label(
             SwMgmt.find_base_product)
         ) do
           registration.upgrade_product(base_product)
@@ -233,7 +233,7 @@ module Registration
       base_product = SwMgmt.find_base_product
 
       Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-        _("Registering %s ...") % SwMgmt.base_product_label(base_product)
+        _("Registering %s ...") % SwMgmt.product_label(base_product)
       ) do
         base_product_data = SwMgmt.base_product_to_register
         base_product_data["reg_code"] = options.reg_code

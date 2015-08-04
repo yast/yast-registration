@@ -52,7 +52,9 @@ module Registration
       # The repositories migration workflow is:
       #
       # - find all installed products
+      # - query registered addons from the server
       # - ask the registration server for the available product migrations
+      #   (for both installed and registered products)
       # - user selects the migration target
       # - the registered products are upgraded and new services/repositories
       #   are added to the system
@@ -161,7 +163,21 @@ module Registration
           return :abort
         end
 
+        merge_registered_addons
+        log.info "Products to migrate: #{products}"
+
         :next
+      end
+
+      def merge_registered_addons
+        # load the extensions to merge the registered but not installed extensions
+        Addon.find_all(registration)
+
+        addons = Addon.registered_not_installed.map(&:to_h).map do |addon|
+          SwMgmt.remote_product(addon)
+        end
+
+        products.concat(addons)
       end
 
       # load migration products for the installed products from the registration server
@@ -176,10 +192,6 @@ module Registration
           return :abort
         end
 
-        # FIXME: just to prefill the cache, after upgrading the base product
-        # the addons for the current base product cannot be loaded
-        Addon.find_all(registration)
-
         :next
       end
 
@@ -187,16 +199,31 @@ module Registration
       # @return [Symbol] workflow symbol (:next or :abort)
       def select_migration_products
         log.info "Displaying migration target selection dialog"
-        dialog = MigrationSelectionDialog.new(migrations)
+        dialog = MigrationSelectionDialog.new(migrations, products_to_migrate)
         ret = dialog.run
 
         if ret == :next
           self.selected_migration = dialog.selected_migration
           self.manual_repo_selection = dialog.manual_repo_selection
+          log.info "Selected migration: #{selected_migration}"
         end
 
-        log.info "Selected migration: #{selected_migration}"
         ret
+      end
+
+      # collect products to migrate
+      # @return [Array<Hash>] installed or registered products
+      def products_to_migrate
+        installed_products = SwMgmt.installed_products
+        log.info "installed_products: #{installed_products}"
+
+        registered_products = Addon.registered_not_installed.map do |addon|
+          ret = addon.to_h
+          ret["display_name"] = addon.friendly_name
+          ret
+        end
+
+        installed_products.concat(registered_products)
       end
 
       # upgrade the services to the new version

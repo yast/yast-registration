@@ -15,6 +15,8 @@
 require "cgi/util"
 
 require "yast"
+require "registration/migration_sorter"
+require "registration/sw_mgmt"
 
 module Registration
   module UI
@@ -27,21 +29,24 @@ module Registration
       Yast.import "UI"
       Yast.import "Wizard"
 
-      attr_accessor :selected_migration, :manual_repo_selection
+      attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
       # run the dialog
-      # @param [Array<SUSE::Connect::Remote::Product>] the available migration targets
-      def self.run(migrations)
-        dialog = MigrationSelectionDialog.new(migrations)
+      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<Hash>] installed_products the currently installed products
+      def self.run(migrations, installed_products)
+        dialog = MigrationSelectionDialog.new(migrations, installed_products)
         dialog.run
       end
 
       # constructor
-      # @param [Array<SUSE::Connect::Remote::Product>] the available migration targets
-      def initialize(migrations)
+      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<Hash>] installed_products the currently installed products
+      def initialize(migrations, installed_products)
         textdomain "registration"
 
         @migrations = migrations
+        @installed_products = installed_products
         @manual_repo_selection = false
       end
 
@@ -57,9 +62,9 @@ module Registration
               "server may offer several possible migration to new products.</p>") +
           # TRANSLATORS: help text (2/3)
           _("<p>Only one migration target from the list can be selected.</p>") +
-            # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
-            (_("<p>Use the <b>%s</b> check box to manually select the migration " \
-                  "repositories later.</p>") % _("Manually Select Migration Repositories")),
+          # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
+          (_("<p>Use the <b>%s</b> check box to manually select the migration " \
+                "repositories later.</p>") % _("Manually Select Migration Repositories")),
           true,
           true
         )
@@ -78,6 +83,11 @@ module Registration
       private
 
       attr_accessor :migrations
+
+      def add_registered_addons
+        extra = Addon.registered_not_installed.map { |addon| SwMgmt.remote_product(addon) }
+        installed_products.concat(extra)
+      end
 
       # the main dialog content
       # @return [Yast::Term] UI term
@@ -112,9 +122,9 @@ module Registration
       # list of items for the main widget
       # @return [Array<Yast::Term>] widget content
       def migration_items
-        migrations.map.with_index do |arr, idx|
+        sorted_migrations.map.with_index do |arr, idx|
           products = arr.map do |product|
-            "#{product.identifier}-#{product.version}-#{product.arch}"
+            "#{product.identifier}-#{product.version}"
           end
 
           Item(Id(idx), products.join(", "))
@@ -134,14 +144,51 @@ module Registration
       # @param [Integer] migration index
       # @return [String] user friendly description (in RichText format)
       def migration_details(idx)
-        # TODO: display some more user friendly details
-        details = migrations[idx].map do |product|
-          "<li>" + CGI.escapeHTML("#{product.identifier}-#{product.version}-#{product.arch}") +
-            "</li>"
+        details = sorted_migrations[idx].map do |product|
+          installed = installed_products.find do |installed_product|
+            installed_product["name"] == product.identifier
+          end
+
+          "<li>" + product_summary(product, installed) + "</li>"
         end
 
-        details = "<ul>" + details.join + "</ul>"
-        _("<h3>Migration Products Details</h3>%s") % details
+        # TRANSLATORS: RichText header (details for the selected item)
+        "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join + "</ul>"
+      end
+
+      def product_summary(product, installed_product)
+        product_name = CGI.escapeHTML(product.friendly_name)
+
+        if !installed_product
+          # this is rather a theoretical case, but anyway....
+          # TRANSLATORS: Summary message, rich text format
+          # %s is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
+          return _("%s <b>will be installed.</b>") % product_name
+        end
+
+        installed_version = installed_product["version_version"]
+
+        if installed_version == product.version
+          # TRANSLATORS: Summary message, rich text format
+          # %s is a product name, e.g. "SUSE Linux Enterprise Server 12"
+          return _("%s <b>stays unchanged.</b>") % product_name
+        end
+
+        old_product_name = SwMgmt.product_label(installed_product)
+
+        # use Gem::Version for version compare
+        if Gem::Version.new(installed_version) < Gem::Version.new(product.version)
+          # TRANSLATORS: Summary message, rich text format
+          # %{old_product} is a product name, e.g. "SUSE Linux Enterprise Server 12"
+          # %{new_product} is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
+          return _("%{old_product} <b>will be upgraded to</b> %{new_product}.") \
+            % { old_product: old_product_name, new_product: product_name }
+        else
+          # TRANSLATORS: Summary message, rich text format
+          # %{old_product} and %{new_product} are product names
+          return _("%{old_product} <b>will be downgraded to</b> %{new_product}.") \
+            % { old_product: old_product_name, new_product: product_name }
+        end
       end
 
       # store the current UI values
@@ -151,6 +198,13 @@ module Registration
         log.info "Selected migration: #{selected_migration}"
 
         self.manual_repo_selection = Yast::UI.QueryWidget(:manual_repos, :Value)
+      end
+
+      def sorted_migrations
+        # sort the products in each migration
+        migrations.map do |migration|
+          migration.sort(&::Registration::MIGRATION_SORTER)
+        end
       end
     end
   end

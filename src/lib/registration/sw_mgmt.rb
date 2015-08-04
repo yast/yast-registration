@@ -51,7 +51,7 @@ module Registration
     ZYPP_DIR = "/etc/zypp"
 
     FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-      "release_type" => "DVD" }
+      "release_type" => "DVD", "version_version" => "12" }
 
     def self.init
       # false = do not allow continuing without the libzypp lock
@@ -137,7 +137,7 @@ module Registration
     # create UI label for a base product
     # @param base_product [Hash] Product (hash from pkg-bindings)
     # @return [String] UI Label
-    def self.base_product_label(base_product)
+    def self.product_label(base_product)
       base_product["display_name"] ||
         base_product["short_name"] ||
         base_product["name"] ||

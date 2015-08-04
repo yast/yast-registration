@@ -48,17 +48,25 @@ module Registration
           dialog_content,
           # TRANSLATORS: help text
           _("<p>In this dialog you can manually select which repositories will" \
-            "be used for online migration. The packages will be upgraded to the" \
-            "highest version found in the selected repositories.</p>"),
+              "be used for online migration. The packages will be upgraded to the" \
+              "highest version found in the selected repositories.</p>"),
           true,
           true
         )
 
+        update_repo_details
+
         loop do
           ret = Yast::UI.UserInput
 
-          store_values if ret == :next
-          repo_mgmt if ret == :repo_mgmt
+          case ret
+          when :next
+            store_values
+          when :repo_mgmt
+            repo_mgmt
+          when :repos
+            update_repo_details
+          end
 
           return ret if [:next, :back, :cancel, :abort].include?(ret)
         end
@@ -72,9 +80,11 @@ module Registration
       # @return [Yast::Term] UI term
       def dialog_content
         VBox(
-          MultiSelectionBox(Id(:repos), Opt(:vstretch),
+          VWeight(75, MultiSelectionBox(Id(:repos), Opt(:vstretch, :notify),
+            # TRANSLATORS: Multiselection widget label
             _("Select the Migration Repositories"), repo_items
-          ),
+          )),
+          MinHeight(6, VWeight(25, RichText(Id(:details), ""))),
           # TRANSLATORS: Push button label, starts the repository management module
           PushButton(Id(:repo_mgmt), _("Manage Repositories..."))
         )
@@ -94,16 +104,28 @@ module Registration
         end
 
         repos.map do |repo|
-          Item(Id(repo), repo_label(repo), Yast::Pkg.SourceGeneralData(repo)["enabled"])
+          repo_props = Yast::Pkg.SourceGeneralData(repo)
+          Item(Id(repo), repo_props["name"], repo_props["enabled"])
         end
       end
 
-      # repository label, displayed in the MultiSelectionBox widget
-      # @param [Hash] repository data
-      # @return [String] label
-      def repo_label(repo)
-        repo_data = Yast::Pkg.SourceGeneralData(repo)
-        "#{repo_data["name"]} (#{repo_data["url"]})"
+      def repo_details(repo)
+        # TRANSLATORS: summary text, %s is a repository URL
+        url_label = _("URL: %s") % repo["url"]
+        # TRANSLATORS: summary text, %s is a repository priority (1-99)
+        priority_label = _("Priority: %s") % repo["priority"]
+
+        "<p><b><big>#{repo["name"]}</big></b></p><p>#{url_label}<br>#{priority_label}</p>"
+      end
+
+      def update_repo_details
+        log.debug "Currently selected item: #{Yast::UI.QueryWidget(:repos, :CurrentItem)}"
+        current = Yast::UI.QueryWidget(:repos, :CurrentItem)
+
+        return unless current
+
+        Yast::UI.ChangeWidget(Id(:details), :Value,
+          repo_details(Yast::Pkg.SourceGeneralData(current)))
       end
 
       # activate the selection in the dialog
