@@ -152,8 +152,8 @@ module Registration
           "<li>" + product_summary(product, installed) + "</li>"
         end
 
-        details = "<ul>" + details.join + "</ul>"
-        _("<h3>Migration Summary</h3>%s") % details
+        # TRANSLATORS: RichText header (details for the selected item)
+        "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join + "</ul>"
       end
 
       def product_summary(product, installed_product)

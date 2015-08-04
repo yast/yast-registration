@@ -59,6 +59,8 @@ module Registration
         @selected ||= []
       end
 
+      # return add-ons which are registered but not installed in the system
+      # @return [Array<Addon>] the list of add-ons
       def registered_not_installed
         registered.select do |addon|
           !SwMgmt.installed_products.find do |product|
