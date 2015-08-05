@@ -245,6 +245,12 @@ module Registration
           Yast::Wizard.EnableBackButton
         end
 
+        # synchronize the changes done by modifying the services,
+        # reinitialize the repositories and reload the available packages
+        Yast::Pkg.SourceFinishAll
+        Yast::Pkg.SourceRestore
+        Yast::Pkg.SourceLoad
+
         log.info "Registered services: #{registered_services}"
         :next
       end
