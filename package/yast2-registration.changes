@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug  7 14:11:57 UTC 2015 - ancor@suse.com
+
+- Fixed 'back' button in registration screen during installation
+  (bnc#940915)
+- 3.1.139
+
+-------------------------------------------------------------------
 Thu Jul 30 12:26:48 CEST 2015 - gs@suse.de
 
 - change category from "Support" to "Software" (bsc#939543)
