@@ -113,6 +113,8 @@ module Yast
 
       # remember the created registration object for later use
       @registration = base_reg_dialog.registration if ret == :next
+      # tell #registration_check whether the user wants to go back (bnc#940915)
+      @back_from_register = (ret == :back)
 
       ret
     end
@@ -166,6 +168,9 @@ module Yast
     # do some sanity checks and decide which workflow will be used
     # return [Symbol] :update
     def registration_check
+      # Go back if the user clicked 'back' in the registration dialog
+      return :back if @back_from_register
+
       # check the base product at start to avoid problems later
       if ::Registration::SwMgmt.find_base_product.nil?
         ::Registration::Helpers.report_no_base_product
