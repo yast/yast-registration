@@ -26,7 +26,8 @@ RSpec.configure do |config|
   end
 end
 
-$LOAD_PATH.unshift(File.expand_path("../../src/lib", __FILE__))
+libdir = File.expand_path("../../src/lib", __FILE__)
+$LOAD_PATH.unshift(libdir)
 
 ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 
@@ -43,4 +44,4 @@ end
 require_relative "factories"
 
 # force loading all files to report proper code coverage
-Dir.chdir("src/lib") { Dir["**/*.rb"].each { |f| require f } }
+Dir.chdir(libdir) { Dir["**/*.rb"].each { |f| require f } }
