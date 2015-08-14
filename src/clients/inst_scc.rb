@@ -154,7 +154,11 @@ module Yast
       # cache the available addons
       return :cancel if init_registration == :cancel
 
-      registration_ui.get_available_addons
+      addons_loaded = Registration::ConnectHelpers.catch_registration_errors do
+        registration_ui.get_available_addons
+      end
+
+      return :cancel unless addons_loaded
 
       @addons_registered_orig = Registration::Addon.registered.dup
     end
