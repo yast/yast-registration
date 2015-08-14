@@ -9,6 +9,7 @@ require "registration/sw_mgmt"
 require "registration/helpers"
 require "registration/url_helpers"
 require "registration/ui/local_server_dialog"
+require "registration/ui/abort_confirmation"
 
 module Registration
   module UI
@@ -159,7 +160,7 @@ module Registration
           when :next
             ret = handle_registration
           when :abort
-            ret = nil unless Yast::Mode.normal || Yast::Popup.ConfirmAbort(:painless)
+            ret = nil unless Yast::Mode.normal || AbortConfirmation.run
           when :skip
             ret = nil unless confirm_skipping
           end

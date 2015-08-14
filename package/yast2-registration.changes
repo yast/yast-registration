@@ -1,9 +1,15 @@
 -------------------------------------------------------------------
-Fri Aug 14 10:45:56 UTC 2015 - lslezak@suse.cz
+Fri Aug 14 16:01:41 UTC 2015 - lslezak@suse.cz
 
 - Catch exceptions also when loading the available extensions
   (bsc#941491)
 - 3.1.141
+
+-------------------------------------------------------------------
+Fri Aug 14 15:11:37 UTC 2015 - ancor@suse.com
+
+- User messages improved when registration does not happen during
+  installation (bnc#941403, bnc#941739)
 
 -------------------------------------------------------------------
 Fri Aug 14 08:20:21 UTC 2015 - lslezak@suse.cz
