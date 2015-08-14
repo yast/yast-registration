@@ -1,5 +1,6 @@
 
 require "yast"
+require "registration/ui/abort_confirmation"
 
 module Registration
   module UI
@@ -185,7 +186,7 @@ module Registration
           when :next
             collect_addon_regcodes
           when :cancel, :abort
-            ret = Stage.initial && !Popup.ConfirmAbort(:painless) ? nil : :abort
+            ret = Stage.initial && !AbortConfirmation.run ? nil : :abort
           end
         end
 
