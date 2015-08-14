@@ -43,6 +43,8 @@ module Registration
       @registration = registration
 
       Yast.import "Popup"
+      Yast.import "Wizard"
+      Yast.import "Mode"
     end
 
     # register the system and the base product
@@ -230,10 +232,15 @@ module Registration
 
       # not set yet?
       if options.install_updates.nil?
-        options.install_updates = Yast::Popup.YesNo(
-          _("Registration added some update repositories.\n\n" \
-              "Do you want to install the latest available\n" \
-              "on-line updates during installation?"))
+        msg = _("Registration added some update repositories.") + "\n\n"
+        if Yast::Mode.installation
+          msg += _("Do you want to install the latest available\n" \
+                    "on-line updates during installation?")
+        else # Yast::Mode.update
+          msg += _("Do you want to install the latest available\n" \
+                    "on-line updates during update?")
+        end
+        options.install_updates = Yast::Popup.YesNo(msg)
       end
 
       options.install_updates
