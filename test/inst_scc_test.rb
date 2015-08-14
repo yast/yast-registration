@@ -29,6 +29,16 @@ describe "inst_scc client" do
       expect(Yast::WFM.call("inst_scc")).to eq(:abort)
     end
 
+    it "displays an error when loading the available extensions fails" do
+      # click installing extensions, close the error message and abort the workflow
+      expect(Yast::UI).to receive(:UserInput).and_return(:extensions, :ok, :abort)
+
+      expect_any_instance_of(Registration::RegistrationUI).to receive(:get_available_addons)
+        .and_raise("Invalid system credentials")
+
+      expect(Yast::WFM.call("inst_scc")).to eq(:abort)
+    end
+
     it "goes back to initial screen when aborting selection of url" do
       # User clicks on 'select extensions' first time the initial screen is
       # displayed and 'finish' the second time
