@@ -1,5 +1,11 @@
 -------------------------------------------------------------------
-Mon Aug 17 07:42:47 UTC 2015 - lslezak@suse.cz
+Fri Aug 14 15:11:37 UTC 2015 - ancor@suse.com
+
+- User messages improved when registration does not happen during
+  installation (bnc#941403, bnc#941739)
+
+-------------------------------------------------------------------
+Fri Aug 14 12:20:21 UTC 2015 - lslezak@suse.cz
 
 - 3.1.129.3
 
