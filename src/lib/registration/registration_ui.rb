@@ -68,7 +68,7 @@ module Registration
         if register_base_product
           # then register the product(s)
           product_service = Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-            _("Registering %s ...") % SwMgmt.base_product_label(base_product)
+            _("Registering %s ...") % SwMgmt.product_label(base_product)
           ) do
 
             base_product_data = SwMgmt.base_product_to_register

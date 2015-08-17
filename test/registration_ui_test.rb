@@ -28,16 +28,28 @@ describe "Registration::RegistrationUI" do
   let(:addon_legacy) { remote_addons[4] }
   let(:addon_SDK) { remote_addons[7] }
 
+  before do
+    # Stub Popup.Feedback and other messages to user
+    allow(Yast::UI).to receive(:OpenDialog)
+    allow(Yast::UI).to receive(:CloseDialog)
+    allow(Yast::Wizard).to receive(:SetContents)
+  end
+
   describe "#register_system_and_base_product" do
     it "registers the system using the provided registration code" do
       email = "user@example.com"
       reg_code = "reg_code"
 
       expect(Registration::Registration).to receive(:is_registered?).and_return(false)
-      expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
+      expect(Registration::SwMgmt).to receive(:find_base_product).twice.and_return(base_product)
       expect(registration).to receive(:register).with(email, reg_code, target_distro)
       expect(registration).to receive(:register_product).with(base_product_to_register, email)
         .and_return([])
+
+      options = Registration::Storage::InstallationOptions.instance
+      allow(options).to receive(:email).twice.and_return(email)
+      allow(options).to receive(:reg_code).and_return(reg_code)
+      allow(options).to receive(:base_registered).and_return(false)
 
       expect(registration_ui.register_system_and_base_product(email, reg_code)).to be_true
     end
