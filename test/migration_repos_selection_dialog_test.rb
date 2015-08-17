@@ -17,9 +17,9 @@ describe Registration::UI::MigrationReposSelectionDialog do
 
         # do a simple check: convert the term to a String
         # an unselected repository
-        expect(content.to_s).to include("item (`id (0), \"name (https://example.com)\", false)")
+        expect(content.to_s).to include("item (`id (0), \"name\", false)")
         # a selected repository
-        expect(content.to_s).to include("`item (`id (1), \"name2 (https://example2.com)\", true)")
+        expect(content.to_s).to include("`item (`id (1), \"name2\", true)")
       end
     end
 

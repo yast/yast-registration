@@ -34,7 +34,7 @@ describe "Registration::RegistrationUI" do
       reg_code = "reg_code"
 
       expect(Registration::Registration).to receive(:is_registered?).and_return(false)
-      expect(Registration::SwMgmt).to receive(:find_base_product).twice.and_return(base_product)
+      expect(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       expect(registration).to receive(:register).with(email, reg_code, target_distro)
       expect(registration).to receive(:register_product).with(base_product_to_register, email)
         .and_return([])
