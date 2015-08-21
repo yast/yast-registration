@@ -44,6 +44,15 @@ module Registration
         raise "Not implemented"
       end
 
+      protected
+
+      # create widget ID for an addon
+      # @param [<Addon>] addon the addon
+      # @return [String] widget id
+      def addon_widget_id(addon)
+        "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
       private
 
       # reimplement this in a subclass
@@ -154,7 +163,7 @@ module Registration
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
-        CheckBox(Id(addon.identifier), Opt(:notify), label, addon_selected?(addon))
+        CheckBox(Id(addon_widget_id(addon)), Opt(:notify), label, addon_selected?(addon))
       end
 
       # the main event loop - handle the user in put in the dialog
@@ -191,14 +200,14 @@ module Registration
       end
 
       # handler for changing the addon status in the main loop
-      # @param id [String] addon identifier
+      # @param id [String] addon widget id
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @addons.find { |a| a.identifier == id }
+        addon = @addons.find { |a| addon_widget_id(a) == id }
         return unless addon
 
         show_addon_details(addon)
-        if Yast::UI.QueryWidget(Id(addon.identifier), :Value)
+        if Yast::UI.QueryWidget(Id(addon_widget_id(addon)), :Value)
           addon.selected
         else
           addon.unselected
@@ -217,7 +226,7 @@ module Registration
       # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
         @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon.identifier), :Enabled, addon.selectable?)
+          Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
         end
       end
 

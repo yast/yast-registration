@@ -9,8 +9,12 @@ describe "Registration::RegistrationUI" do
   let(:target_distro) { "sles-12-x86_64" }
   let(:base_product) do
     {
-      "arch" => "x86_64", "name" => "SLES", "version" => "12",
-      "flavor" => "DVD", "register_target" => target_distro
+      "arch"            => "x86_64",
+      "flavor"          => "DVD",
+      "name"            => "SLES",
+      "version"         => "12-0",
+      "version_version" => "12",
+      "register_target" => target_distro
     }
   end
   let(:base_product_to_register) do
@@ -18,7 +22,7 @@ describe "Registration::RegistrationUI" do
       "arch"         => "x86_64",
       "name"         => "SLES",
       "reg_code"     => "reg_code",
-      "release_type" => "DVD",
+      "release_type" => nil,
       "version"      => "12"
     }
   end
