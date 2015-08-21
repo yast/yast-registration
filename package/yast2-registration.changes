@@ -4,6 +4,7 @@ Fri Aug 21 11:38:22 UTC 2015 - lslezak@suse.cz
 - Fixed registering a product with POOL flavor (bsc#941402)
 - Addon selection dialog - avoid possible ID duplicates when
   an addon with multiple versions is displayed
+- 3.1.143
 
 -------------------------------------------------------------------
 Mon Aug 17 14:40:05 UTC 2015 - igonzalezsosa@suse.com
