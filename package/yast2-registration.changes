@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 21 11:38:22 UTC 2015 - lslezak@suse.cz
+
+- Fixed registering a product with POOL flavor (bsc#941402)
+
+-------------------------------------------------------------------
 Mon Aug 17 14:40:05 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix AutoYaST crash during registration (bsc#941449)
