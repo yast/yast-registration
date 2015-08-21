@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 10 15:37:08 UTC 2015 - lslezak@suse.cz
+
+- set the $releasever URL variable to the new base product
+  during online migration (bsc#941563)
+
+-------------------------------------------------------------------
 Wed Sep  9 12:34:35 UTC 2015 - lslezak@suse.cz
 
 - display short product names instead of the internal identifiers
