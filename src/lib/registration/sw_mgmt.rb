@@ -49,8 +49,11 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp"
 
-    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12",
-      "release_type" => "DVD", "version_version" => "12" }
+    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
+      "flavor" => "DVD", "version_version" => "12", "register_release" => "",
+      "register_target" => "sle-12-x86_64" }
+
+    OEM_DIR = "/var/lib/suseRegister/OEM"
 
     def self.init
       # false = do not allow continuing without the libzypp lock
@@ -144,17 +147,15 @@ module Registration
     end
 
     def self.base_product_to_register
-      # just for debugging:
-      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
-
-      base_product = find_base_product
+      # use FAKE_BASE_PRODUCT just for debugging
+      base_product = ENV["FAKE_BASE_PRODUCT"] ? FAKE_BASE_PRODUCT : find_base_product
 
       # filter out not needed data
       product_info = {
         "name"         => base_product["name"],
         "arch"         => base_product["arch"],
-        "version"      => ::Registration::Helpers.base_version(base_product["version"]),
-        "release_type" => base_product["flavor"]
+        "version"      => base_product["version_version"],
+        "release_type" => get_release_type(base_product)
       }
 
       log.info("Base product to register: #{product_info}")
@@ -412,6 +413,56 @@ module Registration
       products.all? { |product| Pkg.ResolvableInstall(product, :product) }
     end
 
-    private_class_method :each_repo
+    # select remote addons matching the product resolvables
+    def self.select_product_addons(products, addons)
+      addons.each do |addon|
+        log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # select a remote addon for each product
+      products.each do |product|
+        remote_addon = addons.find do |addon|
+          product["name"] == addon.identifier &&
+            product["version_version"] == addon.version &&
+            product["arch"] == addon.arch
+        end
+
+        if remote_addon
+          remote_addon.selected
+        else
+          product_label = "#{product["display_name"]} (#{product["name"]}" \
+            "-#{product["version_version"]}-#{product["arch"]})"
+
+          # TRANSLATORS: %s is a product name
+          Report.Error(_("Cannot find remote product %s.\n" \
+                "The product cannot be registered.") % product_label
+          )
+        end
+      end
+    end
+
+    # find the product resolvables from the specified repository
+    def self.products_from_repo(repo_id)
+      # TODO: only installed products??
+      Pkg.ResolvableProperties("", :product, "").select do |product|
+        product["source"] == repo_id
+      end
+    end
+
+    def self.get_release_type(product)
+      if product["product_line"]
+        oem_file = File.join(OEM_DIR, product["product_line"])
+
+        if File.exist?(oem_file)
+          # read only the first line
+          line = File.open(oem_file, &:readline)
+          return line.chomp if line
+        end
+      end
+
+      product["register_release"]
+    end
+
+    private_class_method :each_repo, :get_release_type
   end
 end
