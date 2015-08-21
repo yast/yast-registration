@@ -64,6 +64,15 @@ module Registration
         handle_dialog
       end
 
+      protected
+
+      # create widget ID for an addon
+      # @param [<Addon>] addon the addon
+      # @return [String] widget id
+      def addon_widget_id(addon)
+        "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
       private
 
       # create widget ID for an addon
