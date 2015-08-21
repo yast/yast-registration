@@ -1,3 +1,6 @@
+- Addon selection dialog - avoid possible ID duplicates when
+  an addon with multiple versions is displayed
+
 -------------------------------------------------------------------
 Wed Apr  8 15:31:18 UTC 2015 - lslezak@suse.cz
 
