@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 25 13:54:46 UTC 2015 - lslezak@suse.cz
+
+- Handle not available products when using a SMT server for running
+  online migration (bsc#942892)
+
+-------------------------------------------------------------------
 Fri Aug 21 11:38:22 UTC 2015 - lslezak@suse.cz
 
 - Fixed registering a product with POOL flavor (bsc#941402)
