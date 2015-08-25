@@ -17,6 +17,7 @@ require "cgi/util"
 require "yast"
 require "registration/migration_sorter"
 require "registration/sw_mgmt"
+require "registration/url_helpers"
 
 module Registration
   module UI
@@ -28,6 +29,8 @@ module Registration
 
       Yast.import "UI"
       Yast.import "Wizard"
+      Yast.import "Report"
+      Yast.import "HTML"
 
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
@@ -71,18 +74,48 @@ module Registration
 
         update_details
 
-        loop do
-          ret = Yast::UI.UserInput
-          update_details if ret == :migration_targets
-          store_values if ret == :next
-
-          return ret if [:next, :back, :cancel, :abort].include?(ret)
-        end
+        handle_user_input
       end
 
       private
 
       attr_accessor :migrations
+
+      # the main loop for handling the user inut
+      # @return [Symbol] the UI symbol
+      def handle_user_input
+        loop do
+          ret = Yast::UI.UserInput
+
+          case ret
+          when :migration_targets
+            update_details
+          when :next
+            if !current_migration
+              # TRANSLATORS: error popup, no target migration is selected
+              Yast::Report.Error(_("Select the target migration."))
+              next
+            end
+
+            if valid_migration?
+              store_values
+            else
+              report_unavailable_migration
+              next
+            end
+          end
+
+          return ret if [:next, :back, :cancel, :abort].include?(ret)
+        end
+      end
+
+      # is the current selected migration valid? (a migration is selected and
+      # all products are available)
+      # @return [Boolean] true if the migration can be used
+      def valid_migration?
+        # available is nil (not set) or true
+        current_migration.all? { |p| p.available.nil? || p.available }
+      end
 
       def add_registered_addons
         extra = Addon.registered_not_installed.map { |addon| SwMgmt.remote_product(addon) }
@@ -156,8 +189,32 @@ module Registration
         "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join + "</ul>"
       end
 
+      # create a product summary for the details widget
+      # @return [String] product summary
       def product_summary(product, installed_product)
         product_name = CGI.escapeHTML(product.friendly_name)
+        log.info "creating summary for #{product} and #{installed_product}"
+
+        # explicitly check for false, the flag is not returned by SCC, this is
+        # a SMT specific check (in SCC all products are implicitly available)
+        if product.available == false
+          # a product can be unavailable only when using SMT, the default
+          # SCC URL should be never used
+          url = UrlHelpers.registration_url || SUSE::Connect::YaST::DEFAULT_URL
+
+          # TRANSLATORS: An error message displayed in the migration details.
+          # The product has not been mirrored to the SMT server and cannot be used
+          # for migration. The SMT admin has to mirror the product to allow
+          # using the selected migration.
+          # %{url} is the URL of the registration server (SMT)
+          # %{product} is a full product name, e.g. "SUSE Linux Enterprise Server 12"
+          return Yast::HTML.Colorize(
+            _("ERROR: Product <b>%{product}</b> is not available at the " \
+                "registration server (%{url}). Make the product available " \
+                "to allow using this migration.") %
+            { product: product_name, url: url },
+            "red")
+        end
 
         if !installed_product
           # this is rather a theoretical case, but anyway....
@@ -166,38 +223,53 @@ module Registration
           return _("%s <b>will be installed.</b>") % product_name
         end
 
-        installed_version = installed_product["version_version"]
+        product_change_summary(installed_product, product)
+      end
 
-        if installed_version == product.version
+      # create a summary for changed product
+      # @param [Hash] old_product the old installed libzypp product
+      # @param [OpenStruct] the new target product
+      # @return [String] RichText summary
+      def product_change_summary(old_product, new_product)
+        new_product_name = CGI.escapeHTML(new_product.friendly_name)
+        installed_version = old_product["version_version"]
+
+        if installed_version == new_product.version
           # TRANSLATORS: Summary message, rich text format
           # %s is a product name, e.g. "SUSE Linux Enterprise Server 12"
-          return _("%s <b>stays unchanged.</b>") % product_name
+          return _("%s <b>stays unchanged.</b>") % new_product_name
         end
 
-        old_product_name = SwMgmt.product_label(installed_product)
+        old_product_name = SwMgmt.product_label(old_product)
 
         # use Gem::Version for version compare
-        if Gem::Version.new(installed_version) < Gem::Version.new(product.version)
+        if Gem::Version.new(installed_version) < Gem::Version.new(new_product.version)
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} is a product name, e.g. "SUSE Linux Enterprise Server 12"
           # %{new_product} is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
           return _("%{old_product} <b>will be upgraded to</b> %{new_product}.") \
-            % { old_product: old_product_name, new_product: product_name }
+            % { old_product: old_product_name, new_product: new_product_name }
         else
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} and %{new_product} are product names
           return _("%{old_product} <b>will be downgraded to</b> %{new_product}.") \
-            % { old_product: old_product_name, new_product: product_name }
+            % { old_product: old_product_name, new_product: new_product_name }
         end
       end
 
       # store the current UI values
       def store_values
-        selected = Yast::UI.QueryWidget(:migration_targets, :CurrentItem)
-        self.selected_migration = migrations[selected]
-        log.info "Selected migration: #{selected_migration}"
-
+        self.selected_migration = current_migration
         self.manual_repo_selection = Yast::UI.QueryWidget(:manual_repos, :Value)
+      end
+
+      # return the currently selected migration
+      # @return [Array<OpenStruct>] the selected migration target
+      def current_migration
+        current_item = Yast::UI.QueryWidget(:migration_targets, :CurrentItem)
+        migration = migrations[current_item]
+        log.info "Selected migration: #{migration}"
+        migration
       end
 
       def sorted_migrations
@@ -205,6 +277,15 @@ module Registration
         migrations.map do |migration|
           migration.sort(&::Registration::MIGRATION_SORTER)
         end
+      end
+
+      # display an error popup
+      def report_unavailable_migration
+        # TRANSLATORS: an error popup message
+        Yast::Report.Error(_("The selected migration contains a product\n" \
+              "which is not available at the registration server.\n\n" \
+              "Select a different migration target or make the missing products\n" \
+              "available at the registration server."))
       end
     end
   end
