@@ -174,7 +174,7 @@ module Registration
       end
 
       # get migration details
-      # @param [Integer] migration index
+      # @param [Integer] idx migration index
       # @return [String] user friendly description (in RichText format)
       def migration_details(idx)
         details = sorted_migrations[idx].map do |product|
@@ -228,7 +228,7 @@ module Registration
 
       # create a summary for changed product
       # @param [Hash] old_product the old installed libzypp product
-      # @param [OpenStruct] the new target product
+      # @param [OpenStruct] new_product the new target product
       # @return [String] RichText summary
       def product_change_summary(old_product, new_product)
         new_product_name = CGI.escapeHTML(new_product.friendly_name)
