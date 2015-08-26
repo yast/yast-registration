@@ -47,8 +47,8 @@ module Registration
         # before the translation deadline...
         # TRANSLATORS: popup question, confirm installing the available
         # updates now
-        _("There are some online updates available to installation,\n" \
-            "it is recommended to install all updates before proceeding.\n\n" \
+        _("Online updates are available for installation.\n" \
+            "It is recommended to install all updates before proceeding.\n\n" \
             "Would you like to install the updates now?")
 
         url = UrlHelpers.registration_url
