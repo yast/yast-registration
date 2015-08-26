@@ -232,14 +232,19 @@ module Registration
 
       # not set yet?
       if options.install_updates.nil?
-        msg = _("Registration added some update repositories.") + "\n\n"
+        # TRANSLATORS: updates popup question (1/2), multiline, max. ~60 chars/line
+        msg = _("The registration server offers update repositories.\n\n")
+
         if Yast::Mode.installation
-          msg += _("Do you want to install the latest available\n" \
-                    "on-line updates during installation?")
+          # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
+          msg += _("Would you like to enable these repositories during installation\n" /
+              "in order to receive the latest updates?")
         else # Yast::Mode.update
-          msg += _("Do you want to install the latest available\n" \
-                    "on-line updates during update?")
+          # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
+          msg += _("Would you like to enable these repositories during upgrade\n" /
+              "in order to receive the latest updates?")
         end
+
         options.install_updates = Yast::Popup.YesNo(msg)
       end
 
