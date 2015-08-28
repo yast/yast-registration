@@ -25,6 +25,7 @@ require "yast"
 
 require "tmpdir"
 require "fileutils"
+require "shellwords"
 
 require "registration/exceptions"
 require "registration/helpers"
@@ -331,9 +332,11 @@ module Registration
       new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
-      # preserve the original file permissions (equivalent to "cp -p")
-      # (SMT uses different permissions than the defaults, make sure it works after upgrade)
-      ::FileUtils.cp(file, new_file, preserve: true)
+
+      # SMT uses extra ACL permissions, make sure they are kept in the copied file,
+      # (use "cp -a ", ::FileUtils.cp(..., preserve: true) cannot be used as it preserves only
+      # the traditional Unix file permissions, the extended ACLs are NOT copied!)
+      `cp -a #{Shellwords.escape(file)} #{Shellwords.escape(new_file)}`
 
       credentials = SUSE::Connect::Credentials.read(new_file)
       # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
