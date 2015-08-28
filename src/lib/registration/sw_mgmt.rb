@@ -332,7 +332,9 @@ module Registration
       new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
-      ::FileUtils.cp(file, new_file)
+      # preserve the original file permissions (equivalent to "cp -p")
+      # (SMT uses different permissions than the defaults, make sure it works after upgrade)
+      ::FileUtils.cp(file, new_file, preserve: true)
 
       credentials = SUSE::Connect::Credentials.read(new_file)
       # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
