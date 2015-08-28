@@ -178,8 +178,8 @@ describe Registration::SwMgmt do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(false)
 
-      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
-        File.join(target_dir, "SCCcredentials"), preserve: true)
+      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+        "NCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::Credentials).to receive(:read)
 
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
@@ -191,8 +191,8 @@ describe Registration::SwMgmt do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(true)
 
-      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
-        File.join(target_dir, "SCCcredentials"), preserve: true)
+      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+        "SCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::Credentials).to receive(:read)
 
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
