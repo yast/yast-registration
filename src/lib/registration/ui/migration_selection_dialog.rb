@@ -15,7 +15,7 @@
 require "cgi/util"
 
 require "yast"
-require "registration/migration_sorter"
+require "registration/addon_sorter"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
 
@@ -276,7 +276,10 @@ module Registration
       def sorted_migrations
         # sort the products in each migration
         migrations.map do |migration|
-          migration.sort(&::Registration::MIGRATION_SORTER)
+          # use the addon sorter, put the base product(s) at the end
+          base = migration.select { |m| m.product_type == "base" }
+          addons = migration - base
+          addons.sort(&::Registration::ADDON_SORTER) + base
         end
       end
 
