@@ -190,9 +190,8 @@ module Registration
         end
         # SCC uses the same credentials for all services, just save them to
         # a different file
-        service_credentials = credentials.dup
-        service_credentials.file = credentials_file
-        service_credentials.write
+        SUSE::Connect::YaST.create_credentials_file(credentials.username,
+          credentials.password, credentials_file)
       end
 
       service_name = product_service.name
@@ -324,14 +323,14 @@ module Registration
       ncc_file = File.join(source_dir, dir, "NCCcredentials")
       copy_old_credentials_file(ncc_file)
 
-      scc_file = File.join(source_dir, SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE)
+      scc_file = File.join(source_dir, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
       copy_old_credentials_file(scc_file)
     end
 
     def self.copy_old_credentials_file(file)
       return unless File.exist?(file)
 
-      new_file = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
+      new_file = SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
 
@@ -340,9 +339,8 @@ module Registration
       # the traditional Unix file permissions, the extended ACLs are NOT copied!)
       `cp -a #{Shellwords.escape(file)} #{Shellwords.escape(new_file)}`
 
-      credentials = SUSE::Connect::Credentials.read(new_file)
-      # note: SUSE::Connect::Credentials override #to_s, the password is filtered out
-      log.info "Using previous credentials: #{credentials}"
+      credentials = SUSE::Connect::YaST.credentials(new_file)
+      log.info "Using previous credentials (username): #{credentials.username}"
     end
 
     private_class_method :copy_old_credentials_file

@@ -32,8 +32,6 @@ module Registration
   class Registration
     include Yast::Logger
 
-    SCC_CREDENTIALS = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
-
     attr_accessor :url
 
     def initialize(url = nil)
@@ -47,15 +45,13 @@ module Registration
       )
 
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
-      credentials = SUSE::Connect::Credentials.new(login, password, SCC_CREDENTIALS)
-
-      log.info "Global SCC credentials: #{credentials}"
+      log.info "Global SCC credentials (username): #{login}"
 
       # ensure the zypp config directories are writable in inst-sys
       ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
-      credentials.write
+      SUSE::Connect::YaST.create_credentials_file(login, password)
     end
 
     def register_product(product, email = nil)
@@ -140,7 +136,7 @@ module Registration
 
     def self.is_registered?
       # just a simple file check without connection to SCC
-      File.exist?(SCC_CREDENTIALS)
+      File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
     private
@@ -188,7 +184,8 @@ module Registration
         ::Registration::SwMgmt.remove_service(old_service)
       end
 
-      credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
+      # read the global credentials
+      credentials = SUSE::Connect::YaST.credentials
       ::Registration::SwMgmt.add_service(product_service, credentials)
     end
 

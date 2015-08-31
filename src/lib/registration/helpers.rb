@@ -145,7 +145,7 @@ module Registration
     end
 
     def self.reset_registration_status
-      file = ::Registration::Registration::SCC_CREDENTIALS
+      file = SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
       return unless File.exist?(file)
 
       log.info "Resetting registration status, removing #{file}"
