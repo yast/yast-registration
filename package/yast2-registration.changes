@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 31 12:17:49 UTC 2015 - lslezak@suse.cz
+
+- make the migration selection widget smaller to have more space
+  for details when only few migrations are available (bsc#943636)
+
+-------------------------------------------------------------------
 Fri Aug 28 10:31:56 UTC 2015 - lslezak@suse.cz
 
 - Keep the original NCCCredentials file permissions when upgrading
