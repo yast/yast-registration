@@ -65,9 +65,9 @@ describe "Registration::Registration" do
         .with("SUSE_SLES_SAP" => "SLES_SAP")
 
       allow(File).to receive(:exist?).with(
-        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(true)
       allow(File).to receive(:read).with(
-        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(
           "username=SCC_foo\npassword=bar")
 
       registered_service = Registration::Registration.new.send(yast_method, product)

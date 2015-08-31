@@ -103,7 +103,7 @@ describe "Registration::Helpers" do
   end
 
   describe ".reset_registration_status" do
-    let(:credentials) { ::Registration::Registration::SCC_CREDENTIALS }
+    let(:credentials) { SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE }
 
     it "does nothing if there are no system credentials present" do
       expect(File).to receive(:exist?).with(credentials).and_return(false)

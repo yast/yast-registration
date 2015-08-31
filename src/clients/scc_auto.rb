@@ -334,7 +334,7 @@ module Yast
       ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
       # update the registration using the old credentials
-      File.exist?(::Registration::Registration::SCC_CREDENTIALS)
+      File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
     # update the system registration
