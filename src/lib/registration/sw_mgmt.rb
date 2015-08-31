@@ -304,7 +304,9 @@ module Registration
     end
 
     # copy old NCC/SCC credentials from the old installation to new SCC credentials
-    # the files are copied to the current system
+    # the files are copied to the root of the current system (/), at installation
+    # the credentials are copied to the target (/mnt) at the beginning of the
+    # installation (in the inst_kickoff.rb client)
     def self.copy_old_credentials(source_dir)
       log.info "Searching registration credentials in #{source_dir}..."
 
