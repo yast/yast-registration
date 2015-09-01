@@ -22,12 +22,14 @@ module Yast
     def main
       textdomain "registration"
 
-      Wizard.CreateDialog
+      # create the Wizard dialog if needed
+      wizard_present = Wizard.IsWizardDialog
+      Wizard.CreateDialog unless wizard_present
 
       begin
         ::Registration::UI::MigrationReposWorkflow.run(*Yast::WFM.Args)
       ensure
-        Wizard.CloseDialog
+        Wizard.CloseDialog unless wizard_present
       end
     end
   end unless defined?(YaST::MigrationReposClient)
