@@ -13,10 +13,10 @@
 #
 
 require "yast"
-require "registration/ui/migration_repos_workflow"
+require "registration/ui/migration_finish_workflow"
 
 module Yast
-  class MigrationReposClient < Client
+  class MigrationFinishClient < Client
     Yast.import "Wizard"
 
     def main
@@ -27,12 +27,12 @@ module Yast
       Wizard.CreateDialog unless wizard_present
 
       begin
-        ::Registration::UI::MigrationReposWorkflow.run
+        ::Registration::UI::MigrationFinishWorkflow.run
       ensure
         Wizard.CloseDialog unless wizard_present
       end
     end
-  end unless defined?(YaST::MigrationReposClient)
+  end unless defined?(YaST::MigrationFinishClient)
 end
 
-Yast::MigrationReposClient.new.main
+Yast::MigrationFinishClient.new.main

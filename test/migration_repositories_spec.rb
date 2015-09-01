@@ -23,6 +23,7 @@ describe Registration::MigrationRepositories do
 
     it "activates the specified sevices for upgrade" do
       subject.services << "test_service"
+      allow(Yast::Pkg).to receive(:ResolvablePreselectPatches)
 
       subject.activate_services
     end
@@ -41,6 +42,7 @@ describe Registration::MigrationRepositories do
       subject.install_updates = false
       subject.services << service
 
+      expect(Yast::Pkg).to_not receive(:ResolvablePreselectPatches)
       expect(Registration::SwMgmt).to receive(:service_repos).with(service, only_updates: true)
         .and_return(["SrcId" => repo])
 
@@ -57,6 +59,9 @@ describe Registration::MigrationRepositories do
       expect(Yast::Pkg).to receive(:PkgSolve)
       expect(Yast::Pkg).to receive(:PkgUpdateAll)
       expect(Yast::Pkg).to receive(:SourceLoad)
+
+      allow(Yast::Pkg).to receive(:ResolvablePreselectPatches)
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
     end
 
     it "activates the specified repositories and disables the rest" do

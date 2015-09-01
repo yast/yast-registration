@@ -96,13 +96,10 @@ module Registration
       # check if the add-on repository provides a product resolvable
       # @return [Symbol] workflow symbol (:next, :finish or :abort)
       def find_products
-        if !SwMgmt.init
+        if !SwMgmt.init(true)
           Report.Error(Pkg.LastError)
           return :abort
         end
-
-        # load the resolvables from the repositories
-        Pkg.SourceLoad
 
         self.products = SwMgmt.products_from_repo(repo_id)
 

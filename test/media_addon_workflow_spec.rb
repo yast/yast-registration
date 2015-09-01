@@ -27,6 +27,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
       let(:swmgmt_init) { false }
 
       it "aborts" do
+        allow(Yast::Pkg).to receive(:LastError)
         expect(Yast::Report).to receive(:Error)
         expect(run).to eq(:abort)
       end
