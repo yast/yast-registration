@@ -89,6 +89,66 @@ describe "Registration::RegistrationUI" do
     end
   end
 
+  describe "#register_addons" do
+    before do
+      # installation mode
+      allow(Yast::Mode).to receive(:installation).and_return(true)
+      allow(Yast::Mode).to receive(:normal).and_return(false)
+      allow(Yast::Mode).to receive(:update).and_return(false)
+
+      # Stub Popup.Feedback and other messages to user
+      allow(Yast::UI).to receive(:OpenDialog)
+      allow(Yast::UI).to receive(:CloseDialog)
+      allow(Yast::Wizard).to receive(:SetContents)
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
+
+      # stub the registration
+      allow(registration).to receive(:register_product)
+      allow(registration).to receive(:select_repositories)
+    end
+
+    it "does not ask for reg. code if all addons are free" do
+      # user is not asked for any reg. code
+      expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
+
+      # Register Legacy module
+      registration_ui.register_addons([addon_legacy], {})
+    end
+
+    it "asks for a reg. code if there is some paid addon" do
+      # User is asked for reg. codes
+      expect(Registration::UI::AddonRegCodesDialog).to receive(:run)
+        .with([addon_HA], {}).and_return(:next)
+
+      # Register High Availability module
+      registration_ui.register_addons([addon_HA], {})
+    end
+
+    it "registers all addons" do
+      # Stub user interaction for reg codes
+      allow(Registration::UI::AddonRegCodesDialog).to receive(:run).and_return(:next)
+
+      # Register HA-GEO + SDK addons
+      selected_addons = [addon_HA_GEO, addon_SDK]
+      registration_ui.register_addons(selected_addons, {})
+
+      # All selected addons are marked as registered
+      expect(selected_addons.all?(&:registered?)).to eq(true)
+    end
+
+    it "returns :next if everything goes fine" do
+      expect(registration_ui.register_addons([addon_legacy], {})).to eq :next
+    end
+
+    it "returns :back if some registration failed" do
+      # FIXME: Since the code is not functional, there is currently no cleaner
+      # way to mock a registration failure
+      allow(registration_ui).to receive(:register_selected_addons).and_return false
+
+      expect(registration_ui.register_addons([addon_legacy], {})).to eq :back
+    end
+  end
+
   describe "#migration_products" do
     let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
     let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }

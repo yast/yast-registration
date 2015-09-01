@@ -12,6 +12,9 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Registration::Addon).to receive(:find_all)
       # Load source information
       allow(Yast::Pkg).to receive(:SourceLoad)
+      allow(Yast::Pkg).to receive(:SourceFinishAll)
+      allow(Yast::Pkg).to receive(:SourceRestore)
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
     end
 
     it "aborts if package management initialization fails" do
@@ -34,7 +37,8 @@ describe Registration::UI::MigrationReposWorkflow do
       let(:migration_service) { load_yaml_fixture("migration_service.yml") }
 
       before do
-        expect(Registration::SwMgmt).to receive(:init).and_return(true)
+        expect(Registration::SwMgmt).to receive(:init).at_least(1).and_return(true)
+        allow_any_instance_of(Registration::RepoStateStorage).to receive(:write)
       end
 
       let(:set_success_expectations) do

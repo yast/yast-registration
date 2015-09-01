@@ -43,7 +43,7 @@ module Registration
         return nil unless Registration.is_registered?
 
         # enable back the update repositories in the installed system
-        revert_repository_changes
+        RepoStateStorage.instance.restore_all
 
         Yast.import "Installation"
 
@@ -62,20 +62,6 @@ module Registration
       else
         raise "Uknown action #{func} passed as first parameter"
       end
-    end
-
-    private
-
-    # revert back the original repository states from the registration server
-    def revert_repository_changes
-      changed_repos = RepoStateStorage.instance.repositories
-      return if changed_repos.empty?
-
-      # activate the original repository states
-      changed_repos.each(&:restore)
-
-      # save all repositories
-      Yast::Pkg.SourceSaveAll
     end
   end
 end

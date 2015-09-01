@@ -56,7 +56,9 @@ module Registration
 
     OEM_DIR = "/var/lib/suseRegister/OEM"
 
-    def self.init
+    # initialize the package management
+    # @param [Boolean] load_packages load also the available packages from the repositories
+    def self.init(load_packages = false)
       # false = do not allow continuing without the libzypp lock
       lock = PackageLock.Connect(false)
       return false unless lock["connected"]
@@ -66,6 +68,7 @@ module Registration
       Pkg.TargetInitialize(Installation.destdir)
       Pkg.TargetLoad
       Pkg.SourceRestore
+      load_packages ? Pkg.SourceLoad : true
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
@@ -294,8 +297,7 @@ module Registration
         next if repo["enabled"] == enabled
 
         # remember the original state
-        repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
-        RepoStateStorage.instance.repositories << repo_state
+        RepoStateStorage.instance.add(repo["SrcId"], repo["enabled"])
 
         log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
         Pkg.SourceSetEnabled(repo["SrcId"], enabled)
