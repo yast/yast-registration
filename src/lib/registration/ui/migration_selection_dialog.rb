@@ -15,7 +15,7 @@
 require "cgi/util"
 
 require "yast"
-require "registration/migration_sorter"
+require "registration/addon_sorter"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
 
@@ -128,28 +128,29 @@ module Registration
         VBox(
           VSpacing(1),
           migration_selection_widget,
-
-          MinHeight(8,
-            VWeight(25,
-              RichText(Id(:details), Opt(:vstretch), "")
-            )),
+          VWeight(15,
+            RichText(Id(:details), Opt(:vstretch), "")
+          ),
 
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # TRANSLATORS: check button label
           CheckBox(Id(:manual_repos), _("Manually Select Migration Repositories")),
-          VSpacing(1)
+          VSpacing(Yast::UI.TextMode ? 0 : 1)
         )
       end
 
       # the main migration selection widget
       # @return [Yast::Term] UI term
       def migration_selection_widget
-        MinHeight(8,
-          VWeight(25,
-            # TRANSLATORS: selection box label
-            SelectionBox(Id(:migration_targets), Opt(:vstretch, :notify),
-              _("Possible Migration Targets"), migration_items)
-          ))
+        # make the selection widget size depending on the number of available migrations
+        # (limit the size to have reasonable space for the details below)
+        weight = [5 + migrations.size, 10].min
+
+        VWeight(weight,
+          # TRANSLATORS: selection box label
+          SelectionBox(Id(:migration_targets), Opt(:vstretch, :notify),
+            _("Possible Migration Targets"), migration_items)
+        )
       end
 
       # list of items for the main widget
@@ -275,7 +276,10 @@ module Registration
       def sorted_migrations
         # sort the products in each migration
         migrations.map do |migration|
-          migration.sort(&::Registration::MIGRATION_SORTER)
+          # use the addon sorter, put the base product(s) at the end
+          base = migration.select { |m| m.product_type == "base" }
+          addons = migration - base
+          addons.sort(&::Registration::ADDON_SORTER) + base
         end
       end
 

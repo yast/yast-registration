@@ -180,7 +180,7 @@ describe Registration::SwMgmt do
 
       expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
         "NCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
-      expect(SUSE::Connect::Credentials).to receive(:read)
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
     end
@@ -193,7 +193,7 @@ describe Registration::SwMgmt do
 
       expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
         "SCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
-      expect(SUSE::Connect::Credentials).to receive(:read)
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
     end

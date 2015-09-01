@@ -17,9 +17,8 @@ describe Registration::UI::MigrationSelectionDialog do
         expected_list_item = Item(Id(0), "SLES-12.1")
 
         term = content.nested_find do |t|
-          t.respond_to?(:value) && t.value == :MinHeight &&
-            t.params[1].params[1].value == :SelectionBox &&
-            t.params[1].params[1].params[3].include?(expected_list_item)
+          t.respond_to?(:value) && t.value == :SelectionBox &&
+            t.params[3].include?(expected_list_item)
         end
 
         expect(term).to_not eq(nil)
