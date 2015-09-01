@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep  2 10:27:28 UTC 2015 - lslezak@suse.cz
+
+- disable "Back" at the initial dialog
+
+-------------------------------------------------------------------
 Wed Sep  2 05:45:28 UTC 2015 - jsrain@suse.cz
 
 - fixed syntax error (bsc#944089)
