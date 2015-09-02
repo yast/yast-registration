@@ -73,7 +73,7 @@ describe "Registration::SwMgmt" do
         .and_return("name" => "SLES", "arch" => "x86_64",
           "version" => "12.1-1.47", "version_version" => "12.1", "flavor" => "DVD"))
 
-      expect(subject.base_product_to_register).to eq("name" => "SLES",
+      expect(Registration::SwMgmt.base_product_to_register).to eq("name" => "SLES",
         "arch" => "x86_64", "version" => "12.1", "release_type" => nil)
     end
   end
@@ -148,7 +148,7 @@ describe "Registration::SwMgmt" do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(false)
 
-      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+      expect(Registration::SwMgmt).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
         "NCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
@@ -161,7 +161,7 @@ describe "Registration::SwMgmt" do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(true)
 
-      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+      expect(Registration::SwMgmt).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
         "SCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
