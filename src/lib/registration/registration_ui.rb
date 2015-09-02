@@ -204,11 +204,11 @@ module Registration
 
         if Yast::Mode.installation
           # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
-          msg += _("Would you like to enable these repositories during installation\n" /
+          msg += _("Would you like to enable these repositories during installation\n" \
               "in order to receive the latest updates?")
         else # Yast::Mode.update
           # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
-          msg += _("Would you like to enable these repositories during upgrade\n" /
+          msg += _("Would you like to enable these repositories during upgrade\n" \
               "in order to receive the latest updates?")
         end
 
