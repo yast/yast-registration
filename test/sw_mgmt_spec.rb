@@ -55,23 +55,22 @@ describe Registration::SwMgmt do
 
     context "when the libzypp lock can be obtained" do
       let(:connected) { true }
-      let(:source_restore_result) { true }
 
-      it "initializes package management and returns Pkg.:SourceRestore result" do
+      it "initializes package management" do
         expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
-        expect(Yast::Pkg).to receive(:TargetInitialize)
-        expect(Yast::Pkg).to receive(:TargetLoad)
-        expect(Yast::Pkg).to receive(:SourceRestore).and_return(source_restore_result)
+        expect(Yast::Pkg).to receive(:TargetInitialize).and_return(true)
+        expect(Yast::Pkg).to receive(:TargetLoad).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceRestore).and_return(true)
 
-        expect(subject.init).to eq(source_restore_result)
+        subject.init
       end
     end
 
     context "when the libzypp lock cannot be obtained" do
       let(:connected) { false }
 
-      it "returns false" do
-        expect(subject.init).to eq(false)
+      it "raises an PkgError exception" do
+        expect { subject.init }.to raise_error(Registration::PkgError)
       end
     end
   end

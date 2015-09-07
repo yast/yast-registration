@@ -93,10 +93,7 @@ module Registration
       # download the addons from SCC, let the user select addons to install
       # @return [Symbol] the user input
       def select_remote_addons
-        if !SwMgmt.init
-          Report.Error(Pkg.LastError)
-          return :abort
-        end
+        SwMgmt.init
 
         url = UrlHelpers.registration_url
         registration = ::Registration::Registration.new(url)

@@ -19,8 +19,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
     it "aborts if package management initialization fails" do
       msg = "Initialization failed"
-      expect(Registration::SwMgmt).to receive(:init).and_return(false)
-      expect(Yast::Pkg).to receive(:LastError).and_return(msg)
+      expect(Registration::SwMgmt).to receive(:init).and_raise(Registration::PkgError, msg)
 
       expect(subject.run).to eq(:abort)
     end
@@ -37,7 +36,7 @@ describe Registration::UI::MigrationReposWorkflow do
       let(:migration_service) { load_yaml_fixture("migration_service.yml") }
 
       before do
-        expect(Registration::SwMgmt).to receive(:init).at_least(1).and_return(true)
+        expect(Registration::SwMgmt).to receive(:init).at_least(1)
         allow_any_instance_of(Registration::RepoStateStorage).to receive(:write)
       end
 

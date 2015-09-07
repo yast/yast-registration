@@ -62,14 +62,16 @@ module Registration
     def self.init(load_packages = false)
       # false = do not allow continuing without the libzypp lock
       lock = PackageLock.Connect(false)
-      return false unless lock["connected"]
+      raise pkg_exception unless lock["connected"]
 
       # display progress when refreshing repositories
       PackageCallbacks.InitPackageCallbacks
-      Pkg.TargetInitialize(Installation.destdir)
-      Pkg.TargetLoad
-      Pkg.SourceRestore
-      load_packages ? Pkg.SourceLoad : true
+
+      raise pkg_exception unless Pkg.TargetInitialize(Installation.destdir)
+      raise pkg_exception unless Pkg.TargetLoad
+      raise pkg_exception unless Pkg.SourceRestore
+
+      raise pkg_exception if load_packages && !Pkg.SourceLoad
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
@@ -469,6 +471,10 @@ module Registration
       end
 
       product["register_release"]
+    end
+
+    def self.pkg_exception
+      PkgError.new(Pkg.LastError)
     end
 
     private_class_method :each_repo, :get_release_type

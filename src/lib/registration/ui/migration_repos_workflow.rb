@@ -157,10 +157,7 @@ module Registration
       def find_products
         log.info "Loading installed products"
 
-        if !SwMgmt.init(true)
-          Yast::Report.Error(Yast::Pkg.LastError)
-          return :abort
-        end
+        SwMgmt.init(true)
 
         self.products = ::Registration::SwMgmt.installed_products.map do |product|
           ::Registration::SwMgmt.remote_product(product)
