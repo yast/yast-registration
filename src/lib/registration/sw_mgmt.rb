@@ -57,16 +57,21 @@ module Registration
 
     OEM_DIR = "/var/lib/suseRegister/OEM"
 
-    def self.init
+    # initialize the package management
+    # @param [Boolean] load_packages load also the available packages from the repositories
+    def self.init(load_packages = false)
       # false = do not allow continuing without the libzypp lock
       lock = PackageLock.Connect(false)
-      return false unless lock["connected"]
+      raise_pkg_exception unless lock["connected"]
 
       # display progress when refreshing repositories
       PackageCallbacks.InitPackageCallbacks
-      Pkg.TargetInitialize(Installation.destdir)
-      Pkg.TargetLoad
-      Pkg.SourceRestore
+
+      raise_pkg_exception unless Pkg.TargetInitialize(Installation.destdir)
+      raise_pkg_exception unless Pkg.TargetLoad
+      raise_pkg_exception unless Pkg.SourceRestore
+
+      raise_pkg_exception if load_packages && !Pkg.SourceLoad
     end
 
     # during installation /etc/zypp directory is not writable (mounted on
@@ -295,8 +300,7 @@ module Registration
         next if repo["enabled"] == enabled
 
         # remember the original state
-        repo_state = RepoState.new(repo["SrcId"], repo["enabled"])
-        RepoStateStorage.instance.repositories << repo_state
+        RepoStateStorage.instance.add(repo["SrcId"], repo["enabled"])
 
         log.info "Changing repository state: #{repo["name"]} enabled: #{enabled}"
         Pkg.SourceSetEnabled(repo["SrcId"], enabled)
@@ -467,6 +471,10 @@ module Registration
       end
 
       product["register_release"]
+    end
+
+    def self.raise_pkg_exception
+      raise PkgError.new, Pkg.LastError
     end
 
     private_class_method :each_repo, :get_release_type

@@ -17,24 +17,25 @@ describe "Registration::UI::MediaAddonWorkflow" do
 
     before do
       # SwMgmt initialization
-      allow(Registration::SwMgmt).to receive(:init).and_return swmgmt_init
+      allow(Registration::SwMgmt).to receive(:init)
       # List of products
       allow(Registration::SwMgmt).to receive(:products_from_repo)
         .and_return(products_from_repo)
     end
 
     context "if package management initialization fails" do
-      let(:swmgmt_init) { false }
+      before do
+        allow(Registration::SwMgmt).to receive(:init).and_raise(Registration::PkgError, "error")
+      end
 
       it "aborts" do
+        allow(Yast::Pkg).to receive(:LastError)
         expect(Yast::Report).to receive(:Error)
         expect(run).to eq(:abort)
       end
     end
 
     context "if package management initialization success" do
-      let(:swmgmt_init) { true }
-
       before do
         # Load source information
         allow(Yast::Pkg).to receive(:SourceLoad)

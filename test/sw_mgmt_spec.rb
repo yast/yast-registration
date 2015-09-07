@@ -55,23 +55,22 @@ describe Registration::SwMgmt do
 
     context "when the libzypp lock can be obtained" do
       let(:connected) { true }
-      let(:source_restore_result) { true }
 
-      it "initializes package management and returns Pkg.:SourceRestore result" do
+      it "initializes package management" do
         expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
-        expect(Yast::Pkg).to receive(:TargetInitialize)
-        expect(Yast::Pkg).to receive(:TargetLoad)
-        expect(Yast::Pkg).to receive(:SourceRestore).and_return(source_restore_result)
+        expect(Yast::Pkg).to receive(:TargetInitialize).and_return(true)
+        expect(Yast::Pkg).to receive(:TargetLoad).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceRestore).and_return(true)
 
-        expect(subject.init).to eq(source_restore_result)
+        subject.init
       end
     end
 
     context "when the libzypp lock cannot be obtained" do
       let(:connected) { false }
 
-      it "returns false" do
-        expect(subject.init).to eq(false)
+      it "raises an PkgError exception" do
+        expect { subject.init }.to raise_error(Registration::PkgError)
       end
     end
   end
@@ -315,6 +314,57 @@ describe Registration::SwMgmt do
       expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(false)
 
       expect { subject.remove_service(service) }.to raise_error(::Registration::PkgError)
+    end
+  end
+
+  describe ".set_repos_state" do
+    it "sets the repository state and stores the original state" do
+      repos = [{ "SrcId" => 42, "enabled" => true }]
+
+      expect(Yast::Pkg).to receive(:SourceSetEnabled).with(42, false)
+      expect_any_instance_of(Registration::RepoStateStorage).to receive(:add)
+        .with(42, true)
+
+      subject.set_repos_state(repos, false)
+    end
+  end
+
+  describe ".update_product_renames" do
+    it "forwards the product renames to the AddOnProduct module" do
+      expect(Yast::AddOnProduct).to receive(:add_rename).with("foo", "FOO")
+      subject.update_product_renames("foo" => "FOO")
+    end
+  end
+
+  describe ".zypp_config_writable!" do
+    let(:zypp_dir) { Registration::SwMgmt::ZYPP_DIR }
+
+    it "does nothing in running system" do
+      expect(Yast::Mode).to receive(:installation).and_return(false)
+      expect(Yast::Mode).to receive(:update).and_return(false)
+      expect(FileUtils).to_not receive(:cp_r)
+
+      subject.zypp_config_writable!
+    end
+
+    it "does nothing if the target is already writable (not read-only)" do
+      expect(Yast::Mode).to receive(:installation).and_return(true)
+      expect(File).to receive(:writable?).with(zypp_dir).and_return(true)
+      expect(FileUtils).to_not receive(:cp_r)
+
+      subject.zypp_config_writable!
+    end
+
+    it "otherwise it overrides the zypp directory with a writable copy" do
+      tmpdir = "/tmp/foo"
+      expect(Yast::Mode).to receive(:installation).and_return(true)
+      expect(File).to receive(:writable?).with(zypp_dir)
+        .and_return(false)
+      expect(Dir).to receive(:mktmpdir).and_return(tmpdir)
+      expect(FileUtils).to receive(:cp_r).with(zypp_dir, tmpdir)
+      expect(subject).to receive(:`).with("mount -o bind #{tmpdir}/zypp #{zypp_dir}")
+
+      subject.zypp_config_writable!
     end
   end
 end

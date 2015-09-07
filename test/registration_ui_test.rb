@@ -94,6 +94,7 @@ describe "Registration::RegistrationUI" do
       allow(Yast::UI).to receive(:OpenDialog)
       allow(Yast::UI).to receive(:CloseDialog)
       allow(Yast::Wizard).to receive(:SetContents)
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
 
       # stub the registration
       allow(registration).to receive(:register_product)

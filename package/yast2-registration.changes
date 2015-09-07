@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Sep  2 10:27:28 UTC 2015 - lslezak@suse.cz
+
+- disable "Back" at the initial dialog
+- restore (enable) the Updates repositories at the end of the
+  migration workflow (bsc#943960)
+- 3.1.148
+
+-------------------------------------------------------------------
 Wed Sep  2 05:45:28 UTC 2015 - jsrain@suse.cz
 
 - fixed syntax error (bsc#944089)

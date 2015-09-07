@@ -86,7 +86,15 @@ module Registration
         }
 
         log.info "Starting registering media add-on sequence"
-        Sequencer.Run(aliases, sequence)
+
+        begin
+          Sequencer.Run(aliases, sequence)
+        rescue => e
+          log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
+          # TRANSLATORS: error message, %s are details
+          Yast::Report.Error(_("Internal error: %s") % e.message)
+          :abort
+        end
       end
 
       private
@@ -96,13 +104,7 @@ module Registration
       # check if the add-on repository provides a product resolvable
       # @return [Symbol] workflow symbol (:next, :finish or :abort)
       def find_products
-        if !SwMgmt.init
-          Report.Error(Pkg.LastError)
-          return :abort
-        end
-
-        # load the resolvables from the repositories
-        Pkg.SourceLoad
+        SwMgmt.init(true)
 
         self.products = SwMgmt.products_from_repo(repo_id)
 

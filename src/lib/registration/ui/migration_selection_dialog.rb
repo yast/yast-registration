@@ -31,6 +31,7 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Report"
       Yast.import "HTML"
+      Yast.import "GetInstArgs"
 
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
@@ -68,7 +69,7 @@ module Registration
           # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
           (_("<p>Use the <b>%s</b> check box to manually select the migration " \
                 "repositories later.</p>") % _("Manually Select Migration Repositories")),
-          true,
+          Yast::GetInstArgs.enable_back,
           true
         )
 

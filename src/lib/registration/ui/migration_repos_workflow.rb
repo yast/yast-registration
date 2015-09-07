@@ -122,12 +122,15 @@ module Registration
           abort:          :abort,
           cancel:         :abort,
           repo_selection: "select_migration_repos",
-          next:           :next
+          next:           "store_repos_state"
         },
         "select_migration_repos"      => {
           abort:  :abort,
           cancel: :abort,
-          next:   :next
+          next:   "store_repos_state"
+        },
+        "store_repos_state"           => {
+          next: :next
         }
       }
 
@@ -140,7 +143,8 @@ module Registration
           "select_migration_products"   => ->() { select_migration_products },
           "register_migration_products" => [->() { register_migration_products }, true],
           "activate_migration_repos"    => [->() { activate_migration_repos }, true],
-          "select_migration_repos"      => ->() { select_migration_repos }
+          "select_migration_repos"      => ->() { select_migration_repos },
+          "store_repos_state"           => ->() { store_repos_state }
         }
 
         ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
@@ -153,13 +157,7 @@ module Registration
       def find_products
         log.info "Loading installed products"
 
-        if !SwMgmt.init
-          Yast::Report.Error(Yast::Pkg.LastError)
-          return :abort
-        end
-
-        # load the resolvables from the repositories
-        Yast::Pkg.SourceLoad
+        SwMgmt.init(true)
 
         self.products = ::Registration::SwMgmt.installed_products.map do |product|
           ::Registration::SwMgmt.remote_product(product)
@@ -256,8 +254,8 @@ module Registration
         # synchronize the changes done by modifying the services,
         # reinitialize the repositories and reload the available packages
         Yast::Pkg.SourceFinishAll
-        Yast::Pkg.SourceRestore
-        Yast::Pkg.SourceLoad
+        Yast::Pkg.TargetFinish
+        SwMgmt.init(true)
 
         log.info "Registered services: #{registered_services}"
         :next
@@ -308,6 +306,11 @@ module Registration
       # @return [Symbol] the UI symbol (:abort, :next)
       def select_migration_repos
         UI::MigrationReposSelectionDialog.run
+      end
+
+      def store_repos_state
+        RepoStateStorage.instance.write
+        :next
       end
     end
   end
