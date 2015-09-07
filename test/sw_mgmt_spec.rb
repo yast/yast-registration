@@ -48,6 +48,33 @@ describe "Registration::SwMgmt" do
     }
   end
 
+  describe ".init" do
+    before do
+      allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected)
+    end
+
+    context "when the libzypp lock can be obtained" do
+      let(:connected) { true }
+
+      it "initializes package management" do
+        expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
+        expect(Yast::Pkg).to receive(:TargetInitialize).and_return(true)
+        expect(Yast::Pkg).to receive(:TargetLoad).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceRestore).and_return(true)
+
+        subject.init
+      end
+    end
+
+    context "when the libzypp lock cannot be obtained" do
+      let(:connected) { false }
+
+      it "raises an PkgError exception" do
+        expect { subject.init }.to raise_error(Registration::PkgError)
+      end
+    end
+  end
+
   describe ".service_repos" do
     let(:service) { double }
 

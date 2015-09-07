@@ -43,17 +43,12 @@ module Registration
       #  - restore the saved repository states (i.e. enable the Updates
       #    repositories when they were disabled during migration)
       def run
-        ret = nil
-        begin
-          ret = run_sequence
-        rescue => e
-          log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
-          # TRANSLATORS: error message, %s are details
-          Yast::Report.Error(_("Internal error: %s") % e.message)
-          ret = :abort
-        end
-
-        ret
+        run_sequence
+      rescue => e
+        log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
+        # TRANSLATORS: error message, %s are details
+        Yast::Report.Error(_("Internal error: %s") % e.message)
+        return :abort
       end
 
       private
@@ -74,7 +69,7 @@ module Registration
         }
 
         ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
-        log.info "User input: #{ui}"
+        log.info "Workflow result: #{ui}"
         ui
       end
 
