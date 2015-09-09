@@ -3,6 +3,7 @@ Wed Sep  9 12:34:35 UTC 2015 - lslezak@suse.cz
 
 - display short product names instead of the internal identifiers
   in the migration selection dialog (bsc#945028)
+- 3.1.129.6
 
 -------------------------------------------------------------------
 Mon Sep  7 18:55:54 UTC 2015 - lslezak@suse.cz
