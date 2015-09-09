@@ -159,7 +159,7 @@ module Registration
       def migration_items
         sorted_migrations.map.with_index do |arr, idx|
           products = arr.map do |product|
-            "#{product.identifier}-#{product.version}"
+            product.shortname || "#{product.identifier}-#{product.version}"
           end
 
           Item(Id(idx), products.join(", "))
