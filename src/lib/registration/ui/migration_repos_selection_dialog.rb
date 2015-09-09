@@ -44,7 +44,7 @@ module Registration
       def run
         Yast::Wizard.SetContents(
           # TRANSLATORS: dialog title
-          _("Migration Repositories"),
+          _("Repositories used for Migration"),
           dialog_content,
           # TRANSLATORS: help text
           _("<p>In this dialog you can manually select which repositories will" \
@@ -82,7 +82,7 @@ module Registration
         VBox(
           VWeight(75, MultiSelectionBox(Id(:repos), Opt(:vstretch, :notify),
             # TRANSLATORS: Multiselection widget label
-            _("Select the Migration Repositories"), repo_items
+            _("Select the Repositories used for Migration"), repo_items
           )),
           MinHeight(6, VWeight(25, RichText(Id(:details), ""))),
           # TRANSLATORS: Push button label, starts the repository management module
