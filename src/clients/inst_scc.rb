@@ -273,7 +273,7 @@ module Yast
         HSquash(
           VBox(
             VSpacing(1),
-            Left(Heading(::Registration::SwMgmt.base_product_label(base_product))),
+            Left(Heading(::Registration::SwMgmt.product_label(base_product))),
             VSpacing(1),
             registered ? Heading(_("The system is already registered.")) : Label(info)
           )
