@@ -135,7 +135,7 @@ module Registration
 
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # TRANSLATORS: check button label
-          CheckBox(Id(:manual_repos), _("Manually Select Migration Repositories")),
+          CheckBox(Id(:manual_repos), _("Manually Adjust the Repositories for Migration")),
           VSpacing(Yast::UI.TextMode ? 0 : 1)
         )
       end
