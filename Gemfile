@@ -6,7 +6,7 @@ group :test do
   gem "rake"
   gem "yard"
   gem "yast-rake", ">= 0.1.9"
-  gem "rspec", "~> 2.14.0"
+  gem "rspec", "~> 3.3.0"
   gem "gettext", require: false
   gem "rubocop", "~> 0.29.1", require: false
   gem "simplecov", require: false
