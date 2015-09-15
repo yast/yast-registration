@@ -16,13 +16,11 @@ if ENV["COVERAGE"]
   end
 end
 
-# allow only the new "expect" RSpec syntax
+# configure RSpec
 RSpec.configure do |config|
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
   config.mock_with :rspec do |c|
-    c.syntax = :expect
+    # https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/partial-doubles
+    c.verify_partial_doubles = true
   end
 end
 

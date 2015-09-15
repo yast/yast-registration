@@ -98,7 +98,6 @@ describe "Registration::RegistrationUI" do
 
       # stub the registration
       allow(registration).to receive(:register_product)
-      allow(registration).to receive(:select_repositories)
     end
 
     it "does not ask for reg. code if all addons are free" do

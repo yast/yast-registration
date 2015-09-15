@@ -26,7 +26,6 @@ describe ::Registration::FinishDialog do
       it "do nothing if system is not registered" do
         expect(Registration::Registration).to receive(:is_registered?).once
           .and_return(false)
-        expect_any_instance_of(SUSE::Connect::Config).to_not receive(:write)
         expect(Yast::Pkg).to_not receive(:SourceSetEnabled)
 
         subject.run("Write")
