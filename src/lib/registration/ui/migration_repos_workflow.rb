@@ -44,14 +44,6 @@ module Registration
       def initialize
         textdomain "registration"
 
-        # a dummy message which will be used later, just make sure we have it
-        # before the translation deadline...
-        # TRANSLATORS: popup question, confirm installing the available
-        # updates now
-        _("Online updates are available for installation.\n" \
-            "It is recommended to install all updates before proceeding.\n\n" \
-            "Would you like to install the updates now?")
-
         url = UrlHelpers.registration_url
         self.registration = Registration.new(url)
         self.registration_ui = RegistrationUI.new(registration)
