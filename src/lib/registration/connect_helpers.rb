@@ -214,6 +214,8 @@ module Registration
       import_ssl_certificate(cert)
     end
 
+    # @return [Boolean] true on success, can fail if cannot import or if the cert
+    # is not valid after all
     def self.import_ssl_certificate(cert)
       # Has been a certificate already imported? In some cases the certificate
       # import might not help, avoid endless certificate import loop.
