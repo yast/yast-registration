@@ -214,7 +214,23 @@ module Registration
       import_ssl_certificate(cert)
     end
 
+    # @return [Boolean] true on success, can fail if cannot import or if the cert
+    # is not valid after all
     def self.import_ssl_certificate(cert)
+      # Has been a certificate already imported? In some cases the certificate
+      # import might not help, avoid endless certificate import loop.
+      if Storage::InstallationOptions.instance.imported_cert_sha256_fingerprint
+        # TRANSLATORS: multiline error message - a SSL certificate has been
+        # imported but the registration server still cannot be accessed securely,
+        # user has to solve the certificate issue manually.
+        Yast::Report.Error(_("A certificate has been already imported\n" \
+          "but the server connection still cannot be trusted.\n\n" \
+          "Please fix the certificate issue manually, ensure that the server\n" \
+          "can be connected securely and start the YaST module again."))
+
+        return false
+      end
+
       cn = cert.subject_name
       log.info "Importing '#{cn}' certificate..."
 
@@ -229,7 +245,7 @@ module Registration
         cert.fingerprint(Fingerprint::SHA256).value
 
       log.info "Certificate import result: #{result}"
-      true
+      result
     end
 
     def self.report_ssl_error(message, cert)
