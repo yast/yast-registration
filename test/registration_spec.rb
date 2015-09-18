@@ -1,11 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "yaml"
 
-describe "Registration::Registration" do
-  let(:yast_wfm) { double("Yast::Wfm") }
-
+describe Registration::Registration do
+  let(:installed_sles) { load_yaml_fixture("products_legacy_installation.yml")[1] }
   before do
     allow(Yast::WFM).to receive(:GetLanguage).and_return("en")
     allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
@@ -178,6 +176,37 @@ describe "Registration::Registration" do
         .and_return(migration_products)
       result = Registration::Registration.new.migration_products(installed_products)
       expect(result).to eq(migration_products)
+    end
+  end
+
+  describe "#synchronize_products" do
+    it "synchronizes the local products with the server" do
+      expect(SUSE::Connect::YaST).to receive(:synchronize)
+        .with([
+          OpenStruct.new(
+            arch:         "x86_64",
+            identifier:   "SLES",
+            version:      "12",
+            release_type: nil
+          )])
+
+      subject.synchronize_products([installed_sles])
+    end
+  end
+
+  describe "#downgrade_product" do
+    it "downgrades the product registration" do
+      expect(SUSE::Connect::YaST).to receive(:downgrade_product)
+        .with(
+          OpenStruct.new(
+            arch:         "x86_64",
+            identifier:   "SLES",
+            version:      "12-0",
+            release_type: nil
+          ),
+          anything)
+
+      expect(subject.downgrade_product(installed_sles))
     end
   end
 end

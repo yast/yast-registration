@@ -165,6 +165,40 @@ module Registration
       failed_addons
     end
 
+    # downgrade product registration
+    # @param [Hash] product libzypp product which registration will be downgraded
+    # @return [Array<Boolean, OpenStruct>] a pair with success flag and the
+    # registered remote service
+    def downgrade_product(product)
+      product_service = nil
+      success = ConnectHelpers.catch_registration_errors do
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating product registration, %s is a product name
+          _("Updating to %s ...") % SwMgmt.product_label(product)
+        ) do
+          registration.downgrade_product(product)
+        end
+      end
+
+      [success, product_service]
+    end
+
+    # synchronize the local products with the registration server
+    # @param [Array<Hash>] products libzypp products to synchronize
+    # @return [Boolean] true on success
+    def synchronize_products(products)
+      ConnectHelpers.catch_registration_errors do
+        Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # TRANSLATORS: progress label
+          _("Synchronizing Products...")
+        ) do
+          registration.synchronize_products(products)
+        end
+      end
+    end
+
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow

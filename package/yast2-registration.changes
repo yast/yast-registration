@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 21 13:53:12 UTC 2015 - lslezak@suse.cz
+
+- restore the original product registration when online migration
+  is aborted (FATE#315161)
+
+-------------------------------------------------------------------
 Fri Sep 11 07:54:56 UTC 2015 - lslezak@suse.cz
 
 - use better labels - specific migration repositories are not used
