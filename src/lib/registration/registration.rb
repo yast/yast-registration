@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 #
 
+require "ostruct"
 require "yast"
 require "suse/connect"
 
@@ -83,6 +84,35 @@ module Registration
 
         service
       end
+    end
+
+    # downgrade product registration
+    # used when restoring the original registration after aborted migration
+    # @param [Hash] product libzypp product to which the registration should be downgraded
+    def downgrade_product(product)
+      service_for_product(product) do |product_ident, params|
+        log.info "Downgrading product: #{product}"
+        service = SUSE::Connect::YaST.downgrade_product(product_ident, params)
+        log.info "Downgrade product result: #{service}"
+
+        service
+      end
+    end
+
+    # synchronize the registedred products on the server with the local installed products
+    # (removes all o registrered products)
+    # @param [Array<Hash>] products list of installed libzypp products
+    def synchronize_products(products)
+      remote_products = products.map do |product|
+        OpenStruct.new(
+          arch:         product["arch"],
+          identifier:   product["name"],
+          version:      product["version_version"],
+          release_type: product["release_type"]
+        )
+      end
+      log.info "Synchronizing products: #{remote_products}"
+      SUSE::Connect::YaST.synchronize(remote_products)
     end
 
     # @param [String] target_distro new target distribution

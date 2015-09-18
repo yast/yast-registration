@@ -32,19 +32,21 @@ Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 3.1.27
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
-Requires:       rubygem(suse-connect) >= 0.2.18
+Requires:       rubygem(suse-connect) >= 0.2.22
 Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.26
+Requires:       yast2-update >= 3.1.19
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
 BuildRequires:  rubygem(yast-rake) >= 0.1.8
 BuildRequires:  rubygem(rspec)
-BuildRequires:  rubygem(suse-connect) >= 0.2.18
+BuildRequires:  rubygem(suse-connect) >= 0.2.22
 BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.26
+BuildRequires:  yast2-update >= 3.1.19
 
 BuildArch:      noarch
 

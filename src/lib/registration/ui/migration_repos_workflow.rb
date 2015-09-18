@@ -19,6 +19,7 @@ require "registration/registration_ui"
 require "registration/migration_repositories"
 require "registration/releasever"
 require "registration/sw_mgmt"
+require "registration/url_helpers"
 require "registration/ui/migration_selection_dialog"
 require "registration/ui/migration_repos_selection_dialog"
 
