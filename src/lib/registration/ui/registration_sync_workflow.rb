@@ -14,29 +14,21 @@
 
 require "yast"
 
+require "registration/registration"
 require "registration/registration_ui"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
+require "registration/ui/wizard_client"
 
 module Registration
   module UI
     # This class handles synchronizing the repositories/services after abort
-    class RegistrationSyncWorkflow
-      include Yast::Logger
-      include Yast::I18n
+    class RegistrationSyncWorkflow < WizardClient
       include Yast::UIShortcuts
 
-      Yast.import "Report"
       Yast.import "Pkg"
       Yast.import "Update"
       Yast.import "Installation"
-
-      # run the registration synchronization
-      # @return [Symbol] the UI symbol (:next on sucess, :abort on error)
-      def self.run
-        workflow = RegistrationSyncWorkflow.new
-        workflow.run
-      end
 
       # the constructor
       def initialize
@@ -46,24 +38,9 @@ module Registration
         self.registration_ui = RegistrationUI.new(registration)
       end
 
-      # run the registration synchronization
-      # @return [Symbol] the UI symbol (:next on sucess, :abort on error)
-      def run
-        rollback
-      rescue => e
-        log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
-        # TRANSLATORS: error message, %s are details
-        Yast::Report.Error(_("Internal error: %s") % e.message)
-        return :abort
-      end
-
-      private
-
-      attr_accessor :registration_ui
-
       # restore the registration status
       # @return [Symbol] :next on sucess, :abort on error
-      def rollback
+      def run_sequence
         log.info "Restoring the original repository and registration status..."
 
         restore_repos
@@ -80,6 +57,10 @@ module Registration
         # synchronize all installed products (remove additional registrations at the server)
         registration_ui.synchronize_products(products) ? :next : :abort
       end
+
+      private
+
+      attr_accessor :registration_ui
 
       # restore the repositpories from the backup archive
       def restore_repos
