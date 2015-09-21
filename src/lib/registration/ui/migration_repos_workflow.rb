@@ -245,12 +245,8 @@ module Registration
 
         begin
           log.info "Registering the migration target products"
-          Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
-            # TRANSLATORS: Progress label
-            _("Registering Migration Products...")) do
-            if !selected_migration.all? { |product| register_migration_product(product) }
-              return :abort
-            end
+          if !selected_migration.all? { |product| register_migration_product(product) }
+            return :abort
           end
         ensure
           Yast::Wizard.EnableNextButton
@@ -284,10 +280,18 @@ module Registration
       # @return [Boolean] true on success
       def register_migration_product(product)
         log.info "Registering migration product #{product}"
+        ret = nil
 
-        ConnectHelpers.catch_registration_errors do
-          registered_services << registration.upgrade_product(product)
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
+          # TRANSLATORS: Progress label
+          _("Updating to %s ...") % product.friendly_name) do
+
+          ret = ConnectHelpers.catch_registration_errors do
+            registered_services << registration.upgrade_product(product)
+          end
         end
+
+        ret
       end
 
       # activate the added migration repos (set the DUP property)
