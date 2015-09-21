@@ -12,27 +12,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require "yast"
 require "registration/ui/migration_repos_workflow"
 
-module Yast
-  class MigrationReposClient < Client
-    Yast.import "Wizard"
-
-    def main
-      textdomain "registration"
-
-      # create the Wizard dialog if needed
-      wizard_present = Wizard.IsWizardDialog
-      Wizard.CreateDialog unless wizard_present
-
-      begin
-        ::Registration::UI::MigrationReposWorkflow.run
-      ensure
-        Wizard.CloseDialog unless wizard_present
-      end
-    end
-  end unless defined?(YaST::MigrationReposClient)
-end
-
-Yast::MigrationReposClient.new.main
+Registration::UI::MigrationReposWorkflow.new.main

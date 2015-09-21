@@ -3,7 +3,7 @@
 require_relative "spec_helper"
 
 describe Registration::UI::RegistrationSyncWorkflow do
-  describe "#run" do
+  describe "#run_sequence" do
     before do
       allow(Yast::Pkg).to receive(:SourceFinishAll)
       allow(Yast::Pkg).to receive(:TargetFinish)
@@ -22,21 +22,7 @@ describe Registration::UI::RegistrationSyncWorkflow do
         .with(installed_sles).and_return([true, nil])
       expect_any_instance_of(Registration::RegistrationUI).to receive(:synchronize_products)
         .with([installed_sles]).and_return(true)
-      expect(subject.run).to eq(:next)
-    end
-
-    it "returns :abort on an error" do
-      msg = "Something failed..."
-      expect(subject).to receive(:rollback).and_raise(msg)
-      expect(subject.run).to eq(:abort)
-    end
-  end
-
-  describe ".run" do
-    subject { Registration::UI::RegistrationSyncWorkflow }
-    it "creates an instance object and calls run()" do
-      allow_any_instance_of(subject).to receive(:run).and_return(:next)
-      expect(subject.run).to eq(:next)
+      expect(subject.run_sequence).to eq(:next)
     end
   end
 end

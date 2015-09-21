@@ -3,9 +3,7 @@
 require_relative "spec_helper"
 
 describe Registration::UI::MigrationReposWorkflow do
-  describe ".run" do
-    subject { Registration::UI::MigrationReposWorkflow }
-
+  describe "#run_sequence" do
     before do
       # Url of the registration server
       allow(Registration::UrlHelpers).to receive(:registration_url)
@@ -15,20 +13,6 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Yast::Pkg).to receive(:SourceFinishAll)
       allow(Yast::Pkg).to receive(:SourceRestore)
       allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
-    end
-
-    it "aborts if package management initialization fails" do
-      msg = "Initialization failed"
-      expect(Registration::SwMgmt).to receive(:init).and_raise(Registration::PkgError, msg)
-
-      expect(subject.run).to eq(:abort)
-    end
-
-    it "handles any exception raised and reports an error" do
-      msg = "Something failed..."
-      expect(Yast::Sequencer).to receive(:Run).and_raise(msg)
-
-      expect(subject.run).to eq(:abort)
     end
 
     context "if package management initialization succeeds" do
@@ -62,7 +46,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
       it "registers the selected migration products" do
         set_success_expectations
-        expect(subject.run).to eq(:next)
+        expect(subject.run_sequence).to eq(:next)
       end
 
       it "displays the custom repository selection if required" do

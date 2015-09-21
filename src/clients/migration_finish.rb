@@ -12,27 +12,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require "yast"
 require "registration/ui/migration_finish_workflow"
 
-module Yast
-  class MigrationFinishClient < Client
-    Yast.import "Wizard"
-
-    def main
-      textdomain "registration"
-
-      # create the Wizard dialog if needed
-      wizard_present = Wizard.IsWizardDialog
-      Wizard.CreateDialog unless wizard_present
-
-      begin
-        ::Registration::UI::MigrationFinishWorkflow.run
-      ensure
-        Wizard.CloseDialog unless wizard_present
-      end
-    end
-  end unless defined?(YaST::MigrationFinishClient)
-end
-
-Yast::MigrationFinishClient.new.main
+Registration::UI::MigrationFinishWorkflow.new.main
