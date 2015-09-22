@@ -96,7 +96,7 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run).to eq(:abort)
       end
 
-      it "reports error and aborts when registering the migration products fails" do
+      it "reports error and indicates needed rollback when upgrading a product fails" do
         # installed SLES12
         allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
@@ -113,7 +113,7 @@ describe Registration::UI::MigrationReposWorkflow do
         expect_any_instance_of(Registration::Registration).to receive(:upgrade_product)
           .and_raise("Registration failed")
 
-        expect(subject.run).to eq(:abort)
+        expect(subject.run).to eq(:rollback)
       end
     end
   end
