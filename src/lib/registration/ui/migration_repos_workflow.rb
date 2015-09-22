@@ -113,19 +113,19 @@ module Registration
           next:   "register_migration_products"
         },
         "register_migration_products" => {
-          abort:  :abort,
-          cancel: :abort,
+          abort:  :rollback,
+          cancel: :rollback,
           next:   "activate_migration_repos"
         },
         "activate_migration_repos"    => {
-          abort:          :abort,
-          cancel:         :abort,
+          abort:          :rollback,
+          cancel:         :rollback,
           repo_selection: "select_migration_repos",
           next:           "store_repos_state"
         },
         "select_migration_repos"      => {
-          abort:  :abort,
-          cancel: :abort,
+          abort:  :rollback,
+          cancel: :rollback,
           next:   "store_repos_state"
         },
         "store_repos_state"           => {
