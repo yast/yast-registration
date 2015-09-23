@@ -8,11 +8,41 @@ describe Registration::UI::MigrationReposWorkflow do
       # Url of the registration server
       allow(Registration::UrlHelpers).to receive(:registration_url)
       allow(Registration::Addon).to receive(:find_all)
+      allow(Registration::Registration).to receive(:is_registered?).and_return(true)
       # Load source information
       allow(Yast::Pkg).to receive(:SourceLoad)
       allow(Yast::Pkg).to receive(:SourceFinishAll)
       allow(Yast::Pkg).to receive(:SourceRestore)
       allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
+    end
+
+    context "the system is not registered" do
+      before do
+        expect(Registration::Registration).to receive(:is_registered?).and_return(false)
+        allow(Yast::Mode).to receive(:SetMode)
+      end
+
+      it "asks the user to register the system first" do
+        expect(Yast::Popup).to receive(:ContinueCancel).and_return(false)
+        subject.run_sequence
+      end
+
+      it "aborts when user does not want to continue" do
+        expect(Yast::Popup).to receive(:ContinueCancel).and_return(false)
+        expect(subject.run_sequence).to eq(:abort)
+      end
+
+      it "runs the full registration if user continues" do
+        expect(Yast::Popup).to receive(:ContinueCancel).and_return(true)
+        expect(Yast::WFM).to receive(:call).with("inst_scc")
+        subject.run_sequence
+      end
+
+      it "aborts when the registration is aborted" do
+        expect(Yast::Popup).to receive(:ContinueCancel).and_return(true)
+        expect(Yast::WFM).to receive(:call).with("inst_scc").and_return(:abort)
+        expect(subject.run_sequence).to eq(:abort)
+      end
     end
 
     context "if package management initialization succeeds" do

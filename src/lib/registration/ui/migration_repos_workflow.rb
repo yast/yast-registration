@@ -31,6 +31,7 @@ module Registration
       include Yast::UIShortcuts
 
       Yast.import "Sequencer"
+      Yast.import "Mode"
 
       # the constructor
       def initialize
@@ -44,6 +45,8 @@ module Registration
 
       # The repositories migration workflow is:
       #
+      # - if the system is not registered ask the user to register it first
+      #   (otherwise abort the online migration)
       # - find all installed products
       # - query registered addons from the server
       # - ask the registration server for the available product migrations
@@ -63,6 +66,7 @@ module Registration
         log.info "Starting migration repositories sequence"
 
         aliases = {
+          "registration_check"          => [->() { registration_check }, true],
           "find_products"               => [->() { find_products }, true],
           "load_migration_products"     => [->() { load_migration_products }, true],
           "select_migration_products"   => ->() { select_migration_products },
@@ -85,7 +89,11 @@ module Registration
         :manual_repo_selection
 
       WORKFLOW_SEQUENCE = {
-        "ws_start"                    => "find_products",
+        "ws_start"                    => "registration_check",
+        "registration_check"          => {
+          abort: :abort,
+          next:  "find_products"
+        },
         "find_products"               => {
           abort:  :abort,
           cancel: :abort,
@@ -124,6 +132,40 @@ module Registration
           next: :next
         }
       }
+
+      # check whether the system is registered, ask the user to register it
+      # if the system is not registered
+      # @return [Symbol] workflow symbol, :next if registered, :abort when not
+      def registration_check
+        return :next if Registration.is_registered?
+
+        # TRANSLATORS: a popup message with [Continue] [Cancel] buttons,
+        # pressing [Continue] starts the registration module, [Cancel] aborts
+        # the online migration
+        register = Yast::Popup.ContinueCancel(_("The system is not registered,\n" \
+              "to run the online migration you need\n" \
+              "to register the system first."))
+
+        return :abort unless register
+
+        register_system
+      end
+
+      # run the registration module to register the system
+      # @return [Symbol] the registration result
+      def register_system
+        # temporarily switch back to the normal mode so the registration behaves as expected
+        mode = Yast::Mode.mode
+        log.info "Setting 'normal' mode"
+        Yast::Mode.SetMode("normal")
+
+        ret = Yast::WFM.call("inst_scc")
+        log.info "Registration result: #{ret.inspect}"
+
+        log.info "Restoring #{mode.inspect} mode"
+        Yast::Mode.SetMode(mode)
+        ret
+      end
 
       # find all installed products
       # @return [Symbol] workflow symbol (:next or :abort)
