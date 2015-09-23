@@ -12,6 +12,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require "registration/ui/migration_finish_workflow"
+require "registration/ui/registration_sync_workflow"
 
-Registration::UI::MigrationFinishWorkflow.new.main
+Registration::UI::RegistrationSyncWorkflow.new.main

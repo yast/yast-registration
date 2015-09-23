@@ -3,7 +3,7 @@ before_install:
     # disable rvm, use system Ruby
     - rvm reset
     - wget https://raw.githubusercontent.com/yast/yast-devtools/master/travis-tools/travis_setup.sh
-    - sh ./travis_setup.sh -p "yast2-devtools yast2 yast2-slp yast2-add-on" -g bundler
+    - sh ./travis_setup.sh -p "yast2-devtools yast2 yast2-slp yast2-add-on yast2-update" -g bundler
 script:
     - rake check:pot
     - rubocop

@@ -31,6 +31,7 @@ describe "Registration::RegistrationUI" do
   let(:addon_HA_GEO) { remote_addons[1] }
   let(:addon_legacy) { remote_addons[4] }
   let(:addon_SDK) { remote_addons[7] }
+  let(:installed_sles) { load_yaml_fixture("products_legacy_installation.yml")[1] }
 
   describe "#register_system_and_base_product" do
     it "registers the system using the provided registration code" do
@@ -155,6 +156,28 @@ describe "Registration::RegistrationUI" do
         .and_return(migration_products)
 
       expect(registration_ui.migration_products(installed_products)).to eq(migration_products)
+    end
+  end
+
+  describe "#downgrade_product" do
+    it "displays UI feedback and downgrades the product" do
+      expect(Yast::UI).to receive(:OpenDialog)
+      expect(Yast::UI).to receive(:CloseDialog)
+
+      service = double("fake_service")
+      expect(registration).to receive(:downgrade_product).with(installed_sles).and_return(service)
+      expect(registration_ui.downgrade_product(installed_sles)).to eq([true, service])
+    end
+  end
+
+  describe "#synchronize_products" do
+    it "displays UI feedback and synchronizes the products" do
+      expect(Yast::UI).to receive(:OpenDialog)
+      expect(Yast::UI).to receive(:CloseDialog)
+
+      products = [installed_sles]
+      expect(registration).to receive(:synchronize_products).with(products)
+      expect(registration_ui.synchronize_products(products)).to eq(true)
     end
   end
 end

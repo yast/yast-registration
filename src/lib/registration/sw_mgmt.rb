@@ -26,6 +26,7 @@ require "yast"
 require "tmpdir"
 require "fileutils"
 require "shellwords"
+require "ostruct"
 
 require "registration/exceptions"
 require "registration/helpers"
@@ -135,7 +136,7 @@ module Registration
     # @param product [Hash] product Hash obtained from pkg-bindings
     # @return [SUSE::Connect::Remote::Product] the remote product
     def self.remote_product(product)
-      SUSE::Connect::Remote::Product.new(
+      OpenStruct.new(
         arch:         product["arch"],
         identifier:   product["name"],
         version:      product["version"],
@@ -477,6 +478,6 @@ module Registration
       raise PkgError.new, Pkg.LastError
     end
 
-    private_class_method :each_repo, :get_release_type
+    private_class_method :each_repo
   end
 end

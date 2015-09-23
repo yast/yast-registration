@@ -19,26 +19,18 @@ require "registration/registration_ui"
 require "registration/migration_repositories"
 require "registration/releasever"
 require "registration/sw_mgmt"
+require "registration/url_helpers"
+require "registration/ui/wizard_client"
 require "registration/ui/migration_selection_dialog"
 require "registration/ui/migration_repos_selection_dialog"
 
 module Registration
   module UI
     # This class handles workflow for adding migration services
-    class MigrationReposWorkflow
-      include Yast::Logger
-      include Yast::I18n
+    class MigrationReposWorkflow < WizardClient
       include Yast::UIShortcuts
 
-      Yast.import "Report"
       Yast.import "Sequencer"
-
-      # run workflow for adding the migration services
-      # @return [Symbol] the UI symbol
-      def self.run
-        workflow = MigrationReposWorkflow.new
-        workflow.run
-      end
 
       # the constructor
       def initialize
@@ -67,20 +59,23 @@ module Registration
       # - return the user input symbol (:next or :abort) to the caller
       # @return [Symbol] the UI symbol
       #
-      def run
+      def run_sequence
         log.info "Starting migration repositories sequence"
 
-        ret = nil
-        begin
-          ret = run_sequence
-        rescue => e
-          log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
-          # TRANSLATORS: error message, %s are details
-          Yast::Report.Error(_("Internal error: %s") % e.message)
-          ret = :abort
-        end
+        aliases = {
+          "find_products"               => [->() { find_products }, true],
+          "load_migration_products"     => [->() { load_migration_products }, true],
+          "select_migration_products"   => ->() { select_migration_products },
+          "update_releasever"           => ->() { update_releasever },
+          "register_migration_products" => [->() { register_migration_products }, true],
+          "activate_migration_repos"    => [->() { activate_migration_repos }, true],
+          "select_migration_repos"      => ->() { select_migration_repos },
+          "store_repos_state"           => ->() { store_repos_state }
+        }
 
-        ret
+        ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
+        log.info "User input: #{ui}"
+        ui
       end
 
       private
@@ -110,44 +105,25 @@ module Registration
           next:   "register_migration_products"
         },
         "register_migration_products" => {
-          abort:  :abort,
-          cancel: :abort,
+          abort:  :rollback,
+          cancel: :rollback,
           next:   "activate_migration_repos"
         },
         "activate_migration_repos"    => {
-          abort:          :abort,
-          cancel:         :abort,
+          abort:          :rollback,
+          cancel:         :rollback,
           repo_selection: "select_migration_repos",
           next:           "store_repos_state"
         },
         "select_migration_repos"      => {
-          abort:  :abort,
-          cancel: :abort,
+          abort:  :rollback,
+          cancel: :rollback,
           next:   "store_repos_state"
         },
         "store_repos_state"           => {
           next: :next
         }
       }
-
-      # run the workflow
-      # @return [Symbol] the UI symbol
-      def run_sequence
-        aliases = {
-          "find_products"               => [->() { find_products }, true],
-          "load_migration_products"     => [->() { load_migration_products }, true],
-          "select_migration_products"   => ->() { select_migration_products },
-          "update_releasever"           => ->() { update_releasever },
-          "register_migration_products" => [->() { register_migration_products }, true],
-          "activate_migration_repos"    => [->() { activate_migration_repos }, true],
-          "select_migration_repos"      => ->() { select_migration_repos },
-          "store_repos_state"           => ->() { store_repos_state }
-        }
-
-        ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
-        log.info "User input: #{ui}"
-        ui
-      end
 
       # find all installed products
       # @return [Symbol] workflow symbol (:next or :abort)
@@ -236,12 +212,8 @@ module Registration
 
         begin
           log.info "Registering the migration target products"
-          Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
-            # TRANSLATORS: Progress label
-            _("Registering Migration Products...")) do
-            if !selected_migration.all? { |product| register_migration_product(product) }
-              return :abort
-            end
+          if !selected_migration.all? { |product| register_migration_product(product) }
+            return :abort
           end
         ensure
           Yast::Wizard.EnableNextButton
@@ -275,10 +247,18 @@ module Registration
       # @return [Boolean] true on success
       def register_migration_product(product)
         log.info "Registering migration product #{product}"
+        ret = nil
 
-        ConnectHelpers.catch_registration_errors do
-          registered_services << registration.upgrade_product(product)
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
+          # TRANSLATORS: Progress label
+          _("Updating to %s ...") % product.friendly_name) do
+
+          ret = ConnectHelpers.catch_registration_errors do
+            registered_services << registration.upgrade_product(product)
+          end
         end
+
+        ret
       end
 
       # activate the added migration repos (set the DUP property)
