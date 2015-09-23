@@ -51,6 +51,7 @@ describe Registration::UI::MigrationReposSelectionDialog do
         .and_return(:next)
 
       expect(Yast::UI).to receive(:ChangeWidget).twice
+      expect(subject).to receive(:store_values)
 
       expect(subject.run).to eq(:abort)
     end
