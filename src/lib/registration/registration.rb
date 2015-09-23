@@ -99,8 +99,8 @@ module Registration
       end
     end
 
-    # synchronize the registedred products on the server with the local installed products
-    # (removes all o registrered products)
+    # synchronize the registered products on the server with the local installed products
+    # (removes all registrered products on the server which are not installed in the system)
     # @param [Array<Hash>] products list of installed libzypp products
     def synchronize_products(products)
       remote_products = products.map do |product|
