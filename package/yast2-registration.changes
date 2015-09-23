@@ -3,6 +3,9 @@ Mon Sep 21 13:53:12 UTC 2015 - lslezak@suse.cz
 
 - restore the original product registration when online migration
   is aborted (FATE#315161)
+- set the selected repository states in the manual repository
+  selection dialog before starting the full repository management
+  module
 - 3.1.153
 
 -------------------------------------------------------------------
