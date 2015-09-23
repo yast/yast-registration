@@ -80,7 +80,9 @@ module Registration
       # downgrade product registrations (restore the original status before upgrading)
       # @return [Boolean] true on success
       def downgrade_products(products)
-        products.all? do |product|
+        # sort the products so the base product is downgraded first
+        sorted_products = products.sort_by { |p| p["category"] == "base" ? 0 : 1 }
+        sorted_products.all? do |product|
           product["release_type"] = SwMgmt.get_release_type(product)
           success, _service = registration_ui.downgrade_product(product)
           success
