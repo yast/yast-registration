@@ -145,6 +145,7 @@ module Registration
       # run the repository management, refresh the dialog content if it
       # has not been aborted
       def repo_mgmt
+        store_values
         # refresh enabled repositories so they are up-to-date
         ret = Yast::WFM.call("repositories", ["refresh-enabled"])
         return :abort if ret == :abort
