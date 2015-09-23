@@ -32,6 +32,9 @@
   update_urls: []
   vendor: SUSE LLC <https://www.suse.com/>
   version: 12-0
+  version_epoch:
+  version_version: '12'
+  version_release: '0'
 - arch: x86_64
   category: base
   description: |-
@@ -69,6 +72,9 @@
   upgrades: []
   vendor: SUSE
   version: 12-0
+  version_epoch:
+  version_version: '12'
+  version_release: '0'
 - arch: x86_64
   category: addon
   description: |-
@@ -106,3 +112,6 @@
   update_urls: []
   vendor: SUSE LLC <https://www.suse.com/>
   version: 12-0
+  version_epoch:
+  version_version: '12'
+  version_release: '0'
