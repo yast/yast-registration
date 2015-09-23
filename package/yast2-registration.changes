@@ -6,6 +6,7 @@ Mon Sep 21 13:53:12 UTC 2015 - lslezak@suse.cz
 - set the selected repository states in the manual repository
   selection dialog before starting the full repository management
   module
+- 3.1.129.8
 
 -------------------------------------------------------------------
 Fri Sep 11 07:54:56 UTC 2015 - lslezak@suse.cz
