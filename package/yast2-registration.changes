@@ -3,6 +3,7 @@ Wed Sep 23 18:03:15 UTC 2015 - lslezak@suse.cz
 
 - migration rollback: make sure the base product is downgraded
   first (FATE#315161)
+- 3.1.155
 
 -------------------------------------------------------------------
 Wed Sep 23 12:14:17 UTC 2015 - lslezak@suse.cz
