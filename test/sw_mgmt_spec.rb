@@ -300,4 +300,69 @@ describe "Registration::SwMgmt" do
       subject.zypp_config_writable!
     end
   end
+
+  describe ".check_repositories" do
+    let(:repo) { 42 }
+
+    before do
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).with(true).and_return([repo])
+      allow(Yast::Pkg).to receive(:SourceGeneralData).with(repo)
+        .and_return("autorefresh" => true)
+    end
+
+    it "refreshes all repositories with autorefresh enabled" do
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(repo)
+        .and_return("autorefresh" => true)
+      expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(true)
+
+      subject.check_repositories
+    end
+
+    it "returns true if all repositores refresh" do
+      expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(true)
+
+      expect(subject.check_repositories).to eq(true)
+    end
+
+    context "a repository refresh fails" do
+      before do
+        expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(false)
+        allow(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
+        allow(Registration::RepoStateStorage.instance).to receive(:add).with(repo, true)
+        allow(Yast::Pkg).to receive(:SourceSetEnabled)
+      end
+
+      it "asks the user when a repository refresh fails" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
+
+        subject.check_repositories
+      end
+
+      it "returns false if user select aborting the migration" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
+
+        expect(subject.check_repositories).to eq(false)
+      end
+
+      it "disables the failed repo if user selects skipping it" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceSetEnabled).with(repo, false)
+
+        subject.check_repositories
+      end
+
+      it "returns true if user selects skipping the failed repo" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+
+        expect(subject.check_repositories).to eq(true)
+      end
+
+      it "remembers to re-enable the failed repo after migration" do
+        allow(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+        expect(Registration::RepoStateStorage.instance).to receive(:add).with(repo, true)
+
+        subject.check_repositories
+      end
+    end
+  end
 end
