@@ -14,6 +14,7 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Yast::Pkg).to receive(:SourceFinishAll)
       allow(Yast::Pkg).to receive(:SourceRestore)
       allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
+      allow(Registration::SwMgmt).to receive(:check_repositories).and_return(true)
     end
 
     context "the system is not registered" do
