@@ -42,6 +42,7 @@ module Registration
   Yast.import "PackageLock"
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
+  Yast.import "Popup"
 
   class SwMgmt
     include Yast
@@ -73,6 +74,43 @@ module Registration
       raise_pkg_exception unless Pkg.SourceRestore
 
       raise_pkg_exception if load_packages && !Pkg.SourceLoad
+    end
+
+    # try refreshing all enabled repositories with autorefresh enabled
+    # and report repositories which fail, ask the user to disable them or to abort
+    # @return [Boolean] true = migration can continue, false = abort migration
+    def self.check_repositories
+      # only enabled repositories
+      repos = Pkg.SourceGetCurrent(true)
+
+      repos.each do |repo|
+        data = Pkg.SourceGeneralData(repo)
+        # skip repositories which have autorefresh disabled
+        next unless data["autorefresh"]
+
+        log.info "Refreshing repository #{data["alias"].inspect}"
+        next if Pkg.SourceRefreshNow(repo)
+
+        # TRANSLATORS: error popup, %s is a repository name, the popup is displayed
+        # when a migration repository cannot be accessed, there are [Skip]
+        # and [Abort] buttons displayed below the question
+        question = _("Repository '%s'\ncannot be loaded.\n\n"\
+            "Skip the repository or abort?") % data["name"]
+        ret = Popup.ErrorAnyQuestion(Label.ErrorMsg, question, Label.SkipButton,
+          Label.AbortButton, :focus_yes)
+
+        log.info "Abort online migration: #{ret}"
+        return false unless ret
+
+        # disable the repository
+        log.info "Disabling repository #{data["alias"].inspect}"
+        Pkg.SourceSetEnabled(repo, false)
+
+        # make sure the repository is enabled again after migration
+        RepoStateStorage.instance.add(repo, true)
+      end
+
+      true
     end
 
     # during installation /etc/zypp directory is not writable (mounted on

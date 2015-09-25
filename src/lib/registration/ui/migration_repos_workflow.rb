@@ -263,13 +263,21 @@ module Registration
         end
 
         # synchronize the changes done by modifying the services,
-        # reinitialize the repositories and reload the available packages
+        # reinitialize the repositories
         Yast::Pkg.SourceFinishAll
         Yast::Pkg.TargetFinish
-        SwMgmt.init(true)
+        SwMgmt.init
+
+        # check the repositories (and possibly disable the invalid repositories)
+        return :abort unless SwMgmt.check_repositories
+        # reload the available packages
+        Yast::Pkg.SourceLoad
 
         log.info "Registered services: #{registered_services}"
         :next
+      ensure
+        # clear the progress message
+        Yast::Wizard.ClearContents
       end
 
       # just set an empty Wizard dialog to replace the current one after

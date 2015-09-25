@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 25 07:41:32 UTC 2015 - lslezak@suse.cz
+
+- do not crash when a repository cannot be accessed, ask the user
+  to skip it or abort the online migration (bsc#946200)
+- 3.1.156
+
+-------------------------------------------------------------------
 Wed Sep 23 18:03:15 UTC 2015 - lslezak@suse.cz
 
 - migration rollback: make sure the base product is downgraded
