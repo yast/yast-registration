@@ -327,7 +327,6 @@ describe "Registration::SwMgmt" do
     context "a repository refresh fails" do
       before do
         expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(false)
-        allow(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
         allow(Registration::RepoStateStorage.instance).to receive(:add).with(repo, true)
         allow(Yast::Pkg).to receive(:SourceSetEnabled)
       end
