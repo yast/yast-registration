@@ -16,6 +16,7 @@ require "yast"
 
 require "registration/registration"
 require "registration/registration_ui"
+require "registration/releasever"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
 require "registration/ui/wizard_client"
@@ -71,10 +72,17 @@ module Registration
         Yast::Pkg.TargetInitialize(Yast::Installation.destdir)
       end
 
-      # reload the repositories to synchronize the changes
+      # reload the repositories to synchronize the changes, reset the $releasever value
+      # if it has been set and refresh the affected repositories
       def reload_repos
         Yast::Pkg.SourceFinishAll
         Yast::Pkg.SourceRestore
+
+        return unless Releasever.set?
+
+        log.info "Resetting the $releasever..."
+        releasever = Releasever.new(nil)
+        releasever.activate
       end
 
       # downgrade product registrations (restore the original status before upgrading)

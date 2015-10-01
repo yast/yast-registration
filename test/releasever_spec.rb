@@ -57,4 +57,16 @@ describe Registration::Releasever do
       subject.activate
     end
   end
+
+  describe ".set?" do
+    it "returns false if the $releasever has not been set" do
+      expect(ENV).to receive(:[]).with("ZYPP_REPO_RELEASEVER").and_return(nil)
+      expect(Registration::Releasever.set?).to eq(false)
+    end
+
+    it "returns true if the $releasever has been set" do
+      expect(ENV).to receive(:[]).with("ZYPP_REPO_RELEASEVER").and_return("42")
+      expect(Registration::Releasever.set?).to eq(true)
+    end
+  end
 end
