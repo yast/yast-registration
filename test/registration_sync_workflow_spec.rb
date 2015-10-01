@@ -19,6 +19,8 @@ describe Registration::UI::RegistrationSyncWorkflow do
       allow(Registration::UrlHelpers).to receive(:registration_url)
       allow(Registration::SwMgmt).to receive(:get_release_type)
       allow(subject).to receive(:registration_ui).and_return(registration_ui)
+      allow(Registration::Releasever).to receive(:set?).and_return(false)
+      allow(Registration::SwMgmt).to receive(:installed_products).and_return([])
     end
 
     it "restores repositories, downgrades registration and synchronizes the products" do
@@ -45,6 +47,17 @@ describe Registration::UI::RegistrationSyncWorkflow do
 
       expect(registration_ui).to receive(:synchronize_products)
         .with(installed_products).and_return(true)
+      expect(subject.run_sequence).to eq(:next)
+    end
+
+    it "resets the $releasever if it has been set" do
+      allow(registration_ui).to receive(:synchronize_products).and_return(true)
+      expect(Registration::Releasever).to receive(:set?).and_return(true)
+
+      releasever = Registration::Releasever.new(nil)
+      expect(Registration::Releasever).to receive(:new).with(nil).and_return(releasever)
+      expect(releasever).to receive(:activate)
+
       expect(subject.run_sequence).to eq(:next)
     end
   end
