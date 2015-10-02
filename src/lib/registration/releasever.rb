@@ -32,6 +32,12 @@ module Registration
     # the new $releasever value
     attr_reader :version
 
+    # has been the $releasever set?
+    # @return [Boolean] true if $releasever has been set
+    def self.set?
+      !ENV[RELEASEVER_ENV].nil?
+    end
+
     # constructor
     # @param [String] version the new release version value
     def initialize(version)
