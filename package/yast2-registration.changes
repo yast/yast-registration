@@ -3,6 +3,7 @@ Fri Oct  2 10:26:44 UTC 2015 - lslezak@suse.cz
 
 - Restore the original $releasever value and refresh the
   repositories when online migration is aborted (bsc#948363)
+- 3.1.129.12
 
 -------------------------------------------------------------------
 Fri Sep 25 07:41:32 UTC 2015 - lslezak@suse.cz
