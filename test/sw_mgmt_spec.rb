@@ -253,7 +253,7 @@ describe Registration::SwMgmt do
       available_addons = load_yaml_fixture("available_addons.yml")
 
       # expect the sle-module-legacy product to be selected
-      expect(available_addons[4]).to receive(:selected)
+      expect(available_addons[10]).to receive(:selected)
       subject.select_product_addons(products, available_addons)
     end
 

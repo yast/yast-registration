@@ -1,6 +1,165 @@
 ---
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1317
+      :name: SUSE Cloud for SLE 12 Compute Nodes
+      :identifier: suse-sle12-cloud-compute
+      :former_identifier: suse-sle12-cloud-compute
+      :version: '5'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: SUSE Cloud for SLE 12 Compute Nodes 5 x86_64
+      :product_class: SUSE_CLOUD
+      :cpe: cpe:/o:suse:suse-sle12-cloud-compute:5
+      :free: false
+      :description: SUSE Cloud for SLE 12 Compute Nodes
+      :eula_url: https://updates.suse.com/SUSE/Products/12-Cloud-Compute/5/x86_64/product.license/
+      :repositories:
+      - id: 1813
+        name: SLE-12-Cloud-Compute5-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-12-Cloud-Compute5-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/12-Cloud-Compute/5/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1814
+        name: SLE-12-Cloud-Compute5-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-12-Cloud-Compute5-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/12-Cloud-Compute/5/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1815
+        name: SLE-12-Cloud-Compute5-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-12-Cloud-Compute5-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/12-Cloud-Compute/5/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1816
+        name: SLE-12-Cloud-Compute5-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-12-Cloud-Compute5-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/12-Cloud-Compute/5/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: extension
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1342
+      :name: SUSE Enterprise Storage
+      :identifier: ses
+      :former_identifier: ses
+      :version: '2'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: SUSE Enterprise Storage 2 x86_64
+      :product_class: SES-TEST
+      :cpe: cpe:/o:suse:ses:2
+      :free: false
+      :description: SUSE Enterprise Storage 2 for SUSE Linux Enterprise Server 12,
+        powered by Ceph.
+      :eula_url: https://updates.suse.com/SUSE/Products/Storage/2/x86_64/product.license/
+      :repositories:
+      - id: 1917
+        name: SUSE-Enterprise-Storage-2-Updates
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-2-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/Storage/2/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1918
+        name: SUSE-Enterprise-Storage-2-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-2-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/Storage/2/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1919
+        name: SUSE-Enterprise-Storage-2-Pool
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-2-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/Storage/2/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1920
+        name: SUSE-Enterprise-Storage-2-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-2-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/Storage/2/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      - id: 1921
+        name: SUSE-Enterprise-Storage-2-Source-Pool
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-2-Source-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/Storage/2/x86_64/product_source
+        enabled: false
+        autorefresh: false
+      :product_type: extension
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1304
+      :name: SUSE Enterprise Storage
+      :identifier: ses
+      :former_identifier: ses
+      :version: '1'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: SUSE Enterprise Storage 1 x86_64
+      :product_class: SES
+      :cpe: cpe:/o:suse:ses:1
+      :free: false
+      :description: SUSE Enterprise Storage 1.0 for SUSE Linux Enterprise Server 12,
+        powered by Ceph.
+      :eula_url: https://updates.suse.com/SUSE/Products/Storage/1.0/x86_64/product.license/
+      :repositories:
+      - id: 1772
+        name: SUSE-Enterprise-Storage-1.0-Updates
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-1.0-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/Storage/1.0/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1773
+        name: SUSE-Enterprise-Storage-1.0-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-1.0-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/Storage/1.0/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1774
+        name: SUSE-Enterprise-Storage-1.0-Pool
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-1.0-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/Storage/1.0/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1775
+        name: SUSE-Enterprise-Storage-1.0-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SUSE-Enterprise-Storage-1.0-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/Storage/1.0/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: extension
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
 - &2 !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1245
       :name: SUSE Linux Enterprise High Availability Extension
@@ -10,28 +169,49 @@
       :release_type: 
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise High Availability Extension 12 x86_64
-      :product_class: 
-      :product_family: sle-ha
-      :cpe: cpe:/o:suse:sle-ha:12.0
-      :free: 
+      :product_class: SLE-HAE-X86
+      :cpe: cpe:/o:suse:sle-ha:12
+      :free: false
       :description: SUSE Linux Enterprise High Availability Extension.
-      :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-HA-POOL-x86_64-Media1.license/
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-HA/12/x86_64/product.license/
       :repositories:
-      - id: 1500
-        name: SLE-HA12-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-HA12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-HA-POOL-x86_64-Media1
-        enabled: true
-        autorefresh: false
-      - id: 1539
+      - id: 1712
         name: SLE-HA12-Updates
         distro_target: sle-12-x86_64
         description: SLE-HA12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-HA:/12:/x86_64/standard
+        url: https://updates.suse.com/SUSE/Updates/SLE-HA/12/x86_64/update
         enabled: true
         autorefresh: true
+      - id: 1713
+        name: SLE-HA12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-HA12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-HA/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1714
+        name: SLE-HA12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-HA12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-HA/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1715
+        name: SLE-HA12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-HA12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-HA/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
       :product_type: extension
+      :predecessor_ids:
+      - 1256
+      - 971
+      - 961
+      - 967
+      - 958
+      :successor_ids:
+      - 1324
       :extensions:
       - &1 !ruby/object:SUSE::Connect::Remote::Product
         table:
@@ -44,32 +224,50 @@
           :arch: x86_64
           :friendly_name: SUSE Linux Enterprise High Availability GEO Extension 12
             x86_64
-          :product_class: 
-          :product_family: sle-ha
-          :cpe: cpe:/o:suse:sle-ha-geo:12.0
-          :free: 
+          :product_class: SLE-HAE-GEO
+          :cpe: cpe:/o:suse:sle-ha-geo:12
+          :free: false
           :description: SUSE Linux Enterprise High Availability Geographical Cluster
             Extension
-          :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-HA-GEO-POOL-s390x-x86_64-Media1.license/
+          :eula_url: https://updates.suse.com/SUSE/Products/SLE-HA-GEO/12/x86_64/product.license/
           :repositories:
-          - id: 1502
-            name: SLE-HA-GEO12-Pool
-            distro_target: sle-12-x86_64
-            description: SLE-HA-GEO12-Pool for sle-12-x86_64
-            url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-HA-GEO-POOL-s390x-x86_64-Media1
-            enabled: true
-            autorefresh: false
-          - id: 1545
+          - id: 1720
             name: SLE-HA-GEO12-Updates
             distro_target: sle-12-x86_64
             description: SLE-HA-GEO12-Updates for sle-12-x86_64
-            url: https://nu.novell.com/SUSE:/Updates:/SLE-HA-GEO:/12:/x86_64/standard
+            url: https://updates.suse.com/SUSE/Updates/SLE-HA-GEO/12/x86_64/update
             enabled: true
             autorefresh: true
+          - id: 1721
+            name: SLE-HA-GEO12-Debuginfo-Updates
+            distro_target: sle-12-x86_64
+            description: SLE-HA-GEO12-Debuginfo-Updates for sle-12-x86_64
+            url: https://updates.suse.com/SUSE/Updates/SLE-HA-GEO/12/x86_64/update_debug
+            enabled: false
+            autorefresh: true
+          - id: 1722
+            name: SLE-HA-GEO12-Pool
+            distro_target: sle-12-x86_64
+            description: SLE-HA-GEO12-Pool for sle-12-x86_64
+            url: https://updates.suse.com/SUSE/Products/SLE-HA-GEO/12/x86_64/product
+            enabled: true
+            autorefresh: false
+          - id: 1723
+            name: SLE-HA-GEO12-Debuginfo-Pool
+            distro_target: sle-12-x86_64
+            description: SLE-HA-GEO12-Debuginfo-Pool for sle-12-x86_64
+            url: https://updates.suse.com/SUSE/Products/SLE-HA-GEO/12/x86_64/product_debug
+            enabled: false
+            autorefresh: false
           :product_type: extension
+          :predecessor_ids:
+          - 1101
+          - 1107
+          - 1286
+          :successor_ids:
+          - 1337
           :extensions: []
         modifiable: true
-    modifiable: true
   children:
   - &3 !ruby/object:Registration::Addon
     pure_addon: *1
@@ -77,176 +275,61 @@
     depends_on: *2
 - *3
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
-      :id: 1153
-      :name: Web and Scripting Module
-      :identifier: sle-module-web-scripting
-      :former_identifier: sle-module-web-scripting
+      :id: 1253
+      :name: SUSE Linux Enterprise Live Patching
+      :identifier: sle-live-patching
+      :former_identifier: sle-live-patching
       :version: '12'
       :release_type: 
       :arch: x86_64
-      :friendly_name: Web and Scripting Module 12 x86_64
-      :product_class: 
-      :product_family: sles
-      :cpe: cpe:/o:suse:sle-module-web-scripting:12.0
-      :free: true
-      :description: '<p> The SUSE Linux Enterprise Web and Scripting Module delivers
-        a comprehensive suite of scripting languages, frameworks, and related tools
-        helping developers and systems administrators accelerate the creation of stable,
-        modern web applications, including: PHP, Ruby on Rails, Python version 3.
-        </p> <p> Access to the Web and Scripting Module is included in your SUSE Linux
-        Enterprise Server subscription. The module has a different lifecycle than
-        SUSE Linux Enterprise Server itself; please check the Release Notes for further
-        details. </p>'
-      :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-web-scripting-POOL-x86_64-Media1.license/
+      :friendly_name: SUSE Linux Enterprise Live Patching 12 x86_64
+      :product_class: SLE-LP
+      :cpe: cpe:/o:suse:sle-live-patching:12
+      :free: false
+      :description: "<p> SUSE Linux Enterprise Live Patching provides packages to
+        update critical kernel modules live in SUSE Linux Enterprise. With SUSE Linux
+        Enterprise Live Patching, you can perform critical kernel patching without
+        shutting down your system, reducing the need for planned downtime and increasing
+        service availability. <p>"
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-Live-Patching/12/x86_64/product.license/
       :repositories:
-      - id: 1494
-        name: SLE-Module-Web-Scripting12-Pool
+      - id: 1741
+        name: SLE-Live-Patching12-Updates
         distro_target: sle-12-x86_64
-        description: SLE-Module-Web-Scripting12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-web-scripting-POOL-x86_64-Media1
-        enabled: true
-        autorefresh: false
-      - id: 1551
-        name: SLE-Module-Web-Scripting12-Updates
-        distro_target: sle-12-x86_64
-        description: SLE-Module-Web-Scripting12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Web-Scripting:/12:/x86_64/standard
+        description: SLE-Live-Patching12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Live-Patching/12/x86_64/update
         enabled: true
         autorefresh: true
-      :product_type: module
-      :extensions: []
-    modifiable: true
-  children: []
-- !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
-    table:
-      :id: 1212
-      :name: Advanced Systems Management Module
-      :identifier: sle-module-adv-systems-management
-      :former_identifier: sle-module-adv-systems-management
-      :version: '12'
-      :release_type: 
-      :arch: x86_64
-      :friendly_name: Advanced Systems Management Module 12 x86_64
-      :product_class: 
-      :product_family: sles
-      :cpe: cpe:/o:suse:sle-module-adv-systems-management:12.0
-      :free: true
-      :description: <p>This Module contains current versions of the popular configuration
-        management frameworks Puppet and CFEngine as well as the new systems management
-        toolbox called machinery.</p> <p>The machinery tool will be frequently updated
-        and is SUSE's upcoming systems management toolbox for inspecting and validating
-        systems remotely, storing their system description and creating new systems
-        to deploy them in datacenters and clouds. </p>
-      :eula_url: 
-      :repositories:
-      - id: 1498
-        name: SLE-Module-Adv-Systems-Management12-Pool
+      - id: 1742
+        name: SLE-Live-Patching12-Debuginfo-Updates
         distro_target: sle-12-x86_64
-        description: SLE-Module-Adv-Systems-Management12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-adv-systems-management-POOL-x86_64-Media1
+        description: SLE-Live-Patching12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Live-Patching/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1743
+        name: SLE-Live-Patching12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Live-Patching12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Live-Patching/12/x86_64/product
         enabled: true
         autorefresh: false
-      - id: 1555
-        name: SLE-Module-Adv-Systems-Management12-Updates
+      - id: 1744
+        name: SLE-Live-Patching12-Debuginfo-Pool
         distro_target: sle-12-x86_64
-        description: SLE-Module-Adv-Systems-Management12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Adv-Systems-Management:/12:/x86_64/standard
-        enabled: true
-        autorefresh: true
-      :product_type: module
-      :extensions: []
-    modifiable: true
-  children: []
-- !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
-    table:
-      :id: 1150
-      :name: Legacy Module
-      :identifier: sle-module-legacy
-      :former_identifier: sle-module-legacy
-      :version: '12'
-      :release_type: 
-      :arch: x86_64
-      :friendly_name: Legacy Module 12 x86_64
-      :product_class: 
-      :product_family: sles
-      :cpe: cpe:/o:suse:sle-module-legacy:12.0
-      :free: true
-      :description: '<p> The Legacy Module supports your migration from SUSE Linux
-        Enterprise 10 and 11 and other systems to SUSE Linux Enterprise 12, by providing
-        packages which are discontinued on SUSE Linux Enterprise Server, but which
-        you may rely on, such as: CyrusIMAP, BSD like ftp client, sendmail, IBM Java6.
-        </p> <p> Access to the Legacy Module is included in your SUSE Linux Enterprise
-        Server subscription. The module has a different lifecycle than SUSE Linux
-        Enterprise Server itself; please check the Release Notes for further details.
-        </p>'
-      :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1.license/
-      :repositories:
-      - id: 1491
-        name: SLE-Module-Legacy12-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-Module-Legacy12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1
-        enabled: true
+        description: SLE-Live-Patching12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Live-Patching/12/x86_64/product_debug
+        enabled: false
         autorefresh: false
-      - id: 1548
-        name: SLE-Module-Legacy12-Updates
-        distro_target: sle-12-x86_64
-        description: SLE-Module-Legacy12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Legacy:/12:/x86_64/standard
-        enabled: true
-        autorefresh: true
-      :product_type: module
+      :product_type: extension
+      :predecessor_ids: []
+      :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
-    table:
-      :id: 1220
-      :name: Public Cloud Module
-      :identifier: sle-module-public-cloud
-      :former_identifier: sle-module-public-cloud
-      :version: '12'
-      :release_type: 
-      :arch: x86_64
-      :friendly_name: Public Cloud Module 12 x86_64
-      :product_class: 
-      :product_family: sles
-      :cpe: cpe:/o:suse:sle-module-public-cloud:12.0
-      :free: true
-      :description: <p> The Public Cloud Module is a collection of tools that enables
-        you to create and manage cloud images from the commandline on SUSE Linux Enterprise
-        Server. When building your own images with KIWI or SUSE Studio, initialization
-        code specific to the target cloud is included in that image. </p> <p> Access
-        to the Public Cloud Module is included in your SUSE Linux Enterprise Server
-        subscription. The module has a different lifecycle than SUSE Linux Enterprise
-        Server itself; please check the Release Notes for further details. </p>
-      :eula_url: 
-      :repositories:
-      - id: 1497
-        name: SLE-Module-Public-Cloud12-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-Module-Public-Cloud12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-public-cloud-POOL-x86_64-Media1
-        enabled: true
-        autorefresh: false
-      - id: 1554
-        name: SLE-Module-Public-Cloud12-Updates
-        distro_target: sle-12-x86_64
-        description: SLE-Module-Public-Cloud12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Public-Cloud:/12:/x86_64/standard
-        enabled: true
-        autorefresh: true
-      :product_type: module
-      :extensions: []
-    modifiable: true
-  children: []
-- !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1222
       :name: SUSE Linux Enterprise Workstation Extension
@@ -256,58 +339,66 @@
       :release_type: 
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise Workstation Extension 12 x86_64
-      :product_class: 
-      :product_family: sled
-      :cpe: cpe:/o:suse:sle-we:12.0
-      :free: true
+      :product_class: SLE-WE
+      :cpe: cpe:/o:suse:sle-we:12
+      :free: false
       :description: SUSE Linux Enterprise Workstation Extension extends the functionality
         of SUSE Linux Enterprise Server with packages of SUSE Linux Enterprise Desktop,
         like additional desktop applications (office suite, email client, graphical
         editor ...) and libraries. It allows to combine both products to create a
         full featured Workstation.
-      :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-WE-POOL-x86_64-Media1.license/
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-WE/12/x86_64/product.license/
       :repositories:
-      - id: 1503
-        name: SLE-12-GA-Desktop-nVidia-Driver
-        distro_target: sle-12-x86_64
-        description: SLE-12-GA-Desktop-nVidia-Driver for sle-12-x86_64
-        url: http://download.nvidia.com/novell/sle12
-        enabled: true
-        autorefresh: true
-      - id: 1543
-        name: SLE-WE12-Debuginfo-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-WE12-Debuginfo-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-WE-POOL-x86_64-Media3
-        enabled: false
-        autorefresh: false
-      - id: 1469
-        name: SLE-WE12-Debuginfo-Updates
-        distro_target: sle-12-x86_64
-        description: SLE-WE12-Debuginfo-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-WE:/12:/x86_64/standard_debug
-        enabled: false
-        autorefresh: true
-      - id: 1485
-        name: SLE-WE12-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-WE12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-WE-POOL-x86_64-Media1
-        enabled: true
-        autorefresh: false
-      - id: 1468
+      - id: 1652
         name: SLE-WE12-Updates
         distro_target: sle-12-x86_64
         description: SLE-WE12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-WE:/12:/x86_64/standard
+        url: https://updates.suse.com/SUSE/Updates/SLE-WE/12/x86_64/update
         enabled: true
         autorefresh: true
+      - id: 1653
+        name: SLE-WE12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-WE12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-WE/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1654
+        name: SLE-WE12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-WE12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-WE/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1503
+        name: SLE-12-GA-Desktop-NVIDIA-Driver
+        distro_target: sle-12-x86_64
+        description: SLE-12-GA-Desktop-NVIDIA-Driver for sle-12-x86_64
+        url: http://download.nvidia.com/novell/sle12
+        enabled: true
+        autorefresh: true
+      - id: 1745
+        name: SLE-12-GA-Desktop-AMD-Driver
+        distro_target: sle-12-x86_64
+        description: SLE-12-GA-Desktop-AMD-Driver for sle-12-x86_64
+        url: http://www2.ati.com/suse/sle12
+        enabled: true
+        autorefresh: true
+      - id: 1655
+        name: SLE-WE12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-WE12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-WE/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
       :product_type: extension
+      :predecessor_ids: []
+      :successor_ids:
+      - 1338
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1223
       :name: SUSE Linux Enterprise Software Development Kit
@@ -317,36 +408,384 @@
       :release_type: 
       :arch: x86_64
       :friendly_name: SUSE Linux Enterprise Software Development Kit 12 x86_64
-      :product_class: 
-      :product_family: sles
-      :cpe: cpe:/o:suse:sle-sdk:12.0
+      :product_class: SLE-SDK
+      :cpe: cpe:/o:suse:sle-sdk:12
       :free: true
-      :description: <p> SUSE Linux Enterprise Software Development Kit 12 is the Software
-        Development Kit for the family of SUSE Linux Enterprise products. It is a
-        free of charge extension for partners and customers working with SUSE Linux
-        Enterprise Server and Desktop and derived products. </p> <p> Packages on the
-        SDK are delivered without L3 support; maintenance updates will be done for
-        critical security and critical non-security issues, and where needed to remain
-        in sync with packages delivered in the SUSE Linux Enterprise Server and Desktop
-        products. </p> <p> Packages to rebuild SUSE Linux Enterprise Server are not
-        part of the SUSE Linux Enterprise Software Development Kit. </p>
-      :eula_url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-SDK-POOL-x86_64-Media1.license/
+      :description: "<p> SUSE Linux Enterprise Software Development Kit 12 is the
+        Software Development Kit for the family of SUSE Linux Enterprise products.
+        It is a free of charge extension for partners and customers working with SUSE
+        Linux Enterprise Server and Desktop and derived products. </p> <p> Packages
+        on the SDK are delivered without L3 support; maintenance updates will be done
+        for critical security and critical non-security issues, and where needed to
+        remain in sync with packages delivered in the SUSE Linux Enterprise Server
+        and Desktop products. </p> <p> Packages to rebuild SUSE Linux Enterprise Server
+        are not part of the SUSE Linux Enterprise Software Development Kit. </p>"
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-SDK/12/x86_64/product.license/
       :repositories:
-      - id: 1488
-        name: SLE-SDK12-Pool
-        distro_target: sle-12-x86_64
-        description: SLE-SDK12-Pool for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-SDK-POOL-x86_64-Media1
-        enabled: true
-        autorefresh: false
-      - id: 1232
+      - id: 1664
         name: SLE-SDK12-Updates
         distro_target: sle-12-x86_64
         description: SLE-SDK12-Updates for sle-12-x86_64
-        url: https://nu.novell.com/SUSE:/Updates:/SLE-SDK:/12:/x86_64/standard
+        url: https://updates.suse.com/SUSE/Updates/SLE-SDK/12/x86_64/update
         enabled: true
         autorefresh: true
+      - id: 1665
+        name: SLE-SDK12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-SDK12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-SDK/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1666
+        name: SLE-SDK12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-SDK12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-SDK/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1667
+        name: SLE-SDK12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-SDK12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-SDK/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
       :product_type: extension
+      :predecessor_ids: []
+      :successor_ids:
+      - 1323
       :extensions: []
-    modifiable: true
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1212
+      :name: Advanced Systems Management Module
+      :identifier: sle-module-adv-systems-management
+      :former_identifier: sle-module-adv-systems-management
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Advanced Systems Management Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-adv-systems-management:12
+      :free: true
+      :description: "<p>This Module contains current versions of the popular configuration
+        management frameworks Puppet and CFEngine as well as the new systems management
+        toolbox called machinery.</p> <p>The machinery tool will be frequently updated
+        and is SUSE's upcoming systems management toolbox for inspecting and validating
+        systems remotely, storing their system description and creating new systems
+        to deploy them in datacenters and clouds. </p>"
+      :eula_url: ''
+      :repositories:
+      - id: 1704
+        name: SLE-Module-Adv-Systems-Management12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Adv-Systems-Management12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Adv-Systems-Management/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1705
+        name: SLE-Module-Adv-Systems-Management12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Adv-Systems-Management12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Adv-Systems-Management/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1706
+        name: SLE-Module-Adv-Systems-Management12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Adv-Systems-Management12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Adv-Systems-Management/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1707
+        name: SLE-Module-Adv-Systems-Management12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Adv-Systems-Management12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Adv-Systems-Management/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1332
+      :name: Containers Module
+      :identifier: sle-module-containers
+      :former_identifier: sle-module-containers
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Containers Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-containers:12
+      :free: true
+      :description: "<p>This Module contains several packages revolving around containers
+        and related tools. </p>"
+      :eula_url: ''
+      :repositories:
+      - id: 1864
+        name: SLE-Module-Containers12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Containers12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Containers/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1865
+        name: SLE-Module-Containers12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Containers12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Containers/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1866
+        name: SLE-Module-Containers12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Containers12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Containers/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1867
+        name: SLE-Module-Containers12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Containers12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Containers/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1150
+      :name: Legacy Module
+      :identifier: sle-module-legacy
+      :former_identifier: sle-module-legacy
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Legacy Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-legacy:12
+      :free: true
+      :description: "<p> The Legacy Module helps you migrating applications from SUSE
+        Linux Enterprise 10 and 11 and other systems to SUSE Linux Enterprise 12,
+        by providing packages which are discontinued on SUSE Linux Enterprise Server,
+        such as: sendmail, syslog-ng, IBM Java6, and a number of libraries (for example
+        openssl-0.9.8). </p> <p> Access to the Legacy Module is included in your SUSE
+        Linux Enterprise Server subscription. The module has a different lifecycle
+        than SUSE Linux Enterprise Server itself. Packages in the this module are
+        usually supported for at most three years. Support for Sendmail and IBM Java
+        6 will end in September 2017 the latest. </p>"
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/12/x86_64/product.license/
+      :repositories:
+      - id: 1676
+        name: SLE-Module-Legacy12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Legacy12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Legacy/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1677
+        name: SLE-Module-Legacy12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Legacy12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Legacy/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1678
+        name: SLE-Module-Legacy12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Legacy12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1679
+        name: SLE-Module-Legacy12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Legacy12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1220
+      :name: Public Cloud Module
+      :identifier: sle-module-public-cloud
+      :former_identifier: sle-module-public-cloud
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Public Cloud Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-public-cloud:12
+      :free: true
+      :description: "<p> The Public Cloud Module is a collection of tools that enables
+        you to create and manage cloud images from the commandline on SUSE Linux Enterprise
+        Server. When building your own images with KIWI or SUSE Studio, initialization
+        code specific to the target cloud is included in that image. </p> <p> Access
+        to the Public Cloud Module is included in your SUSE Linux Enterprise Server
+        subscription. The module has a different lifecycle than SUSE Linux Enterprise
+        Server itself; please check the Release Notes for further details. </p>"
+      :eula_url: ''
+      :repositories:
+      - id: 1700
+        name: SLE-Module-Public-Cloud12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Public-Cloud12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Public-Cloud/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1701
+        name: SLE-Module-Public-Cloud12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Public-Cloud12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Public-Cloud/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1702
+        name: SLE-Module-Public-Cloud12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Public-Cloud12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Public-Cloud/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1703
+        name: SLE-Module-Public-Cloud12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Public-Cloud12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Public-Cloud/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1341
+      :name: Toolchain Module
+      :identifier: sle-module-toolchain
+      :former_identifier: sle-module-toolchain
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Toolchain Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-toolchain:12
+      :free: true
+      :description: Via this Module you will have access to a more recent GCC and
+        Toolchain in addition to the default compiler of SUSE Linux Enterprise. Access
+        to the Toolchain Module is included in your SUSE Linux Enterprise Server subscription.
+        The module has a different lifecycle than SUSE Linux Enterprise Server itself.
+        Please check the Release Notes for further details.
+      :eula_url: ''
+      :repositories:
+      - id: 1903
+        name: SLE-Module-Toolchain12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Toolchain12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Toolchain/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1904
+        name: SLE-Module-Toolchain12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Toolchain12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Toolchain/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1905
+        name: SLE-Module-Toolchain12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Toolchain12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Toolchain/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1906
+        name: SLE-Module-Toolchain12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Toolchain12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Toolchain/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
+  children: []
+- !ruby/object:Registration::Addon
+  pure_addon: !ruby/object:OpenStruct
+    table:
+      :id: 1153
+      :name: Web and Scripting Module
+      :identifier: sle-module-web-scripting
+      :former_identifier: sle-module-web-scripting
+      :version: '12'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: Web and Scripting Module 12 x86_64
+      :product_class: '7261'
+      :cpe: cpe:/o:suse:sle-module-web-scripting:12
+      :free: true
+      :description: "<p> The SUSE Linux Enterprise Web and Scripting Module delivers
+        a comprehensive suite of scripting languages, frameworks, and related tools
+        helping developers and systems administrators accelerate the creation of stable,
+        modern web applications, using dynamic languages, such as PHP, Ruby on Rails,
+        and Python. </p> <p> Access to the Web and Scripting Module is included in
+        your SUSE Linux Enterprise Server subscription. The module has a different
+        lifecycle than SUSE Linux Enterprise Server itself: Package versions in the
+        this module are usually supported for at most three years. We are planning
+        to release more recent versions on a schedule of approximately 18 month; the
+        exact dates may differ per package. </p>"
+      :eula_url: https://updates.suse.com/SUSE/Products/SLE-Module-Web-Scripting/12/x86_64/product.license/
+      :repositories:
+      - id: 1688
+        name: SLE-Module-Web-Scripting12-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Web-Scripting12-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Web-Scripting/12/x86_64/update
+        enabled: true
+        autorefresh: true
+      - id: 1689
+        name: SLE-Module-Web-Scripting12-Debuginfo-Updates
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Web-Scripting12-Debuginfo-Updates for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Updates/SLE-Module-Web-Scripting/12/x86_64/update_debug
+        enabled: false
+        autorefresh: true
+      - id: 1690
+        name: SLE-Module-Web-Scripting12-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Web-Scripting12-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Web-Scripting/12/x86_64/product
+        enabled: true
+        autorefresh: false
+      - id: 1691
+        name: SLE-Module-Web-Scripting12-Debuginfo-Pool
+        distro_target: sle-12-x86_64
+        description: SLE-Module-Web-Scripting12-Debuginfo-Pool for sle-12-x86_64
+        url: https://updates.suse.com/SUSE/Products/SLE-Module-Web-Scripting/12/x86_64/product_debug
+        enabled: false
+        autorefresh: false
+      :product_type: module
+      :predecessor_ids: []
+      :successor_ids: []
+      :extensions: []
   children: []
