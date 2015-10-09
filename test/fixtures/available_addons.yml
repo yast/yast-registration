@@ -1,6 +1,6 @@
 ---
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1317
       :name: SUSE Cloud for SLE 12 Compute Nodes
@@ -48,10 +48,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1342
       :name: SUSE Enterprise Storage
@@ -107,10 +106,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1304
       :name: SUSE Enterprise Storage
@@ -159,10 +157,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - &2 !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1245
       :name: SUSE Linux Enterprise High Availability Extension
@@ -271,7 +268,6 @@
           - 1337
           :extensions: []
         modifiable: true
-    modifiable: true
   children:
   - &3 !ruby/object:Registration::Addon
     pure_addon: *1
@@ -279,7 +275,7 @@
     depends_on: *2
 - *3
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1253
       :name: SUSE Linux Enterprise Live Patching
@@ -331,10 +327,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1222
       :name: SUSE Linux Enterprise Workstation Extension
@@ -401,10 +396,9 @@
       :successor_ids:
       - 1338
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1223
       :name: SUSE Linux Enterprise Software Development Kit
@@ -461,10 +455,9 @@
       :successor_ids:
       - 1323
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1212
       :name: Advanced Systems Management Module
@@ -517,10 +510,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1332
       :name: Containers Module
@@ -569,10 +561,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1150
       :name: Legacy Module
@@ -628,10 +619,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1220
       :name: Public Cloud Module
@@ -685,10 +675,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1341
       :name: Toolchain Module
@@ -740,10 +729,9 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1153
       :name: Web and Scripting Module
@@ -800,5 +788,4 @@
       :predecessor_ids: []
       :successor_ids: []
       :extensions: []
-    modifiable: true
   children: []
