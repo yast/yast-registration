@@ -27,9 +27,9 @@ describe "Registration::RegistrationUI" do
   end
 
   let(:remote_addons) { load_yaml_fixture("available_addons.yml") }
-  let(:addon_HA) { remote_addons[0] }
-  let(:addon_HA_GEO) { remote_addons[1] }
-  let(:addon_legacy) { remote_addons[4] }
+  let(:addon_HA) { remote_addons[3] }
+  let(:addon_HA_GEO) { remote_addons[4] }
+  let(:addon_legacy) { remote_addons[10] }
   let(:addon_SDK) { remote_addons[7] }
   let(:installed_sles) { load_yaml_fixture("products_legacy_installation.yml")[1] }
 
