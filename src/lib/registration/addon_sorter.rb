@@ -21,8 +21,8 @@ module Registration
       # paid (non-free) first
       x.free ? 1 : -1
     else
-      # sort the groups by name
-      x.name <=> y.name
+      # sort the groups by label ("friendly_name" or "name" attribute)
+      x.label <=> y.label
     end
   end
 end
