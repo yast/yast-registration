@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  8 15:51:19 UTC 2015 - lslezak@suse.cz
+
+- Addon selection dialog - sort the addons by the displayed label,
+  not by the internal name (which might not be unique) (bsc#949424)
+
+-------------------------------------------------------------------
 Fri Oct  2 10:26:44 UTC 2015 - lslezak@suse.cz
 
 - Restore the original $releasever value and refresh the
