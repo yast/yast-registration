@@ -3,6 +3,8 @@ Fri Nov  6 20:26:06 UTC 2015 - lslezak@suse.cz
 
 - always enable update repositories for modules during online
   migration (bsc#953536)
+- AutoYaST config: fixed crash at the end of the configuration
+  workflow (bsc#949934)
 
 -------------------------------------------------------------------
 Mon Oct 19 07:21:58 UTC 2015 - lslezak@suse.cz
