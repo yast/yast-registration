@@ -47,6 +47,7 @@ BuildRequires:  rubygem(suse-connect) >= 0.2.22
 BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.26
 BuildRequires:  yast2-update >= 3.1.19
+BuildRequires:  autoyast2
 
 BuildArch:      noarch
 
