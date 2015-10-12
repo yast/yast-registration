@@ -1,153 +1,51 @@
 -------------------------------------------------------------------
-Fri Oct  2 10:26:44 UTC 2015 - lslezak@suse.cz
+Mon Oct 12 12:03:53 UTC 2015 - lslezak@suse.cz
 
+- 3.1.129.13
 - Restore the original $releasever value and refresh the
   repositories when online migration is aborted (bsc#948363)
-- 3.1.129.12
-
--------------------------------------------------------------------
-Fri Sep 25 07:41:32 UTC 2015 - lslezak@suse.cz
-
 - do not crash when a repository cannot be accessed, ask the user
   to skip it or abort the online migration (bsc#946200)
-- 3.1.129.11
-
--------------------------------------------------------------------
-Wed Sep 23 18:03:15 UTC 2015 - lslezak@suse.cz
-
 - migration rollback: make sure the base product is downgraded
   first (FATE#315161)
-- 3.1.129.10
-
--------------------------------------------------------------------
-Wed Sep 23 12:14:17 UTC 2015 - lslezak@suse.cz
-
 - check whether the system is registered before running online
   migration (bsc#946004)
-- 3.1.129.9
-
--------------------------------------------------------------------
-Mon Sep 21 13:53:12 UTC 2015 - lslezak@suse.cz
-
 - restore the original product registration when online migration
   is aborted (FATE#315161)
 - set the selected repository states in the manual repository
   selection dialog before starting the full repository management
   module
-- 3.1.129.8
-
--------------------------------------------------------------------
-Fri Sep 11 07:54:56 UTC 2015 - lslezak@suse.cz
-
 - use better labels - specific migration repositories are not used
   in SLE12, use better wording (bsc#944510)
-- 3.1.129.7
-
--------------------------------------------------------------------
-Thu Sep 10 15:37:08 UTC 2015 - lslezak@suse.cz
-
 - set the $releasever URL variable to the new base product
   during online migration (bsc#941563)
-
--------------------------------------------------------------------
-Wed Sep  9 12:34:35 UTC 2015 - lslezak@suse.cz
-
 - display short product names instead of the internal identifiers
   in the migration selection dialog (bsc#945028)
-- 3.1.129.6
-
--------------------------------------------------------------------
-Mon Sep  7 18:55:54 UTC 2015 - lslezak@suse.cz
-
-- 3.1.129.5
-
--------------------------------------------------------------------
-Tue Sep  2 10:27:28 UTC 2015 - lslezak@suse.cz
-
 - disable "Back" at the initial dialog
 - restore (enable) the Updates repositories at the end of the
   migration workflow (bsc#943960)
-
--------------------------------------------------------------------
-Wed Sep  2 08:11:42 UTC 2015 - lslezak@suse.cz
-
-- 3.1.129.4
-
--------------------------------------------------------------------
-Wed Sep  2 05:45:28 UTC 2015 - jsrain@suse.cz
-
 - fixed syntax error (bsc#944089)
-
--------------------------------------------------------------------
-Mon Aug 31 12:17:49 UTC 2015 - lslezak@suse.cz
-
 - make the migration selection widget smaller to have more space
   for details when only few migrations are available (bsc#943636)
-
--------------------------------------------------------------------
-Fri Aug 28 10:31:56 UTC 2015 - lslezak@suse.cz
-
 - Keep the original NCCCredentials file permissions when upgrading
   from SLE11 (bsc#943568)
-
--------------------------------------------------------------------
-Wed Aug 26 07:33:14 UTC 2015 - lslezak@suse.cz
-
 - Better wording in the "install updates" popup (bsc#942843)
-
--------------------------------------------------------------------
-Tue Aug 25 13:54:46 UTC 2015 - lslezak@suse.cz
-
 - Handle not available products when using a SMT server for running
   online migration (bsc#942892)
-
--------------------------------------------------------------------
-Fri Aug 21 11:38:22 UTC 2015 - lslezak@suse.cz
-
 - Fixed registering a product with POOL flavor (bsc#941402)
 - Addon selection dialog - avoid possible ID duplicates when
   an addon with multiple versions is displayed
-
--------------------------------------------------------------------
-Fri Aug 14 15:11:37 UTC 2015 - ancor@suse.com
-
 - User messages improved when registration does not happen during
   installation (bnc#941403, bnc#941739)
-
--------------------------------------------------------------------
-Fri Aug 14 12:20:21 UTC 2015 - lslezak@suse.cz
-
-- 3.1.129.3
-
--------------------------------------------------------------------
-Fri Aug 14 10:45:56 UTC 2015 - lslezak@suse.cz
-
 - Catch exceptions also when loading the available extensions
   (bsc#941491)
-
--------------------------------------------------------------------
-Fri Aug 14 08:20:21 UTC 2015 - lslezak@suse.cz
-
 - Reload the packages after modifying the repository setup
   (bsc#941532)
-
--------------------------------------------------------------------
-Mon Jul 27 15:49:32 UTC 2015 - lslezak@suse.cz
-
-- 3.1.129.2
-
--------------------------------------------------------------------
-Tue Jul  7 13:02:23 UTC 2015 - lslezak@suse.cz
-
 - Use "zypper dup --no-vendor-change" equivalent for online
   migration (FATE#319138)
 - added support for online migration, the registration part handles
   the service upgrade and migration repository management
   (fate#315161)
-
--------------------------------------------------------------------
-Tue Jun 16 08:37:02 UTC 2015 - jreidinger@suse.com
-
 - Adapt module to new version of SUSEConnect (FATE#318800)
 
 -------------------------------------------------------------------
