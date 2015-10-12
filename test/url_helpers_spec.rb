@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+Yast.import "Profile"
+
 describe "Registration::UrlHelpers" do
   describe ".registration_url" do
     before do
@@ -46,6 +48,42 @@ describe "Registration::UrlHelpers" do
         expect(Yast::WFM).to receive(:call).with("discover_registration_services")
           .and_return(nil)
         expect(Registration::UrlHelpers.registration_url).to be_nil
+      end
+    end
+
+    context "at AutoYaST installation" do
+      before do
+        allow(Yast::Mode).to receive(:mode).and_return("autoinstallation")
+      end
+
+      it "returns registration server which has been defined in the AutoYaST configuration file" do
+        Yast::Profile.ReadXML(fixtures_file('autoinst_with_server.xml'))
+        Yast::WFM.CallFunction("scc_auto", ["Import", Yast::Profile.current["suse_register"]])
+        expect(Registration::UrlHelpers.registration_url).to eq(Yast::Profile.current["suse_register"]["reg_server"])
+      end
+
+      it "returns default server if it has not been defined in the AutoYaST configuration file" do
+        Yast::Profile.ReadXML(fixtures_file('autoinst_without_server.xml'))
+        Yast::WFM.CallFunction("scc_auto", ["Import", Yast::Profile.current["suse_register"]])
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+      end
+    end
+
+    context "at AutoYaST upgrade" do
+      before do
+        allow(Yast::Mode).to receive(:mode).and_return("autoupgrade")
+      end
+
+      it "returns registration server which has been defined in the AutoYaST configuration file" do
+        Yast::Profile.ReadXML(fixtures_file('autoinst_with_server.xml'))
+        Yast::WFM.CallFunction("scc_auto", ["Import", Yast::Profile.current["suse_register"]])
+        expect(Registration::UrlHelpers.registration_url).to eq(Yast::Profile.current["suse_register"]["reg_server"])
+      end
+
+      it "returns default server if it has not been defined in the AutoYaST configuration file" do
+        Yast::Profile.ReadXML(fixtures_file('autoinst_without_server.xml'))
+        Yast::WFM.CallFunction("scc_auto", ["Import", Yast::Profile.current["suse_register"]])
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
       end
     end
 
