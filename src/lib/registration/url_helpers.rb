@@ -59,8 +59,6 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
-      # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
-      # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
       url = case Yast::Mode.mode
       when "installation"
         reg_url_at_installation
@@ -68,6 +66,8 @@ module Registration
         reg_url_at_runnig_system
       when "update"
         reg_url_at_upgrade
+      when "autoupgrade", "autoinstallation"
+        reg_url_from_autoyast_config
       else
         log.warn "Unknown mode: #{Yast::Mode.mode}, using default URL"
         # use the default
@@ -116,6 +116,13 @@ module Registration
 
       # if no SLP is selected nil is returned which means the default URL
       slp_service_url
+    end
+
+    # get registration URL from AutoYaST configuration file
+    def self.reg_url_from_autoyast_config
+      server = ::Registration::Storage::Config.instance.reg_server
+      return server if server && !server.empty?
+      SUSE::Connect::Config::DEFAULT_CONFIG_FILE
     end
 
     # get registration URL in upgrade mode
