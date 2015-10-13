@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct 13 09:04:45 UTC 2015 - lslezak@suse.cz
+
+- disable the [Clone] button in the AutoYaST configuration UI, the
+  registration module does not support cloning (bsc#950098)
+- 3.1.160
+
+-------------------------------------------------------------------
 Mon Oct 12 07:44:14 UTC 2015 - lslezak@suse.cz
 
 - AutoYaST config: fixed crash at the end of the configuration
