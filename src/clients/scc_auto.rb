@@ -98,6 +98,9 @@ module Yast
       when "Packages"
         # Return needed packages
         auto_packages
+      when "Read"
+        log.error "Cloning is not supported by this YaST module"
+        false
       when "Write"
         # Write given settings
         write
