@@ -228,6 +228,8 @@ module Registration
       # the main UI even loop
       # @return [Symbol] the user input
       def handle_dialog
+        ret = nil
+
         loop do
           ret = Yast::UI.UserInput
           log.info "ret: #{ret}"
