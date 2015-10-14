@@ -1,0 +1,6 @@
+---
+do_registration: true
+install_updates: true
+reg_server: smtproxy.test.test.corp
+reg_server_cert_fingerprint: test
+reg_server_cert_fingerprint_type: SHA256
