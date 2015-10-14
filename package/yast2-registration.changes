@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 14 09:55:05 CEST 2015 - schubi@suse.de
+
+- AutoYaST: Taking registration server from AutoYaST configuration
+  file and set it in /etc/SUSEConnect. (bnc#943466,bnc#950233)
+- 3.1.162
+
+-------------------------------------------------------------------
 Tue Oct 13 15:30:58 UTC 2015 - ancor@suse.com
 
 - Using a "suse_register" section in the AutoYaST profile does not

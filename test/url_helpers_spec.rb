@@ -49,6 +49,42 @@ describe "Registration::UrlHelpers" do
       end
     end
 
+    context "at AutoYaST installation" do
+      before do
+        allow(Yast::Mode).to receive(:mode).and_return("autoinstallation")
+      end
+
+      it "returns registration server which has been defined in the AutoYaST configuration file" do
+        autoinst_registration = load_yaml_fixture("autoinst_with_server.yml")
+        Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
+        expect(Registration::UrlHelpers.registration_url).to eq(autoinst_registration["reg_server"])
+      end
+
+      it "returns default server if it has not been defined in the AutoYaST configuration file" do
+        autoinst_registration = load_yaml_fixture("autoinst_without_server.yml")
+        Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::YaST::DEFAULT_URL)
+      end
+    end
+
+    context "at AutoYaST upgrade" do
+      before do
+        allow(Yast::Mode).to receive(:mode).and_return("autoupgrade")
+      end
+
+      it "returns registration server which has been defined in the AutoYaST configuration file" do
+        autoinst_registration = load_yaml_fixture("autoinst_with_server.yml")
+        Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
+        expect(Registration::UrlHelpers.registration_url).to eq(autoinst_registration["reg_server"])
+      end
+
+      it "returns default server if it has not been defined in the AutoYaST configuration file" do
+        autoinst_registration = load_yaml_fixture("autoinst_without_server.yml")
+        Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::YaST::DEFAULT_URL)
+      end
+    end
+
     context "at installed system" do
       before do
         allow(Yast::Mode).to receive(:mode).and_return("normal")
@@ -60,7 +96,7 @@ describe "Registration::UrlHelpers" do
 
       it "return nil (default) if config file is not present" do
         # stub config file reading
-        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+        expect(File).to receive(:exist?).with(SUSE::Connect::YaST::DEFAULT_CONFIG_FILE)
           .and_return(false)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
@@ -68,7 +104,7 @@ describe "Registration::UrlHelpers" do
       it "reads the URL from config file if present" do
         # stub config file reading
         url = "https://example.com"
-        expect(File).to receive(:exist?).with(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+        expect(File).to receive(:exist?).with(SUSE::Connect::YaST::DEFAULT_CONFIG_FILE)
           .and_return(true).twice
         expect(YAML).to receive(:load_file).and_return("url" => url, "insecure" => false)
         expect(Registration::UrlHelpers.registration_url).to eq(url)
