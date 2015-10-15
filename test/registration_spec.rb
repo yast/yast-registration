@@ -1,11 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "yaml"
 
-describe "Registration::Registration" do
-  let(:yast_wfm) { double("Yast::Wfm") }
-
+describe Registration::Registration do
+  let(:installed_sles) { load_yaml_fixture("products_legacy_installation.yml")[1] }
   before do
     allow(Yast::WFM).to receive(:GetLanguage).and_return("en")
     allow(Registration::Helpers).to receive(:insecure_registration).and_return(false)
@@ -32,7 +30,7 @@ describe "Registration::Registration" do
   # product registration and product upgrade behave the same, they only
   # call a different connect funtion internally
   shared_examples "add_product" do |connect_method, yast_method|
-    let(:available_addons) { YAML.load_file(fixtures_file("available_addons.yml")) }
+    let(:available_addons) { load_yaml_fixture("available_addons.yml") }
 
     it "adds the selected product and returns added zypp services" do
       product = {
@@ -65,10 +63,10 @@ describe "Registration::Registration" do
         .with("SUSE_SLES_SAP" => "SLES_SAP")
 
       allow(File).to receive(:exist?).with(
-        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(true)
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(true)
       allow(File).to receive(:read).with(
-        SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE).and_return(
-        "username=SCC_foo\npassword=bar")
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(
+          "username=SCC_foo\npassword=bar")
 
       registered_service = Registration::Registration.new.send(yast_method, product)
       expect(registered_service).to eq(service)
@@ -114,7 +112,7 @@ describe "Registration::Registration" do
     end
 
     it "downloads available extensions" do
-      remote_product = YAML.load_file(fixtures_file("remote_product.yml"))
+      remote_product = load_yaml_fixture("remote_product.yml")
       expect(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
       # no product renames defined
       expect(Registration::SwMgmt).to receive(:update_product_renames).with({})
@@ -168,4 +166,47 @@ describe "Registration::Registration" do
     end
   end
 
+  describe "#migration_products" do
+    let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
+    let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }
+
+    it "returns migration products from the server" do
+      expect(SUSE::Connect::YaST).to receive(:system_migrations)
+        .with(installed_products)
+        .and_return(migration_products)
+      result = Registration::Registration.new.migration_products(installed_products)
+      expect(result).to eq(migration_products)
+    end
+  end
+
+  describe "#synchronize_products" do
+    it "synchronizes the local products with the server" do
+      expect(SUSE::Connect::YaST).to receive(:synchronize)
+        .with([
+          OpenStruct.new(
+            arch:         "x86_64",
+            identifier:   "SLES",
+            version:      "12",
+            release_type: nil
+          )])
+
+      subject.synchronize_products([installed_sles])
+    end
+  end
+
+  describe "#downgrade_product" do
+    it "downgrades the product registration" do
+      expect(SUSE::Connect::YaST).to receive(:downgrade_product)
+        .with(
+          OpenStruct.new(
+            arch:         "x86_64",
+            identifier:   "SLES",
+            version:      "12-0",
+            release_type: nil
+          ),
+          anything)
+
+      expect(subject.downgrade_product(installed_sles))
+    end
+  end
 end

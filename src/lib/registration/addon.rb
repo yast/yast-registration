@@ -20,6 +20,7 @@
 #
 
 require "forwardable"
+require "registration/sw_mgmt"
 
 module Registration
   class Addon
@@ -48,6 +49,18 @@ module Registration
 
       def selected
         @selected ||= []
+      end
+
+      # return add-ons which are registered but not installed in the system
+      # @return [Array<Addon>] the list of add-ons
+      def registered_not_installed
+        registered.select do |addon|
+          !SwMgmt.installed_products.find do |product|
+            product["name"] == addon.identifier &&
+              product["version_version"] == addon.version &&
+              product["arch"] == addon.arch
+          end
+        end
       end
 
       private
@@ -164,6 +177,12 @@ module Registration
     # @return [Boolean] true if it updates the old addon, false otherwise
     def updates_addon?(old_addon)
       old_addon["name"] == identifier || old_addon["name"] == @pure_addon.former_identifier
+    end
+
+    def matches_remote_product?(remote_product)
+      [:arch, :identifier, :version, :release_type].all? do |attr|
+        send(attr) == remote_product.send(attr)
+      end
     end
   end
 end

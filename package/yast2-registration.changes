@@ -1,4 +1,57 @@
 -------------------------------------------------------------------
+Mon Oct 12 12:03:53 UTC 2015 - lslezak@suse.cz
+
+- 3.1.129.13
+- Added "registration" -> "scc" client symlink
+- AutoYaST: Taking registration server from AutoYaST configuration
+  file and set it in /etc/SUSEConnect. (bnc#943466, bnc#950233)
+- Restore the original $releasever value and refresh the
+  repositories when online migration is aborted (bsc#948363)
+- do not crash when a repository cannot be accessed, ask the user
+  to skip it or abort the online migration (bsc#946200)
+- migration rollback: make sure the base product is downgraded
+  first (FATE#315161)
+- check whether the system is registered before running online
+  migration (bsc#946004)
+- restore the original product registration when online migration
+  is aborted (FATE#315161)
+- set the selected repository states in the manual repository
+  selection dialog before starting the full repository management
+  module
+- use better labels - specific migration repositories are not used
+  in SLE12, use better wording (bsc#944510)
+- set the $releasever URL variable to the new base product
+  during online migration (bsc#941563)
+- display short product names instead of the internal identifiers
+  in the migration selection dialog (bsc#945028)
+- disable "Back" at the initial dialog
+- restore (enable) the Updates repositories at the end of the
+  migration workflow (bsc#943960)
+- fixed syntax error (bsc#944089)
+- make the migration selection widget smaller to have more space
+  for details when only few migrations are available (bsc#943636)
+- Keep the original NCCCredentials file permissions when upgrading
+  from SLE11 (bsc#943568)
+- Better wording in the "install updates" popup (bsc#942843)
+- Handle not available products when using a SMT server for running
+  online migration (bsc#942892)
+- Fixed registering a product with POOL flavor (bsc#941402)
+- Addon selection dialog - avoid possible ID duplicates when
+  an addon with multiple versions is displayed
+- User messages improved when registration does not happen during
+  installation (bnc#941403, bnc#941739)
+- Catch exceptions also when loading the available extensions
+  (bsc#941491)
+- Reload the packages after modifying the repository setup
+  (bsc#941532)
+- Use "zypper dup --no-vendor-change" equivalent for online
+  migration (FATE#319138)
+- added support for online migration, the registration part handles
+  the service upgrade and migration repository management
+  (fate#315161)
+- Adapt module to new version of SUSEConnect (FATE#318800)
+
+-------------------------------------------------------------------
 Thu Oct  8 15:51:19 UTC 2015 - lslezak@suse.cz
 
 - Addon selection dialog - avoid possible ID duplicates when

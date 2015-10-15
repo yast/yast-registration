@@ -81,7 +81,7 @@ describe "Registration::Helpers" do
   end
 
   describe ".copy_certificate_to_target" do
-    let(:cert_file) { SUSE::Connect::SSLCertificate::SERVER_CERT_FILE }
+    let(:cert_file) { SUSE::Connect::YaST::SERVER_CERT_FILE }
 
     it "does nothing when no SSL certificate has been imported" do
       expect(File).to receive(:exist?).with(cert_file).and_return(false)
@@ -96,14 +96,14 @@ describe "Registration::Helpers" do
       expect(FileUtils).to receive(:mkdir_p).with("/mnt" + File.dirname(cert_file))
       expect(FileUtils).to receive(:cp).with(cert_file, "/mnt" + cert_file)
       expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash"),
-        SUSE::Connect::SSLCertificate::UPDATE_CERTIFICATES)
+        SUSE::Connect::YaST::UPDATE_CERTIFICATES)
 
       expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
   end
 
   describe ".reset_registration_status" do
-    let(:credentials) { ::Registration::Registration::SCC_CREDENTIALS }
+    let(:credentials) { SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE }
 
     it "does nothing if there are no system credentials present" do
       expect(File).to receive(:exist?).with(credentials).and_return(false)
@@ -190,12 +190,13 @@ describe "Registration::Helpers" do
 
       expect(Registration::UrlHelpers).to receive(:registration_url)
 
-      addon = Registration::Addon.new(addon_generator(
+      addon = Registration::Addon.new(
+        addon_generator(
           "zypper_name"  => "sle-sdk",
           "version"      => "12",
           "arch"         => "x86_64",
           "release_type" => nil
-        )
+          )
       )
       expect(Registration::Addon).to receive(:registered).and_return([addon])
 

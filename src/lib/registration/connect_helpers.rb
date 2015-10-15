@@ -72,9 +72,9 @@ module Registration
             !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
 
           if Yast::Popup.YesNo(
-              # Error popup
-              _("Network is not configured, the registration server cannot be reached.\n" \
-                  "Do you want to configure the network now?"))
+            # Error popup
+            _("Network is not configured, the registration server cannot be reached.\n" \
+                "Do you want to configure the network now?"))
 
             ::Registration::Helpers.run_network_configuration
           end
@@ -105,7 +105,7 @@ module Registration
                   "%s to speed up the synchronization process.\n" \
                   "Just wait several minutes after logging in and then retry \n" \
                   "the upgrade again.") % \
-                SUSE::Connect::Client::DEFAULT_URL
+                SUSE::Connect::YaST::DEFAULT_URL
             end
 
             # add the hint to the error details

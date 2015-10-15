@@ -48,10 +48,7 @@ module Yast
         Wizard.CreateDialog
 
         begin
-          if !::Registration::SwMgmt.init
-            Report.Error(Pkg.LastError)
-            return :abort
-          end
+          ::Registration::SwMgmt.init
 
           return WFM.call("inst_scc")
         ensure

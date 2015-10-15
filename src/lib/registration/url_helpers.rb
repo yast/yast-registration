@@ -59,15 +59,17 @@ module Registration
       cache = ::Registration::Storage::Cache.instance
       return cache.reg_url if cache.reg_url_cached
 
-      # FIXME: handle autoyast mode as well, currently it is handled in scc_auto client
-      # see https://github.com/yast/yast-yast2/blob/master/library/general/src/modules/Mode.rb#L105
+      log.info "Evaluating the registration URL in #{Yast::Mode.mode.inspect} mode"
+
       url = case Yast::Mode.mode
       when "installation"
         reg_url_at_installation
       when "normal"
-        reg_url_at_runnig_system
+        reg_url_at_running_system
       when "update"
         reg_url_at_upgrade
+      when "autoupgrade", "autoinstallation"
+        reg_url_from_autoyast_config
       else
         log.warn "Unknown mode: #{Yast::Mode.mode}, using default URL"
         # use the default
@@ -118,8 +120,18 @@ module Registration
       slp_service_url
     end
 
+    # get registration URL from AutoYaST configuration file
+    def self.reg_url_from_autoyast_config
+      server = ::Registration::Storage::Config.instance.reg_server
+      return server if server && !server.empty?
+      SUSE::Connect::YaST::DEFAULT_URL
+    end
+
     # get registration URL in upgrade mode
     def self.reg_url_at_upgrade
+      # in online upgrade mode behave like in installed system
+      return reg_url_at_running_system if Yast::Installation.destdir == "/"
+
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
@@ -129,7 +141,7 @@ module Registration
 
       # check for suse_register config only when NCC credentials file exists
       # (the config file exists even on a not registered system)
-      dir = SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR
+      dir = SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR
       ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
 
       # do not use the old URL when it has failed before
@@ -150,12 +162,12 @@ module Registration
     end
 
     # get registration URL in running system
-    def self.reg_url_at_runnig_system
+    def self.reg_url_at_running_system
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
       # check for previously saved config value
-      if File.exist?(SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
+      if File.exist?(SUSE::Connect::YaST::DEFAULT_CONFIG_FILE)
         config = SUSE::Connect::Config.new
         return config.url
       end
@@ -172,7 +184,7 @@ module Registration
       reg_url
     end
 
-    private_class_method :reg_url_at_runnig_system, :reg_url_at_upgrade,
+    private_class_method :reg_url_at_running_system, :reg_url_at_upgrade,
       :reg_url_at_installation, :boot_reg_url
 
     def self.slp_service_url

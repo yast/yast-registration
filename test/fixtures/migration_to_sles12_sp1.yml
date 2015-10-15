@@ -1,0 +1,9 @@
+---
+- - !ruby/object:SUSE::Connect::Remote::Product
+    table:
+      :identifier: SLES
+      :version: '12.1'
+      :arch: x86_64
+      :release_type: 
+      :friendly_name: SUSE Linux Enterprise Server SP1 x86_64
+      :shortname: SLES12-SP1

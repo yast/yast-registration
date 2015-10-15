@@ -43,7 +43,7 @@ module Registration
         return nil unless Registration.is_registered?
 
         # enable back the update repositories in the installed system
-        revert_repository_changes
+        RepoStateStorage.instance.restore_all
 
         Yast.import "Installation"
 
@@ -51,7 +51,7 @@ module Registration
         Helpers.write_config
 
         # copy it to the target system
-        source_path = SUSE::Connect::Config::DEFAULT_CONFIG_FILE
+        source_path = SUSE::Connect::YaST::DEFAULT_CONFIG_FILE
         target_path = Yast::Installation.destdir + source_path
 
         Yast::WFM.Execute(Yast::Path.new(".local.bash"), "mv '#{source_path}' '#{target_path}'")
@@ -62,20 +62,6 @@ module Registration
       else
         raise "Uknown action #{func} passed as first parameter"
       end
-    end
-
-    private
-
-    # revert back the original repository states from the registration server
-    def revert_repository_changes
-      changed_repos = RepoStateStorage.instance.repositories
-      return if changed_repos.empty?
-
-      # activate the original repository states
-      changed_repos.each(&:restore)
-
-      # save all repositories
-      Yast::Pkg.SourceSaveAll
     end
   end
 end

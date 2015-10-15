@@ -4,6 +4,8 @@ require_relative "spec_helper"
 require "yaml"
 
 describe "Registration::SwMgmt" do
+  subject { Registration::SwMgmt }
+
   let(:service_name) { "SLES" }
   let(:repos) do
     {
@@ -46,6 +48,33 @@ describe "Registration::SwMgmt" do
     }
   end
 
+  describe ".init" do
+    before do
+      allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected)
+    end
+
+    context "when the libzypp lock can be obtained" do
+      let(:connected) { true }
+
+      it "initializes package management" do
+        expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
+        expect(Yast::Pkg).to receive(:TargetInitialize).and_return(true)
+        expect(Yast::Pkg).to receive(:TargetLoad).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceRestore).and_return(true)
+
+        subject.init
+      end
+    end
+
+    context "when the libzypp lock cannot be obtained" do
+      let(:connected) { false }
+
+      it "raises an PkgError exception" do
+        expect { subject.init }.to raise_error(Registration::PkgError)
+      end
+    end
+  end
+
   describe ".service_repos" do
     let(:service) { double }
 
@@ -71,10 +100,10 @@ describe "Registration::SwMgmt" do
     it "returns base product base version and release_type" do
       expect(Registration::SwMgmt).to(receive(:find_base_product)
         .and_return("name" => "SLES", "arch" => "x86_64",
-          "version" => "12.1-1.47", "flavor" => "DVD"))
+          "version" => "12.1-1.47", "version_version" => "12.1", "flavor" => "DVD"))
 
       expect(Registration::SwMgmt.base_product_to_register).to eq("name" => "SLES",
-          "arch" => "x86_64", "version" => "12.1", "release_type" => "DVD")
+        "arch" => "x86_64", "version" => "12.1", "release_type" => nil)
     end
   end
 
@@ -121,7 +150,7 @@ describe "Registration::SwMgmt" do
 
   describe ".copy_old_credentials" do
     let(:root_dir) { "/mnt" }
-    let(:target_dir) { SUSE::Connect::Credentials::DEFAULT_CREDENTIALS_DIR }
+    let(:target_dir) { SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR }
 
     before do
       expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
@@ -148,9 +177,9 @@ describe "Registration::SwMgmt" do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(false)
 
-      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "NCCcredentials"),
-        File.join(target_dir, "SCCcredentials"))
-      expect(SUSE::Connect::Credentials).to receive(:read)
+      expect(Registration::SwMgmt).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+        "NCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
       expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
     end
@@ -161,9 +190,9 @@ describe "Registration::SwMgmt" do
       expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
         .and_return(true)
 
-      expect(FileUtils).to receive(:cp).with(File.join(root_dir, target_dir, "SCCcredentials"),
-        File.join(target_dir, "SCCcredentials"))
-      expect(SUSE::Connect::Credentials).to receive(:read)
+      expect(Registration::SwMgmt).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
+        "SCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
       expect { Registration::SwMgmt.copy_old_credentials(root_dir) }.to_not raise_error
     end
@@ -197,8 +226,209 @@ describe "Registration::SwMgmt" do
         .and_return(YAML.load_file(fixtures_file("products_legacy_installation.yml")))
       expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
 
-      Registration::SwMgmt.select_addon_products
+      subject.select_addon_products
     end
   end
 
+  describe ".products_from_repo" do
+    before do
+      expect(Yast::Pkg).to receive(:ResolvableProperties)
+        .and_return(load_yaml_fixture("products_legacy_installation.yml"))
+    end
+
+    it "Returns product resolvables from the specified repository" do
+      expect(subject.products_from_repo(5).size).to eq 1
+    end
+
+    it "Returns empty list if not product is found" do
+      expect(subject.products_from_repo(255)).to be_empty
+    end
+  end
+
+  describe ".select_product_addons" do
+    # just the sle-module-legacy product
+    let(:products) { [load_yaml_fixture("products_legacy_installation.yml").first] }
+
+    it "selects remote addons matching the product resolvables" do
+      available_addons = load_yaml_fixture("available_addons.yml")
+
+      # expect the sle-module-legacy product to be selected
+      expect(available_addons[10]).to receive(:selected)
+      subject.select_product_addons(products, available_addons)
+    end
+
+    it "reports an error when the matching remote addon is not found" do
+      available_addons = []
+
+      expect(Yast::Report).to receive(:Error).with(/Cannot find remote product/)
+      subject.select_product_addons(products, available_addons)
+    end
+  end
+
+  describe ".installed_products" do
+    let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+
+    it "returns installed products" do
+      expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+      # only the SLES product in the list is installed
+      expect(subject.installed_products).to eq([products[1]])
+    end
+  end
+
+  describe ".find_base_product" do
+    context "in installed system" do
+      let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+      it "returns installed products" do
+        allow(Yast::Stage).to receive(:initial).and_return(false)
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        # the SLES product in the list is installed
+        expect(subject.find_base_product).to eq(products[1])
+      end
+    end
+
+    context "at installation" do
+      let(:products) { load_yaml_fixture("products_sp2_update.yml") }
+      it "returns the product from the installation medium" do
+        allow(Yast::Stage).to receive(:initial).and_return(true)
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        # the SLES product in the list is installed
+        expect(subject.find_base_product).to eq(products[3])
+      end
+    end
+  end
+
+  describe ".remove_service" do
+    let(:service) { "service" }
+
+    before do
+      expect(Yast::Pkg).to receive(:ServiceDelete).with(service).and_return(true)
+    end
+
+    it "removes the service and saves the repository configuration" do
+      expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(true)
+
+      expect { subject.remove_service(service) }.to_not raise_error
+    end
+
+    it "raises an exception when saving failes after service removal" do
+      expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(false)
+
+      expect { subject.remove_service(service) }.to raise_error(::Registration::PkgError)
+    end
+  end
+
+  describe ".set_repos_state" do
+    it "sets the repository state and stores the original state" do
+      repos = [{ "SrcId" => 42, "enabled" => true }]
+
+      expect(Yast::Pkg).to receive(:SourceSetEnabled).with(42, false)
+      expect_any_instance_of(Registration::RepoStateStorage).to receive(:add)
+        .with(42, true)
+
+      subject.set_repos_state(repos, false)
+    end
+  end
+
+  describe ".update_product_renames" do
+    it "forwards the product renames to the AddOnProduct module" do
+      expect(Yast::AddOnProduct).to receive(:add_rename).with("foo", "FOO")
+      subject.update_product_renames("foo" => "FOO")
+    end
+  end
+
+  describe ".zypp_config_writable!" do
+    let(:zypp_dir) { Registration::SwMgmt::ZYPP_DIR }
+
+    it "does nothing in running system" do
+      expect(Yast::Mode).to receive(:installation).and_return(false)
+      expect(Yast::Mode).to receive(:update).and_return(false)
+      expect(FileUtils).to_not receive(:cp_r)
+
+      subject.zypp_config_writable!
+    end
+
+    it "does nothing if the target is already writable (not read-only)" do
+      expect(Yast::Mode).to receive(:installation).and_return(true)
+      expect(File).to receive(:writable?).with(zypp_dir).and_return(true)
+      expect(FileUtils).to_not receive(:cp_r)
+
+      subject.zypp_config_writable!
+    end
+
+    it "otherwise it overrides the zypp directory with a writable copy" do
+      tmpdir = "/tmp/foo"
+      expect(Yast::Mode).to receive(:installation).and_return(true)
+      expect(File).to receive(:writable?).with(zypp_dir)
+        .and_return(false)
+      expect(Dir).to receive(:mktmpdir).and_return(tmpdir)
+      expect(FileUtils).to receive(:cp_r).with(zypp_dir, tmpdir)
+      expect(subject).to receive(:`).with("mount -o bind #{tmpdir}/zypp #{zypp_dir}")
+
+      subject.zypp_config_writable!
+    end
+  end
+
+  describe ".check_repositories" do
+    let(:repo) { 42 }
+
+    before do
+      allow(Yast::Pkg).to receive(:SourceGetCurrent).with(true).and_return([repo])
+      allow(Yast::Pkg).to receive(:SourceGeneralData).with(repo)
+        .and_return("autorefresh" => true)
+    end
+
+    it "refreshes all repositories with autorefresh enabled" do
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(repo)
+        .and_return("autorefresh" => true)
+      expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(true)
+
+      subject.check_repositories
+    end
+
+    it "returns true if all repositores refresh" do
+      expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(true)
+
+      expect(subject.check_repositories).to eq(true)
+    end
+
+    context "a repository refresh fails" do
+      before do
+        expect(Yast::Pkg).to receive(:SourceRefreshNow).with(repo).and_return(false)
+        allow(Registration::RepoStateStorage.instance).to receive(:add).with(repo, true)
+        allow(Yast::Pkg).to receive(:SourceSetEnabled)
+      end
+
+      it "asks the user when a repository refresh fails" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
+
+        subject.check_repositories
+      end
+
+      it "returns false if user select aborting the migration" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(false)
+
+        expect(subject.check_repositories).to eq(false)
+      end
+
+      it "disables the failed repo if user selects skipping it" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+        expect(Yast::Pkg).to receive(:SourceSetEnabled).with(repo, false)
+
+        subject.check_repositories
+      end
+
+      it "returns true if user selects skipping the failed repo" do
+        expect(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+
+        expect(subject.check_repositories).to eq(true)
+      end
+
+      it "remembers to re-enable the failed repo after migration" do
+        allow(Yast::Popup).to receive(:ErrorAnyQuestion).and_return(true)
+        expect(Registration::RepoStateStorage.instance).to receive(:add).with(repo, true)
+
+        subject.check_repositories
+      end
+    end
+  end
 end

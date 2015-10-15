@@ -1,5 +1,6 @@
 
 require "yast"
+require "registration/ui/abort_confirmation"
 require "registration/addon"
 require "registration/addon_sorter"
 
@@ -61,6 +62,15 @@ module Registration
         reactivate_dependencies
 
         handle_dialog
+      end
+
+      protected
+
+      # create widget ID for an addon
+      # @param [<Addon>] addon the addon
+      # @return [String] widget id
+      def addon_widget_id(addon)
+        "#{addon.identifier}-#{addon.version}-#{addon.arch}"
       end
 
       private
@@ -157,7 +167,7 @@ module Registration
           when :next
             ret = handle_next_button
           when :cancel, :abort
-            ret = Stage.initial && !Popup.ConfirmAbort(:painless) ? nil : :abort
+            ret = Stage.initial && !AbortConfirmation.run ? nil : :abort
             # when canceled switch to old selection
             Addon.selected.replace(@old_selection) if ret == :abort
           else

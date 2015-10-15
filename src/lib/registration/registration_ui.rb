@@ -32,6 +32,7 @@ module Registration
   class RegistrationUI
     include Yast::Logger
     include Yast::I18n
+    include Yast::UIShortcuts
     extend Yast::I18n
 
     # popup message
@@ -42,6 +43,8 @@ module Registration
       @registration = registration
 
       Yast.import "Popup"
+      Yast.import "Wizard"
+      Yast.import "Mode"
     end
 
     # register the system and the base product
@@ -67,7 +70,7 @@ module Registration
         if register_base_product
           # then register the product(s)
           product_service = Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-            _("Registering %s ...") % SwMgmt.base_product_label(base_product)
+            _("Registering %s ...") % SwMgmt.product_label(base_product)
           ) do
 
             base_product_data = SwMgmt.base_product_to_register
@@ -117,7 +120,7 @@ module Registration
         product_service = Yast::Popup.Feedback(
           _(CONTACTING_MESSAGE),
           # updating base product registration, %s is a new base product name
-          _("Updating to %s ...") % SwMgmt.base_product_label(
+          _("Updating to %s ...") % SwMgmt.product_label(
             SwMgmt.find_base_product)
         ) do
           registration.upgrade_product(base_product)
@@ -162,6 +165,40 @@ module Registration
       failed_addons
     end
 
+    # downgrade product registration
+    # @param [Hash] product libzypp product which registration will be downgraded
+    # @return [Array<Boolean, OpenStruct>] a pair with success flag and the
+    # registered remote service
+    def downgrade_product(product)
+      product_service = nil
+      success = ConnectHelpers.catch_registration_errors do
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating product registration, %s is a product name
+          _("Updating to %s ...") % SwMgmt.product_label(product)
+        ) do
+          registration.downgrade_product(product)
+        end
+      end
+
+      [success, product_service]
+    end
+
+    # synchronize the local products with the registration server
+    # @param [Array<Hash>] products libzypp products to synchronize
+    # @return [Boolean] true on success
+    def synchronize_products(products)
+      ConnectHelpers.catch_registration_errors do
+        Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # TRANSLATORS: progress label
+          _("Synchronizing Products...")
+        ) do
+          registration.synchronize_products(products)
+        end
+      end
+    end
+
     # load available addons from SCC server
     # the result is cached to avoid reloading when going back and forth in the
     # installation workflow
@@ -181,8 +218,174 @@ module Registration
       SwMgmt.set_repos_state(update_repos, false)
     end
 
+    def migration_products(products)
+      Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        _("Loading Migration Products...")) do
+        registration.migration_products(products)
+      end
+    end
+
+    # Register the selected addons, asks for reg. codes if required, known_reg_codes
+    # @param selected_addons [Array<Addon>] list of addons selected for registration,
+    #   successfully registered addons are removed from the list
+    # @param known_reg_codes [Hash] remembered reg. code, it's updated with the
+    #   user entered values
+    # @return [Symbol]
+    def register_addons(selected_addons, known_reg_codes)
+      # if registering only add-ons which do not need a reg. code (like SDK)
+      # then simply start the registration
+      if selected_addons.all?(&:free)
+        Yast::Wizard.SetContents(
+          # dialog title
+          _("Register Extensions and Modules"),
+          # display only the products which need a registration code
+          Empty(),
+          # help text
+          _("<p>Extensions and Modules are being registered.</p>"),
+          false,
+          false
+        )
+        # when registration fails go back
+        return register_selected_addons(selected_addons, known_reg_codes) ? :next : :back
+      else
+        loop do
+          ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
+          return ret unless ret == :next
+
+          return :next if register_selected_addons(selected_addons, known_reg_codes)
+        end
+      end
+    end
+
+    def install_updates?
+      # ask only at installation/update
+      return true unless Yast::Mode.installation || Yast::Mode.update
+
+      options = Storage::InstallationOptions.instance
+
+      # not set yet?
+      if options.install_updates.nil?
+        # TRANSLATORS: updates popup question (1/2), multiline, max. ~60 chars/line
+        msg = _("The registration server offers update repositories.\n\n")
+
+        if Yast::Mode.installation
+          # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
+          msg += _("Would you like to enable these repositories during installation\n" \
+              "in order to receive the latest updates?")
+        else # Yast::Mode.update
+          # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
+          msg += _("Would you like to enable these repositories during upgrade\n" \
+              "in order to receive the latest updates?")
+        end
+
+        options.install_updates = Yast::Popup.YesNo(msg)
+      end
+
+      options.install_updates
+    end
+
     private
 
     attr_accessor :registration
+
+    def register_system
+      options = Storage::InstallationOptions.instance
+      base_product = SwMgmt.find_base_product
+      distro_target = base_product["register_target"]
+
+      log.info "Registering system, distro_target: #{distro_target}"
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering the System...")) do
+        registration.register(options.email, options.reg_code, distro_target)
+      end
+    end
+
+    # the credentials are read from Storage::InstallationOptions
+    def register_base_product
+      options = Storage::InstallationOptions.instance
+      return if options.base_registered
+
+      # then register the product(s)
+      base_product = SwMgmt.find_base_product
+
+      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+        _("Registering %s ...") % SwMgmt.product_label(base_product)
+      ) do
+        base_product_data = SwMgmt.base_product_to_register
+        base_product_data["reg_code"] = options.reg_code
+        registration.register_product(base_product_data, options.email)
+      end
+    end
+
+    # register all selected addons
+    def register_selected_addons(selected_addons, known_reg_codes)
+      # create duplicate as array is modified in loop for registration order
+      registration_order = selected_addons.clone
+
+      product_succeed = registration_order.map do |product|
+        ConnectHelpers.catch_registration_errors(
+          message_prefix: "#{product.label}\n") do
+          register_selected_addon(product, known_reg_codes[product.identifier])
+        end
+
+        # remove from selected after successful registration
+        selected_addons.reject! { |selected| selected.identifier == product.identifier }
+      end
+
+      !product_succeed.include?(false) # succeed only if noone failed
+    end
+
+    def register_selected_addon(product, reg_code)
+      product_service = Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        # %s is name of given product
+        _("Registering %s ...") % product.label) do
+        product_data = {
+          "name"     => product.identifier,
+          "reg_code" => reg_code,
+          "arch"     => product.arch,
+          "version"  => product.version
+        }
+
+        registration.register_product(product_data)
+      end
+
+      # select repositories to use in installation (e.g. enable/disable Updates)
+      select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+      # remember the added service
+      Storage::Cache.instance.addon_services << product_service
+
+      # mark as registered
+      product.registered
+    end
+
+    def select_repositories(product_service)
+      # added update repositories
+      updates = SwMgmt.service_repos(product_service, only_updates: true)
+      log.info "Found update repositories: #{updates.size}"
+
+      SwMgmt.set_repos_state(updates, install_updates?)
+    end
+
+    def update_addon(addon, enable_updates)
+      ConnectHelpers.catch_registration_errors do
+        # then register the product(s)
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # updating registered addon/extension, %s is an extension name
+          _("Updating to %s ...") % addon.label
+        ) do
+          registration.upgrade_product(addon)
+        end
+
+        Storage::Cache.instance.addon_services << product_service
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        disable_update_repos(product_service) if !enable_updates
+      end
+    end
   end
 end

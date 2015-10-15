@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 #
 
+require "ostruct"
 require "yast"
 require "suse/connect"
 
@@ -31,8 +32,6 @@ require "registration/ssl_certificate"
 module Registration
   class Registration
     include Yast::Logger
-
-    SCC_CREDENTIALS = SUSE::Connect::Credentials::GLOBAL_CREDENTIALS_FILE
 
     attr_accessor :url
 
@@ -47,15 +46,13 @@ module Registration
       )
 
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
-      credentials = SUSE::Connect::Credentials.new(login, password, SCC_CREDENTIALS)
-
-      log.info "Global SCC credentials: #{credentials}"
+      log.info "Global SCC credentials (username): #{login}"
 
       # ensure the zypp config directories are writable in inst-sys
       ::Registration::SwMgmt.zypp_config_writable!
 
       # write the global credentials
-      credentials.write
+      SUSE::Connect::YaST.create_credentials_file(login, password)
     end
 
     def register_product(product, email = nil)
@@ -89,6 +86,35 @@ module Registration
       end
     end
 
+    # downgrade product registration
+    # used when restoring the original registration after aborted migration
+    # @param [Hash] product libzypp product to which the registration should be downgraded
+    def downgrade_product(product)
+      service_for_product(product) do |product_ident, params|
+        log.info "Downgrading product: #{product}"
+        service = SUSE::Connect::YaST.downgrade_product(product_ident, params)
+        log.info "Downgrade product result: #{service}"
+
+        service
+      end
+    end
+
+    # synchronize the registered products on the server with the local installed products
+    # (removes all registrered products on the server which are not installed in the system)
+    # @param [Array<Hash>] products list of installed libzypp products
+    def synchronize_products(products)
+      remote_products = products.map do |product|
+        OpenStruct.new(
+          arch:         product["arch"],
+          identifier:   product["name"],
+          version:      product["version_version"],
+          release_type: product["release_type"]
+        )
+      end
+      log.info "Synchronizing products: #{remote_products}"
+      SUSE::Connect::YaST.synchronize(remote_products)
+    end
+
     # @param [String] target_distro new target distribution
     # @return [OpenStruct] SCC response
     def update_system(target_distro = nil)
@@ -104,15 +130,8 @@ module Registration
 
       log.info "Reading available addons for product: #{base_product["name"]}"
 
-      remote_product = SUSE::Connect::Remote::Product.new(
-        arch:         base_product["arch"],
-        identifier:   base_product["name"],
-        version:      base_product["version"],
-        release_type: base_product["release_type"]
-      )
-
-      params = connect_params
-      addons = SUSE::Connect::YaST.show_product(remote_product, params).extensions || []
+      remote_product = SwMgmt.remote_product(base_product)
+      addons = SUSE::Connect::YaST.show_product(remote_product, connect_params).extensions || []
       log.info "Available addons result: #{addons}"
 
       renames = collect_renames(addons)
@@ -129,19 +148,32 @@ module Registration
       activated
     end
 
+    # get the list of migration products
+    # @param [Array<SUSE::Connect::Remote::Product>] installed_products
+    # @return [Array<Array<SUSE::Connect::Remote::Product>>] list of possible migrations,
+    #   each migration contains a list of target products
+    def migration_products(installed_products)
+      log.info "Loading migration products for: #{installed_products}"
+      migrations = []
+
+      ConnectHelpers.catch_registration_errors do
+        migrations = SUSE::Connect::YaST.system_migrations(installed_products)
+      end
+
+      log.info "Received system migrations: #{migrations}"
+      migrations
+    end
+
     def self.is_registered?
       # just a simple file check without connection to SCC
-      File.exist?(SCC_CREDENTIALS)
+      File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
     private
 
     def set_registered(remote_product)
       addon = Addon.find_all(self).find do |a|
-        a.arch == remote_product.arch &&
-          a.identifier == remote_product.identifier &&
-          a.version  == remote_product.version &&
-          a.release_type == remote_product.release_type
+        a.matches_remote_product?(remote_product)
       end
 
       return unless addon
@@ -152,12 +184,7 @@ module Registration
 
     def service_for_product(product, &block)
       if product.is_a?(Hash)
-        remote_product =  SUSE::Connect::Remote::Product.new(
-          arch:         product["arch"],
-          identifier:   product["name"],
-          version:      product["version"],
-          release_type: product["release_type"]
-        )
+        remote_product = SwMgmt.remote_product(product)
       else
         remote_product = product
       end
@@ -172,15 +199,24 @@ module Registration
       end
 
       product_service = block.call(remote_product, params)
-
       log.info "registration result: #{product_service}"
-
-      if product_service
-        credentials = SUSE::Connect::Credentials.read(SCC_CREDENTIALS)
-        ::Registration::SwMgmt.add_service(product_service, credentials)
-      end
+      update_services(product_service) if product_service
 
       product_service
+    end
+
+    # add/remove services for the registered product
+    def update_services(product_service)
+      old_service = product_service.obsoleted_service_name
+      # sanity check
+      if old_service && !old_service.empty? && old_service != product_service.name
+        log.info "Found obsoleted service: #{old_service}"
+        ::Registration::SwMgmt.remove_service(old_service)
+      end
+
+      # read the global credentials
+      credentials = SUSE::Connect::YaST.credentials
+      ::Registration::SwMgmt.add_service(product_service, credentials)
     end
 
     # returns SSL verify callback

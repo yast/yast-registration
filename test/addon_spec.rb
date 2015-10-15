@@ -66,8 +66,8 @@ describe Registration::Addon do
 
     it "sets the registration status for dependent addons" do
       registration = double(
-        activated_products: YAML.load_file(fixtures_file("activated_products.yml")),
-        get_addon_list:     YAML.load_file(fixtures_file("pure_addons.yml"))
+        activated_products: load_yaml_fixture("activated_products.yml"),
+        get_addon_list:     load_yaml_fixture("pure_addons.yml")
       )
 
       addons = Registration::Addon.find_all(registration)
@@ -170,10 +170,11 @@ describe Registration::Addon do
 
   describe "#selectable?" do
     let(:addons) do
-      Registration::Addon.find_all(double(
+      Registration::Addon.find_all(
+        double(
           get_addon_list:     [addon_with_child_generator],
           activated_products: []
-        ))
+          ))
     end
 
     let(:parent) { addons.first }
