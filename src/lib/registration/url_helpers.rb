@@ -122,7 +122,7 @@ module Registration
     def self.reg_url_from_autoyast_config
       server = ::Registration::Storage::Config.instance.reg_server
       return server if server && !server.empty?
-      SUSE::Connect::YaST::DEFAULT_URL
+      SUSE::Connect::Client::DEFAULT_URL
     end
 
     # get registration URL in upgrade mode

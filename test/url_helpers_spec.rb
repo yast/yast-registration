@@ -64,7 +64,7 @@ describe "Registration::UrlHelpers" do
       it "returns default server if it has not been defined in the AutoYaST configuration file" do
         autoinst_registration = load_yaml_fixture("autoinst_without_server.yml")
         Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
-        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::YaST::DEFAULT_URL)
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::Client::DEFAULT_URL)
       end
     end
 
@@ -82,7 +82,7 @@ describe "Registration::UrlHelpers" do
       it "returns default server if it has not been defined in the AutoYaST configuration file" do
         autoinst_registration = load_yaml_fixture("autoinst_without_server.yml")
         Yast::WFM.CallFunction("scc_auto", ["Import", autoinst_registration])
-        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::YaST::DEFAULT_URL)
+        expect(Registration::UrlHelpers.registration_url).to eq(SUSE::Connect::Client::DEFAULT_URL)
       end
     end
 
