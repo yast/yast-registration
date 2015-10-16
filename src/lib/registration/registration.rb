@@ -132,7 +132,7 @@ module Registration
 
       remote_product = SwMgmt.remote_product(base_product)
       addons = SUSE::Connect::YaST.show_product(remote_product, connect_params).extensions || []
-      log.info "Available addons result: #{addons}"
+      addons.each { |a| log.info "Found available addon: #{a.inspect}" }
 
       renames = collect_renames(addons)
       ::Registration::SwMgmt.update_product_renames(renames)
