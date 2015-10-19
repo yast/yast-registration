@@ -373,7 +373,7 @@ module Registration
     end
 
     # update addon registration to a new version
-    # @param [Array<Registration::Addon>] adddon addon to update
+    # @param [Registration::Addon] addon addon to update
     def update_addon(addon, enable_updates)
       ConnectHelpers.catch_registration_errors do
         # then register the product(s)
