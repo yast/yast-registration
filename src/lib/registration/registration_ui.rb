@@ -118,9 +118,11 @@ module Registration
       [upgraded, product_service]
     end
 
+    # @param [Array<Registration::Addon>] addons to update
     def update_addons(addons, enable_updates: true)
       # find addon updates
       addons_to_update = SwMgmt.find_addon_updates(addons)
+      log.info "addons to update: #{addons_to_update.inspect}"
 
       failed_addons = addons_to_update.reject do |addon_to_update|
         update_addon(addon_to_update, enable_updates)
@@ -337,6 +339,8 @@ module Registration
       SwMgmt.set_repos_state(updates, install_updates?)
     end
 
+    # update addon registration to a new version
+    # @param [Registration::Addon] addon addon to update
     def update_addon(addon, enable_updates)
       ConnectHelpers.catch_registration_errors do
         # then register the product(s)
@@ -345,7 +349,8 @@ module Registration
           # updating registered addon/extension, %s is an extension name
           _("Updating to %s ...") % addon.label
         ) do
-          registration.upgrade_product(addon)
+          # FIXME: unify with add-on upgrade in online migration
+          registration.upgrade_product(SwMgmt.remote_product(addon.to_h))
         end
 
         Storage::Cache.instance.addon_services << product_service

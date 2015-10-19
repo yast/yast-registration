@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 19 07:21:58 UTC 2015 - lslezak@suse.cz
+
+- Addon upgrade - fixed crash when upgrading installed addon
+  (undefined method) (bsc#950795)
+- 3.1.163
+
+-------------------------------------------------------------------
 Mon Oct 14 09:55:05 CEST 2015 - schubi@suse.de
 
 - AutoYaST: Taking registration server from AutoYaST configuration
