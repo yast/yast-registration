@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 19 07:21:58 UTC 2015 - lslezak@suse.cz
+
+- Addon upgrade - fixed crash when upgrading installed addon
+  (undefined method) (bsc#950795)
+- 3.1.129.14
+
+-------------------------------------------------------------------
 Mon Oct 12 12:03:53 UTC 2015 - lslezak@suse.cz
 
 - 3.1.129.13
