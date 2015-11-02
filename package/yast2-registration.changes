@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov  2 14:21:16 UTC 2015 - lslezak@suse.cz
+
+- display a better error message when registration fails because
+  of a typo in the URL (bsc#952443)
+- 3.1.164
+
+-------------------------------------------------------------------
 Mon Oct 19 07:21:58 UTC 2015 - lslezak@suse.cz
 
 - Addon upgrade - fixed crash when upgrading installed addon

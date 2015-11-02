@@ -49,6 +49,7 @@ module Registration
     Yast.import "Mode"
     Yast.import "Popup"
     Yast.import "Report"
+    Yast.import "NetworkService"
 
     # Call a block, rescuing various exceptions including StandardError.
     # Return a boolean success value instead.
@@ -68,17 +69,7 @@ module Registration
         true
       rescue SocketError, Errno::ENETUNREACH => e
         log.error "Network error: #{e.class}: #{e.message}"
-        if Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
-          if Yast::Popup.YesNo(
-            # Error popup
-            _("Network is not configured, the registration server cannot be reached.\n" \
-                "Do you want to configure the network now?"))
-
-            Helpers.run_network_configuration
-          end
-        else
-          Yast::Report.Error(_("Network error, check the network configuration."))
-        end
+        handle_network_error(message_prefix, e)
         false
       rescue Timeout::Error
         # Error popup
@@ -283,7 +274,26 @@ module Registration
       e.message.replace(msg)
     end
 
+    # @param [String] message_prefix prefix displayed in the error message
+    # @param [Exception] e caught exception for displaying the details
+    def self.handle_network_error(message_prefix, e)
+      if Yast::NetworkService.isNetworkRunning
+        # FIXME: use a better message, this one has been reused after the text freeze
+        report_error(message_prefix + _("Invalid URL."), e)
+      elsif Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+        if Yast::Popup.YesNo(
+          # Error popup
+          _("Network is not configured, the registration server cannot be reached.\n" \
+              "Do you want to configure the network now?"))
+
+          Helpers.run_network_configuration
+        end
+      else
+        Yast::Report.Error(_("Network error, check the network configuration."))
+      end
+    end
+
     private_class_method :report_error, :error_with_details, :ssl_error_details,
-      :import_ssl_certificate, :report_ssl_error, :check_smt_api
+      :import_ssl_certificate, :report_ssl_error, :check_smt_api, :handle_network_error
   end
 end
