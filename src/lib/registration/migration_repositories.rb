@@ -53,6 +53,8 @@ module Registration
     def activate_services
       # disable the update repositories if not required
       if !install_updates
+        # note: the module update repositories are kept enabled
+        # see https://bugzilla.suse.com/show_bug.cgi?id=953536
         SwMgmt.set_repos_state(services_repositories(only_updates: true), false)
       end
 
@@ -111,14 +113,23 @@ module Registration
     end
 
     # evaluate migration repositories and services
-    # @param [Boolean] only_updates return only the update repositories
+    # @param [Boolean] only_updates return only the update repositories,
+    #   for modules the update repositories are never returned
     # @return [Array<Fixnum>] list of used migration repositories
     def services_repositories(only_updates: false)
-      service_repos = services.map do |service|
+      # ignore update repositories for modules
+      services_to_search = only_updates ? non_module_services : services
+      service_repos = services_to_search.map do |service|
         SwMgmt.service_repos(service, only_updates: only_updates)
       end
 
       service_repos.flatten
+    end
+
+    # return services of different type than module
+    # @return [Array] list of services
+    def non_module_services
+      services.select { |s| s.product.product_type != "module" }
     end
   end
 end
