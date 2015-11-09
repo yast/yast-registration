@@ -21,7 +21,7 @@ describe Registration::MigrationRepositories do
       expect(Yast::Pkg).to receive(:SourceLoad)
     end
 
-    it "activates the specified sevices for upgrade" do
+    it "activates the specified services for upgrade" do
       subject.services << "test_service"
       allow(Yast::Pkg).to receive(:ResolvablePreselectPatches)
 
@@ -37,7 +37,8 @@ describe Registration::MigrationRepositories do
     end
 
     it "disables update repositories if updates should not be installed" do
-      service = "test_service"
+      product = double("test_product", product_type: "base")
+      service = double("test_service", product: product)
       repo = 42
       subject.install_updates = false
       subject.services << service
@@ -47,6 +48,19 @@ describe Registration::MigrationRepositories do
         .and_return(["SrcId" => repo])
 
       expect(Registration::SwMgmt).to receive(:set_repos_state).with([{ "SrcId" => repo }], false)
+
+      subject.activate_services
+    end
+
+    it "keeps module update repositories enabled eventhough updates should not be installed" do
+      product = double("test_product", product_type: "module")
+      service = double("test_service", product: product)
+
+      subject.install_updates = false
+      subject.services << service
+
+      # empty list of disabled repositories
+      expect(Registration::SwMgmt).to receive(:set_repos_state).with([], false)
 
       subject.activate_services
     end
