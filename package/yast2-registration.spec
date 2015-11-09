@@ -49,7 +49,7 @@ Requires:       yast2-update >= 3.1.19
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.6
-BuildRequires:  rubygem(yast-rake) >= 0.1.8
+BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
 BuildRequires:  yast2-slp >= 3.1.2
