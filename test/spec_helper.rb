@@ -1,15 +1,22 @@
 if ENV["COVERAGE"]
   require "simplecov"
 
+  formatters = [ SimpleCov::Formatter::HTMLFormatter ]
   # use coveralls for on-line code coverage reporting at Travis CI
   if ENV["TRAVIS"]
     require "coveralls"
-
-    SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-      SimpleCov::Formatter::HTMLFormatter,
-      Coveralls::SimpleCov::Formatter
-    ]
+    formatters << Coveralls::SimpleCov::Formatter
   end
+
+  # optionally generate lcov output if it is present
+  begin
+    require "simplecov-lcov"
+    SimpleCov::Formatter::LcovFormatter.report_with_single_file = true
+    formatters << SimpleCov::Formatter::LcovFormatter
+  rescue LoadError
+  end
+  
+  SimpleCov.formatters = formatters
 
   SimpleCov.start do
     add_filter "/test/"
