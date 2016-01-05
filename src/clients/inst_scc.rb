@@ -40,6 +40,7 @@ require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/local_server_dialog"
+require "registration/ui/abort_confirmation"
 
 module Yast
   class InstSccClient < Client
@@ -161,7 +162,7 @@ module Yast
             ::Registration::Helpers.reset_registration_status
           end
         when :abort
-          ret = nil unless Popup.ConfirmAbort(:painless)
+          ret = nil unless ::Registration::UI::AbortConfirmation.run
         end
 
         next unless ret == :skip && confirm_skipping
