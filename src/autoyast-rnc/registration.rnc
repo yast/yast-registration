@@ -15,7 +15,7 @@ suse_register = element suse_register {
   slp_discovery?
 }
 
-addons = element addons { LIST, addon }
+addons = element addons { LIST, addon* }
 addon = element addon {
   addon_name &
   addon_version &
