@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 15 08:44:50 UTC 2016 - lslezak@suse.cz
+
+- Fixed a crash when EULA download fails (bsc#941232)
+- 3.1.167
+
+-------------------------------------------------------------------
 Wed Nov 18 11:32:26 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix validation of AutoYaST profiles (bsc#954412)
