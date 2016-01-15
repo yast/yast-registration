@@ -128,7 +128,7 @@ module Registration
       # @return [Symbol] :accepted, :back, :abort, :halt
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
-          return false unless download_eula(addon, tmpdir)
+          return :back unless download_eula(addon, tmpdir)
           eula_reader = EulaReader.new(tmpdir)
 
           setup_eula_dialog(addon, eula_reader, tmpdir)
