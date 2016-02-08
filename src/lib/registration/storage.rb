@@ -24,6 +24,8 @@
 
 require "singleton"
 
+require "yast"
+
 module Registration
   # a module holding data needed during (auto)installation
   module Storage
@@ -32,6 +34,9 @@ module Registration
       include Singleton
 
       def initialize
+        # TODO: package it better
+        Yast.include(self, "autoinstall/io.rb")
+
         self.reg_codes = reg_codes_from_usb_stick || {}
       end
 
@@ -39,7 +44,11 @@ module Registration
 
       # @return [Hash{String => String},nil]
       def reg_codes_from_usb_stick
-        # TODO: see if a usb stick is inserted, use it
+        # TODO: name of usb file
+        # TODO: a temporary local file
+        # TODO: success or not?
+        GetURL("usb:///reg_codes", "/root/reg_codes")
+
         reg_codes_from_file("/root/reg_codes")
       end
 
