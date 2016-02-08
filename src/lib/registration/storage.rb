@@ -23,8 +23,8 @@
 #
 
 require "singleton"
-
 require "yast"
+require "registration/autoinstall_io"
 
 module Registration
   # a module holding data needed during (auto)installation
@@ -32,10 +32,13 @@ module Registration
     # storage for changed repositories
     class RegCodes < Struct.new(:reg_codes)
       include Singleton
+      include Yast::AutoinstallIoInclude
+      include Yast
+      include Yast::I18n
 
       def initialize
         # TODO: package it better
-        Yast.include(self, "autoinstall/io.rb")
+        initialize_autoinstall_io(self)
 
         self.reg_codes = reg_codes_from_usb_stick || {}
       end
