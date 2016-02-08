@@ -17,7 +17,6 @@ module Yast
       Yast.import "HTTP"
       Yast.import "StorageDevices"
       Yast.import "TFTP"
-      Yast.import "AutoinstConfig"
       Yast.import "Storage"
       Yast.import "InstURL"
 
@@ -66,7 +65,7 @@ module Yast
       @GET_error = ""
       ok = false
       res = {}
-      toks = deep_copy(AutoinstConfig.urltok)
+      toks = @urltok
       Ops.set(toks, "scheme", _Scheme)
       Ops.set(toks, "host", _Host)
       Builtins.y2milestone(
@@ -87,7 +86,7 @@ module Yast
       mp_in_local = mount_point
       chr = WFM.SCRGetName(WFM.SCRGetDefault)
       if Builtins.search(chr, "chroot=/mnt:") == 0
-        mp_in_local = Ops.add(AutoinstConfig.destdir, mount_point)
+        mp_in_local = Ops.add(Installation.destdir, mount_point)
       end
       Builtins.y2milestone("Chr:%3 TmpDir:%1 Mp:%2", tmp_dir, mp_in_local, chr)
       WFM.Execute(path(".local.mkdir"), mp_in_local)
@@ -545,8 +544,8 @@ module Yast
 
     # Get a file froma  given URL
     def GetURL(url, target)
-      AutoinstConfig.urltok = URL.Parse(url)
-      toks = deep_copy(AutoinstConfig.urltok)
+      @urltok = URL.Parse(url)
+      toks = @urltok
       Get(
         Ops.get_string(toks, "scheme", ""),
         Ops.get_string(toks, "host", ""),
