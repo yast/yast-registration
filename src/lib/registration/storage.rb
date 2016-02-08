@@ -45,6 +45,7 @@ module Registration
         initialize_autoinstall_io(self)
 
         self.reg_codes = reg_codes_from_usb_stick || {}
+        log.info "Registration codes read for #{reg_codes.keys.inspect}"
       end
 
       private
