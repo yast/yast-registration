@@ -32,7 +32,38 @@ module Registration
       include Singleton
 
       def initialize
-        self.reg_codes = {}
+        self.reg_codes = reg_codes_from_usb_stick || {}
+      end
+
+      private
+
+      # @return [Hash{String => String},nil]
+      def reg_codes_from_usb_stick
+        # TODO: see if a usb stick is inserted, use it
+        reg_codes_from_file("/root/reg_codes")
+      end
+
+      # @param filename [String]
+      # @return [Hash{String => String},nil]
+      def reg_codes_from_file(filename)
+        return nil unless File.readable?(filename)
+
+        text = File.read(filename)
+
+        # TODO: parse AutoYaST profile format
+        reg_codes_from_plain_text(text)
+      end
+
+      # @param text [String] lines with a key and a value,
+      #   separated by white space
+      # @return [Hash{String => String},nil]
+      def reg_codes_from_plain_text(text)
+        # TODO: report parse errors in log
+        # TODO: allow for DOS line endings
+        pairs = text.each_line.map do |l|
+          l.chomp.split(/\s+/, 2)
+        end
+        Hash[pairs.reject(&:empty?)]
       end
     end
 
