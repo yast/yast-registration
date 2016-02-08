@@ -23,6 +23,8 @@
 #
 
 require "singleton"
+require "tempfile"
+
 require "yast"
 require "registration/autoinstall_io"
 
@@ -35,8 +37,10 @@ module Registration
       include Yast::AutoinstallIoInclude
       include Yast
       include Yast::I18n
+      include Yast::Logger
 
       def initialize
+        Yast.import "XML"
         # TODO: package it better
         initialize_autoinstall_io(self)
 
@@ -45,31 +49,59 @@ module Registration
 
       private
 
+      REGCODES_NAME_HANDLERS = {
+        "regcodes.xml" => :reg_codes_from_xml,
+        "regcodes.txt" => :reg_codes_from_txt
+      }
+
       # @return [Hash{String => String},nil]
       def reg_codes_from_usb_stick
-        # TODO: name of usb file
-        # TODO: a temporary local file
-        # TODO: success or not?
-        GetURL("usb:///reg_codes", "/root/reg_codes")
+        REGCODES_NAME_HANDLERS.each do |name, handler|
+          with_tempfile(name) do |path|
+            if GetURL("usb:///#{name}", path)
+              codes = send(handler, path)
+              return codes if codes
+            end
+          end
+        end
+        nil
+      end
 
-        reg_codes_from_file("/root/reg_codes")
+      # @param template for tempfile name
+      # @yieldparam actual file name
+      def with_tempfile(pattern, &block)
+        tempfile = Tempfile.new(pattern)
+        block.call(tempfile.path)
+      ensure
+        tempfile.unlink
       end
 
       # @param filename [String]
       # @return [Hash{String => String},nil]
-      def reg_codes_from_file(filename)
+      def reg_codes_from_xml(filename)
         return nil unless File.readable?(filename)
-
-        text = File.read(filename)
-
-        # TODO: parse AutoYaST profile format
-        reg_codes_from_plain_text(text)
+        xml_hash = XML.XMLToYCPFile(filename)
+        parse_xml(xml_hash)
       end
 
-      # @param text [String] lines with a key and a value,
-      #   separated by white space
+      # @param xml_hash [Hash] as used in AY and returned by XML.XMLToYCPFile
       # @return [Hash{String => String},nil]
-      def reg_codes_from_plain_text(text)
+      def parse_xml(xml_hash)
+        suse_register = xml_hash.fetch("suse_register", {})
+        addons = suse_register.fetch("addons", [])
+        pairs = addons.map do |a|
+          [a.fetch("name", ""), a.fetch("reg_code", "")]
+        end
+        Hash[pairs]
+      end
+
+      # The format is: lines with a key and a value,
+      #   separated by white space
+      # @param filename [String]
+      # @return [Hash{String => String},nil]
+      def reg_codes_from_txt(filename)
+        return nil unless File.readable?(filename)
+        text = File.read(filename)
         # TODO: report parse errors in log
         # TODO: allow for DOS line endings
         pairs = text.each_line.map do |l|
