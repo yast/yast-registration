@@ -95,7 +95,7 @@ module Yast
     def initialize_regcodes
       @known_reg_codes = ::Registration::Storage::RegCodes.instance.reg_codes
       if @known_reg_codes
-        log.info "Known reg codes: #{@known_reg_codes.size} codes"
+        log.info "Known reg codes for #{@known_reg_codes.keys.inspect}"
         return
       end
 
