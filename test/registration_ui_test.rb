@@ -128,6 +128,7 @@ describe "Registration::RegistrationUI" do
 
       # All selected addons are marked as registered
       expect(selected_addons.all?(&:registered?)).to eq(true)
+      expect(selected_addons.size).to eq (0)
     end
 
     it "returns :next if everything goes fine" do
