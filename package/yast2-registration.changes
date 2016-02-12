@@ -1,9 +1,7 @@
 -------------------------------------------------------------------
 Fri Feb 12 12:42:19 UTC 2016 - knut.anderssen@suse.com
 
-- Continue asking for registration codes also after failed
-  registration. you should go back to unselect some of not wanted
-  modules (bsc#958521)
+- Ask again after some provided registration code failed (bsc#958521)
 - 3.1.168
 
 -------------------------------------------------------------------
