@@ -22,21 +22,16 @@
 require "tempfile"
 
 require "yast"
-require "registration/autoinstall_io"
+require "transfer/file_from_url"
+
+Yast.import "XML"
 
 module Registration
   # Aids Registration::Storage::RegCodes in loading the codes
   # from external storage so that the user does not have to type them
   # each time when doing multiple installations. FATE#316796
   module RegCodesLoader
-
-    include Yast::AutoinstallIoInclude
-    include Yast
-    include Yast::I18n
-    include Yast::Logger
-
-    # TODO: OK?
-    private
+    include Yast::Transfer::FileFromUrl
 
     REGCODES_NAME_HANDLERS = {
       "regcodes.xml" => :reg_codes_from_xml,
@@ -45,13 +40,14 @@ module Registration
 
     # @return [Hash{String => String},nil]
     def reg_codes_from_usb_stick
-      Yast.import "XML"
       # TODO: package it better
       initialize_autoinstall_io(self)
 
       REGCODES_NAME_HANDLERS.each do |name, handler|
         with_tempfile(name) do |path|
-          if GetURL("usb:///#{name}", path)
+          if get_file_from_url(scheme: "usb", host: "", urlpath: "/#{name}",
+                               localfile: path,
+                               urltok: {}, destdir: "")
             codes = send(handler, path)
             return codes if codes
           end
@@ -73,11 +69,11 @@ module Registration
     # @return [Hash{String => String},nil]
     def reg_codes_from_xml(filename)
       return nil unless File.readable?(filename)
-      xml_hash = XML.XMLToYCPFile(filename)
+      xml_hash = Yast::XML.XMLToYCPFile(filename)
       parse_xml(xml_hash)
     end
 
-    # @param xml_hash [Hash] as used in AY and returned by XML.XMLToYCPFile
+    # @param xml_hash [Hash] as used in AY and returned by Yast::XML.XMLToYCPFile
     # @return [Hash{String => String},nil]
     def parse_xml(xml_hash)
       suse_register = xml_hash.fetch("suse_register", {})

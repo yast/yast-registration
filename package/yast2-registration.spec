@@ -44,7 +44,7 @@ Requires:       SUSEConnect
 Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.26
-Requires:       yast2-update >= 3.1.19
+Requires:       yast2-update >= 3.1.36
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
@@ -54,7 +54,7 @@ BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
 BuildRequires:  yast2-slp >= 3.1.2
 BuildRequires:  yast2-packager >= 3.1.26
-BuildRequires:  yast2-update >= 3.1.19
+BuildRequires:  yast2-update >= 3.1.36
 
 BuildArch:      noarch
 
