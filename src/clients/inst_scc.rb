@@ -168,7 +168,8 @@ module Yast
     def register_addons
       return false if init_registration == :cancel
       ret = registration_ui.register_addons(@selected_addons, @known_reg_codes)
-      (ret == :back) ? :extensions : ret
+      ret = :extensions if ret == :back
+      ret
     end
 
     # do some sanity checks and decide which workflow will be used
@@ -312,7 +313,7 @@ module Yast
         },
         "reregister_addons"      => {
           abort:      :abort,
-          extensions: "select_addons",
+          extensions: "select_addons_rereg",
           next:       "check"
         },
         "update_autoyast_config" => {
