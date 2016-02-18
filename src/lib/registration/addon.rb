@@ -133,7 +133,7 @@ module Registration
       Addon.selected.delete(self) if selected?
     end
 
-    # has beem the add-on registered?
+    # has been the add-on registered?
     # @return [Boolean] true if the add-on has been registered
     def registered?
       Addon.registered.include?(self)

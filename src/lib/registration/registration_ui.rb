@@ -294,13 +294,16 @@ module Registration
       registration_order = selected_addons.clone
 
       product_succeed = registration_order.map do |product|
-        ConnectHelpers.catch_registration_errors(
+        registered = ConnectHelpers.catch_registration_errors(
           message_prefix: "#{product.label}\n") do
-          register_selected_addon(product, known_reg_codes[product.identifier])
-        end
+            register_selected_addon(product, known_reg_codes[product.identifier])
+          end
 
         # remove from selected after successful registration
-        selected_addons.reject! { |selected| selected.identifier == product.identifier }
+        if registered
+          selected_addons.reject! { |selected| selected.identifier == product.identifier }
+        end
+        registered
       end
 
       !product_succeed.include?(false) # succeed only if noone failed
