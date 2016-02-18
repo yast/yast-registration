@@ -1,0 +1,13 @@
+# This is the repository specific custom dictionary
+#
+# Write the words in alphabetical order, one word per line.
+# If an unknown word is generic put it into the global dictionary
+# in yast-rake in lib/tasks/spell.yml file.
+
+---
+ignore:
+  - "doc/**/*"
+  - "coverage/**/*"
+dictionary:
+  - SLE
+  - SMT
