@@ -31,7 +31,7 @@ module Registration
     # storage for changed repositories
     class RegCodes < Struct.new(:reg_codes)
       include Singleton
-      include RegCodesLoader
+      include RegistrationCodesLoader
 
       def initialize
         self.reg_codes = reg_codes_from_usb_stick || {}

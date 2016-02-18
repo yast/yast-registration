@@ -1,0 +1,5 @@
+SLES    cc360000
+SLED    30910000
+
+sle-we  5eed0000
+sle-live-patching 8c540000

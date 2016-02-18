@@ -30,7 +30,7 @@ module Registration
   # Aids Registration::Storage::RegCodes in loading the codes
   # from external storage so that the user does not have to type them
   # each time when doing multiple installations. FATE#316796
-  module RegCodesLoader
+  module RegistrationCodesLoader
     include Yast::I18n # missing in yast2-update
     include Yast::Transfer::FileFromUrl
 
@@ -41,8 +41,8 @@ module Registration
 
     # @return [Hash{String => String},nil]
     def reg_codes_from_usb_stick
-      REGCODES_NAME_HANDLERS.each do |name, handler|
-        with_tempfile(name) do |path|
+      with_tempfile("regcodes-") do |path|
+        REGCODES_NAME_HANDLERS.each do |name, handler|
           if get_file_from_url(scheme: "usb", host: "", urlpath: "/#{name}",
                                localfile: path,
                                urltok: {}, destdir: "")
@@ -67,7 +67,7 @@ module Registration
     # @param filename [String]
     # @return [Hash{String => String},nil]
     def reg_codes_from_xml(filename)
-      return nil unless File.readable?(filename)
+      return nil unless File.readable?(filename) && File.file?(filename)
       xml_hash = Yast::XML.XMLToYCPFile(filename)
       parse_xml(xml_hash)
     end
@@ -88,7 +88,7 @@ module Registration
     # @param filename [String]
     # @return [Hash{String => String},nil]
     def reg_codes_from_txt(filename)
-      return nil unless File.readable?(filename)
+      return nil unless File.readable?(filename) && File.file?(filename)
       text = File.read(filename)
       # TODO: report parse errors in log
       # TODO: allow for DOS line endings
