@@ -60,6 +60,7 @@ module Registration
       tempfile = Tempfile.new(pattern)
       block.call(tempfile.path)
     ensure
+      tempfile.close
       tempfile.unlink
     end
 
