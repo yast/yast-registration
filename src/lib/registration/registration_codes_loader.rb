@@ -31,6 +31,7 @@ module Registration
   # from external storage so that the user does not have to type them
   # each time when doing multiple installations. FATE#316796
   module RegCodesLoader
+    include Yast::I18n # missing in yast2-update
     include Yast::Transfer::FileFromUrl
 
     REGCODES_NAME_HANDLERS = {
@@ -40,9 +41,6 @@ module Registration
 
     # @return [Hash{String => String},nil]
     def reg_codes_from_usb_stick
-      # TODO: package it better
-      initialize_autoinstall_io(self)
-
       REGCODES_NAME_HANDLERS.each do |name, handler|
         with_tempfile(name) do |path|
           if get_file_from_url(scheme: "usb", host: "", urlpath: "/#{name}",
