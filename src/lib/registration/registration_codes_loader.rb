@@ -91,7 +91,6 @@ module Registration
       return nil unless File.readable?(filename) && File.file?(filename)
       text = File.read(filename)
       # TODO: report parse errors in log
-      # TODO: allow for DOS line endings
       pairs = text.each_line.map do |l|
         l.chomp.split(/\s+/, 2)
       end

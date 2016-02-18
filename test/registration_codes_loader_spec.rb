@@ -124,5 +124,10 @@ describe Registration::RegistrationCodesLoader do
       filename = fixtures_file("regcodes.txt")
       expect(subject.reg_codes_from_txt(filename)).to eq(valid_fixture_codes)
     end
+
+    it "parses a valid fixture with CRLF" do
+      filename = fixtures_file("regcodes_crlf.txt")
+      expect(subject.reg_codes_from_txt(filename)).to eq(valid_fixture_codes)
+    end
   end
 end
