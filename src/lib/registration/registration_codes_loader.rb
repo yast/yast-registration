@@ -43,12 +43,12 @@ module Registration
     def reg_codes_from_usb_stick
       with_tempfile("regcodes-") do |path|
         REGCODES_NAME_HANDLERS.each do |name, handler|
-          if get_file_from_url(scheme: "usb", host: "", urlpath: "/#{name}",
-                               localfile: path,
-                               urltok: {}, destdir: "")
-            codes = send(handler, path)
-            return codes if codes
-          end
+          next unless get_file_from_url(scheme: "usb", host: "",
+                                        urlpath: "/#{name}",
+                                        localfile: path,
+                                        urltok: {}, destdir: "")
+          codes = send(handler, path)
+          return codes if codes
         end
       end
       nil
