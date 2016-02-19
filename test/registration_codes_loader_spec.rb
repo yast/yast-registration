@@ -58,6 +58,26 @@ describe Registration::RegistrationCodesLoader do
       end
     end
 
+    context "when both regcodes.xml, regcodes.txt exist" do
+      it "delegates to reg_codes_from_xml" do
+        allow(subject).to receive(:get_file_from_url)
+          .with(scheme: "usb", host: "", urlpath: "/#{xmlname}",
+                               localfile: tempfile,
+                               urltok: {}, destdir: "")
+          .and_return(true)
+        allow(subject).to receive(:get_file_from_url)
+          .with(scheme: "usb", host: "", urlpath: "/#{txtname}",
+                               localfile: tempfile,
+                               urltok: {}, destdir: "")
+          .and_return(true)
+
+        expect(subject).to receive(:reg_codes_from_xml)
+          .with(tempfile)
+          .and_return("a" => "b")
+
+        expect(subject.reg_codes_from_usb_stick).to eq("a" => "b")
+      end
+    end
 
     context "when neither regcodes.* exists" do
       it "returns nil" do
