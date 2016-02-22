@@ -48,7 +48,7 @@ Requires:       yast2-update >= 3.1.36
 
 BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
-BuildRequires:  yast2-devtools >= 3.1.6
+BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
@@ -57,6 +57,13 @@ BuildRequires:  yast2-packager >= 3.1.26
 BuildRequires:  yast2-update >= 3.1.36
 
 BuildArch:      noarch
+
+# FIXME: it seems can we cannot move it to macros.yast, the yast-rake-ci is not
+# installed into the chroot, the build fails...
+%bcond_with yast_run_ci_tests
+%if %{with yast_run_ci_tests}
+BuildRequires: rubygem(yast-rake-ci)
+%endif
 
 Summary:        YaST2 - Registration Module
 Url:            https://github.com/yast/yast-registration
@@ -76,12 +83,10 @@ Authors:
 %build
 
 %check
-rake test:unit
+%yast_check
 
 %install
-rake install DESTDIR="%{buildroot}"
-%suse_update_desktop_file customer_center
-
+%yast_install
 
 %files
 %defattr(-,root,root)
