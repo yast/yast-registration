@@ -126,12 +126,19 @@ module Registration
       def input_widgets
         options = Storage::InstallationOptions.instance
 
+        reg_code = options.reg_code
+        if reg_code.empty?
+          known_reg_codes = Storage::RegCodes.instance.reg_codes
+          base_product_name = SwMgmt.find_base_product["name"]
+          reg_code = known_reg_codes[base_product_name] || ""
+        end
+
         HSquash(
           VBox(
             MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
             VSpacing(Yast::UI.TextMode ? 0 : 0.5),
             MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-              options.reg_code))
+              reg_code))
           )
         )
       end

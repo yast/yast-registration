@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <suse_register>
+    <addons config:type="list">
+      <!-- the fixture reg_codes are just some random strings -->
+      <addon>
+        <name>SLES</name>
+        <reg_code>cc36aae1</reg_code>
+      </addon>
+      <addon>
+        <name>SLED</name>
+        <reg_code>309105d4</reg_code>
+      </addon>
+      <addon>
+        <name>sle-we</name>
+        <reg_code>5eedd26a</reg_code>
+      </addon>
+      <addon>
+        <name>sle-live-patching</name>
+        <reg_code>8c541494</reg_code>
+      </addon>
+    </addons>
+  </suse_register>
+</profile>
