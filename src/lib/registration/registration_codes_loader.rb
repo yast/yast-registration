@@ -54,7 +54,7 @@ module Registration
       nil
     end
 
-    # @param template for tempfile name
+    # @param pattern [String] template for tempfile name
     # @yieldparam actual file name
     def with_tempfile(pattern, &block)
       tempfile = Tempfile.new(pattern)
