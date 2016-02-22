@@ -24,6 +24,8 @@
 
 require "singleton"
 require "registration/registration_codes_loader"
+require "yast"
+Yast.import "Stage"
 
 module Registration
   # a module holding data needed during (auto)installation
@@ -34,7 +36,11 @@ module Registration
       include RegistrationCodesLoader
 
       def initialize
-        self.reg_codes = reg_codes_from_usb_stick || {}
+        if Stage.initial
+          self.reg_codes = reg_codes_from_usb_stick || {}
+        else
+          self.reg_codes = {}
+        end
       end
     end
 
