@@ -12,6 +12,7 @@ describe "inst_scc client" do
     allow(Yast::UI).to receive(:ChangeWidget)
     allow(Yast::UI).to receive(:SetFocus)
     allow(Yast::UI).to receive(:ReplaceWidget)
+    allow(Yast::SlpService).to receive(:all).and_return([])
   end
 
   context "the system is already registered" do

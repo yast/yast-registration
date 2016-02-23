@@ -21,6 +21,7 @@ describe "Registration::UI::MediaAddonWorkflow" do
       # List of products
       allow(Registration::SwMgmt).to receive(:products_from_repo)
         .and_return(products_from_repo)
+      allow(Yast::SlpService).to receive(:all).and_return([])
     end
 
     context "if package management initialization fails" do
