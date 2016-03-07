@@ -58,7 +58,7 @@ module Registration
         ret
       end
 
-      private
+    private
 
       # the main dialog content
       # @return [Yast::Term] UI term

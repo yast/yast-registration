@@ -45,7 +45,7 @@ module Registration
         handle_dialog
       end
 
-      private
+    private
 
       # @return [String] the main dialog label
       def heading

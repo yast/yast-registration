@@ -60,7 +60,7 @@ module Registration
 
       attr_accessor :registration
 
-      private
+    private
 
       # width of reg code input field widget
       REG_CODE_WIDTH = 33

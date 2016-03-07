@@ -254,7 +254,7 @@ module Registration
       options.install_updates
     end
 
-    private
+  private
 
     attr_accessor :registration
 

@@ -82,7 +82,7 @@ module Registration
         ui
       end
 
-      private
+    private
 
       attr_accessor :products, :migrations, :registration,
         :registration_ui, :selected_migration, :registered_services,

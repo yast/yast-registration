@@ -88,7 +88,7 @@ module Registration
       ::SUSE::Connect::YaST.import_certificate(x509_cert)
     end
 
-    private
+  private
 
     # @param x509_name [OpenSSL::X509::Name] name object
     # @param attribute [String] requested attribute name. e.g. "CN"

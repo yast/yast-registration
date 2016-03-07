@@ -59,7 +59,7 @@ module Registration
         registration_ui.synchronize_products(products) ? :next : :abort
       end
 
-      private
+    private
 
       attr_accessor :registration_ui
 

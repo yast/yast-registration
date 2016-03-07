@@ -63,7 +63,7 @@ module Registration
       licenses.keys
     end
 
-    private
+  private
 
     # read downloaded EULAs
     def read_licenses

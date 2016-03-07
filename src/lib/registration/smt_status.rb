@@ -31,7 +31,7 @@ module Registration
       end
     end
 
-    private
+  private
 
     # created NCC API URL for testing API presence
     def ncc_api_url
