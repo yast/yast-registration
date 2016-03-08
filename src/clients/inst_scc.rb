@@ -57,7 +57,9 @@ module Yast
       textdomain "registration"
       import_modules
 
-      first_run
+      ret = first_run
+
+      return ret if ret == :restart_yast
 
       @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
