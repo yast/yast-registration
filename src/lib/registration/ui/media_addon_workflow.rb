@@ -97,7 +97,7 @@ module Registration
         end
       end
 
-      private
+    private
 
       attr_accessor :repo_id, :products, :registration, :registration_ui
 

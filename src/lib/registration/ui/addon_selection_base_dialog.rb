@@ -44,7 +44,7 @@ module Registration
         raise "Not implemented"
       end
 
-      protected
+    protected
 
       # create widget ID for an addon
       # @param [<Addon>] addon the addon
@@ -53,7 +53,7 @@ module Registration
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
       end
 
-      private
+    private
 
       # reimplement this in a subclass
       # @return [String] dialog head

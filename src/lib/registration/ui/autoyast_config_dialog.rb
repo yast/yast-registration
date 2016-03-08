@@ -81,7 +81,7 @@ module Registration
         ret
       end
 
-      private
+    private
 
       attr_reader :config
 

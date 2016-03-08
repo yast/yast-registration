@@ -27,7 +27,7 @@ module Registration
       res
     end
 
-    private
+  private
 
     attr_reader :url
 

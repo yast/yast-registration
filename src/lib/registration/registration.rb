@@ -169,7 +169,7 @@ module Registration
       File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
-    private
+  private
 
     def set_registered(remote_product)
       addon = Addon.find_all(self).find do |a|

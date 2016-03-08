@@ -61,7 +61,7 @@ module Registration
         end
       end
 
-      private
+    private
 
       # UI widgets with the certificate description
       # @return [Yast::Term] UI term

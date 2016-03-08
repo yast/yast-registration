@@ -80,7 +80,7 @@ module Registration
         Sequencer.Run(aliases, sequence)
       end
 
-      private
+    private
 
       attr_reader :config
 

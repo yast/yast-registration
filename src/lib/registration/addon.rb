@@ -71,7 +71,7 @@ module Registration
         end
       end
 
-      private
+    private
 
       # create an Addon from a SUSE::Connect::Product
       # @param root [SUSE::Connect::Product] the root add-on object

@@ -50,7 +50,7 @@ module Registration
 
       attr_accessor :registration, :registration_ui
 
-      private
+    private
 
       # handle the dialog
       # @return [Symbol] workflow symbol

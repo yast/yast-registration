@@ -65,7 +65,7 @@ module Registration
         eula_ret == :accepted ? :next : eula_ret
       end
 
-      private
+    private
 
       # download the addon EULAs to a temp dir
       # @param [Addon] addon the addon

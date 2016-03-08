@@ -51,7 +51,7 @@ module Registration
       Helpers.render_erb_template("certificate_summary.erb", binding)
     end
 
-    private
+  private
 
     attr_reader :certificate
 

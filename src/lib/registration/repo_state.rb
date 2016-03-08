@@ -104,7 +104,7 @@ module Registration
       File.unlink(REPO_STATE_FILE) if File.exist?(REPO_STATE_FILE)
     end
 
-    private
+  private
 
     # create repository mapping repo_id => alias
     # @return [Hash<Fixnum>,String>] the current repository mapping

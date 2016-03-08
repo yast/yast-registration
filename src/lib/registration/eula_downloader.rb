@@ -67,7 +67,7 @@ module Registration
       end
     end
 
-    private
+  private
 
     # returns list of available files in a remote location
     # @return [Array<String>] the list of the remote EULAs

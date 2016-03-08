@@ -82,7 +82,7 @@ module Registration
       activate_solver
     end
 
-    private
+  private
 
     # activate the migration repositories to install the updates
     def activate_solver

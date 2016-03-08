@@ -66,7 +66,7 @@ module Yast
       media_workflow? ? ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1]) : start_workflow
     end
 
-    private
+  private
 
     def import_modules
       Yast.import "UI"

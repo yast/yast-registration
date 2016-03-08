@@ -58,7 +58,7 @@ module Registration
         handle_dialog
       end
 
-      private
+    private
 
       attr_reader :addons, :known_reg_codes
 

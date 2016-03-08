@@ -65,7 +65,7 @@ module Yast
       ret
     end
 
-    private
+  private
 
     def import_modules
       Yast.import "UI"

@@ -78,7 +78,7 @@ module Registration
         handle_user_input
       end
 
-      private
+    private
 
       attr_accessor :migrations
 

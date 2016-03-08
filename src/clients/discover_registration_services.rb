@@ -26,7 +26,7 @@ module Yast
       services.empty? ? nil : select_registration_service
     end
 
-    private
+  private
 
     def button_box
       ButtonBox(

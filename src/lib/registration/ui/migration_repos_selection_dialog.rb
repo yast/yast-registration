@@ -72,7 +72,7 @@ module Registration
         end
       end
 
-      private
+    private
 
       attr_accessor :migrations
 

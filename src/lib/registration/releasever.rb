@@ -60,7 +60,7 @@ module Registration
       Yast::Pkg.SourceLoad
     end
 
-    private
+  private
 
     # get the repositories which contain "$releasever" directory in the URL
     # @return [Array<Fixnum>] the repository list

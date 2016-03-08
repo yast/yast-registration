@@ -49,7 +49,7 @@ module Registration
         end
       end
 
-      private
+    private
 
       # the main UI event loop
       # FIXME: return a symbol like the other dialogs
