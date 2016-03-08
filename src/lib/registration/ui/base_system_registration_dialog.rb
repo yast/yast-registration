@@ -154,7 +154,7 @@ module Registration
       # @return [Symbol] the user input
       def handle_dialog
         ret = nil
-        continue_buttons = [:next, :back, :cancel, :abort, :skip, :reregister_addons]
+        continue_buttons = [:next, :back, :cancel, :abort, :skip, :reregister_addons, :restart_yast]
 
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
@@ -162,6 +162,8 @@ module Registration
           case ret
           when :network
             Helpers.run_network_configuration
+            ret = WFM::CallFunction("inst_update_installer")
+            ret = nil if ret == :next
           when :local_server
             handle_local_server
           when :next
