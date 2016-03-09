@@ -57,7 +57,9 @@ module Yast
       textdomain "registration"
       import_modules
 
-      first_run
+      ret = first_run
+
+      return ret if ret == :restart_yast
 
       @selected_addons = ::Registration::Storage::InstallationOptions.instance.selected_addons
 
@@ -269,13 +271,14 @@ module Yast
       sequence = {
         "ws_start"               => workflow_start,
         "check"                  => {
-          auto:       :auto,
-          abort:      :abort,
-          cancel:     :abort,
-          register:   "register",
-          extensions: "select_addons",
-          update:     "update",
-          next:       :next
+          auto:         :auto,
+          abort:        :abort,
+          cancel:       :abort,
+          register:     "register",
+          extensions:   "select_addons",
+          update:       "update",
+          next:         :next,
+          restart_yast: :restart_yast
         },
         "update"                 => {
           abort:    :abort,
@@ -288,7 +291,8 @@ module Yast
           cancel:            :abort,
           skip:              :next,
           reregister_addons: "select_addons_rereg",
-          next:              "select_addons"
+          next:              "select_addons",
+          restart_yast:      :restart_yast
         },
         "select_addons"          => {
           abort:  :abort,
@@ -357,6 +361,10 @@ module Yast
       return unless ::Registration::Storage::Cache.instance.first_run
 
       ::Registration::Storage::Cache.instance.first_run = false
+
+      ret = WFM.CallFunction("inst_update_installer")
+
+      return ret if ret == :restart_yast
 
       return unless Stage.initial && ::Registration::Registration.is_registered?
 
