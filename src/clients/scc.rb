@@ -50,7 +50,7 @@ module Yast
         begin
           ::Registration::SwMgmt.init
 
-          return WFM.call("inst_scc")
+          return WFM.call("inst_scc", WFM.Args)
         ensure
           Wizard.CloseDialog
         end
