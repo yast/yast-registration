@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Mar 18 15:54:32 UTC 2016 - lslezak@suse.cz
+
+- Enable [Next] button in the first boot workflow to allow using
+  the registration module (pass the WFM arguments with the Back/Next
+  status to the internally called client) (bsc#970572)
+- 3.1.166.1
+
+-------------------------------------------------------------------
 Wed Nov 18 11:32:26 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix validation of AutoYaST profiles (bsc#954412)
