@@ -222,7 +222,7 @@ module Registration
       def network_button
         return Empty() unless Helpers.network_configurable
 
-        Right(PushButton(Id(:network), _("Network Configuration...")))
+        Right(PushButton(Id(:network), _("Net&work Configuration...")))
       end
 
       # handle pressing the "Local Registration Server" button

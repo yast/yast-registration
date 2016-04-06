@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr  6 10:21:38 UTC 2016 - knut.anderssen@suse.com
+
+- Unified shortcut 'alt-w' for network setup button (bsc#974216)
+- 3.1.170
+
+-------------------------------------------------------------------
 Thu Feb 18 08:24:18 UTC 2016 - mvidner@suse.com
 
 - Read registration codes from a USB stick (FATE#316796)
