@@ -120,7 +120,7 @@ describe Registration::SwMgmt do
 
     before do
       expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(true).twice
-      expect(Yast::Pkg).to receive(:ServiceRefresh).with(service_name).and_return(true)
+      expect(Yast::Pkg).to receive(:ServiceForceRefresh).with(service_name).and_return(true)
       expect(Yast::Pkg).to receive(:ServiceSave).with(service_name).and_return(true)
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
 
