@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Apr  6 16:10:58 CEST 2016 - schubi@suse.de
+
+- Force refreshing while adding a service (bnc#967828).
+  Otherwise some services will not be refreshed due TTL entries.
+  So, some packages are not be available for installation.
+- 3.1.166.2
+
+-------------------------------------------------------------------
 Fri Mar 18 15:54:32 UTC 2016 - lslezak@suse.cz
 
 - Enable [Next] button in the first boot workflow to allow using
