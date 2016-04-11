@@ -4,14 +4,16 @@ Wed Apr  6 16:10:58 CEST 2016 - schubi@suse.de
 - Force refreshing while adding a service (bnc#967828).
   Otherwise some services will not be refreshed due TTL entries.
   So, some packages are not be available for installation.
-- 3.1.170
-
--------------------------------------------------------------------
-Fri Mar 18 15:54:32 UTC 2016 - lslezak@suse.cz
-
 - Enable [Next] button in the first boot workflow to allow using
   the registration module (pass the WFM arguments with the Back/Next
   status to the internally called client) (bsc#970572)
+- 3.1.171
+
+-------------------------------------------------------------------
+Wed Apr  6 10:21:38 UTC 2016 - knut.anderssen@suse.com
+
+- Unified shortcut 'alt-w' for network setup button (bsc#974216)
+- 3.1.170
 
 -------------------------------------------------------------------
 Thu Feb 18 08:24:18 UTC 2016 - mvidner@suse.com
