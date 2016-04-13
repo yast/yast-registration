@@ -274,7 +274,8 @@ module Registration
         raise ::Registration::ServiceError.new(N_("Saving service '%s' failed."), service_name)
       end
 
-      if !Pkg.ServiceRefresh(service_name)
+      # Force refreshing due timing issues (bnc#967828)
+      if !Pkg.ServiceForceRefresh(service_name)
         # error message
         raise ::Registration::ServiceError.new(N_("Refreshing service '%s' failed."), service_name)
       end
