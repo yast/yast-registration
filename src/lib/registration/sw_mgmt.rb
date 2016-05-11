@@ -33,6 +33,8 @@ require "registration/helpers"
 require "registration/url_helpers"
 require "registration/repo_state"
 
+require "packager/product_patterns"
+
 module Registration
   Yast.import "AddOnProduct"
   Yast.import "Mode"
@@ -460,7 +462,15 @@ module Registration
 
       log.info "Products to install: #{products}"
 
-      products.all? { |product| Pkg.ResolvableInstall(product, :product) }
+      ret = products.all? { |product| Pkg.ResolvableInstall(product, :product) }
+
+      # preselect the default product patterns (FATE#320199)
+      # note: must be called *after* selecting the products
+      product_patterns = ProductPatterns.new
+      log.info "Selecting the default product patterns: #{product_patterns.names}"
+      product_patterns.select
+
+      ret
     end
 
     # select remote addons matching the product resolvables

@@ -215,16 +215,28 @@ describe Registration::SwMgmt do
   end
 
   describe ".select_addon_products" do
-    it "selects new addon products for installation" do
-      legacy_services = load_yaml_fixture("legacy_module_services.yml")
+    before do
+      allow_any_instance_of(Yast::ProductPatterns).to receive(:names).and_return([])
+      allow_any_instance_of(Yast::ProductPatterns).to receive(:select)
 
-      expect(::Registration::Storage::Cache).to receive(:instance)
+      legacy_services = load_yaml_fixture("legacy_module_services.yml")
+      allow(::Registration::Storage::Cache).to receive(:instance)
         .and_return(double("addon_services" => legacy_services))
-      expect(subject).to receive(:service_repos).with(legacy_services.first)
+      allow(subject).to receive(:service_repos).with(legacy_services.first)
         .and_return(load_yaml_fixture("legacy_module_repositories.yml"))
-      expect(Yast::Pkg).to receive(:ResolvableProperties)
+      allow(Yast::Pkg).to receive(:ResolvableProperties)
         .and_return(load_yaml_fixture("products_legacy_installation.yml"))
+      allow(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
+    end
+
+    it "selects new addon products for installation" do
       expect(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
+
+      subject.select_addon_products
+    end
+
+    it "selects the default patterns for the selected products" do
+      expect_any_instance_of(Yast::ProductPatterns).to receive(:select)
 
       subject.select_addon_products
     end
