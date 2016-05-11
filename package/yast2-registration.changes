@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May  4 12:58:57 UTC 2016 - lslezak@suse.cz
+
+- Select the default product patterns for the registered modules
+  and extensions (FATE#320199)
+- 3.1.172
+
+-------------------------------------------------------------------
 Wed Apr  6 16:10:58 CEST 2016 - schubi@suse.de
 
 - Force refreshing while adding a service (bnc#967828).
