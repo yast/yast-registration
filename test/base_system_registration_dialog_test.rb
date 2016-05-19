@@ -110,7 +110,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       context "in installation mode" do
         it "disables widgets" do
           expect(Yast::UI).to receive(:ChangeWidget).with(Id(:action), :Enabled, false)
-          allow(subject).to receive(:handle_dialog).and_return(nil)
+          allow(subject).to receive(:event_loop).and_return(nil)
           subject.run
         end
       end
@@ -122,7 +122,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           allow(subject).to receive(:PushButton).and_call_original
           expect(subject).to receive(:PushButton)
             .with(Id(:reregister_addons), _("&Register Extensions or Modules Again"))
-          allow(subject).to receive(:handle_dialog).and_return(nil)
+          allow(subject).to receive(:event_loop).and_return(nil)
           subject.run
         end
       end

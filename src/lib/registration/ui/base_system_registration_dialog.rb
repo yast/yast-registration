@@ -60,7 +60,7 @@ module Registration
         # disable the input fields when already registered
         disable_widgets if Registration.is_registered? && !Yast::Mode.normal
 
-        handle_dialog
+        event_loop
       end
 
       attr_accessor :registration
@@ -212,7 +212,17 @@ module Registration
             "get updates and extensions.")
       end
 
-      def handle_next
+      # Handle pushing the :next button depending on the action
+      #
+      # When action is:
+      #
+      # * :skip_registration: returns :skip to skip the registration process.
+      # * :register_scc o :register_local: calls #handle_registration
+      #
+      # @return [Symbol,nil]
+      #
+      # @see #handle_registration
+      def next_handler
         case action
         when :skip_registration
           confirm_skipping ? :skip : nil
@@ -221,30 +231,69 @@ module Registration
         end
       end
 
+      # Buttons to break the event loop (@see #event_loop).
+      CONTINUE_BUTTONS = [:next, :back, :skip, :cancel, :abort, :reregister_addons]
+
       # the main UI event loop
       # @return [Symbol] the user input
-      def handle_dialog
+      def event_loop
         ret = nil
-        continue_buttons = [:next, :back, :skip, :cancel, :abort, :reregister_addons]
 
-        until continue_buttons.include?(ret)
-          ret = Yast::UI.UserInput
+        until CONTINUE_BUTTONS.include?(ret)
+          input = Yast::UI.UserInput
           log.debug "User input: #{ret}"
 
-          case ret
-          when :skip_registration, :register_scc, :register_local
-            self.action = ret # Set the dialog action
-          when :network
-            Helpers.run_network_configuration
-          when :next
-            ret = handle_next
-          when :abort
+          meth = :"#{input}_handler"
+          if respond_to?(meth, true)
+            ret = send(meth)
+          elsif input == :abort
             ret = nil unless Yast::Mode.normal || AbortConfirmation.run
+          else
+            raise "Unknown action #{input}"
           end
         end
 
         log.info "Registration result: #{ret}"
         ret
+      end
+
+      # :abort action handler
+      #
+      # * In normal mode returns :abort
+      # * In installation mode, ask for confirmation. If user
+      #   confirms, returns :abort; nil otherwise.
+      #
+      # @return [Symbol,nil] :abort or nil
+      def abort_handler
+        (Yast::Mode.normal || AbortConfirmation.run) ? :abort : nil
+      end
+
+      # :skip_registration handler
+      #
+      # Set the dialog's action to :skip_registration
+      def skip_registration_handler
+        self.action = :skip_registration
+      end
+
+      # :register_scc handler
+      #
+      # Set the dialog's action to :register_scc
+      def register_scc_handler
+        self.action = :register_scc
+      end
+
+      # :register_local handler
+      #
+      # Set the dialog's action to :register_local
+      def register_local_handler
+        self.action = :register_local
+      end
+
+      # :network handler
+      #
+      # Runs the network configuration
+      def network_handler
+        Helpers.run_network_configuration
       end
 
       # ask the user to confirm skipping the registration
