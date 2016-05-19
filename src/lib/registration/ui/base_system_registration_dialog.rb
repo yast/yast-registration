@@ -20,6 +20,8 @@ module Registration
       include Yast::UIShortcuts
       include Yast
 
+      attr_accessor :action
+
       Yast.import "Mode"
       Yast.import "GetInstArgs"
       Yast.import "UI"
@@ -36,12 +38,15 @@ module Registration
       # the constructor
       def initialize
         textdomain "registration"
+
+        # Set default action
+        self.action = :register_scc
       end
 
       # display the extension selection dialog and wait for a button click
       # @return [Symbol] user input (:import, :cancel)
       def run
-        log.info "Diplaying registration dialog"
+        log.info "Displaying registration dialog"
 
         Yast::Wizard.SetContents(
           # dialog title
@@ -66,8 +71,7 @@ module Registration
       REG_CODE_WIDTH = 33
 
       def disable_widgets
-        Yast::UI.ChangeWidget(Id(:email), :Enabled, false)
-        Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, false)
+        Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
       end
 
       # content for the main registration dialog
@@ -78,23 +82,103 @@ module Registration
           VStretch(),
           product_details_widgets,
           VSpacing(Yast::UI.TextMode ? 1 : 2),
-          input_widgets,
-          VSpacing(Yast::UI.TextMode ? 0 : 1),
-          # button label
-          PushButton(Id(:local_server), _("&Local Registration Server...")),
+          registration_widgets,
           VSpacing(Yast::UI.TextMode ? 0 : 3),
-          skip_button,
           reregister_extensions_button,
           VStretch()
         )
       end
 
-      # part of the main dialog definition - display the "skip" skip button only
-      # when the system is not registered yet
-      # @return [Yast::Term] UI term
-      def skip_button
-        # button label
-        Registration.is_registered? ? Empty() : PushButton(Id(:skip), _("&Skip Registration"))
+      def registration_widgets
+        HSquash(
+          VBox(
+            RadioButtonGroup(
+              Id(:action),
+              VBox(
+                register_scc_option,
+                register_local_option,
+                skip_option
+              )
+            )
+          )
+        )
+      end
+
+      def register_scc_option
+        options = Storage::InstallationOptions.instance
+
+        reg_code = options.reg_code
+        if reg_code.empty?
+          known_reg_codes = Storage::RegCodes.instance.reg_codes
+          base_product_name = SwMgmt.find_base_product["name"]
+          reg_code = known_reg_codes[base_product_name] || ""
+        end
+
+        # FIXME: it should be in a different method responsible for handling the UI
+        VBox(
+          Left(
+            RadioButton(
+              Id(:register_scc),
+              Opt(:notify),
+              # TRANSLATORS: radio button
+              _("Register System via SCC.SUSE.COM"),
+              action == :register_scc
+              )
+            ),
+          VSpacing(0.3),
+          Left(
+            HBox(
+              HSpacing(5),
+              VBox(
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
+                VSpacing(Yast::UI.TextMode ? 0 : 0.5),
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
+                reg_code))
+                )
+              )
+            ),
+          VSpacing(1)
+          )
+      end
+
+      def register_local_option
+        options = Storage::InstallationOptions.instance
+        custom_url = options.custom_url || SUSE::Connect::Config.new.url
+
+        # FIXME: it should be in a different method responsible for handling the UI
+        VBox(
+          Left(
+            RadioButton(
+              Id(:register_local),
+              Opt(:notify),
+              # TRANSLATORS: radio button
+              _("Register System via local SMT Server"),
+              action == :register_local
+              )
+            ),
+          VSpacing(0.3),
+          Left(
+            HBox(
+              HSpacing(5),
+              VBox(
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:smt_url), _("&Local Registration Server URL"), custom_url))
+                )
+              )
+            ),
+          VSpacing(1)
+          )
+      end
+
+      def skip_option
+        return Empty() if Registration.is_registered?
+        Left(
+          RadioButton(
+            Id(:skip_registration),
+            Opt(:notify),
+            _("&Skip Registration"),
+            action == :skip_registration
+          )
+        )
       end
 
       def reregister_extensions_button
@@ -121,28 +205,6 @@ module Registration
         )
       end
 
-      # part of the main dialog definition - the input fields
-      # @return [Yast::Term] UI term
-      def input_widgets
-        options = Storage::InstallationOptions.instance
-
-        reg_code = options.reg_code
-        if reg_code.empty?
-          known_reg_codes = Storage::RegCodes.instance.reg_codes
-          base_product_name = SwMgmt.find_base_product["name"]
-          reg_code = known_reg_codes[base_product_name] || ""
-        end
-
-        HSquash(
-          VBox(
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
-            VSpacing(Yast::UI.TextMode ? 0 : 0.5),
-            MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-              reg_code))
-          )
-        )
-      end
-
       # help text for the main registration dialog
       def help_text
         # help text
@@ -150,26 +212,34 @@ module Registration
             "get updates and extensions.")
       end
 
+      def handle_next
+        case action
+        when :skip_registration
+          confirm_skipping ? :skip : nil
+        when :register_scc, :register_local
+          handle_registration
+        end
+      end
+
       # the main UI event loop
       # @return [Symbol] the user input
       def handle_dialog
         ret = nil
-        continue_buttons = [:next, :back, :cancel, :abort, :skip, :reregister_addons]
+        continue_buttons = [:next, :back, :skip, :cancel, :abort, :reregister_addons]
 
         until continue_buttons.include?(ret)
           ret = Yast::UI.UserInput
+          log.debug "User input: #{ret}"
 
           case ret
+          when :skip_registration, :register_scc, :register_local
+            self.action = ret # Set the dialog action
           when :network
             Helpers.run_network_configuration
-          when :local_server
-            handle_local_server
           when :next
-            ret = handle_registration
+            ret = handle_next
           when :abort
             ret = nil unless Yast::Mode.normal || AbortConfirmation.run
-          when :skip
-            ret = nil unless confirm_skipping
           end
         end
 
@@ -198,14 +268,11 @@ module Registration
       def info
         # label text describing the registration (1/2)
         # use \n to split to more lines if needed (use max. 76 chars/line)
-        info = _("Please enter a registration or evaluation code for this product and your\n" \
-            "User Name/E-mail address from the SUSE Customer Center in the fields below.\n" \
-            "Access to security and general software updates is only possible on\n" \
-            "a registered system.")
+        info = _("Please select your preferred method of registration.")
 
         if !Yast::Mode.normal
           # add a paragraph separator
-          info += "\n\n"
+          info += "\n"
 
           # label text describing the registration (2/2),
           # not displayed in installed system
@@ -223,17 +290,6 @@ module Registration
         return Empty() unless Helpers.network_configurable
 
         Right(PushButton(Id(:network), _("Net&work Configuration...")))
-      end
-
-      # handle pressing the "Local Registration Server" button
-      def handle_local_server
-        options = Storage::InstallationOptions.instance
-        current_url = options.custom_url || SUSE::Connect::Config.new.url
-        url = LocalServerDialog.run(current_url)
-        return unless url
-
-        log.info "Entered custom URL: #{url}"
-        options.custom_url = url
       end
 
       # run the registration
@@ -261,7 +317,7 @@ module Registration
       # @return [Boolean] true on success
       def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
-        store_credentials
+        set_registration_options
 
         success, product_service = registration_ui.register_system_and_base_product
 
@@ -272,11 +328,23 @@ module Registration
         success
       end
 
-      # remember the entered values in case user goes back
-      def store_credentials
+      # Set registration options according to current action
+      #
+      # When current action is:
+      #
+      # * :register_scc -> set email and registration code
+      # * :register_local -> set custom url
+      def set_registration_options
         options = Storage::InstallationOptions.instance
-        options.email = Yast::UI.QueryWidget(:email, :Value)
-        options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+        case action
+        when :register_scc
+          options.email = Yast::UI.QueryWidget(:email, :Value)
+          options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+        when :register_local
+          options.custom_url = Yast::UI.QueryWidget(:smt_url, :Value)
+        else
+          raise "Unknown action: #{action}"
+        end
       end
 
       # store the successful registration
