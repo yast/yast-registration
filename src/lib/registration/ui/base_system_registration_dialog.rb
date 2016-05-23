@@ -22,7 +22,8 @@ module Registration
       include Yast
       include ::UI::EventDispatcher
 
-      attr_accessor :action
+      # @return [Symbol] Current action (:register_scc, :register_local or :skip_registration)
+      attr_reader :action
 
       Yast.import "Mode"
       Yast.import "GetInstArgs"
@@ -40,9 +41,6 @@ module Registration
       # the constructor
       def initialize
         textdomain "registration"
-
-        # Set default action
-        self.action = :register_scc
       end
 
       # display the extension selection dialog and wait for a button click
@@ -59,13 +57,28 @@ module Registration
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
-        # disable the input fields when already registered
-        disable_widgets if Registration.is_registered? && !Yast::Mode.normal
+        if Registration.is_registered? && !Yast::Mode.normal
+          # disable the input fields when already registered
+          set_registered_option
+          disable_widgets
+        else
+          # Set default action
+          self.action = :register_scc
+        end
 
         event_loop
       end
 
-      # Handle pushing the :next button depending on the action
+      # Set the option selected in an already registered system
+      def set_registered_option
+        if reg_options[:reg_code]
+          Yast::UI.ChangeWidget(Id(:register_scc), :Enabled, true)
+        elsif reg_options[:custom_url]
+          Yast::UI.ChangeWidget(Id(:register_local), :Enabled, true)
+        end
+      end
+
+      # Handle pushing the 'Next' button depending on the action
       #
       # When action is:
       #
@@ -87,55 +100,56 @@ module Registration
         result
       end
 
-      # :abort action handler
+      # Handle pushing the 'Abort' button
       #
       # * In normal mode returns :abort
       # * In installation mode, ask for confirmation. If user
       #   confirms, returns :abort; nil otherwise.
       #
       # @return [Symbol,nil] :abort or nil
+      # @see finish_di
       def abort_handler
         result = (Yast::Mode.normal || AbortConfirmation.run) ? :abort : nil
-        finish_dialog(result)
+        finish_dialog(result) unless result.nil?
         result
       end
 
-      # :skip_registration handler
+      # Handle selecting the 'Skip' option
       #
       # Set the dialog's action to :skip_registration
       def skip_registration_handler
         self.action = :skip_registration
       end
 
-      # :register_scc handler
+      # Handle selection the 'Register System via SCC.SUSE.COM' option
       #
       # Set the dialog's action to :register_scc
       def register_scc_handler
         self.action = :register_scc
       end
 
-      # :register_local handler
+      # Handle selection the 'Register System via local SMT Server' option
       #
       # Set the dialog's action to :register_local
       def register_local_handler
         self.action = :register_local
       end
 
-      # :network handler
+      # Handle pushing 'Network Configuration' button
       #
       # Runs the network configuration
       def network_handler
         Helpers.run_network_configuration
       end
 
-      # :reregister_addons handler
+      # Handle pushing the button to register again
       #
       # Just finish the dialog returning :reregister_addons
       def reregister_addons_handler
         finish_dialog(:reregister_addons)
       end
 
-      # :back handler
+      # Handle pushing the 'Back' button
       def back_handler
         finish_dialog(:back)
       end
@@ -147,8 +161,18 @@ module Registration
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
 
+      # Disable all input widgets
       def disable_widgets
         Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
+      end
+
+      # Refresh widgets status depending on the current action
+      #
+      # @see #action
+      def refresh
+        Yast::UI.ChangeWidget(Id(:email), :Enabled, action == :register_scc)
+        Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, action == :register_scc)
+        Yast::UI.ChangeWidget(Id(:smt_url), :Enabled, action == :register_local)
       end
 
       # content for the main registration dialog
@@ -181,7 +205,15 @@ module Registration
         )
       end
 
-      def register_scc_option
+      # Return registration options
+      #
+      # Read registration options from Storage::InstallationOptions
+      # and, if needed, from Storage::RegCodes.
+      #
+      # @retun [Hash] Hash containing values for :reg_code,
+      #               :email and :custom_url.
+      def reg_options
+        return @reg_options unless @reg_options.nil?
         options = Storage::InstallationOptions.instance
 
         reg_code = options.reg_code
@@ -191,7 +223,14 @@ module Registration
           reg_code = known_reg_codes[base_product_name] || ""
         end
 
-        # FIXME: it should be in a different method responsible for handling the UI
+        @reg_options = {
+          reg_code: reg_code,
+          email: options.email,
+          custom_url: options.custom_url || SUSE::Connect::Config.new.url
+        }
+      end
+
+      def register_scc_option
         VBox(
           Left(
             RadioButton(
@@ -207,10 +246,10 @@ module Registration
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), options.email)),
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), reg_options[:email])),
                 VSpacing(Yast::UI.TextMode ? 0 : 0.5),
                 MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-                reg_code))
+                reg_options[:reg_code]))
                 )
               )
             ),
@@ -219,10 +258,6 @@ module Registration
       end
 
       def register_local_option
-        options = Storage::InstallationOptions.instance
-        custom_url = options.custom_url || SUSE::Connect::Config.new.url
-
-        # FIXME: it should be in a different method responsible for handling the UI
         VBox(
           Left(
             RadioButton(
@@ -238,7 +273,7 @@ module Registration
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:smt_url), _("&Local Registration Server URL"), custom_url))
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:smt_url), _("&Local Registration Server URL"), reg_options[:custom_url]))
                 )
               )
             ),
@@ -415,6 +450,14 @@ module Registration
         return :cancel if url == :cancel
         log.info "Initializing registration with URL: #{url.inspect}"
         self.registration = Registration.new(url)
+      end
+
+      # Set dialog action
+      #
+      # @return [Symbol] Action (:register_scc, :register_local or :skip_registration)
+      def action=(value)
+        @action = value
+        refresh
       end
     end
   end

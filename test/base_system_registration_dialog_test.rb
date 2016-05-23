@@ -110,6 +110,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       context "in installation mode" do
         it "disables widgets" do
           expect(Yast::UI).to receive(:ChangeWidget).with(Id(:action), :Enabled, false)
+          allow(Yast::UI).to receive(:ChangeWidget).and_call_original
           allow(subject).to receive(:event_loop).and_return(nil)
           subject.run
         end
