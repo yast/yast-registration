@@ -79,7 +79,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
       context "when user enters a local SMT server" do
         it "registers the system via local SMT server" do
-          expect(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
+          allow(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
             .and_return(custom_url)
           expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next)
 
@@ -96,6 +96,20 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(subject.run).to eq(:next)
         end
       end
+
+      context "when user enters an invalid local SMT server" do
+        it "shows an error and does not try to register the system" do
+          allow(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
+            .and_return("ftp://smt.suse.com")
+          expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next, :abort)
+          expect(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
+          expect(Yast::Report).to receive(:Error).with(_("Invalid URL.")).and_return(true)
+          expect(registration_ui).to_not receive(:register_system_and_base_product)
+
+          expect(subject.run).to eq(:abort)
+        end
+      end
+
 
       context "when user skips registration" do
         it "does not try to register the system and close the dialog" do

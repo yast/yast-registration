@@ -2,6 +2,7 @@
 require "yast"
 require "yast/suse_connect"
 require "ui/event_dispatcher"
+require "uri"
 
 require "registration/registration"
 require "registration/registration_ui"
@@ -30,6 +31,7 @@ module Registration
       Yast.import "UI"
       Yast.import "Wizard"
       Yast.import "Popup"
+      Yast.import "Report"
 
       WIDGETS = {
         register_scc:      [:email, :reg_code],
@@ -371,6 +373,8 @@ module Registration
           return :next
         end
 
+        return nil unless valid_input?
+
         set_registration_options
         return nil if init_registration == :cancel
 
@@ -489,6 +493,49 @@ module Registration
       # @return [Boolean] True if the default URL is used; false otherwise.
       def using_default_url?
         reg_options[:custom_url] == default_url
+      end
+
+      # This method check whether the input is valid
+      #
+      # It relies in methods "validate_#{action}". For example, #validate_register_local.
+      # It's intended to be used when the user clicks "Next" button.
+      #
+      # @return [Boolean] True if input is valid; false otherwise.
+      def valid_input?
+        validation_method = "validate_#{action}"
+        if respond_to?(validation_method, true)
+          send(validation_method)
+        else
+          true
+        end
+      end
+
+      # Validate input for :register_local action
+      #
+      # Currently it makes sure that URL is valid. It shows
+      # a message if validation fails.
+      #
+      # @return [Boolean] true if it's valid; false otherwise.
+      def validate_register_local
+        if valid_custom_url?(Yast::UI.QueryWidget(:custom_url, :Value))
+          true
+        else
+          # error message, the entered URL is not valid.
+          Yast::Report.Error(_("Invalid URL."))
+          false
+        end
+      end
+
+      VALID_CUSTOM_URL_SCHEMES = ["http", "https"]
+
+      # Determine whether an URL is valid and suitable to be used as local SMT server
+      #
+      # @return [Boolean] true if it's valid; false otherwise.
+      def valid_custom_url?(custom_url)
+        uri = URI(custom_url)
+        VALID_CUSTOM_URL_SCHEMES.include?(uri.scheme)
+      rescue URI::InvalidURIError
+        false
       end
     end
   end
