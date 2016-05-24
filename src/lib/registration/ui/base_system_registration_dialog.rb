@@ -64,9 +64,6 @@ module Registration
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
-        # disable the input fields when already registered
-        disable_widgets if Registration.is_registered? && !Yast::Mode.normal
-
         # Set default action
         self.action = initial_action
         set_focus
@@ -77,14 +74,14 @@ module Registration
       # Set the initial action
       #
       # * If the system is registered:
-      #   * reg_code is present -> :register_scc
-      #   * otherwise -> :register_local
+      #   * using the default url -> :register_scc
+      #   * using a custom URL -> :register_local
       # * If the system is not registered -> :register_scc
       #
       # @return [Symbol] Selected action
       def initial_action
         if Registration.is_registered?
-          reg_options[:reg_code].empty? ? :register_local : :register_scc
+          reg_options[:custom_url] == default_url ? :register_scc : :register_local
         else # Default option for unregistered systems
           :register_scc
         end
@@ -224,8 +221,15 @@ module Registration
         @reg_options = {
           reg_code: reg_code,
           email: options.email,
-          custom_url: options.custom_url || SUSE::Connect::Config.new.url
+          custom_url: options.custom_url || default_url
         }
+      end
+
+      # Default registration server
+      #
+      # @return [String] URL for the registration server
+      def default_url
+        @default_url ||= SUSE::Connect::Config.new.url
       end
 
       def register_scc_option
@@ -462,6 +466,9 @@ module Registration
       #
       # @see #action
       def refresh
+        # disable the input fields when already registered
+        return disable_widgets if Registration.is_registered? && !Yast::Mode.normal
+
         WIDGETS.values.flatten.each do |wgt|
           Yast::UI.ChangeWidget(Id(wgt), :Enabled, WIDGETS[action].include?(wgt))
         end
@@ -473,6 +480,11 @@ module Registration
         Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
       end
 
+      # Set focus
+      #
+      # The focus is set to the first widget of the current action.
+      #
+      # @see #action
       def set_focus
         widget = WIDGETS[action].first
         Yast::UI.SetFocus(Id(widget)) if widget
