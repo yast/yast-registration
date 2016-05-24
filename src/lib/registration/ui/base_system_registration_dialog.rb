@@ -430,9 +430,12 @@ module Registration
         options = Storage::InstallationOptions.instance
         case action
         when :register_scc
-          options.email = Yast::UI.QueryWidget(:email, :Value)
-          options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+          options.email      = Yast::UI.QueryWidget(:email, :Value)
+          options.reg_code   = Yast::UI.QueryWidget(:reg_code, :Value)
+          options.custom_url = nil
         when :register_local
+          options.email      = "" # Use an empty string like InstallationOptions constructor
+          options.reg_code   = ""
           options.custom_url = Yast::UI.QueryWidget(:custom_url, :Value)
         else
           raise "Unknown action: #{action}"

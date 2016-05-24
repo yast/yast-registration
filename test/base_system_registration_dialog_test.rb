@@ -48,6 +48,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(Yast::UI).to receive(:UserInput).and_return(:next)
 
           options = Registration::Storage::InstallationOptions.instance
+          # Avoid modifying the singleton object
           expect(options).to receive(:email=).with(email)
           expect(options).to receive(:email).and_return(email)
           expect(options).to receive(:reg_code=).with(reg_code)
@@ -83,9 +84,11 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next)
 
           options = Registration::Storage::InstallationOptions.instance
+          # Avoid modifying the singleton object
           expect(options).to receive(:custom_url=).with(custom_url)
           expect(options).to receive(:custom_url).and_return(custom_url)
-          expect(options).to_not receive(:reg_code=)
+          expect(options).to receive(:reg_code=).with("")
+          expect(options).to receive(:email=).with("")
 
           expect(registration_ui).to receive(:register_system_and_base_product)
             .and_return([true, nil])
