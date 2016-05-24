@@ -10,7 +10,6 @@ require "registration/storage"
 require "registration/sw_mgmt"
 require "registration/helpers"
 require "registration/url_helpers"
-require "registration/ui/local_server_dialog"
 require "registration/ui/abort_confirmation"
 
 module Registration
