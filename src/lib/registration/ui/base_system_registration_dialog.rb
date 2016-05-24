@@ -394,6 +394,7 @@ module Registration
           return :next
         end
 
+        set_registration_options
         return nil if init_registration == :cancel
 
         if register_system_and_base_product
@@ -409,7 +410,6 @@ module Registration
       # @return [Boolean] true on success
       def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
-        set_registration_options
 
         success, product_service = registration_ui.register_system_and_base_product
 
