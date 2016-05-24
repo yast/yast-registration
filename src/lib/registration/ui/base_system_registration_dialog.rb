@@ -32,8 +32,8 @@ module Registration
       Yast.import "Popup"
 
       WIDGETS = {
-        register_scc: [:email, :reg_code],
-        register_local: [:custom_url],
+        register_scc:      [:email, :reg_code],
+        register_local:    [:custom_url],
         skip_registration: []
       }
       private_constant :WIDGETS
@@ -219,8 +219,8 @@ module Registration
         end
 
         @reg_options = {
-          reg_code: reg_code,
-          email: options.email,
+          reg_code:   reg_code,
+          email:      options.email,
           custom_url: options.custom_url || default_url
         }
       end
@@ -241,22 +241,23 @@ module Registration
               # TRANSLATORS: radio button
               _("Register System via SCC.SUSE.COM"),
               action == :register_scc
-              )
-            ),
+            )
+          ),
           VSpacing(0.3),
           Left(
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"), reg_options[:email])),
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:email), _("&E-mail Address"),
+                  reg_options[:email])),
                 VSpacing(Yast::UI.TextMode ? 0 : 0.5),
                 MinWidth(REG_CODE_WIDTH, InputField(Id(:reg_code), _("Registration &Code"),
-                reg_options[:reg_code]))
-                )
+                  reg_options[:reg_code]))
               )
-            ),
+            )
+          ),
           VSpacing(1)
-          )
+        )
       end
 
       def register_local_option
@@ -268,19 +269,20 @@ module Registration
               # TRANSLATORS: radio button
               _("Register System via local SMT Server"),
               action == :register_local
-              )
-            ),
+            )
+          ),
           VSpacing(0.3),
           Left(
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:custom_url), _("&Local Registration Server URL"), reg_options[:custom_url]))
-                )
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:custom_url),
+                  _("&Local Registration Server URL"), reg_options[:custom_url]))
               )
-            ),
+            )
+          ),
           VSpacing(1)
-          )
+        )
       end
 
       def skip_option
