@@ -7,7 +7,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
   let(:email) { "email@example.com" }
   let(:reg_code) { "my-reg-code" }
-  let(:smt_url) { "http://smt.example.com/" }
+  let(:custom_url) { "http://smt.example.com/" }
 
   describe ".run" do
     let(:instance) { double("dialog") }
@@ -78,13 +78,13 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
       context "when user enters a local SMT server" do
         it "registers the system via local SMT server" do
-          expect(Yast::UI).to receive(:QueryWidget).with(:smt_url, :Value)
-            .and_return(smt_url)
+          expect(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
+            .and_return(custom_url)
           expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next)
 
           options = Registration::Storage::InstallationOptions.instance
-          expect(options).to receive(:custom_url=).with(smt_url)
-          expect(options).to receive(:custom_url).and_return(smt_url)
+          expect(options).to receive(:custom_url=).with(custom_url)
+          expect(options).to receive(:custom_url).and_return(custom_url)
           expect(options).to_not receive(:reg_code=)
 
           expect(registration_ui).to receive(:register_system_and_base_product)

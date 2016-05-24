@@ -33,7 +33,7 @@ module Registration
 
       WIDGETS = {
         register_scc: [:email, :reg_code],
-        register_local: [:smt_url],
+        register_local: [:custom_url],
         skip_registration: []
       }
       private_constant :WIDGETS
@@ -271,7 +271,7 @@ module Registration
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:smt_url), _("&Local Registration Server URL"), reg_options[:custom_url]))
+                MinWidth(REG_CODE_WIDTH, InputField(Id(:custom_url), _("&Local Registration Server URL"), reg_options[:custom_url]))
                 )
               )
             ),
@@ -416,7 +416,7 @@ module Registration
           options.email = Yast::UI.QueryWidget(:email, :Value)
           options.reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
         when :register_local
-          options.custom_url = Yast::UI.QueryWidget(:smt_url, :Value)
+          options.custom_url = Yast::UI.QueryWidget(:custom_url, :Value)
         else
           raise "Unknown action: #{action}"
         end
