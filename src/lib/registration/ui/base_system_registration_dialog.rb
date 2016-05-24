@@ -101,7 +101,8 @@ module Registration
         result =
           case action
           when :skip_registration
-            confirm_skipping ? :skip : nil
+            log.info "Skipping registration on user request"
+            :skip
           when :register_scc, :register_local
             handle_registration
           end
@@ -128,6 +129,7 @@ module Registration
       # Set the dialog's action to :skip_registration
       def skip_registration_handler
         self.action = :skip_registration
+        show_skipping_warning
       end
 
       # Handle selection the 'Register System via scc.suse.com' option
@@ -327,7 +329,7 @@ module Registration
             Left(Heading(SwMgmt.product_label(SwMgmt.find_base_product))),
             VSpacing(1),
             Registration.is_registered? ? Heading(_("The system is already registered.")) :
-              Label(info)
+              Label(_("Please select your preferred method of registration."))
           )
         )
       end
@@ -339,41 +341,16 @@ module Registration
             "get updates and extensions.")
       end
 
-      # ask the user to confirm skipping the registration
+      # Show a warning about skipping the registration
+      #
       # @return [Boolean] true when skipping has been confirmed
-      def confirm_skipping
+      def show_skipping_warning
         # Popup question: confirm skipping the registration
-        confirmation = _("If you do not register your system we will not be able\n" \
+        warning = _("If you do not register your system we will not be able\n" \
             "to grant you access to the update repositories.\n\n" \
             "You can register after the installation or visit our\n" \
-            "Customer Center for online registration.\n\n" \
-            "Really skip the registration now?")
-
-        ret = Yast::Popup.YesNo(confirmation)
-        log.info "Skipping registration on user request" if ret
-
-        ret
-      end
-
-      # description text displayed in the main dialog (kind of help text)
-      # @return [String] translated description text
-      def info
-        # label text describing the registration (1/2)
-        # use \n to split to more lines if needed (use max. 76 chars/line)
-        info = _("Please select your preferred method of registration.")
-
-        if !Yast::Mode.normal
-          # add a paragraph separator
-          info += "\n"
-
-          # label text describing the registration (2/2),
-          # not displayed in installed system
-          # use \n to split to more lines if needed (use max. 76 chars/line)
-          info += _("If you skip product registration now, remember to register after\n" \
-              "installation has completed.")
-        end
-
-        info
+            "Customer Center for online registration.")
+        Yast::Popup.Message(warning)
       end
 
       # UI term for the network configuration button (or empty if not needed)
