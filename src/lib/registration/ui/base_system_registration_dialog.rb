@@ -31,6 +31,13 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Popup"
 
+      WIDGETS = {
+        register_scc: [:email, :reg_code],
+        register_local: [:smt_url],
+        skip_registration: []
+      }
+      private_constant :WIDGETS
+
       # create and run the dialog for registering the base system
       # @return [Symbol] the user input
       def self.run
@@ -57,24 +64,29 @@ module Registration
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
-        if Registration.is_registered? && !Yast::Mode.normal
-          # disable the input fields when already registered
-          set_registered_option
-          disable_widgets
-        else
-          # Set default action
-          self.action = :register_scc
-        end
+        # disable the input fields when already registered
+        disable_widgets if Registration.is_registered? && !Yast::Mode.normal
+
+        # Set default action
+        self.action = initial_action
+        set_focus
 
         event_loop
       end
 
-      # Set the option selected in an already registered system
-      def set_registered_option
-        if reg_options[:reg_code]
-          Yast::UI.ChangeWidget(Id(:register_scc), :Enabled, true)
-        elsif reg_options[:custom_url]
-          Yast::UI.ChangeWidget(Id(:register_local), :Enabled, true)
+      # Set the initial action
+      #
+      # * If the system is registered:
+      #   * reg_code is present -> :register_scc
+      #   * otherwise -> :register_local
+      # * If the system is not registered -> :register_scc
+      #
+      # @return [Symbol] Selected action
+      def initial_action
+        if Registration.is_registered?
+          reg_options[:reg_code].empty? ? :register_local : :register_scc
+        else # Default option for unregistered systems
+          :register_scc
         end
       end
 
@@ -160,20 +172,6 @@ module Registration
 
       # width of reg code input field widget
       REG_CODE_WIDTH = 33
-
-      # Disable all input widgets
-      def disable_widgets
-        Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
-      end
-
-      # Refresh widgets status depending on the current action
-      #
-      # @see #action
-      def refresh
-        Yast::UI.ChangeWidget(Id(:email), :Enabled, action == :register_scc)
-        Yast::UI.ChangeWidget(Id(:reg_code), :Enabled, action == :register_scc)
-        Yast::UI.ChangeWidget(Id(:smt_url), :Enabled, action == :register_local)
-      end
 
       # content for the main registration dialog
       # @return [Yast::Term]  UI term
@@ -458,6 +456,26 @@ module Registration
       def action=(value)
         @action = value
         refresh
+      end
+
+      # Refresh widgets status depending on the current action
+      #
+      # @see #action
+      def refresh
+        WIDGETS.values.flatten.each do |wgt|
+          Yast::UI.ChangeWidget(Id(wgt), :Enabled, WIDGETS[action].include?(wgt))
+        end
+        Yast::UI.ChangeWidget(Id(:action), :Value, action)
+      end
+
+      # Disable all input widgets
+      def disable_widgets
+        Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
+      end
+
+      def set_focus
+        widget = WIDGETS[action].first
+        Yast::UI.SetFocus(Id(widget)) if widget
       end
     end
   end
