@@ -81,7 +81,7 @@ module Registration
       # @return [Symbol] Selected action
       def initial_action
         if Registration.is_registered?
-          reg_options[:custom_url] == default_url ? :register_scc : :register_local
+          using_default_url? ? :register_scc : :register_local
         else # Default option for unregistered systems
           :register_scc
         end
@@ -232,6 +232,9 @@ module Registration
         @default_url ||= SUSE::Connect::Config.new.url
       end
 
+      # Widgets for :register_scc action
+      #
+      # @return [Yast::Term] UI terms
       def register_scc_option
         VBox(
           Left(
@@ -260,7 +263,15 @@ module Registration
         )
       end
 
+      # Example URL to be used in the :register_local UI
+      EXAMPLE_SMT_URL = "https://smt.example.com"
+
+      # Widgets for :register_local action
+      #
+      # @return [Yast::Term] UI terms
       def register_local_option
+        # If not special URL is used, show an example one.
+        url = using_default_url? ? EXAMPLE_SMT_URL : reg_options[:custom_url]
         VBox(
           Left(
             RadioButton(
@@ -277,7 +288,7 @@ module Registration
               HSpacing(5),
               VBox(
                 MinWidth(REG_CODE_WIDTH, InputField(Id(:custom_url),
-                  _("&Local Registration Server URL"), reg_options[:custom_url]))
+                  _("&Local Registration Server URL"), url))
               )
             )
           ),
@@ -490,6 +501,13 @@ module Registration
       def set_focus
         widget = WIDGETS[action].first
         Yast::UI.SetFocus(Id(widget)) if widget
+      end
+
+      # Determine whether we're using the default URL for SCC
+      #
+      # @return [Boolean] True if the default URL is used; false otherwise.
+      def using_default_url?
+        reg_options[:custom_url] == default_url
       end
     end
   end
