@@ -130,7 +130,7 @@ module Registration
         self.action = :skip_registration
       end
 
-      # Handle selection the 'Register System via SCC.SUSE.COM' option
+      # Handle selection the 'Register System via scc.suse.com' option
       #
       # Set the dialog's action to :register_scc
       def register_scc_handler
@@ -239,7 +239,7 @@ module Registration
               Id(:register_scc),
               Opt(:notify),
               # TRANSLATORS: radio button
-              _("Register System via SCC.SUSE.COM"),
+              _("Register System via scc.suse.com"),
               action == :register_scc
             )
           ),
