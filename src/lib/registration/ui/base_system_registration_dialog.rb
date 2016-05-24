@@ -351,7 +351,7 @@ module Registration
             "to grant you access to the update repositories.\n\n" \
             "You can register after the installation or visit our\n" \
             "Customer Center for online registration.")
-        Yast::Popup.Message(warning)
+        Yast::Popup.Warning(warning)
       end
 
       # UI term for the network configuration button (or empty if not needed)
