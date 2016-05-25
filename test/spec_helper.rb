@@ -16,14 +16,6 @@ if ENV["COVERAGE"]
   end
 end
 
-# configure RSpec
-RSpec.configure do |config|
-  config.mock_with :rspec do |c|
-    # https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/partial-doubles
-    c.verify_partial_doubles = true
-  end
-end
-
 libdir = File.expand_path("../../src/lib", __FILE__)
 $LOAD_PATH.unshift(libdir)
 
@@ -43,3 +35,14 @@ require_relative "factories"
 
 # force loading all files to report proper code coverage
 Dir.chdir(libdir) { Dir["**/*.rb"].each { |f| require f } }
+
+# configure RSpec
+RSpec.configure do |config|
+  config.mock_with :rspec do |c|
+    # https://relishapp.com/rspec/rspec-mocks/v/3-0/docs/verifying-doubles/partial-doubles
+    c.verify_partial_doubles = true
+  end
+
+  config.extend Yast::I18n # available in context/describe
+  config.include Yast::I18n # available in it/let/before
+end
