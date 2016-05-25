@@ -81,11 +81,7 @@ module Registration
       #
       # @return [Symbol] Selected action
       def initial_action
-        if Registration.is_registered?
-          using_default_url? ? :register_scc : :register_local
-        else # Default option for unregistered systems
-          :register_scc
-        end
+        using_default_url? ? :register_scc : :register_local
       end
 
       # Handle pushing the 'Next' button depending on the action
@@ -224,7 +220,7 @@ module Registration
         @reg_options = {
           reg_code:   reg_code,
           email:      options.email,
-          custom_url: options.custom_url || default_url
+          custom_url: options.custom_url || boot_url || default_url
         }
       end
 
@@ -233,6 +229,13 @@ module Registration
       # @return [String] URL for the registration server
       def default_url
         @default_url ||= SUSE::Connect::Config.new.url
+      end
+
+      # Registration server URL given through Linuxrc
+      #
+      # @retrun [String,nil] URL for the registration server; nil if not given.
+      def boot_url
+        @boot_url ||= UrlHelpers.boot_reg_url
       end
 
       # Widgets for :register_scc action
@@ -412,7 +415,8 @@ module Registration
         when :register_scc
           options.email      = Yast::UI.QueryWidget(:email, :Value)
           options.reg_code   = Yast::UI.QueryWidget(:reg_code, :Value)
-          options.custom_url = nil
+          # Avoid that boot_reg_url has precedence (see UrlHelpers.reg_url_at_installation)
+          options.custom_url = default_url
         when :register_local
           options.email      = "" # Use an empty string like InstallationOptions constructor
           options.reg_code   = ""

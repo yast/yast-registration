@@ -185,7 +185,7 @@ module Registration
     end
 
     private_class_method :reg_url_at_running_system, :reg_url_at_upgrade,
-      :reg_url_at_installation, :boot_reg_url
+      :reg_url_at_installation
 
     def self.slp_service_url
       log.info "Starting SLP discovery..."

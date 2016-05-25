@@ -8,6 +8,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
   let(:email) { "email@example.com" }
   let(:reg_code) { "my-reg-code" }
   let(:custom_url) { "http://smt.example.com/" }
+  let(:default_url) { SUSE::Connect::Config.new.url }
 
   describe ".run" do
     let(:instance) { double("dialog") }
@@ -53,6 +54,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(options).to receive(:email).and_return(email)
           expect(options).to receive(:reg_code=).with(reg_code)
           expect(options).to receive(:reg_code).and_return(reg_code)
+          expect(options).to receive(:custom_url=).with(default_url)
+          expect(options).to receive(:custom_url).and_return(default_url)
 
           expect(registration_ui).to receive(:register_system_and_base_product)
             .and_return([true, nil])
@@ -69,6 +72,12 @@ describe Registration::UI::BaseSystemRegistrationDialog do
             .and_return(reg_code)
           expect(Yast::UI).to receive(:UserInput).and_return(:next, :abort)
           expect(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
+
+          options = Registration::Storage::InstallationOptions.instance
+          # Avoid modifying the singleton object
+          expect(options).to receive(:email=).with(email)
+          expect(options).to receive(:reg_code=).with(reg_code)
+          expect(options).to receive(:custom_url=).with(default_url)
 
           expect(registration_ui).to receive(:register_system_and_base_product)
             .and_return([false, nil])

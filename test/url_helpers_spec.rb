@@ -258,4 +258,26 @@ describe "Registration::UrlHelpers" do
       expect(Registration::UrlHelpers.slp_discovery_feedback).to eql(services)
     end
   end
+
+  describe ".boot_reg_url" do
+    before do
+      allow(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
+    end
+
+    context "when a URL was given through Linuxrc" do
+      let(:url) { "http://smt.example.com" }
+
+      it "returns that URL" do
+        expect(Registration::UrlHelpers.boot_reg_url).to eq(url)
+      end
+    end
+
+    context "when no URL was given through Linuxrc" do
+      let(:url) { nil }
+
+      it "returns nil" do
+        expect(Registration::UrlHelpers.boot_reg_url).to be_nil
+      end
+    end
+  end
 end
