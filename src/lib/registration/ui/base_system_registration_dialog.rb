@@ -220,20 +220,23 @@ module Registration
         @reg_options = {
           reg_code:   reg_code,
           email:      options.email,
-          custom_url: options.custom_url || boot_url || default_url
+          custom_url: options.custom_url || default_url
         }
       end
 
       # Default registration server
       #
+      # The boot_url takes precedence over the SUSE::Connect default
+      # one.
+      #
       # @return [String] URL for the registration server
       def default_url
-        @default_url ||= SUSE::Connect::Config.new.url
+        @default_url ||= boot_url || SUSE::Connect::Config.new.url
       end
 
       # Registration server URL given through Linuxrc
       #
-      # @retrun [String,nil] URL for the registration server; nil if not given.
+      # @return [String,nil] URL for the registration server; nil if not given.
       def boot_url
         @boot_url ||= UrlHelpers.boot_reg_url
       end
@@ -247,8 +250,8 @@ module Registration
             RadioButton(
               Id(:register_scc),
               Opt(:notify),
-              # TRANSLATORS: radio button
-              _("Register System via scc.suse.com"),
+              # TRANSLATORS: radio button; %s is a host name.
+              format(_("Register System via %s"), URI(default_url).host.downcase),
               action == :register_scc
             )
           ),
