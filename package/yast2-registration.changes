@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun  3 09:53:50 UTC 2016 - igonzalezsosa@suse.com
+
+- regurl parameter overwrites default SCC registration URL
+  (bsc#982974)
+- 3.1.174
+
+-------------------------------------------------------------------
 Mon May 23 12:27:38 UTC 2016 - igonzalezsosa@suse.com
 
 - Redesigned UI for the registration of the base system

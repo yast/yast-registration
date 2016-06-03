@@ -86,6 +86,36 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         end
       end
 
+      context "when user sets a registration URL through regurl= parameter" do
+        let(:regurl) { "https://example.suse.net" }
+
+        before do
+          allow(Registration::UrlHelpers).to receive(:boot_reg_url).and_return(regurl)
+        end
+
+        it "uses the given URL to register the system" do
+          expect(Yast::UI).to receive(:QueryWidget).with(:email, :Value)
+            .and_return(email)
+          expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value)
+            .and_return(reg_code)
+          expect(Yast::UI).to receive(:UserInput).and_return(:next)
+
+          options = Registration::Storage::InstallationOptions.instance
+          # Avoid modifying the singleton object
+          expect(options).to receive(:email=).with(email)
+          expect(options).to receive(:email).and_return(email)
+          expect(options).to receive(:reg_code=).with(reg_code)
+          expect(options).to receive(:reg_code).and_return(reg_code)
+          expect(options).to receive(:custom_url=).with(regurl)
+          expect(options).to receive(:custom_url).and_return(regurl)
+
+          expect(registration_ui).to receive(:register_system_and_base_product)
+            .and_return([true, nil])
+
+          expect(subject.run).to eq(:next)
+        end
+      end
+
       context "when user enters a local SMT server" do
         it "registers the system via local SMT server" do
           allow(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
