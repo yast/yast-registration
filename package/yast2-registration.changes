@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jun 13 17:08:26 UTC 2016 - lslezak@suse.cz
+
+- Automatically preselect the Toolchain module on ARM in SLES12-SP2
+  (FATE#320679)
+- 3.1.175
+
+-------------------------------------------------------------------
 Fri Jun  3 09:53:50 UTC 2016 - igonzalezsosa@suse.com
 
 - regurl parameter overwrites default SCC registration URL
