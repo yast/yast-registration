@@ -4,6 +4,7 @@ require "yast"
 require "registration/ui/abort_confirmation"
 require "registration/addon"
 require "registration/addon_sorter"
+require "registration/sw_mgmt"
 
 module Registration
   module UI
@@ -21,6 +22,7 @@ module Registration
       Yast.import "UI"
       Yast.import "Wizard"
       Yast.import "Stage"
+      Yast.import "Arch"
 
       # constructor
       # @param registration [Registration::Registration] use this Registration object for
@@ -33,6 +35,9 @@ module Registration
         @addons.sort!(&::Registration::ADDON_SORTER)
 
         @old_selection = Addon.selected.dup
+
+        # activate a workaround on ARM (FATE#320679)
+        aarch64_workaround if Arch.aarch64
 
         log.info "Available addons: #{@addons}"
       end
@@ -259,6 +264,26 @@ module Registration
           # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log"\
               "into the SUSE Customer Center and remove them manually there.</p>")
+      end
+
+      # workaround for FATE#320679 - preselect the Toolchain module on ARM
+      # in SLES12-SP2
+      # FIXME: remove this hack in SLES12-SP3, use a proper solution instead
+      def aarch64_workaround
+        # SLES12-SP2 base?
+        product = SwMgmt.base_product_to_register
+        return unless product["name"] == "SLES" && product["version"] == "12.2"
+
+        # is the Toolchain module available?
+        toolchain = @addons.find do |addon|
+          addon.identifier == "sle-module-toolchain" && addon.version == "12" \
+            && addon.arch == "aarch64"
+        end
+        return unless toolchain
+
+        # then pre-select it!
+        log.info "Activating the ARM64 workaround, preselecting addon: #{toolchain}"
+        toolchain.selected
       end
     end
   end

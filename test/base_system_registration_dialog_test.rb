@@ -38,6 +38,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       before do
         allow(Registration::UrlHelpers).to receive(:registration_url).and_return(nil)
         allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
+        allow(Registration::Helpers).to receive(:reset_registration_status)
       end
 
       context "when user enters a correct regcode" do
