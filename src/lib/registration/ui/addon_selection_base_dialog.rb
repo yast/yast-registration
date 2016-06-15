@@ -268,6 +268,7 @@ module Registration
 
       # workaround for FATE#320679 - preselect the Toolchain module on ARM
       # in SLES12-SP2
+      # FIXME: remove this hack in SLES12-SP3, use a proper solution instead
       def aarch64_workaround
         # SLES12-SP2 base?
         product = SwMgmt.base_product_to_register
