@@ -279,8 +279,15 @@ module Registration
       #
       # @return [Yast::Term] UI terms
       def register_local_option
-        # If not special URL is used, show an example one.
-        url = using_default_url? ? EXAMPLE_SMT_URL : reg_options[:custom_url]
+        # If not special URL is used, probe with SLP
+        if using_default_url?
+          services = UrlHelpers.slp_discovery_feedback
+          urls = services.map { |svc| UrlHelpers.service_url(svc.slp_url) }
+          urls = [EXAMPLE_SMT_URL] if urls.empty?
+        else
+          urls = [reg_options[:custom_url]]
+        end
+
         VBox(
           Left(
             RadioButton(
@@ -296,8 +303,10 @@ module Registration
             HBox(
               HSpacing(5),
               VBox(
-                MinWidth(REG_CODE_WIDTH, InputField(Id(:custom_url),
-                  _("&Local Registration Server URL"), url))
+                MinWidth(REG_CODE_WIDTH,
+                  ComboBox(Id(:custom_url), Opt(:editable),
+                    _("&Local Registration Server URL"), urls)
+                )
               )
             )
           ),
