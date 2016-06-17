@@ -204,7 +204,7 @@ module Registration
       # Read registration options from Storage::InstallationOptions
       # and, if needed, from Storage::RegCodes.
       #
-      # @retun [Hash] Hash containing values for :reg_code,
+      # @return [Hash] Hash containing values for :reg_code,
       #               :email and :custom_url.
       def reg_options
         return @reg_options unless @reg_options.nil?
@@ -512,7 +512,8 @@ module Registration
 
       # This method check whether the input is valid
       #
-      # It relies in methods "validate_#{action}". For example, #validate_register_local.
+      # It relies on methods "validate_#!{action}".
+      # For example, {#validate_register_local}.
       # It's intended to be used when the user clicks "Next" button.
       #
       # @return [Boolean] True if input is valid; false otherwise.

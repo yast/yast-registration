@@ -48,7 +48,6 @@ module Registration
     # SLP service name
     SLP_SERVICE = "registration.suse"
 
-    # Get the language for using in HTTP requests (in "Accept-Language" header)
     # Evaluate the registration URL to use
     # @see https://github.com/yast/yast-registration/wiki/Changing-the-Registration-Server
     # for details
@@ -85,6 +84,7 @@ module Registration
       url
     end
 
+    # @return [void]
     def self.reset_registration_url
       ::Registration::Storage::Cache.instance.reg_url = nil
       ::Registration::Storage::Cache.instance.reg_url_cached = false
@@ -93,12 +93,14 @@ module Registration
     # convert service URL to plain URL, remove the SLP service prefix
     # "service:registration.suse:smt:https://scc.suse.com/connect" ->
     # "https://scc.suse.com/connect"
+    # @param service [String]
+    # @return [String]
     def self.service_url(service)
       service.sub(/\Aservice:#{Regexp.escape(SLP_SERVICE)}:[^:]+:/, "")
     end
 
-    # return "credentials" parameter from URL
-    # raises URI::InvalidURIError if URL is invalid
+    # @return [String] "credentials" parameter from URL
+    # @raise [URI::InvalidURIError] if URL is invalid
     # @param url [String] URL as string
     def self.credentials_from_url(url)
       parsed_url = URI(url)
@@ -108,6 +110,7 @@ module Registration
     end
 
     # get registration URL in installation mode
+    # @return (see registration_url)
     def self.reg_url_at_installation
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
@@ -121,6 +124,7 @@ module Registration
     end
 
     # get registration URL from AutoYaST configuration file
+    # @return (see registration_url)
     def self.reg_url_from_autoyast_config
       server = ::Registration::Storage::Config.instance.reg_server
       return server if server && !server.empty?
@@ -128,6 +132,7 @@ module Registration
     end
 
     # get registration URL in upgrade mode
+    # @return (see registration_url)
     def self.reg_url_at_upgrade
       # in online upgrade mode behave like in installed system
       return reg_url_at_running_system if Yast::Installation.destdir == "/"
@@ -162,6 +167,7 @@ module Registration
     end
 
     # get registration URL in running system
+    # @return (see registration_url)
     def self.reg_url_at_running_system
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
@@ -176,7 +182,7 @@ module Registration
       slp_service_url
     end
 
-    # return the boot command line parameter
+    # @return [String,nil] the boot command line parameter
     def self.boot_reg_url
       reg_url = Yast::Linuxrc.InstallInf("regurl")
       log.info "Boot regurl option: #{reg_url.inspect}"
@@ -187,6 +193,7 @@ module Registration
     private_class_method :reg_url_at_running_system, :reg_url_at_upgrade,
       :reg_url_at_installation
 
+    # @return (see registration_url)
     def self.slp_service_url
       log.info "Starting SLP discovery..."
       url = Yast::WFM.call("discover_registration_services")
@@ -195,6 +202,7 @@ module Registration
       url
     end
 
+    # @return [Array<Yast::SlpServiceClass::Service>]
     def self.slp_discovery
       log.info "Searching for #{SLP_SERVICE} SLP services"
       services = Yast::SlpService.all(SLP_SERVICE)
@@ -207,6 +215,7 @@ module Registration
       services
     end
 
+    # @return [Array<Yast::SlpServiceClass::Service>]
     def self.slp_discovery_feedback
       Yast::Popup.Feedback(_("Searching..."), _("Looking up local registration servers...")) do
         slp_discovery
