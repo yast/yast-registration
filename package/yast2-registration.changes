@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun 17 12:45:21 UTC 2016 - mvidner@suse.com
+
+- For "Register System via local SMT Server" offer a list of servers
+  found with SLP (bsc#981633).
+- 3.1.176
+
+-------------------------------------------------------------------
 Mon Jun 13 17:08:26 UTC 2016 - lslezak@suse.cz
 
 - Automatically preselect the Toolchain module on ARM in SLES12-SP2
