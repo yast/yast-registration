@@ -52,6 +52,7 @@ module Registration
     textdomain "registration"
 
     ZYPP_DIR = "/etc/zypp"
+    ZYPP_CREDENTIALS_DIR = "/etc/zypp/credentials.d"
 
     FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
       "flavor" => "DVD", "version_version" => "12", "register_release" => "",
@@ -118,18 +119,13 @@ module Registration
     # structure into a writable temporary directory and override the original
     # location by "mount -o bind"
     def self.zypp_config_writable!
-      return if !(Mode.installation || Mode.update) || File.writable?(ZYPP_DIR)
+      return if !(Mode.installation || Mode.update) ||
+        (File.writable?(ZYPP_DIR) && File.writable?(ZYPP_CREDENTIALS_DIR))
 
-      log.info "Copying libzypp config to a writable place"
-
-      # create writable zypp directory structure in /tmp
-      tmpdir = Dir.mktmpdir
-
-      log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
-      ::FileUtils.cp_r ZYPP_DIR, tmpdir
-
-      log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
-      `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
+      make_writable(ZYPP_DIR) unless File.writable?(ZYPP_DIR)
+      # we need to handle the "credentials.d" subdirectory separately as
+      # it might be already overriden by a driver update (see bsc#967828)
+      make_writable(ZYPP_CREDENTIALS_DIR) unless File.writable?(ZYPP_CREDENTIALS_DIR)
     end
 
     def self.find_base_product
@@ -517,6 +513,21 @@ module Registration
       raise PkgError.new, Pkg.LastError
     end
 
-    private_class_method :each_repo
+    # make the directory writable
+    # copies the content of the directory to a temporary writable directory
+    # and overrides the original directory by "mount -o bind"
+    # @param [String] dir target directory name
+    def self.make_writable(dir)
+      # create writable zypp directory structure in /tmp
+      tmpdir = Dir.mktmpdir
+
+      log.info "Copying #{dir} to #{tmpdir} ..."
+      ::FileUtils.cp_r dir, tmpdir
+
+      log.info "Mounting #{tmpdir} to #{dir}"
+      `mount -o bind #{tmpdir}/zypp #{dir}`
+    end
+
+    private_class_method :each_repo, :make_writable
   end
 end
