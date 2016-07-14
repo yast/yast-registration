@@ -53,13 +53,13 @@ module Registration
 
     textdomain "registration"
 
-    ZYPP_DIR = "/etc/zypp"
+    ZYPP_DIR = "/etc/zypp".freeze
 
     FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
       "flavor" => "DVD", "version_version" => "12", "register_release" => "",
-      "register_target" => "sle-12-x86_64" }
+      "register_target" => "sle-12-x86_64" }.freeze
 
-    OEM_DIR = "/var/lib/suseRegister/OEM"
+    OEM_DIR = "/var/lib/suseRegister/OEM".freeze
 
     # initialize the package management
     # @param [Boolean] load_packages load also the available packages from the repositories

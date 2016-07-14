@@ -43,10 +43,10 @@ module Registration
     Yast.import "SlpService"
 
     # name of the boot parameter
-    BOOT_PARAM = "reg_url"
+    BOOT_PARAM = "reg_url".freeze
 
     # SLP service name
-    SLP_SERVICE = "registration.suse"
+    SLP_SERVICE = "registration.suse".freeze
 
     # Evaluate the registration URL to use
     # @see https://github.com/yast/yast-registration/wiki/Changing-the-Registration-Server

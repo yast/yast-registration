@@ -3,8 +3,8 @@ module Registration
   class Fingerprint
     attr_reader :sum, :value
 
-    SHA1 = "SHA1"
-    SHA256 = "SHA256"
+    SHA1 = "SHA1".freeze
+    SHA256 = "SHA256".freeze
 
     def initialize(sum, value)
       @sum = sum

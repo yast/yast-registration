@@ -23,7 +23,7 @@ module Registration
         :addons, :do_registration, :email, :install_updates,
         :reg_code, :reg_server, :reg_server_cert, :reg_server_cert_fingerprint,
         :reg_server_cert_fingerprint_type, :slp_discovery
-      ]
+      ].freeze
 
       # widgets containing data (serialized to the exported Hash)
       # (:addons belongs to a push button, it does not contain any data)

@@ -34,7 +34,7 @@ module Registration
     include Yast::Logger
 
     # name of the directory index file with list of available files
-    INDEX_FILE = "directory.yast"
+    INDEX_FILE = "directory.yast".freeze
 
     # the constructor
     # @param base_url [String] the base URL for EULAs

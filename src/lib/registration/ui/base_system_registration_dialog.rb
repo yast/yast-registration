@@ -36,7 +36,7 @@ module Registration
         register_scc:      [:email, :reg_code],
         register_local:    [:custom_url],
         skip_registration: []
-      }
+      }.freeze
       private_constant :WIDGETS
 
       # create and run the dialog for registering the base system
@@ -273,7 +273,7 @@ module Registration
       end
 
       # Example URL to be used in the :register_local UI
-      EXAMPLE_SMT_URL = "https://smt.example.com"
+      EXAMPLE_SMT_URL = "https://smt.example.com".freeze
 
       # Widgets for :register_local action
       #
@@ -542,7 +542,7 @@ module Registration
         end
       end
 
-      VALID_CUSTOM_URL_SCHEMES = ["http", "https"]
+      VALID_CUSTOM_URL_SCHEMES = ["http", "https"].freeze
 
       # Determine whether an URL is valid and suitable to be used as local SMT server
       #

@@ -45,7 +45,7 @@ module Registration
     Yast.import "SlpService"
 
     # reg. code replacement
-    FILTERED = "[FILTERED]"
+    FILTERED = "[FILTERED]".freeze
 
     # Get the current language (without encoding suffix)
     # @return [String,nil] the current language or nil if set to "POSIX" or "C"

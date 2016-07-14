@@ -37,7 +37,7 @@ module Registration
     REGCODES_NAME_HANDLERS = {
       "regcodes.xml" => :reg_codes_from_xml,
       "regcodes.txt" => :reg_codes_from_txt
-    }
+    }.freeze
 
     # @return [Hash{String => String},nil]
     def reg_codes_from_usb_stick

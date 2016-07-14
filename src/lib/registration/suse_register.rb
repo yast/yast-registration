@@ -3,8 +3,8 @@ require "uri"
 module Registration
   # class to read and query old suse register configuration file
   class SuseRegister
-    PATH = "/etc/suseRegister.conf"
-    NCC_HOST = "secure-www.novell.com"
+    PATH = "/etc/suseRegister.conf".freeze
+    NCC_HOST = "secure-www.novell.com".freeze
 
     def initialize(root)
       @found = read_conf(root)

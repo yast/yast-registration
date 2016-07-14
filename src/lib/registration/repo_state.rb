@@ -38,7 +38,7 @@ module Registration
     attr_accessor :repositories
 
     # location of the persistent storage (to store the data when restarting YaST)
-    REPO_STATE_FILE = "/var/lib/YaST2/migration_repo_state.yml"
+    REPO_STATE_FILE = "/var/lib/YaST2/migration_repo_state.yml".freeze
 
     def initialize
       @repositories = []
