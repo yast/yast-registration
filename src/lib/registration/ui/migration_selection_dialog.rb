@@ -130,8 +130,7 @@ module Registration
           VSpacing(1),
           migration_selection_widget,
           VWeight(15,
-            RichText(Id(:details), Opt(:vstretch), "")
-          ),
+            RichText(Id(:details), Opt(:vstretch), "")),
 
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # TRANSLATORS: check button label
@@ -150,8 +149,7 @@ module Registration
         VWeight(weight,
           # TRANSLATORS: selection box label
           SelectionBox(Id(:migration_targets), Opt(:vstretch, :notify),
-            _("Possible Migration Targets"), migration_items)
-        )
+            _("Possible Migration Targets"), migration_items))
       end
 
       # list of items for the main widget
@@ -215,7 +213,8 @@ module Registration
                 "registration server (%{url}). Make the product available " \
                 "to allow using this migration.") %
             { product: product_name, url: url },
-            "red")
+            "red"
+          )
         end
 
         if !installed_product

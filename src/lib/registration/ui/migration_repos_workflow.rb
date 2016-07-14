@@ -110,7 +110,7 @@ module Registration
           next:   "update_releasever"
         },
         "update_releasever"           => {
-          next:   "register_migration_products"
+          next: "register_migration_products"
         },
         "register_migration_products" => {
           abort:  :rollback,

@@ -9,9 +9,11 @@ describe Registration::UI::MigrationReposSelectionDialog do
     before do
       allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([0, 1])
       allow(Yast::Pkg).to receive(:SourceGeneralData).with(0).and_return(
-        "name" => "name", "url" => "https://example.com", "enabled" => false)
+        "name" => "name", "url" => "https://example.com", "enabled" => false
+      )
       allow(Yast::Pkg).to receive(:SourceGeneralData).with(1).and_return(
-        "name" => "name2", "url" => "https://example2.com", "enabled" => true)
+        "name" => "name2", "url" => "https://example2.com", "enabled" => true
+      )
       allow(Yast::UI).to receive(:QueryWidget).with(:repos, :CurrentItem).and_return(0)
 
       # check the displayed content

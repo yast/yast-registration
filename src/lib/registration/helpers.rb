@@ -165,8 +165,11 @@ module Registration
     def self.render_erb_template(file, binding)
       # use erb template for rendering the richtext summary
 
-      erb_file = Pathname.new(file).absolute? ? file :
+      erb_file = if Pathname.new(file).absolute?
+        file
+      else
         File.expand_path(File.join("../../../data/registration", file), __FILE__)
+      end
 
       log.info "Loading ERB template #{erb_file}"
       erb = ERB.new(File.read(erb_file))

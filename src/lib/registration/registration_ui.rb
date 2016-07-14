@@ -104,7 +104,8 @@ module Registration
           _(CONTACTING_MESSAGE),
           # updating base product registration, %s is a new base product name
           _("Updating to %s ...") % SwMgmt.product_label(
-            SwMgmt.find_base_product)
+            SwMgmt.find_base_product
+          )
         ) do
           registration.upgrade_product(base_product)
         end
@@ -176,7 +177,8 @@ module Registration
     def get_available_addons
       Yast::Popup.Feedback(
         _(CONTACTING_MESSAGE),
-        _("Loading Available Extensions and Modules...")) do
+        _("Loading Available Extensions and Modules...")
+      ) do
         Addon.find_all(registration)
       end
     end
@@ -190,7 +192,8 @@ module Registration
     def migration_products(products)
       Yast::Popup.Feedback(
         _(CONTACTING_MESSAGE),
-        _("Loading Migration Products...")) do
+        _("Loading Migration Products...")
+      ) do
         registration.migration_products(products)
       end
     end
@@ -280,8 +283,7 @@ module Registration
       base_product = SwMgmt.find_base_product
 
       Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-        _("Registering %s ...") % SwMgmt.product_label(base_product)
-      ) do
+        _("Registering %s ...") % SwMgmt.product_label(base_product)) do
         base_product_data = SwMgmt.base_product_to_register
         base_product_data["reg_code"] = options.reg_code
         registration.register_product(base_product_data, options.email)
@@ -295,9 +297,10 @@ module Registration
 
       product_succeed = registration_order.map do |product|
         registered = ConnectHelpers.catch_registration_errors(
-          message_prefix: "#{product.label}\n") do
-            register_selected_addon(product, known_reg_codes[product.identifier])
-          end
+          message_prefix: "#{product.label}\n"
+        ) do
+          register_selected_addon(product, known_reg_codes[product.identifier])
+        end
 
         # remove from selected after successful registration
         if registered
@@ -313,7 +316,8 @@ module Registration
       product_service = Yast::Popup.Feedback(
         _(CONTACTING_MESSAGE),
         # %s is name of given product
-        _("Registering %s ...") % product.label) do
+        _("Registering %s ...") % product.label
+      ) do
         product_data = {
           "name"     => product.identifier,
           "reg_code" => reg_code,

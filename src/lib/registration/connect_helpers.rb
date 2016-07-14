@@ -284,7 +284,8 @@ module Registration
         if Yast::Popup.YesNo(
           # Error popup
           _("Network is not configured, the registration server cannot be reached.\n" \
-              "Do you want to configure the network now?"))
+              "Do you want to configure the network now?")
+        )
 
           Helpers.run_network_configuration
         end

@@ -54,8 +54,7 @@ module Yast
           ),
           VSpacing(Opt(:vstretch), 1),
           button_box
-        )
-      )
+        ))
     end
 
     def handle_dialog

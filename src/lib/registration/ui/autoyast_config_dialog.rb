@@ -111,8 +111,7 @@ module Registration
               Left(CheckBox(Id(:install_updates),
                 _("Install Available Updates from Update Repositories"),
                 config.install_updates))
-            )
-          )
+            ))
         )
       end
 
@@ -166,8 +165,7 @@ module Registration
                 _("SSL Certificate Fingerprint"),
                 config.reg_server_cert_fingerprint
               )
-            )
-          )
+            ))
         )
       end
 

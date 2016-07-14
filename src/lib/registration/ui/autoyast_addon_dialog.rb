@@ -69,8 +69,7 @@ module Registration
             PushButton(Id(:delete), Label.DeleteButton),
             HSpacing(0.5),
             # button label
-            PushButton(Id(:download), _("Download Available Extensions...")
-            )
+            PushButton(Id(:download), _("Download Available Extensions..."))
           )
         )
       end

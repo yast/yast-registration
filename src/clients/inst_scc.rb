@@ -202,12 +202,10 @@ module Yast
         end
       end
 
-      if Mode.normal && ::Registration::Registration.is_registered?
-        log.info "The system is already registered, displaying registered dialog"
-        return ::Registration::UI::RegisteredSystemDialog.run
-      else
-        return :register
-      end
+      return :register unless Mode.normal && ::Registration::Registration.is_registered?
+
+      log.info "The system is already registered, displaying registered dialog"
+      ::Registration::UI::RegisteredSystemDialog.run
     end
 
     # display EULAs for the selected addons

@@ -44,7 +44,8 @@ describe "Registration::Downloader" do
       expect_any_instance_of(Net::HTTP).to receive(:proxy?).and_return(false)
 
       expect { Registration::Downloader.download(url) }.to raise_error(
-        Registration::DownloadError, "Downloading #{url} failed: Not Found")
+        Registration::DownloadError, "Downloading #{url} failed: Not Found"
+      )
     end
 
     it "handles HTTP redirection" do

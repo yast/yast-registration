@@ -36,10 +36,10 @@ module Registration
       include RegistrationCodesLoader
 
       def initialize
-        if Stage.initial
-          self.reg_codes = reg_codes_from_usb_stick || {}
+        self.reg_codes = if Stage.initial
+          reg_codes_from_usb_stick || {}
         else
-          self.reg_codes = {}
+          {}
         end
       end
     end

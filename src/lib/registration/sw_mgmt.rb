@@ -251,8 +251,7 @@ module Registration
           "name"        => service_name,
           "url"         => product_service.url.to_s,
           "enabled"     => true,
-          "autorefresh" => true
-          )
+          "autorefresh" => true)
 
           ## error message
           raise ::Registration::ServiceError.new(N_("Updating service '%s' failed."), service_name)
@@ -495,8 +494,7 @@ module Registration
 
           # TRANSLATORS: %s is a product name
           Report.Error(_("Cannot find remote product %s.\n" \
-                "The product cannot be registered.") % product_label
-          )
+                "The product cannot be registered.") % product_label)
         end
       end
     end

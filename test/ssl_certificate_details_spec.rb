@@ -5,7 +5,8 @@ require_relative "spec_helper"
 describe "Registration::SslCertificateDetails" do
   subject do
     Registration::SslCertificateDetails.new(
-      Registration::SslCertificate.load_file(fixtures_file("test.pem")))
+      Registration::SslCertificate.load_file(fixtures_file("test.pem"))
+    )
   end
 
   let(:identity) do
@@ -48,7 +49,7 @@ SHA1 Fingerprint:
 SHA256 Fingerprint: 
    #{sha256sum}
 EOS
-      # rubocop:enable Style/TrailingWhitespace
+        # rubocop:enable Style/TrailingWhitespace
       )
     end
 

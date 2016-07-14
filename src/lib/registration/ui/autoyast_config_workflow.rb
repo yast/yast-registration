@@ -103,7 +103,8 @@ module Registration
         success = ConnectHelpers.catch_registration_errors do
           Popup.Feedback(
             SccAutoClient::CONTACTING_MESSAGE,
-            _("Loading Available Extensions and Modules...")) do
+            _("Loading Available Extensions and Modules...")
+          ) do
             # reset registration status to allow selecting all addons
             ::Registration::Addon.find_all(registration).each(&:unregistered)
           end
