@@ -160,7 +160,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       end
     end
 
-    context "when system is already registered"  do
+    context "when system is already registered" do
       let(:registered?) { true }
 
       context "in installation mode" do

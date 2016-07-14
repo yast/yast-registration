@@ -80,7 +80,7 @@ module Registration
     # @param service [Yast::SlpServiceClass::Service] SLP service
     # @return [String] label
     def self.service_description(service)
-      url  = UrlHelpers.service_url(service.slp_url)
+      url = UrlHelpers.service_url(service.slp_url)
       descr = service.attributes.to_h[:description]
 
       # display URL and the description if it is present

@@ -145,7 +145,7 @@ module Registration
       # @return [Hash, nil] found addon or nil
       def find_addon(addon)
         config.addons.find do |a|
-          a["name"] == addon["name"] &&  a["version"] == addon["version"] &&
+          a["name"] == addon["name"] && a["version"] == addon["version"] &&
             a["arch"] == addon["arch"] && a["release_type"] == addon["release_type"]
         end
       end
