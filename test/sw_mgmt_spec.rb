@@ -136,14 +136,16 @@ describe Registration::SwMgmt do
       expect(Yast::Pkg).to receive(:ServiceAliases).and_return([])
       expect(Yast::Pkg).to receive(:ServiceAdd).with(service_name, service_url).and_return(true)
       expect(Yast::Pkg).to receive(:ServiceSet).with(
-        service_name, hash_including("autorefresh" => true)).and_return(true)
+        service_name, hash_including("autorefresh" => true)
+      ).and_return(true)
       expect { subject.add_service(product_service, credentials) }.to_not raise_error
     end
 
     it "updates the existing service if the service already exists" do
       expect(Yast::Pkg).to receive(:ServiceAliases).and_return([service_name])
       expect(Yast::Pkg).to receive(:ServiceSet).with(
-        service_name, hash_including("url" => service_url)).and_return(true)
+        service_name, hash_including("url" => service_url)
+      ).and_return(true)
       expect { subject.add_service(product_service, credentials) }.to_not raise_error
     end
   end

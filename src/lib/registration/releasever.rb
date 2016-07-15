@@ -25,7 +25,7 @@ module Registration
     include Yast::Logger
 
     # the environment variable which overrides the system default in libzpp
-    RELEASEVER_ENV = "ZYPP_REPO_RELEASEVER"
+    RELEASEVER_ENV = "ZYPP_REPO_RELEASEVER".freeze
 
     Yast.import "Pkg"
 

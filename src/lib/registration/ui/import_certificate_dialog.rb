@@ -25,7 +25,7 @@ module Registration
         18 => N_("Self signed certificate"),
         # SSL error message
         19 => N_("Self signed certificate in certificate chain")
-      }
+      }.freeze
 
       Yast.import "UI"
       Yast.import "Label"

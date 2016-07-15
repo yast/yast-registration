@@ -45,7 +45,7 @@ module Registration
     Yast.import "SlpService"
 
     # reg. code replacement
-    FILTERED = "[FILTERED]"
+    FILTERED = "[FILTERED]".freeze
 
     # Get the current language (without encoding suffix)
     # @return [String,nil] the current language or nil if set to "POSIX" or "C"
@@ -80,7 +80,7 @@ module Registration
     # @param service [Yast::SlpServiceClass::Service] SLP service
     # @return [String] label
     def self.service_description(service)
-      url  = UrlHelpers.service_url(service.slp_url)
+      url = UrlHelpers.service_url(service.slp_url)
       descr = service.attributes.to_h[:description]
 
       # display URL and the description if it is present
@@ -165,8 +165,11 @@ module Registration
     def self.render_erb_template(file, binding)
       # use erb template for rendering the richtext summary
 
-      erb_file = Pathname.new(file).absolute? ? file :
+      erb_file = if Pathname.new(file).absolute?
+        file
+      else
         File.expand_path(File.join("../../../data/registration", file), __FILE__)
+      end
 
       log.info "Loading ERB template #{erb_file}"
       erb = ERB.new(File.read(erb_file))

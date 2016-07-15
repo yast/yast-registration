@@ -20,8 +20,7 @@ describe Registration::Registration do
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(token: reg_code), target_distro)
-        .and_return([username, password])
-      )
+        .and_return([username, password]))
 
       Registration::Registration.new.register("email", reg_code, target_distro)
     end
@@ -63,10 +62,13 @@ describe Registration::Registration do
         .with("SUSE_SLES_SAP" => "SLES_SAP")
 
       allow(File).to receive(:exist?).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(true)
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
+      ).and_return(true)
       allow(File).to receive(:read).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE).and_return(
-          "username=SCC_foo\npassword=bar")
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
+      ).and_return(
+        "username=SCC_foo\npassword=bar"
+      )
 
       registered_service = Registration::Registration.new.send(yast_method, product)
       expect(registered_service).to eq(service)
@@ -157,7 +159,8 @@ describe Registration::Registration do
       expect(logger).to receive(:error).with(/SSL verification failed:/)
       # the exception is logged
       expect(logger).to receive(:error).with(
-        /Exception in SSL verify callback: OpenSSL::X509::CertificateError/)
+        /Exception in SSL verify callback: OpenSSL::X509::CertificateError/
+      )
 
       allow(registration).to receive(:log).and_return(logger)
 
@@ -183,12 +186,13 @@ describe Registration::Registration do
     it "synchronizes the local products with the server" do
       expect(SUSE::Connect::YaST).to receive(:synchronize)
         .with([
-          OpenStruct.new(
-            arch:         "x86_64",
-            identifier:   "SLES",
-            version:      "12",
-            release_type: nil
-          )])
+                OpenStruct.new(
+                  arch:         "x86_64",
+                  identifier:   "SLES",
+                  version:      "12",
+                  release_type: nil
+                )
+              ])
 
       subject.synchronize_products([installed_sles])
     end
@@ -204,7 +208,8 @@ describe Registration::Registration do
             version:      "12-0",
             release_type: nil
           ),
-          anything)
+          anything
+        )
 
       expect(subject.downgrade_product(installed_sles))
     end

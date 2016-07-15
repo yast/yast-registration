@@ -69,8 +69,7 @@ module Registration
             PushButton(Id(:delete), Label.DeleteButton),
             HSpacing(0.5),
             # button label
-            PushButton(Id(:download),  _("Download Available Extensions...")
-            )
+            PushButton(Id(:download), _("Download Available Extensions..."))
           )
         )
       end
@@ -171,7 +170,7 @@ module Registration
       def set_addon_table_content(current = nil)
         content = addons.map do |a|
           Item(Id(a["name"]), a["name"], a["version"], a["arch"],
-            a["release_type"],  a["reg_code"])
+            a["release_type"], a["reg_code"])
         end
 
         Yast::UI.ChangeWidget(Id(:addons_table), :Items, content)

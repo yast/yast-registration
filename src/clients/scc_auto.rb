@@ -326,7 +326,8 @@ module Yast
       Popup.Feedback(
         _(CONTACTING_MESSAGE),
         # %s is name of given product
-        _("Registering %s ...") % addon["name"]) do
+        _("Registering %s ...") % addon["name"]
+      ) do
         registration.register_product(addon)
       end
     end

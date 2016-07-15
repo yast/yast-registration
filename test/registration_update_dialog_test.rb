@@ -13,18 +13,25 @@ describe Registration::UI::RegistrationUpdateDialog do
 
     it "updates system registration, base and add-on products" do
       expect_any_instance_of(Registration::RegistrationUI).to receive(
-        :update_system).and_return(true)
+        :update_system
+      ).and_return(true)
       allow_any_instance_of(Registration::RegistrationUI).to receive(
-        :update_base_product).and_return(
-          [true, load_yaml_fixture("remote_product.yml")])
+        :update_base_product
+      ).and_return(
+        [true, load_yaml_fixture("remote_product.yml")]
+      )
       allow_any_instance_of(Registration::RegistrationUI).to receive(
-        :install_updates?).and_return(false)
+        :install_updates?
+      ).and_return(false)
       allow_any_instance_of(Registration::RegistrationUI).to receive(
-        :disable_update_repos).and_return(true)
+        :disable_update_repos
+      ).and_return(true)
       allow_any_instance_of(Registration::RegistrationUI).to receive(
-        :get_available_addons).and_return([])
+        :get_available_addons
+      ).and_return([])
       allow_any_instance_of(Registration::RegistrationUI).to receive(
-        :update_addons).and_return([])
+        :update_addons
+      ).and_return([])
 
       expect(subject.run).to eq(:next)
     end

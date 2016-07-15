@@ -29,6 +29,12 @@ Metrics/MethodLength:
 Metrics/PerceivedComplexity:
   Max: 25
 
+# FIXME: It seems the cop does not handle this complex case correctly,
+# disable it for now on that file.
+Lint/ShadowedException:
+  Exclude:
+    - 'src/lib/registration/connect_helpers.rb'
+
 # Offense count: 5
 Style/AccessorMethodName:
   Enabled: false

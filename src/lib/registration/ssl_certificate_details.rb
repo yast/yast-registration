@@ -32,16 +32,16 @@ module Registration
 
     def summary(small_space: false)
       summary = _("Certificate:") + "\n" + _("Issued To") + "\n" + subject +
-        "\n" + _("Issued By")  + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
+        "\n" + _("Issued By") + "\n" + issuer + "\n" + _("SHA1 Fingerprint: ") +
         "\n" + INDENT + certificate.fingerprint(Fingerprint::SHA1).value + "\n" +
-        _("SHA256 Fingerprint: ")  + "\n"
+        _("SHA256 Fingerprint: ") + "\n"
 
       sha256 = certificate.fingerprint(Fingerprint::SHA256).value
-      if small_space
+      summary += if small_space
         # split the long SHA256 digest to two lines in small text mode UI
-        summary += INDENT + sha256[0..59] + "\n" + INDENT + sha256[60..-1]
+        INDENT + sha256[0..59] + "\n" + INDENT + sha256[60..-1]
       else
-        summary += INDENT + sha256
+        INDENT + sha256
       end
 
       summary

@@ -15,7 +15,7 @@ module Registration
       :live_installation,
       :autoinst,
       :update
-    ]
+    ].freeze
 
     def initialize
       textdomain "registration"

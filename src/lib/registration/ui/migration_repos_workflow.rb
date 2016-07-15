@@ -110,7 +110,7 @@ module Registration
           next:   "update_releasever"
         },
         "update_releasever"           => {
-          next:   "register_migration_products"
+          next: "register_migration_products"
         },
         "register_migration_products" => {
           abort:  :rollback,
@@ -131,7 +131,7 @@ module Registration
         "store_repos_state"           => {
           next: :next
         }
-      }
+      }.freeze
 
       # check whether the system is registered, ask the user to register it
       # if the system is not registered

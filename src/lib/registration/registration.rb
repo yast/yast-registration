@@ -183,10 +183,10 @@ module Registration
     end
 
     def service_for_product(product, &block)
-      if product.is_a?(Hash)
-        remote_product = SwMgmt.remote_product(product)
+      remote_product = if product.is_a?(Hash)
+        SwMgmt.remote_product(product)
       else
-        remote_product = product
+        product
       end
 
       log.info "Using product: #{remote_product}"

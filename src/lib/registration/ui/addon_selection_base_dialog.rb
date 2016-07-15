@@ -90,8 +90,7 @@ module Registration
       def details_widget
         MinHeight(8,
           VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an extension or a module to show details here") + "</small>"))
-        )
+                _("Select an extension or a module to show details here") + "</small>")))
       end
 
       # create UI box with addon check boxes, if the number of the addons is too big
@@ -129,10 +128,10 @@ module Registration
         box = VBox()
 
         # whether to add extra spacing in the UI
-        if Yast::UI.TextMode
-          add_extra_spacing = addons.size < 5
+        add_extra_spacing = if Yast::UI.TextMode
+          addons.size < 5
         else
-          add_extra_spacing = true
+          true
         end
 
         addons.each do |addon|

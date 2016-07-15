@@ -36,7 +36,7 @@ module Registration
         register_scc:      [:email, :reg_code],
         register_local:    [:custom_url],
         skip_registration: []
-      }
+      }.freeze
       private_constant :WIDGETS
 
       # create and run the dialog for registering the base system
@@ -273,7 +273,7 @@ module Registration
       end
 
       # Example URL to be used in the :register_local UI
-      EXAMPLE_SMT_URL = "https://smt.example.com"
+      EXAMPLE_SMT_URL = "https://smt.example.com".freeze
 
       # Widgets for :register_local action
       #
@@ -305,8 +305,7 @@ module Registration
               VBox(
                 MinWidth(REG_CODE_WIDTH,
                   ComboBox(Id(:custom_url), Opt(:editable),
-                    _("&Local Registration Server URL"), urls)
-                )
+                    _("&Local Registration Server URL"), urls))
               )
             )
           ),
@@ -339,13 +338,18 @@ module Registration
       # part of the main dialog definition - the base product details
       # @return [Yast::Term]  UI term
       def product_details_widgets
+        label = if Registration.is_registered?
+          Heading(_("The system is already registered."))
+        else
+          Label(_("Please select your preferred method of registration."))
+        end
+
         HSquash(
           VBox(
             VSpacing(1),
             Left(Heading(SwMgmt.product_label(SwMgmt.find_base_product))),
             VSpacing(1),
-            Registration.is_registered? ? Heading(_("The system is already registered.")) :
-              Label(_("Please select your preferred method of registration."))
+            label
           )
         )
       end
@@ -542,7 +546,7 @@ module Registration
         end
       end
 
-      VALID_CUSTOM_URL_SCHEMES = ["http", "https"]
+      VALID_CUSTOM_URL_SCHEMES = ["http", "https"].freeze
 
       # Determine whether an URL is valid and suitable to be used as local SMT server
       #

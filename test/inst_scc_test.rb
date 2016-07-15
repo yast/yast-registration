@@ -68,7 +68,8 @@ describe "inst_scc client" do
     it "switchs to manual registration when aborting selection of url" do
       # User cancels the selection of registration url
       expect_any_instance_of(Registration::UI::RegistrationUpdateDialog).to receive(
-        :init_registration).and_return(:cancel)
+        :init_registration
+      ).and_return(:cancel)
       # So manual registration dialog is displayed
       expect_any_instance_of(Yast::InstSccClient).to receive(:register_base_system)
         .and_return(:cancel)
