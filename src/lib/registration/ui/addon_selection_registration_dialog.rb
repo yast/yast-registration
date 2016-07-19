@@ -59,9 +59,7 @@ module Registration
 
       # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
-        @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
-        end
+        Yast::UI.ChangeWidget(Id(:items), :Value, richtext_checkboxes(@addons))
       end
     end
   end

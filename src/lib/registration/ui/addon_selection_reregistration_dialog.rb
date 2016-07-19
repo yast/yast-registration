@@ -44,6 +44,8 @@ module Registration
           true
         )
 
+        reactivate_dependencies
+
         handle_dialog
       end
 
@@ -62,6 +64,8 @@ module Registration
       # empty implementation, allow reregistration of a dependant addon
       # without reregistering its parent
       def reactivate_dependencies
+        # FIXME: how to test this?
+        Yast::UI.ChangeWidget(Id(:items), :Value, richtext_checkboxes(@addons))
       end
     end
   end

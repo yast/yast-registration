@@ -76,12 +76,10 @@ module Registration
       # @return [Yast::Term] the main UI dialog term
       def content
         VBox(
-          VStretch(),
           Left(Heading(heading)),
           addons_box,
           Left(Label(_("Details"))),
-          details_widget,
-          VStretch()
+          details_widget
         )
       end
 
@@ -93,18 +91,60 @@ module Registration
                 _("Select an extension or a module to show details here") + "</small>")))
       end
 
+      # @return [String] a Value for a RichText
+      def richtext_checkboxes(addons)
+        items = addons.map do |addon|
+          # checkbox label for an unavailable extension
+          # (%s is an extension name)
+          label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
+
+          rt_cb(id: addon_widget_id(addon),
+                label: label,
+                selected: addon_selected?(addon),
+                enabled: addon.available?,
+                indented: addon.depends_on)
+        end
+        items.join("\n")
+      end
+
+      # FIXME: acknowledge Lada's code
+      # https://gist.github.com/lslezak/5ed82fe19337bef4807b
+
+      # FIXME: adapt to installation theme
+      IMG_ON = "/usr/share/YaST2/theme/current/wizard/checkbox-on.png"
+      IMG_OFF = "/usr/share/YaST2/theme/current/wizard/checkbox-off.png"
+
+      def rt_cb(id:, label:, selected:, enabled:,
+                indented: false, text_mode: Yast::UI.TextMode)
+        selected = false unless enabled
+        if text_mode
+          indent = "&nbsp;" * (indented ? 5 : 1)
+          check = selected ? "[x]" : "[ ]"
+          widget = "#{check} #{label}"
+          enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
+          "#{indent}#{enabled_widget}<br>"
+        else
+          indent = "&nbsp;" * (indented ? 7 : 1)
+          # FIXME: a disabled checkbox?
+          check = "<img src='#{selected ? IMG_ON : IMG_OFF}'></img>"
+          widget = "#{check} #{label}"
+          enabled_widget = if enabled
+            # FIXME: adapt to installation theme: find a suitable class?
+            "<a href='#{id}' style='text-decoration:none; color:black'>#{widget}</a>"
+          else
+            "<span style='color:grey'>#{widget}</span>"
+          end
+          "<p>#{indent}#{enabled_widget}</p>"
+        end
+      end
+
       # create UI box with addon check boxes, if the number of the addons is too big
       # the UI uses two column layout
       # @return [Yast::Term] the main UI dialog term
       def addons_box
-        lines = Yast::UI.TextMode ? 9 : 14
-        if @addons.size <= lines
-          content = addon_selection_items(@addons)
-        else
-          content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
-        end
+        content = RichText(Id(:items), richtext_checkboxes(@addons))
 
-        VWeight(75, MarginBox(2, 1, content))
+        VWeight(75, MinHeight(12, content))
       end
 
       # display the addon checkboxes in two columns
@@ -173,6 +213,8 @@ module Registration
       # the main event loop - handle the user in put in the dialog
       # @return [Symbol] the user input
       def handle_dialog
+        Yast::UI.SetFocus(Id(:items))
+
         ret = nil
         continue_buttons = [:next, :back, :abort, :skip]
 
@@ -211,7 +253,8 @@ module Registration
         return unless addon
 
         show_addon_details(addon)
-        if Yast::UI.QueryWidget(Id(addon_widget_id(addon)), :Value)
+        new_state = ! addon.selected?
+        if new_state
           addon.selected
         else
           addon.unselected
@@ -228,10 +271,9 @@ module Registration
       end
 
       # update the enabled/disabled status in UI for dependent addons
+      # FIXME: is this always overriden?
       def reactivate_dependencies
-        @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
-        end
+        Yast::UI.ChangeWidget(Id(:items), :Value, richtext_checkboxes(@addons))
       end
 
       # the maximum number of reg. codes displayed vertically,
