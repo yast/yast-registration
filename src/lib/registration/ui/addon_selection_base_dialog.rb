@@ -29,17 +29,19 @@ module Registration
       #   communication with SCC
       def initialize(registration)
         textdomain "registration"
-        @addons = Addon.find_all(registration)
+        @all_addons = Addon.find_all(registration)
 
         # sort the addons
-        @addons.sort!(&::Registration::ADDON_SORTER)
+        @all_addons.sort!(&::Registration::ADDON_SORTER)
+
+        @filtered_addons = @all_addons.reject(&:beta_release?)
 
         @old_selection = Addon.selected.dup
 
         # activate a workaround on ARM (FATE#320679)
         aarch64_workaround if Arch.aarch64
 
-        log.info "Available addons: #{@addons}"
+        log.info "Available addons: #{@all_addons}"
       end
 
       # reimplement this in a subclass
@@ -56,6 +58,12 @@ module Registration
       # @return [String] widget id
       def addon_widget_id(addon)
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # Enables or disables beta addons filtering
+      # @param [Boolean] enable true for filtering beta releases
+      def filter_beta_releases(enable)
+        @filtered_addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
       end
 
     private
@@ -98,10 +106,10 @@ module Registration
       # @return [Yast::Term] the main UI dialog term
       def addons_box
         lines = Yast::UI.TextMode ? 9 : 14
-        if @addons.size <= lines
-          content = addon_selection_items(@addons)
+        if @filtered_addons.size <= lines
+          content = addon_selection_items(@filtered_addons)
         else
-          content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
+          content = two_column_layout(@filtered_addons[lines..(2 * lines - 1)], @filtered_addons[0..(lines - 1)])
         end
 
         VWeight(75, MarginBox(2, 1, content))
@@ -207,7 +215,7 @@ module Registration
       # @param id [String] addon widget id
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @addons.find { |a| addon_widget_id(a) == id }
+        addon = @filtered_addons.find { |a| addon_widget_id(a) == id }
         return unless addon
 
         show_addon_details(addon)
@@ -229,7 +237,7 @@ module Registration
 
       # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
-        @addons.each do |addon|
+        @filtered_addons.each do |addon|
           Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
         end
       end

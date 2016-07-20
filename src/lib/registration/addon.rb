@@ -108,6 +108,7 @@ module Registration
       :name,
       :product_type,
       :release_type,
+      :release_stage,
       :version
 
     # the constructor
@@ -147,6 +148,10 @@ module Registration
     # just internally mark the addon as NOT registered, not a real unregistration
     def unregistered
       Addon.registered.delete(self) if registered?
+    end
+
+    def beta_release?
+      release_stage == "beta"
     end
 
     # get a product printable name (long name if present, fallbacks to the short name)
