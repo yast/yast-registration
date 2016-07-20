@@ -146,6 +146,20 @@ describe Registration::Addon do
     end
   end
 
+  describe "#beta_release?" do
+    it "returns if addon is beta release" do
+      product = addon_generator("release_stage" => "beta")
+      addon = Registration::Addon.new(product)
+
+      expect(addon.beta_release?).to eq(true)
+
+      product = addon_generator("release_stage" => "production")
+      addon = Registration::Addon.new(product)
+
+      expect(addon.beta_release?).to eq(false)
+    end
+  end
+
   describe "#label" do
     it "returns short name when the long name is nil" do
       product = addon_generator

@@ -34,7 +34,7 @@ module Registration
         # sort the addons
         @all_addons.sort!(&::Registration::ADDON_SORTER)
 
-        @addons = @all_addons.reject(&:beta_release?)
+        filter_beta_releases(true)
 
         @old_selection = Addon.selected.dup
 
