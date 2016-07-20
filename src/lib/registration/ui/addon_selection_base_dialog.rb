@@ -34,7 +34,7 @@ module Registration
         # sort the addons
         @all_addons.sort!(&::Registration::ADDON_SORTER)
 
-        @filtered_addons = @all_addons.reject(&:beta_release?)
+        @addons = @all_addons.reject(&:beta_release?)
 
         @old_selection = Addon.selected.dup
 
@@ -63,7 +63,7 @@ module Registration
       # Enables or disables beta addons filtering
       # @param [Boolean] enable true for filtering beta releases
       def filter_beta_releases(enable)
-        @filtered_addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
+        @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
       end
 
     private
@@ -106,10 +106,10 @@ module Registration
       # @return [Yast::Term] the main UI dialog term
       def addons_box
         lines = Yast::UI.TextMode ? 9 : 14
-        if @filtered_addons.size <= lines
-          content = addon_selection_items(@filtered_addons)
+        if @addons.size <= lines
+          content = addon_selection_items(@addons)
         else
-          content = two_column_layout(@filtered_addons[lines..(2 * lines - 1)], @filtered_addons[0..(lines - 1)])
+          content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
         end
 
         VWeight(75, MarginBox(2, 1, content))
@@ -215,7 +215,7 @@ module Registration
       # @param id [String] addon widget id
       def handle_addon_selection(id)
         # check whether it's an add-on ID (checkbox clicked)
-        addon = @filtered_addons.find { |a| addon_widget_id(a) == id }
+        addon = @addons.find { |a| addon_widget_id(a) == id }
         return unless addon
 
         show_addon_details(addon)
@@ -237,7 +237,7 @@ module Registration
 
       # update the enabled/disabled status in UI for dependent addons
       def reactivate_dependencies
-        @filtered_addons.each do |addon|
+        @addons.each do |addon|
           Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
         end
       end
