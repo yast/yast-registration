@@ -147,12 +147,14 @@ describe Registration::Addon do
   end
 
   describe "#beta_release?" do
-    it "returns if addon is beta release" do
+    it "returns true if addon is beta release" do
       product = addon_generator("release_stage" => "beta")
       addon = Registration::Addon.new(product)
 
       expect(addon.beta_release?).to eq(true)
+    end
 
+    it "returns false if addon is not beta release" do
       product = addon_generator("release_stage" => "production")
       addon = Registration::Addon.new(product)
 
