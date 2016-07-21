@@ -114,10 +114,9 @@ module Registration
       IMG_ON = "/usr/share/YaST2/theme/current/wizard/checkbox-on.png".freeze
       IMG_OFF = "/usr/share/YaST2/theme/current/wizard/checkbox-off.png".freeze
 
-      def rt_cb(id:, label:, selected:, enabled:,
-        indented: false, text_mode: Yast::UI.TextMode)
+      def rt_cb(id:, label:, selected:, enabled:, indented: false)
         selected = false unless enabled
-        if text_mode
+        if Yast::UI.TextMode
           indent = "&nbsp;" * (indented ? 5 : 1)
           check = selected ? "[x]" : "[ ]"
           widget = "#{check} #{label}"
