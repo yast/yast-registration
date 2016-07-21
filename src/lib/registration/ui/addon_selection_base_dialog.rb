@@ -29,17 +29,19 @@ module Registration
       #   communication with SCC
       def initialize(registration)
         textdomain "registration"
-        @addons = Addon.find_all(registration)
+        @all_addons = Addon.find_all(registration)
 
         # sort the addons
-        @addons.sort!(&::Registration::ADDON_SORTER)
+        @all_addons.sort!(&::Registration::ADDON_SORTER)
+
+        filter_beta_releases(true)
 
         @old_selection = Addon.selected.dup
 
         # activate a workaround on ARM (FATE#320679)
         aarch64_workaround if Arch.aarch64
 
-        log.info "Available addons: #{@addons}"
+        log.info "Available addons: #{@all_addons}"
       end
 
       # reimplement this in a subclass
@@ -56,6 +58,12 @@ module Registration
       # @return [String] widget id
       def addon_widget_id(addon)
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # Enables or disables beta addons filtering
+      # @param [Boolean] enable true for filtering beta releases
+      def filter_beta_releases(enable)
+        @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
       end
 
     private
