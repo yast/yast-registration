@@ -98,23 +98,36 @@ module Registration
           # (%s is an extension name)
           label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
-          rt_cb(id:       addon_widget_id(addon),
-                label:    label,
-                selected: addon_selected?(addon),
-                enabled:  addon.available?,
-                indented: addon.depends_on)
+          richtext_checkbox(id:       addon_widget_id(addon),
+                            label:    label,
+                            selected: addon_selected?(addon),
+                            enabled:  addon.available?,
+                            indented: addon.depends_on)
         end
         items.join("\n")
       end
 
-      # FIXME: acknowledge Lada's code
-      # https://gist.github.com/lslezak/5ed82fe19337bef4807b
+      IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
+      IMAGES = {
+        "normal:on:enabled"   => "checkbox-on.png",
+        "normal:off:enabled"  => "checkbox-off.png",
+        # theme has no special images for disabled checkboxes
+        "normal:on:disabled"  => "checkbox-on.png",
+        "normal:off:disabled" => "checkbox-off.png",
+        "inst:on:enabled"     => "inst_checkbox-on.png",
+        "inst:off:enabled"    => "inst_checkbox-off.png",
+        "inst:on:disabled"    => "inst_checkbox-on-disabled.png",
+        "inst:off:disabled"   => "inst_checkbox-off-disabled.png"
+      }.freeze
 
-      # FIXME: adapt to installation theme
-      IMG_ON = "/usr/share/YaST2/theme/current/wizard/checkbox-on.png".freeze
-      IMG_OFF = "/usr/share/YaST2/theme/current/wizard/checkbox-off.png".freeze
-
-      def rt_cb(id:, label:, selected:, enabled:, indented: false)
+      # Make a simulation of a CheckBox displayed in a RichText
+      # @param id [String]
+      # @param label [String]
+      # @param selected [Boolean]
+      # @param enabled [Boolean]
+      # @param indented [Boolean]
+      # @return [String] a Value for a RichText
+      def richtext_checkbox(id:, label:, selected:, enabled:, indented: false)
         selected = false unless enabled
         if Yast::UI.TextMode
           indent = "&nbsp;" * (indented ? 5 : 1)
@@ -124,12 +137,16 @@ module Registration
           "#{indent}#{enabled_widget}<br>"
         else
           indent = "&nbsp;" * (indented ? 7 : 1)
-          # FIXME: a disabled checkbox?
-          check = "<img src='#{selected ? IMG_ON : IMG_OFF}'></img>"
+
+          installation = !Yast::Mode.normal
+          image = (installation ? "inst:" : "normal:") +
+            (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
+          color = installation ? "white" : "black"
+
+          check = "<img src='#{IMAGE_DIR}/#{IMAGES[image]}'></img>"
           widget = "#{check} #{label}"
           enabled_widget = if enabled
-            # FIXME: adapt to installation theme: find a suitable class?
-            "<a href='#{id}' style='text-decoration:none; color:black'>#{widget}</a>"
+            "<a href='#{id}' style='text-decoration:none; color:#{color}'>#{widget}</a>"
           else
             "<span style='color:grey'>#{widget}</span>"
           end
