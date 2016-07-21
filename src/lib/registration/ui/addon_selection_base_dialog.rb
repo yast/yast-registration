@@ -85,6 +85,8 @@ module Registration
       def content
         VBox(
           Left(Heading(heading)),
+          Left(CheckBox(Id(:filter_beta), Opt(:notify),
+            _("&Filter Out Beta Versions"))),
           addons_box,
           Left(Label(_("Details"))),
           details_widget
@@ -189,6 +191,9 @@ module Registration
             ret = Stage.initial && !AbortConfirmation.run ? nil : :abort
             # when canceled switch to old selection
             Addon.selected.replace(@old_selection) if ret == :abort
+          when :filter_beta
+            filter_beta_releases(Yast::UI.QueryWidget(Id(ret), :Value))
+            reactivate_dependencies
           else
             handle_addon_selection(ret)
           end
