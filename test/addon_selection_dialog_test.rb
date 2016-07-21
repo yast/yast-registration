@@ -45,12 +45,12 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       addon = addon_generator
       widget = "#{addon.identifier}-#{addon.version}-#{addon.arch}"
       expect(Yast::UI).to receive(:UserInput).and_return(widget, :next)
-      # mock that widget is selected
-      expect(Yast::UI).to receive(:QueryWidget)
-        .with(Yast::Term.new(:id, widget), :Value)
-        .and_return(true)
       registration = double(activated_products: [], get_addon_list: [addon])
       expect(subject.run(registration)).to eq :next
+
+      addons = Registration::Addon.find_all(registration)
+      wrapped_addon = addons.first
+      expect(wrapped_addon.selected?).to eq true
     end
 
     context "in SLES12-SP2" do
