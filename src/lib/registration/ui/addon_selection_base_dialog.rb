@@ -98,10 +98,10 @@ module Registration
           # (%s is an extension name)
           label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
-          rt_cb(id: addon_widget_id(addon),
-                label: label,
+          rt_cb(id:       addon_widget_id(addon),
+                label:    label,
                 selected: addon_selected?(addon),
-                enabled: addon.available?,
+                enabled:  addon.available?,
                 indented: addon.depends_on)
         end
         items.join("\n")
@@ -111,11 +111,11 @@ module Registration
       # https://gist.github.com/lslezak/5ed82fe19337bef4807b
 
       # FIXME: adapt to installation theme
-      IMG_ON = "/usr/share/YaST2/theme/current/wizard/checkbox-on.png"
-      IMG_OFF = "/usr/share/YaST2/theme/current/wizard/checkbox-off.png"
+      IMG_ON = "/usr/share/YaST2/theme/current/wizard/checkbox-on.png".freeze
+      IMG_OFF = "/usr/share/YaST2/theme/current/wizard/checkbox-off.png".freeze
 
       def rt_cb(id:, label:, selected:, enabled:,
-                indented: false, text_mode: Yast::UI.TextMode)
+        indented: false, text_mode: Yast::UI.TextMode)
         selected = false unless enabled
         if text_mode
           indent = "&nbsp;" * (indented ? 5 : 1)
@@ -190,7 +190,7 @@ module Registration
         return unless addon
 
         show_addon_details(addon)
-        new_state = ! addon.selected?
+        new_state = !addon.selected?
         if new_state
           addon.selected
         else
