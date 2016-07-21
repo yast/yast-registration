@@ -147,69 +147,6 @@ module Registration
         VWeight(75, MinHeight(12, content))
       end
 
-      # display the addon checkboxes in two columns
-      # @param col1 [Array<Addon>] the addons displayed in the first column
-      # @param col2 [Array<Addon>] the addons displayed in the second column
-      # @return [Yast::Term] the addon cheboxes
-      def two_column_layout(col1, col2)
-        box2 = addon_selection_items(col1)
-        box2.params << VStretch() # just UI tweak
-
-        HBox(
-          addon_selection_items(col2),
-          HSpacing(1),
-          box2
-        )
-      end
-
-      # create a single UI column with addon checkboxes
-      # @return [Yast::Term] addon column
-      def addon_selection_items(addons)
-        box = VBox()
-
-        # whether to add extra spacing in the UI
-        add_extra_spacing = if Yast::UI.TextMode
-          addons.size < 5
-        else
-          true
-        end
-
-        addons.each do |addon|
-          box.params.concat(addon_checkbox(addon, add_extra_spacing))
-        end
-
-        box
-      end
-
-      # create spacing around the addon checkbox so the layout looks better
-      # @param addon [Registration::Addon]
-      # @param extra_spacing [Boolean] add extra spacing (indicates enough space in UI)
-      # @return [Array<Yast::Term>] Return array with one or two elements for VBox
-      def addon_checkbox(addon, extra_spacing)
-        checkbox = Left(addon_checkbox_element(addon))
-
-        # usability help. If addon depends on something, then we get it
-        # immediatelly after parent, so indent it slightly, so it is easier visible
-        checkbox = HBox(HSpacing(2.5), checkbox) if addon.depends_on
-
-        res = [checkbox]
-        # add extra spacing when there are just few addons, in GUI always
-        res << VSpacing(0.7) if extra_spacing
-
-        res
-      end
-
-      # create the UI checkbox element for the addon
-      # @param addon [Registration::Addon] the addon
-      # @return [Yast::Term] checkbox term
-      def addon_checkbox_element(addon)
-        # checkbox label for an unavailable extension
-        # (%s is an extension name)
-        label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
-
-        CheckBox(Id(addon_widget_id(addon)), Opt(:notify), label, addon_selected?(addon))
-      end
-
       # the main event loop - handle the user in put in the dialog
       # @return [Symbol] the user input
       def handle_dialog
