@@ -17,11 +17,23 @@ require "registration/helpers"
 
 module Registration
   module UI
+    # This class implements a SCC/SMT service selection dialog.
     class ServiceSelectionDialog < ::UI::Dialog
       # @return [Array<SlpServiceClass::Service] list of services to show
       attr_reader :services
 
       # Run dialog
+      #
+      # The return value will be:
+      # * A service in case one SMT server was selected
+      # * :scc symbol if default SCC was selected
+      # * :cancel symbol if the SCC was canceled (pressing the 'cancel' button)
+      #
+      # @example Select the default SCC service
+      #   Registration::UI::SelectionServiceDialog.run(services) #=> :scc
+      #
+      # @example Select some SMT service
+      #   Registration::UI::SelectionServiceDialog.run(services) #=> #<Yast::SlpServiceClass::Service...>
       #
       # @param services [Array<SlpServiceClass::Service] list of services to show
       # @return [SlpServiceClass::Service,Symbol] selected service or symbol (:scc or :cancel)
