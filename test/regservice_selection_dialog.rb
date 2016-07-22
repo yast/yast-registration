@@ -89,7 +89,7 @@ describe Registration::UI::RegserviceSelectionDialog do
       subject(:dialog) do
         Registration::UI::RegserviceSelectionDialog.new(
           services: services, heading: "some title", description: "some description"
-          )
+        )
       end
 
       it "sets heading and description accordingly" do

@@ -78,7 +78,7 @@ module Registration
         service.is_a?(String) ? service : super
       end
 
-      private
+    private
 
       # Default registration server
       #
@@ -86,7 +86,6 @@ module Registration
       def scc_service
         @scc_service ||= _("SUSE Customer Center (%s)") % SUSE::Connect::YaST::DEFAULT_URL
       end
-
     end
   end
 end
