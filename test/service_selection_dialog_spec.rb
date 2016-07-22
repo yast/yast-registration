@@ -2,7 +2,6 @@ require_relative "spec_helper"
 require "registration/ui/service_selection_dialog"
 
 Yast.import "SlpService"
-Yast.import "Label"
 
 describe Registration::UI::ServiceSelectionDialog do
   include Yast::UIShortcuts

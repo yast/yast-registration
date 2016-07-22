@@ -9,6 +9,7 @@ module Yast
   class DiscoverRegistrationServicesClient < Client
     include Yast::Logger
 
+    # @return [Array<SlpServiceClass::Service>] list of candidate services
     attr_reader :services
 
     def initialize

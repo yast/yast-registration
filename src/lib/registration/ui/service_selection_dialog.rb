@@ -19,6 +19,10 @@ module Registration
   module UI
     # This class implements a SCC/SMT service selection dialog.
     class ServiceSelectionDialog < ::UI::Dialog
+      Yast.import "UI"
+      Yast.import "Label"
+      Yast.import "Report"
+
       # @return [Array<SlpServiceClass::Service] list of services to show
       attr_reader :services
       # @return [String] dialog's heading
@@ -53,10 +57,6 @@ module Registration
       # @param services [Array<SlpServiceClass::Service] list of services to show
       def initialize(services: [], heading: nil, description: nil)
         super()
-
-        Yast.import "UI"
-        Yast.import "Label"
-        Yast.import "Report"
 
         textdomain "registration"
 
