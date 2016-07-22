@@ -138,6 +138,21 @@ describe Registration::Addon do
     end
   end
 
+  describe "#toggle_selected" do
+    it "marks an unselected addon as selected" do
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
+      addon.toggle_selected
+      expect(Registration::Addon.selected.include?(addon)).to eq(true)
+    end
+
+    it "marks a selected addon as unselected" do
+      Registration::Addon.selected << addon
+      expect(Registration::Addon.selected.include?(addon)).to eq(true)
+      addon.toggle_selected
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
+    end
+  end
+
   describe "#registered?" do
     it "returns if addon is already registered" do
       expect(addon.registered?).to eq(false)

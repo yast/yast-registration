@@ -218,13 +218,8 @@ module Registration
         addon = @addons.find { |a| addon_widget_id(a) == id }
         return unless addon
 
+        addon.toggle_selected
         show_addon_details(addon)
-        new_state = !addon.selected?
-        if new_state
-          addon.selected
-        else
-          addon.unselected
-        end
         reactivate_dependencies
       end
 

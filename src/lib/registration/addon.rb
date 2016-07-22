@@ -134,6 +134,15 @@ module Registration
       Addon.selected.delete(self) if selected?
     end
 
+    # toggle the selection state of the add-on
+    def toggle_selected
+      if selected?
+        unselected
+      else
+        selected
+      end
+    end
+
     # has been the add-on registered?
     # @return [Boolean] true if the add-on has been registered
     def registered?
