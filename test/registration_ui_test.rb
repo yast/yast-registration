@@ -99,6 +99,9 @@ describe "Registration::RegistrationUI" do
 
       # stub the registration
       allow(registration).to receive(:register_product)
+
+      # set the default URL
+      allow(Registration::UrlHelpers).to receive(:registration_url)
     end
 
     context "when the addons are free" do
@@ -147,6 +150,16 @@ describe "Registration::RegistrationUI" do
         registration_ui.register_addons(selected_addons, {})
       end
 
+      it "does not ask for the reg. codes when using an SMT server" do
+        allow(Registration::UrlHelpers).to receive(:registration_url)
+          .and_return("https://smt.example.com")
+        allow(registration_ui).to receive(:register_selected_addons).with(any_args).and_return(true)
+        # do NOT ask for the reg. codes
+        expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
+
+        # Register the HA-GEO addon, it requires a reg. code
+        registration_ui.register_addons([addon_HA_GEO], {})
+      end
     end
 
   end

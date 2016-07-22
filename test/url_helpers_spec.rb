@@ -193,6 +193,28 @@ describe "Registration::UrlHelpers" do
     end
   end
 
+  describe ".scc_url?" do
+    it "returns true if the URL is set to the default (nil)" do
+      allow(Registration::UrlHelpers).to receive(:registration_url)
+
+      expect(Registration::UrlHelpers.scc_url?).to eq(true)
+    end
+
+    it "returns true if the URL is set to the SCC URL" do
+      allow(Registration::UrlHelpers).to receive(:registration_url)
+        .and_return("https://scc.suse.com")
+
+      expect(Registration::UrlHelpers.scc_url?).to eq(true)
+    end
+
+    it "returns false if the URL is set to a different URL" do
+      allow(Registration::UrlHelpers).to receive(:registration_url)
+        .and_return("https://smt.example.com")
+
+      expect(Registration::UrlHelpers.scc_url?).to eq(false)
+    end
+  end
+
   describe ".service_url" do
     it "converts a SLP service to plain URL" do
       url = "https://example.com/registration"
