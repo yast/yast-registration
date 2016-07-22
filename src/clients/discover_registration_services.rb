@@ -17,16 +17,14 @@ module Yast
 
     def main
       textdomain "registration"
-
       @services = ::Registration::UrlHelpers.slp_discovery_feedback
-
       services.empty? ? nil : select_registration_service
     end
 
   private
 
     def select_registration_service
-      service = ::Registration::UI::ServiceSelectionDialog.run(services)
+      service = ::Registration::UI::ServiceSelectionDialog.run(services: services)
       return nil unless service.respond_to?(:slp_url)
       url = ::Registration::UrlHelpers.service_url(service.slp_url)
       log.info "Selected service URL: #{url}"

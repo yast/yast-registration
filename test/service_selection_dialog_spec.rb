@@ -7,7 +7,7 @@ Yast.import "Label"
 describe Registration::UI::ServiceSelectionDialog do
   include Yast::UIShortcuts
 
-  subject(:dialog) { Registration::UI::ServiceSelectionDialog.new(services) }
+  subject(:dialog) { Registration::UI::ServiceSelectionDialog.new(services: services) }
 
   before do
     allow(Yast::UI).to receive(:OpenDialog).and_return(true)
@@ -73,6 +73,31 @@ describe Registration::UI::ServiceSelectionDialog do
       it "returns :cancel" do
         expect(Yast::UI).to receive(:UserInput).and_return(:cancel)
         expect(dialog.run).to eq(:cancel)
+      end
+    end
+
+    it "sets default heading and description" do
+      expect(Yast::UI).to receive(:UserInput).and_return(:cancel)
+      expect(dialog).to receive(:Heading)
+        .with(_("Local Registration Servers"))
+      expect(dialog).to receive(:Label)
+        .with(_("Select a detected registration server " \
+        "from the list\nor the default SUSE registration server."))
+      dialog.run
+    end
+
+    context "when customized heading/description are specified" do
+      subject(:dialog) do
+        Registration::UI::ServiceSelectionDialog.new(
+          services: services, heading: "some title", description: "some description"
+          )
+      end
+
+      it "sets heading and description accordingly" do
+        expect(Yast::UI).to receive(:UserInput).and_return(:cancel)
+        expect(dialog).to receive(:Heading).with("some title")
+        expect(dialog).to receive(:Label).with("some description")
+        dialog.run
       end
     end
   end

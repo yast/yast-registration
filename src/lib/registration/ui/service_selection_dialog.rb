@@ -21,6 +21,10 @@ module Registration
     class ServiceSelectionDialog < ::UI::Dialog
       # @return [Array<SlpServiceClass::Service] list of services to show
       attr_reader :services
+      # @return [String] dialog's heading
+      attr_reader :heading
+      # @return [String] dialog's description
+      attr_reader :description
 
       # Run dialog
       #
@@ -33,20 +37,21 @@ module Registration
       #   Registration::UI::SelectionServiceDialog.run(services) #=> :scc
       #
       # @example Select some SMT service
-      #   Registration::UI::SelectionServiceDialog.run(services) #=> #<Yast::SlpServiceClass::Service...>
+      #   Registration::UI::SelectionServiceDialog.run(services)
+      #     #=> #<Yast::SlpServiceClass::Service...>
       #
       # @param services [Array<SlpServiceClass::Service] list of services to show
       # @return [SlpServiceClass::Service,Symbol] selected service or symbol (:scc or :cancel)
       #
       # @see #run
-      def self.run(services)
-        new(services).run
+      def self.run(services:, heading: nil, description: nil)
+        new(services: services, heading: heading, description: description).run
       end
 
       # Constructor
       #
       # @param services [Array<SlpServiceClass::Service] list of services to show
-      def initialize(services = [])
+      def initialize(services: [], heading: nil, description: nil)
         super()
 
         Yast.import "UI"
@@ -56,6 +61,9 @@ module Registration
         textdomain "registration"
 
         @services = services
+        @heading = heading || _("Local Registration Servers")
+        @description = description || _("Select a detected registration server " \
+          "from the list\nor the default SUSE registration server.")
       end
 
       # Handler for the Ok button
@@ -85,10 +93,9 @@ module Registration
         MarginBox(2, 0.5,
           VBox(
             # popup heading (in bold)
-            Heading(_("Local Registration Servers")),
+            Heading(heading),
             VSpacing(0.5),
-            Label(_("Select a detected registration server from the list\n" \
-                    "or the default SUSE registration server.")),
+            Label(description),
             VSpacing(0.5),
             RadioButtonGroup(
               Id(:services),
