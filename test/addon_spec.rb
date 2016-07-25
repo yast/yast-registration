@@ -138,11 +138,42 @@ describe Registration::Addon do
     end
   end
 
+  describe "#toggle_selected" do
+    it "marks an unselected addon as selected" do
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
+      addon.toggle_selected
+      expect(Registration::Addon.selected.include?(addon)).to eq(true)
+    end
+
+    it "marks a selected addon as unselected" do
+      Registration::Addon.selected << addon
+      expect(Registration::Addon.selected.include?(addon)).to eq(true)
+      addon.toggle_selected
+      expect(Registration::Addon.selected.include?(addon)).to eq(false)
+    end
+  end
+
   describe "#registered?" do
     it "returns if addon is already registered" do
       expect(addon.registered?).to eq(false)
       Registration::Addon.registered << addon
       expect(addon.registered?).to eq(true)
+    end
+  end
+
+  describe "#beta_release?" do
+    it "returns true if addon is beta release" do
+      product = addon_generator("release_stage" => "beta")
+      addon = Registration::Addon.new(product)
+
+      expect(addon.beta_release?).to eq(true)
+    end
+
+    it "returns false if addon is not beta release" do
+      product = addon_generator("release_stage" => "production")
+      addon = Registration::Addon.new(product)
+
+      expect(addon.beta_release?).to eq(false)
     end
   end
 

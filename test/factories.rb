@@ -15,6 +15,7 @@ def suse_connect_product_generator(attrs = {})
   params["eula_url"] = attrs["eula_url"]
   params["extensions"] = attrs["extensions"] || []
   params["former_identifier"] = attrs["former_identifier"]
+  params["release_stage"] = attrs["release_stage"]
 
   params
 end

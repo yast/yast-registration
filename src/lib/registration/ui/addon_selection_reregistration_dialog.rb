@@ -24,9 +24,9 @@ module Registration
         super(registration)
 
         # filter out the unregistered addons
-        @addons.select!(&:registered?)
+        @all_addons.select!(&:registered?)
 
-        log.info "Registered addons: #{@addons}"
+        log.info "Registered addons: #{@all_addons}"
       end
 
       # display the extension selection dialog and wait for a button click
@@ -57,11 +57,6 @@ module Registration
       # @return [Boolean] is the addon selected?
       def addon_selected?(addon)
         addon.selected?
-      end
-
-      # empty implementation, allow reregistration of a dependant addon
-      # without reregistering its parent
-      def reactivate_dependencies
       end
     end
   end

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Jul 25 14:21:00 UTC 2016 - mvidner@suse.com
+
+- Extensions and Modules:
+  - do not show beta versions of products (FATE#319909)
+  - make many items fit by using a scrollable widget (bsc#967387)
+- 3.1.177
+
+-------------------------------------------------------------------
 Fri Jun 17 12:45:21 UTC 2016 - mvidner@suse.com
 
 - For "Register System via local SMT Server" offer a list of servers

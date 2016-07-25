@@ -2,8 +2,6 @@ require_relative "spec_helper"
 require "registration/addon"
 
 describe Registration::UI::AddonSelectionRegistrationDialog do
-  subject { Registration::UI::AddonSelectionRegistrationDialog }
-
   before(:each) do
     # generic UI stubs for the wizard dialog
     allow(Yast::UI).to receive(:WizardCommand)
@@ -17,6 +15,8 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   end
 
   describe ".run" do
+    subject { Registration::UI::AddonSelectionRegistrationDialog }
+
     let(:toolchain) do
       Registration::Addon.new(
         addon_generator("zypper_name" => "sle-module-toolchain",
@@ -45,12 +45,12 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       addon = addon_generator
       widget = "#{addon.identifier}-#{addon.version}-#{addon.arch}"
       expect(Yast::UI).to receive(:UserInput).and_return(widget, :next)
-      # mock that widget is selected
-      expect(Yast::UI).to receive(:QueryWidget)
-        .with(Yast::Term.new(:id, widget), :Value)
-        .and_return(true)
       registration = double(activated_products: [], get_addon_list: [addon])
       expect(subject.run(registration)).to eq :next
+
+      addons = Registration::Addon.find_all(registration)
+      wrapped_addon = addons.first
+      expect(wrapped_addon.selected?).to eq true
     end
 
     context "in SLES12-SP2" do
@@ -108,6 +108,24 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
           subject.run(registration)
         end
       end
+    end
+  end
+
+  describe "#handle_dialog" do
+    subject do
+      registration = double(activated_products: [], get_addon_list: [])
+      Registration::UI::AddonSelectionRegistrationDialog.new(registration)
+    end
+
+    it "filters beta releases" do
+      expect(Yast::UI).to receive(:UserInput).and_return(:filter_beta, :next)
+
+      expect(Yast::UI).to receive(:QueryWidget)
+        .with(Yast::Term.new(:id, :filter_beta), :Value)
+        .and_return(true)
+      expect(subject).to receive(:filter_beta_releases).with(true)
+
+      expect(subject.send(:handle_dialog)).to_not eq :back
     end
   end
 end

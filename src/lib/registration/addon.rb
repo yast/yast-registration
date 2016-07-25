@@ -108,6 +108,7 @@ module Registration
       :name,
       :product_type,
       :release_type,
+      :release_stage,
       :version
 
     # the constructor
@@ -133,6 +134,15 @@ module Registration
       Addon.selected.delete(self) if selected?
     end
 
+    # toggle the selection state of the add-on
+    def toggle_selected
+      if selected?
+        unselected
+      else
+        selected
+      end
+    end
+
     # has been the add-on registered?
     # @return [Boolean] true if the add-on has been registered
     def registered?
@@ -147,6 +157,10 @@ module Registration
     # just internally mark the addon as NOT registered, not a real unregistration
     def unregistered
       Addon.registered.delete(self) if registered?
+    end
+
+    def beta_release?
+      release_stage == "beta"
     end
 
     # get a product printable name (long name if present, fallbacks to the short name)

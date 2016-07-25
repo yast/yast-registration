@@ -40,8 +40,6 @@ module Registration
 
         @old_selection = Addon.selected.dup
 
-        reactivate_dependencies
-
         handle_dialog
       end
 
@@ -55,13 +53,6 @@ module Registration
       # @return [Boolean] is the addon selected?
       def addon_selected?(addon)
         addon.selected? || addon.registered?
-      end
-
-      # update the enabled/disabled status in UI for dependent addons
-      def reactivate_dependencies
-        @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
-        end
       end
     end
   end

@@ -24,22 +24,26 @@ module Registration
       Yast.import "Stage"
       Yast.import "Arch"
 
+      FILTER_BETAS_INITIALLY = true
+
       # constructor
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
       def initialize(registration)
         textdomain "registration"
-        @addons = Addon.find_all(registration)
+        @all_addons = Addon.find_all(registration)
 
         # sort the addons
-        @addons.sort!(&::Registration::ADDON_SORTER)
+        @all_addons.sort!(&::Registration::ADDON_SORTER)
+
+        filter_beta_releases(FILTER_BETAS_INITIALLY)
 
         @old_selection = Addon.selected.dup
 
         # activate a workaround on ARM (FATE#320679)
         aarch64_workaround if Arch.aarch64
 
-        log.info "Available addons: #{@addons}"
+        log.info "Available addons: #{@all_addons}"
       end
 
       # reimplement this in a subclass
@@ -56,6 +60,12 @@ module Registration
       # @return [String] widget id
       def addon_widget_id(addon)
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # Enables or disables beta addons filtering
+      # @param [Boolean] enable true for filtering beta releases
+      def filter_beta_releases(enable)
+        @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
       end
 
     private
@@ -76,12 +86,12 @@ module Registration
       # @return [Yast::Term] the main UI dialog term
       def content
         VBox(
-          VStretch(),
           Left(Heading(heading)),
+          Left(CheckBox(Id(:filter_beta), Opt(:notify),
+            _("&Filter Out Beta Versions"), FILTER_BETAS_INITIALLY)),
           addons_box,
           Left(Label(_("Details"))),
-          details_widget,
-          VStretch()
+          details_widget
         )
       end
 
@@ -93,86 +103,83 @@ module Registration
                 _("Select an extension or a module to show details here") + "</small>")))
       end
 
-      # create UI box with addon check boxes, if the number of the addons is too big
-      # the UI uses two column layout
-      # @return [Yast::Term] the main UI dialog term
-      def addons_box
-        lines = Yast::UI.TextMode ? 9 : 14
-        if @addons.size <= lines
-          content = addon_selection_items(@addons)
-        else
-          content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
-        end
-
-        VWeight(75, MarginBox(2, 1, content))
+      # @return [String] a Value for a RichText
+      def addon_checkboxes
+        @addons.map { |a| addon_checkbox(a) }.join("\n")
       end
 
-      # display the addon checkboxes in two columns
-      # @param col1 [Array<Addon>] the addons displayed in the first column
-      # @param col2 [Array<Addon>] the addons displayed in the second column
-      # @return [Yast::Term] the addon cheboxes
-      def two_column_layout(col1, col2)
-        box2 = addon_selection_items(col1)
-        box2.params << VStretch() # just UI tweak
-
-        HBox(
-          addon_selection_items(col2),
-          HSpacing(1),
-          box2
-        )
-      end
-
-      # create a single UI column with addon checkboxes
-      # @return [Yast::Term] addon column
-      def addon_selection_items(addons)
-        box = VBox()
-
-        # whether to add extra spacing in the UI
-        add_extra_spacing = if Yast::UI.TextMode
-          addons.size < 5
-        else
-          true
-        end
-
-        addons.each do |addon|
-          box.params.concat(addon_checkbox(addon, add_extra_spacing))
-        end
-
-        box
-      end
-
-      # create spacing around the addon checkbox so the layout looks better
-      # @param addon [Registration::Addon]
-      # @param extra_spacing [Boolean] add extra spacing (indicates enough space in UI)
-      # @return [Array<Yast::Term>] Return array with one or two elements for VBox
-      def addon_checkbox(addon, extra_spacing)
-        checkbox = Left(addon_checkbox_element(addon))
-
-        # usability help. If addon depends on something, then we get it
-        # immediatelly after parent, so indent it slightly, so it is easier visible
-        checkbox = HBox(HSpacing(2.5), checkbox) if addon.depends_on
-
-        res = [checkbox]
-        # add extra spacing when there are just few addons, in GUI always
-        res << VSpacing(0.7) if extra_spacing
-
-        res
-      end
-
-      # create the UI checkbox element for the addon
-      # @param addon [Registration::Addon] the addon
-      # @return [Yast::Term] checkbox term
-      def addon_checkbox_element(addon)
+      # @param [<Addon>] addon the addon
+      # @return [String] a Value for a RichText
+      def addon_checkbox(addon)
         # checkbox label for an unavailable extension
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
+        richtext_checkbox(id:       addon_widget_id(addon),
+                          label:    label,
+                          selected: addon_selected?(addon),
+                          enabled:  addon.selectable?,
+                          indented: addon.depends_on)
+      end
 
-        CheckBox(Id(addon_widget_id(addon)), Opt(:notify), label, addon_selected?(addon))
+      IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
+      IMAGES = {
+        "normal:on:enabled"   => "checkbox-on.png",
+        "normal:off:enabled"  => "checkbox-off.png",
+        # theme has no special images for disabled checkboxes
+        "normal:on:disabled"  => "checkbox-on.png",
+        "normal:off:disabled" => "checkbox-off.png",
+        "inst:on:enabled"     => "inst_checkbox-on.png",
+        "inst:off:enabled"    => "inst_checkbox-off.png",
+        "inst:on:disabled"    => "inst_checkbox-on-disabled.png",
+        "inst:off:disabled"   => "inst_checkbox-off-disabled.png"
+      }.freeze
+
+      # Make a simulation of a CheckBox displayed in a RichText
+      # @param id [String]
+      # @param label [String]
+      # @param selected [Boolean]
+      # @param enabled [Boolean]
+      # @param indented [Boolean]
+      # @return [String] a Value for a RichText
+      def richtext_checkbox(id:, label:, selected:, enabled:, indented: false)
+        if Yast::UI.TextMode
+          indent = "&nbsp;" * (indented ? 5 : 1)
+          check = selected ? "[x]" : "[ ]"
+          widget = "#{check} #{label}"
+          enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
+          "#{indent}#{enabled_widget}<br>"
+        else
+          indent = "&nbsp;" * (indented ? 7 : 1)
+
+          installation = !Yast::Mode.normal
+          image = (installation ? "inst:" : "normal:") +
+            (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
+          color = installation ? "white" : "black"
+
+          check = "<img src='#{IMAGE_DIR}/#{IMAGES[image]}'></img>"
+          widget = "#{check} #{label}"
+          enabled_widget = if enabled
+            "<a href='#{id}' style='text-decoration:none; color:#{color}'>#{widget}</a>"
+          else
+            "<span style='color:grey'>#{widget}</span>"
+          end
+          "<p>#{indent}#{enabled_widget}</p>"
+        end
+      end
+
+      # create UI box with addon check boxes
+      # @return [Yast::Term] the main UI dialog term
+      def addons_box
+        content = RichText(Id(:items), addon_checkboxes)
+
+        VWeight(75, MinHeight(12, content))
       end
 
       # the main event loop - handle the user in put in the dialog
       # @return [Symbol] the user input
       def handle_dialog
+        Yast::UI.SetFocus(Id(:items))
+
         ret = nil
         continue_buttons = [:next, :back, :abort, :skip]
 
@@ -186,6 +193,9 @@ module Registration
             ret = Stage.initial && !AbortConfirmation.run ? nil : :abort
             # when canceled switch to old selection
             Addon.selected.replace(@old_selection) if ret == :abort
+          when :filter_beta
+            filter_beta_releases(Yast::UI.QueryWidget(Id(ret), :Value))
+            show_addons
           else
             handle_addon_selection(ret)
           end
@@ -210,13 +220,9 @@ module Registration
         addon = @addons.find { |a| addon_widget_id(a) == id }
         return unless addon
 
+        addon.toggle_selected
         show_addon_details(addon)
-        if Yast::UI.QueryWidget(Id(addon_widget_id(addon)), :Value)
-          addon.selected
-        else
-          addon.unselected
-        end
-        reactivate_dependencies
+        show_addons
       end
 
       # update addon details after changing the current addon in the UI
@@ -227,11 +233,9 @@ module Registration
         Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
 
-      # update the enabled/disabled status in UI for dependent addons
-      def reactivate_dependencies
-        @addons.each do |addon|
-          Yast::UI.ChangeWidget(Id(addon_widget_id(addon)), :Enabled, addon.selectable?)
-        end
+      # show the addon list when some are filtered, enabled, selected
+      def show_addons
+        Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
       end
 
       # the maximum number of reg. codes displayed vertically,
