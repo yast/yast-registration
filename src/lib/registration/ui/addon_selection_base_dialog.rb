@@ -24,6 +24,8 @@ module Registration
       Yast.import "Stage"
       Yast.import "Arch"
 
+      FILTER_BETAS_INITIALLY = true
+
       # constructor
       # @param registration [Registration::Registration] use this Registration object for
       #   communication with SCC
@@ -34,7 +36,7 @@ module Registration
         # sort the addons
         @all_addons.sort!(&::Registration::ADDON_SORTER)
 
-        filter_beta_releases(true)
+        filter_beta_releases(FILTER_BETAS_INITIALLY)
 
         @old_selection = Addon.selected.dup
 
@@ -86,7 +88,7 @@ module Registration
         VBox(
           Left(Heading(heading)),
           Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Filter Out Beta Versions"))),
+            _("&Filter Out Beta Versions"), FILTER_BETAS_INITIALLY)),
           addons_box,
           Left(Label(_("Details"))),
           details_widget
