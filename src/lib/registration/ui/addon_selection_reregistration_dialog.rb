@@ -24,9 +24,9 @@ module Registration
         super(registration)
 
         # filter out the unregistered addons
-        @addons.select!(&:registered?)
+        @all_addons.select!(&:registered?)
 
-        log.info "Registered addons: #{@addons}"
+        log.info "Registered addons: #{@all_addons}"
       end
 
       # display the extension selection dialog and wait for a button click
