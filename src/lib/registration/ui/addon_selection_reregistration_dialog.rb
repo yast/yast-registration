@@ -44,8 +44,6 @@ module Registration
           true
         )
 
-        reactivate_dependencies
-
         handle_dialog
       end
 
@@ -59,13 +57,6 @@ module Registration
       # @return [Boolean] is the addon selected?
       def addon_selected?(addon)
         addon.selected?
-      end
-
-      # empty implementation, allow reregistration of a dependant addon
-      # without reregistering its parent
-      def reactivate_dependencies
-        # FIXME: how to test this?
-        Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
       end
     end
   end

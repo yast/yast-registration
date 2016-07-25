@@ -194,7 +194,7 @@ module Registration
             Addon.selected.replace(@old_selection) if ret == :abort
           when :filter_beta
             filter_beta_releases(Yast::UI.QueryWidget(Id(ret), :Value))
-            reactivate_dependencies
+            show_addons
           else
             handle_addon_selection(ret)
           end
@@ -221,7 +221,7 @@ module Registration
 
         addon.toggle_selected
         show_addon_details(addon)
-        reactivate_dependencies
+        show_addons
       end
 
       # update addon details after changing the current addon in the UI
@@ -232,9 +232,8 @@ module Registration
         Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
       end
 
-      # update the enabled/disabled status in UI for dependent addons
-      # FIXME: is this always overriden?
-      def reactivate_dependencies
+      # show the addon list when some are filtered, enabled, selected
+      def show_addons
         Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
       end
 
