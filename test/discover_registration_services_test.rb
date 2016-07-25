@@ -1,7 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
-require "registration/ui/service_selection_dialog"
+require "registration/ui/regservice_selection_dialog"
 
 Yast.import "SlpService"
 
@@ -12,7 +12,7 @@ describe "discover_registration_services client" do
     end
 
     it "returns nil and does not ask the user" do
-      expect(Registration::UI::ServiceSelectionDialog).to_not receive(:run)
+      expect(Registration::UI::RegserviceSelectionDialog).to_not receive(:run)
       expect(Yast::WFM.call("discover_registration_services")).to be_nil
     end
   end
@@ -26,13 +26,13 @@ describe "discover_registration_services client" do
     end
 
     it "returns the SLP server selected by user" do
-      expect(Registration::UI::ServiceSelectionDialog).to receive(:run).and_return(slp_service)
+      expect(Registration::UI::RegserviceSelectionDialog).to receive(:run).and_return(slp_service)
       expect(Yast::WFM.call("discover_registration_services")).to eq(slp_url)
     end
 
-    it "returns nil when the SLP dialog is canceled" do
-      expect(Registration::UI::ServiceSelectionDialog).to receive(:run).and_return(:cancel)
-      expect(Yast::WFM.call("discover_registration_services")).to be_nil
+    it "returns :cancel when the SLP dialog is canceled" do
+      expect(Registration::UI::RegserviceSelectionDialog).to receive(:run).and_return(:cancel)
+      expect(Yast::WFM.call("discover_registration_services")).to eq(:cancel)
     end
   end
 end

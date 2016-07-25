@@ -1,12 +1,12 @@
 require_relative "spec_helper"
-require "registration/ui/service_selection_dialog"
+require "registration/ui/regservice_selection_dialog"
 
 Yast.import "SlpService"
 
-describe Registration::UI::ServiceSelectionDialog do
+describe Registration::UI::RegserviceSelectionDialog do
   include Yast::UIShortcuts
 
-  subject(:dialog) { Registration::UI::ServiceSelectionDialog.new(services: services) }
+  subject(:dialog) { Registration::UI::RegserviceSelectionDialog.new(services: services) }
 
   before do
     allow(Yast::UI).to receive(:OpenDialog).and_return(true)
@@ -42,15 +42,15 @@ describe Registration::UI::ServiceSelectionDialog do
       end
 
       context "when 'scc' option is selected" do
-        let(:selected) { "scc" }
+        let(:selected) { "0" }
 
-        it "returns 'scc'" do
+        it "returns :scc" do
           expect(dialog.run).to eq(:scc)
         end
       end
 
       context "when a service is selected" do
-        let(:selected) { "0" }
+        let(:selected) { "1" }
 
         it "returns the selected service" do
           expect(dialog.run).to eq(services.first)
@@ -87,7 +87,7 @@ describe Registration::UI::ServiceSelectionDialog do
 
     context "when customized heading/description are specified" do
       subject(:dialog) do
-        Registration::UI::ServiceSelectionDialog.new(
+        Registration::UI::RegserviceSelectionDialog.new(
           services: services, heading: "some title", description: "some description"
           )
       end

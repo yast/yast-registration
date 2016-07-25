@@ -3,7 +3,7 @@ require "yast/suse_connect"
 
 require "registration/helpers"
 require "registration/url_helpers"
-require "registration/ui/service_selection_dialog"
+require "registration/ui/regservice_selection_dialog"
 
 module Yast
   class DiscoverRegistrationServicesClient < Client
@@ -25,11 +25,17 @@ module Yast
   private
 
     def select_registration_service
-      service = ::Registration::UI::ServiceSelectionDialog.run(services: services)
-      return nil unless service.respond_to?(:slp_url)
-      url = ::Registration::UrlHelpers.service_url(service.slp_url)
-      log.info "Selected service URL: #{url}"
-      url
+      service = ::Registration::UI::RegserviceSelectionDialog.run(services: services)
+      case service
+      when :scc
+        nil
+      when :cancel
+        :cancel
+      else
+        url = ::Registration::UrlHelpers.service_url(service.slp_url)
+        log.info "Selected service URL: #{url}"
+        url
+      end
     end
   end unless defined?(DiscoverRegistrationServicesClient)
   DiscoverRegistrationServicesClient.new.main

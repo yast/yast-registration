@@ -41,7 +41,7 @@ Requires:       rubygem(suse-connect) >= 0.2.22
 # suse-connect gem.
 Requires:       SUSEConnect
 
-Requires:       yast2-slp >= 3.1.2
+Requires:       yast2-slp >= 3.1.9
 Requires:       yast2-add-on >= 3.1.8
 # packager/product_patterns.rb
 Requires:       yast2-packager >= 3.1.95
@@ -53,7 +53,7 @@ BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
-BuildRequires:  yast2-slp >= 3.1.2
+BuildRequires:  yast2-slp >= 3.1.9
 # packager/product_patterns.rb
 BuildRequires:  yast2-packager >= 3.1.95
 BuildRequires:  yast2-update >= 3.1.36
