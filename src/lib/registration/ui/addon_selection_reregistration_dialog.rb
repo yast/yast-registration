@@ -65,7 +65,7 @@ module Registration
       # without reregistering its parent
       def reactivate_dependencies
         # FIXME: how to test this?
-        Yast::UI.ChangeWidget(Id(:items), :Value, richtext_checkboxes(@addons))
+        Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
       end
     end
   end

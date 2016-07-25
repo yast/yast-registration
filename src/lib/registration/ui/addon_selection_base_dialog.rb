@@ -102,19 +102,21 @@ module Registration
       end
 
       # @return [String] a Value for a RichText
-      def richtext_checkboxes(addons)
-        items = addons.map do |addon|
-          # checkbox label for an unavailable extension
-          # (%s is an extension name)
-          label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
+      def addon_checkboxes
+        @addons.map { |a| addon_checkbox(a) }.join("\n")
+      end
 
-          richtext_checkbox(id:       addon_widget_id(addon),
-                            label:    label,
-                            selected: addon_selected?(addon),
-                            enabled:  addon.available?,
-                            indented: addon.depends_on)
-        end
-        items.join("\n")
+      # @param [<Addon>] addon the addon
+      # @return [String] a Value for a RichText
+      def addon_checkbox(addon)
+        # checkbox label for an unavailable extension
+        # (%s is an extension name)
+        label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
+        richtext_checkbox(id:       addon_widget_id(addon),
+                          label:    label,
+                          selected: addon_selected?(addon),
+                          enabled:  addon.available?,
+                          indented: addon.depends_on)
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
@@ -164,11 +166,10 @@ module Registration
         end
       end
 
-      # create UI box with addon check boxes, if the number of the addons is too big
-      # the UI uses two column layout
+      # create UI box with addon check boxes
       # @return [Yast::Term] the main UI dialog term
       def addons_box
-        content = RichText(Id(:items), richtext_checkboxes(@addons))
+        content = RichText(Id(:items), addon_checkboxes)
 
         VWeight(75, MinHeight(12, content))
       end
@@ -234,7 +235,7 @@ module Registration
       # update the enabled/disabled status in UI for dependent addons
       # FIXME: is this always overriden?
       def reactivate_dependencies
-        Yast::UI.ChangeWidget(Id(:items), :Value, richtext_checkboxes(@addons))
+        Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
       end
 
       # the maximum number of reg. codes displayed vertically,
