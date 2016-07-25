@@ -115,7 +115,7 @@ module Registration
         richtext_checkbox(id:       addon_widget_id(addon),
                           label:    label,
                           selected: addon_selected?(addon),
-                          enabled:  addon.available?,
+                          enabled:  addon.selectable?,
                           indented: addon.depends_on)
       end
 
@@ -140,7 +140,6 @@ module Registration
       # @param indented [Boolean]
       # @return [String] a Value for a RichText
       def richtext_checkbox(id:, label:, selected:, enabled:, indented: false)
-        selected = false unless enabled
         if Yast::UI.TextMode
           indent = "&nbsp;" * (indented ? 5 : 1)
           check = selected ? "[x]" : "[ ]"
