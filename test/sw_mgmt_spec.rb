@@ -338,6 +338,9 @@ describe Registration::SwMgmt do
 
   describe ".zypp_config_writable!" do
     let(:zypp_dir) { Registration::SwMgmt::ZYPP_DIR }
+    before do
+      allow(File).to receive(:writable?).and_return(true)
+    end
 
     it "does nothing in running system" do
       expect(Yast::Mode).to receive(:installation).and_return(false)
@@ -359,7 +362,7 @@ describe Registration::SwMgmt do
       tmpdir = "/tmp/foo"
       expect(Yast::Mode).to receive(:installation).and_return(true)
       expect(File).to receive(:writable?).with(zypp_dir)
-        .and_return(false)
+        .and_return(false).at_least(:once)
       expect(Dir).to receive(:mktmpdir).and_return(tmpdir)
       expect(FileUtils).to receive(:cp_r).with(zypp_dir, tmpdir)
       expect(subject).to receive(:`).with("mount -o bind #{tmpdir}/zypp #{zypp_dir}")
