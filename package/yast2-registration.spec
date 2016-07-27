@@ -32,14 +32,15 @@ Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
-Requires:       rubygem(suse-connect) >= 0.2.22
+# SUSE::Connect::YaST.list_installer_updates
+Requires:       rubygem(suse-connect) >= 0.2.37
 
 # NOTE: Workaround for bsc#947482, SUSEConnect is actually not needed by the
 # YaST registration module, it is used just to install the Connect dependencies.
 #
 # TODO: Remove it once the SUSEConnect dependencies are properly moved to the
 # suse-connect gem.
-Requires:       SUSEConnect
+Requires:       SUSEConnect >= 0.2.37
 
 Requires:       yast2-slp >= 3.1.9
 Requires:       yast2-add-on >= 3.1.8
