@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Fri Jul 29 09:29:45 UTC 2016 - igonzalezsosa@suse.com
+
+- Improve certificates handling during registration:
+  - Write imported certificates to /etc/pki/trust/anchors
+    instead of the /usr/share/pki/trust/anchors counterpart
+    (bsc#989787).
+  - Prevent removal of installation system CA certificates
+    when importing a new one (bsc#981428).
+  - Continue the registration after successful import of
+    a new certificate (bsc#991028).
+- 3.1.178
+
+-------------------------------------------------------------------
 Mon Jul 25 14:21:00 UTC 2016 - mvidner@suse.com
 
 - Extensions and Modules:
