@@ -85,7 +85,7 @@ describe "Registration::Helpers" do
     let(:instsys_cert_file) { Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE }
 
     before do
-      expect(Yast::Mode).to receive(:installation).and_return(true)
+      expect(Yast::Stage).to receive(:initial).and_return(true)
     end
 
     it "does nothing when no SSL certificate has been imported" do
