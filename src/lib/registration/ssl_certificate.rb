@@ -9,7 +9,7 @@ module Registration
   # class handling SSL certificate
   # TODO: move it to yast2 to share it?
   class SslCertificate
-    Yast.import "Mode"
+    Yast.import "Stage"
 
     # Path to the registration certificate in the instsys
     INSTSYS_SERVER_CERT_FILE = "/etc/pki/trust/anchors/registration_server.pem".freeze
@@ -25,11 +25,7 @@ module Registration
     #
     # @return [String] Path to store the certificate
     def self.default_certificate_path
-      if Yast::Mode.installation || Yast::Mode.update
-        INSTSYS_SERVER_CERT_FILE
-      else
-        SUSE::Connect::YaST::SERVER_CERT_FILE
-      end
+      Yast::Stage.initial ? INSTSYS_SERVER_CERT_FILE : SUSE::Connect::YaST::SERVER_CERT_FILE
     end
 
     def initialize(x509_cert)
@@ -69,21 +65,23 @@ module Registration
 
       # Copy certificates/links
       files = Dir[File.join(TMP_CA_CERTS_DIR, "*")]
+      return false if files.empty?
       targets = ["pem", "openssl"].map { |d| File.join(CA_CERTS_DIR, d) }
-      targets.each do |subdir|
+      new_files = []
+      targets.each_with_object(new_files) do |subdir|
         FileUtils.mkdir_p(subdir) unless Dir.exist?(subdir)
         files.each do |file|
           # FileUtils.cp does not seem to allow copying the links without dereferencing them.
           Yast::Execute.locally("cp", "--no-dereference", "--preserve=links", file, subdir)
+          new_files << File.join(subdir, File.basename(file))
         end
       end
 
       # Cleanup
       FileUtils.rm_rf(TMP_CA_CERTS_DIR)
-      true
-    rescue Cheetah::ExecutionFailed => e
-      log.error("Error updating instsys CA certificates: #{e.message}")
-      false
+
+      # Check that last file was copied to return true or false
+      File.exist?(new_files.last)
     end
 
     # certificate serial number (in HEX format, e.g. AB:CD:42:FF...)
@@ -155,7 +153,7 @@ module Registration
     # @see #import_to_system
     # @see #import_to_instsys
     def import
-      (Yast::Mode.installation || Yast::Mode.update) ? import_to_instsys : import_to_system
+      Yast::Stage.initial ? import_to_instsys : import_to_system
     end
 
     # Import a certificate to the installed system

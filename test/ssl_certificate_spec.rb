@@ -13,6 +13,11 @@ describe Registration::SslCertificate do
     "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:" \
       "18:48:CA:84:81:48:60:F3:CB:BF"
   end
+  let(:initial) { false }
+
+  before do
+    allow(Yast::Stage).to receive(:initial).and_return(initial)
+  end
 
   describe ".load_file" do
     it "loads SSL certificate from a file" do
@@ -75,8 +80,8 @@ describe Registration::SslCertificate do
 
     context "when updating the system CA certificate fails" do
       before do
-        expect(Yast::Execute).to receive(:locally)
-          .and_raise(Cheetah::ExecutionFailed.new("cmd", 1, nil, nil, nil))
+        allow(Cheetah).to receive(:run)
+        allow(FileUtils).to receive(:rm_rf)
       end
 
       it "returns false" do
@@ -86,29 +91,12 @@ describe Registration::SslCertificate do
   end
 
   describe ".default_certificate_path" do
-    let(:installation) { false }
-    let(:update) { false }
-
-    before do
-      allow(Yast::Mode).to receive(:installation).and_return(installation)
-      allow(Yast::Mode).to receive(:update).and_return(update)
-    end
-
     it "returns the path specified in SUSE::Connect" do
       expect(described_class.default_certificate_path).to eq(SUSE::Connect::YaST::SERVER_CERT_FILE)
     end
 
-    context "during installation" do
-      let(:installation) { true }
-
-      it "returns the path defined by INSTSYS_SERVER_CERT_FILE" do
-        expect(described_class.default_certificate_path)
-          .to eq(Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE)
-      end
-    end
-
-    context "during update" do
-      let(:update) { true }
+    context "during 1st stage" do
+      let(:initial) { true }
 
       it "returns the path defined by INSTSYS_SERVER_CERT_FILE" do
         expect(described_class.default_certificate_path)
@@ -296,30 +284,13 @@ describe Registration::SslCertificate do
   end
 
   describe "#import" do
-    let(:installation) { false }
-    let(:update) { false }
-
-    before do
-      allow(Yast::Mode).to receive(:installation).and_return(installation)
-      allow(Yast::Mode).to receive(:update).and_return(update)
-    end
-
     it "installs the certificate in the installed system" do
       expect(subject).to receive(:import_to_system)
       subject.import
     end
 
-    context "during installation" do
-      let(:installation) { true }
-
-      it "installs the certificate in the instsys" do
-        expect(subject).to receive(:import_to_instsys)
-        subject.import
-      end
-    end
-
-    context "during update" do
-      let(:update) { true }
+    context "during 1st stage" do
+      let(:initial) { true }
 
       it "installs the certificate in the instsys" do
         expect(subject).to receive(:import_to_instsys)
