@@ -1,3 +1,8 @@
+require "pathname"
+
+TESTS_PATH = Pathname.new(File.dirname(__FILE__))
+FIXTURES_PATH = TESTS_PATH.join("fixtures")
+
 if ENV["COVERAGE"]
   require "simplecov"
 
@@ -22,7 +27,7 @@ $LOAD_PATH.unshift(libdir)
 ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
 
 def fixtures_file(file)
-  File.expand_path(File.join("../fixtures", file), __FILE__)
+  FIXTURES_PATH.join(file).to_s
 end
 
 require "yaml"

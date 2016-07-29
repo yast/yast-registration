@@ -11,4 +11,5 @@ group :test do
   gem "rubocop", "~> 0.41.2", require: false
   gem "simplecov", require: false
   gem "coveralls", require: false if ENV["TRAVIS"]
+  gem "cheetah"
 end
