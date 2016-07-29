@@ -130,7 +130,8 @@ module Registration
       return unless File.exist?(cert_file) # no certificate imported?
       # copy the imported certificate
       log.info "Copying SSL certificate (#{cert_file}) to the target system..."
-      cert_target_file = File.join(Yast::Installation.destdir, cert_file)
+      cert_target_file = File.join(Yast::Installation.destdir,
+        SUSE::Connect::YaST::SERVER_CERT_FILE)
       ::FileUtils.mkdir_p(File.dirname(cert_target_file))
       ::FileUtils.cp(cert_file, cert_target_file)
 
