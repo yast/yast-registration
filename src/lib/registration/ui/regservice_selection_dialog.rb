@@ -38,8 +38,12 @@ module Registration
       #   Registration::UI::SelectionServiceDialog.run(services)
       #     #=> #<Yast::SlpServiceClass::Service...>
       #
-      # @param services [Array<SlpServiceClass::Service] list of services to show
-      # @return [SlpServiceClass::Service,Symbol] selected service or symbol (:scc or :cancel)
+      # @param services    [Array<SlpServiceClass::Service] List of services to show.
+      # @param heading     [String] Text to be shown as dialog heading. A default text
+      #                             will be used if it's not specified.
+      # @param description [String] Text to be shown as description. A default text
+      #                             will be used if it's not specified.
+      # @return [SlpServiceClass::Service,Symbol] selected service or symbol (:scc or :cancel).
       #
       # @see #run
       def self.run(services:, heading: nil, description: nil)
@@ -48,7 +52,11 @@ module Registration
 
       # Constructor
       #
-      # @param services [Array<SlpServiceClass::Service] list of services to show
+      # @param services    [Array<SlpServiceClass::Service] List of services to show.
+      # @param heading     [String] Text to be shown as dialog heading. A default text
+      #                             will be used if it's not specified.
+      # @param description [String] Text to be shown as description. A default text
+      #                             will be used if it's not specified.
       def initialize(services: [], heading: nil, description: nil)
         super(
           services:        [scc_service] + services,
@@ -71,6 +79,12 @@ module Registration
 
       # Return the service description to be shown to the user
       #
+      # This method just overrides the services description in case
+      # of a String is passed (instead of a SlpServiceClass::Service).
+      # It's needed because the "scc" option is not a proper service, just a
+      # special value.
+      #
+      # @param  [SlpServiceClass::Service,String] Service to describe
       # @return [String] Service description
       #
       # @see Yast::Dialogs::ServiceSelection#service_to_description

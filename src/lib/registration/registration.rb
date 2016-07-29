@@ -167,8 +167,14 @@ module Registration
 
     # Get the list of updates for a given product
     #
-    # @param [Hash]           Product. If nil the base product will be used.
+    # @param [Hash] Hash containing the product description.
+    #               Description should contain "name", "arch",
+    #               "version" and "release_type".
     # @return [Array<String>] List of URLs of updates repositories.
+    #
+    # @see SwMgmt.base_product_to_register
+    # @see SwMgmt.remote_product
+    # @see SUSE::Connect::Yast.list_installer_updates
     def get_updates_list(product = nil)
       product ||= SwMgmt.base_product_to_register
 
