@@ -84,7 +84,7 @@ module Registration
             msg = _("Check that this system is known to the registration server.")
 
             # probably missing NCC->SCC sync, display a hint unless SMT is used
-            if UrlHelpers.registration_url.nil?
+            if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL
               msg += "\n\n"
               # TRANSLATORS: additional hint for an error message
               msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
@@ -101,22 +101,22 @@ module Registration
             e.message << "\n\n\n" + msg
           end
 
-          report_error(message_prefix + _("Registration failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), e)
         when 404
           # update the message when an old SMT server is found
           check_smt_api(e)
 
-          report_error(message_prefix + _("Registration failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), e)
         when 422
           # Error popup
-          report_error(message_prefix + _("Registration failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), e)
         when 400..499
           report_error(message_prefix + _("Registration client error."), e)
         when 500..599
           report_error(message_prefix + _("Registration server error.\n" \
                 "Retry registration later."), e)
         else
-          report_error(message_prefix + _("Registration failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), e)
         end
         false
       rescue ::Registration::ServiceError => e
@@ -167,10 +167,12 @@ module Registration
         # update the message when an old SMT server is found
         check_smt_api(e)
 
-        report_error(message_prefix + _("Registration failed."), e)
+        report_error(message_prefix + _("Connection to registration server failed."), e)
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
-        Yast::Report.Error(error_with_details(_("Registration failed."), e.message))
+        Yast::Report.Error(
+          error_with_details(_("Connection to registration server failed."), e.message)
+        )
         false
       end
     end
