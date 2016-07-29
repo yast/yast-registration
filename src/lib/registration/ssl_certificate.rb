@@ -67,13 +67,12 @@ module Registration
       files = Dir[File.join(TMP_CA_CERTS_DIR, "*")]
       return false if files.empty?
       targets = ["pem", "openssl"].map { |d| File.join(CA_CERTS_DIR, d) }
-      new_files = []
-      targets.each_with_object(new_files) do |subdir|
+      new_files = targets.each_with_object([]) do |subdir, memo|
         FileUtils.mkdir_p(subdir) unless Dir.exist?(subdir)
         files.each do |file|
           # FileUtils.cp does not seem to allow copying the links without dereferencing them.
           Yast::Execute.locally("cp", "--no-dereference", "--preserve=links", file, subdir)
-          new_files << File.join(subdir, File.basename(file))
+          memo << File.join(subdir, File.basename(file))
         end
       end
 
