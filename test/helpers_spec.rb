@@ -82,19 +82,24 @@ describe "Registration::Helpers" do
 
   describe ".copy_certificate_to_target" do
     let(:cert_file) { SUSE::Connect::YaST::SERVER_CERT_FILE }
+    let(:instsys_cert_file) { Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE }
+
+    before do
+      expect(Yast::Stage).to receive(:initial).and_return(true)
+    end
 
     it "does nothing when no SSL certificate has been imported" do
-      expect(File).to receive(:exist?).with(cert_file).and_return(false)
+      expect(File).to receive(:exist?).with(instsys_cert_file).and_return(false)
       expect(FileUtils).to receive(:cp).never
 
       expect { Registration::Helpers.copy_certificate_to_target }.to_not raise_error
     end
 
     it "copies the certificate and updates all certificate links" do
-      expect(File).to receive(:exist?).with(cert_file).and_return(true)
+      expect(File).to receive(:exist?).with(instsys_cert_file).and_return(true)
       expect(Yast::Installation).to receive(:destdir).and_return("/mnt")
       expect(FileUtils).to receive(:mkdir_p).with("/mnt" + File.dirname(cert_file))
-      expect(FileUtils).to receive(:cp).with(cert_file, "/mnt" + cert_file)
+      expect(FileUtils).to receive(:cp).with(instsys_cert_file, "/mnt" + cert_file)
       expect(Yast::SCR).to receive(:Execute).with(Yast::Path.new(".target.bash"),
         SUSE::Connect::YaST::UPDATE_CERTIFICATES)
 

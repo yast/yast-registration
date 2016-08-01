@@ -28,6 +28,7 @@ require "registration/addon"
 require "registration/registration"
 require "registration/storage"
 require "registration/url_helpers"
+require "registration/ssl_certificate"
 require "suse/connect"
 
 module Registration
@@ -125,20 +126,19 @@ module Registration
 
     # copy the imported SSL certificate to the target system (if exists)
     def self.copy_certificate_to_target
-      cert_file = SUSE::Connect::YaST::SERVER_CERT_FILE
-      # any certificate imported?
-      if File.exist?(cert_file)
-        # copy the imported certificate
-        log.info "Copying SSL certificate (#{cert_file}) to the target system..."
-        cert_target_file = File.join(Yast::Installation.destdir, cert_file)
-        ::FileUtils.mkdir_p(File.dirname(cert_target_file))
-        ::FileUtils.cp(cert_file, cert_target_file)
+      cert_file = SslCertificate.default_certificate_path
+      return unless File.exist?(cert_file) # no certificate imported?
+      # copy the imported certificate
+      log.info "Copying SSL certificate (#{cert_file}) to the target system..."
+      cert_target_file = File.join(Yast::Installation.destdir,
+        SUSE::Connect::YaST::SERVER_CERT_FILE)
+      ::FileUtils.mkdir_p(File.dirname(cert_target_file))
+      ::FileUtils.cp(cert_file, cert_target_file)
 
-        # update the certificate links
-        cmd = SUSE::Connect::YaST::UPDATE_CERTIFICATES
-        log.info "Updating certificate links (#{cmd})..."
-        Yast::SCR.Execute(Yast::Path.new(".target.bash"), cmd)
-      end
+      # update the certificate links
+      cmd = SUSE::Connect::YaST::UPDATE_CERTIFICATES
+      log.info "Updating certificate links (#{cmd})..."
+      Yast::SCR.Execute(Yast::Path.new(".target.bash"), cmd)
     end
 
     # write the current configuration to the configuration file

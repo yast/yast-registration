@@ -2,7 +2,7 @@
 
 require_relative "spec_helper"
 
-describe "Registration::SslCertificate" do
+describe Registration::SslCertificate do
   subject { Registration::SslCertificate.load_file(fixtures_file("test.pem")) }
   # use "openssl x509 -in test.pem -noout -serial -fingerprint" to get serial and SHA1
   # use "openssl x509 -outform der -in test.pem -out test.der" and then
@@ -12,6 +12,11 @@ describe "Registration::SslCertificate" do
   let(:sha256) do
     "2A:02:DA:EC:A9:FF:4C:B4:A6:C0:57:08:F6:1C:8B:B0:94:FA:F4:60:96:5E:" \
       "18:48:CA:84:81:48:60:F3:CB:BF"
+  end
+  let(:initial) { false }
+
+  before do
+    allow(Yast::Stage).to receive(:initial).and_return(initial)
   end
 
   describe ".load_file" do
@@ -34,6 +39,69 @@ describe "Registration::SslCertificate" do
 
       expect(Registration::SslCertificate.download("http://example.com/smt.crt")).to \
         be_a(Registration::SslCertificate)
+    end
+  end
+
+  describe ".update_instsys_ca" do
+    CERT_NAME = "YaST_Team.pem".freeze
+    # Names are asigned by "trust" and related to certificate content
+    CERT_LINKS = ["8820a2e8.0", "8f13f82e.0"].freeze
+
+    let(:ca_dir) { Pathname.new(Dir.mktmpdir) }
+    let(:tmp_ca_dir) { FIXTURES_PATH.join("anchors") }
+
+    before do
+      stub_const("Registration::SslCertificate::TMP_CA_CERTS_DIR", tmp_ca_dir.to_s)
+      stub_const("Registration::SslCertificate::CA_CERTS_DIR", ca_dir.to_s)
+      allow(Yast::Execute).to receive(:locally).and_call_original
+      allow(FileUtils).to receive(:rm_rf).and_call_original
+    end
+
+    after do
+      FileUtils.rm_rf(ca_dir.to_s)
+    end
+
+    it "adds new certs under anchors to system CA certificates" do
+      expect(Yast::Execute).to receive(:locally).with("trust", "extract",
+        "--format=openssl-directory", "--filter=ca-anchors", "--overwrite", tmp_ca_dir.to_s)
+        .and_return(true)
+      expect(FileUtils).to receive(:rm_rf).with(tmp_ca_dir.to_s)
+        .and_return(Dir[tmp_ca_dir.join("*")])
+
+      expect(described_class.update_instsys_ca).to eq(true)
+
+      # Check that certificates and symlink exists
+      targets = ["pem", "openssl"].map { |d| ca_dir.join(d) }
+      targets.each do |subdir|
+        expect(ca_dir.join(subdir, CERT_NAME)).to be_file
+        CERT_LINKS.each { |l| expect(ca_dir.join(subdir, l)).to be_symlink }
+      end
+    end
+
+    context "when updating the system CA certificate fails" do
+      before do
+        allow(Cheetah).to receive(:run)
+        allow(FileUtils).to receive(:rm_rf)
+      end
+
+      it "returns false" do
+        expect(described_class.update_instsys_ca).to eq(false)
+      end
+    end
+  end
+
+  describe ".default_certificate_path" do
+    it "returns the path specified in SUSE::Connect" do
+      expect(described_class.default_certificate_path).to eq(SUSE::Connect::YaST::SERVER_CERT_FILE)
+    end
+
+    context "during 1st stage" do
+      let(:initial) { true }
+
+      it "returns the path defined by INSTSYS_SERVER_CERT_FILE" do
+        expect(described_class.default_certificate_path)
+          .to eq(Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE)
+      end
     end
   end
 
@@ -164,7 +232,70 @@ describe "Registration::SslCertificate" do
       expect(SUSE::Connect::YaST).to receive(:import_certificate) \
         .with(an_instance_of(OpenSSL::X509::Certificate))
 
-      subject.import_to_system
+      expect(subject.import_to_system).to eq(true)
+    end
+
+    context "when fails to update system CA certificates" do
+      before do
+        allow(SUSE::Connect::YaST).to receive(:import_certificate)
+          .and_raise(SUSE::Connect::SystemCallError)
+      end
+
+      it "returns false" do
+        expect(subject.import_to_system).to eq(false)
+      end
+    end
+  end
+
+  describe "#import_to_instsys" do
+    before do
+      allow(subject.x509_cert).to receive(:to_pem).and_return("CERTIFICATE")
+    end
+
+    it "copies the certificate to the default instsys path" do
+      allow(described_class).to receive(:update_instsys_ca)
+      expect(File).to receive(:write)
+        .with(described_class.default_certificate_path, "CERTIFICATE")
+
+      subject.import_to_instsys
+    end
+
+    context "when successfully updates system CA certificates" do
+      before do
+        allow(File).to receive(:write)
+        expect(described_class).to receive(:update_instsys_ca).and_return(true)
+      end
+
+      it "returns true" do
+        expect(subject.import_to_instsys).to eq(true)
+      end
+    end
+
+    context "when fails to update system CA certificates" do
+      before do
+        allow(File).to receive(:write)
+        expect(described_class).to receive(:update_instsys_ca).and_return(false)
+      end
+
+      it "returns false" do
+        expect(subject.import_to_instsys).to eq(false)
+      end
+    end
+  end
+
+  describe "#import" do
+    it "installs the certificate in the installed system" do
+      expect(subject).to receive(:import_to_system)
+      subject.import
+    end
+
+    context "during 1st stage" do
+      let(:initial) { true }
+
+      it "installs the certificate in the instsys" do
+        expect(subject).to receive(:import_to_instsys)
+        subject.import
+      end
     end
   end
 end
