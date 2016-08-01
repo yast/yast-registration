@@ -114,7 +114,7 @@ module Registration
           report_error(message_prefix + _("Registration client error."), e)
         when 500..599
           report_error(message_prefix + _("Registration server error.\n" \
-                "Retry registration later."), e)
+                "Retry the operation later."), e)
         else
           report_error(message_prefix + _("Connection to registration server failed."), e)
         end
