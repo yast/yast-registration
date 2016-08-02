@@ -22,6 +22,7 @@
 require "ostruct"
 require "yast"
 require "suse/connect"
+require "registration/connect_helpers"
 
 require "registration/addon"
 require "registration/helpers"
@@ -162,6 +163,31 @@ module Registration
 
       log.info "Received system migrations: #{migrations}"
       migrations
+    end
+
+    # Get the list of updates for a given product
+    #
+    # @param [Hash] Hash containing the product description.
+    #               Description should contain "name", "arch",
+    #               "version" and "release_type".
+    # @return [Array<String>] List of URLs of updates repositories.
+    #
+    # @see SwMgmt.base_product_to_register
+    # @see SwMgmt.remote_product
+    # @see SUSE::Connect::Yast.list_installer_updates
+    def get_updates_list(product = nil)
+      product ||= SwMgmt.base_product_to_register
+
+      log.info "Reading available updates for product: #{product["name"]}"
+      updates = []
+
+      ConnectHelpers.catch_registration_errors do
+        remote_product = SwMgmt.remote_product(product)
+        updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
+      end
+
+      log.info "Updates for '#{product["name"]}' are available at '#{updates}'"
+      updates
     end
 
     def self.is_registered?

@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.178
+Version:        3.1.179
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -32,16 +32,17 @@ Requires:       yast2 >= 3.1.26
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
-Requires:       rubygem(suse-connect) >= 0.2.22
+# SUSE::Connect::YaST.list_installer_updates
+Requires:       rubygem(suse-connect) >= 0.2.37
 
 # NOTE: Workaround for bsc#947482, SUSEConnect is actually not needed by the
 # YaST registration module, it is used just to install the Connect dependencies.
 #
 # TODO: Remove it once the SUSEConnect dependencies are properly moved to the
 # suse-connect gem.
-Requires:       SUSEConnect
+Requires:       SUSEConnect >= 0.2.37
 
-Requires:       yast2-slp >= 3.1.2
+Requires:       yast2-slp >= 3.1.9
 Requires:       yast2-add-on >= 3.1.8
 # packager/product_patterns.rb
 Requires:       yast2-packager >= 3.1.95
@@ -53,7 +54,7 @@ BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
-BuildRequires:  yast2-slp >= 3.1.2
+BuildRequires:  yast2-slp >= 3.1.9
 # packager/product_patterns.rb
 BuildRequires:  yast2-packager >= 3.1.95
 BuildRequires:  yast2-update >= 3.1.36

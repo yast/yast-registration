@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug  1 07:34:21 UTC 2016 - igonzalezsosa@suse.com
+
+- Extract the services selection dialog so it can be used by
+  other YaST modules (related to FATE#319716)
+- 3.1.179
+
+-------------------------------------------------------------------
 Fri Jul 29 09:29:45 UTC 2016 - igonzalezsosa@suse.com
 
 - Improve certificates handling during registration:
