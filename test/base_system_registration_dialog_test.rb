@@ -26,6 +26,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
     let(:mode) { "installation" }
 
     before do
+      textdomain "registration"
+
       allow(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       allow(Yast::Mode).to receive(:mode).and_return(mode)
       allow(Registration::Registration).to receive(:is_registered?).and_return(registered?)

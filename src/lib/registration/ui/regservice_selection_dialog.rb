@@ -58,6 +58,7 @@ module Registration
       # @param description [String] Text to be shown as description. A default text
       #                             will be used if it's not specified.
       def initialize(services: [], heading: nil, description: nil)
+        textdomain "registration"
         super(
           services:        [scc_service] + services,
           heading:         heading || _("Local Registration Servers"),

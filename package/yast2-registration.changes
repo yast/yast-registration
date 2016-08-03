@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug  3 15:51:28 UTC 2016 - mvidner@suse.com
+
+- Declare textdomain to fix untranslated texts in the previous
+  change (related to FATE#319716)
+- 3.1.180
+
+-------------------------------------------------------------------
 Mon Aug  1 07:34:21 UTC 2016 - igonzalezsosa@suse.com
 
 - Extract the services selection dialog so it can be used by

@@ -76,6 +76,8 @@ describe Registration::UI::RegserviceSelectionDialog do
     end
 
     it "sets default heading and description" do
+      textdomain "registration"
+
       expect(Yast::UI).to receive(:UserInput).and_return(:cancel)
       expect(dialog).to receive(:Heading)
         .with(_("Local Registration Servers"))
