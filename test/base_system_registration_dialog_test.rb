@@ -31,6 +31,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       allow(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       allow(Yast::Mode).to receive(:mode).and_return(mode)
       allow(Registration::Registration).to receive(:is_registered?).and_return(registered?)
+      allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
     end
 
     context "when system is not registered" do
