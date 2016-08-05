@@ -11,6 +11,9 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     allow(Yast::UI).to receive(:ReplaceWidget)
     allow(Yast::UI).to receive(:TextMode).and_return(false)
 
+    # empty hash for any base product, it does not matter
+    allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return({})
+
     addon_reset_cache
   end
 
@@ -22,11 +25,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         addon_generator("zypper_name" => "sle-module-toolchain",
         "name" => "Toolchain module", "version" => "12", "arch" => "aarch64")
       )
-    end
-
-    before do
-      # empty hash for any base product, it does not matter
-      allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return({})
     end
 
     it "returns response from addon selection according to pressed button" do
