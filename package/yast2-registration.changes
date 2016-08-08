@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug  5 15:50:59 UTC 2016 - lslezak@suse.cz
+
+- Preselect the add-on products also during installation
+  (bsc#992304)
+- 3.1.182
+
+-------------------------------------------------------------------
 Fri Aug  5 10:20:55 UTC 2016 - igonzalezsosa@suse.com
 
 - Fix package building in AArch64 (bsc#992341)
