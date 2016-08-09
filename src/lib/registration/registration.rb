@@ -49,9 +49,6 @@ module Registration
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
       log.info "Global SCC credentials (username): #{login}"
 
-      # ensure the zypp config directories are writable in inst-sys
-      ::Registration::SwMgmt.zypp_config_writable!
-
       # write the global credentials
       SUSE::Connect::YaST.create_credentials_file(login, password)
     end

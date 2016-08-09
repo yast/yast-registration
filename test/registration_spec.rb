@@ -16,7 +16,6 @@ describe Registration::Registration do
       reg_code = "reg_code"
       target_distro = "sles-12-x86_64"
 
-      expect(Registration::SwMgmt).to receive(:zypp_config_writable!)
       expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(token: reg_code), target_distro)
