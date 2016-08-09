@@ -115,25 +115,6 @@ module Registration
       true
     end
 
-    # during installation /etc/zypp directory is not writable (mounted on
-    # a read-only file system), the workaround is to copy the whole directory
-    # structure into a writable temporary directory and override the original
-    # location by "mount -o bind"
-    def self.zypp_config_writable!
-      return if !(Mode.installation || Mode.update) || File.writable?(ZYPP_DIR)
-
-      log.info "Copying libzypp config to a writable place"
-
-      # create writable zypp directory structure in /tmp
-      tmpdir = Dir.mktmpdir
-
-      log.info "Copying #{ZYPP_DIR} to #{tmpdir} ..."
-      ::FileUtils.cp_r ZYPP_DIR, tmpdir
-
-      log.info "Mounting #{tmpdir} to #{ZYPP_DIR}"
-      `mount -o bind #{tmpdir}/zypp #{ZYPP_DIR}`
-    end
-
     def self.find_base_product
       # just for debugging:
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
@@ -354,9 +335,6 @@ module Registration
     # installation (in the inst_kickoff.rb client)
     def self.copy_old_credentials(source_dir)
       log.info "Searching registration credentials in #{source_dir}..."
-
-      # ensure the zypp directory is writable in inst-sys
-      zypp_config_writable!
 
       dir = SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR
       # create the target directory if missing
