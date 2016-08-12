@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug 12 11:58:58 UTC 2016 - igonzalezsosa@suse.com
+
+- Improve 'connection timeout' error messages (related to
+  bsc#993467)
+- 3.1.184
+
+-------------------------------------------------------------------
 Tue Aug  9 12:59:25 UTC 2016 - lslezak@suse.cz
 
 - Removed workaround for making /etc/zypp directory writable,
