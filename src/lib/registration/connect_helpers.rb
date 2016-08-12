@@ -74,9 +74,11 @@ module Registration
       rescue Timeout::Error => e
         # Error popup
         log.error "Timeout error: #{e.message}"
+        # FIXME: to not break existing translation, this typo should be fixed
+        # later after SP2: time -> timed
         Yast::Report.Error(
-          error_with_details(message_prefix + _("Connection time out.\n"),
-            _("Make sure that the registration server is reachable and " \
+          error_with_details(message_prefix + _("Connection time out.") + "\n",
+            _("Make sure that the registration server is reachable and\n" \
               "the connection is reliable."))
         )
         false

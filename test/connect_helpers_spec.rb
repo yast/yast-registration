@@ -7,11 +7,11 @@ describe Registration::ConnectHelpers do
   subject(:helpers) { Registration::ConnectHelpers }
 
   describe "#catch_registration_errors" do
-    it "catches Timeout::Error" do
-      details = _("Make sure that the registration server is reachable " \
-        "and the connection is reliable.")
+    it "reports an error with details on timeout" do
+      details = _("Make sure that the registration server is reachable and\n" \
+        "the connection is reliable.")
       expect(Yast::Report).to receive(:Error).with(
-        "Registration: #{_("Connection time out.\n")}\n\nDetails: #{details}"
+        "Registration: #{_("Connection time out.")}\n\n\nDetails: #{details}"
       )
 
       helpers.catch_registration_errors(message_prefix: "Registration: ") do
@@ -19,7 +19,7 @@ describe Registration::ConnectHelpers do
       end
     end
 
-    it "catches standard errors" do
+    it "reports general errors including the original message" do
       expect(Yast::Report).to receive(:Error)
         .with(/some message/)
 
