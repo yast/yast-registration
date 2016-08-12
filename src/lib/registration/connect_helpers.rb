@@ -71,9 +71,14 @@ module Registration
         log.error "Network error: #{e.class}: #{e.message}"
         handle_network_error(message_prefix, e)
         false
-      rescue Timeout::Error
+      rescue Timeout::Error => e
         # Error popup
-        Yast::Report.Error(_("Connection time out."))
+        log.error "Timeout error: #{e.message}"
+        Yast::Report.Error(
+          error_with_details(message_prefix + _("Connection time out.\n"),
+            _("Make sure that the registration server is reachable and " \
+              "the connection is reliable."))
+        )
         false
       rescue SUSE::Connect::ApiError => e
         log.error "Received error: #{e.response.inspect}"
@@ -171,7 +176,8 @@ module Registration
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
-          error_with_details(_("Connection to registration server failed."), e.message)
+          error_with_details(message_prefix + _("Connection to registration server failed."),
+            e.message)
         )
         false
       end
