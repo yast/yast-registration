@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug 15 14:54:16 UTC 2016 - lslezak@suse.cz
+
+- Fixed typos and grammar issues in the SSL certificate import
+  dialog (bsc#992585)
+- 3.1.185
+
+-------------------------------------------------------------------
 Fri Aug 12 11:58:58 UTC 2016 - igonzalezsosa@suse.com
 
 - Improve 'connection timeout' error messages (related to
