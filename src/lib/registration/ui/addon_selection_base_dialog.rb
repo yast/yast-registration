@@ -15,7 +15,6 @@ module Registration
       include Yast::UIShortcuts
       include Yast
 
-      Yast.import "Mode"
       Yast.import "GetInstArgs"
       Yast.import "Popup"
       Yast.import "Report"
@@ -151,7 +150,7 @@ module Registration
         else
           indent = "&nbsp;" * (indented ? 7 : 1)
 
-          installation = !Yast::Mode.normal
+          installation = Yast::Stage.initial
           image = (installation ? "inst:" : "normal:") +
             (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
           color = installation ? "white" : "black"

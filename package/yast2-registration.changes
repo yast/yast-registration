@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 24 12:21:26 UTC 2016 - jreidinger@suse.com
+
+- fix detection of installation qss, so registration in first boot
+  have readable text (bnc#995333)
+- 3.1.186
+
+-------------------------------------------------------------------
 Mon Aug 15 14:54:16 UTC 2016 - lslezak@suse.cz
 
 - Fixed typos and grammar issues in the SSL certificate import
