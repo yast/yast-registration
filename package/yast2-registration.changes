@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug 25 12:22:58 UTC 2016 - jreidinger@suse.com
+
+- write name of server which have certificate problem in error
+  popup (bnc#995526)
+- 3.1.187
+
+-------------------------------------------------------------------
 Wed Aug 24 12:21:26 UTC 2016 - jreidinger@suse.com
 
 - fix detection of installation qss, so registration in first boot
