@@ -257,6 +257,9 @@ module Registration
       msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
       msg = message if msg.nil? || msg.empty?
 
+      url = UrlHelpers.registration_url || SUSE::Connect::YaST::DEFAULT_URL
+      msg = url + ": " + msg # workaround after string freeze
+
       Yast::Report.Error(
         error_with_details(_("Secure connection error: %s") % msg, ssl_error_details(cert))
       )
