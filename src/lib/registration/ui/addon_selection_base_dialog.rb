@@ -150,7 +150,8 @@ module Registration
         else
           indent = "&nbsp;" * (indented ? 7 : 1)
 
-          installation = Yast::Stage.initial
+          # check for installation style, which is dark, FIXME: find better way
+          installation = ENV["Y2STYLE"] == "installation.qss"
           image = (installation ? "inst:" : "normal:") +
             (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
           color = installation ? "white" : "black"
