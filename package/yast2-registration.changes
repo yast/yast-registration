@@ -1,8 +1,7 @@
 -------------------------------------------------------------------
 Wed Aug 31 09:10:41 UTC 2016 - jreidinger@suse.com
 
-- more robust check for installation qss for dark theme
-  (bnc#996258)
+- more robust check for installation dark theme (bnc#996258)
 - 3.1.188
 
 -------------------------------------------------------------------
