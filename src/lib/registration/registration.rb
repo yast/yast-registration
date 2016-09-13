@@ -132,6 +132,10 @@ module Registration
 
       remote_product = SwMgmt.remote_product(base_product)
       addons = SUSE::Connect::YaST.show_product(remote_product, connect_params).extensions || []
+
+      # hack, the last character is trimmed in ncurses (bsc#955156)
+      addons.each { |a| a.friendly_name += " " }
+
       addons.each { |a| log.info "Found available addon: #{a.inspect}" }
 
       renames = collect_renames(addons)
