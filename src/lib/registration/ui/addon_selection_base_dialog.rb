@@ -163,6 +163,9 @@ module Registration
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
 
+        # workaround for an ncurses UI bug (the last character is lost)(bsc#955156)
+        label += " " if Yast::UI.TextMode
+
         CheckBox(Id(addon_widget_id(addon)), Opt(:notify), label, addon_selected?(addon))
       end
 
