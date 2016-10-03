@@ -17,6 +17,17 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     addon_reset_cache
   end
 
+  describe "#initialize" do
+    it "sets filter beta to previous state" do
+      fake_ref = double.as_null_object
+      res = described_class.new(fake_ref)
+      res.send(:filter_beta_releases, false)
+
+      expect_any_instance_of(described_class).to receive(:filter_beta_releases).with(false)
+      described_class.new(fake_ref)
+    end
+  end
+
   describe ".run" do
     subject { Registration::UI::AddonSelectionRegistrationDialog }
 

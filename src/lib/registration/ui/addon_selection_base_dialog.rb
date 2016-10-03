@@ -23,6 +23,10 @@ module Registration
       Yast.import "Stage"
       Yast.import "Arch"
 
+      class << self
+        attr_accessor :filter_beta
+      end
+
       FILTER_BETAS_INITIALLY = true
 
       # constructor
@@ -35,7 +39,9 @@ module Registration
         # sort the addons
         @all_addons.sort!(&::Registration::ADDON_SORTER)
 
-        filter_beta_releases(FILTER_BETAS_INITIALLY)
+        self.class.filter_beta = FILTER_BETAS_INITIALLY if self.class.filter_beta.nil?
+
+        filter_beta_releases(self.class.filter_beta)
 
         @old_selection = Addon.selected.dup
 
@@ -64,6 +70,7 @@ module Registration
       # Enables or disables beta addons filtering
       # @param [Boolean] enable true for filtering beta releases
       def filter_beta_releases(enable)
+        self.class.filter_beta = enable
         @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
       end
 
