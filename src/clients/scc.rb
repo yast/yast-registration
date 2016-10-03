@@ -26,8 +26,13 @@
 require "yast"
 require "registration/sw_mgmt"
 
+# HTML escaping
+require "cgi/util"
+
 module Yast
   class SccClient < Client
+    include Yast::Logger
+
     Yast.import "CommandLine"
     Yast.import "Pkg"
     Yast.import "Report"
@@ -51,6 +56,16 @@ module Yast
           ::Registration::SwMgmt.init
 
           return WFM.call("inst_scc", WFM.Args)
+        rescue Registration::SourceRestoreError => e
+          # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
+          Report.LongError(_("<p>The repository initialization failed. " \
+            "Disable (or remove) the offending service or repository " \
+            "in the repository manager.</p><p>Details:</p><p>%s</p>") % CGI.escapeHTML(e.message))
+          ret = WFM.call("repositories", WFM.Args)
+          log.info "repository manager result: #{ret}"
+          # drop all loaded repos, force complete reloading
+          Pkg.SourceFinishAll
+          retry if ret == :next
         ensure
           Wizard.CloseDialog
         end
