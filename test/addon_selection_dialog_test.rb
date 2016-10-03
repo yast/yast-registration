@@ -18,7 +18,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   end
 
   describe "#initialize" do
-    it "sets filter beta to previous state" do
+    it "sets the beta filter to the previous state" do
       fake_ref = double.as_null_object
       res = described_class.new(fake_ref)
       res.send(:filter_beta_releases, false)
