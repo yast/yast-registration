@@ -58,6 +58,8 @@ module Yast
       end
     end
 
+  private
+
     # Print help in command line mode
     def print_help
       cmdline_description = {
