@@ -73,7 +73,7 @@ module Registration
 
       raise_pkg_exception unless Pkg.TargetInitialize(Installation.destdir)
       raise_pkg_exception unless Pkg.TargetLoad
-      raise_pkg_exception unless Pkg.SourceRestore
+      raise_pkg_exception(SourceRestoreError) unless Pkg.SourceRestore
 
       raise_pkg_exception if load_packages && !Pkg.SourceLoad
     end
@@ -499,8 +499,8 @@ module Registration
       product["register_release"]
     end
 
-    def self.raise_pkg_exception
-      raise PkgError.new, Pkg.LastError
+    def self.raise_pkg_exception(klass = PkgError)
+      raise klass, Pkg.LastError
     end
 
     private_class_method :each_repo
