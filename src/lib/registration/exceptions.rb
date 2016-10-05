@@ -35,6 +35,9 @@ module Registration
     end
   end
 
+  class SourceRestoreError < PkgError
+  end
+
   # generic download error
   class DownloadError < RuntimeError
   end

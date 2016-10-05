@@ -26,8 +26,13 @@
 require "yast"
 require "registration/sw_mgmt"
 
+# HTML escaping
+require "cgi/util"
+
 module Yast
   class SccClient < Client
+    include Yast::Logger
+
     Yast.import "CommandLine"
     Yast.import "Pkg"
     Yast.import "Report"
@@ -37,13 +42,7 @@ module Yast
       textdomain "registration"
 
       if WFM.Args.include?("help")
-        cmdline_description = {
-          "id"   => "scc",
-          # Command line help text for the repository module, %1 is "SUSEconnect"
-          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
-        }
-
-        CommandLine.Run(cmdline_description)
+        print_help
       else
         Wizard.CreateDialog
 
@@ -51,10 +50,42 @@ module Yast
           ::Registration::SwMgmt.init
 
           return WFM.call("inst_scc", WFM.Args)
+        rescue Registration::SourceRestoreError => e
+          retry if fix_repositories(e.message)
         ensure
           Wizard.CloseDialog
         end
       end
+    end
+
+  private
+
+    # Print help in command line mode
+    def print_help
+      cmdline_description = {
+        "id"   => "scc",
+        # Command line help text for the repository module, %1 is "SUSEconnect"
+        "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
+      }
+
+      CommandLine.Run(cmdline_description)
+    end
+
+    # Let the user manually fix the broken repositories
+    # @return [Boolean] true if the repository manager was successfuly closed,
+    #   false after pressing [Cancel]
+    def fix_repositories(details)
+      # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
+      Report.LongError(_("<p>The repository initialization failed. " \
+        "Disable (or remove) the offending service or repository " \
+        "in the repository manager.</p><p>Details:</p><p>%s</p>") % CGI.escapeHTML(details))
+
+      ret = WFM.call("repositories", WFM.Args)
+      log.info "repository manager result: #{ret}"
+
+      # drop all loaded repos, force complete reloading
+      Pkg.SourceFinishAll
+      ret == :next
     end
   end unless defined?(SccClient)
 end
