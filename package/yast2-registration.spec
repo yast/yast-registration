@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-registration
 #
-# Copyright (c) 2014 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2016 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -17,18 +17,15 @@
 
 
 Name:           yast2-registration
-Version:        3.1.166.2
+Version:        3.1.166.3
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
-Group:          System/YaST
-License:        GPL-2.0
-
 # Popup.Feedback
 Requires:       yast2 >= 3.1.26
-# "dupAllowVendorChange" option in Pkg.SetSolverFlags()
+# Pkg.ServiceForceRefresh()
 Requires:       yast2-pkg-bindings >= 3.1.31.1
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
@@ -41,24 +38,29 @@ Requires:       rubygem(suse-connect) >= 0.2.22
 # suse-connect gem.
 Requires:       SUSEConnect
 
-Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.26
+Requires:       yast2-slp >= 3.1.2
 Requires:       yast2-update >= 3.1.19
+Recommends:     yast2-migration
 
-BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  update-desktop-files
+BuildRequires:  yast2 >= 3.1.26
 BuildRequires:  yast2-devtools >= 3.1.6
-BuildRequires:  rubygem(yast-rake) >= 0.2.5
+BuildRequires:  yast2-packager >= 3.1.26
+# Pkg.ServiceForceRefresh()
+BuildRequires:  yast2-pkg-bindings >= 3.1.31.1
+BuildRequires:  yast2-slp >= 3.1.2
+BuildRequires:  yast2-update >= 3.1.19
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
-BuildRequires:  yast2-slp >= 3.1.2
-BuildRequires:  yast2-packager >= 3.1.26
-BuildRequires:  yast2-update >= 3.1.19
+BuildRequires:  rubygem(yast-rake) >= 0.2.5
 
 BuildArch:      noarch
 
 Summary:        YaST2 - Registration Module
+License:        GPL-2.0
+Group:          System/YaST
 Url:            https://github.com/yast/yast-registration
 
 %description
@@ -81,7 +83,6 @@ rake test:unit
 %install
 rake install DESTDIR="%{buildroot}"
 %suse_update_desktop_file customer_center
-
 
 %files
 %defattr(-,root,root)

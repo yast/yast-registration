@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 17 11:21:34 UTC 2016 - lslezak@suse.cz
+
+- Recommend yast2-migration package to install it by default
+  (bsc#982150)
+- 3.1.166.3
+
+-------------------------------------------------------------------
 Mon Sep 19 12:08:54 UTC 2016 - lslezak@suse.cz
 
 - Added a workaround for missing last characters in the addon
