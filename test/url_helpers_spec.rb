@@ -22,6 +22,15 @@ describe "Registration::UrlHelpers" do
         expect(Registration::UrlHelpers.registration_url).to eq(url)
       end
 
+      it "does not return 'regurl' boot parameter from Linuxrc if it is empty" do
+        url = ""
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(url)
+        # make sure no SLP discovery is executed, the boot parameter has higher priority
+        expect(Yast::WFM).to receive(:call).with("discover_registration_services")
+          .and_return(nil)
+        expect(Registration::UrlHelpers.registration_url).to eq(nil)
+      end
+
       it "returns the SLP server selected by user" do
         # no boot parameter passed, it would have higher priority
         expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)

@@ -251,7 +251,7 @@ module Registration
               Id(:register_scc),
               Opt(:notify),
               # TRANSLATORS: radio button; %s is a host name.
-              format(_("Register System via %s"), URI(default_url).host.downcase),
+              format(_("Register System via %s"), (URI(default_url).host || "").downcase),
               action == :register_scc
             )
           ),

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov 23 10:01:44 UTC 2016 - jreidinger@suse.com
+
+- do not crash if empty regurl paremeter is passed (bsc#1010387)
+
+-------------------------------------------------------------------
 Mon Oct  3 19:11:11 UTC 2016 - lslezak@suse.cz
 
 - Better handle invalid credentials at start - start the repository
