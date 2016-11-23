@@ -115,9 +115,9 @@ module Registration
       custom_url = ::Registration::Storage::InstallationOptions.instance.custom_url
       return custom_url if custom_url && !custom_url.empty?
 
-      # boot command line if present
+      # boot command line if present and not empty (see bsc#1010387)
       boot_url = boot_reg_url
-      return boot_url if boot_url
+      return boot_url if boot_url && !boot_url.empty?
 
       # if no SLP is selected nil is returned which means the default URL
       slp_service_url
