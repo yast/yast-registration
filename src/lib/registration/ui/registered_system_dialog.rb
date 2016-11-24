@@ -42,8 +42,8 @@ module Registration
               "extension or modules to enhance the functionality of the system.</p>") +
             _("<p>If you want to deregister your system you need to log "\
               "into the SUSE Customer Center and remove the system manually there.</p>"),
-          GetInstArgs.enable_back || Mode.normal,
-          GetInstArgs.enable_back || Mode.normal
+          true,
+          true
         )
 
         Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
