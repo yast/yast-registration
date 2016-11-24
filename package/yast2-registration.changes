@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 24 09:28:31 UTC 2016 - jreidinger@suse.com
+
+- allow user to go forward in firstboot when system is already
+  registered (bsc#975368)
+- 3.2.0
+
+-------------------------------------------------------------------
 Wed Nov 23 10:01:44 UTC 2016 - jreidinger@suse.com
 
 - do not crash if empty regurl paremeter is passed (bsc#1010387)

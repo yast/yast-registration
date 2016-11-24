@@ -202,7 +202,7 @@ module Yast
         end
       end
 
-      return :register unless Mode.normal && ::Registration::Registration.is_registered?
+      return :register unless ::Registration::Registration.is_registered?
 
       log.info "The system is already registered, displaying registered dialog"
       ::Registration::UI::RegisteredSystemDialog.run
