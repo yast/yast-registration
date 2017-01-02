@@ -1,4 +1,3 @@
-FROM yastorg/ruby-tw
+FROM yastdevel/ruby-tw
 COPY . /tmp/sources
-WORKDIR /tmp/sources
 
