@@ -1,4 +1,0 @@
----
-rules:
-  ignore:
-    - indent_when_as_deep_as_case

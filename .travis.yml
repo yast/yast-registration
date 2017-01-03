@@ -4,6 +4,8 @@ services:
   - docker
 
 before_install:
-  - docker build -t yast-devel-tw .
+  - docker build -t yast-test-image .
 script:
-  - docker run -it -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-devel-tw ./.travis.sh
+  # the "yast-travis" script is included in the base yastdevel/ruby-tw image
+  # see https://github.com/yast/docker-yast-ruby-tw/blob/master/yast-travis
+  - docker run -it -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-test-image yast-travis
