@@ -74,10 +74,13 @@ module Registration
           return false
         end
 
+
         log.info("Registering the system and the base product.")
+        # Error reports and logs about the registration are mostly handled
+        # by ConnectHelpers.catch_registration_errors and used by instances
+        # of RegistrationUI.
         return false if !register_system_and_base_product
 
-        log.info("System registered with success.")
         Storage::InstallationOptions.instance.base_registered = true
       end
 
