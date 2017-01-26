@@ -29,8 +29,6 @@ module Registration
     class RegistrationCode < CWM::InputField
       VALID_URL_SCHEMES = ["http", "https"].freeze
 
-      attr_accessor :registration_code, :registration, :reg_options
-
       def initialize
         textdomain "registration"
       end
@@ -41,22 +39,22 @@ module Registration
 
       # Initialize the widget with stored values
       def init
-        log.info("Already registered") if registered?
+        reg_code = options.reg_code.to_s
 
-        @options = Storage::InstallationOptions.instance
-        self.value = @options.custom_url
-        self.value = @options.reg_code if !@options.reg_code.to_s.empty?
+        self.value = reg_code.empty? ? options.custom_url || boot_url : options.reg_code
       end
 
       # Set registration options according to the value
       def store
         if valid_url?
-          @options.reg_code   = ""
-          @options.custom_url = value
+          options.reg_code   = ""
+          options.custom_url = value
         else
-          @options.reg_code   = value
-          @options.custom_url = default_url
+          options.reg_code   = value
+          options.custom_url = default_url
         end
+
+        register if !registered?
       end
 
       def registered?
@@ -64,7 +62,10 @@ module Registration
       end
 
       def register
-        return true if skip?
+        if skip?
+          log.info("Empty value, skipping registration")
+          return true
+        end
 
         log.info("Registering the system and the base product.")
         return false if !register_system_and_base_product
@@ -73,13 +74,38 @@ module Registration
         Storage::InstallationOptions.instance.base_registered = true
       end
 
+      def validate
+        return error(_("System already registered.")) if Registration.is_registered?
+
+        return true if skip?
+
+        return error(_("Not valid url.")) if url? & !valid_url?
+
+        true
+      end
+
     private
+
+      def error(message)
+        Yast::Popup.Error(message)
+
+        false
+      end
+
+      def url?
+        uri = URI(value)
+        uri.scheme ? true : false
+      rescue URI::InvalidURIError
+        false
+      end
 
       def valid_url?
         return false if value.to_s.empty?
 
         uri = URI(value)
         VALID_URL_SCHEMES.include?(uri.scheme)
+      rescue URI::InvalidURIError
+        false
       end
 
       # run the system and the base product registration
@@ -120,6 +146,10 @@ module Registration
       # Skip registration if the value is empty or nil
       def skip?
         value.to_s.empty?
+      end
+
+      def options
+        Storage::InstallationOptions.instance
       end
     end
   end
