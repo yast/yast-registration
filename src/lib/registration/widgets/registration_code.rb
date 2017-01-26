@@ -23,6 +23,7 @@ require "yast"
 require "cwm/widget"
 require "uri"
 require "registration/registration_ui"
+require "registration/sw_mgmt"
 
 module Registration
   module Widgets
@@ -41,7 +42,7 @@ module Registration
       def init
         reg_code = options.reg_code.to_s
 
-        self.value = reg_code.empty? ? options.custom_url || boot_url : options.reg_code
+        self.value = reg_code.empty? ? (options.custom_url || boot_url) : options.reg_code
       end
 
       # Set registration options according to the value
@@ -54,16 +55,22 @@ module Registration
           options.custom_url = default_url
         end
 
-        register if !registered?
-      end
-
-      def registered?
-        Registration.is_registered?
+        register
       end
 
       def register
         if skip?
           log.info("Empty value, skipping registration")
+          return true
+        end
+
+        if Registration.is_registered?
+          log.info("The system is already registered so skipped registration.")
+          return true
+        end
+
+        if !SwMgmt.find_base_product
+          log.info("Not base product found, skipping registration.")
           return true
         end
 
@@ -75,13 +82,16 @@ module Registration
       end
 
       def validate
-        return error(_("System already registered.")) if Registration.is_registered?
+        (url? & !valid_url?) ? error(_("Not valid url.")) : true
+      end
 
-        return true if skip?
-
-        return error(_("Not valid url.")) if url? & !valid_url?
-
-        true
+      def help
+        _(
+          "<p>\n" \
+          "The SMT Server URL must use http or https protocol, " \
+          "other schemes are not supported." \
+          "</p>\n"
+        )
       end
 
     private
