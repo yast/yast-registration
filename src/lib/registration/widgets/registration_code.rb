@@ -70,8 +70,7 @@ module Registration
         end
 
         if !SwMgmt.find_base_product
-          log.info("Not base product found, skipping registration.")
-          return true
+          return error(_("No base product found, skipping registration."))
         end
 
         log.info("Registering the system and the base product.")
