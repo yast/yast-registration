@@ -61,19 +61,18 @@ module Registration
       def register
         if skip?
           log.info("Empty value, skipping registration")
-          return true
+          return false
         end
 
         if Registration.is_registered?
           log.info("The system is already registered so skipped registration.")
-          return true
+          return false
         end
 
         if !SwMgmt.find_base_product
           Helpers.report_no_base_product
           return false
         end
-
 
         log.info("Registering the system and the base product.")
         # Error reports and logs about the registration are mostly handled
@@ -106,6 +105,8 @@ module Registration
       end
 
       def url?
+        return false if value.to_s.empty?
+
         uri = URI(value)
         uri.scheme ? true : false
       rescue URI::InvalidURIError
