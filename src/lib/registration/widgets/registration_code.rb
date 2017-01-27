@@ -45,7 +45,8 @@ module Registration
         self.value = reg_code.empty? ? (options.custom_url || boot_url) : options.reg_code
       end
 
-      # Set registration options according to the value
+      # Set registration options according to the value and try to register the
+      # system.
       def store
         if valid_url?
           options.reg_code   = ""
@@ -58,6 +59,10 @@ module Registration
         register
       end
 
+      # Try to register the system against SCC or a custom SMT depending on if
+      # the value is an URL or not.
+      #
+      # @return [Boolean] false if not attempted or failed and true if success
       def register
         if skip?
           log.info("Empty value, skipping registration")
