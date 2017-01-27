@@ -45,6 +45,7 @@ describe Registration::Widgets::RegistrationCode do
 
         subject.init
       end
+
     end
   end
 
