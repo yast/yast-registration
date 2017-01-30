@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
+
+- Fixed initialization of the registration code in case of called
+  more than once (fate#322328).
+- 3.1.190.2
+
+-------------------------------------------------------------------
 Mon Jan 23 13:21:42 UTC 2017 - kanderssen@suse.com
 
 - Added Registration::Widgets::RegistrationCode (fate#322328).
