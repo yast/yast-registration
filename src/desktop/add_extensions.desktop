@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Software;
+
+X-SuSE-YaST-Call=extensions
+X-SuSE-YaST-RootOnly=yes
+X-SuSE-YaST-Group=Software
+
+Icon=yast-product-registration
+Exec=/sbin/yast2 extensions
+
+Name=Add System Extensions/Modules
+GenericName=Add System Extensions/Modules
+StartupNotify=true
