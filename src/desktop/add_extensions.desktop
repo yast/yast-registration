@@ -3,6 +3,7 @@ Type=Application
 Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-Software;
 
 X-SuSE-YaST-Call=scc
+X-SuSE-YaST-Argument=select_extensions
 X-SuSE-YaST-RootOnly=yes
 X-SuSE-YaST-Group=Software
 
