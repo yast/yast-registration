@@ -23,12 +23,24 @@
 
 require "yast"
 
+require "registration/registration"
+
 module Yast
   class ExtensionClient < Client
     include Yast::Logger
 
+    Yast.import "Wizard"
+
     def main
-      textdomain "registration"
+      # Extension and module selection dialog's run method expects a dialog to exist already
+      Wizard.CreateDialog
+
+      begin
+        ::Registration::SwMgmt.init
+        return WFM.call("inst_scc", WFM.Args + ["select_extensions"])
+      ensure
+        Wizard.CloseDialog
+      end
     end
   end unless defined?(ExtensionClient)
 end
