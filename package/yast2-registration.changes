@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
+
+- Added Registration::Widgets::RegistrationCode (fate#322328).
+- Fixed initialization of the registration code in case of called
+  more than once (fate#322328).
+- 3.2.1
+
+-------------------------------------------------------------------
 Thu Nov 24 09:28:31 UTC 2016 - jreidinger@suse.com
 
 - allow user to go forward in firstboot when system is already
