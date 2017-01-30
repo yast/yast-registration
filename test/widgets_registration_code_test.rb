@@ -102,6 +102,8 @@ describe Registration::Widgets::RegistrationCode do
       end
 
       it "tries to register to the given URL" do
+        allow(options).to receive(:reg_code=)
+        allow(options).to receive(:custom_url=)
         expect(subject).to receive(:register)
 
         subject.store
