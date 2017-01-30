@@ -93,7 +93,7 @@ Authors:
 
 %files
 %defattr(-,root,root)
-%{yast_desktopdir}/customer_center.desktop
+%{yast_desktopdir}/*.desktop
 %{yast_clientdir}/*.rb
 %{yast_ydatadir}/registration
 %{yast_schemadir}/autoyast/rnc/*.rnc
