@@ -42,7 +42,7 @@ module Registration
       def init
         reg_code = options.reg_code.to_s
 
-        self.value = reg_code.empty? ? (options.custom_url || boot_url) : options.reg_code
+        self.value = reg_code.empty? ? init_url : options.reg_code
       end
 
       # Set registration options according to the value and try to register the
@@ -153,6 +153,15 @@ module Registration
       # @return [String] URL for the registration server
       def default_url
         boot_url || SUSE::Connect::Config.new.url
+      end
+
+      def init_url
+        case options.custom_url
+        when nil, "", SUSE::Connect::Config.new.url
+          boot_url
+        else
+          options.custom_url
+        end
       end
 
       # Registration server URL given through Linuxrc
