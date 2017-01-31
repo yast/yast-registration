@@ -7,9 +7,9 @@ X-SuSE-YaST-Argument=select_extensions
 X-SuSE-YaST-RootOnly=yes
 X-SuSE-YaST-Group=Software
 
-Icon=yast-product-registration
+Icon=yast-addon
 Exec=/sbin/yast2 scc select_extensions
 
-Name=Add System Extensions/Modules
-GenericName=Add System Extensions/Modules
+Name=Add System Extensions or Modules
+GenericName=Add System Extensions or Modules
 StartupNotify=true
