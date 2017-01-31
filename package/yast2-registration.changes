@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Jan 30 20:05:56 UTC 2017 - mfilka@suse.com
+
+- fate#321044
+  - provide a shortcut for running "Add System Extensions/Modules"
+    dialog directly from control centre.
+- 3.2.2
+
+-------------------------------------------------------------------
 Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
 
 - Added Registration::Widgets::RegistrationCode (fate#322328).
