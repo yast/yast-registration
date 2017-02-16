@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Feb 14 10:00:41 UTC 2017 - igonzalezsosa@suse.com
+
+- Registration#get_updates_list won't catch errors anymore because
+  that's something tightly coupled to the user interface. They
+  should be handled outside that method (bsc#1025251)
+- 3.2.3
+
+-------------------------------------------------------------------
 Mon Jan 30 20:05:56 UTC 2017 - mfilka@suse.com
 
 - fate#321044
