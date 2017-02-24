@@ -83,8 +83,8 @@ module Registration
       # addon description widget
       # @return [Yast::Term] the addon details widget
       def details_widget
-        MinHeight(8,
-          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
+        MinHeight(5,
+          VWeight(15, RichText(Id(:details), Opt(:disabled), "<small>" +
                 _("Select an extension or a module to show details here") + "</small>"))
         )
       end
@@ -93,14 +93,14 @@ module Registration
       # the UI uses two column layout
       # @return [Yast::Term] the main UI dialog term
       def addons_box
-        lines = Yast::UI.TextMode ? 9 : 14
+        lines = Yast::UI.TextMode ? 11 : 14
         if @addons.size <= lines
           content = addon_selection_items(@addons)
         else
           content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
         end
 
-        VWeight(75, MarginBox(2, 1, content))
+        VWeight(85, MarginBox(2, 1, content))
       end
 
       # display the addon checkboxes in two columns
