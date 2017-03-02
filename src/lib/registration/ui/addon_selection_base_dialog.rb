@@ -83,8 +83,22 @@ module Registration
       # addon description widget
       # @return [Yast::Term] the addon details widget
       def details_widget
-        MinHeight(5,
-          VWeight(15, RichText(Id(:details), Opt(:disabled), "<small>" +
+        vweight =
+          if Yast::UI.TextMode
+            screen_height > 35 ? 25 : 15
+          else
+            25
+          end
+
+        minheight =
+          if Yast::UI.TextMode
+            screen_height > 35 ? 8 : 5
+          else
+            8
+          end
+
+        MinHeight(minheight,
+          VWeight(vweight, RichText(Id(:details), Opt(:disabled), "<small>" +
                 _("Select an extension or a module to show details here") + "</small>"))
         )
       end
@@ -93,14 +107,39 @@ module Registration
       # the UI uses two column layout
       # @return [Yast::Term] the main UI dialog term
       def addons_box
-        lines = Yast::UI.TextMode ? 11 : 14
+        lines = addons_box_lines
         if @addons.size <= lines
           content = addon_selection_items(@addons)
         else
           content = two_column_layout(@addons[lines..(2 * lines - 1)], @addons[0..(lines - 1)])
         end
 
-        VWeight(85, MarginBox(2, 1, content))
+        vweight =
+          if Yast::UI.TextMode
+            screen_height > 35 ? 75 : 85
+          else
+            85
+          end
+
+        VWeight(vweight, MarginBox(2, 1, content))
+      end
+
+      # number of addons displayed in one column
+      def addons_box_lines
+        if Yast::UI.TextMode
+          # experimentally obtained constant - the number of occupied lines
+          # by the other widgets
+          screen_height - 12
+        else
+          14
+        end
+      end
+
+      # height of the screen, in text mode number of lines, in graphical
+      # mode height in pixels
+      # @return [Integer] screen height
+      def screen_height
+        Yast::UI.GetDisplayInfo["Height"]
       end
 
       # display the addon checkboxes in two columns
