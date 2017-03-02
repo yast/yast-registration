@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.1.166.3
+Version:        3.1.166.4
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
