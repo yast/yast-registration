@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Thu Mar  2 12:54:20 UTC 2017 - lslezak@suse.cz
 
-- Fixed layout of the "Extension and Module Selection" dialog
+- Fixed the layout of the "Extension and Module Selection" dialog
   in text mode to make all items visible (bsc#1024464)
 - 3.1.166.4
 
