@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Mar 20 12:28:45 UTC 2017 - okurz@suse.com
+
+- Be explicit about 'Details' box not being localized (bsc#1025846)
+- 3.2.6
+
+-------------------------------------------------------------------
 Fri Mar 17 09:23:03 UTC 2017 - gsouzadossantos@suse.com
 
 - Remember the state of the checkbox when leaving the dialog
