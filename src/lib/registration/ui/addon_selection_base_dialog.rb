@@ -102,7 +102,7 @@ module Registration
           Left(CheckBox(Id(:filter_beta), Opt(:notify),
             _("&Hide Beta Versions"), check_filter)),
           addons_box,
-          Left(Label(_("Details"))),
+          Left(Label(_("Details (English only)"))),
           details_widget
         )
       end
