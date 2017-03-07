@@ -13,7 +13,7 @@ X-SuSE-YaST-AutoInstSchema=registration.rnc
 X-SuSE-YaST-AutoInstResource=suse_register
 
 Icon=yast-product-registration
-Exec=/sbin/yast2 scc
+Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc"
 
 Name=Product Registration
 GenericName=Product Registration
