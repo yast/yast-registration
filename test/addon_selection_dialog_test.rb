@@ -39,6 +39,13 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       )
     end
 
+    let(:registration) { double(activated_products: [], get_addon_list: []) }
+    let(:filter_beta) { false }
+
+    before do
+      allow(described_class).to receive(:filter_beta).and_return(filter_beta)
+    end
+
     it "returns response from addon selection according to pressed button" do
       expect(Yast::UI).to receive(:UserInput).and_return(:abort)
       registration = double(activated_products: [], get_addon_list: [])
@@ -61,6 +68,32 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       addons = Registration::Addon.find_all(registration)
       wrapped_addon = addons.first
       expect(wrapped_addon.selected?).to eq true
+    end
+
+    context "when beta versions are not filtered" do
+      subject(:dialog) { described_class.new(registration) }
+      let(:filter_beta) { false }
+
+      it "sets the filter as 'enabled' in the UI" do
+        expect(dialog).to receive(:CheckBox)
+          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+    end
+
+    context "when beta versions are filtered" do
+      subject(:dialog) { described_class.new(registration) }
+      let(:filter_beta) { true }
+
+      it "sets the filter as 'disabled' in the UI" do
+        expect(dialog).to receive(:CheckBox)
+          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
     end
 
     context "in SLES12-SP2" do
