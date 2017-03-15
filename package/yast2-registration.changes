@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Mar 15 14:43:42 UTC 2017 - gsouzadossantos@suse.com
+
+- Remember the state of the checkbox when leaving the dialog
+  (bsc#1026155) and correct the filter to always show installed
+  addons, even if they are beta versions.
+- 3.1.191
+
+-------------------------------------------------------------------
 Wed Nov 23 10:01:44 UTC 2016 - jreidinger@suse.com
 
 - do not crash if empty regurl paremeter is passed (bsc#1010387)
