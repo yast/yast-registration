@@ -20,7 +20,8 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   describe "#initialize" do
     it "sets the beta filter to the previous state" do
       fake_ref = double.as_null_object
-      res = described_class.new(fake_ref)
+      registration = double(activated_products: [], get_addon_list: [])
+      res = described_class.new(registration)
       res.send(:filter_beta_releases, false)
 
       expect_any_instance_of(described_class).to receive(:filter_beta_releases).with(false)
