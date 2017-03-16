@@ -133,7 +133,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
-
     end
 
     context "in SLES12-SP2" do
