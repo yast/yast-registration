@@ -100,7 +100,7 @@ module Registration
         VBox(
           Left(Heading(heading)),
           Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Filter Out Beta Versions"), check_filter)),
+            _("&Hide Beta Versions"), check_filter)),
           addons_box,
           Left(Label(_("Details"))),
           details_widget
