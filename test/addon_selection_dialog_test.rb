@@ -20,7 +20,8 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   describe "#initialize" do
     it "sets the beta filter to the previous state" do
       fake_ref = double.as_null_object
-      res = described_class.new(fake_ref)
+      registration = double(activated_products: [], get_addon_list: [])
+      res = described_class.new(registration)
       res.send(:filter_beta_releases, false)
 
       expect_any_instance_of(described_class).to receive(:filter_beta_releases).with(false)
@@ -36,6 +37,13 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         addon_generator("zypper_name" => "sle-module-toolchain",
         "name" => "Toolchain module", "version" => "12", "arch" => "aarch64")
       )
+    end
+
+    let(:registration) { double(activated_products: [], get_addon_list: []) }
+    let(:filter_beta) { false }
+
+    before do
+      allow(described_class).to receive(:filter_beta).and_return(filter_beta)
     end
 
     it "returns response from addon selection according to pressed button" do
@@ -60,6 +68,71 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       addons = Registration::Addon.find_all(registration)
       wrapped_addon = addons.first
       expect(wrapped_addon.selected?).to eq true
+    end
+
+    context "when beta versions are not filtered" do
+      let(:addon) do
+        Registration::Addon.new(
+          addon_generator
+        )
+      end
+      subject(:dialog) { described_class.new(registration) }
+      let(:filter_beta) { false }
+
+      it "sets the filter as not checked in the UI" do
+        expect(dialog).to receive(:CheckBox)
+          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+
+      it "displays beta add-ons" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
+        expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
+        allow(subject).to receive(:RichText).and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+    end
+
+    context "when beta versions are filtered" do
+      let(:addon) do
+        Registration::Addon.new(
+          addon_generator
+        )
+      end
+      subject(:dialog) { described_class.new(registration) }
+      let(:filter_beta) { true }
+
+      it "sets the filter as checked in the UI" do
+        expect(dialog).to receive(:CheckBox)
+          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+
+      it "does not display beta add-ons that are not registered" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:registered?).and_return(false)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
+        expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), "")
+        allow(subject).to receive(:RichText).and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+
+      it "display registered beta add-ons" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:registered?).and_return(true)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
+        expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
+        allow(subject).to receive(:RichText).and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
     end
 
     context "in SLES12-SP2" do

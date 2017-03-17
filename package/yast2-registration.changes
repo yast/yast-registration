@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Mar 17 09:23:03 UTC 2017 - gsouzadossantos@suse.com
+
+- Remember the state of the checkbox when leaving the dialog
+  (bsc#1026155) and correct the filter to always show installed
+  addons, even if they are beta versions.
+- 3.2.5 
+
+-------------------------------------------------------------------
 Tue Mar  7 12:59:27 UTC 2017 - kanderssen@suse.com
 
 - Adjusted .desktop files wrapping /sbin/yast2 calls that requires
