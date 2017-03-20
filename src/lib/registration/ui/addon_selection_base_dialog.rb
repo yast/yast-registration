@@ -71,7 +71,12 @@ module Registration
       # @param [Boolean] enable true for filtering beta releases
       def filter_beta_releases(enable)
         self.class.filter_beta = enable
-        @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
+        if enable
+          @addons, available_addons = @all_addons.partition(&:registered?)
+          @addons.concat(available_addons.reject(&:beta_release?))
+        else
+          @addons = @all_addons
+        end
       end
 
     private
@@ -91,10 +96,11 @@ module Registration
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
+        check_filter = self.class.filter_beta.nil? ? FILTER_BETAS_INITIALLY : self.class.filter_beta
         VBox(
           Left(Heading(heading)),
           Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Filter Out Beta Versions"), FILTER_BETAS_INITIALLY)),
+            _("&Filter Out Beta Versions"), check_filter)),
           addons_box,
           Left(Label(_("Details"))),
           details_widget
