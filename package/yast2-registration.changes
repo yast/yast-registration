@@ -4,7 +4,7 @@ Wed Mar 15 14:43:42 UTC 2017 - gsouzadossantos@suse.com
 - Remember the state of the checkbox when leaving the dialog
   (bsc#1026155) and correct the filter to always show installed
   addons, even if they are beta versions.
-- 3.1.191
+- 3.1.190.3
 
 -------------------------------------------------------------------
 Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
