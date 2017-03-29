@@ -97,14 +97,16 @@ module Registration
       # @return [Yast::Term] the main UI dialog term
       def content
         check_filter = self.class.filter_beta.nil? ? FILTER_BETAS_INITIALLY : self.class.filter_beta
-        VBox(
-          Left(Heading(heading)),
-          Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Hide Beta Versions"), check_filter)),
-          addons_box,
-          Left(Label(_("Details"))),
-          details_widget
-        )
+        vbox_elements = [Left(Heading(heading))]
+        available_addons = @all_addons.reject(&:registered?)
+
+        unless (available_addons.empty? || available_addons.select(&:beta_release?).empty?)
+          vbox_elements.push(Left(CheckBox(Id(:filter_beta), Opt(:notify),
+            _("&Hide Beta Versions"), check_filter)))
+        end
+
+        vbox_elements.concat([addons_box, Left(Label(_("Details"))), details_widget])
+        VBox(*vbox_elements)
       end
 
       # addon description widget
