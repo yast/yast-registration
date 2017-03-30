@@ -169,6 +169,20 @@ module Registration
       products
     end
 
+    def self.installed_products_not_registered(addons)
+      addons.each do |addon|
+        log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      installed_products.select do |product|
+        (product["type"] != "base") && addons.find do |addon|
+          product["name"] == addon.identifier &&
+            product["version_version"] == addon.version &&
+            product["arch"] == addon.arch
+        end
+      end
+    end
+
     # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
     # @param product [Hash] product Hash obtained from pkg-bindings
     # @return [SUSE::Connect::Remote::Product] the remote product

@@ -43,6 +43,11 @@ module Registration
         end
       end
 
+      def reset!
+        @cached_addons = nil
+        @registered    = nil
+      end
+
       def registered
         @registered ||= []
       end
