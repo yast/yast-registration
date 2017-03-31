@@ -74,7 +74,7 @@ module Registration
           ButtonBox(
             PushButton(Id(:cancel), Opt(:key_F9, :cancelButton), Yast::Label.AbortButton),
             # FIXME: Maybe we could remove this option and just warn the user
-            PushButton(Id(:install), _("Ins&tall Release Package")),
+            PushButton(Id(:install), _("Ins&tall addons")),
             PushButton(Id(:sync), _("&Synchronize")),
             PushButton(Id(:next), Opt(:okButton, :key_F10, :default), _("Continue"))
           )
@@ -129,7 +129,7 @@ module Registration
 
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)
-        summary << _("<p><b>Synchronize</b> your products if you want to <b>deactive</b> " \
+        summary << _("<p><b>Synchronize</b> your products if you want to <b>deactivate</b> " \
                      "them at your registration server.</p>")
 
         summary

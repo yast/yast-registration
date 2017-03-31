@@ -214,14 +214,17 @@ module Registration
         :next
       end
 
+      # ask the user about adding not installed addons to the current products
+      #
+      # @return [Array<Hash>] installed products and addons selected to be installed
       def merge_registered_addons
         # load the extensions to merge the registered but not installed extensions
         Addon.find_all(registration)
 
         msg = "The '%s' extension is registered but not installed.\n" \
-              "If you accept it will be added for be upgraded, in other case " \
-              "it will be unregistered after the migration.\n\n" \
-              "Do you want to upgrade it?"
+              "If you accept it will be added for be installed, in other case " \
+              "it will be unregistered at the end of the migration.\n\n" \
+              "Do you want to add it?"
 
         addons =
           Addon.registered_not_installed.each_with_object([]) do |addon, result|

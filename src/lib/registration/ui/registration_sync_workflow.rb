@@ -56,7 +56,10 @@ module Registration
 
         # Ask the user about adding all the registered but not installed addons
         # to the rollback
-        products.concat(registration_ui.registered_addons_to_rollback)
+        addons = registration_ui.registered_addons_to_rollback
+        log.info "Addons registered but not installed: #{addons}"
+
+        products.concat(addons)
 
         # downgrade all installed products
         return :abort unless downgrade_products(products)

@@ -295,14 +295,23 @@ module Registration
     def registered_addons_to_rollback
       get_available_addons
 
-      addon_names = Addon.registered_not_installed.map(&:friendly_name)
+      addons =
+        Addon.registered_not_installed.map do |addon|
+          ret = addon.to_h
+          ret["display_name"]    = addon.friendly_name
+          ret["version_version"] = addon.version
+          ret
+        end
 
-      return [] if addon_names.empty?
+      return [] if addons.empty?
+
+      addon_names = addons.map {|a| a["display_name"] }
 
       msg = _("The addons listed below are registered but not installed: \n\n%s\n\n" \
-              "Would you like to rollback also them? If not, they will be deactivated. ")
+              "Would you like to downgrade also them in the registration server? \n" \
+              "If not they will be deactivated. ")
       if Yast::Popup.YesNo(msg % addon_names.join("\n"))
-        Addon.registered_not_installed
+        addons
       else
         []
       end

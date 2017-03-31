@@ -209,7 +209,9 @@ module Registration
         if !product
           product_name = CGI.escapeHTML(SwMgmt.product_label(installed_product))
           return _("The registration server does not offer migrations for Product " \
-                   "<b>%s</b>. <b> The product stays unchanged.</b>") % product_name
+                   "<b>%s</b> so it will <b>stay unchanged</b> . We recommend you " \
+                   "to check if it's correct and to configure the repositories " \
+                   "manually in case of needed.") % product_name
 
         end
 
