@@ -62,7 +62,7 @@ module Registration
         end
       end
 
-    private
+      private
 
       def content
         VBox(
@@ -114,8 +114,6 @@ module Registration
           end
         end
       end
-
-    private
 
       # RichText summary of the installed but not registered products.
       #

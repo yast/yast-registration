@@ -305,7 +305,7 @@ module Registration
 
       return [] if addons.empty?
 
-      addon_names = addons.map {|a| a["display_name"] }
+      addon_names = addons.map { |a| a["display_name"] }
 
       msg = _("The addons listed below are registered but not installed: \n\n%s\n\n" \
               "Would you like to downgrade also them in the registration server? \n" \
