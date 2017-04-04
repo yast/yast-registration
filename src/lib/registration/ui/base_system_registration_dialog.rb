@@ -376,7 +376,7 @@ module Registration
       # UI term for the network configuration button (or empty if not needed)
       # @return [Yast::Term] UI term
       def network_button
-        return Empty() unless Helpers.network_configurable
+        return Empty() unless Helpers.network_configurable && Stage.initial
 
         Right(PushButton(Id(:network), _("Net&work Configuration...")))
       end
