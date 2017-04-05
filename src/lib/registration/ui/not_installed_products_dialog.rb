@@ -75,7 +75,7 @@ module Registration
             PushButton(Id(:cancel), Opt(:key_F9, :cancelButton), Yast::Label.AbortButton),
             # FIXME: Maybe we could remove this option and just warn the user
             PushButton(Id(:install), _("Ins&tall addons")),
-            PushButton(Id(:sync), _("&Synchronize")),
+            PushButton(Id(:sync), _("&Deactive")),
             PushButton(Id(:next), Opt(:okButton, :key_F10, :default), _("Continue"))
           )
         )
@@ -89,29 +89,33 @@ module Registration
           case ui
           when :install
             not_installed = []
-            Addon.registered_not_installed.map do |addon|
-              begin
-                Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
-                  _("Installing %s release package") % addon.identifier) do
+            Addon.registered_not_installed.each do |addon|
+              Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
+                # TRANSLATORS: Feedback popup showing the addon release
+                # package trying to be installed, %s is the addon identifier
+                _("Installing %s release package") % addon.identifier) do
 
-                  Yast::Pkg.ResolvableInstall(addon.identifier, :product)
+                if !Yast::Pkg.ResolvableInstall(addon.identifier, :product)
+                  not_installed << addon.identifier
+                else
                   Yast::Pkg.PkgSolve(true)
                   Yast::Pkg.PkgCommit(0)
                 end
-              rescue
-                not_installed << addon.identifier
               end
             end
+            # TRANSLATORS: Popup error showing all the addons that weren't
+            # installed, %s is the addons identifiers.
             Yast::Popup.Error(_("These addons were not installed:\n\n%s") %
                               not_installed.join("\n")) unless not_installed.empty?
             update_summary
           when :sync
             registration_ui.synchronize_products(SwMgmt.installed_products)
             update_summary
-            return :next if !registered_not_installed_addons?
           when :next, :cancel
             return ui
           end
+
+          return :next if !registered_not_installed_addons?
         end
       end
 

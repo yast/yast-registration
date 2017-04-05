@@ -208,6 +208,8 @@ module Registration
 
         if !product
           product_name = CGI.escapeHTML(SwMgmt.product_label(installed_product))
+          # TRANSLATORS: Summary message in rich text format
+          # %s is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
           return _("The registration server does not offer migrations for Product " \
                    "<b>%s</b> so it will <b>stay unchanged</b> . We recommend you " \
                    "to check if it's correct and to configure the repositories " \

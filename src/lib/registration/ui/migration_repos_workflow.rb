@@ -221,6 +221,9 @@ module Registration
         # load the extensions to merge the registered but not installed extensions
         Addon.find_all(registration)
 
+        # TRANSLATORS: Popup question, merge this addon that are registered but not
+        # installed to the current migration products list.
+        # %s is an addon friendly name, e.g 'SUSE Enterprise Storage 2 x86_64'
         msg = "The '%s' extension is registered but not installed.\n" \
               "If you accept it will be added for be installed, in other case " \
               "it will be unregistered at the end of the migration.\n\n" \
