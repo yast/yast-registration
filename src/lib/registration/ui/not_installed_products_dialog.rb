@@ -117,34 +117,26 @@ module Registration
         not_installed = []
 
         Addon.registered_not_installed.each do |addon|
-          Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
-            # TRANSLATORS: Feedback popup showing the addon release
-            # package trying to be installed, %s is the addon identifier
-            _("Installing %s release package") % addon.identifier) do
+          # FIXME: fix the product installation, the add-on name might not match
+          # the libzypp product name
+          # Check for possible conflicts and let the user solve them,
+          # confirm package licenses if there are any,
+          # and run the package installation
+          if addon_product_installable?(addon)
 
-            # FIXME: fix the product installation, the add-on name might not match
-            # the libzypp product name
-            # Check for possible conflicts and let the user solve them,
-            # confirm package licenses if there are any,
-            # and run the package installation
-            if Yast::Pkg.ResolvableInstall(addon.identifier, :product) &&
-              (Yast::Pkg.PkgSolve(true) || Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) == :accept) &&
-              Yast::Packages::ConfirmLicenses
-
-              result = Yast::Pkg.PkgCommit(0)
-              # success?
-              if result && result[1].empty?
-                Yast::PackagesUI.show_update_messages(result)
-                next
-              end
+            result = Yast::Pkg.PkgCommit(0)
+            # success?
+            if result && result[1].empty?
+              Yast::PackagesUI.show_update_messages(result)
+              next
             end
-
-            log.error("Product #{addon.identifier} could not be installed")
-            # revert the changes
-            Yast::Pkg.PkgApplReset
-            Yast::Pkg.PkgReset
-            not_installed << addon.identifier
           end
+
+          log.error("Product #{addon.identifier} could not be installed")
+          # revert the changes
+          Yast::Pkg.PkgApplReset
+          Yast::Pkg.PkgReset
+          not_installed << addon.identifier
         end
 
         not_installed
@@ -190,6 +182,18 @@ module Registration
       #   installed addon names.
       def not_installed_addon_names
         Addon.registered_not_installed.map(&:name)
+      end
+
+      # @param addon [Registration::Addon] addon to be installed
+      # @return [Boolean] true if the given addon is installable
+      def addon_product_installable?(addon)
+        return false if !Yast::Pkg.ResolvableInstall(addon.identifier, :product)
+
+        if !Yast::Pkg.PkgSolve(true)
+          return false if Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept
+        end
+
+        Yast::Packages::ConfirmLicenses
       end
     end
   end

@@ -224,14 +224,14 @@ module Registration
         # TRANSLATORS: Popup question, merge this addon that are registered but not
         # installed to the current migration products list.
         # %s is an addon friendly name, e.g 'SUSE Enterprise Storage 2 x86_64'
-        msg = "The '%s' extension is registered but not installed.\n" \
+        msg = _("The '%s' extension is registered but not installed.\n" \
               "If you accept it will be added for be installed, in other case " \
               "it will be unregistered at the end of the migration.\n\n" \
-              "Do you want to add it?"
+              "Do you want to add it?")
 
         addons =
           Addon.registered_not_installed.each_with_object([]) do |addon, result|
-            if Yast::Popup.YesNoHeadline(addon.friendly_name, _(msg % addon.friendly_name))
+            if Yast::Popup.YesNoHeadline(addon.friendly_name, (msg % addon.friendly_name))
               result << SwMgmt.remote_product(addon.to_h)
             end
           end
