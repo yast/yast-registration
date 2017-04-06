@@ -34,6 +34,12 @@ module Registration
       include Yast::UIShortcuts
       include Yast
 
+      Yast.import "UI"
+      Yast.import "Popup"
+      Yast.import "Pkg"
+      Yast.import "Packages"
+      Yast.import "PackagesUI"
+
       attr_accessor :registration, :registration_ui
 
       def self.run
@@ -88,21 +94,7 @@ module Registration
           log.info "User input: #{ui}"
           case ui
           when :install
-            not_installed = []
-            Addon.registered_not_installed.each do |addon|
-              Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
-                # TRANSLATORS: Feedback popup showing the addon release
-                # package trying to be installed, %s is the addon identifier
-                _("Installing %s release package") % addon.identifier) do
-
-                if !Yast::Pkg.ResolvableInstall(addon.identifier, :product)
-                  not_installed << addon.identifier
-                else
-                  Yast::Pkg.PkgSolve(true)
-                  Yast::Pkg.PkgCommit(0)
-                end
-              end
-            end
+            not_installed = install_products
             # TRANSLATORS: Popup error showing all the addons that weren't
             # installed, %s is the addons identifiers.
             Yast::Popup.Error(_("These addons were not installed:\n\n%s") %
@@ -117,6 +109,45 @@ module Registration
 
           return :next if !registered_not_installed_addons?
         end
+      end
+
+      # Install the not installed products
+      # @return [Array] list of not installed (failed) products, empty list on success
+      def install_products
+        not_installed = []
+
+        Addon.registered_not_installed.each do |addon|
+          Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE,
+            # TRANSLATORS: Feedback popup showing the addon release
+            # package trying to be installed, %s is the addon identifier
+            _("Installing %s release package") % addon.identifier) do
+
+            # FIXME: fix the product installation, the add-on name might not match
+            # the libzypp product name
+            # Check for possible conflicts and let the user solve them,
+            # confirm package licenses if there are any,
+            # and run the package installation
+            if Yast::Pkg.ResolvableInstall(addon.identifier, :product) &&
+              (Yast::Pkg.PkgSolve(true) || Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) == :accept) &&
+              Yast::Packages::ConfirmLicenses
+
+              result = Yast::Pkg.PkgCommit(0)
+              # success?
+              if result && result[1].empty?
+                Yast::PackagesUI.show_update_messages(result)
+                next
+              end
+            end
+
+            log.error("Product #{addon.identifier} could not be installed")
+            # revert the changes
+            Yast::Pkg.PkgApplReset
+            Yast::Pkg.PkgReset
+            not_installed << addon.identifier
+          end
+        end
+
+        not_installed
       end
 
       # RichText summary of the installed but not registered products.
