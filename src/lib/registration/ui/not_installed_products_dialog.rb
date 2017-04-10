@@ -81,7 +81,7 @@ module Registration
             PushButton(Id(:cancel), Opt(:key_F9, :cancelButton), Yast::Label.AbortButton),
             # FIXME: Maybe we could remove this option and just warn the user
             PushButton(Id(:install), _("Ins&tall addons")),
-            PushButton(Id(:sync), _("&Deactive")),
+            PushButton(Id(:sync), _("&Deactivate")),
             PushButton(Id(:next), Opt(:okButton, :key_F10, :default), _("Continue"))
           )
         )
@@ -126,10 +126,7 @@ module Registration
 
             result = Yast::Pkg.PkgCommit(0)
             # success?
-            if result && result[1].empty?
-              Yast::PackagesUI.show_update_messages(result)
-              next
-            end
+            next if result && result[1].empty?
           end
 
           log.error("Product #{addon.identifier} could not be installed")
@@ -187,13 +184,41 @@ module Registration
       # @param addon [Registration::Addon] addon to be installed
       # @return [Boolean] true if the given addon is installable
       def addon_product_installable?(addon)
-        return false if !Yast::Pkg.ResolvableInstall(addon.identifier, :product)
+        product = product_from_addon_repos(addon)
+        return false if !product || !Yast::Pkg.ResolvableInstall(product["name"], :product)
 
         if !Yast::Pkg.PkgSolve(true)
           return false if Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept
         end
 
-        Yast::Packages::ConfirmLicenses
+        Yast::PackagesUI.ConfirmLicenses
+      end
+
+      # Find the product resolvables matching the repository url with the addon
+      # ones.
+      #
+      # @param addon [Registration::Addon]
+      # @return [Hash] product which repository url match with addon ones
+      def product_from_addon_repos(addon)
+        Yast::Pkg.ResolvableProperties("", :product, "").find do |product|
+          return false if product["status"] != :available
+
+          product_url = SwMgmt.repository_data(product["source"]).fetch("url", "")
+
+          addon.repositories.any? { |r| no_params_url(product_url) == no_params_url(r["url"]) }
+        end
+      end
+
+      # Given an URL return the concatenation of host and path removing all the
+      # end slashes.
+      #
+      # FIXME: This method could be moved to UrlHelpers or to URL module.
+      #
+      # @param [String] url to parse
+      # @return [String] url without params
+      def no_params_url(url)
+        uri = URI.parse(url)
+        "#{uri.host}#{uri.path.gsub(/\/+$/, "")}"
       end
     end
   end

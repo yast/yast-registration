@@ -102,7 +102,8 @@ module Registration
       :name,
       :product_type,
       :release_type,
-      :version
+      :version,
+      :repositories
 
     def initialize(pure_addon)
       @pure_addon = pure_addon
