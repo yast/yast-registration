@@ -35,7 +35,7 @@ module Registration
       def initialize
         textdomain "registration"
 
-        registration = Registration.new(UrlHelpers.registration_url)
+        self.registration = Registration.new(UrlHelpers.registration_url)
         self.registration_ui = RegistrationUI.new(registration)
       end
 
@@ -46,24 +46,35 @@ module Registration
 
         restore_repos
 
-        # load the installed products
+        # load the installed products that are activated
         Yast::Pkg.TargetLoad
-        products = SwMgmt.installed_products
+        activated = registration.activated_products.map(&:identifier)
+        products =
+          SwMgmt.installed_products.each_with_object([]) do |product, result|
+            result << product if activated.include?(product["name"])
+          end
+
+        # Ask the user about adding all the registered but not installed addons
+        # to the rollback
+        addons = registration_ui.registered_addons_to_rollback
+        log.info "Addons registered but not installed: #{addons}"
+
+        products.concat(addons)
 
         # downgrade all installed products
         return :abort unless downgrade_products(products)
 
         reload_repos
 
-        # synchronize all installed products (remove additional registrations at the server)
+        # synchronize the products (remove additional registrations at the server)
         registration_ui.synchronize_products(products) ? :next : :abort
       end
 
       private
 
-      attr_accessor :registration_ui
+      attr_accessor :registration_ui, :registration
 
-      # restore the repositpories from the backup archive
+      # restore the repositories from the backup archive
       def restore_repos
         # finish the sources and the target to reload the repositories from the backup
         Yast::Pkg.SourceFinishAll
