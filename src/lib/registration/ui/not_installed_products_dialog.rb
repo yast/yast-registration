@@ -41,6 +41,8 @@ module Registration
       Yast.import "Packages"
       Yast.import "PackagesUI"
 
+      REGISTRATION_CHECK_MSG = N_("Checking registration status")
+
       attr_accessor :registration, :registration_ui
 
       def self.run
@@ -56,7 +58,7 @@ module Registration
       end
 
       def run
-        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, _("Checking product conflicts")) do
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, REGISTRATION_CHECK_MSG) do
           return :next if !registered_not_installed_addons?
         end
 
@@ -81,7 +83,7 @@ module Registration
           ButtonBox(
             PushButton(Id(:cancel), Opt(:key_F9, :cancelButton), Yast::Label.AbortButton),
             # FIXME: Maybe we could remove this option and just warn the user
-            PushButton(Id(:install), _("Ins&tall addons")),
+            PushButton(Id(:install), _("Ins&tall products")),
             PushButton(Id(:sync), _("&Deactivate")),
             PushButton(Id(:next), Opt(:okButton, :key_F10, :default), _("Continue"))
           )
@@ -158,8 +160,8 @@ module Registration
 
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)
-        summary << _("<p><b>Synchronize</b> your products if you want to <b>deactivate</b> " \
-                     "them at your registration server.</p>")
+        summary << _("<p>It's preferable to <b>deactivate</b> your products at your " \
+                     "registration server if you don't plan to use them anymore.</p>")
 
         summary
       end
@@ -168,7 +170,7 @@ module Registration
       # updating also Addon cache.
       def update_summary
         log.info "Updating summary"
-        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, _("Updating summary")) do
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, REGISTRATION_CHECK_MSG) do
           Addon.reset!
           Addon.find_all(registration)
         end
