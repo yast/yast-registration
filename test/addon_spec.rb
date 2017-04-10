@@ -91,6 +91,27 @@ describe Registration::Addon do
     end
   end
 
+  describe ".registered_not_installed" do
+    it "returns an array of already registered addons but not installed" do
+      prod1 = addon_generator("name" => "prod1")
+      prod2 = addon_generator("name" => "prod2")
+      registration = double(
+        activated_products: [prod2],
+        get_addon_list:     [prod1, prod2]
+      )
+
+      addons = Registration::Addon.find_all(registration)
+
+      addon2 = addons.find { |addon| addon.name == "prod2" }
+
+      expect(Registration::SwMgmt).to receive(:installed_products).and_return([])
+      reg_not_installed_addons = Registration::Addon.registered_not_installed
+
+      expect(reg_not_installed_addons.size).to eql(1)
+      expect(reg_not_installed_addons.first.name).to eql(addon2.name)
+    end
+  end
+
   describe "#unregistered" do
     it "marks addon as unregistered" do
       Registration::Addon.registered << addon

@@ -179,12 +179,22 @@ module Registration
       # @param [Integer] idx migration index
       # @return [String] user friendly description (in RichText format)
       def migration_details(idx)
+        products_to_migrate = []
+
         details = sorted_migrations[idx].map do |product|
           installed = installed_products.find do |installed_product|
             installed_product["name"] == product.identifier
           end
 
+          products_to_migrate << installed if installed
+
           "<li>" + product_summary(product, installed) + "</li>"
+        end
+
+        installed_products.each do |installed_product|
+          next if products_to_migrate.include?(installed_product)
+
+          details << "<li>" + product_summary(nil, installed_product) + "</li>"
         end
 
         # TRANSLATORS: RichText header (details for the selected item)
@@ -194,8 +204,20 @@ module Registration
       # create a product summary for the details widget
       # @return [String] product summary
       def product_summary(product, installed_product)
-        product_name = CGI.escapeHTML(product.friendly_name)
         log.info "creating summary for #{product} and #{installed_product}"
+
+        if !product
+          product_name = CGI.escapeHTML(SwMgmt.product_label(installed_product))
+          # TRANSLATORS: Summary message in rich text format
+          # %s is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
+          return _("The registration server does not offer migrations for Product " \
+                   "<b>%s</b> so it will <b>stay unchanged</b>. We recommend you " \
+                   "to check if it's correct and to configure the repositories " \
+                   "manually in case of needed.") % product_name
+
+        end
+
+        product_name = CGI.escapeHTML(product.friendly_name)
 
         # explicitly check for false, the flag is not returned by SCC, this is
         # a SMT specific check (in SCC all products are implicitly available)
