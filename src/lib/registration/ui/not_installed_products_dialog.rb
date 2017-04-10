@@ -22,6 +22,7 @@
 require "yast"
 require "registration/sw_mgmt"
 require "registration/helpers"
+require "uri"
 
 module Registration
   module UI
@@ -126,6 +127,12 @@ module Registration
 
             result = Yast::Pkg.PkgCommit(0)
             # success?
+            if result && result[1].empty?
+              # FIXME: This method is not available in SLE-12-GA
+              # Yast::PackagesUI.show_update_messages(result)
+              next
+            end
+            #
             next if result && result[1].empty?
           end
 
@@ -205,20 +212,23 @@ module Registration
 
           product_url = SwMgmt.repository_data(product["source"]).fetch("url", "")
 
-          addon.repositories.any? { |r| no_params_url(product_url) == no_params_url(r["url"]) }
+          addon.repositories.any? { |r| no_query_uri(product_url) == no_query_uri(r["url"]) }
         end
       end
 
-      # Given an URL return the concatenation of host and path removing all the
-      # end slashes.
+      # Given an 'url' return an URI object without query parameters and
+      # without slashes at the end of the path
       #
       # FIXME: This method could be moved to UrlHelpers or to URL module.
       #
       # @param [String] url to parse
-      # @return [String] url without params
-      def no_params_url(url)
+      # @return [URI] parsed url without query and without slashes at the end
+      # of the path
+      def no_query_uri(url)
         uri = URI.parse(url)
-        "#{uri.host}#{uri.path.gsub(/\/+$/, "")}"
+        uri.query = nil
+        uri.path.gsub!(/\/+\z/, "")
+        uri
       end
     end
   end
