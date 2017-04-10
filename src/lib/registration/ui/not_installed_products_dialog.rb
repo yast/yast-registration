@@ -32,6 +32,7 @@ module Registration
     class NotInstalledProductsDialog
       include Yast::Logger
       include Yast::I18n
+      extend Yast::I18n
       include Yast::UIShortcuts
       include Yast
 
@@ -134,8 +135,6 @@ module Registration
               # Yast::PackagesUI.show_update_messages(result)
               next
             end
-            #
-            next if result && result[1].empty?
           end
 
           log.error("Product #{addon.identifier} could not be installed")
