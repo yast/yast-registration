@@ -58,7 +58,7 @@ module Registration
       end
 
       def run
-        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, REGISTRATION_CHECK_MSG) do
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, _(REGISTRATION_CHECK_MSG)) do
           return :next if !registered_not_installed_addons?
         end
 
@@ -170,7 +170,7 @@ module Registration
       # updating also Addon cache.
       def update_summary
         log.info "Updating summary"
-        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, REGISTRATION_CHECK_MSG) do
+        Yast::Popup.Feedback(RegistrationUI::CONTACTING_MESSAGE, _(REGISTRATION_CHECK_MSG)) do
           Addon.reset!
           Addon.find_all(registration)
         end
