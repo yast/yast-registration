@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
+
+- Online Migration (fate#320534)
+  - Added step for check registered but not installed addons to the
+    migration workflow. In case of existence, allow the user to
+    install the release package or deactivate the products.
+  - In case of abort, only registered products are downgraded and
+    synced.
+  - Added to the migration summary information about products not
+    offering migrations (third party addons).
+- 3.2.7
+
+-------------------------------------------------------------------
+
 Mon Mar 20 12:28:45 UTC 2017 - okurz@suse.com
 
 - Be explicit about 'Details' box not being localized (bsc#1025846)
@@ -10,7 +24,7 @@ Fri Mar 17 09:23:03 UTC 2017 - gsouzadossantos@suse.com
 - Remember the state of the checkbox when leaving the dialog
   (bsc#1026155) and correct the filter to always show installed
   addons, even if they are beta versions.
-- 3.2.5 
+- 3.2.5
 
 -------------------------------------------------------------------
 Tue Mar  7 12:59:27 UTC 2017 - kanderssen@suse.com

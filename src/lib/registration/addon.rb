@@ -47,6 +47,11 @@ module Registration
         end
       end
 
+      def reset!
+        @cached_addons = nil
+        @registered    = nil
+      end
+
       # list of registered add-ons
       # @return [Array<Addon>] registered add-ons
       def registered
@@ -109,7 +114,8 @@ module Registration
       :product_type,
       :release_type,
       :release_stage,
-      :version
+      :version,
+      :repositories
 
     # the constructor
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
