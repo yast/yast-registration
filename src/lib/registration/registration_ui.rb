@@ -257,6 +257,37 @@ module Registration
       options.install_updates
     end
 
+    # Ask the user if wants to also rollback the registered but not
+    # installed addons, in case of accept, it returns the addons list.
+    #
+    # @return [Array<OpenStruct>] registered but not installed addons if
+    #   accept or an empty array if not.
+    def registered_addons_to_rollback
+      get_available_addons
+
+      addons =
+        Addon.registered_not_installed.map do |addon|
+          ret = addon.to_h
+          ret["display_name"]    = addon.friendly_name
+          ret["version_version"] = addon.version
+          ret
+        end
+
+      return [] if addons.empty?
+
+      addon_names = addons.map { |a| a["display_name"] }
+
+      # TRANSLATORS: Popup question, add registered but not installed addons to
+      # the list of products that will be downgraded.
+      # %s are all the product names splited by '\n' e.g
+      # "SUSE Linux Enterprise Server 12\nSUSE Enterprise Storage 1 x86_64"
+      msg = _("The addons listed below are registered but not installed: \n\n%s\n\n" \
+              "Would you like to downgrade also them in the registration server? \n" \
+              "If not they will be deactivated. ") % addon_names.join("\n")
+
+      Yast::Popup.YesNo(msg) ? addons : []
+    end
+
   private
 
     attr_accessor :registration
