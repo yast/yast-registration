@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
+
+- Online Migration (fate#320534)
+  - Added step for check registered but not installed addons to the
+    migration workflow. In case of existence, allow the user to
+    install the release package or deactivate the products.
+  - In case of abort, only registered products are downgraded and
+    synced.
+  - Added to the migration summary information about products not
+    offering migrations (third party addons).
+- 3.1.192
+
+-------------------------------------------------------------------
+
 Wed Mar 15 14:43:42 UTC 2017 - gsouzadossantos@suse.com
 
 - Remember the state of the checkbox when leaving the dialog
