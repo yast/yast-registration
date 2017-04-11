@@ -69,6 +69,18 @@ describe "Registration::RegistrationUI" do
 
       expect(registration_ui.update_system).to eq(true)
     end
+
+    it "resets registration credentials and registration url in case of failure" do
+      cache = Registration::Storage::Cache.instance
+      expect(Registration::ConnectHelpers).to receive(:catch_registration_errors)
+        .and_return(false)
+
+      expect(Registration::Helpers).to receive(:reset_registration_status)
+      expect(Registration::UrlHelpers).to receive(:reset_registration_url)
+      expect(cache).to receive(:upgrade_failed=).with(true)
+
+      expect(registration_ui.update_system).to eql false
+    end
   end
 
   describe "#update_base_product" do
@@ -81,6 +93,15 @@ describe "Registration::RegistrationUI" do
         .and_return(remote_product)
 
       expect(registration_ui.update_base_product).to eql([true, remote_product])
+    end
+
+    it "resets registration credentials in case of failure" do
+      expect(Registration::ConnectHelpers).to receive(:catch_registration_errors)
+        .and_return(false)
+
+      expect(Registration::Helpers).to receive(:reset_registration_status)
+
+      expect(registration_ui.update_base_product).to eql([false, nil])
     end
   end
 
@@ -178,6 +199,39 @@ describe "Registration::RegistrationUI" do
       products = [installed_sles]
       expect(registration).to receive(:synchronize_products).with(products)
       expect(registration_ui.synchronize_products(products)).to eq(true)
+    end
+  end
+
+  describe "registered_addons_to_rollback" do
+    let(:not_installed_addon) { addon_generator }
+
+    before do
+      allow(Yast::Popup).to receive(:YesNo).and_return(true)
+      allow(registration_ui).to receive(:get_available_addons)
+    end
+
+    it "returns an empty array in case of not 'registered but not installed' addons" do
+      expect(Registration::Addon).to receive(:registered_not_installed).and_return([])
+
+      expect(registration_ui.registered_addons_to_rollback).to eql([])
+    end
+
+    it "returns an empty array if the user doesn't want to rollback the obtained addons" do
+      expect(Registration::Addon).to receive(:registered_not_installed)
+        .and_return([not_installed_addon])
+      expect(Yast::Popup).to receive(:YesNo).and_return(false)
+
+      expect(registration_ui.registered_addons_to_rollback).to eql([])
+    end
+
+    it "returns an array with all the registered but not installed addons if user accepts" do
+      expect(Registration::Addon).to receive(:registered_not_installed)
+        .and_return([not_installed_addon])
+
+      addons = registration_ui.registered_addons_to_rollback
+
+      expect(addons.size).to eql(1)
+      expect(addons.first["display_name"]).to eql(not_installed_addon.friendly_name)
     end
   end
 end

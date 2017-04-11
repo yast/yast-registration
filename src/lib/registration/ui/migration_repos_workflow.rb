@@ -23,6 +23,7 @@ require "registration/url_helpers"
 require "registration/ui/wizard_client"
 require "registration/ui/migration_selection_dialog"
 require "registration/ui/migration_repos_selection_dialog"
+require "registration/ui/not_installed_products_dialog"
 
 module Registration
   module UI
@@ -47,6 +48,8 @@ module Registration
       #
       # - if the system is not registered ask the user to register it first
       #   (otherwise abort the online migration)
+      # - check registered but not installed products allowing the user to
+      #   syncronize them (skipped in case of not found)
       # - find all installed products
       # - query registered addons from the server
       # - ask the registration server for the available product migrations
@@ -66,15 +69,16 @@ module Registration
         log.info "Starting migration repositories sequence"
 
         aliases = {
-          "registration_check"          => [->() { registration_check }, true],
-          "find_products"               => [->() { find_products }, true],
-          "load_migration_products"     => [->() { load_migration_products }, true],
-          "select_migration_products"   => ->() { select_migration_products },
-          "update_releasever"           => ->() { update_releasever },
-          "register_migration_products" => [->() { register_migration_products }, true],
-          "activate_migration_repos"    => [->() { activate_migration_repos }, true],
-          "select_migration_repos"      => ->() { select_migration_repos },
-          "store_repos_state"           => ->() { store_repos_state }
+          "registration_check"           => [->() { registration_check }, true],
+          "not_installed_products_check" => [->() { not_installed_products_check }, true],
+          "find_products"                => [->() { find_products }, true],
+          "load_migration_products"      => [->() { load_migration_products }, true],
+          "select_migration_products"    => ->() { select_migration_products },
+          "update_releasever"            => ->() { update_releasever },
+          "register_migration_products"  => [->() { register_migration_products }, true],
+          "activate_migration_repos"     => [->() { activate_migration_repos }, true],
+          "select_migration_repos"       => ->() { select_migration_repos },
+          "store_repos_state"            => ->() { store_repos_state }
         }
 
         ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
@@ -89,46 +93,51 @@ module Registration
         :manual_repo_selection
 
       WORKFLOW_SEQUENCE = {
-        "ws_start"                    => "registration_check",
-        "registration_check"          => {
+        "ws_start"                     => "registration_check",
+        "registration_check"           => {
           abort: :abort,
-          next:  "find_products"
+          next:  "not_installed_products_check"
         },
-        "find_products"               => {
+        "not_installed_products_check" => {
+          abort:  :abort,
+          cancel: :abort,
+          next:   "find_products"
+        },
+        "find_products"                => {
           abort:  :abort,
           cancel: :abort,
           next:   "load_migration_products"
         },
-        "load_migration_products"     => {
+        "load_migration_products"      => {
           abort:  :abort,
           cancel: :abort,
           next:   "select_migration_products"
         },
-        "select_migration_products"   => {
+        "select_migration_products"    => {
           abort:  :abort,
           cancel: :abort,
           next:   "update_releasever"
         },
-        "update_releasever"           => {
+        "update_releasever"            => {
           next:   "register_migration_products"
         },
-        "register_migration_products" => {
+        "register_migration_products"  => {
           abort:  :rollback,
           cancel: :rollback,
           next:   "activate_migration_repos"
         },
-        "activate_migration_repos"    => {
+        "activate_migration_repos"     => {
           abort:          :rollback,
           cancel:         :rollback,
           repo_selection: "select_migration_repos",
           next:           "store_repos_state"
         },
-        "select_migration_repos"      => {
+        "select_migration_repos"       => {
           abort:  :rollback,
           cancel: :rollback,
           next:   "store_repos_state"
         },
-        "store_repos_state"           => {
+        "store_repos_state"            => {
           next: :next
         }
       }
@@ -167,12 +176,18 @@ module Registration
         ret
       end
 
+      def not_installed_products_check
+        SwMgmt.init(true)
+
+        Addon.find_all(registration)
+
+        UI::NotInstalledProductsDialog.run
+      end
+
       # find all installed products
       # @return [Symbol] workflow symbol (:next or :abort)
       def find_products
         log.info "Loading installed products"
-
-        SwMgmt.init(true)
 
         self.products = ::Registration::SwMgmt.installed_products.map do |product|
           ::Registration::SwMgmt.remote_product(product)
@@ -185,18 +200,33 @@ module Registration
         end
 
         merge_registered_addons
+
         log.info "Products to migrate: #{products}"
 
         :next
       end
 
+      # ask the user about adding not installed addons to the current products
+      #
+      # @return [Array<Hash>] installed products and addons selected to be installed
       def merge_registered_addons
         # load the extensions to merge the registered but not installed extensions
         Addon.find_all(registration)
 
-        addons = Addon.registered_not_installed.map(&:to_h).map do |addon|
-          SwMgmt.remote_product(addon)
-        end
+        # TRANSLATORS: Popup question, merge this addon that are registered but not
+        # installed to the current migration products list.
+        # %s is an addon friendly name, e.g 'SUSE Enterprise Storage 2 x86_64'
+        msg = _("The '%s' extension is registered but not installed.\n" \
+              "If you accept it will be added for be installed, in other case " \
+              "it will be unregistered at the end of the migration.\n\n" \
+              "Do you want to add it?")
+
+        addons =
+          Addon.registered_not_installed.each_with_object([]) do |addon, result|
+            if Yast::Popup.YesNoHeadline(addon.friendly_name, (msg % addon.friendly_name))
+              result << SwMgmt.remote_product(addon.to_h)
+            end
+          end
 
         products.concat(addons)
       end
@@ -220,7 +250,7 @@ module Registration
       # @return [Symbol] workflow symbol (:next or :abort)
       def select_migration_products
         log.info "Displaying migration target selection dialog"
-        dialog = MigrationSelectionDialog.new(migrations, products_to_migrate)
+        dialog = MigrationSelectionDialog.new(migrations, SwMgmt.installed_products)
         ret = dialog.run
 
         if ret == :next
