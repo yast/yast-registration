@@ -100,7 +100,7 @@ module Registration
         vbox_elements = [Left(Heading(heading))]
         available_addons = @all_addons.reject(&:registered?)
 
-        unless (available_addons.empty? || available_addons.select(&:beta_release?).empty?)
+        unless available_addons.empty? || available_addons.select(&:beta_release?).empty?
           vbox_elements.push(Left(CheckBox(Id(:filter_beta), Opt(:notify),
             _("&Hide Beta Versions"), check_filter)))
         end

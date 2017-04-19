@@ -131,14 +131,14 @@ module Yast
     end
 
     # run the addon selection dialog
-    def select_addons()
+    def select_addons
       # FIXME: available_addons is called just to fill cache with popup
       return :cancel if get_available_addons == :cancel
 
       # FIXME: workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-        Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
+      Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
     end
 
     # load available addons from SCC server
@@ -271,10 +271,10 @@ module Yast
           register: "register"
         },
         "register"               => {
-          abort:             :abort,
-          cancel:            :abort,
-          skip:              :next,
-          next:              "select_addons"
+          abort:  :abort,
+          cancel: :abort,
+          skip:   :next,
+          next:   "select_addons"
         },
         "select_addons"          => {
           abort:  :abort,
