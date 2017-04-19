@@ -105,7 +105,7 @@ module Registration
             _("&Hide Beta Versions"), check_filter)))
         end
 
-        vbox_elements.concat([addons_box, Left(Label(_("Details"))), details_widget])
+        vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
         VBox(*vbox_elements)
       end
 
