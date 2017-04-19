@@ -38,7 +38,6 @@ require "registration/registration"
 require "registration/registration_ui"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_selection_registration_dialog"
-require "registration/ui/addon_selection_reregistration_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/registered_system_dialog"
 require "registration/ui/base_system_registration_dialog"
@@ -132,19 +131,14 @@ module Yast
     end
 
     # run the addon selection dialog
-    def select_addons(reregistration: false)
+    def select_addons()
       # FIXME: available_addons is called just to fill cache with popup
       return :cancel if get_available_addons == :cancel
 
       # FIXME: workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-
-      if reregistration
-        Registration::UI::AddonSelectionReregistrationDialog.run(@registration)
-      else
         Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
-      end
     end
 
     # load available addons from SCC server
@@ -249,12 +243,9 @@ module Yast
         "check"                  => ->() { registration_check },
         "register"               => ->() { register_base_system },
         "select_addons"          => ->() { select_addons },
-        "select_addons_rereg"    => ->() { select_addons(reregistration: true) },
         "update"                 => [->() { update_registration }, true],
         "addon_eula"             => ->() { addon_eula },
         "register_addons"        => ->() { register_addons },
-        # use the same implementation, just handle the next step differently
-        "reregister_addons"      => ->() { register_addons },
         "update_autoyast_config" => ->() { update_autoyast_config },
         "pkg_manager"            => ->() { pkg_manager }
       }
@@ -283,7 +274,6 @@ module Yast
           abort:             :abort,
           cancel:            :abort,
           skip:              :next,
-          reregister_addons: "select_addons_rereg",
           next:              "select_addons"
         },
         "select_addons"          => {
@@ -291,12 +281,6 @@ module Yast
           skip:   "update_autoyast_config",
           cancel: "check",
           next:   "addon_eula"
-        },
-        "select_addons_rereg"    => {
-          abort:  :abort,
-          skip:   "check",
-          cancel: "check",
-          next:   "reregister_addons"
         },
         "addon_eula"             => {
           abort: :abort,
@@ -306,11 +290,6 @@ module Yast
           abort:      :abort,
           extensions: "select_addons",
           next:       "update_autoyast_config"
-        },
-        "reregister_addons"      => {
-          abort:      :abort,
-          extensions: "select_addons_rereg",
-          next:       "check"
         },
         "update_autoyast_config" => {
           abort: :abort,
