@@ -174,18 +174,6 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           subject.run
         end
       end
-
-      context "in normal mode" do
-        let(:mode) { "normal" }
-
-        it "shows the re-register extensions button" do
-          allow(subject).to receive(:PushButton).and_call_original
-          expect(subject).to receive(:PushButton)
-            .with(Id(:reregister_addons), _("&Register Extensions or Modules Again"))
-          allow(subject).to receive(:event_loop).and_return(nil)
-          subject.run
-        end
-      end
     end
   end
 end

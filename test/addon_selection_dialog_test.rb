@@ -80,6 +80,9 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       let(:filter_beta) { false }
 
       it "sets the filter as not checked in the UI" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:registered?).and_return(false)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
           .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
           .and_call_original
@@ -107,6 +110,9 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       let(:filter_beta) { true }
 
       it "sets the filter as checked in the UI" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:registered?).and_return(false)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
           .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
           .and_call_original
@@ -130,6 +136,16 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
         allow(subject).to receive(:RichText).and_call_original
+        expect(Yast::UI).to receive(:UserInput).and_return(:next)
+        dialog.run
+      end
+    end
+
+    context "when there is no beta versions to filter" do
+      subject(:dialog) { described_class.new(registration) }
+
+      it "shows no filter in the UI" do
+        expect(dialog).to_not receive(:CheckBox)
         expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end

@@ -150,13 +150,6 @@ module Registration
         Helpers.run_network_configuration
       end
 
-      # Handle pushing the button to register again
-      #
-      # Just finish the dialog returning :reregister_addons
-      def reregister_addons_handler
-        finish_dialog(:reregister_addons)
-      end
-
       # Handle pushing the 'Back' button
       def back_handler
         finish_dialog(:back)
@@ -178,8 +171,6 @@ module Registration
           product_details_widgets,
           VSpacing(Yast::UI.TextMode ? 1 : 2),
           registration_widgets,
-          VSpacing(Yast::UI.TextMode ? 0 : 3),
-          reregister_extensions_button,
           VStretch()
         )
       end
@@ -325,16 +316,6 @@ module Registration
         )
       end
 
-      def reregister_extensions_button
-        # display the addon re-registration button only in registered installed system
-        return Empty() unless Registration.is_registered? && Yast::Mode.normal
-
-        VBox(
-          VSpacing(Yast::UI.TextMode ? 1 : 4),
-          PushButton(Id(:reregister_addons), _("&Register Extensions or Modules Again"))
-        )
-      end
-
       # part of the main dialog definition - the base product details
       # @return [Yast::Term]  UI term
       def product_details_widgets
@@ -376,7 +357,7 @@ module Registration
       # UI term for the network configuration button (or empty if not needed)
       # @return [Yast::Term] UI term
       def network_button
-        return Empty() unless Helpers.network_configurable
+        return Empty() unless Helpers.network_configurable && Stage.initial
 
         Right(PushButton(Id(:network), _("Net&work Configuration...")))
       end

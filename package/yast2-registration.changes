@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Apr 19 08:37:28 UTC 2017 - gsouza@suse.com
+
+- Removed the option "Register Extensions of Modules Again"
+  (bsc#1029885).
+- Hides "Filter Beta Versions" checkbox when there is no beta
+  version to filter.
+- Hides "Network config" option when the system is already
+  installed.
+- 3.2.8
+
+-------------------------------------------------------------------
 Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
 
 - Online Migration (fate#320534)
