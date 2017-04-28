@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Apr 28 11:11:22 CEST 2017 - schubi@suse.de
+
+- AY inst-sys: Copy certificate to /etc/pki/trust/anchors instead of
+  /usr/share/pki/trust/anchors wich is read only (bnc#103466).
+- 3.1.193
+
+-------------------------------------------------------------------
 Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
 
 - Online Migration (fate#320534)
