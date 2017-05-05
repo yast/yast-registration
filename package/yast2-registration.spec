@@ -75,11 +75,6 @@ Url:            https://github.com/yast/yast-registration
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
 
-
-Authors:
---------
-    Ladislav Slezak <lslezak@suse.cz>
-
 %prep
 %setup -n %{name}-%{version}
 
