@@ -218,30 +218,30 @@ module Registration
       # Default registration server
       #
       # The boot_url takes precedence over the SUSE::Connect default
-      # one.
+      # one. It shows a message if the boot_url is not valid.
       #
       # @return [String] URL for the registration server
       def default_url
-        @default_url ||= boot_url || SUSE::Connect::Config.new.url
+        return @default_url if @default_url
+
+        if boot_url
+          return (@default_url = boot_url) if valid_custom_url?(boot_url)
+
+          Yast::Report.Error(
+            # TRANSLATORS: Wrong url for registration provided, %s is an URL.
+            _("The registration URL provided by the command line is not valid.\n\n" \
+              "URL: %s\n\nThe default one will be used instead.") % boot_url
+          )
+        end
+
+        @default_url = SUSE::Connect::Config.new.url
       end
 
       # Registration server URL given through Linuxrc
       #
       # @return [String,nil] URL for the registration server; nil if not given.
       def boot_url
-        return nil unless UrlHelpers.boot_reg_url
-
-        unless valid_custom_url?(UrlHelpers.boot_reg_url)
-          Yast::Report.Error(
-            # TRANSLATORS: Wrong url for registration provided, %s is an URL.
-            _("The registration URL provided by Linuxrc is not valid.\n\n" \
-              "URL: %s\n\nThe default one will be used.") % UrlHelpers.boot_reg_url
-          )
-
-          return nil
-        end
-
-        UrlHelpers.boot_reg_url
+        @boot_url ||= UrlHelpers.boot_reg_url
       end
 
       # Widgets for :register_scc action
