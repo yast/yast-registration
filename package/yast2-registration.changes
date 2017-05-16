@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+
+Mon May  8 13:27:09 UTC 2017 - knut.anderssen@suse.com
+
+- Don't crash if the regurl provided by linuxrc is invalid, use
+  the one provided by the control file as fallback (bsc#1035908).
+- 3.2.10
+
+-------------------------------------------------------------------
 Fri Apr 28 11:11:22 CEST 2017 - schubi@suse.de
 
 - AY inst-sys: Copy certificate to /etc/pki/trust/anchors instead of
@@ -30,7 +38,6 @@ Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
 - 3.2.7
 
 -------------------------------------------------------------------
-
 Mon Mar 20 12:28:45 UTC 2017 - okurz@suse.com
 
 - Be explicit about 'Details' box not being localized (bsc#1025846)

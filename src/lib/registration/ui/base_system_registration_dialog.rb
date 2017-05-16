@@ -218,11 +218,23 @@ module Registration
       # Default registration server
       #
       # The boot_url takes precedence over the SUSE::Connect default
-      # one.
+      # one. It shows a message if the boot_url is not valid.
       #
       # @return [String] URL for the registration server
       def default_url
-        @default_url ||= boot_url || SUSE::Connect::Config.new.url
+        return @default_url if @default_url
+
+        if boot_url
+          return (@default_url = boot_url) if valid_custom_url?(boot_url)
+
+          Yast::Report.Error(
+            # TRANSLATORS: Wrong url for registration provided, %s is an URL.
+            _("The registration URL provided by the command line is not valid.\n\n" \
+              "URL: %s\n\nThe default one will be used instead.") % boot_url
+          )
+        end
+
+        @default_url = SUSE::Connect::Config.new.url
       end
 
       # Registration server URL given through Linuxrc
