@@ -41,7 +41,4 @@ module Registration
   # generic download error
   class DownloadError < RuntimeError
   end
-
-  class InvalidURL < StandardError
-  end
 end
