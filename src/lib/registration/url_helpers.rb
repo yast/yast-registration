@@ -182,6 +182,15 @@ module Registration
       slp_service_url
     end
 
+    # Is an SCC server used for registration?
+    # @note It checks only the URL which is used, if the server is just a proxy
+    #   which forwards the requests to the real SCC server then it cannot
+    #   detect it and the code considers it as a non-SCC registration.
+    # @return [Boolean] true when SCC is used, false otherwise
+    def self.scc_url?
+      registration_url.nil? || registration_url == SUSE::Connect::YaST::DEFAULT_URL
+    end
+
     # @return [String,nil] the boot command line parameter
     def self.boot_reg_url
       reg_url = Yast::Linuxrc.InstallInf("regurl")

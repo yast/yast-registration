@@ -205,9 +205,10 @@ module Registration
     #   user entered values
     # @return [Symbol]
     def register_addons(selected_addons, known_reg_codes)
-      # if registering only add-ons which do not need a reg. code (like SDK)
-      # then simply start the registration
-      if selected_addons.all?(&:free)
+      # if using an SMT server for registration (bsc#970990)
+      # or registering only add-ons which do not need a reg. code (like SDK)
+      # then simply start the registration without asking for the reg. codes
+      if !UrlHelpers.scc_url? || selected_addons.all?(&:free)
         Yast::Wizard.SetContents(
           # dialog title
           _("Register Extensions and Modules"),
