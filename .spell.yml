@@ -11,3 +11,4 @@ ignore:
 dictionary:
   - SLE
   - SMT
+  - vc
