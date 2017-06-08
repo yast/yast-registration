@@ -1,13 +1,14 @@
-language: ruby
-before_install:
-    # disable rvm, use system Ruby
-    - rvm reset
-    - wget https://raw.githubusercontent.com/yast/yast-devtools/master/travis-tools/travis_setup.sh
-    - sh ./travis_setup.sh -p "yast2-devtools yast2 yast2-slp yast2-add-on yast2-update" -g bundler
-script:
-    - rake check:pot
-    - rubocop
-    - yardoc
-    - COVERAGE=1 bundle exec rake test:unit
-    - sudo rake install
+sudo: required
+language: bash
+services:
+  - docker
 
+before_install:
+  - docker build -t yast-registration-image .
+  # list the installed packages (just for easier debugging)
+  - docker run --rm -it yast-registration-image rpm -qa | sort
+
+script:
+  # the "yast-travis-ruby" script is included in the base yastdevel/ruby image
+  # see https://github.com/yast/docker-yast-ruby/blob/master/yast-travis-ruby
+  - docker run -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-registration-image yast-travis-ruby
