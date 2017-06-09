@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun  9 09:52:43 UTC 2017 - gsouza@suse.com
+
+- A system registered in a local SMT server uses the same SMT
+  server URL to register during upgrade (bsc#1043033).
+- 3.2.11
+
+-------------------------------------------------------------------
 
 Mon May  8 13:27:09 UTC 2017 - knut.anderssen@suse.com
 

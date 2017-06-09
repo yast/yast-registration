@@ -122,6 +122,7 @@ describe "Registration::UrlHelpers" do
 
     context "at upgrade" do
       let(:suse_register) { "/mnt/etc/suseRegister.conf" }
+      let(:suse_connect) { "/mnt/etc/SUSEConnect" }
 
       before do
         allow(Yast::Mode).to receive(:mode).and_return("update")
@@ -139,10 +140,12 @@ describe "Registration::UrlHelpers" do
         expect(Registration::UrlHelpers.registration_url).to eq(url)
       end
 
-      context "the system has been already registered" do
+      context "the system has been already registered with NCC" do
         before do
           allow(File).to receive(:exist?)
             .with("/mnt/etc/zypp/credentials.d/NCCcredentials").and_return(true)
+          allow(File).to receive(:exist?)
+            .with("/mnt/etc/SUSEConnect").and_return(false)
           expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
         end
 
@@ -153,12 +156,18 @@ describe "Registration::UrlHelpers" do
 
           expect(Registration::UrlHelpers.registration_url).to be_nil
         end
+      end
 
-        it "return URL of SMT server when used" do
-          expect(File).to receive(:exist?).with(suse_register).and_return(true)
-          expect(File).to receive(:readlines).with(suse_register)\
-            .and_return(File.readlines(fixtures_file("old_conf_custom/etc/suseRegister.conf")))
+      context " when the system has been already registered with SMT server" do
+        before do
+          allow(File).to receive(:exist?)
+            .with("/mnt/etc/SUSEConnect").and_return(true)
+        end
 
+        it "returns URL of SMT server" do
+          expect(File).to receive(:exist?).with(fixtures_file("SUSEConnect")).and_return(true)
+          expect(SUSE::Connect::Config).to receive(:new).with(suse_connect)
+            .and_return(SUSE::Connect::Config.new(fixtures_file("SUSEConnect")))
           expect(Registration::UrlHelpers.registration_url).to eq("https://myserver.com")
         end
 
@@ -171,6 +180,8 @@ describe "Registration::UrlHelpers" do
 
       context "the system has not been registered" do
         before do
+          allow(File).to receive(:exist?)
+            .with("/mnt/etc/SUSEConnect").and_return(false)
           expect(File).to receive(:exist?).with("/mnt/etc/zypp/credentials.d/NCCcredentials")
             .and_return(false)
           expect(Yast::Linuxrc).to receive(:InstallInf).with("regurl").and_return(nil)
