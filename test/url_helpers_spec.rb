@@ -122,7 +122,7 @@ describe "Registration::UrlHelpers" do
 
     context "at upgrade" do
       let(:suse_register) { "/mnt/etc/suseRegister.conf" }
-      let(:suse_connect) {"/mnt/etc/SUSEConnect"}
+      let(:suse_connect) { "/mnt/etc/SUSEConnect" }
 
       before do
         allow(Yast::Mode).to receive(:mode).and_return("update")
