@@ -16,6 +16,10 @@ if ENV["COVERAGE"]
     ]
   end
 
+  src_location = File.expand_path("../../src", __FILE__)
+  # track all ruby files under src
+  SimpleCov.track_files("#{src_location}/**/*.rb")
+
   SimpleCov.start do
     add_filter "/test/"
   end
