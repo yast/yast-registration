@@ -84,46 +84,25 @@ module Registration
         false
       rescue SUSE::Connect::ApiError => e
         log.error "Received error: #{e.response.inspect}"
+        error_msg = e.message || ""
         case e.code
         when 401
-          if show_update_hint
-            # TRANSLATORS: additional hint for an error message
-            msg = _("Check that this system is known to the registration server.")
-
-            # probably missing NCC->SCC sync, display a hint unless SMT is used
-            if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL
-              msg += "\n\n"
-              # TRANSLATORS: additional hint for an error message
-              msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
-                  "knows the old NCC registration. Synchronization from NCC to SCC\n" \
-                  "might take very long time.\n\n" \
-                  "If the SLE11 system was installed recently you could log into\n" \
-                  "%s to speed up the synchronization process.\n" \
-                  "Just wait several minutes after logging in and then retry \n" \
-                  "the upgrade again.") % \
-                SUSE::Connect::YaST::DEFAULT_URL
-            end
-
-            # add the hint to the error details
-            e.message << "\n\n\n" + msg
-          end
-
-          report_error(message_prefix + _("Connection to registration server failed."), e)
+          add_update_hint(error_msg) if show_update_hint
+          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 404
           # update the message when an old SMT server is found
-          check_smt_api(e)
-
-          report_error(message_prefix + _("Connection to registration server failed."), e)
+          check_smt_api(error_msg)
+          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 422
           # Error popup
-          report_error(message_prefix + _("Connection to registration server failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 400..499
-          report_error(message_prefix + _("Registration client error."), e)
+          report_error(message_prefix + _("Registration client error."), error_msg)
         when 500..599
           report_error(message_prefix + _("Registration server error.\n" \
-                "Retry the operation later."), e)
+                "Retry the operation later."), error_msg)
         else
-          report_error(message_prefix + _("Connection to registration server failed."), e)
+          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         end
         false
       rescue ::Registration::ServiceError => e
@@ -171,10 +150,11 @@ module Registration
 
         false
       rescue JSON::ParserError => e
+        log.error "JSON parse error"
         # update the message when an old SMT server is found
-        check_smt_api(e)
+        check_smt_api(e.message)
 
-        report_error(message_prefix + _("Connection to registration server failed."), e)
+        report_error(message_prefix + _("Connection to registration server failed."), e.message)
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
@@ -185,10 +165,8 @@ module Registration
       end
     end
 
-    def self.report_error(msg, api_error)
-      localized_error = api_error.message
-
-      Yast::Report.Error(error_with_details(msg, localized_error))
+    def self.report_error(msg, error_message)
+      Yast::Report.Error(error_with_details(msg, error_message))
     end
 
     def self.error_with_details(error, details)
@@ -265,10 +243,13 @@ module Registration
       )
     end
 
-    def self.check_smt_api(e)
+    # Check whether the registration server provides the old NCC API,
+    # if yes it replaces the error message with a hint about old registration server
+    # @param error_msg [String] the received error message, the content might be replaced
+    def self.check_smt_api(error_msg)
       url = UrlHelpers.registration_url
       # no SMT/custom server used
-      return if url.nil?
+      return if url == SUSE::Connect::YaST::DEFAULT_URL
 
       # test old SMT instance
       smt_status = SmtStatus.new(url, insecure: Helpers.insecure_registration)
@@ -284,7 +265,7 @@ module Registration
           "Make sure the latest product supporting the new registration\n" \
           "protocol is installed at the server.") % display_url
 
-      e.message.replace(msg)
+      error_msg.replace(msg)
     end
 
     # @param [String] message_prefix prefix displayed in the error message
@@ -292,7 +273,7 @@ module Registration
     def self.handle_network_error(message_prefix, e)
       if Yast::NetworkService.isNetworkRunning
         # FIXME: use a better message, this one has been reused after the text freeze
-        report_error(message_prefix + _("Invalid URL."), e)
+        report_error(message_prefix + _("Invalid URL."), e.message)
       elsif Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
         if Yast::Popup.YesNo(
           # Error popup
@@ -305,6 +286,33 @@ module Registration
       else
         Yast::Report.Error(_("Network error, check the network configuration."))
       end
+    end
+
+    # Add SCC synchronization hint into the text message when using the SCC
+    # registration server.
+    # @param error_msg [String] the error message from the registratino server,
+    #   the hint is appended at the end
+    def self.add_update_hint(error_msg)
+      # TRANSLATORS: additional hint for an error message
+      msg = _("Check that this system is known to the registration server.")
+
+      # probably missing NCC->SCC sync, display a hint unless SMT is used
+      if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL
+        msg += "\n\n"
+        # TRANSLATORS: additional hint for an error message
+        msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
+            "knows the old NCC registration. Synchronization from NCC to SCC\n" \
+            "might take very long time.\n\n" \
+            "If the SLE11 system was installed recently you could log into\n" \
+            "%s to speed up the synchronization process.\n" \
+            "Just wait several minutes after logging in and then retry \n" \
+            "the upgrade again.") % \
+          SUSE::Connect::YaST::DEFAULT_URL
+      end
+
+      # add the hint to the error details
+      error_msg << "\n\n\n" unless error_msg.empty?
+      error_msg << msg
     end
 
     private_class_method :report_error, :error_with_details, :ssl_error_details,
