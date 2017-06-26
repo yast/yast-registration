@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jun 22 13:46:00 UTC 2017 - lslezak@suse.cz
+
+- Do not display a hint about the old registration server when
+  SCC is used (bsc#1045344)
+- 3.2.12
+
+-------------------------------------------------------------------
 Fri Jun  9 09:52:43 UTC 2017 - gsouza@suse.com
 
 - A system registered in a local SMT server uses the same SMT
