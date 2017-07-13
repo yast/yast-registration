@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul 13 11:46:08 UTC 2017 - jreidinger@suse.com
+
+- workaround YAML loading issue in ruby 2.4 (bsc#148526)
+- 3.3.0
+
+-------------------------------------------------------------------
 Thu Jun 22 13:46:00 UTC 2017 - lslezak@suse.cz
 
 - Do not display a hint about the old registration server when
