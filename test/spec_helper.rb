@@ -46,7 +46,7 @@ module SUSE
 
       class Service
         alias_method :initialize_orig, :initialize
-        def initialize(arg = {"product" => {}})
+        def initialize(arg = { "product" => {} })
           initialize_orig(arg)
         end
       end
