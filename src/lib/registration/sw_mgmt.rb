@@ -119,6 +119,9 @@ module Registration
       # just for debugging:
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
+      # use the selected product if a product has been already selected
+      selected = product_selected? if Stage.initial
+
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
@@ -126,8 +129,8 @@ module Registration
         if Stage.initial
           # during installation the type is not valid yet yet
           # (the base product is determined by /etc/products.d/baseproduct symlink)
-          # the base product comes from the first repository
-          p["source"] == 0
+          # use the selected product or the product from the first repository
+          selected ? p["status"] == :selected : p["source"] == 0
         else
           # in installed system the base product has valid type
           p["status"] == :installed && p["type"] == "base"
@@ -139,6 +142,12 @@ module Registration
       log.warn "More than one base product found!" if products.size > 1
 
       products.first
+    end
+
+    # Any product selected to install?
+    # @return [Boolean] true if at least one product is selected to install
+    def self.product_selected?
+      Pkg.ResolvableProperties("", :product, "").any? { |p| p["status"] == :selected }
     end
 
     def self.installed_products
