@@ -309,9 +309,27 @@ describe Registration::SwMgmt do
 
     context "at installation" do
       let(:products) { load_yaml_fixture("products_sp2_update.yml") }
-      it "returns the product from the installation medium" do
+
+      it "returns the selected product if a product is selected" do
         allow(Yast::Stage).to receive(:initial).and_return(true)
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products).twice
+        # sanity check: just make sure the fixture contains the expected data
+        expect(products.any? { |p| p["status"] == :selected })
+
+        # the SLES product in the list is installed
+        expect(subject.find_base_product).to eq(products[3])
+      end
+
+      it "returns the product from the installation medium if no product is selected" do
+        allow(Yast::Stage).to receive(:initial).and_return(true)
+
+        # patch the fixture so no product is selected
+        products2 = products.dup
+        products2[3]["status"] = :available
+        # sanity check: just make sure the fixture was patched correctly
+        expect(products2.none? { |p| p["status"] == :selected })
+
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products2).twice
         # the SLES product in the list is installed
         expect(subject.find_base_product).to eq(products[3])
       end
