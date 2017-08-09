@@ -25,7 +25,20 @@ Wed Mar 15 14:43:42 UTC 2017 - gsouzadossantos@suse.com
 - Remember the state of the checkbox when leaving the dialog
   (bsc#1026155) and correct the filter to always show installed
   addons, even if they are beta versions.
-- 3.1.191
+- 3.1.190.3
+
+-------------------------------------------------------------------
+Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
+
+- Fixed initialization of the registration code in case of called
+  more than once (fate#322328).
+- 3.1.190.2
+
+-------------------------------------------------------------------
+Mon Jan 23 13:21:42 UTC 2017 - kanderssen@suse.com
+
+- Added Registration::Widgets::RegistrationCode (fate#322328).
+- 3.1.190.1
 
 -------------------------------------------------------------------
 Wed Nov 23 10:01:44 UTC 2016 - jreidinger@suse.com
