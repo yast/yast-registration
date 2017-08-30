@@ -175,7 +175,7 @@ module Registration
       return error if !details || details.empty?
 
       # %s are error details
-      error + "\n\n" + (_("Details: %s") % wrap_text(details))
+      error + "\n\n" + wrap_text(_("Details: %s") % details)
     end
 
     def self.ssl_error_details(cert)
