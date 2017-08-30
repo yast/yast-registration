@@ -42,8 +42,10 @@ describe Registration::ConnectHelpers do
     it "reports an error with details on timeout" do
       details = _("Make sure that the registration server is reachable and\n" \
         "the connection is reliable.")
+
+      expect(subject).to receive(:wrap_text).with(details).and_return("wrapped text")
       expect(Yast::Report).to receive(:Error).with(
-        "Registration: " + _("Connection time out.") + "\n\n\nDetails: #{details}"
+        "Registration: " + _("Connection time out.") + "\n\n\nDetails: wrapped text"
       )
 
       helpers.catch_registration_errors(message_prefix: "Registration: ") do

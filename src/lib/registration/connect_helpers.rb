@@ -23,6 +23,7 @@
 
 require "yast"
 require "suse/connect"
+require "ui/text_helpers"
 
 require "registration/helpers"
 require "registration/exceptions"
@@ -37,6 +38,7 @@ module Registration
   # FIXME: change to a module and include it in the clients
   class ConnectHelpers
     include Yast::Logger
+    extend ::UI::TextHelpers
     extend Yast::I18n
 
     # openSSL error codes for which the import SSL certificate dialog is shown,
@@ -173,7 +175,7 @@ module Registration
       return error if !details || details.empty?
 
       # %s are error details
-      error + "\n\n" + (_("Details: %s") % details)
+      error + "\n\n" + (_("Details: %s") % wrap_text(details))
     end
 
     def self.ssl_error_details(cert)
