@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug 30 14:20:46 UTC 2017 - knut.anderssen@suse.com
+
+- Wrap text of connection_helpers error messages (bsc#1055643)
+- 3.3.2
+
+-------------------------------------------------------------------
 Mon Jul 31 14:20:44 UTC 2017 - lslezak@suse.cz
 
 - LeanOS: Better handle multiple products on the installation
