@@ -175,7 +175,15 @@ module Registration
       return error if !details || details.empty?
 
       # %s are error details
-      error + "\n\n" + wrap_text(_("Details: %s") % details)
+      details_msg = _("Details: %s") % details
+      displayinfo = Yast::UI.GetDisplayInfo || {}
+
+      return (error + "\n\n" + details_msg) unless displayinfo["TextMode"]
+
+      # Use almost the max width available
+      max_size = (displayinfo["Width"] || 80) - 4
+
+      error + "\n\n" + wrap_text(details_msg, max_size)
     end
 
     def self.ssl_error_details(cert)

@@ -127,6 +127,7 @@ describe "Registration::RegistrationUI" do
       it "does not ask for reg. code if all addons are free" do
         # user is not asked for any reg. code
         expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
+        allow(registration_ui).to receive(:register_selected_addons) { true }
 
         # Register Legacy module
         registration_ui.register_addons([addon_legacy], {})

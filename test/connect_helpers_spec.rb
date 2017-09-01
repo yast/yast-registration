@@ -21,6 +21,11 @@ describe Registration::ConnectHelpers do
   describe "#catch_registration_errors" do
     before do
       allow(Yast::Report).to receive(:Error)
+      allow(Yast::UI).to receive(:GetDisplayInfo).and_return(
+        "TextMode" => true,
+        "Width"    => 80,
+        "Height"   => 25
+      )
     end
 
     it "returns true if not exception is raised" do
@@ -43,7 +48,7 @@ describe Registration::ConnectHelpers do
       details = _("Make sure that the registration server is reachable and\n" \
         "the connection is reliable.")
 
-      expect(subject).to receive(:wrap_text).with("Details: #{details}")
+      expect(subject).to receive(:wrap_text).with("Details: #{details}", 76)
         .and_return("Details wrapped text")
       expect(Yast::Report).to receive(:Error).with(
         "Registration: " + _("Connection time out.") + "\n\n\nDetails wrapped text"
