@@ -19,11 +19,13 @@ describe Registration::ConnectHelpers do
   subject(:helpers) { Registration::ConnectHelpers }
 
   describe "#catch_registration_errors" do
+    let(:screen_width) { 80 }
+
     before do
       allow(Yast::Report).to receive(:Error)
       allow(Yast::UI).to receive(:GetDisplayInfo).and_return(
         "TextMode" => true,
-        "Width"    => 80,
+        "Width"    => screen_width,
         "Height"   => 25
       )
     end
@@ -48,7 +50,7 @@ describe Registration::ConnectHelpers do
       details = _("Make sure that the registration server is reachable and\n" \
         "the connection is reliable.")
 
-      expect(subject).to receive(:wrap_text).with("Details: #{details}", 76)
+      expect(subject).to receive(:wrap_text).with("Details: #{details}", screen_width - 4)
         .and_return("Details wrapped text")
       expect(Yast::Report).to receive(:Error).with(
         "Registration: " + _("Connection time out.") + "\n\n\nDetails wrapped text"
