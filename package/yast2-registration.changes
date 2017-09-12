@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep 12 08:20:51 UTC 2017 - mfilka@suse.com
+
+- bnc#1056318
+  - fixed internal error raised when cloning configuration
+- 3.3.1 
+
+-------------------------------------------------------------------
 Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com
 
 - Added Registration::Widgets::RegistrationCode (fate#322328).
