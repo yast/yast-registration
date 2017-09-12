@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        3.2.1
+Version:        3.3.3
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -26,8 +26,8 @@ Source0:        %{name}-%{version}.tar.bz2
 Group:          System/YaST
 License:        GPL-2.0
 
-# Popup.Feedback
-Requires:       yast2 >= 3.1.26
+## UI::TextHelpers wrap_text
+Requires:       yast2 >= 4.0.1
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
@@ -48,7 +48,7 @@ Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.95
 Requires:       yast2-update >= 3.1.36
 
-BuildRequires:  yast2 >= 3.1.26
+BuildRequires:  yast2 >= 4.0.1
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5
@@ -75,11 +75,6 @@ Url:            https://github.com/yast/yast-registration
 The registration module to register products and/or to fetch an update
 source (mirror) automatically.
 
-
-Authors:
---------
-    Ladislav Slezak <lslezak@suse.cz>
-
 %prep
 %setup -n %{name}-%{version}
 
@@ -93,7 +88,7 @@ Authors:
 
 %files
 %defattr(-,root,root)
-%{yast_desktopdir}/customer_center.desktop
+%{yast_desktopdir}/*.desktop
 %{yast_clientdir}/*.rb
 %{yast_ydatadir}/registration
 %{yast_schemadir}/autoyast/rnc/*.rnc

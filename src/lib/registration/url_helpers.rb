@@ -148,17 +148,22 @@ module Registration
       # (the config file exists even on a not registered system)
       dir = SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR
       ncc_creds = File.join(Yast::Installation.destdir, dir, "NCCcredentials")
+      scc_creds = File.join(Yast::Installation.destdir, SUSE::Connect::Config::DEFAULT_CONFIG_FILE)
 
       # do not use the old URL when it has failed before
-      if !::Registration::Storage::Cache.instance.upgrade_failed && File.exist?(ncc_creds)
-        # FIXME: check at first new suseconnect conf
-        old_conf = SuseRegister.new(Yast::Installation.destdir)
-
-        if old_conf.found?
-          # use default if ncc was used in past
-          return nil if old_conf.ncc?
-          # if specific server is used, then also use it
-          return old_conf.stripped_url.to_s
+      if !::Registration::Storage::Cache.instance.upgrade_failed
+        if File.exist?(scc_creds)
+          config = SUSE::Connect::Config.new(scc_creds)
+          return config.url
+        end
+        if File.exist?(ncc_creds)
+          old_conf = SuseRegister.new(Yast::Installation.destdir)
+          if old_conf.found?
+            # use default if ncc was used in past
+            return nil if old_conf.ncc?
+            # if specific server is used, then also use it
+            return old_conf.stripped_url.to_s
+          end
         end
       end
 

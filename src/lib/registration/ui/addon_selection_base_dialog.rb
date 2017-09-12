@@ -71,7 +71,12 @@ module Registration
       # @param [Boolean] enable true for filtering beta releases
       def filter_beta_releases(enable)
         self.class.filter_beta = enable
-        @addons = enable ? @all_addons.reject(&:beta_release?) : @all_addons
+        if enable
+          @addons, available_addons = @all_addons.partition(&:registered?)
+          @addons.concat(available_addons.reject(&:beta_release?))
+        else
+          @addons = @all_addons
+        end
       end
 
     private
@@ -91,14 +96,17 @@ module Registration
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
-        VBox(
-          Left(Heading(heading)),
-          Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Filter Out Beta Versions"), FILTER_BETAS_INITIALLY)),
-          addons_box,
-          Left(Label(_("Details"))),
-          details_widget
-        )
+        check_filter = self.class.filter_beta.nil? ? FILTER_BETAS_INITIALLY : self.class.filter_beta
+        vbox_elements = [Left(Heading(heading))]
+        available_addons = @all_addons.reject(&:registered?)
+
+        unless available_addons.empty? || available_addons.select(&:beta_release?).empty?
+          vbox_elements.push(Left(CheckBox(Id(:filter_beta), Opt(:notify),
+            _("&Hide Beta Versions"), check_filter)))
+        end
+
+        vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
+        VBox(*vbox_elements)
       end
 
       # addon description widget

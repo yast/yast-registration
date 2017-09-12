@@ -3,7 +3,116 @@ Tue Sep 12 08:20:51 UTC 2017 - mfilka@suse.com
 
 - bnc#1056318
   - fixed internal error raised when cloning configuration
-- 3.3.1 
+- 3.3.3 
+
+-------------------------------------------------------------------
+Wed Aug 30 14:20:46 UTC 2017 - knut.anderssen@suse.com
+
+- Wrap text of connection_helpers error messages (bsc#1055643)
+- 3.3.2
+
+-------------------------------------------------------------------
+Mon Jul 31 14:20:44 UTC 2017 - lslezak@suse.cz
+
+- LeanOS: Better handle multiple products on the installation
+  medium, register the selected product (FATE#323450)
+- 3.3.1
+
+-------------------------------------------------------------------
+Thu Jul 13 11:46:08 UTC 2017 - jreidinger@suse.com
+
+- workaround YAML loading issue in ruby 2.4 (bsc#1048526)
+- 3.3.0
+
+-------------------------------------------------------------------
+Thu Jun 22 13:46:00 UTC 2017 - lslezak@suse.cz
+
+- Do not display a hint about the old registration server when
+  SCC is used (bsc#1045344)
+- 3.2.12
+
+-------------------------------------------------------------------
+Fri Jun  9 09:52:43 UTC 2017 - gsouza@suse.com
+
+- A system registered in a local SMT server uses the same SMT
+  server URL to register during upgrade (bsc#1043033).
+- 3.2.11
+
+-------------------------------------------------------------------
+
+Mon May  8 13:27:09 UTC 2017 - knut.anderssen@suse.com
+
+- Don't crash if the regurl provided by linuxrc is invalid, use
+  the one provided by the control file as fallback (bsc#1035908).
+- 3.2.10
+
+-------------------------------------------------------------------
+Fri Apr 28 11:11:22 CEST 2017 - schubi@suse.de
+
+- AY inst-sys: Copy certificate to /etc/pki/trust/anchors instead of
+  /usr/share/pki/trust/anchors which is read only (bnc#1034663).
+- 3.2.9
+
+-------------------------------------------------------------------
+Wed Apr 19 08:37:28 UTC 2017 - gsouza@suse.com
+
+- Removed the option "Register Extensions of Modules Again"
+  (bsc#1029885).
+- Hides "Filter Beta Versions" checkbox when there is no beta
+  version to filter.
+- Hides "Network config" option when the system is already
+  installed.
+- 3.2.8
+
+-------------------------------------------------------------------
+Mon Apr 10 07:38:45 WEST 2017 - knut.anderssen@suse.com
+
+- Online Migration (fate#320534)
+  - Added step for check registered but not installed addons to the
+    migration workflow. In case of existence, allow the user to
+    install the release package or deactivate the products.
+  - In case of abort, only registered products are downgraded and
+    synced.
+  - Added to the migration summary information about products not
+    offering migrations (third party addons).
+- 3.2.7
+
+-------------------------------------------------------------------
+Mon Mar 20 12:28:45 UTC 2017 - okurz@suse.com
+
+- Be explicit about 'Details' box not being localized (bsc#1025846)
+- 3.2.6
+
+-------------------------------------------------------------------
+Fri Mar 17 09:23:03 UTC 2017 - gsouzadossantos@suse.com
+
+- Remember the state of the checkbox when leaving the dialog
+  (bsc#1026155) and correct the filter to always show installed
+  addons, even if they are beta versions.
+- 3.2.5
+
+-------------------------------------------------------------------
+Tue Mar  7 12:59:27 UTC 2017 - kanderssen@suse.com
+
+- Adjusted .desktop files wrapping /sbin/yast2 calls that requires
+  root permisions with xdg-su (bsc#1028053).
+- 3.2.4
+
+-------------------------------------------------------------------
+Tue Feb 14 10:00:41 UTC 2017 - igonzalezsosa@suse.com
+
+- Registration#get_updates_list won't catch errors anymore because
+  that's something tightly coupled to the user interface. They
+  should be handled outside that method (bsc#1025251)
+- 3.2.3
+
+-------------------------------------------------------------------
+Mon Jan 30 20:05:56 UTC 2017 - mfilka@suse.com
+
+- fate#321044
+  - provide a shortcut for running "Add System Extensions/Modules"
+    dialog directly from control centre.
+- 3.2.2
 
 -------------------------------------------------------------------
 Fri Jan 27 17:18:29 UTC 2017 - kanderssen@suse.com

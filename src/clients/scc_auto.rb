@@ -265,7 +265,7 @@ module Yast
       end
 
       Popup.Feedback(_("Importing SSL Certificate"), cert.subject_name) do
-        cert.import_to_system
+        cert.import
       end
     end
 
