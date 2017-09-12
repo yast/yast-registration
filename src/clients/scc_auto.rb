@@ -39,6 +39,19 @@ require "registration/ssl_certificate"
 require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 
+# A helper used to get ERB out of Yast context
+class RegistrationErbRendered
+  include Yast::I18n
+
+  def initialize(config)
+    @config = config
+  end
+
+  def render_erb_template(file)
+    ::Registration::Helpers.render_erb_template(file, binding)
+  end
+end
+
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
@@ -139,7 +152,7 @@ module Yast
     # Create a textual summary
     # @return [String] summary of the current configuration
     def summary
-      ::Registration::Helpers.render_erb_template("autoyast_summary.erb", binding)
+      RegistrationErbRendered.new(@config).render_erb_template("autoyast_summary.erb")
     end
 
     # set the registration URL from the profile or use the default
