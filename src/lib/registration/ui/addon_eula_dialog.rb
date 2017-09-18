@@ -104,9 +104,6 @@ module Registration
         Yast::ProductLicense.DisplayLicenseDialogWithTitle(eula_reader.languages, enable_back,
           eula_reader.current_language, arg_ref(eula_reader.licenses), id, title)
 
-        # display info file if present
-        display_optional_info(File.join(tmpdir, "info.txt"))
-
         # display beta warning if present
         display_optional_info(File.join(tmpdir, "README.BETA"))
       end
