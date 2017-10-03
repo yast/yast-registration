@@ -12,6 +12,7 @@ describe "inst_scc client" do
     allow(Yast::UI).to receive(:ChangeWidget)
     allow(Yast::UI).to receive(:SetFocus)
     allow(Yast::UI).to receive(:ReplaceWidget)
+    allow(Yast::Mode).to receive(:update).and_return(false)
     allow(Yast::SlpService).to receive(:all).and_return([])
   end
 

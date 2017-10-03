@@ -148,6 +148,11 @@ module Yast
       # cache the available addons
       return :cancel if init_registration == :cancel
 
+      if !Registration::SwMgmt.find_base_product
+        Registration::Helpers.report_no_base_product
+        return :cancel
+      end
+
       addons_loaded = Registration::ConnectHelpers.catch_registration_errors do
         registration_ui.get_available_addons
       end
