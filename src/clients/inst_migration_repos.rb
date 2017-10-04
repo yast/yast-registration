@@ -12,38 +12,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require "yast"
-require "yast/suse_connect"
+require "registration/clients/inst_migration_repos"
 
-module Yast
-  # This is just a wrapper around the "migration_repos" client to run it at
-  # the upgrade workflow.
-  class InstMigrationRepos < Client
-    include Yast::Logger
-    extend Yast::I18n
-
-    def main
-      textdomain "registration"
-
-      Yast.import "Installation"
-
-      # initialize the target path
-      set_target_path
-
-      # call the normal client
-      Yast::WFM.call("migration_repos")
-    end
-
-  private
-
-    # Pass the target directory to SUSEConnect
-    def set_target_path
-      return if Installation.destdir == "/"
-
-      log.info("Setting SUSEConnect target directory: #{Installation.destdir}")
-      SUSE::Connect::System.filesystem_root = Installation.destdir
-    end
-  end
-end
-
-Yast::InstMigrationRepos.new.main
+Registration::Clients::InstMigrationRepos.new.main
