@@ -20,6 +20,7 @@
 #
 
 require "forwardable"
+require "set"
 require "registration/sw_mgmt"
 
 module Registration
@@ -64,6 +65,16 @@ module Registration
         @selected ||= []
       end
 
+      # invalidates automatically selected addons. Resulting in recalculating it.
+      def reset_auto_selected
+        @auto_selected = nil
+      end
+
+      # list of auto selected add-ons
+      def auto_selected
+        @auto_selected ||= detect_auto_selection
+      end
+
       # return add-ons which are registered but not installed in the system
       # @return [Array<Addon>] the list of add-ons
       def registered_not_installed
@@ -80,12 +91,14 @@ module Registration
 
       # create an Addon from a SUSE::Connect::Product
       # @param root [SUSE::Connect::Product] the root add-on object
-      # @return [Addon] created Addon object
+      # @return [Array<Addon>] list of addons, where the first one is
+      #   the one based on root and rest is its children
       def create_addon_with_deps(root)
         root_addon = Addon.new(root)
         result = [root_addon]
 
         (root.extensions || []).each do |ext|
+          # FIXME: endless loop if circular dependency between addons happen
           child = create_addon_with_deps(ext)
           result.concat(child)
           child.first.depends_on = root_addon
@@ -93,6 +106,25 @@ module Registration
         end
 
         result
+      end
+
+      def detect_auto_selection
+        required = selected + registered
+
+        # here we use sets as for bigger dependencies this can be quite slow
+        # how it works? it fills set with selected and registered items and it will
+        # adds recursive all its children and then subtract that manually selected
+        # or registered.
+        to_process = Set.new(required)
+
+        to_process.each do |addon|
+          children = addon.children
+          to_process.merge(children)
+        end
+
+        to_process.subtract(required)
+
+        to_process.to_a
       end
     end
 
@@ -132,12 +164,18 @@ module Registration
 
     # select the add-on
     def selected
-      Addon.selected << self unless selected?
+      return if selected?
+
+      Addon.selected << self
+      Addon.reset_auto_selected
     end
 
     # unselect the add-on
     def unselected
-      Addon.selected.delete(self) if selected?
+      return unless selected?
+
+      Addon.selected.delete(self)
+      Addon.reset_auto_selected
     end
 
     # toggle the selection state of the add-on
@@ -147,6 +185,7 @@ module Registration
       else
         selected
       end
+      Addon.reset_auto_selected
     end
 
     # has been the add-on registered?

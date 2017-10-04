@@ -153,17 +153,17 @@ module Registration
       # @param label [String]
       # @param selected [Boolean]
       # @param enabled [Boolean]
-      # @param indented [Boolean]
+      # @param auto_selected [Boolean]
       # @return [String] a Value for a RichText
-      def richtext_checkbox(id:, label:, selected:, enabled:, indented: false)
+      def richtext_checkbox(id:, label:, selected:, enabled:, auto_selected:)
         if Yast::UI.TextMode
-          indent = "&nbsp;" * (indented ? 5 : 1)
+          indent = "&nbsp;"
           check = selected ? "[x]" : "[ ]"
           widget = "#{check} #{label}"
           enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
           "#{indent}#{enabled_widget}<br>"
         else
-          indent = "&nbsp;" * (indented ? 7 : 1)
+          indent = "&nbsp;"
 
           # check for installation style, which is dark, FIXME: find better way
           installation = ENV["Y2STYLE"] == "installation.qss"
