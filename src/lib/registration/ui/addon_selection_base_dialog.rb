@@ -132,7 +132,8 @@ module Registration
                           label:    label,
                           selected: addon_selected?(addon),
                           enabled:  addon.selectable?,
-                          indented: addon.depends_on)
+                          auto_selected: Addon.auto_selected.include?(addon)
+                          )
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
@@ -156,17 +157,27 @@ module Registration
       # @param auto_selected [Boolean]
       # @return [String] a Value for a RichText
       def richtext_checkbox(id:, label:, selected:, enabled:, auto_selected:)
+        indent = "&nbsp;"
         if Yast::UI.TextMode
-          indent = "&nbsp;"
-          check = selected ? "[x]" : "[ ]"
+          check = if selected
+                    "[x]"
+                  elsif auto_selected
+                    "[a]"
+                  else
+                    "[ ]"
+                  end
           widget = "#{check} #{label}"
           enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
           "#{indent}#{enabled_widget}<br>"
         else
-          indent = "&nbsp;"
-
           # check for installation style, which is dark, FIXME: find better way
           installation = ENV["Y2STYLE"] == "installation.qss"
+
+          # FIXME: no suitable widget for auto-selected yet, so use disable + selected
+          if auto_selected
+            selected = true
+            enabled = false
+          end
           image = (installation ? "inst:" : "normal:") +
             (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
           color = installation ? "white" : "black"
