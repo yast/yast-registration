@@ -115,16 +115,17 @@ module Registration
         # how it works? it fills set with selected and registered items and it will
         # adds recursive all its children and then subtract that manually selected
         # or registered.
-        to_process = Set.new(required)
+        already_processed = Set.new(required)
+        to_process = required.dup
 
         to_process.each do |addon|
+          already_processed << addon
           children = addon.children
-          to_process.merge(children)
+          new_addons = children.reject { |c| already_processed.include?(c) }
+          to_process.concat(new_addons)
         end
 
-        to_process.subtract(required)
-
-        to_process.to_a
+        to_process - required
       end
     end
 
@@ -221,8 +222,6 @@ module Registration
       return false if registered?
       # Do not select not available addons
       return false if !available?
-      # Do not allow to select child without selected or already registered parent
-      return false if depends_on && !(depends_on.selected? || depends_on.registered?)
       # Do not allow to unselect parent if any children is selected
       return false if children.any?(&:selected?)
 

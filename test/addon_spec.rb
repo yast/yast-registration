@@ -241,10 +241,6 @@ describe Registration::Addon do
       expect(addon.selectable?).to eq(true)
     end
 
-    it "returns false when the parent is not selected or registered" do
-      expect(child.selectable?).to eq(false)
-    end
-
     it "returns true when the parent is selected" do
       parent.selected
       expect(child.selectable?).to eq(true)
