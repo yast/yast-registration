@@ -45,7 +45,6 @@ module Registration
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
   Yast.import "Popup"
-  Yast.import "AutoinstConfig"
 
   class SwMgmt
     include Yast
@@ -122,14 +121,16 @@ module Registration
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial
-      selected = !AutoinstConfig.selected_product.nil? if Mode.auto
 
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
         if Stage.initial && Mode.auto
-          p["short_name"] == AutoinstConfig.selected_product.short_name
+          Yast.import "AutoinstConfig"
+          # note: AutoinstConfig.selected_product should never be nil when
+          # AY let it pass here
+          p["name"] == AutoinstConfig.selected_product.name
         elsif Stage.initial && !Mode.update
           # during installation the type is not valid yet yet
           # (the base product is determined by /etc/products.d/baseproduct symlink)
