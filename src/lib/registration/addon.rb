@@ -120,8 +120,9 @@ module Registration
 
         to_process.each do |addon|
           already_processed << addon
-          children = addon.children
-          new_addons = children.reject { |c| already_processed.include?(c) }
+          # prepared when depends_on support multiple addons
+          dependencies = addon.depends_on ? [addon.depends_on] : []
+          new_addons = dependencies.reject { |c| already_processed.include?(c) }
           to_process.concat(new_addons)
         end
 
