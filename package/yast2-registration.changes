@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 12 11:57:29 UTC 2017 - mfilka@suse.com
+
+- fate#323450
+  - when searching for base product check also AY profiles for
+    user's selection
+- 4.0.6 
+-------------------------------------------------------------------
 Wed Oct 11 11:51:31 UTC 2017 - jreidinger@suse.com
 
 - use self update id if defined instead of product name to make
