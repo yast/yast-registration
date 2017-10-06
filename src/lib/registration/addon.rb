@@ -100,13 +100,13 @@ module Registration
         processed = Set.new
         result = []
 
-        to_process.each do |(ext, dependency)|
-          next if processed.include?(ext)
-          processed << ext
-          addon = Addon.new(ext)
+        to_process.each do |(pure, dependency)|
+          next if processed.include?(pure)
+          processed << pure
+          addon = Addon.new(pure)
           result << addon
           addon.depends_on = dependency
-          (ext.extensions || []).each do |ext|
+          (pure.extensions || []).each do |ext|
             to_process << [ext, addon]
           end
         end
@@ -199,7 +199,7 @@ module Registration
       return :auto_selected if auto_selected?
       return :available if available?
 
-      return :none
+      :none
     end
 
     # toggle the selection state of the add-on

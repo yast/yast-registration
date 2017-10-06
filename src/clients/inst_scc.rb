@@ -83,9 +83,9 @@ module Yast
     # @return [Boolean] true if the media add-on worklow should be started
     def media_workflow?
       return false if WFM.Args[0] != "register_media_addon"
-      return true if WFM.Args[1].is_a?(Fixnum)
+      return true if WFM.Args[1].is_a?(::Integer)
 
-      log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
+      log.warn "Invalid argument: #{WFM.Args[1].inspect}, an Integer is expected"
       log.warn "Starting the standard workflow"
       false
     end

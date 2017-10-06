@@ -122,10 +122,9 @@ module Registration
         # checkbox label for an unavailable extension
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
-        richtext_checkbox(id:       addon_widget_id(addon),
-                          label:    label,
-                          status:   addon.status
-                         )
+        richtext_checkbox(id:     addon_widget_id(addon),
+                          label:  label,
+                          status: addon.status)
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
@@ -142,7 +141,6 @@ module Registration
         "inst:on:disabled"    => "inst_checkbox-on-disabled.png",
         "inst:off:disabled"   => "inst_checkbox-off-disabled.png"
       }.freeze
-
 
       INDENT = "&nbsp;".freeze
 
@@ -171,12 +169,12 @@ module Registration
 
           selected = case status
                      when :selected, :registered
-                        "on"
-                      when :auto_selected
-                        "auto"
-                      else
-                        "off"
-                      end
+                       "on"
+                     when :auto_selected
+                       "auto"
+                     else
+                       "off"
+                     end
 
           image = (installation ? "inst:" : "normal:") +
             selected + ":" + (enabled ? "enabled" : "disabled")
