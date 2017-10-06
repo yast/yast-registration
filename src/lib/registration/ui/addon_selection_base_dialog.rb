@@ -47,8 +47,6 @@ module Registration
 
         # activate a workaround on ARM (FATE#320679)
         aarch64_workaround if Arch.aarch64
-
-        log.info "Available addons: #{@all_addons}"
       end
 
       # reimplement this in a subclass

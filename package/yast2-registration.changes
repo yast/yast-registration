@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Tue Oct  3 14:17:52 UTC 2017 - lslezak@suse.cz
+
+- Initial support for the SLE12 -> SLE15 upgrade, honor the target
+  mount point prefix (fate#323163)
+- Do not crash when the baseproduct symlink does not exist in
+  installed system
+- Dump the available addons to a separate file
+  (/var/log/YaST2/registration_addons.yml) instead of the y2log
+  to make it better readable
+- 4.0.1
+
+-------------------------------------------------------------------
 Thu Sep 14 07:27:48 UTC 2017 - knut.anderssen@suse.com
 
 - Do not display info.txt file anymore (bsc#1047060).

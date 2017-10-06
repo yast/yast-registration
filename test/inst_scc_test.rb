@@ -3,7 +3,9 @@
 require_relative "spec_helper"
 require "yast"
 
-describe "inst_scc client" do
+require "registration/clients/inst_scc"
+
+describe Yast::InstSccClient do
   before do
     # generic UI stubs for the wizard dialog
     Yast.import "UI"
@@ -12,6 +14,7 @@ describe "inst_scc client" do
     allow(Yast::UI).to receive(:ChangeWidget)
     allow(Yast::UI).to receive(:SetFocus)
     allow(Yast::UI).to receive(:ReplaceWidget)
+    allow(Yast::Mode).to receive(:update).and_return(false)
     allow(Yast::SlpService).to receive(:all).and_return([])
   end
 
@@ -26,7 +29,7 @@ describe "inst_scc client" do
     it "returns :abort when closing the status dialog" do
       # user closes the dialog via window manager
       expect(Yast::UI).to receive(:UserInput).and_return(:cancel)
-      expect(Yast::WFM.call("inst_scc")).to eq(:abort)
+      expect(subject.main).to eq(:abort)
     end
 
     it "displays an error when loading the available extensions fails" do
@@ -42,7 +45,7 @@ describe "inst_scc client" do
       expect_any_instance_of(Registration::RegistrationUI).to receive(:get_available_addons)
         .and_raise(error)
 
-      expect(Yast::WFM.call("inst_scc")).to eq(:abort)
+      expect(subject.main).to eq(:abort)
     end
 
     it "goes back to initial screen when aborting selection of url" do
@@ -50,18 +53,18 @@ describe "inst_scc client" do
       # displayed and 'finish' the second time
       expect(Yast::UI).to receive(:UserInput).and_return(:extensions, :next)
       # User cancels the selection of registration url
-      expect_any_instance_of(Yast::InstSccClient).to receive(:init_registration).and_return(:cancel)
+      expect(subject).to receive(:init_registration).and_return(:cancel)
       # Initial screen is displayed twice
-      expect_any_instance_of(Yast::InstSccClient).to receive(:registration_check)
+      expect(subject).to receive(:registration_check)
         .twice.and_call_original
 
-      expect(Yast::WFM.call("inst_scc")).to eq(:next)
+      expect(subject.main).to eq(:next)
     end
   end
 
   context "the system is updating reusing old credentials" do
     before do
-      expect_any_instance_of(Yast::InstSccClient).to receive(:registration_check)
+      expect(subject).to receive(:registration_check)
         .and_return(:update)
     end
 
@@ -71,9 +74,9 @@ describe "inst_scc client" do
         :init_registration
       ).and_return(:cancel)
       # So manual registration dialog is displayed
-      expect_any_instance_of(Yast::InstSccClient).to receive(:register_base_system)
+      expect(subject).to receive(:register_base_system)
         .and_return(:cancel)
-      expect(Yast::WFM.call("inst_scc")).to eq(:abort)
+      expect(subject.main).to eq(:abort)
     end
   end
 end
