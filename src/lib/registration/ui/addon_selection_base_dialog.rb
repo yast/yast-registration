@@ -87,12 +87,6 @@ module Registration
         raise "Not implemented"
       end
 
-      # reimplement this in a subclass
-      # @return [Boolean] is the addon selected?
-      def addon_selected?(_addon)
-        raise "Not implemented"
-      end
-
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
@@ -130,56 +124,62 @@ module Registration
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
         richtext_checkbox(id:       addon_widget_id(addon),
                           label:    label,
-                          selected: addon_selected?(addon),
-                          enabled:  addon.selectable?,
-                          auto_selected: Addon.auto_selected.include?(addon)
-                          )
+                          status:   addon.status
+                         )
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
       IMAGES = {
+        "normal:auto:enabled" => "auto-selected.png",
         "normal:on:enabled"   => "checkbox-on.png",
         "normal:off:enabled"  => "checkbox-off.png",
         # theme has no special images for disabled checkboxes
         "normal:on:disabled"  => "checkbox-on.png",
         "normal:off:disabled" => "checkbox-off.png",
+        "inst:auto:enabled"   => "auto-selected.png",
         "inst:on:enabled"     => "inst_checkbox-on.png",
         "inst:off:enabled"    => "inst_checkbox-off.png",
         "inst:on:disabled"    => "inst_checkbox-on-disabled.png",
         "inst:off:disabled"   => "inst_checkbox-off-disabled.png"
       }.freeze
 
+
+      INDENT = "&nbsp;".freeze
+
       # Make a simulation of a CheckBox displayed in a RichText
       # @param id [String]
       # @param label [String]
-      # @param selected [Boolean]
-      # @param enabled [Boolean]
-      # @param auto_selected [Boolean]
+      # @param status [Symbol]
       # @return [String] a Value for a RichText
-      def richtext_checkbox(id:, label:, selected:, enabled:, auto_selected:)
-        indent = "&nbsp;"
+      def richtext_checkbox(id:, label:, status:)
+        enabled = [:selected, :auto_selected, :available].include?(status)
         if Yast::UI.TextMode
-          check = if selected
+          check = case status
+                  when :selected, :registered
                     "[x]"
-                  elsif auto_selected
+                  when :auto_selected
                     "[a]"
                   else
                     "[ ]"
                   end
           widget = "#{check} #{label}"
           enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
-          "#{indent}#{enabled_widget}<br>"
+          "#{INDENT}#{enabled_widget}<br>"
         else
           # check for installation style, which is dark, FIXME: find better way
           installation = ENV["Y2STYLE"] == "installation.qss"
 
-          # FIXME: no suitable widget for auto-selected yet, so use disable + selected
-          if auto_selected
-            selected = true
-            enabled = false
-          end
+          selected = case status
+                     when :selected, :registered
+                        "on"
+                      when :auto_selected
+                        "auto"
+                      else
+                        "off"
+                      end
+
           image = (installation ? "inst:" : "normal:") +
-            (selected ? "on:" : "off:") + (enabled ? "enabled" : "disabled")
+            selected + ":" + (enabled ? "enabled" : "disabled")
           color = installation ? "white" : "black"
 
           check = "<img src='#{IMAGE_DIR}/#{IMAGES[image]}'></img>"
@@ -189,7 +189,7 @@ module Registration
           else
             "<span style='color:grey'>#{widget}</span>"
           end
-          "<p>#{indent}#{enabled_widget}</p>"
+          "<p>#{INDENT}#{enabled_widget}</p>"
         end
       end
 
