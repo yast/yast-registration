@@ -94,15 +94,21 @@ module Registration
       # @return [Array<Addon>] list of addons, where the first one is
       #   the one based on root and rest is its children
       def create_addon_with_deps(root)
-        root_addon = Addon.new(root)
-        result = [root_addon]
+        # to_process is array of pairs, where first is pure addon to process and second is
+        # its dependency. Currently SUSE::Connect structure have only one dependency.
+        to_process = [[root, nil]]
+        processed = Set.new
+        result = []
 
-        (root.extensions || []).each do |ext|
-          # FIXME: endless loop if circular dependency between addons happen
-          child = create_addon_with_deps(ext)
-          result.concat(child)
-          child.first.depends_on = root_addon
-          root_addon.children << child.first
+        to_process.each do |(ext, dependency)|
+          next if processed.include?(ext)
+          processed << ext
+          addon = Addon.new(ext)
+          result << addon
+          addon.depends_on = dependency
+          (ext.extensions || []).each do |ext|
+            to_process << [ext, addon]
+          end
         end
 
         result
@@ -132,7 +138,6 @@ module Registration
 
     extend Forwardable
 
-    attr_reader :children
     attr_accessor :depends_on, :regcode
 
     # delegate methods to underlaying suse connect object
@@ -155,13 +160,18 @@ module Registration
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
-      @children = []
     end
 
     # is the add-on selected
-    # @return [Boolean] true if the add-on is selectec
+    # @return [Boolean] true if the add-on is selected
     def selected?
       Addon.selected.include?(self)
+    end
+
+    # is the add-on auto_selected
+    # @return [Boolean] true if the add-on is auto_selected
+    def auto_selected?
+      Addon.auto_selected.include?(self)
     end
 
     # select the add-on
@@ -178,6 +188,18 @@ module Registration
 
       Addon.selected.delete(self)
       Addon.reset_auto_selected
+    end
+
+    # returns status of addon. Potential statuses are :registered, :selected, :auto_selected,
+    # :available and :none.
+    # @return [Symbol]
+    def status
+      return :registered if registered?
+      return :selected if selected?
+      return :auto_selected if auto_selected?
+      return :available if available?
+
+      return :none
     end
 
     # toggle the selection state of the add-on
@@ -223,8 +245,6 @@ module Registration
       return false if registered?
       # Do not select not available addons
       return false if !available?
-      # Do not allow to unselect parent if any children is selected
-      return false if children.any?(&:selected?)
 
       true
     end
