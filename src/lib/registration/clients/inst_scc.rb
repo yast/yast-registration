@@ -63,6 +63,8 @@ module Yast
 
       initialize_regcodes
 
+      # FIXME: Add a separate client, changing the behavior completely acording to
+      # the passed parameters is not nice
       media_workflow? ? ::Registration::UI::MediaAddonWorkflow.run(WFM.Args[1]) : start_workflow
     end
 
@@ -343,5 +345,5 @@ module Yast
 
       ::Registration::Helpers.reset_registration_status
     end
-  end unless defined?(InstSccClient)
+  end
 end
