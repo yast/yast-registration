@@ -32,20 +32,8 @@ module Registration
       #  reading the remote add-ons
       def find_all(registration)
         return @cached_addons if @cached_addons
-        pure_addons = registration.get_addon_list
-        # get IDs of the already activated addons
-        activated_addon_ids = registration.activated_products.map(&:id)
 
-        @cached_addons = pure_addons.reduce([]) do |res, addon|
-          yast_addons = create_addon_with_deps(addon)
-
-          # mark as registered if found in the status call
-          yast_addons.each do |yast_addon|
-            yast_addon.registered if activated_addon_ids.include?(yast_addon.id)
-          end
-
-          res.concat(yast_addons)
-        end
+        @cached_addons = load_addons(registration)
 
         dump_addons
 
@@ -116,6 +104,23 @@ module Registration
         end
 
         result
+      end
+
+      def load_addons(registration)
+        pure_addons = registration.get_addon_list
+        # get IDs of the already activated addons
+        activated_addon_ids = registration.activated_products.map(&:id)
+
+        @cached_addons = pure_addons.reduce([]) do |res, addon|
+          yast_addons = create_addon_with_deps(addon)
+
+          # mark as registered if found in the status call
+          yast_addons.each do |yast_addon|
+            yast_addon.registered if activated_addon_ids.include?(yast_addon.id)
+          end
+
+          res.concat(yast_addons)
+        end
       end
 
       def detect_auto_selection
