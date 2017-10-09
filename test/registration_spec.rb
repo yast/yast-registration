@@ -30,8 +30,8 @@ describe Registration::Registration do
   shared_examples "add_product" do |connect_method, yast_method|
     let(:available_addons) { load_yaml_fixture("available_addons.yml") }
 
-    it "adds the selected product and returns added zypp services" do
-      product = {
+    let(:product) do
+      {
         "arch"              => "x86_64",
         "name"              => "sle-sdk",
         "version"           => "12",
@@ -39,15 +39,20 @@ describe Registration::Registration do
         "identifier"        => "SLES_SAP",
         "former_identifier" => "SUSE_SLES_SAP"
       }
+    end
 
-      service_data = {
+    let(:service_data) do
+      {
         "name"    => "service",
         "url"     => "https://example.com",
         "product" => product
       }
+    end
 
-      service = SUSE::Connect::Remote::Service.new(service_data)
+    let(:service) { SUSE::Connect::Remote::Service.new(service_data) }
+    let(:destdir) { "/foo" }
 
+    before do
       expect(SUSE::Connect::YaST).to receive(connect_method).and_return(service)
 
       expect(Registration::SwMgmt).to receive(:add_service)
@@ -60,17 +65,28 @@ describe Registration::Registration do
       expect(Registration::SwMgmt).to receive(:update_product_renames)
         .with("SUSE_SLES_SAP" => "SLES_SAP")
 
-      allow(File).to receive(:exist?).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
-      ).and_return(true)
-      allow(File).to receive(:read).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
-      ).and_return(
-        "username=SCC_foo\npassword=bar"
-      )
+      allow(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return(true)
 
-      registered_service = Registration::Registration.new.send(yast_method, product)
+      allow(File).to receive(:read).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return("username=SCC_foo\npassword=bar")
+    end
+
+    it "adds the selected product and returns added zypp services" do
+      registered_service = subject.send(yast_method, product)
       expect(registered_service).to eq(service)
+    end
+
+    it "honors the target system prefix" do
+      expect(Yast::Installation).to receive(:destdir).and_return(destdir)
+
+      expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}\//)
+        .and_return(true)
+
+      expect(File).to receive(:read).with(/\A#{Regexp.escape(destdir)}\//)
+        .and_return("username=SCC_foo\npassword=bar")
+
+      subject.send(yast_method, product)
     end
   end
 
@@ -245,6 +261,16 @@ describe Registration::Registration do
         )
 
       expect(subject.downgrade_product(installed_sles))
+    end
+  end
+
+  describe ".is_registered?" do
+    let(:destdir) { "/foo" }
+
+    it "honors the target system prefix" do
+      expect(Yast::Installation).to receive(:destdir).and_return(destdir)
+      expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}/)
+      Registration::Registration.is_registered?
     end
   end
 end

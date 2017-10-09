@@ -12,6 +12,6 @@
 # ------------------------------------------------------------------------------
 #
 
-require "registration/clients/inst_scc"
+require "registration/clients/inst_migration_repos"
 
-Yast::InstSccClient.new.main
+Registration::Clients::InstMigrationRepos.new.main

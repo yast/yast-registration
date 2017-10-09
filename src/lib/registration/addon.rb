@@ -46,6 +46,10 @@ module Registration
 
           res.concat(yast_addons)
         end
+
+        dump_addons
+
+        @cached_addons
       end
 
       def reset!
@@ -282,6 +286,19 @@ module Registration
       [:arch, :identifier, :version, :release_type].all? do |attr|
         send(attr) == remote_product.send(attr)
       end
+    end
+
+    def self.dump_addons
+      # dump the downloaded data to a file for easier debugging,
+      # avoid write failures when running as an unprivileged user (rspec tests)
+      return unless File.writable?("/var/log/YaST2")
+
+      require "yaml"
+      header = "# see " \
+        "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
+        "# for an example how to read this dump file\n"
+      File.write("/var/log/YaST2/registration_addons.yml",
+        header + @cached_addons.to_yaml)
     end
   end
 end

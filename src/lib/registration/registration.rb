@@ -30,6 +30,8 @@ require "registration/sw_mgmt"
 require "registration/storage"
 require "registration/ssl_certificate"
 
+Yast.import "Installation"
+
 module Registration
   class Registration
     include Yast::Logger
@@ -185,7 +187,8 @@ module Registration
 
     def self.is_registered?
       # just a simple file check without connection to SCC
-      File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+      File.exist?(File.join(Yast::Installation.destdir,
+        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE))
     end
 
   private
@@ -234,7 +237,10 @@ module Registration
       end
 
       # read the global credentials
-      credentials = SUSE::Connect::YaST.credentials
+      credentials = SUSE::Connect::YaST.credentials(
+        File.join(Yast::Installation.destdir,
+          SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+      )
       ::Registration::SwMgmt.add_service(product_service, credentials)
     end
 
