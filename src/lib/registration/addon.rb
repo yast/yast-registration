@@ -93,6 +93,7 @@ module Registration
         result = []
 
         to_process.each do |(pure, dependency)|
+          # this avoid endless loop if there is circular dependency.
           next if processed.include?(pure)
           processed << pure
           addon = Addon.new(pure)
