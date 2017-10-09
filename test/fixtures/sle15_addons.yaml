@@ -1,0 +1,573 @@
+---
+- &10 !ruby/object:Registration::Addon
+  pure_addon: &1 !ruby/object:SUSE::Connect::Remote::Product
+    table:
+      :id: 1582
+      :name: SUSE Linux Enterprise High Availability Extension
+      :identifier: sle-ha
+      :former_identifier: sle-hae
+      :version: '15'
+      :release_type: 
+      :arch: x86_64
+      :friendly_name: SUSE Linux Enterprise High Availability Extension 15 x86_64
+        (ALPHA)
+      :product_class: SLE-HAE-X86-ALPHA
+      :cpe: cpe:/o:suse:sle-ha:15
+      :free: false
+      :description: SUSE Linux Enterprise High Availability Extension.
+      :release_stage: alpha
+      :eula_url: https://updates.suse.com/SUSE/Updates/SLE-HA/15/x86_64/update.license/
+      :repositories:
+      - id: 2554
+        url: https://updates.suse.com/SUSE/Updates/SLE-HA/15/x86_64/update/
+        name: SLE-HA15-Updates
+        distro_target: sle-15-x86_64
+        description: SLE-HA15-Updates for sle-15-x86_64
+        enabled: true
+        autorefresh: true
+        installer_updates: false
+      - id: 2555
+        url: https://updates.suse.com/SUSE/Updates/SLE-HA/15/x86_64/update_debug/
+        name: SLE-HA15-Debuginfo-Updates
+        distro_target: sle-15-x86_64
+        description: SLE-HA15-Debuginfo-Updates for sle-15-x86_64
+        enabled: false
+        autorefresh: true
+        installer_updates: false
+      - id: 2556
+        url: https://updates.suse.com/SUSE/Products/SLE-HA/15/x86_64/product/
+        name: SLE-HA15-Pool
+        distro_target: sle-15-x86_64
+        description: SLE-HA15-Pool for sle-15-x86_64
+        enabled: true
+        autorefresh: false
+        installer_updates: false
+      - id: 2557
+        url: https://updates.suse.com/SUSE/Products/SLE-HA/15/x86_64/product_debug/
+        name: SLE-HA15-Debuginfo-Pool
+        distro_target: sle-15-x86_64
+        description: SLE-HA15-Debuginfo-Pool for sle-15-x86_64
+        enabled: false
+        autorefresh: false
+        installer_updates: false
+      - id: 2558
+        url: https://updates.suse.com/SUSE/Products/SLE-HA/15/x86_64/product_source/
+        name: SLE-HA15-Source-Pool
+        distro_target: sle-15-x86_64
+        description: SLE-HA15-Source-Pool for sle-15-x86_64
+        enabled: false
+        autorefresh: false
+        installer_updates: false
+      :product_type: extension
+      :predecessor_ids: []
+      :shortname: SLEHA15
+      :extensions: []
+    modifiable: true
+  children: []
+  depends_on: &8 !ruby/object:Registration::Addon
+    pure_addon: !ruby/object:OpenStruct
+      table:
+        :id: 1576
+        :name: Basesystem Module
+        :identifier: sle-module-basesystem
+        :former_identifier: sle-module-basesystem
+        :version: '15'
+        :release_type: 
+        :arch: x86_64
+        :friendly_name: Basesystem Module 15 x86_64 (ALPHA)
+        :product_class: 7261-ALPHA
+        :cpe: cpe:/o:suse:sle-module-basesystem:15
+        :free: true
+        :description: "<p> The SUSE Linux Enterprise Basesystem Module delivers the
+          base system of the product. </p>"
+        :release_stage: alpha
+        :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Basesystem/15/x86_64/update.license/
+        :repositories:
+        - id: 2524
+          url: https://updates.suse.com/SUSE/Updates/SLE-Module-Basesystem/15/x86_64/update/
+          name: SLE-Module-Basesystem15-Updates
+          distro_target: sle-15-x86_64
+          description: SLE-Module-Basesystem15-Updates for sle-15-x86_64
+          enabled: true
+          autorefresh: true
+          installer_updates: false
+        - id: 2525
+          url: https://updates.suse.com/SUSE/Updates/SLE-Module-Basesystem/15/x86_64/update_debug/
+          name: SLE-Module-Basesystem15-Debuginfo-Updates
+          distro_target: sle-15-x86_64
+          description: SLE-Module-Basesystem15-Debuginfo-Updates for sle-15-x86_64
+          enabled: false
+          autorefresh: true
+          installer_updates: false
+        - id: 2526
+          url: https://updates.suse.com/SUSE/Products/SLE-Module-Basesystem/15/x86_64/product/
+          name: SLE-Module-Basesystem15-Pool
+          distro_target: sle-15-x86_64
+          description: SLE-Module-Basesystem15-Pool for sle-15-x86_64
+          enabled: true
+          autorefresh: false
+          installer_updates: false
+        - id: 2527
+          url: https://updates.suse.com/SUSE/Products/SLE-Module-Basesystem/15/x86_64/product_debug/
+          name: SLE-Module-Basesystem15-Debuginfo-Pool
+          distro_target: sle-15-x86_64
+          description: SLE-Module-Basesystem15-Debuginfo-Pool for sle-15-x86_64
+          enabled: false
+          autorefresh: false
+          installer_updates: false
+        - id: 2528
+          url: https://updates.suse.com/SUSE/Products/SLE-Module-Basesystem/15/x86_64/product_source/
+          name: SLE-Module-Basesystem15-Source-Pool
+          distro_target: sle-15-x86_64
+          description: SLE-Module-Basesystem15-Source-Pool for sle-15-x86_64
+          enabled: false
+          autorefresh: false
+          installer_updates: false
+        :product_type: module
+        :predecessor_ids: []
+        :shortname: Basesystem-Module
+        :extensions:
+        - &2 !ruby/object:SUSE::Connect::Remote::Product
+          table:
+            :id: 1577
+            :name: Scripting Languages Module
+            :identifier: sle-module-scripting
+            :former_identifier: sle-module-scripting
+            :version: '15'
+            :release_type: 
+            :arch: x86_64
+            :friendly_name: Scripting Languages Module 15 x86_64 (ALPHA)
+            :product_class: 7261-ALPHA
+            :cpe: cpe:/o:suse:sle-module-scripting:15
+            :free: true
+            :description: "<p> The SUSE Linux Enterprise Scripting Languages Module
+              delivers a comprehensive suite of scripting languages, frameworks, and
+              related tools helping developers and systems administrators accelerate
+              the creation of stable, modern web applications, using dynamic languages,
+              such as PHP, Ruby on Rails, and Python. It contains those packages of
+              the scripting language that are not included with other modules. </p>
+              <p> Access to the Scripting Languages Module is included in your SUSE
+              Linux Enterprise Server subscription. The module has a different lifecycle
+              than SUSE Linux Enterprise Server itself: Package versions in the this
+              module are usually supported for at most three years. We are planning
+              to release more recent versions on a schedule of approximately 18 month;
+              the exact dates may differ per package. </p>"
+            :release_stage: alpha
+            :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Scripting/15/x86_64/update.license/
+            :repositories:
+            - id: 2529
+              url: https://updates.suse.com/SUSE/Updates/SLE-Module-Scripting/15/x86_64/update/
+              name: SLE-Module-Scripting15-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Scripting15-Updates for sle-15-x86_64
+              enabled: true
+              autorefresh: true
+              installer_updates: false
+            - id: 2530
+              url: https://updates.suse.com/SUSE/Updates/SLE-Module-Scripting/15/x86_64/update_debug/
+              name: SLE-Module-Scripting15-Debuginfo-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Scripting15-Debuginfo-Updates for sle-15-x86_64
+              enabled: false
+              autorefresh: true
+              installer_updates: false
+            - id: 2531
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Scripting/15/x86_64/product/
+              name: SLE-Module-Scripting15-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Scripting15-Pool for sle-15-x86_64
+              enabled: true
+              autorefresh: false
+              installer_updates: false
+            - id: 2532
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Scripting/15/x86_64/product_debug/
+              name: SLE-Module-Scripting15-Debuginfo-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Scripting15-Debuginfo-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            - id: 2533
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Scripting/15/x86_64/product_source/
+              name: SLE-Module-Scripting15-Source-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Scripting15-Source-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            :product_type: module
+            :predecessor_ids: []
+            :shortname: Scripting-Module
+            :extensions:
+            - &3 !ruby/object:SUSE::Connect::Remote::Product
+              table:
+                :id: 1578
+                :name: Desktop Applications Module
+                :identifier: sle-module-desktop-applications
+                :former_identifier: sle-module-desktop-applications
+                :version: '15'
+                :release_type: 
+                :arch: x86_64
+                :friendly_name: Desktop Applications Module 15 x86_64 (ALPHA)
+                :product_class: 7261-ALPHA
+                :cpe: cpe:/o:suse:sle-module-desktop-applications:15
+                :free: true
+                :description: "<p> The SUSE Linux Enterprise Desktop Applications
+                  Module delivers a basic set of Desktop functionality. </p> <p> Access
+                  to the Desktop Applications Module is included in your SUSE Linux
+                  Enterprise product subscription. </p>"
+                :release_stage: alpha
+                :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Desktop-Applications/15/x86_64/update.license/
+                :repositories:
+                - id: 2534
+                  url: https://updates.suse.com/SUSE/Updates/SLE-Module-Desktop-Applications/15/x86_64/update/
+                  name: SLE-Module-Desktop-Applications15-Updates
+                  distro_target: sle-15-x86_64
+                  description: SLE-Module-Desktop-Applications15-Updates for sle-15-x86_64
+                  enabled: true
+                  autorefresh: true
+                  installer_updates: false
+                - id: 2535
+                  url: https://updates.suse.com/SUSE/Updates/SLE-Module-Desktop-Applications/15/x86_64/update_debug/
+                  name: SLE-Module-Desktop-Applications15-Debuginfo-Updates
+                  distro_target: sle-15-x86_64
+                  description: SLE-Module-Desktop-Applications15-Debuginfo-Updates
+                    for sle-15-x86_64
+                  enabled: false
+                  autorefresh: true
+                  installer_updates: false
+                - id: 2536
+                  url: https://updates.suse.com/SUSE/Products/SLE-Module-Desktop-Applications/15/x86_64/product/
+                  name: SLE-Module-Desktop-Applications15-Pool
+                  distro_target: sle-15-x86_64
+                  description: SLE-Module-Desktop-Applications15-Pool for sle-15-x86_64
+                  enabled: true
+                  autorefresh: false
+                  installer_updates: false
+                - id: 2537
+                  url: https://updates.suse.com/SUSE/Products/SLE-Module-Desktop-Applications/15/x86_64/product_debug/
+                  name: SLE-Module-Desktop-Applications15-Debuginfo-Pool
+                  distro_target: sle-15-x86_64
+                  description: SLE-Module-Desktop-Applications15-Debuginfo-Pool for
+                    sle-15-x86_64
+                  enabled: false
+                  autorefresh: false
+                  installer_updates: false
+                - id: 2538
+                  url: https://updates.suse.com/SUSE/Products/SLE-Module-Desktop-Applications/15/x86_64/product_source/
+                  name: SLE-Module-Desktop-Applications15-Source-Pool
+                  distro_target: sle-15-x86_64
+                  description: SLE-Module-Desktop-Applications15-Source-Pool for sle-15-x86_64
+                  enabled: false
+                  autorefresh: false
+                  installer_updates: false
+                :product_type: module
+                :predecessor_ids: []
+                :shortname: Desktop-Applications-Module
+                :extensions:
+                - &4 !ruby/object:SUSE::Connect::Remote::Product
+                  table:
+                    :id: 1579
+                    :name: Development Tools Module
+                    :identifier: sle-module-development-tools
+                    :former_identifier: sle-module-development-tools
+                    :version: '15'
+                    :release_type: 
+                    :arch: x86_64
+                    :friendly_name: Development Tools Module 15 x86_64 (ALPHA)
+                    :product_class: 7261-ALPHA
+                    :cpe: cpe:/o:suse:sle-module-development-tools:15
+                    :free: true
+                    :description: "<p> The Development Tools Module helps you developing
+                      applications for SUSE Linux Enterprise 15. </p> <p> Access to
+                      the Development Tools Module is included in your SUSE Linux
+                      Enterprise product subscription. The module has a different
+                      lifecycle than SUSE Linux Enterprise itself. </p>"
+                    :release_stage: alpha
+                    :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Development-Tools/15/x86_64/update.license/
+                    :repositories:
+                    - id: 2539
+                      url: https://updates.suse.com/SUSE/Updates/SLE-Module-Development-Tools/15/x86_64/update/
+                      name: SLE-Module-DevTools15-Updates
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-DevTools15-Updates for sle-15-x86_64
+                      enabled: true
+                      autorefresh: true
+                      installer_updates: false
+                    - id: 2540
+                      url: https://updates.suse.com/SUSE/Updates/SLE-Module-Development-Tools/15/x86_64/update_debug/
+                      name: SLE-Module-DevTools15-Debuginfo-Updates
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-DevTools15-Debuginfo-Updates for sle-15-x86_64
+                      enabled: false
+                      autorefresh: true
+                      installer_updates: false
+                    - id: 2541
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Development-Tools/15/x86_64/product/
+                      name: SLE-Module-DevTools15-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-DevTools15-Pool for sle-15-x86_64
+                      enabled: true
+                      autorefresh: false
+                      installer_updates: false
+                    - id: 2542
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Development-Tools/15/x86_64/product_debug/
+                      name: SLE-Module-DevTools15-Debuginfo-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-DevTools15-Debuginfo-Pool for sle-15-x86_64
+                      enabled: false
+                      autorefresh: false
+                      installer_updates: false
+                    - id: 2543
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Development-Tools/15/x86_64/product_source/
+                      name: SLE-Module-DevTools15-Source-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-DevTools15-Source-Pool for sle-15-x86_64
+                      enabled: false
+                      autorefresh: false
+                      installer_updates: false
+                    :product_type: module
+                    :predecessor_ids: []
+                    :shortname: Development-Tools-Module
+                    :extensions: []
+                  modifiable: true
+                - &6 !ruby/object:SUSE::Connect::Remote::Product
+                  table:
+                    :id: 1580
+                    :name: Server Applications Module
+                    :identifier: sle-module-server-applications
+                    :former_identifier: sle-module-server-applications
+                    :version: '15'
+                    :release_type: 
+                    :arch: x86_64
+                    :friendly_name: Server Applications Module 15 x86_64 (ALPHA)
+                    :product_class: 7261-ALPHA
+                    :cpe: cpe:/o:suse:sle-module-server-applications:15
+                    :free: true
+                    :description: "<p> The SUSE Linux Enterprise Server Applications
+                      Module delivers a basic set of Server functionality. </p> <p>
+                      Access to the Server Applications Module is included in your
+                      SUSE Linux Enterprise Server subscription. </p>"
+                    :release_stage: alpha
+                    :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Server-Applications/15/x86_64/update.license/
+                    :repositories:
+                    - id: 2544
+                      url: https://updates.suse.com/SUSE/Updates/SLE-Module-Server-Applications/15/x86_64/update/
+                      name: SLE-Module-Server-Applications15-Updates
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-Server-Applications15-Updates for sle-15-x86_64
+                      enabled: true
+                      autorefresh: true
+                      installer_updates: false
+                    - id: 2545
+                      url: https://updates.suse.com/SUSE/Updates/SLE-Module-Server-Applications/15/x86_64/update_debug/
+                      name: SLE-Module-Server-Applications15-Debuginfo-Updates
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-Server-Applications15-Debuginfo-Updates
+                        for sle-15-x86_64
+                      enabled: false
+                      autorefresh: true
+                      installer_updates: false
+                    - id: 2546
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Server-Applications/15/x86_64/product/
+                      name: SLE-Module-Server-Applications15-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-Server-Applications15-Pool for sle-15-x86_64
+                      enabled: true
+                      autorefresh: false
+                      installer_updates: false
+                    - id: 2547
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Server-Applications/15/x86_64/product_debug/
+                      name: SLE-Module-Server-Applications15-Debuginfo-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-Server-Applications15-Debuginfo-Pool
+                        for sle-15-x86_64
+                      enabled: false
+                      autorefresh: false
+                      installer_updates: false
+                    - id: 2548
+                      url: https://updates.suse.com/SUSE/Products/SLE-Module-Server-Applications/15/x86_64/product_source/
+                      name: SLE-Module-Server-Applications15-Source-Pool
+                      distro_target: sle-15-x86_64
+                      description: SLE-Module-Server-Applications15-Source-Pool for
+                        sle-15-x86_64
+                      enabled: false
+                      autorefresh: false
+                      installer_updates: false
+                    :product_type: module
+                    :predecessor_ids: []
+                    :shortname: Server-Applications-Module
+                    :extensions: []
+                  modifiable: true
+              modifiable: true
+          modifiable: true
+        - &9 !ruby/object:SUSE::Connect::Remote::Product
+          table:
+            :id: 1581
+            :name: Legacy Module
+            :identifier: sle-module-legacy
+            :former_identifier: sle-module-legacy
+            :version: '15'
+            :release_type: 
+            :arch: x86_64
+            :friendly_name: Legacy Module 15 x86_64 (ALPHA)
+            :product_class: 7261-ALPHA
+            :cpe: cpe:/o:suse:sle-module-legacy:15
+            :free: true
+            :description: "<p> The Legacy Module helps you migrating applications
+              from SUSE Linux Enterprise 12 and other systems to SUSE Linux Enterprise
+              15, by providing packages which are discontinued on SUSE Linux Enterprise
+              Server, such as: ntp, IBM Java7, and a number of libraries. </p> <p>
+              Access to the Legacy Module is included in your SUSE Linux Enterprise
+              Server subscription. The module has a different lifecycle than SUSE
+              Linux Enterprise Server itself. Packages in the this module are usually
+              supported for at most three years. </p>"
+            :release_stage: alpha
+            :eula_url: https://updates.suse.com/SUSE/Updates/SLE-Module-Legacy/15/x86_64/update.license/
+            :repositories:
+            - id: 2549
+              url: https://updates.suse.com/SUSE/Updates/SLE-Module-Legacy/15/x86_64/update/
+              name: SLE-Module-Legacy15-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Legacy15-Updates for sle-15-x86_64
+              enabled: true
+              autorefresh: true
+              installer_updates: false
+            - id: 2550
+              url: https://updates.suse.com/SUSE/Updates/SLE-Module-Legacy/15/x86_64/update_debug/
+              name: SLE-Module-Legacy15-Debuginfo-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Legacy15-Debuginfo-Updates for sle-15-x86_64
+              enabled: false
+              autorefresh: true
+              installer_updates: false
+            - id: 2551
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/15/x86_64/product/
+              name: SLE-Module-Legacy15-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Legacy15-Pool for sle-15-x86_64
+              enabled: true
+              autorefresh: false
+              installer_updates: false
+            - id: 2552
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/15/x86_64/product_debug/
+              name: SLE-Module-Legacy15-Debuginfo-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Legacy15-Debuginfo-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            - id: 2553
+              url: https://updates.suse.com/SUSE/Products/SLE-Module-Legacy/15/x86_64/product_source/
+              name: SLE-Module-Legacy15-Source-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-Module-Legacy15-Source-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            :product_type: module
+            :predecessor_ids: []
+            :shortname: Legacy-Module
+            :extensions: []
+          modifiable: true
+        - *1
+        - &11 !ruby/object:SUSE::Connect::Remote::Product
+          table:
+            :id: 1583
+            :name: SUSE Linux Enterprise Workstation Extension
+            :identifier: sle-we
+            :former_identifier: sle-we
+            :version: '15'
+            :release_type: 
+            :arch: x86_64
+            :friendly_name: SUSE Linux Enterprise Workstation Extension 15 x86_64
+              (ALPHA)
+            :product_class: SLE-WE-ALPHA
+            :cpe: cpe:/o:suse:sle-we:15
+            :free: false
+            :description: SUSE Linux Enterprise Workstation Extension extends the
+              functionality of SUSE Linux Enterprise Server with packages of SUSE
+              Linux Enterprise Desktop, like additional desktop applications (office
+              suite, email client, graphical editor ...) and libraries. It allows
+              to combine both products to create a full featured Workstation.
+            :release_stage: alpha
+            :eula_url: https://updates.suse.com/SUSE/Updates/SLE-WE/15/x86_64/update.license/
+            :repositories:
+            - id: 2559
+              url: https://updates.suse.com/SUSE/Updates/SLE-WE/15/x86_64/update/
+              name: SLE-WE15-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-WE15-Updates for sle-15-x86_64
+              enabled: true
+              autorefresh: true
+              installer_updates: false
+            - id: 2560
+              url: https://updates.suse.com/SUSE/Updates/SLE-WE/15/x86_64/update_debug/
+              name: SLE-WE15-Debuginfo-Updates
+              distro_target: sle-15-x86_64
+              description: SLE-WE15-Debuginfo-Updates for sle-15-x86_64
+              enabled: false
+              autorefresh: true
+              installer_updates: false
+            - id: 2561
+              url: https://updates.suse.com/SUSE/Products/SLE-WE/15/x86_64/product/
+              name: SLE-WE15-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-WE15-Pool for sle-15-x86_64
+              enabled: true
+              autorefresh: false
+              installer_updates: false
+            - id: 2562
+              url: https://updates.suse.com/SUSE/Products/SLE-WE/15/x86_64/product_debug/
+              name: SLE-WE15-Debuginfo-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-WE15-Debuginfo-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            - id: 2563
+              url: https://updates.suse.com/SUSE/Products/SLE-WE/15/x86_64/product_source/
+              name: SLE-WE15-Source-Pool
+              distro_target: sle-15-x86_64
+              description: SLE-WE15-Source-Pool for sle-15-x86_64
+              enabled: false
+              autorefresh: false
+              installer_updates: false
+            :product_type: extension
+            :predecessor_ids: []
+            :shortname: SLEWE15
+            :extensions: []
+          modifiable: true
+    children:
+    - &7 !ruby/object:Registration::Addon
+      pure_addon: *2
+      children:
+      - &5 !ruby/object:Registration::Addon
+        pure_addon: *3
+        children:
+        - &13 !ruby/object:Registration::Addon
+          pure_addon: *4
+          children: []
+          depends_on: *5
+        - &15 !ruby/object:Registration::Addon
+          pure_addon: *6
+          children: []
+          depends_on: *5
+        depends_on: *7
+      depends_on: *8
+    - &14 !ruby/object:Registration::Addon
+      pure_addon: *9
+      children: []
+      depends_on: *8
+    - *10
+    - &12 !ruby/object:Registration::Addon
+      pure_addon: *11
+      children: []
+      depends_on: *8
+- *12
+- *8
+- *5
+- *13
+- *14
+- *7
+- *15
