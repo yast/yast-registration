@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 #
 
+require "yast"
 require "forwardable"
 require "set"
 require "registration/sw_mgmt"
@@ -147,6 +148,7 @@ module Registration
     end
 
     extend Forwardable
+    include Yast::Logger
 
     attr_accessor :depends_on, :regcode
 
@@ -201,7 +203,7 @@ module Registration
     end
 
     # returns status of addon. Potential statuses are :registered, :selected, :auto_selected,
-    # :available and :none.
+    # :available and :unknown.
     # @return [Symbol]
     def status
       return :registered if registered?
@@ -209,7 +211,8 @@ module Registration
       return :auto_selected if auto_selected?
       return :available if available?
 
-      :none
+      log.warn "unknown state for #{inspect}"
+      :unknown
     end
 
     # toggle the selection state of the add-on
