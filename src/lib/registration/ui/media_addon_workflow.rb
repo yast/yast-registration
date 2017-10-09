@@ -163,7 +163,7 @@ module Registration
       # @return [Symbol] workflow symbol
       def register_addons
         known_reg_codes = Storage::RegCodes.instance.reg_codes
-        registration_ui.register_addons(Addon.selected, known_reg_codes)
+        registration_ui.register_addons(Addon.selected + Addon.auto_selected, known_reg_codes)
       end
     end
   end

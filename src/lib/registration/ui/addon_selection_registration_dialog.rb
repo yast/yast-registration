@@ -49,11 +49,6 @@ module Registration
       def heading
         _("Available Extensions and Modules")
       end
-
-      # @return [Boolean] is the addon selected?
-      def addon_selected?(addon)
-        addon.selected? || addon.registered?
-      end
     end
   end
 end

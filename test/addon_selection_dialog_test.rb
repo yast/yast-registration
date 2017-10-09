@@ -70,6 +70,36 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       expect(wrapped_addon.selected?).to eq true
     end
 
+    it "works in textmode" do
+      allow(Yast::UI).to receive(:TextMode).and_return(true)
+      addons = load_yaml_fixture("sle15_addons.yaml")
+      allow(Registration::Addon).to receive(:find_all).and_return(addons)
+
+      addons.find { |a| a.identifier == "sle-we" }.selected
+
+      registration = double(activated_products: [], get_addon_list: [addons])
+
+      expect(Yast::UI).to receive(:UserInput).and_return(:next)
+      expect(subject.run(registration)).to eq :next
+    end
+
+    it "recomputes auto_selection after each widget change" do
+      addons = load_yaml_fixture("sle15_addons.yaml")
+      allow(Registration::Addon).to receive(:find_all).and_return(addons)
+
+      addon = addons.find { |a| a.identifier == "sle-we" }
+
+      widget = "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+
+      expect(Yast::UI).to receive(:UserInput).and_return(widget, :next)
+      expect(subject.run(registration)).to eq :next
+
+      expect(addon.selected?).to eq true
+
+      child = addons.find { |a| a.identifier == "sle-module-basesystem" }
+      expect(child.auto_selected?).to eq true
+    end
+
     context "when beta versions are not filtered" do
       let(:addon) do
         Registration::Addon.new(

@@ -19,7 +19,9 @@
 # ------------------------------------------------------------------------------
 #
 
+require "yast"
 require "forwardable"
+require "set"
 require "registration/sw_mgmt"
 
 module Registration
@@ -31,20 +33,8 @@ module Registration
       #  reading the remote add-ons
       def find_all(registration)
         return @cached_addons if @cached_addons
-        pure_addons = registration.get_addon_list
-        # get IDs of the already activated addons
-        activated_addon_ids = registration.activated_products.map(&:id)
 
-        @cached_addons = pure_addons.reduce([]) do |res, addon|
-          yast_addons = create_addon_with_deps(addon)
-
-          # mark as registered if found in the status call
-          yast_addons.each do |yast_addon|
-            yast_addon.registered if activated_addon_ids.include?(yast_addon.id)
-          end
-
-          res.concat(yast_addons)
-        end
+        @cached_addons = load_addons(registration)
 
         dump_addons
 
@@ -68,6 +58,16 @@ module Registration
         @selected ||= []
       end
 
+      # invalidates automatically selected addons. Resulting in recalculating it.
+      def reset_auto_selected
+        @auto_selected = nil
+      end
+
+      # list of auto selected add-ons
+      def auto_selected
+        @auto_selected ||= detect_auto_selection
+      end
+
       # return add-ons which are registered but not installed in the system
       # @return [Array<Addon>] the list of add-ons
       def registered_not_installed
@@ -84,25 +84,72 @@ module Registration
 
       # create an Addon from a SUSE::Connect::Product
       # @param root [SUSE::Connect::Product] the root add-on object
-      # @return [Addon] created Addon object
+      # @return [Array<Addon>] list of addons, where the first one is
+      #   the one based on root and rest is its children
       def create_addon_with_deps(root)
-        root_addon = Addon.new(root)
-        result = [root_addon]
+        # to_process is array of pairs, where first is pure addon to process and second is
+        # its dependency. Currently SUSE::Connect structure have only one dependency.
+        to_process = [[root, nil]]
+        processed = Set.new
+        result = []
 
-        (root.extensions || []).each do |ext|
-          child = create_addon_with_deps(ext)
-          result.concat(child)
-          child.first.depends_on = root_addon
-          root_addon.children << child.first
+        to_process.each do |(pure, dependency)|
+          # this avoid endless loop if there is circular dependency.
+          next if processed.include?(pure)
+          processed << pure
+          addon = Addon.new(pure)
+          result << addon
+          addon.depends_on = dependency
+          (pure.extensions || []).each do |ext|
+            to_process << [ext, addon]
+          end
         end
 
         result
       end
+
+      def load_addons(registration)
+        pure_addons = registration.get_addon_list
+        # get IDs of the already activated addons
+        activated_addon_ids = registration.activated_products.map(&:id)
+
+        @cached_addons = pure_addons.reduce([]) do |res, addon|
+          yast_addons = create_addon_with_deps(addon)
+
+          # mark as registered if found in the status call
+          yast_addons.each do |yast_addon|
+            yast_addon.registered if activated_addon_ids.include?(yast_addon.id)
+          end
+
+          res.concat(yast_addons)
+        end
+      end
+
+      def detect_auto_selection
+        required = selected + registered
+
+        # here we use sets as for bigger dependencies this can be quite slow
+        # how it works? it fills set with selected and registered items and it will
+        # adds recursive all its children and then subtract that manually selected
+        # or registered.
+        already_processed = Set.new(required)
+        to_process = required.dup
+
+        to_process.each do |addon|
+          already_processed << addon
+          # prepared when depends_on support multiple addons
+          dependencies = addon.depends_on ? [addon.depends_on] : []
+          new_addons = dependencies.reject { |c| already_processed.include?(c) }
+          to_process.concat(new_addons)
+        end
+
+        to_process - required
+      end
     end
 
     extend Forwardable
+    include Yast::Logger
 
-    attr_reader :children
     attr_accessor :depends_on, :regcode
 
     # delegate methods to underlaying suse connect object
@@ -125,23 +172,47 @@ module Registration
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
-      @children = []
     end
 
     # is the add-on selected
-    # @return [Boolean] true if the add-on is selectec
+    # @return [Boolean] true if the add-on is selected
     def selected?
       Addon.selected.include?(self)
     end
 
+    # is the add-on auto_selected
+    # @return [Boolean] true if the add-on is auto_selected
+    def auto_selected?
+      Addon.auto_selected.include?(self)
+    end
+
     # select the add-on
     def selected
-      Addon.selected << self unless selected?
+      return if selected?
+
+      Addon.selected << self
+      Addon.reset_auto_selected
     end
 
     # unselect the add-on
     def unselected
-      Addon.selected.delete(self) if selected?
+      return unless selected?
+
+      Addon.selected.delete(self)
+      Addon.reset_auto_selected
+    end
+
+    # returns status of addon. Potential statuses are :registered, :selected, :auto_selected,
+    # :available and :unknown.
+    # @return [Symbol]
+    def status
+      return :registered if registered?
+      return :selected if selected?
+      return :auto_selected if auto_selected?
+      return :available if available?
+
+      log.warn "unknown state for #{inspect}"
+      :unknown
     end
 
     # toggle the selection state of the add-on
@@ -151,6 +222,7 @@ module Registration
       else
         selected
       end
+      Addon.reset_auto_selected
     end
 
     # has been the add-on registered?
@@ -186,10 +258,6 @@ module Registration
       return false if registered?
       # Do not select not available addons
       return false if !available?
-      # Do not allow to select child without selected or already registered parent
-      return false if depends_on && !(depends_on.selected? || depends_on.registered?)
-      # Do not allow to unselect parent if any children is selected
-      return false if children.any?(&:selected?)
 
       true
     end

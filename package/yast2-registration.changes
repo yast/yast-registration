@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct  9 12:33:17 UTC 2017 - jreidinger@suse.com
+
+- Fix showing modules and extensions when there is more then
+  simple one level dependencies. (bsc#1054965)
+- 4.0.2
+
+-------------------------------------------------------------------
 Tue Oct  3 14:17:52 UTC 2017 - lslezak@suse.cz
 
 - Initial support for the SLE12 -> SLE15 upgrade, honor the target

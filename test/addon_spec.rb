@@ -42,7 +42,6 @@ describe Registration::Addon do
       )
 
       addons = Registration::Addon.find_all(registration)
-      expect(addons.any? { |addon| addon.children.size == 1 }).to eq(true)
       expect(addons.any?(&:depends_on)).to eq(true)
     end
 
@@ -71,8 +70,8 @@ describe Registration::Addon do
 
       addons = Registration::Addon.find_all(registration)
 
-      ha = addons.find { |addon| addon.identifier == "sle-ha" }
-      ha_geo = ha.children.first
+      ha_geo = addons.find { |addon| addon.identifier == "sle-ha-geo" }
+      ha = ha_geo.depends_on
 
       expect(ha.registered?).to eq(true)
       expect(ha_geo.registered?).to eq(true)
@@ -230,7 +229,7 @@ describe Registration::Addon do
     end
 
     let(:parent) { addons.first }
-    let(:child) { parent.children.first }
+    let(:child) { addons[1] }
 
     it "returns false when the addon has been already registered" do
       addon.registered
@@ -241,10 +240,6 @@ describe Registration::Addon do
       expect(addon.selectable?).to eq(true)
     end
 
-    it "returns false when the parent is not selected or registered" do
-      expect(child.selectable?).to eq(false)
-    end
-
     it "returns true when the parent is selected" do
       parent.selected
       expect(child.selectable?).to eq(true)
@@ -253,11 +248,6 @@ describe Registration::Addon do
     it "returns true when the parent is registered" do
       parent.registered
       expect(child.selectable?).to eq(true)
-    end
-
-    it "returns false when any child is selected" do
-      child.selected
-      expect(parent.selectable?).to eq(false)
     end
 
     it "returns false when the addon is not available" do
