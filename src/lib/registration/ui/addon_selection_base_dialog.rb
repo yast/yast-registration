@@ -151,13 +151,13 @@ module Registration
         enabled = [:selected, :auto_selected, :available].include?(status)
         if Yast::UI.TextMode
           check = case status
-                  when :selected, :registered
-                    "[x]"
-                  when :auto_selected
-                    "[a]"
-                  else
-                    "[ ]"
-                  end
+          when :selected, :registered
+            "[x]"
+          when :auto_selected
+            "[a]"
+          else
+            "[ ]"
+          end
           widget = "#{check} #{label}"
           enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
           "#{INDENT}#{enabled_widget}<br>"
@@ -166,13 +166,13 @@ module Registration
           installation = ENV["Y2STYLE"] == "installation.qss"
 
           selected = case status
-                     when :selected, :registered
-                       "on"
-                     when :auto_selected
-                       "auto"
-                     else
-                       "off"
-                     end
+          when :selected, :registered
+            "on"
+          when :auto_selected
+            "auto"
+          else
+            "off"
+          end
 
           image = (installation ? "inst:" : "normal:") +
             selected + ":" + (enabled ? "enabled" : "disabled")
