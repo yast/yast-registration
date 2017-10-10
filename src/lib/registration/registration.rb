@@ -31,6 +31,7 @@ require "registration/storage"
 require "registration/ssl_certificate"
 
 Yast.import "Installation"
+Yast.import "ProductFeatures"
 
 module Registration
   class Registration
@@ -175,7 +176,14 @@ module Registration
     # @see SwMgmt.remote_product
     # @see SUSE::Connect::Yast.list_installer_updates
     def get_updates_list(product = nil)
-      product ||= SwMgmt.base_product_to_register
+      if product.nil?
+        product = SwMgmt.base_product_to_register
+        id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
+        if !id.empty?
+          log.info "Using self update id from control file #{id.inspect}"
+          product["name"] = id
+        end
+      end
 
       log.info "Reading available updates for product: #{product["name"]}"
       remote_product = SwMgmt.remote_product(product)
