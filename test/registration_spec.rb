@@ -77,13 +77,29 @@ describe Registration::Registration do
       expect(registered_service).to eq(service)
     end
 
-    it "honors the target system prefix" do
+    it "honors the target system prefix at upgrade" do
+      expect(Yast::Mode).to receive(:update).and_return(true)
+      expect(Yast::Stage).to receive(:initial).and_return(true)
       expect(Yast::Installation).to receive(:destdir).and_return(destdir)
 
       expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}\//)
         .and_return(true)
 
       expect(File).to receive(:read).with(/\A#{Regexp.escape(destdir)}\//)
+        .and_return("username=SCC_foo\npassword=bar")
+
+      subject.send(yast_method, product)
+    end
+
+    it "does not add the target system prefix if not at upgrade" do
+      allow(Yast::Mode).to receive(:update).and_return(false)
+      allow(Yast::Stage).to receive(:initial).and_return(false)
+      expect(Yast::Installation).to_not receive(:destdir)
+
+      expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return(true)
+
+      expect(File).to receive(:read).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
         .and_return("username=SCC_foo\npassword=bar")
 
       subject.send(yast_method, product)
@@ -267,10 +283,21 @@ describe Registration::Registration do
   describe ".is_registered?" do
     let(:destdir) { "/foo" }
 
-    it "honors the target system prefix" do
+    it "honors the target system prefix at upgrade" do
+      expect(Yast::Mode).to receive(:update).and_return(true)
+      expect(Yast::Stage).to receive(:initial).and_return(true)
       expect(Yast::Installation).to receive(:destdir).and_return(destdir)
       expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}/)
       Registration::Registration.is_registered?
     end
+
+    it "does not add the prefix if not at upgrade" do
+      allow(Yast::Mode).to receive(:update).and_return(false)
+      allow(Yast::Stage).to receive(:initial).and_return(false)
+      expect(Yast::Installation).to_not receive(:destdir)
+      expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+      Registration::Registration.is_registered?
+    end
+
   end
 end
