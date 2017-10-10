@@ -31,6 +31,8 @@ require "registration/storage"
 require "registration/ssl_certificate"
 
 Yast.import "Installation"
+Yast.import "Mode"
+Yast.import "Stage"
 
 module Registration
   class Registration
@@ -185,10 +187,18 @@ module Registration
       updates
     end
 
+    # Full path to the SCC credentials file.
+    def self.credentials_path
+      # Use /mnt only at upgrade, during installation /mnt is not yet mounted
+      # at the registration step, the credentials are later copied to
+      # the target system
+      prefix = (Yast::Stage.initial && Yast::Mode.update) ? Yast::Installation.destdir : "/"
+      File.join(prefix, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+    end
+
     def self.is_registered?
       # just a simple file check without connection to SCC
-      File.exist?(File.join(Yast::Installation.destdir,
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE))
+      File.exist?(credentials_path)
     end
 
   private
@@ -238,8 +248,7 @@ module Registration
 
       # read the global credentials
       credentials = SUSE::Connect::YaST.credentials(
-        File.join(Yast::Installation.destdir,
-          SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        File.join(self.class.credentials_path)
       )
       ::Registration::SwMgmt.add_service(product_service, credentials)
     end
