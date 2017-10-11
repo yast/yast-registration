@@ -255,6 +255,7 @@ module Registration
     # mark the add-on as registered
     def registered
       Addon.registered << self unless registered?
+      unselected # if register then mark as no longer selected as register is different state
     end
 
     # just internally mark the addon as NOT registered, not a real unregistration
