@@ -1,8 +1,7 @@
 -------------------------------------------------------------------
 Wed Oct 11 08:49:16 UTC 2017 - jreidinger@suse.com
 
-- Fix registration when there is auto selected extensions
-  (bsc#1062684)
+- Fixed registration of autoselected extensions (bsc#1062684)
 - 4.0.4
 
 -------------------------------------------------------------------

@@ -79,7 +79,7 @@ describe Registration::Addon do
   end
 
   describe ".registration_order" do
-    it "returns in addons in order that allow registration" do
+    it "returns addons sorted in the registration order" do
       addons = load_yaml_fixture("sle15_addons.yaml")
       sorted_addons = Registration::Addon.registration_order(addons)
       expected_output = ["sle-module-basesystem", "sle-ha", "sle-we", "sle-module-legacy",
