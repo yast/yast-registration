@@ -179,6 +179,10 @@ module Registration
       id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
       if !id.empty?
         log.info "Using self update id from control file #{id.inspect}"
+        # It replaces only name of product. It keeps version and arch of base product.
+        # For arch we are sure it is safe. For version it can be issue if media contain products
+        # in different versions, but we do not expect it as it share same installer and should be
+        # based on same base system and service pack.
         product["name"] = id
       end
 
