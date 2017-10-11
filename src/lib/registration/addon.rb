@@ -80,6 +80,27 @@ module Registration
         end
       end
 
+      # Returns passed addons sorted with all dependencies ordered that it can be
+      # registered from first to last ( so no dependencies for first ).
+      # @param list [Array<Addon>] of addons
+      def registration_order(list)
+        to_process = list.dup
+        result = []
+
+        loop do
+          break if to_process.empty?
+          next_addon = to_process.find do |addon|
+            addon.depends_on.nil? || !to_process.include?(addon.depends_on)
+          end
+          raise "circular dependencies found in addons #{to_process.inspect}" unless next_addon
+
+          result << next_addon
+          to_process.delete(next_addon)
+        end
+
+        result
+      end
+
     private
 
       # create an Addon from a SUSE::Connect::Product
@@ -234,6 +255,7 @@ module Registration
     # mark the add-on as registered
     def registered
       Addon.registered << self unless registered?
+      unselected # if register then mark as no longer selected as register is different state
     end
 
     # just internally mark the addon as NOT registered, not a real unregistration

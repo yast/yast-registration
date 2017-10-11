@@ -169,7 +169,9 @@ module Yast
     # back returns directly to the extensions selection
     def register_addons
       return false if init_registration == :cancel
-      ret = registration_ui.register_addons(@selected_addons, @known_reg_codes)
+      addons = Registration::Addon.selected + Registration::Addon.auto_selected
+      addons = Registration::Addon.registration_order(addons)
+      ret = registration_ui.register_addons(addons, @known_reg_codes)
       ret = :extensions if ret == :back
       ret
     end
@@ -212,7 +214,8 @@ module Yast
 
     # display EULAs for the selected addons
     def addon_eula
-      ::Registration::UI::AddonEulaDialog.run(@selected_addons)
+      new_addons = Registration::Addon.selected + Registration::Addon.auto_selected
+      ::Registration::UI::AddonEulaDialog.run(new_addons)
     end
 
     # remember the user entered values so they can be stored to the AutoYast
