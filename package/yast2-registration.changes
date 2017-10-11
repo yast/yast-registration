@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Oct 11 11:51:31 UTC 2017 - jreidinger@suse.com
+
+- use self update id if defined instead of product name to make
+  self update predictable on multi-product media (bsc#1055556)
+- 4.0.5
+
+-------------------------------------------------------------------
 Wed Oct 11 08:49:16 UTC 2017 - jreidinger@suse.com
 
 - Fixed registration of autoselected extensions (bsc#1062684)
