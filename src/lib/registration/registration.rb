@@ -167,24 +167,19 @@ module Registration
       migrations
     end
 
-    # Get the list of updates for a given product
+    # Get the list of updates for a base product or self_update_id if defined
     #
-    # @param [Hash] Hash containing the product description.
-    #               Description should contain "name", "arch",
-    #               "version" and "release_type".
     # @return [Array<String>] List of URLs of updates repositories.
     #
     # @see SwMgmt.base_product_to_register
     # @see SwMgmt.remote_product
     # @see SUSE::Connect::Yast.list_installer_updates
-    def get_updates_list(product = nil)
-      if product.nil?
-        product = SwMgmt.base_product_to_register
-        id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
-        if !id.empty?
-          log.info "Using self update id from control file #{id.inspect}"
-          product["name"] = id
-        end
+    def get_updates_list
+      product = SwMgmt.base_product_to_register
+      id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
+      if !id.empty?
+        log.info "Using self update id from control file #{id.inspect}"
+        product["name"] = id
       end
 
       log.info "Reading available updates for product: #{product["name"]}"
