@@ -83,8 +83,8 @@ describe Registration::Addon do
       addons = load_yaml_fixture("sle15_addons.yaml")
       sorted_addons = Registration::Addon.registration_order(addons)
       expected_output = ["sle-module-basesystem", "sle-ha", "sle-we", "sle-module-legacy",
-        "sle-module-scripting", "sle-module-desktop-applications", "sle-module-development-tools",
-        "sle-module-server-applications"]
+                         "sle-module-scripting", "sle-module-desktop-applications",
+                         "sle-module-development-tools", "sle-module-server-applications"]
 
       expect(addons.size).to eq sorted_addons.size
       expect(sorted_addons.map(&:identifier)).to eq expected_output
