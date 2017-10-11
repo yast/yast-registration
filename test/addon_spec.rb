@@ -78,6 +78,19 @@ describe Registration::Addon do
     end
   end
 
+  describe ".registration_order" do
+    it "returns addons sorted in the registration order" do
+      addons = load_yaml_fixture("sle15_addons.yaml")
+      sorted_addons = Registration::Addon.registration_order(addons)
+      expected_output = ["sle-module-basesystem", "sle-ha", "sle-we", "sle-module-legacy",
+                         "sle-module-scripting", "sle-module-desktop-applications",
+                         "sle-module-development-tools", "sle-module-server-applications"]
+
+      expect(addons.size).to eq sorted_addons.size
+      expect(sorted_addons.map(&:identifier)).to eq expected_output
+    end
+  end
+
   describe ".selected" do
     it "returns array with selected addons" do
       expect(Registration::Addon.selected).to be_a(Array)
