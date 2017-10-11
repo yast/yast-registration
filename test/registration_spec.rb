@@ -226,13 +226,13 @@ describe Registration::Registration do
 
     context "when a product is not given" do
       it "returns updates list from the server for the self update id if defined" do
-        expect(Registration::SwMgmt).to receive(:remote_product).with({"name" => "self_update_id"})
-          .and_return({"name" => "self_update_id"})
+        expect(Registration::SwMgmt).to receive(:remote_product).with("name" => "self_update_id")
+          .and_return("name" => "self_update_id")
         expect(Yast::ProductFeatures).to receive(:GetStringFeature)
           .with("globals", "self_update_id")
           .and_return("self_update_id")
         expect(suse_connect).to receive(:list_installer_updates)
-          .with({"name" => "self_update_id"}, anything)
+          .with({ "name" => "self_update_id" }, anything)
           .and_return(updates)
         expect(subject.get_updates_list).to eq(updates)
       end
