@@ -214,23 +214,36 @@ describe Registration::Registration do
   end
 
   describe "#get_updates_list" do
-    let(:base_product) { double("base_product") }
-    let(:remote_product) { double("remote_product") }
+    let(:base_product) { { "name" => "base" } }
+    let(:remote_product) { { "name" => "base" } }
     let(:updates) { ["http://updates.suse.com/sles12/"] }
     let(:suse_connect) { double("suse_connect") }
 
     before do
       allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
-      allow(base_product).to receive(:[]).with("name").and_return("base")
       stub_const("SUSE::Connect::YaST", suse_connect)
     end
 
-    it "returns updates list from the server for the base product" do
-      expect(Registration::SwMgmt).to receive(:remote_product).with(base_product)
-        .and_return(remote_product)
-      expect(suse_connect).to receive(:list_installer_updates).with(remote_product, anything)
-        .and_return(updates)
-      expect(subject.get_updates_list).to eq(updates)
+    context "when a product is not given" do
+      it "returns updates list from the server for the self update id if defined" do
+        expect(Registration::SwMgmt).to receive(:remote_product).with({"name" => "self_update_id"})
+          .and_return({"name" => "self_update_id"})
+        expect(Yast::ProductFeatures).to receive(:GetStringFeature)
+          .with("globals", "self_update_id")
+          .and_return("self_update_id")
+        expect(suse_connect).to receive(:list_installer_updates)
+          .with({"name" => "self_update_id"}, anything)
+          .and_return(updates)
+        expect(subject.get_updates_list).to eq(updates)
+      end
+
+      it "returns updates list from the server for the base product" do
+        expect(Registration::SwMgmt).to receive(:remote_product).with(base_product)
+          .and_return(remote_product)
+        expect(suse_connect).to receive(:list_installer_updates).with(remote_product, anything)
+          .and_return(updates)
+        expect(subject.get_updates_list).to eq(updates)
+      end
     end
 
     context "when a product is given" do
