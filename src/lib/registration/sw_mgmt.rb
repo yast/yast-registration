@@ -126,7 +126,12 @@ module Registration
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Stage.initial && !Mode.update
+        if Stage.initial && Mode.auto
+          Yast.import "AutoinstConfig"
+          # note: AutoinstConfig.selected_product should never be nil when
+          # AY let it pass here
+          p["name"] == AutoinstConfig.selected_product.name
+        elsif Stage.initial && !Mode.update
           # during installation the type is not valid yet yet
           # (the base product is determined by /etc/products.d/baseproduct symlink)
           # use the selected product or the product from the first repository
