@@ -33,6 +33,8 @@ module Registration
 
       Yast.import "Sequencer"
       Yast.import "Mode"
+      Yast.import "SourceDialogs"
+      Yast.import "Linuxrc"
 
       # the constructor
       def initialize
@@ -96,6 +98,7 @@ module Registration
         "ws_start"                     => "registration_check",
         "registration_check"           => {
           abort: :abort,
+          skip:  :next,
           next:  "not_installed_products_check"
         },
         "not_installed_products_check" => {
@@ -146,6 +149,12 @@ module Registration
       # if the system is not registered
       # @return [Symbol] workflow symbol, :next if registered, :abort when not
       def registration_check
+        # handle system upgrade (fate#323163)
+        if Yast::Stage.initial && Yast::Mode.update
+          log.info "System upgrade mode detected"
+          return system_upgrade_check
+        end
+
         return :next if Registration.is_registered?
 
         # TRANSLATORS: a popup message with [Continue] [Cancel] buttons,
@@ -383,6 +392,64 @@ module Registration
         end
 
         :next
+      end
+
+      # check the system status at upgrade and return the symbol for the next step
+      # @return [Symabol] workflow symbol, :skip => do not use the SCC/SMT upgrade
+      #   (unregistered system or explicitly requested by user), :next =>
+      #   continue with the SCC/SMT based upgrade
+      def system_upgrade_check
+        # media based upgrade requested by user
+        if Yast::Linuxrc.InstallInf("UpgradeMedia") == "1"
+          log.info "Skipping SCC upgrade, media based upgrade requested"
+          Yast::Popup.LongMessage(media_upgrade)
+          return :skip
+        # the system is registered, continue with the SCC/SMT based upgrade
+        elsif Registration.is_registered?
+          log.info "The system is registered, using the registration server for upgrade"
+          return :next
+        else
+          log.info "The system is NOT registered, activating the media based upgrade"
+          # we do not support registering the old system at upgrade, that must
+          # be done before the upgrade, skip registration in that case
+          Yast::Popup.LongMessage(unregistered_message)
+          # do not display the "I would like to install an additional Add On Product"
+          # check box, allow adding the upgrade media directly
+          Yast::SourceDialogs.display_addon_checkbox = false
+          # preselect the DVD repository type
+          Yast::SourceDialogs.SetURL("dvd://")
+          return :skip
+        end
+      end
+
+      # Informative message
+      # @return [String] translated message
+      def unregistered_message
+        # TRANSLATORS: Unregistered system message (1/3)
+        #   Message displayed during upgrade for unregistered systems.
+        #   The user can either boot the old system and register it or use the
+        #   DVD media for upgrade. Use the RichText format.
+        _("<h2>Unregistered System</h2><p>The system is not registered, that means " \
+          "the installer cannot add the new software repositories required for migration " \
+          "automatically.</p>") +
+          # TRANSLATORS: Unregistered system message (2/3)
+          _("<p>Please add the installation media manually in the next step.</p>") +
+          # TRANSLATORS: Unregistered system message (3/3)
+          _("<p>If you cannot provide the installation media you can abort the migration " \
+          "and boot the original system to register it. Then start the migration again.</p>")
+      end
+
+      # Informative message
+      # @return [String] translated message
+      def media_upgrade
+        # TRANSLATORS: Media based upgrade requested by user (1/2)
+        #   User requested media based upgrade which does not use SCC/SMT
+        #   but the downloaded media (physical DVD or shared repo on a local server).
+        _("<h2>Media Based Upgrade</h2><p>The media based upgrade is requested. " \
+          "In this mode YaST will not contact the registration server to obtain " \
+          "the new software repositories required for migration.</p>") +
+          # TRANSLATORS: Media based upgrade requested by user (2/2)
+          _("<p>Please add the installation media manually in the next step.</p>")
       end
     end
   end

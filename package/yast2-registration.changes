@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Oct 19 11:53:37 UTC 2017 - lslezak@suse.cz
+
+- Display an informative popup when upgrading an unregistered
+  system, preselect adding DVD add-ons to make upgrade using media
+  easier (fate#323163)
+- Support "media_upgrade=1" boot parameter for media based upgrade
+  even for registered systems (fate#323163)
+- 4.0.7
+
+-------------------------------------------------------------------
 Thu Oct 12 11:57:29 UTC 2017 - mfilka@suse.com
 
 - fate#323450
