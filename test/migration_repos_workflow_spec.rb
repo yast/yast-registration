@@ -15,11 +15,48 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Yast::Pkg).to receive(:SourceRestore)
       allow(Yast::Pkg).to receive(:SourceGetCurrent).and_return([])
       allow(Registration::SwMgmt).to receive(:check_repositories).and_return(true)
+      allow(Yast::Stage).to receive(:initial).and_return(false)
+      allow(Yast::Mode).to receive(:update).and_return(false)
+      allow(Yast::Linuxrc).to receive(:InstallInf)
+    end
+
+    shared_examples "media based upgrade" do
+      before do
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("UpgradeMedia").and_return("1")
+      end
+
+      it "displays a popup about media based upgrade" do
+        expect(Yast::Popup).to receive(:LongMessage).with(/media based upgrade/i)
+        subject.run_sequence
+      end
+
+      it "returns :next symbol" do
+        expect(subject.run_sequence).to eq(:next)
+      end
+    end
+
+    context "the system is registered" do
+      before do
+        allow(Registration::Registration).to receive(:is_registered?).and_return(true)
+        allow(Yast::Mode).to receive(:SetMode)
+      end
+
+      context "at system upgrade" do
+        before do
+          allow(Yast::Stage).to receive(:initial).and_return(true)
+          allow(Yast::Mode).to receive(:update).and_return(true)
+          allow(Yast::Popup).to receive(:LongMessage)
+        end
+
+        context "the 'media_upgrade=1' boot parameter is used" do
+          include_examples "media based upgrade"
+        end
+      end
     end
 
     context "the system is not registered" do
       before do
-        expect(Registration::Registration).to receive(:is_registered?).and_return(false)
+        allow(Registration::Registration).to receive(:is_registered?).and_return(false)
         allow(Yast::Mode).to receive(:SetMode)
       end
 
@@ -43,6 +80,35 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(Yast::Popup).to receive(:ContinueCancel).and_return(true)
         expect(Yast::WFM).to receive(:call).with("inst_scc").and_return(:abort)
         expect(subject.run_sequence).to eq(:abort)
+      end
+
+      context "at system upgrade" do
+        before do
+          allow(Yast::Stage).to receive(:initial).and_return(true)
+          allow(Yast::Mode).to receive(:update).and_return(true)
+          allow(Yast::Popup).to receive(:LongMessage)
+          allow(Yast::SourceDialogs).to receive(:display_addon_checkbox=)
+          allow(Yast::SourceDialogs).to receive(:SetURL)
+        end
+
+        it "displays a popup about unregistered system" do
+          expect(Yast::Popup).to receive(:LongMessage).with(/unregistered system/i)
+          subject.run_sequence
+        end
+
+        it "preselects a dvd:// add-on repository to be added later" do
+          expect(Yast::SourceDialogs).to receive(:display_addon_checkbox=).with(false)
+          expect(Yast::SourceDialogs).to receive(:SetURL).with("dvd://")
+          subject.run_sequence
+        end
+
+        it "returns :next symbol" do
+          expect(subject.run_sequence).to eq(:next)
+        end
+
+        context "the 'media_upgrade=1' boot parameter is used" do
+          include_examples "media based upgrade"
+        end
       end
     end
 
