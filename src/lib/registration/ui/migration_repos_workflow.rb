@@ -400,7 +400,7 @@ module Registration
       #   continue with the SCC/SMT based upgrade
       def system_upgrade_check
         # media based upgrade requested by user
-        if Yast::Linuxrc.InstallInf("UpgradeMedia") == "1"
+        if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
           log.info "Skipping SCC upgrade, media based upgrade requested"
           Yast::Popup.LongMessage(media_upgrade)
           return :skip
