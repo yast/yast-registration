@@ -45,8 +45,7 @@ module Registration
 
         @old_selection = Addon.selected.dup
 
-        # activate a workaround on ARM (FATE#320679)
-        aarch64_workaround if Arch.aarch64
+        preselect_recommended
       end
 
       # reimplement this in a subclass
@@ -291,24 +290,15 @@ module Registration
               "into the SUSE Customer Center and remove them manually there.</p>")
       end
 
-      # workaround for FATE#320679 - preselect the Toolchain module on ARM
-      # in SLES12-SP2
-      # FIXME: remove this hack in SLES12-SP3, use a proper solution instead
-      def aarch64_workaround
-        # SLES12-SP2 base?
-        product = SwMgmt.base_product_to_register
-        return unless product["name"] == "SLES" && product["version"] == "12.2"
+      def preselect_recommended
+        # something is already selected, keep the user selection unchanged
+        return if !Addon.selected.empty? || @addons.nil?
 
-        # is the Toolchain module available?
-        toolchain = @addons.find do |addon|
-          addon.identifier == "sle-module-toolchain" && addon.version == "12" \
-            && addon.arch == "aarch64"
+        @addons.each do |a|
+          next unless a.recommended
+          log.info("Preselecting a default addon: #{a.friendly_name}")
+          a.selected
         end
-        return unless toolchain
-
-        # then pre-select it!
-        log.info "Activating the ARM64 workaround, preselecting addon: #{toolchain}"
-        toolchain.selected
       end
     end
   end

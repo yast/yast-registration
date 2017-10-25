@@ -32,18 +32,12 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   describe ".run" do
     subject { Registration::UI::AddonSelectionRegistrationDialog }
 
-    let(:toolchain) do
-      Registration::Addon.new(
-        addon_generator("zypper_name" => "sle-module-toolchain",
-        "name" => "Toolchain module", "version" => "12", "arch" => "aarch64")
-      )
-    end
-
     let(:registration) { double(activated_products: [], get_addon_list: []) }
     let(:filter_beta) { false }
 
     before do
       allow(described_class).to receive(:filter_beta).and_return(filter_beta)
+      allow(Yast::UI).to receive(:TextMode).and_return(false)
     end
 
     it "returns response from addon selection according to pressed button" do
@@ -68,6 +62,52 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       addons = Registration::Addon.find_all(registration)
       wrapped_addon = addons.first
       expect(wrapped_addon.selected?).to eq true
+    end
+
+    it "preselects the recommended addons" do
+      addon = addon_generator("recommended" => true)
+
+      expect(Yast::UI).to receive(:UserInput).and_return(:next)
+      registration = double(activated_products: [], get_addon_list: [addon])
+      expect(Registration::Addon).to receive(:selected).and_return([]).at_least(:once)
+
+      expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
+        # check the displayed content
+        term = content.nested_find do |t|
+          t.respond_to?(:value) && t.value == :RichText \
+            && t.params.first.params.first == :items
+        end
+
+        # the check box is checked
+        expect(term.params[1]).to include("checkbox-on.png")
+        expect(term.params[1]).to_not include("checkbox-off.png")
+      end
+
+      subject.run(registration)
+    end
+
+    it "does not preselect the recommended addons if something is already selected" do
+      addon = addon_generator("recommended" => true)
+      # just to have an unknown, but "selected" addon for the Addon.selected call
+      fake_addon = addon_generator
+
+      expect(Yast::UI).to receive(:UserInput).and_return(:next)
+      registration = double(activated_products: [], get_addon_list: [addon])
+      expect(Registration::Addon).to receive(:selected).and_return([fake_addon]).at_least(:once)
+
+      # check the displayed content
+      expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
+        term = content.nested_find do |t|
+          t.respond_to?(:value) && t.value == :RichText \
+            && t.params.first.params.first == :items
+        end
+
+        # the check box is not checked
+        expect(term.params[1]).to include("checkbox-off.png")
+        expect(term.params[1]).to_not include("checkbox-on.png")
+      end
+
+      subject.run(registration)
     end
 
     it "works in textmode" do
@@ -96,7 +136,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
 
       expect(addon.selected?).to eq true
 
-      child = addons.find { |a| a.identifier == "sle-module-basesystem" }
+      child = addons.find { |a| a.identifier == "sle-module-desktop-applications" }
       expect(child.auto_selected?).to eq true
     end
 
@@ -178,63 +218,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         expect(dialog).to_not receive(:CheckBox)
         expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
-      end
-    end
-
-    context "in SLES12-SP2" do
-      let(:registration) { double }
-
-      before do
-        # SLES12-SP2
-        allow(Registration::SwMgmt).to receive(:base_product_to_register)
-          .and_return("name" => "SLES", "version" => "12.2")
-        allow(Registration::Addon).to receive(:find_all).and_return([toolchain])
-        allow(Yast::UI).to receive(:UserInput).and_return(:next)
-      end
-
-      context "on the ARM64 architecture" do
-        before do
-          expect(Yast::Arch).to receive(:aarch64).and_return(true)
-        end
-
-        it "preselects the Toolchain module" do
-          expect(toolchain).to receive(:selected)
-          subject.run(registration)
-        end
-      end
-
-      context "on the other architectures" do
-        before do
-          expect(Yast::Arch).to receive(:aarch64).and_return(false)
-        end
-
-        it "does not preselect the Toolchain module" do
-          expect(toolchain).to_not receive(:selected)
-          subject.run(registration)
-        end
-      end
-    end
-
-    context "in SLES12-SP3" do
-      let(:registration) { double }
-
-      before do
-        # SLES12-SP3
-        allow(Registration::SwMgmt).to receive(:base_product_to_register)
-          .and_return("name" => "SLES", "version" => "12.3")
-        allow(Registration::Addon).to receive(:find_all).and_return([toolchain])
-        allow(Yast::UI).to receive(:UserInput).and_return(:next)
-      end
-
-      context "on the ARM64 architecture" do
-        before do
-          expect(Yast::Arch).to receive(:aarch64).and_return(true)
-        end
-
-        it "does not preselect the Toolchain module" do
-          expect(toolchain).to_not receive(:selected)
-          subject.run(registration)
-        end
       end
     end
   end

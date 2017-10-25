@@ -85,7 +85,8 @@ describe Registration::Addon do
       expected_output = [
         "sle-module-basesystem", "sle-module-desktop-applications",
         "sle-module-legacy", "sle-module-public-cloud", "sle-ha",
-        "sle-module-development-tools", "sle-module-server-applications", "sle-we" ]
+        "sle-module-development-tools", "sle-module-server-applications", "sle-we"
+      ]
 
       expect(addons.size).to eq sorted_addons.size
       expect(sorted_addons.map(&:identifier)).to eq expected_output
