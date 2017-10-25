@@ -286,8 +286,39 @@ module Registration
         _("<p>Please note, that some extensions or modules might need "\
             "specific registration code.</p>") +
           # help text (3/3)
-          _("<p>If you want to remove any extension or module you need to log"\
+          _("<p>If you want to remove any extension or module you need to log "\
               "into the SUSE Customer Center and remove them manually there.</p>")
+      end
+
+      def checkboxes_help
+        header = _("<p>The extensions and modules can have several states depending " \
+          "how they were selected.</p>")
+
+        # TRANSLATORS: help text for checked check box
+        selected = _("The extension or module is selected to install by user or is " \
+          "pre-selected as a recommended addon.") + "<br>"
+        # TRANSLATORS: help text for unchecked check box
+        deselected = _("The extension or module is not selected to install.") + "<br>"
+        # TRANSLATORS: help text for automatically checked check box (it has a
+        # different look that a user selected check box)
+        auto_selected = _("The extension or module was selected automatically as a dependency " \
+          "of another extension or module.")
+
+        if Yast::UI.TextMode
+          return header + "<p>" \
+              "[x] = " + selected +
+              "[ ] = " + deselected +
+              "[a] = " + auto_selected +
+              "</p>"
+        end
+
+        mode = (ENV["Y2STYLE"] == "installation.qss") ? "inst" : "normal"
+
+        header + "<p>" \
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:on:enabled"]}'></img> = " + selected +
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:off:enabled"]}'></img> = " + deselected +
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:auto:enabled"]}'></img> = " + auto_selected +
+          "</p>"
       end
 
       def preselect_recommended
