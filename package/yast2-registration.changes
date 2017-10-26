@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Oct 26 12:42:18 UTC 2017 - lslezak@suse.cz
+
+- Use the correct install.inf key for media base upgrade (related
+  to fate#323163)
+- Warn when doing media based upgrade for a registered system
+- Preselect the recommended modules and extensions (bsc#1056413)
+- Describe the icons in the modules and extensions dialog help
+- 4.0.9
+
+-------------------------------------------------------------------
 Thu Oct 26 08:35:42 UTC 2017 - jsrain@suse.cz
 
 - fixed detection of base product during upgrade (bsc#1064191)
