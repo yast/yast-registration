@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 26 08:35:42 UTC 2017 - jsrain@suse.cz
+
+- fixed detection of base product during upgrade (bsc#1064191)
+- 4.0.8
+
+-------------------------------------------------------------------
 Thu Oct 19 11:53:37 UTC 2017 - lslezak@suse.cz
 
 - Display an informative popup when upgrading an unregistered
