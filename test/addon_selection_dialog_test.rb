@@ -34,21 +34,22 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
 
     let(:registration) { double(activated_products: [], get_addon_list: []) }
     let(:filter_beta) { false }
+    let(:recommended_addon) { addon_generator("recommended" => true) }
 
     before do
       allow(described_class).to receive(:filter_beta).and_return(filter_beta)
       allow(Yast::UI).to receive(:TextMode).and_return(false)
+      allow(Yast::UI).to receive(:UserInput).and_return(:next)
+      allow_any_instance_of(described_class).to receive(:RichText).and_call_original
     end
 
     it "returns response from addon selection according to pressed button" do
       expect(Yast::UI).to receive(:UserInput).and_return(:abort)
-      registration = double(activated_products: [], get_addon_list: [])
       expect(subject.run(registration)).to eq :abort
     end
 
     it "returns `:skip` if no addon is selected and user click next" do
       expect(Yast::UI).to receive(:UserInput).and_return(:next)
-      registration = double(activated_products: [], get_addon_list: [])
       expect(subject.run(registration)).to eq :skip
     end
 
@@ -64,50 +65,34 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       expect(wrapped_addon.selected?).to eq true
     end
 
-    it "preselects the recommended addons" do
-      addon = addon_generator("recommended" => true)
+    context "a recommended addon is available" do
+      let(:registration) { double(activated_products: [], get_addon_list: [recommended_addon]) }
 
-      expect(Yast::UI).to receive(:UserInput).and_return(:next)
-      registration = double(activated_products: [], get_addon_list: [addon])
-      expect(Registration::Addon).to receive(:selected).and_return([]).at_least(:once)
+      it "preselects the recommended addons" do
+        expect(Registration::Addon).to receive(:selected).and_return([]).at_least(:once)
 
-      expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
         # check the displayed content
-        term = content.nested_find do |t|
-          t.respond_to?(:value) && t.value == :RichText \
-            && t.params.first.params.first == :items
-        end
+        expect_any_instance_of(described_class).to receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-on\.png/).and_call_original
+        expect_any_instance_of(described_class).to_not receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-off\.png/)
 
-        # the check box is checked
-        expect(term.params[1]).to include("checkbox-on.png")
-        expect(term.params[1]).to_not include("checkbox-off.png")
+        subject.run(registration)
       end
 
-      subject.run(registration)
-    end
+      it "does not preselect the recommended addons if something is already selected" do
+        # just to have an unknown, but "selected" addon for the Addon.selected call
+        expect(Registration::Addon).to receive(:selected).and_return([addon_generator])
+          .at_least(:once)
 
-    it "does not preselect the recommended addons if something is already selected" do
-      addon = addon_generator("recommended" => true)
-      # just to have an unknown, but "selected" addon for the Addon.selected call
-      fake_addon = addon_generator
+        # check the displayed content
+        expect_any_instance_of(described_class).to receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-off\.png/).and_call_original
+        expect_any_instance_of(described_class).to_not receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-on\.png/)
 
-      expect(Yast::UI).to receive(:UserInput).and_return(:next)
-      registration = double(activated_products: [], get_addon_list: [addon])
-      expect(Registration::Addon).to receive(:selected).and_return([fake_addon]).at_least(:once)
-
-      # check the displayed content
-      expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
-        term = content.nested_find do |t|
-          t.respond_to?(:value) && t.value == :RichText \
-            && t.params.first.params.first == :items
-        end
-
-        # the check box is not checked
-        expect(term.params[1]).to include("checkbox-off.png")
-        expect(term.params[1]).to_not include("checkbox-on.png")
+        subject.run(registration)
       end
-
-      subject.run(registration)
     end
 
     it "works in textmode" do
@@ -156,7 +141,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         expect(dialog).to receive(:CheckBox)
           .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
           .and_call_original
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
 
@@ -165,7 +149,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
         allow(subject).to receive(:RichText).and_call_original
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
     end
@@ -186,7 +169,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         expect(dialog).to receive(:CheckBox)
           .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
           .and_call_original
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
 
@@ -196,7 +178,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), "")
         allow(subject).to receive(:RichText).and_call_original
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
 
@@ -206,7 +187,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
         allow(subject).to receive(:RichText).and_call_original
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
     end
@@ -216,7 +196,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
 
       it "shows no filter in the UI" do
         expect(dialog).to_not receive(:CheckBox)
-        expect(Yast::UI).to receive(:UserInput).and_return(:next)
         dialog.run
       end
     end

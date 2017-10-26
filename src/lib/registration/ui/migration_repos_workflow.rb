@@ -479,7 +479,7 @@ module Registration
         ret + _("<h2>Warning!</h2><p><b>The media based upgrade for registered " \
           "systems is not supported!<b></p>") +
           _("<p>If you upgrade the system using media the registration status " \
-            "will not be upgraded and the system will be still registered " \
+            "will not be updated and the system will be still registered " \
             "using the previous product. The packages from the registration " \
             "repositories can conflict with the new packages.</p>")
       end
