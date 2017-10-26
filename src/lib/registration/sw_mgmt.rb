@@ -139,6 +139,7 @@ module Registration
           selected ? p["status"] == :selected : p["source"] == 0
         elsif Stage.initial
           # during upgrade it depends on whether target is already initialized
+          # use the product from the medium for the self-update step
           installed ? (p["status"] == :installed && p["type"] == "base") : p["source"] == 0
         else
           # in installed system or at upgrade the base product has valid type
