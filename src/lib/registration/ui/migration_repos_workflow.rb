@@ -401,29 +401,45 @@ module Registration
       def system_upgrade_check
         # media based upgrade requested by user
         if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
-          log.info "Skipping SCC upgrade, media based upgrade requested"
-          if Registration.is_registered?
-            Yast::Popup.LongMessageGeometry(media_upgrade(true), 60, 15)
-          else
-            Yast::Popup.LongMessage(media_upgrade(false))
-          end
+          explicit_media_upgrade
           return :skip
         # the system is registered, continue with the SCC/SMT based upgrade
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
           return :next
         else
-          log.info "The system is NOT registered, activating the media based upgrade"
-          # we do not support registering the old system at upgrade, that must
-          # be done before the upgrade, skip registration in that case
-          Yast::Popup.LongMessage(unregistered_message)
-          # do not display the "I would like to install an additional Add On Product"
-          # check box, allow adding the upgrade media directly
-          Yast::SourceDialogs.display_addon_checkbox = false
-          # preselect the DVD repository type
-          Yast::SourceDialogs.SetURL("dvd://")
+          # the system is unregistered we can only upgrade via media
+          unregistered_media_upgrade
           return :skip
         end
+      end
+
+      # explicit media upgrade, requested via boot option
+      def explicit_media_upgrade
+        log.info "Skipping SCC upgrade, media based upgrade requested"
+        if Registration.is_registered?
+          Yast::Popup.LongMessageGeometry(media_upgrade(true), 60, 15)
+        else
+          Yast::Popup.LongMessage(media_upgrade(false))
+        end
+        prepare_media_upgrade
+      end
+
+      # implicit media upgrade for an unregistered system
+      def unregistered_media_upgrade
+        log.info "The system is NOT registered, activating the media based upgrade"
+        # we do not support registering the old system at upgrade, that must
+        # be done before the upgrade, skip registration in that case
+        Yast::Popup.LongMessage(unregistered_message)
+        prepare_media_upgrade
+      end
+
+      def prepare_media_upgrade
+        # do not display the "I would like to install an additional Add On Product"
+        # check box, allow adding the upgrade media directly
+        Yast::SourceDialogs.display_addon_checkbox = false
+        # preselect the DVD repository type
+        Yast::SourceDialogs.SetURL("dvd://")
       end
 
       # Informative message
