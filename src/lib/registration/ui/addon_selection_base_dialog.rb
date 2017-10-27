@@ -45,8 +45,7 @@ module Registration
 
         @old_selection = Addon.selected.dup
 
-        # activate a workaround on ARM (FATE#320679)
-        aarch64_workaround if Arch.aarch64
+        preselect_recommended
       end
 
       # reimplement this in a subclass
@@ -287,28 +286,50 @@ module Registration
         _("<p>Please note, that some extensions or modules might need "\
             "specific registration code.</p>") +
           # help text (3/3)
-          _("<p>If you want to remove any extension or module you need to log"\
+          _("<p>If you want to remove any extension or module you need to log "\
               "into the SUSE Customer Center and remove them manually there.</p>")
       end
 
-      # workaround for FATE#320679 - preselect the Toolchain module on ARM
-      # in SLES12-SP2
-      # FIXME: remove this hack in SLES12-SP3, use a proper solution instead
-      def aarch64_workaround
-        # SLES12-SP2 base?
-        product = SwMgmt.base_product_to_register
-        return unless product["name"] == "SLES" && product["version"] == "12.2"
+      def checkboxes_help
+        header = _("<p>The extensions and modules can have several states depending " \
+          "how they were selected.</p>")
 
-        # is the Toolchain module available?
-        toolchain = @addons.find do |addon|
-          addon.identifier == "sle-module-toolchain" && addon.version == "12" \
-            && addon.arch == "aarch64"
+        # TRANSLATORS: help text for checked check box
+        selected = _("The extension or module is selected to install by user or is " \
+          "pre-selected as a recommended addon.") + "<br>"
+        # TRANSLATORS: help text for unchecked check box
+        deselected = _("The extension or module is not selected to install.") + "<br>"
+        # TRANSLATORS: help text for automatically checked check box (it has a
+        # different look that a user selected check box)
+        auto_selected = _("The extension or module was selected automatically as a dependency " \
+          "of another extension or module.")
+
+        if Yast::UI.TextMode
+          return header + "<p>" \
+              "[x] = " + selected +
+              "[ ] = " + deselected +
+              "[a] = " + auto_selected +
+              "</p>"
         end
-        return unless toolchain
 
-        # then pre-select it!
-        log.info "Activating the ARM64 workaround, preselecting addon: #{toolchain}"
-        toolchain.selected
+        mode = (ENV["Y2STYLE"] == "installation.qss") ? "inst" : "normal"
+
+        header + "<p>" \
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:on:enabled"]}'></img> = " + selected +
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:off:enabled"]}'></img> = " + deselected +
+          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:auto:enabled"]}'></img> = " + auto_selected +
+          "</p>"
+      end
+
+      def preselect_recommended
+        # something is already selected, keep the user selection unchanged
+        return if !Addon.selected.empty? || @addons.nil?
+
+        @addons.each do |a|
+          next unless a.recommended
+          log.info("Preselecting a default addon: #{a.friendly_name}")
+          a.selected
+        end
       end
     end
   end

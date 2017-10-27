@@ -184,10 +184,11 @@ module Registration
       :identifier,
       :name,
       :product_type,
-      :release_type,
+      :recommended,
       :release_stage,
-      :version,
-      :repositories
+      :release_type,
+      :repositories,
+      :version
 
     # the constructor
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server

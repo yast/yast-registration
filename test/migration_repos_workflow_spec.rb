@@ -20,13 +20,18 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Yast::Linuxrc).to receive(:InstallInf)
     end
 
-    shared_examples "media based upgrade" do
+    shared_examples "media based upgrade" do |popup_method|
       before do
-        expect(Yast::Linuxrc).to receive(:InstallInf).with("UpgradeMedia").and_return("1")
+        expect(Yast::Linuxrc).to receive(:InstallInf).with("MediaUpgrade").and_return("1")
       end
 
       it "displays a popup about media based upgrade" do
-        expect(Yast::Popup).to receive(:LongMessage).with(/media based upgrade/i)
+        if popup_method == :LongMessageGeometry
+          expect(Yast::Popup).to receive(popup_method).with(/media based upgrade/i,
+            anything, anything)
+        else
+          expect(Yast::Popup).to receive(popup_method).with(/media based upgrade/i)
+        end
         subject.run_sequence
       end
 
@@ -49,7 +54,7 @@ describe Registration::UI::MigrationReposWorkflow do
         end
 
         context "the 'media_upgrade=1' boot parameter is used" do
-          include_examples "media based upgrade"
+          include_examples "media based upgrade", :LongMessageGeometry
         end
       end
     end
@@ -107,7 +112,7 @@ describe Registration::UI::MigrationReposWorkflow do
         end
 
         context "the 'media_upgrade=1' boot parameter is used" do
-          include_examples "media based upgrade"
+          include_examples "media based upgrade", :LongMessage
         end
       end
     end

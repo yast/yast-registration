@@ -400,26 +400,46 @@ module Registration
       #   continue with the SCC/SMT based upgrade
       def system_upgrade_check
         # media based upgrade requested by user
-        if Yast::Linuxrc.InstallInf("UpgradeMedia") == "1"
-          log.info "Skipping SCC upgrade, media based upgrade requested"
-          Yast::Popup.LongMessage(media_upgrade)
+        if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
+          explicit_media_upgrade
           return :skip
         # the system is registered, continue with the SCC/SMT based upgrade
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
           return :next
         else
-          log.info "The system is NOT registered, activating the media based upgrade"
-          # we do not support registering the old system at upgrade, that must
-          # be done before the upgrade, skip registration in that case
-          Yast::Popup.LongMessage(unregistered_message)
-          # do not display the "I would like to install an additional Add On Product"
-          # check box, allow adding the upgrade media directly
-          Yast::SourceDialogs.display_addon_checkbox = false
-          # preselect the DVD repository type
-          Yast::SourceDialogs.SetURL("dvd://")
+          # the system is unregistered we can only upgrade via media
+          unregistered_media_upgrade
           return :skip
         end
+      end
+
+      # explicit media upgrade, requested via boot option
+      def explicit_media_upgrade
+        log.info "Skipping SCC upgrade, media based upgrade requested"
+        if Registration.is_registered?
+          Yast::Popup.LongMessageGeometry(media_upgrade(true), 60, 15)
+        else
+          Yast::Popup.LongMessage(media_upgrade(false))
+        end
+        prepare_media_upgrade
+      end
+
+      # implicit media upgrade for an unregistered system
+      def unregistered_media_upgrade
+        log.info "The system is NOT registered, activating the media based upgrade"
+        # we do not support registering the old system at upgrade, that must
+        # be done before the upgrade, skip registration in that case
+        Yast::Popup.LongMessage(unregistered_message)
+        prepare_media_upgrade
+      end
+
+      def prepare_media_upgrade
+        # do not display the "I would like to install an additional Add On Product"
+        # check box, allow adding the upgrade media directly
+        Yast::SourceDialogs.display_addon_checkbox = false
+        # preselect the DVD repository type
+        Yast::SourceDialogs.SetURL("dvd://")
       end
 
       # Informative message
@@ -440,16 +460,28 @@ module Registration
       end
 
       # Informative message
+      # @param registered [Boolean] is the system registered?
       # @return [String] translated message
-      def media_upgrade
-        # TRANSLATORS: Media based upgrade requested by user (1/2)
+      def media_upgrade(registered)
+        # TRANSLATORS: Media based upgrade requested by user (1/3)
         #   User requested media based upgrade which does not use SCC/SMT
         #   but the downloaded media (physical DVD or shared repo on a local server).
-        _("<h2>Media Based Upgrade</h2><p>The media based upgrade is requested. " \
+        ret = _("<h2>Media Based Upgrade</h2><p>The media based upgrade is requested. " \
           "In this mode YaST will not contact the registration server to obtain " \
           "the new software repositories required for migration.</p>") +
-          # TRANSLATORS: Media based upgrade requested by user (2/2)
+          # TRANSLATORS: Media based upgrade requested by user (2/3)
           _("<p>Please add the installation media manually in the next step.</p>")
+
+        return ret unless registered
+
+        # TRANSLATORS: a warning message, upgrading the registered systems
+        #   using media is not supported
+        ret + _("<h2>Warning!</h2><p><b>The media based upgrade for registered " \
+          "systems is not supported!<b></p>") +
+          _("<p>If you upgrade the system using media the registration status " \
+            "will not be updated and the system will be still registered " \
+            "using the previous product. The packages from the registration " \
+            "repositories can conflict with the new packages.</p>")
       end
     end
   end

@@ -16,6 +16,7 @@ def suse_connect_product_generator(attrs = {})
   params["extensions"] = attrs["extensions"] || []
   params["former_identifier"] = attrs["former_identifier"]
   params["release_stage"] = attrs["release_stage"]
+  params["recommended"] = attrs["recommended"] || false
 
   params
 end
@@ -39,6 +40,7 @@ module Registration
         @cached_addons = nil
         @registered = nil
         @selected = nil
+        @auto_selected = nil
       end
     end
   end
