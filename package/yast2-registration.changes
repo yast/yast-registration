@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Oct 27 12:44:58 UTC 2017 - lslezak@suse.cz
+
+- Do not preselect the default addons when some addon is already
+  registered (avoid selecting again when going back after
+  registration) (related to bsc#1056413)
+- 4.0.11
+
+-------------------------------------------------------------------
 Fri Oct 27 11:18:10 UTC 2017 - lslezak@suse.cz
 
 - Do not crash when displaying the AutoYaST summary in installed

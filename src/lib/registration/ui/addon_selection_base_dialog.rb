@@ -322,8 +322,8 @@ module Registration
       end
 
       def preselect_recommended
-        # something is already selected, keep the user selection unchanged
-        return if !Addon.selected.empty? || @addons.nil?
+        # something is already selected/registered, keep the user selection unchanged
+        return if !Addon.selected.empty? || !Addon.registered.empty? || @addons.nil?
 
         @addons.each do |a|
           next unless a.recommended
