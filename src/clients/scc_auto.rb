@@ -27,7 +27,6 @@
 #
 
 require "yast/suse_connect"
-require "erb"
 
 require "registration/storage"
 require "registration/sw_mgmt"
@@ -38,24 +37,11 @@ require "registration/connect_helpers"
 require "registration/ssl_certificate"
 require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
-
-# A helper used to get ERB out of Yast context
-class RegistrationErbRendered
-  include Yast::I18n
-
-  def initialize(config)
-    @config = config
-  end
-
-  def render_erb_template(file)
-    ::Registration::Helpers.render_erb_template(file, binding)
-  end
-end
+require "registration/erb_renderer.rb"
 
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
-    include ERB::Util
     extend Yast::I18n
 
     # popup message
@@ -152,7 +138,7 @@ module Yast
     # Create a textual summary
     # @return [String] summary of the current configuration
     def summary
-      RegistrationErbRendered.new(@config).render_erb_template("autoyast_summary.erb")
+      Registration::ErbRenderer.new(@config).render_erb_template("autoyast_summary.erb")
     end
 
     # set the registration URL from the profile or use the default
