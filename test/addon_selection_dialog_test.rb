@@ -68,9 +68,12 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     context "a recommended addon is available" do
       let(:registration) { double(activated_products: [], get_addon_list: [recommended_addon]) }
 
-      it "preselects the recommended addons" do
-        expect(Registration::Addon).to receive(:selected).and_return([]).at_least(:once)
+      before do
+        allow(Registration::Addon).to receive(:selected).and_return([])
+        allow(Registration::Addon).to receive(:registered).and_return([])
+      end
 
+      it "preselects the recommended addons" do
         # check the displayed content
         expect_any_instance_of(described_class).to receive(:RichText)
           .with(Yast::Term.new(:id, :items), /checkbox-on\.png/).and_call_original
@@ -83,6 +86,20 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       it "does not preselect the recommended addons if something is already selected" do
         # just to have an unknown, but "selected" addon for the Addon.selected call
         expect(Registration::Addon).to receive(:selected).and_return([addon_generator])
+          .at_least(:once)
+
+        # check the displayed content
+        expect_any_instance_of(described_class).to receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-off\.png/).and_call_original
+        expect_any_instance_of(described_class).to_not receive(:RichText)
+          .with(Yast::Term.new(:id, :items), /checkbox-on\.png/)
+
+        subject.run(registration)
+      end
+
+      it "does not preselect the recommended addons if something is already registered" do
+        # just to have an unknown, but "registered" addon for the Addon.registered call
+        expect(Registration::Addon).to receive(:registered).and_return([addon_generator])
           .at_least(:once)
 
         # check the displayed content
