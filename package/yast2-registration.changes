@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 27 11:18:10 UTC 2017 - lslezak@suse.cz
+
+- Do not crash when displaying the AutoYaST summary in installed
+  system (bsc#1065432)
+- 4.0.10
+
+-------------------------------------------------------------------
 Thu Oct 26 12:42:18 UTC 2017 - lslezak@suse.cz
 
 - Use the correct install.inf key for media base upgrade (related
