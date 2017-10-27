@@ -42,6 +42,7 @@ require "registration/ui/autoyast_config_workflow"
 # A helper used to get ERB out of Yast context
 class RegistrationErbRendered
   include Yast::I18n
+  include ERB::Util
 
   def initialize(config)
     @config = config
@@ -55,7 +56,6 @@ end
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
-    include ERB::Util
     extend Yast::I18n
 
     # popup message
