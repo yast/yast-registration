@@ -44,6 +44,8 @@ module Registration
       def reset!
         @cached_addons = nil
         @registered    = nil
+        @selected      = nil
+        @auto_selected = nil
       end
 
       # list of registered add-ons

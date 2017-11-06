@@ -30,6 +30,7 @@ require "yast/suse_connect"
 
 require "registration/storage"
 require "registration/sw_mgmt"
+require "registration/autoyast_addons"
 require "registration/registration"
 require "registration/registration_ui"
 require "registration/helpers"
@@ -308,27 +309,16 @@ module Yast
 
     # register the addons specified in the profile
     def register_addons
-      # register addons
-      @config.addons.each do |addon|
-        product_service = register_addon(addon)
+      # set the option for installing the updates for addons
+      options = Registration::Storage::InstallationOptions.instance
+      options.install_updates = @config.install_updates
 
-        ::Registration::Storage::Cache.instance.addon_services << product_service
+      ay_addons_handler = Registration::AutoyastAddons.new(@config.addons, registration)
+      ay_addons_handler.select
+      ay_addons_handler.register
 
-        registration_ui.disable_update_repos(product_service) if !@config.install_updates
-      end
-
-      # install the new products
+      # select the new products to install
       ::Registration::SwMgmt.select_addon_products
-    end
-
-    def register_addon(addon)
-      Popup.Feedback(
-        _(CONTACTING_MESSAGE),
-        # %s is name of given product
-        _("Registering %s ...") % addon["name"]
-      ) do
-        registration.register_product(addon)
-      end
     end
 
     # was the system already registered?
