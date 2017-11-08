@@ -362,9 +362,9 @@ module Registration
         warning = _("Without registration, update-channels will not be\n" \
             "configured. This disables updates and security fixes.\n\n" \
             "A full system can be installed using the\n" \
-            "SLE-15-Packages media from download.suse.com.\n" \
-            "Without this media only a minimum system is available\n" \
-            "in this installation.")
+            "%{media_name} media from https://download.suse.com.\n" \
+            "Without these media only a minimum system is available\n" \
+            "in this installation.") % {media_name: "SLE-15-Packages"}
         Yast::Popup.Warning(warning)
       end
 
