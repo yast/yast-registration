@@ -359,12 +359,16 @@ module Registration
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
         # Popup question: confirm skipping the registration
+        // TRANSLATORS:
+        // %{media_name} is the media name (e.g. SLE-15-Packages),
+        // %{download_url} is an URL link (e.g. https://download.suse.com)
         warning = _("Without registration, update-channels will not be\n" \
             "configured. This disables updates and security fixes.\n\n" \
             "A full system can be installed using the\n" \
-            "%{media_name} media from https://download.suse.com.\n" \
+            "%{media_name} media from %{download_url}.\n" \
             "Without these media only a minimum system is available\n" \
-            "in this installation.") % {media_name: "SLE-15-Packages"}
+            "in this installation.")
+            % {media_name: "SLE-15-Packages", download_url: "https://download.suse.com"}
         Yast::Popup.Warning(warning)
       end
 
