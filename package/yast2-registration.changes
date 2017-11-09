@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov  8 14:36:05 CET 2017 - schubi@suse.de
+
+- Changed warning text if user has skipped registration.
+  (bnc#1055023)
+- 4.0.12
+
+-------------------------------------------------------------------
 Fri Oct 27 12:44:58 UTC 2017 - lslezak@suse.cz
 
 - Do not preselect the default addons when some addon is already
