@@ -28,6 +28,8 @@ module Registration
     # @param registration [Registration::Registration] the Registration object to use
     #   for registering the addons
     def initialize(requested_addons, registration)
+      textdomain "registration"
+
       self.requested_addons = requested_addons
       self.registration = registration
     end
