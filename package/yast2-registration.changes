@@ -4,6 +4,9 @@ Wed Nov 22 09:52:16 UTC 2017 - lslezak@suse.cz
 - AutoYaST fixes (bsc#1065438):
   - fixed addon registration order
   - automatically register the dependant addons
+- Preselect also the recommended beta addons, display them by
+  default even when the beta filter is active
+  (related to bsc#1056413)
 - 4.0.13
 
 -------------------------------------------------------------------
