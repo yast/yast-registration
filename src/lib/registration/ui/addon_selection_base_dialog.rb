@@ -41,11 +41,10 @@ module Registration
 
         self.class.filter_beta = FILTER_BETAS_INITIALLY if self.class.filter_beta.nil?
 
+        preselect_recommended
         filter_beta_releases(self.class.filter_beta)
 
         @old_selection = Addon.selected.dup
-
-        preselect_recommended
       end
 
       # reimplement this in a subclass
@@ -69,8 +68,9 @@ module Registration
       def filter_beta_releases(enable)
         self.class.filter_beta = enable
         if enable
-          @addons, available_addons = @all_addons.partition(&:registered?)
-          @addons.concat(available_addons.reject(&:beta_release?))
+          @addons = @all_addons.select do |a|
+            a.registered? || a.selected? || !a.beta_release?
+          end
         else
           @addons = @all_addons
         end
@@ -323,9 +323,9 @@ module Registration
 
       def preselect_recommended
         # something is already selected/registered, keep the user selection unchanged
-        return if !Addon.selected.empty? || !Addon.registered.empty? || @addons.nil?
+        return if !Addon.selected.empty? || !Addon.registered.empty?
 
-        @addons.each do |a|
+        @all_addons.each do |a|
           next unless a.recommended
           log.info("Preselecting a default addon: #{a.friendly_name}")
           a.selected
