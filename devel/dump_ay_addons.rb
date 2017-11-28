@@ -18,7 +18,7 @@ def dump_addon(a)
 
   ret = prefix + "<!-- #{a.name} -->\n"
 
-  ret +=  prefix + "<!-- Depends on: #{a.depends_on.name} -->\n" if a.depends_on
+  ret += prefix + "<!-- Depends on: #{a.depends_on.name} -->\n" if a.depends_on
 
   ret += prefix + "<name>#{a.identifier}</name>\n" +
     prefix + "<version>#{a.version}</version>\n" +
