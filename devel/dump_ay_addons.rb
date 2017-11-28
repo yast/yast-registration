@@ -16,8 +16,11 @@ INDENT_WIDTH = 4
 def dump_addon(a)
   prefix = " " * INDENT_WIDTH
 
-  ret = prefix + "<!-- #{a.name} -->\n" +
-    prefix + "<name>#{a.identifier}</name>\n" +
+  ret = prefix + "<!-- #{a.name} -->\n"
+
+  ret +=  prefix + "<!-- Depends on: #{a.depends_on.name} -->\n" if a.depends_on
+
+  ret += prefix + "<name>#{a.identifier}</name>\n" +
     prefix + "<version>#{a.version}</version>\n" +
     prefix + "<arch>#{a.arch}</arch>\n"
 
