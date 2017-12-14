@@ -27,10 +27,10 @@
 #
 
 require "yast/suse_connect"
-require "erb"
 
 require "registration/storage"
 require "registration/sw_mgmt"
+require "registration/autoyast_addons"
 require "registration/registration"
 require "registration/registration_ui"
 require "registration/helpers"
@@ -38,24 +38,11 @@ require "registration/connect_helpers"
 require "registration/ssl_certificate"
 require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
-
-# A helper used to get ERB out of Yast context
-class RegistrationErbRendered
-  include Yast::I18n
-
-  def initialize(config)
-    @config = config
-  end
-
-  def render_erb_template(file)
-    ::Registration::Helpers.render_erb_template(file, binding)
-  end
-end
+require "registration/erb_renderer.rb"
 
 module Yast
   class SccAutoClient < Client
     include Yast::Logger
-    include ERB::Util
     extend Yast::I18n
 
     # popup message
@@ -152,7 +139,7 @@ module Yast
     # Create a textual summary
     # @return [String] summary of the current configuration
     def summary
-      RegistrationErbRendered.new(@config).render_erb_template("autoyast_summary.erb")
+      Registration::ErbRenderer.new(@config).render_erb_template("autoyast_summary.erb")
     end
 
     # set the registration URL from the profile or use the default
@@ -322,27 +309,16 @@ module Yast
 
     # register the addons specified in the profile
     def register_addons
-      # register addons
-      @config.addons.each do |addon|
-        product_service = register_addon(addon)
+      # set the option for installing the updates for addons
+      options = Registration::Storage::InstallationOptions.instance
+      options.install_updates = @config.install_updates
 
-        ::Registration::Storage::Cache.instance.addon_services << product_service
+      ay_addons_handler = Registration::AutoyastAddons.new(@config.addons, registration)
+      ay_addons_handler.select
+      ay_addons_handler.register
 
-        registration_ui.disable_update_repos(product_service) if !@config.install_updates
-      end
-
-      # install the new products
+      # select the new products to install
       ::Registration::SwMgmt.select_addon_products
-    end
-
-    def register_addon(addon)
-      Popup.Feedback(
-        _(CONTACTING_MESSAGE),
-        # %s is name of given product
-        _("Registering %s ...") % addon["name"]
-      ) do
-        registration.register_product(addon)
-      end
     end
 
     # was the system already registered?

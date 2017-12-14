@@ -312,7 +312,7 @@ describe Registration::SwMgmt do
 
       it "returns the selected product if a product is selected" do
         allow(Yast::Stage).to receive(:initial).and_return(true)
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products).twice
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products).exactly(3).times
         # sanity check: just make sure the fixture contains the expected data
         expect(products.any? { |p| p["status"] == :selected })
 
@@ -329,7 +329,7 @@ describe Registration::SwMgmt do
         # sanity check: just make sure the fixture was patched correctly
         expect(products2.none? { |p| p["status"] == :selected })
 
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products2).twice
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products2).exactly(3).times
         # the SLES product in the list is installed
         expect(subject.find_base_product).to eq(products[3])
       end

@@ -156,7 +156,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       context "when user skips registration" do
         it "does not try to register the system and close the dialog" do
           allow(Yast::UI).to receive(:UserInput).and_return(:skip_registration, :next)
-          expect(Yast::Popup).to receive(:Warning).with(/If you do not register/)
+          expect(Yast::Popup).to receive(:Warning).with(/Without registration/)
             .and_return(true)
           expect(subject.run).to eq(:skip)
         end

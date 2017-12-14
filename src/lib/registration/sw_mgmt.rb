@@ -121,16 +121,26 @@ module Registration
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial
+      installed = product_installed? if Stage.initial
 
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Stage.initial && !Mode.update
+        if Stage.initial && Mode.auto
+          Yast.import "AutoinstConfig"
+          # note: AutoinstConfig.selected_product should never be nil when
+          # AY let it pass here
+          p["name"] == AutoinstConfig.selected_product.name
+        elsif Stage.initial && !Mode.update
           # during installation the type is not valid yet yet
           # (the base product is determined by /etc/products.d/baseproduct symlink)
           # use the selected product or the product from the first repository
           selected ? p["status"] == :selected : p["source"] == 0
+        elsif Stage.initial
+          # during upgrade it depends on whether target is already initialized
+          # use the product from the medium for the self-update step
+          installed ? (p["status"] == :installed && p["type"] == "base") : p["source"] == 0
         else
           # in installed system or at upgrade the base product has valid type
           p["status"] == :installed && p["type"] == "base"
@@ -148,6 +158,12 @@ module Registration
     # @return [Boolean] true if at least one product is selected to install
     def self.product_selected?
       Pkg.ResolvableProperties("", :product, "").any? { |p| p["status"] == :selected }
+    end
+
+    # Any product installed? (e.g. during upgrade)
+    # @return [Boolean] true if at least one product is installed
+    def self.product_installed?
+      Pkg.ResolvableProperties("", :product, "").any? { |p| p["status"] == :installed }
     end
 
     def self.installed_products

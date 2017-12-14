@@ -4,6 +4,72 @@ Thu Dec 14 08:45:40 UTC 2017 - mfilka@suse.com
 - added support for reading registration code from install.inf
 
 -------------------------------------------------------------------
+Wed Nov 22 09:52:16 UTC 2017 - lslezak@suse.cz
+
+- AutoYaST fixes (bsc#1065438):
+  - fixed addon registration order
+  - automatically register the dependant addons
+- Preselect also the recommended beta addons, display them by
+  default even when the beta filter is active
+  (related to bsc#1056413)
+- 4.0.13
+
+-------------------------------------------------------------------
+Wed Nov  8 14:36:05 CET 2017 - schubi@suse.de
+
+- Changed warning text if user has skipped registration.
+  (bnc#1055023)
+- 4.0.12
+
+-------------------------------------------------------------------
+Fri Oct 27 12:44:58 UTC 2017 - lslezak@suse.cz
+
+- Do not preselect the default addons when some addon is already
+  registered (avoid selecting again when going back after
+  registration) (related to bsc#1056413)
+- 4.0.11
+
+-------------------------------------------------------------------
+Fri Oct 27 11:18:10 UTC 2017 - lslezak@suse.cz
+
+- Do not crash when displaying the AutoYaST summary in installed
+  system (bsc#1065432)
+- 4.0.10
+
+-------------------------------------------------------------------
+Thu Oct 26 12:42:18 UTC 2017 - lslezak@suse.cz
+
+- Use the correct install.inf key for media base upgrade (related
+  to fate#323163)
+- Warn when doing media based upgrade for a registered system
+- Preselect the recommended modules and extensions (bsc#1056413)
+- Describe the icons in the modules and extensions dialog help
+- 4.0.9
+
+-------------------------------------------------------------------
+Thu Oct 26 08:35:42 UTC 2017 - jsrain@suse.cz
+
+- fixed detection of base product during upgrade (bsc#1064191)
+- 4.0.8
+
+-------------------------------------------------------------------
+Thu Oct 19 11:53:37 UTC 2017 - lslezak@suse.cz
+
+- Display an informative popup when upgrading an unregistered
+  system, preselect adding DVD add-ons to make upgrade using media
+  easier (fate#323163)
+- Support "media_upgrade=1" boot parameter for media based upgrade
+  even for registered systems (fate#323163)
+- 4.0.7
+
+-------------------------------------------------------------------
+Thu Oct 12 11:57:29 UTC 2017 - mfilka@suse.com
+
+- fate#323450
+  - when searching for base product check also AY profiles for
+    user's selection
+- 4.0.6 
+-------------------------------------------------------------------
 Wed Oct 11 11:51:31 UTC 2017 - jreidinger@suse.com
 
 - use self update id if defined instead of product name to make
