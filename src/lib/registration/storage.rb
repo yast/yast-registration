@@ -38,7 +38,10 @@ module Registration
 
       def initialize
         self.reg_codes = if Stage.initial
-          reg_codes_from_usb_stick || Yast::Linuxrc.InstallInf("reg_code") || {}
+          raw_reg_code = Yast::Linuxrc.InstallInf("reg_code")
+          reg_code_from_install_inf = raw_reg_code ? [raw_reg_code.split(":", 2)].to_h : {}
+
+          reg_codes_from_usb_stick || reg_code_from_install_inf
         else
           {}
         end
@@ -133,13 +136,15 @@ module Registration
 
       def import(settings)
         reset
+        product = "SLES"
+        do_registration_default = !RegCodes.instance.reg_codes[product].nil?
 
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
         @slp_discovery = settings.fetch("slp_discovery", false)
         @reg_server_cert = settings["reg_server_cert"] || ""
         @email = settings["email"] || ""
-        @reg_code = settings["reg_code"] || ""
+        @reg_code = settings["reg_code"] || RegCodes.instance.reg_codes[product] || ""
         @install_updates = settings.fetch("install_updates", false)
         @addons = import_addons(settings)
         @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""
