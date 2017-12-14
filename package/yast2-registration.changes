@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 14 08:45:40 UTC 2017 - mfilka@suse.com
+
+- added support for reading registration code from install.inf
+
+-------------------------------------------------------------------
 Wed Oct 11 11:51:31 UTC 2017 - jreidinger@suse.com
 
 - use self update id if defined instead of product name to make
