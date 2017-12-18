@@ -4,9 +4,15 @@ require_relative "spec_helper"
 
 describe "Registration::UrlHelpers" do
   describe ".registration_url" do
+    Yast.import "AutoinstConfig"
+
     before do
       # reset the cache before each test
       ::Registration::Storage::Cache.instance.reg_url_cached = nil
+
+      allow(Yast::AutoinstConfig)
+       .to receive(:selected_product)
+       .and_return(Y2Packager::Product.new(short_name: "SLES"))
     end
 
     context "at installation" do

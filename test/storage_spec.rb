@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+Yast.import "AutoinstConfig"
+
 describe Registration::Storage::Config do
   subject { Registration::Storage::Config.instance }
   let(:addon) do
@@ -34,6 +36,10 @@ describe Registration::Storage::Config do
   before do
     # start each test with empty config
     subject.reset
+
+    allow(Yast::AutoinstConfig)
+      .to receive(:selected_product)
+      .and_return(Y2Packager::Product.new(short_name: "SLES"))
   end
 
   describe "#reset" do
