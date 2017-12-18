@@ -135,9 +135,11 @@ module Registration
       end
 
       def import(settings)
+        Yast.import "AutoinstConfig"
+
         reset
-        product = "SLES"
-        do_registration_default = !RegCodes.instance.reg_codes[product].nil?
+
+        product = Yast::AutoinstConfig.selected_product.short_name
 
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
