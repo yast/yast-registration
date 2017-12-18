@@ -11,8 +11,8 @@ describe "Registration::UrlHelpers" do
       ::Registration::Storage::Cache.instance.reg_url_cached = nil
 
       allow(Yast::AutoinstConfig)
-       .to receive(:selected_product)
-       .and_return(Y2Packager::Product.new(short_name: "SLES"))
+        .to receive(:selected_product)
+        .and_return(Y2Packager::Product.new(short_name: "SLES"))
     end
 
     context "at installation" do
