@@ -98,6 +98,33 @@ describe Registration::RegistrationCodesLoader do
     end
   end
 
+  describe "#reg_codes_from_install_inf" do
+    def reg_code(value: "")
+      allow(Yast::Linuxrc)
+        .to receive(:InstallInf)
+        .with("reg_code")
+        .and_return(value)
+    end
+
+    it "returns hash with codes when option is set correctly" do
+      reg_code(value: "product:registration_code")
+
+      expect(subject.reg_codes_from_install_inf).to eq "product" => "registration_code"
+    end
+
+    it "returns empty hash when reg_code option is missing" do
+      reg_code
+
+      expect(subject.reg_codes_from_install_inf).to be_empty
+    end
+
+    it "returns empty hash when the reg_code's value is corrupted" do
+      reg_code(value: "missing_product_part")
+
+      expect(subject.reg_codes_from_install_inf).to be_empty
+    end
+  end
+
   describe "#reg_codes_from_xml" do
     let(:valid_fixture_codes) do
       {
