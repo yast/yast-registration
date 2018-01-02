@@ -1,7 +1,9 @@
 -------------------------------------------------------------------
 Thu Dec 14 08:45:40 UTC 2017 - mfilka@suse.com
 
-- added support for reading registration code from install.inf
+- fate#323450
+  - added support for reading registration code from install.inf
+- 4.0.14
 
 -------------------------------------------------------------------
 Wed Nov 22 09:52:16 UTC 2017 - lslezak@suse.cz
