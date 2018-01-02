@@ -25,6 +25,7 @@ require "yast"
 require "transfer/file_from_url"
 
 Yast.import "XML"
+Yast.import "Linuxrc"
 
 module Registration
   # Aids Registration::Storage::RegCodes in loading the codes
@@ -59,10 +60,10 @@ module Registration
     # Expected format is reg_code: <product>:<registration_code>
     # for example: reg_code: sle15:abcdefghijkl
     #
-    # @return [Hash{String => String, nil] The key of the hash is product name
-    #                                      and the value is registration code
+    # @return [Hash{String => String}, nil] The key of the hash is product name
+    #                                       and the value is registration code
     def reg_codes_from_install_inf
-      raw_reg_code = Yast::Linuxrc.InstallInf("reg_code")
+      raw_reg_code = Yast::Linuxrc.InstallInf("reg_code") || ""
       raw_reg_code.include?(":") ? [raw_reg_code.split(":", 2)].to_h : nil
     end
 
