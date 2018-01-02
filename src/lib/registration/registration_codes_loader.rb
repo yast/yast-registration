@@ -63,7 +63,7 @@ module Registration
     #                                      and the value is registration code
     def reg_codes_from_install_inf
       raw_reg_code = Yast::Linuxrc.InstallInf("reg_code")
-      raw_reg_code.include?(":") ? [raw_reg_code.split(":", 2)].to_h : {}
+      raw_reg_code.include?(":") ? [raw_reg_code.split(":", 2)].to_h : nil
     end
 
     # @param pattern [String] template for tempfile name

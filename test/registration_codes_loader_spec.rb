@@ -115,13 +115,13 @@ describe Registration::RegistrationCodesLoader do
     it "returns empty hash when reg_code option is missing" do
       reg_code
 
-      expect(subject.reg_codes_from_install_inf).to be_empty
+      expect(subject.reg_codes_from_install_inf).to be_nil
     end
 
     it "returns empty hash when the reg_code's value is corrupted" do
       reg_code(value: "missing_product_part")
 
-      expect(subject.reg_codes_from_install_inf).to be_empty
+      expect(subject.reg_codes_from_install_inf).to be_nil
     end
   end
 

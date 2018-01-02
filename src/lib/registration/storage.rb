@@ -38,7 +38,7 @@ module Registration
 
       def initialize
         self.reg_codes = if Stage.initial
-          reg_codes_from_usb_stick || reg_code_from_install_inf
+          reg_codes_from_usb_stick || reg_code_from_install_inf || {}
         else
           {}
         end
