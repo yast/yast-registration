@@ -54,6 +54,18 @@ module Registration
       nil
     end
 
+    # Loades registration code from /etc/install.inf
+    #
+    # Expected format is reg_code: <product>:<registration_code>
+    # for example: reg_code: sle15:abcdefghijkl
+    #
+    # @return [Hash{String => String, nil] The key of the hash is product name
+    #                                      and the value is registration code
+    def reg_codes_from_install_inf
+      raw_reg_code = Yast::Linuxrc.InstallInf("reg_code")
+      raw_reg_code.include?(":") ? [raw_reg_code.split(":", 2)].to_h : {}
+    end
+
     # @param pattern [String] template for tempfile name
     # @yieldparam actual file name
     def with_tempfile(pattern, &block)
