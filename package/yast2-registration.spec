@@ -58,7 +58,6 @@ BuildRequires:  yast2-slp >= 3.1.9
 # packager/product_patterns.rb
 BuildRequires:  yast2-packager >= 3.1.95
 BuildRequires:  yast2-update >= 3.1.36
-BuildRequires:  autoyast2-installation
 
 BuildArch:      noarch
 
