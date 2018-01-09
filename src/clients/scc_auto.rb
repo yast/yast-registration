@@ -129,7 +129,8 @@ module Yast
       # available from other sources
       product = Yast::AutoinstConfig.selected_product
       if product && !settings["reg_code"]
-        settings["reg_code"] = Registration::Storage::RegCodes.instance.reg_codes[product.short_name] || ""
+        reg_codes_loader = Registration::Storage::RegCodes.instance
+        settings["reg_code"] = reg_codes_loader.reg_codes[product.short_name] || ""
       end
 
       log.debug "Importing config: #{settings}"
