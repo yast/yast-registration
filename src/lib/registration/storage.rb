@@ -37,7 +37,7 @@ module Registration
 
       def initialize
         self.reg_codes = if Stage.initial
-          reg_codes_from_usb_stick || {}
+          reg_codes_from_usb_stick || reg_codes_from_install_inf || {}
         else
           {}
         end
@@ -131,14 +131,18 @@ module Registration
       end
 
       def import(settings)
+        Yast.import "AutoinstConfig"
+
         reset
+
+        product = Yast::AutoinstConfig.selected_product.short_name
 
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
         @slp_discovery = settings.fetch("slp_discovery", false)
         @reg_server_cert = settings["reg_server_cert"] || ""
         @email = settings["email"] || ""
-        @reg_code = settings["reg_code"] || ""
+        @reg_code = settings["reg_code"] || RegCodes.instance.reg_codes[product] || ""
         @install_updates = settings.fetch("install_updates", false)
         @addons = import_addons(settings)
         @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""

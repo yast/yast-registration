@@ -123,6 +123,16 @@ module Yast
     # (For use by autoinstallation.)
     # param [Hash] settings The structure to be imported.
     def import(settings)
+      Yast.import "AutoinstConfig"
+
+      # merge reg code if not defined in the profile but
+      # available from other sources
+      product = Yast::AutoinstConfig.selected_product
+      if product && !settings["reg_code"]
+        reg_codes_loader = Registration::Storage::RegCodes.instance
+        settings["reg_code"] = reg_codes_loader.reg_codes[product.short_name] || ""
+      end
+
       log.debug "Importing config: #{settings}"
       @config.import(settings)
     end
