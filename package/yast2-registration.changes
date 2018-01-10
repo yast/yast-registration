@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 10 14:36:51 UTC 2018 - igonzalezsosa@suse.com
+
+- Fix initialization to copy the profile to /tmp/profile again
+  (bsc#1075334)
+- 4.0.15
+
+-------------------------------------------------------------------
 Thu Dec 14 08:45:40 UTC 2017 - mfilka@suse.com
 
 - fate#323450
