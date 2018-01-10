@@ -131,11 +131,11 @@ module Registration
       end
 
       def import(settings)
-        Yast.import "AutoinstConfig"
+        Yast.import "AutoinstFunctions"
 
         reset
 
-        product = Yast::AutoinstConfig.selected_product.short_name
+        product = Yast::AutoinstFunctions.selected_product.short_name
 
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
