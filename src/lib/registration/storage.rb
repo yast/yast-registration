@@ -138,7 +138,7 @@ module Registration
         @slp_discovery = settings.fetch("slp_discovery", false)
         @reg_server_cert = settings["reg_server_cert"] || ""
         @email = settings["email"] || ""
-        @reg_code = settings["reg_code"] ||  ""
+        @reg_code = settings["reg_code"] || ""
         @install_updates = settings.fetch("install_updates", false)
         @addons = import_addons(settings)
         @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""
