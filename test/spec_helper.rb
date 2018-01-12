@@ -66,7 +66,7 @@ end
 require "yast"
 require "y2packager/product"
 def stub_product_selection
-  name = "AutoinstConfig"
+  name = "AutoinstFunctions"
   Yast.const_set name.to_sym, Class.new {
     def self.selected_product
       Y2Packager::Product.new(name: "SLES", short_name: "SLES15")

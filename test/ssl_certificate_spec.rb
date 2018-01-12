@@ -55,10 +55,13 @@ describe Registration::SslCertificate do
       stub_const("Registration::SslCertificate::CA_CERTS_DIR", ca_dir.to_s)
       allow(Yast::Execute).to receive(:locally).and_call_original
       allow(FileUtils).to receive(:rm_rf).and_call_original
+      CERT_LINKS.each { |l| FileUtils.ln_sf(tmp_ca_dir.join(CERT_NAME), tmp_ca_dir.join(l)) }
     end
 
     after do
       FileUtils.rm_rf(ca_dir.to_s)
+      cert_links = tmp_ca_dir.children.select(&:symlink?)
+      FileUtils.rm(cert_links) unless cert_links.empty?
     end
 
     it "adds new certs under anchors to system CA certificates" do

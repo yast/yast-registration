@@ -1,8 +1,16 @@
 -------------------------------------------------------------------
 Fri Jan 12 10:07:29 UTC 2018 - mfilka@suse.com
 
-- fate#323450
-  - added missing part of previos patch
+- bnc#1075723
+  - added missing part of previous patch
+- 4.0.16
+
+-------------------------------------------------------------------
+Wed Jan 10 14:36:51 UTC 2018 - igonzalezsosa@suse.com
+
+- Fix initialization to copy the profile to /tmp/profile again
+  (bsc#1075334)
+- Fix package build (dropping symlinks under test/fixtures/anchors)
 - 4.0.15
 
 -------------------------------------------------------------------
