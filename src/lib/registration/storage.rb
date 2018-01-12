@@ -131,18 +131,14 @@ module Registration
       end
 
       def import(settings)
-        Yast.import "AutoinstFunctions"
-
         reset
-
-        product = Yast::AutoinstFunctions.selected_product.short_name
 
         @do_registration = settings.fetch("do_registration", false)
         @reg_server = settings["reg_server"] || ""
         @slp_discovery = settings.fetch("slp_discovery", false)
         @reg_server_cert = settings["reg_server_cert"] || ""
         @email = settings["email"] || ""
-        @reg_code = settings["reg_code"] || RegCodes.instance.reg_codes[product] || ""
+        @reg_code = settings["reg_code"] || ""
         @install_updates = settings.fetch("install_updates", false)
         @addons = import_addons(settings)
         @reg_server_cert_fingerprint_type = settings["reg_server_cert_fingerprint_type"] || ""
