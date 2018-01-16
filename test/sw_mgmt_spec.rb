@@ -297,6 +297,13 @@ describe Registration::SwMgmt do
   end
 
   describe ".find_base_product" do
+    before do
+      allow(Y2Packager::ProductReader).to receive(:installation_package_mapping)
+        .and_return("SLES"     => "skelcd-control-SLES",
+                    "SLED"     => "skelcd-control-SLED",
+                    "SLES_SAP" => "skelcd-control-SLES_SAP")
+    end
+
     context "in installed system" do
       let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
       it "returns installed products" do

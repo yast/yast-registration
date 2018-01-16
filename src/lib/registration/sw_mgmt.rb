@@ -34,6 +34,7 @@ require "registration/url_helpers"
 require "registration/repo_state"
 
 require "packager/product_patterns"
+require "y2packager/product_reader"
 
 module Registration
   Yast.import "AddOnProduct"
@@ -123,24 +124,41 @@ module Registration
       selected = product_selected? if Stage.initial
       installed = product_installed? if Stage.initial
 
+      # list of products defined by the "system-installation()" provides
+      system_products = Y2Packager::ProductReader.installation_package_mapping.keys
+      log.info("Found system-installation() products: #{system_products.inspect}")
+
       # during installation the products are :selected,
       # on a running system the products are :installed
       # during upgrade use the newer selected product (same as in installation)
+      # The base product must be marked by the "system-installation()" provides
+      # by some package.
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
+        if Stage.initial && !system_products.include?(p["name"])
+          log.info("Skipping product #{p["name"].inspect}, no system-installation() provides")
+          next false
+        end
+
         if Stage.initial && Mode.auto
           Yast.import "AutoinstFunctions"
           # note: AutoinstFunctions.selected_product should never be nil when
           # AY let it pass here
           p["name"] == AutoinstFunctions.selected_product.name
         elsif Stage.initial && !Mode.update
-          # during installation the type is not valid yet yet
+          # during installation the ["type"] value is not valid yet yet
           # (the base product is determined by /etc/products.d/baseproduct symlink)
-          # use the selected product or the product from the first repository
-          selected ? p["status"] == :selected : p["source"] == 0
+          # use the selected or available product
+          p["status"] == (selected ? :selected : :available)
         elsif Stage.initial
-          # during upgrade it depends on whether target is already initialized
+          # during upgrade it depends on whether target is already initialized,
           # use the product from the medium for the self-update step
-          installed ? (p["status"] == :installed && p["type"] == "base") : p["source"] == 0
+          if installed
+            p["status"] == :installed && p["type"] == "base"
+          elsif selected
+            p["status"] == :selected
+          else
+            p["status"] == :available
+          end
         else
           # in installed system or at upgrade the base product has valid type
           p["status"] == :installed && p["type"] == "base"
