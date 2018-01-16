@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Jan 16 12:39:14 UTC 2018 - lslezak@suse.cz
+
+- Adjust the base product selection so it is not influenced by
+  a possibly changed repository priority, use the
+  "system-installation()" provides just like the other code in the
+  installer (related to bsc#1071742)
+- 4.0.17
+
+-------------------------------------------------------------------
 Fri Jan 12 10:07:29 UTC 2018 - mfilka@suse.com
 
 - bnc#1075723

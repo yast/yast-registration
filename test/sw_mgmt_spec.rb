@@ -297,6 +297,14 @@ describe Registration::SwMgmt do
   end
 
   describe ".find_base_product" do
+    before do
+      # mapping of the "system-installation()" provides
+      allow(Y2Packager::ProductReader).to receive(:installation_package_mapping)
+        .and_return("SLES"     => "skelcd-control-SLES",
+                    "SLED"     => "skelcd-control-SLED",
+                    "SLES_SAP" => "skelcd-control-SLES_SAP")
+    end
+
     context "in installed system" do
       let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
       it "returns installed products" do
@@ -310,8 +318,11 @@ describe Registration::SwMgmt do
     context "at installation" do
       let(:products) { load_yaml_fixture("products_sp2_update.yml") }
 
-      it "returns the selected product if a product is selected" do
+      before do
         allow(Yast::Stage).to receive(:initial).and_return(true)
+      end
+
+      it "returns the selected product if a product is selected" do
         expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products).exactly(3).times
         # sanity check: just make sure the fixture contains the expected data
         expect(products.any? { |p| p["status"] == :selected })
@@ -321,8 +332,6 @@ describe Registration::SwMgmt do
       end
 
       it "returns the product from the installation medium if no product is selected" do
-        allow(Yast::Stage).to receive(:initial).and_return(true)
-
         # patch the fixture so no product is selected
         products2 = products.dup
         products2[3]["status"] = :available
@@ -332,6 +341,15 @@ describe Registration::SwMgmt do
         expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products2).exactly(3).times
         # the SLES product in the list is installed
         expect(subject.find_base_product).to eq(products[3])
+      end
+
+      it "ignores a selected product not marked by the `system-installation()` provides" do
+        products3 = [{ "name" => "foo", "status" => :selected },
+                     { "name" => "SLES", "status" => :selected }]
+
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products3).exactly(3).times
+        # the selected product is ignored, the result is nil
+        expect(subject.find_base_product).to eq(products3[1])
       end
     end
   end
