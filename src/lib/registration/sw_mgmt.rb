@@ -117,6 +117,8 @@ module Registration
     end
 
     def self.find_base_product
+      # FIXME: refactor the code to use Y2Packager::Product
+
       # just for debugging:
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
@@ -151,10 +153,10 @@ module Registration
 
     # Evaluate the product if it is a base product depending on the current
     # system status.
-    # @param p Hash the product from pkg-bindings
+    # @param p [Hash] the product from pkg-bindings
     # @param selected [Boolean,nil] is any product selected?
     # @param installed [Boolean,nil] is any product istalled?
-    # @return [Boolean]
+    # @return [Boolean] true if it is a base product
     def self.evaluate_product(p, selected, installed)
       if Stage.initial && Mode.auto
         Yast.import "AutoinstFunctions"
