@@ -139,30 +139,7 @@ module Registration
           next false
         end
 
-        if Stage.initial && Mode.auto
-          Yast.import "AutoinstFunctions"
-          # note: AutoinstFunctions.selected_product should never be nil when
-          # AY let it pass here
-          p["name"] == AutoinstFunctions.selected_product.name
-        elsif Stage.initial && !Mode.update
-          # during installation the ["type"] value is not valid yet yet
-          # (the base product is determined by /etc/products.d/baseproduct symlink)
-          # use the selected or available product
-          p["status"] == (selected ? :selected : :available)
-        elsif Stage.initial
-          # during upgrade it depends on whether target is already initialized,
-          # use the product from the medium for the self-update step
-          if installed
-            p["status"] == :installed && p["type"] == "base"
-          elsif selected
-            p["status"] == :selected
-          else
-            p["status"] == :available
-          end
-        else
-          # in installed system or at upgrade the base product has valid type
-          p["status"] == :installed && p["type"] == "base"
-        end
+        evaluate_product(p, selected, installed)
       end
 
       log.debug "Found base products: #{products}"
@@ -171,6 +148,41 @@ module Registration
 
       products.first
     end
+
+    # Evaluate the product if it is a base product depending on the current
+    # system status.
+    # @param p Hash the product from pkg-bindings
+    # @param selected [Boolean,nil] is any product selected?
+    # @param installed [Boolean,nil] is any product istalled?
+    # @return [Boolean]
+    def self.evaluate_product(p, selected, installed)
+      if Stage.initial && Mode.auto
+        Yast.import "AutoinstFunctions"
+        # note: AutoinstFunctions.selected_product should never be nil when
+        # AY let it pass here
+        p["name"] == AutoinstFunctions.selected_product.name
+      elsif Stage.initial && !Mode.update
+        # during installation the ["type"] value is not valid yet yet
+        # (the base product is determined by /etc/products.d/baseproduct symlink)
+        # use the selected or available product
+        p["status"] == (selected ? :selected : :available)
+      elsif Stage.initial
+        # during upgrade it depends on whether target is already initialized,
+        # use the product from the medium for the self-update step
+        if installed
+          p["status"] == :installed && p["type"] == "base"
+        elsif selected
+          p["status"] == :selected
+        else
+          p["status"] == :available
+        end
+      else
+        # in installed system or at upgrade the base product has valid type
+        p["status"] == :installed && p["type"] == "base"
+      end
+    end
+
+    private_class_method :evaluate_product
 
     # Any product selected to install?
     # @return [Boolean] true if at least one product is selected to install
