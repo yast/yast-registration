@@ -39,10 +39,26 @@ module Registration
 
       # Pass the target directory to SUSEConnect
       def set_target_path
-        return if Yast::Installation.destdir == "/"
+        destdir = Yast::Installation.destdir
+        return if destdir.nil? || destdir == "/"
 
-        log.info("Setting SUSEConnect target directory: #{Yast::Installation.destdir}")
-        SUSE::Connect::System.filesystem_root = Yast::Installation.destdir
+        log.info("Setting SUSEConnect target directory: #{destdir}")
+        SUSE::Connect::System.filesystem_root = destdir
+
+        # copy the old config from the upgraded system to inst-sys
+        # to correctly work in the SMT case
+        # FIXME: this should not be needed, it should be possible to read
+        # the config from the /mnt directly...
+        target_path = SUSE::Connect::YaST::DEFAULT_CONFIG_FILE
+        source_path = File.join(destdir, target_path)
+
+        if File.exist?(source_path)
+          log.info("Copying #{source_path} -> #{target_path}")
+          ::FileUtils.cp(source_path, target_path)
+        elsif File.exist?(target_path)
+          log.info("Removing #{target_path}...")
+          ::FileUtils.rm(target_path)
+        end
       end
     end
   end

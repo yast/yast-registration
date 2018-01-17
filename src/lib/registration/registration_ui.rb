@@ -197,6 +197,18 @@ module Registration
       end
     end
 
+    # According to the official SUSE terminology, "online" refers to a running
+    # system and (offline) to a system that is not running. It's NOT about the
+    # network connectivity
+    def offline_migration_products(products, base_product)
+      Yast::Popup.Feedback(
+        _(CONTACTING_MESSAGE),
+        _("Loading Migration Products...")
+      ) do
+        registration.offline_migration_products(products, base_product)
+      end
+    end
+
     # Register the selected addons, asks for reg. codes if required, known_reg_codes
     # @param selected_addons [Array<Addon>] list of addons selected for registration,
     #   successfully registered addons are removed from the list

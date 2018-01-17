@@ -167,6 +167,18 @@ module Registration
       migrations
     end
 
+    def offline_migration_products(installed_products, target_base_product)
+      log.info "Offline migration for: #{target_base_product}."
+      migration_paths = []
+      ConnectHelpers.catch_registration_errors do
+        migration_paths = SUSE::Connect::YaST
+                          .system_offline_migrations(installed_products, target_base_product)
+      end
+
+      log.info "Received possible migrations paths: #{migration_paths}"
+      migration_paths
+    end
+
     # Get the list of updates for a base product or self_update_id if defined
     #
     # @return [Array<String>] List of URLs of updates repositories.
