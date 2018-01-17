@@ -25,10 +25,12 @@ if ENV["COVERAGE"]
   end
 end
 
-libdir = File.expand_path("../../src/lib", __FILE__)
-$LOAD_PATH.unshift(libdir)
+srcdir = File.expand_path("../../src", __FILE__)
+y2dirs = ENV.fetch("Y2DIR", "").split(":")
+ENV["Y2DIR"] = y2dirs.unshift(srcdir).join(":")
 
-ENV["Y2DIR"] = File.expand_path("../../src", __FILE__)
+libdir = "#{srcdir}/lib"
+$LOAD_PATH.unshift(libdir)
 
 require "suse/connect"
 
