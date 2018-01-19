@@ -218,14 +218,16 @@ module Registration
           false,
           false
         )
+        selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
         # when registration fails go back
-        return register_selected_addons(selected_addons, known_reg_codes) ? :next : :back
+        return selected_addons.empty? ? :next : :back
       else
         loop do
           ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
           return ret unless ret == :next
 
-          return :next if register_selected_addons(selected_addons, known_reg_codes)
+          selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
+          return :next if selected_addons.empty?
         end
       end
     end
@@ -321,52 +323,50 @@ module Registration
       end
     end
 
-    # register all selected addons
-    def register_selected_addons(selected_addons, known_reg_codes)
-      # create duplicate as array is modified in loop for registration order
-      registration_order = selected_addons.clone
-
-      product_succeed = registration_order.map do |product|
-        registered = ConnectHelpers.catch_registration_errors(
-          message_prefix: "#{product.label}\n"
-        ) do
-          register_selected_addon(product, known_reg_codes[product.identifier])
-        end
-
-        # remove from selected after successful registration
-        if registered
-          selected_addons.reject! { |selected| selected.identifier == product.identifier }
-        end
-        registered
+    # Register those of *selected_addons* that we can without asking
+    # the user for a reg code. The remaining ones are returned.
+    # @param product [Array<Addon>]
+    # @param known_reg_codes [Hash{String => String}] addon id -> reg code
+    # @return [Array<Addon>] the remaining addons
+    def try_register_addons(selected_addons, known_reg_codes)
+      # return those where r_s_a fails
+      selected_addons.reject do |product|
+        register_selected_addon(product, known_reg_codes[product.identifier])
       end
-
-      !product_succeed.include?(false) # succeed only if noone failed
     end
 
+    # @param product [Addon]
+    # @param reg_code [String]
+    # @return [Boolean] success
     def register_selected_addon(product, reg_code)
-      product_service = Yast::Popup.Feedback(
-        _(CONTACTING_MESSAGE),
-        # %s is name of given product
-        _("Registering %s ...") % product.label
+      success = ConnectHelpers.catch_registration_errors(
+        message_prefix: "#{product.label}\n"
       ) do
-        product_data = {
-          "name"     => product.identifier,
-          "reg_code" => reg_code,
-          "arch"     => product.arch,
-          "version"  => product.version
-        }
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # %s is name of given product
+          _("Registering %s ...") % product.label
+        ) do
+          product_data = {
+            "name"     => product.identifier,
+            "reg_code" => reg_code,
+            "arch"     => product.arch,
+            "version"  => product.version
+          }
 
-        registration.register_product(product_data)
+          registration.register_product(product_data)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+        # remember the added service
+        Storage::Cache.instance.addon_services << product_service
+
+        # mark as registered
+        product.registered
       end
-
-      # select repositories to use in installation (e.g. enable/disable Updates)
-      select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
-
-      # remember the added service
-      Storage::Cache.instance.addon_services << product_service
-
-      # mark as registered
-      product.registered
+      success
     end
 
     def select_repositories(product_service)
