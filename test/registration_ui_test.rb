@@ -174,6 +174,25 @@ describe "Registration::RegistrationUI" do
 
   end
 
+  describe "#try_register_addons" do
+    context "for a non-free product without a known regcode" do
+      it "uses the base product regcode" do
+        selected_addons = [addon_HA_GEO]
+
+        options = Registration::Storage::InstallationOptions.instance
+        expect(options).to receive(:reg_code).and_return("my_regcode_for_base")
+
+        expect(registration_ui)
+          .to receive(:register_selected_addon)
+          .with(addon_HA_GEO, "my_regcode_for_base", silent_reg_code_mismatch: true)
+          .and_return(false)
+
+        expect(registration_ui.send(:try_register_addons, selected_addons, {}))
+          .to eq(selected_addons)
+      end
+    end
+  end
+
   describe "#migration_products" do
     let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
     let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }

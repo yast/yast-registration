@@ -46,7 +46,6 @@ module Registration
       Yast.import "Mode"
       Yast.import "Popup"
       Yast.import "Wizard"
-      Yast.import "Mode"
     end
 
     # register the system and the base product
@@ -330,16 +329,30 @@ module Registration
     def try_register_addons(selected_addons, known_reg_codes)
       # return those where r_s_a fails
       selected_addons.reject do |product|
-        register_selected_addon(product, known_reg_codes[product.identifier])
+        reg_code = known_reg_codes[product.identifier]
+        mismatch_ok = false
+        if reg_code
+          log.info "registering add-on using its own regcode"
+        elsif product.free
+          log.info "registering a free add-on"
+        elsif !Yast::Mode.auto
+          log.info "registering add-on using regcode for its base"
+          options = Storage::InstallationOptions.instance
+          reg_code = options.reg_code
+          mismatch_ok = true
+        end
+        register_selected_addon(product, reg_code, silent_reg_code_mismatch: mismatch_ok)
       end
     end
 
     # @param product [Addon]
     # @param reg_code [String]
+    # @param silent_reg_code_mismatch [Boolean]
     # @return [Boolean] success
-    def register_selected_addon(product, reg_code)
+    def register_selected_addon(product, reg_code, silent_reg_code_mismatch:)
       success = ConnectHelpers.catch_registration_errors(
-        message_prefix: "#{product.label}\n"
+        message_prefix:           "#{product.label}\n",
+        silent_reg_code_mismatch: silent_reg_code_mismatch
       ) do
         product_service = Yast::Popup.Feedback(
           _(CONTACTING_MESSAGE),
