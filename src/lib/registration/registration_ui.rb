@@ -205,30 +205,29 @@ module Registration
     #   user entered values
     # @return [Symbol]
     def register_addons(selected_addons, known_reg_codes)
-      # if registering only add-ons which do not need a reg. code (like SDK)
-      # then simply start the registration
-      if selected_addons.all?(&:free)
-        Yast::Wizard.SetContents(
-          # dialog title
-          _("Register Extensions and Modules"),
-          # display only the products which need a registration code
-          Empty(),
-          # help text
-          _("<p>Extensions and Modules are being registered.</p>"),
-          false,
-          false
-        )
+      Yast::Wizard.SetContents(
+        # dialog title
+        _("Register Extensions and Modules"),
+        # display only the products which need a registration code
+        Empty(),
+        # help text
+        _("<p>Extensions and Modules are being registered.</p>"),
+        false,
+        false
+      )
+      loop do
+        # If registering only add-ons which do not need a reg. code (like SDK)
+        # then simply start the registration.
+        # Or, try registering the paid add-ons with the base product's key:
+        # eg. use SLES4SAP registration for HA.
         selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
-        # when registration fails go back
-        return selected_addons.empty? ? :next : :back
-      else
-        loop do
-          ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
-          return ret unless ret == :next
+        return :next if selected_addons.empty?
+        # cannot be helped by asking for regcodes
+        return :back if selected_addons.all?(&:free)
 
-          selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
-          return :next if selected_addons.empty?
-        end
+        # ask user to fill in known_reg_codes
+        ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
+        return ret unless ret == :next
       end
     end
 
