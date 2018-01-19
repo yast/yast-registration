@@ -58,8 +58,15 @@ module Registration
     # @param message_prefix [String] Prefix before error like affected product or addon
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
+    # @param silent_reg_code_mismatch [Boolean] true if no popup should be shown
+    #   if a registration code is provided
+    #   that does not match the registered product.
+    #   It still returns false.
     # @return [Boolean] success
-    def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
+    def self.catch_registration_errors(message_prefix: "",
+      show_update_hint: false,
+      silent_reg_code_mismatch: false,
+      &block)
       # import the SSL certificate just once to avoid an infinite loop
       certificate_imported = false
       begin
@@ -96,8 +103,12 @@ module Registration
           check_smt_api(error_msg)
           report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 422
-          # Error popup
-          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          if silent_reg_code_mismatch && e.message =~ /does not include the requested product/
+            log.info "Reg code does not work for this product, that's OK"
+          else
+            # Error popup
+            report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          end
         when 400..499
           report_error(message_prefix + _("Registration client error."), error_msg)
         when 500..599
