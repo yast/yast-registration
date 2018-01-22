@@ -131,7 +131,7 @@ describe Registration::ConnectHelpers do
 
       it "does not report an error and returns false" do
         msg = "Subscription does not include the requested product 'Fountain Wristwatch'"
-        exc = api_error(code: 422, body: { "localized_error" => msg })
+        exc = api_error(code: 422, body: { "error" => msg })
 
         expect(Yast::Report).to_not receive(:Error)
         expect(helpers.catch_registration_errors(silent_reg_code_mismatch: true) { raise exc })
