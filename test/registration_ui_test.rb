@@ -127,21 +127,22 @@ describe "Registration::RegistrationUI" do
       it "does not ask for reg. code if all addons are free" do
         # user is not asked for any reg. code
         expect(Registration::UI::AddonRegCodesDialog).to_not receive(:run)
-        allow(registration_ui).to receive(:register_selected_addons) { true }
+        allow(registration_ui).to receive(:try_register_addons).and_return([])
 
         # Register Legacy module
         registration_ui.register_addons([addon_legacy], {})
       end
 
       it "returns :next if everything goes fine" do
-        allow(registration_ui).to receive(:register_selected_addons) { true }
+        allow(registration_ui).to receive(:try_register_addons).and_return([])
         expect(registration_ui.register_addons([addon_legacy], {})).to eq :next
       end
 
       it "returns :back if some registration failed" do
         # FIXME: Since the code is not functional, there is currently no cleaner
         # way to mock a registration failure
-        allow(registration_ui).to receive(:register_selected_addons).and_return false
+        # FIXME: (Some weeks later...) Now there is?
+        allow(registration_ui).to receive(:try_register_addons).and_return([addon_legacy])
 
         expect(registration_ui.register_addons([addon_legacy], {})).to eq :back
       end
@@ -152,7 +153,7 @@ describe "Registration::RegistrationUI" do
 
       it "returns :next if everything goes fine" do
         allow(Registration::UI::AddonRegCodesDialog).to receive(:run).and_return(:next)
-        allow(registration_ui).to receive(:register_selected_addons).with(any_args) { true }
+        allow(registration_ui).to receive(:try_register_addons).with(any_args).and_return([])
 
         selected_addons = [addon_HA_GEO, addon_SDK]
         expect(registration_ui.register_addons(selected_addons, {})).to eq :next
@@ -161,8 +162,8 @@ describe "Registration::RegistrationUI" do
       it "keep asking for a reg. code if some reg. code failed" do
         # Stub user interaction for reg codes
         allow(Registration::UI::AddonRegCodesDialog).to receive(:run).and_return(:next, :next)
-        allow(registration_ui).to receive(:register_selected_addons)
-          .with(any_args).and_return(false, true)
+        allow(registration_ui).to receive(:try_register_addons)
+          .with(any_args).and_return([addon_SDK], [])
 
         # Register HA-GEO + SDK addons
         selected_addons = [addon_HA_GEO, addon_SDK]
@@ -171,6 +172,25 @@ describe "Registration::RegistrationUI" do
 
     end
 
+  end
+
+  describe "#try_register_addons" do
+    context "for a non-free product without a known regcode" do
+      it "uses the base product regcode" do
+        selected_addons = [addon_HA_GEO]
+
+        options = Registration::Storage::InstallationOptions.instance
+        expect(options).to receive(:reg_code).and_return("my_regcode_for_base")
+
+        expect(registration_ui)
+          .to receive(:register_selected_addon)
+          .with(addon_HA_GEO, "my_regcode_for_base", silent_reg_code_mismatch: true)
+          .and_return(false)
+
+        expect(registration_ui.send(:try_register_addons, selected_addons, {}))
+          .to eq(selected_addons)
+      end
+    end
   end
 
   describe "#migration_products" do

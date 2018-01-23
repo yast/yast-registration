@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Jan 17 14:24:58 UTC 2018 - mvidner@suse.com
+
+- Try base product registration code first (bsc#1075551).
+  Some add-ons/extensions are not free but can be registered
+  using their base product's registration code. Try it automatically
+  so that the user does not have to enter it again.
+- 4.0.18
+
+-------------------------------------------------------------------
 Tue Jan 16 12:39:14 UTC 2018 - lslezak@suse.cz
 
 - Adjust the base product selection so it is not influenced by

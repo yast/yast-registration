@@ -4,7 +4,7 @@ require_relative "spec_helper"
 require "registration/connect_helpers"
 
 # helper for creating the SCC API error exceptions
-def api_error(code: 400, headers: {}, body: "")
+def api_error(code: 400, headers: {}, body: {})
   SUSE::Connect::ApiError.new(
     OpenStruct.new(
       code:    code,
@@ -120,6 +120,22 @@ describe Registration::ConnectHelpers do
     [400, 401, 422, 500, 42].each do |error_code|
       context "error #{error_code} is received" do
         include_examples "reports error and returns false", api_error(code: error_code)
+      end
+    end
+
+    context "'silent_reg_code_mismatch' parameter is set and a mismatch error occurs" do
+      before do
+        allow(Registration::UrlHelpers).to receive(:registration_url)
+          .and_return(SUSE::Connect::YaST::DEFAULT_URL)
+      end
+
+      it "does not report an error and returns false" do
+        msg = "Subscription does not include the requested product 'Fountain Wristwatch'"
+        exc = api_error(code: 422, body: { "error" => msg })
+
+        expect(Yast::Report).to_not receive(:Error)
+        expect(helpers.catch_registration_errors(silent_reg_code_mismatch: true) { raise exc })
+          .to eq(false)
       end
     end
 

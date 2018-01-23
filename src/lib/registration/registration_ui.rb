@@ -46,7 +46,6 @@ module Registration
       Yast.import "Mode"
       Yast.import "Popup"
       Yast.import "Wizard"
-      Yast.import "Mode"
     end
 
     # register the system and the base product
@@ -205,28 +204,29 @@ module Registration
     #   user entered values
     # @return [Symbol]
     def register_addons(selected_addons, known_reg_codes)
-      # if registering only add-ons which do not need a reg. code (like SDK)
-      # then simply start the registration
-      if selected_addons.all?(&:free)
-        Yast::Wizard.SetContents(
-          # dialog title
-          _("Register Extensions and Modules"),
-          # display only the products which need a registration code
-          Empty(),
-          # help text
-          _("<p>Extensions and Modules are being registered.</p>"),
-          false,
-          false
-        )
-        # when registration fails go back
-        return register_selected_addons(selected_addons, known_reg_codes) ? :next : :back
-      else
-        loop do
-          ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
-          return ret unless ret == :next
+      Yast::Wizard.SetContents(
+        # dialog title
+        _("Register Extensions and Modules"),
+        # display only the products which need a registration code
+        Empty(),
+        # help text
+        _("<p>Extensions and Modules are being registered.</p>"),
+        false,
+        false
+      )
+      loop do
+        # If registering only add-ons which do not need a reg. code (like SDK)
+        # then simply start the registration.
+        # Or, try registering the paid add-ons with the base product's key:
+        # eg. use SLES4SAP registration for HA.
+        selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
+        return :next if selected_addons.empty?
+        # cannot be helped by asking for regcodes
+        return :back if selected_addons.all?(&:free)
 
-          return :next if register_selected_addons(selected_addons, known_reg_codes)
-        end
+        # ask user to fill in known_reg_codes
+        ret = UI::AddonRegCodesDialog.run(selected_addons, known_reg_codes)
+        return ret unless ret == :next
       end
     end
 
@@ -321,52 +321,64 @@ module Registration
       end
     end
 
-    # register all selected addons
-    def register_selected_addons(selected_addons, known_reg_codes)
-      # create duplicate as array is modified in loop for registration order
-      registration_order = selected_addons.clone
-
-      product_succeed = registration_order.map do |product|
-        registered = ConnectHelpers.catch_registration_errors(
-          message_prefix: "#{product.label}\n"
-        ) do
-          register_selected_addon(product, known_reg_codes[product.identifier])
+    # Register those of *selected_addons* that we can without asking
+    # the user for a reg code. The remaining ones are returned.
+    # @param product [Array<Addon>]
+    # @param known_reg_codes [Hash{String => String}] addon id -> reg code
+    # @return [Array<Addon>] the remaining addons
+    def try_register_addons(selected_addons, known_reg_codes)
+      # return those where r_s_a fails
+      selected_addons.reject do |product|
+        reg_code = known_reg_codes[product.identifier]
+        mismatch_ok = false
+        if reg_code
+          log.info "registering add-on using its own regcode"
+        elsif product.free
+          log.info "registering a free add-on"
+        elsif !Yast::Mode.auto
+          log.info "registering add-on using regcode for its base"
+          options = Storage::InstallationOptions.instance
+          reg_code = options.reg_code
+          mismatch_ok = true
         end
-
-        # remove from selected after successful registration
-        if registered
-          selected_addons.reject! { |selected| selected.identifier == product.identifier }
-        end
-        registered
+        register_selected_addon(product, reg_code, silent_reg_code_mismatch: mismatch_ok)
       end
-
-      !product_succeed.include?(false) # succeed only if noone failed
     end
 
-    def register_selected_addon(product, reg_code)
-      product_service = Yast::Popup.Feedback(
-        _(CONTACTING_MESSAGE),
-        # %s is name of given product
-        _("Registering %s ...") % product.label
+    # @param product [Addon]
+    # @param reg_code [String]
+    # @param silent_reg_code_mismatch [Boolean]
+    # @return [Boolean] success
+    def register_selected_addon(product, reg_code, silent_reg_code_mismatch:)
+      success = ConnectHelpers.catch_registration_errors(
+        message_prefix:           "#{product.label}\n",
+        silent_reg_code_mismatch: silent_reg_code_mismatch
       ) do
-        product_data = {
-          "name"     => product.identifier,
-          "reg_code" => reg_code,
-          "arch"     => product.arch,
-          "version"  => product.version
-        }
+        product_service = Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # %s is name of given product
+          _("Registering %s ...") % product.label
+        ) do
+          product_data = {
+            "name"     => product.identifier,
+            "reg_code" => reg_code,
+            "arch"     => product.arch,
+            "version"  => product.version
+          }
 
-        registration.register_product(product_data)
+          registration.register_product(product_data)
+        end
+
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
+
+        # remember the added service
+        Storage::Cache.instance.addon_services << product_service
+
+        # mark as registered
+        product.registered
       end
-
-      # select repositories to use in installation (e.g. enable/disable Updates)
-      select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
-
-      # remember the added service
-      Storage::Cache.instance.addon_services << product_service
-
-      # mark as registered
-      product.registered
+      success
     end
 
     def select_repositories(product_service)

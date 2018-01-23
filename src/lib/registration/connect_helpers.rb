@@ -58,8 +58,15 @@ module Registration
     # @param message_prefix [String] Prefix before error like affected product or addon
     # @param show_update_hint [Boolean] true if an extra hint for registration update
     #   should be displayed
+    # @param silent_reg_code_mismatch [Boolean] true if no popup should be shown
+    #   if a registration code is provided
+    #   that does not match the registered product.
+    #   It still returns false.
     # @return [Boolean] success
-    def self.catch_registration_errors(message_prefix: "", show_update_hint: false, &block)
+    def self.catch_registration_errors(message_prefix: "",
+      show_update_hint: false,
+      silent_reg_code_mismatch: false,
+      &block)
       # import the SSL certificate just once to avoid an infinite loop
       certificate_imported = false
       begin
@@ -96,8 +103,13 @@ module Registration
           check_smt_api(error_msg)
           report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 422
-          # Error popup
-          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          if silent_reg_code_mismatch && e.response.body["error"] =~
+              /does not include the requested product/
+            log.info "Reg code does not work for this product, that's OK"
+          else
+            # Error popup
+            report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          end
         when 400..499
           report_error(message_prefix + _("Registration client error."), error_msg)
         when 500..599
@@ -117,39 +129,11 @@ module Registration
         false
       rescue OpenSSL::SSL::SSLError => e
         log.error "OpenSSL error: #{e}"
-
-        cert = Storage::SSLErrors.instance.ssl_failed_cert
-        error_code = Storage::SSLErrors.instance.ssl_error_code
-        expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
-
-        # in non-AutoYast mode ask the user to import the certificate
-        if !Yast::Mode.autoinst && cert && IMPORT_ERROR_CODES.include?(error_code)
-          # retry after successfull import
-          retry if ask_import_ssl_certificate(cert)
-          # in AutoYast mode check whether the certificate fingerprint match
-          # the configured value (if present)
-        elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
-          expected_fingerprint = Fingerprint.new(expected_cert_type,
-            Storage::Config.instance.reg_server_cert_fingerprint)
-
-          if cert.fingerprint(expected_cert_type) == expected_fingerprint
-            # import the certificate and retry (just once)
-            if !certificate_imported
-              import_ssl_certificate(cert)
-              certificate_imported = true
-              retry
-            end
-
-            report_ssl_error(e.message, cert)
-          else
-            # error message
-            Yast::Report.Error(_("Received SSL Certificate does not match " \
-                  "the expected certificate."))
-          end
-        else
-          report_ssl_error(e.message, cert)
+        should_retry = handle_ssl_error(e, certificate_imported)
+        if should_retry
+          certificate_imported = true
+          retry
         end
-
         false
       rescue JSON::ParserError => e
         log.error "JSON parse error"
@@ -184,6 +168,43 @@ module Registration
       max_size = (displayinfo["Width"] || 80) - 4
 
       error + "\n\n" + wrap_text(details_msg, max_size)
+    end
+
+    # @param error [OpenSSL::SSL::SSLError]
+    # @param certificate_imported [Boolean] have we already imported the certificate?
+    # @return [Boolean] should the `rescue` clause `retry`?
+    def self.handle_ssl_error(error, certificate_imported)
+      cert = Storage::SSLErrors.instance.ssl_failed_cert
+      error_code = Storage::SSLErrors.instance.ssl_error_code
+      expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
+
+      # in non-AutoYast mode ask the user to import the certificate
+      if !Yast::Mode.autoinst && cert && IMPORT_ERROR_CODES.include?(error_code)
+        # retry after successfull import
+        return true if ask_import_ssl_certificate(cert)
+      # in AutoYast mode check whether the certificate fingerprint match
+      # the configured value (if present)
+      elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
+        expected_fingerprint = Fingerprint.new(expected_cert_type,
+          Storage::Config.instance.reg_server_cert_fingerprint)
+
+        if cert.fingerprint(expected_cert_type) == expected_fingerprint
+          # import the certificate and retry (just once)
+          if !certificate_imported
+            import_ssl_certificate(cert)
+            return true
+          end
+
+          report_ssl_error(error.message, cert)
+        else
+          # error message
+          Yast::Report.Error(_("Received SSL Certificate does not match " \
+                "the expected certificate."))
+        end
+      else
+        report_ssl_error(error.message, cert)
+      end
+      false
     end
 
     def self.ssl_error_details(cert)
