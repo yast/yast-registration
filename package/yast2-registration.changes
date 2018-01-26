@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 26 16:05:55 UTC 2018 - lslezak@suse.cz
+
+- Initial support for the SLE15 offline migration (fate#323163)
+- 4.0.19
+
+-------------------------------------------------------------------
 Wed Jan 17 14:24:58 UTC 2018 - mvidner@suse.com
 
 - Try base product registration code first (bsc#1075551).

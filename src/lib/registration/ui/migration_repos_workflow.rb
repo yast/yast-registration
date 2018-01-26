@@ -33,6 +33,7 @@ module Registration
 
       Yast.import "Sequencer"
       Yast.import "Mode"
+      Yast.import "Stage"
       Yast.import "SourceDialogs"
       Yast.import "Linuxrc"
 
@@ -114,6 +115,7 @@ module Registration
         "load_migration_products"      => {
           abort:  :abort,
           cancel: :abort,
+          empty:  :back,
           next:   "select_migration_products"
         },
         "select_migration_products"    => {
@@ -188,6 +190,11 @@ module Registration
       def not_installed_products_check
         SwMgmt.init(true)
 
+        # FIXME: do the check also at offline upgrade?
+        # Currently it reads the addons for the new SLES15 which is not
+        # registered yet and fails.
+        return :next if Yast::Stage.initial
+
         Addon.find_all(registration)
 
         UI::NotInstalledProductsDialog.run
@@ -240,16 +247,59 @@ module Registration
         products.concat(addons)
       end
 
-      # load migration products for the installed products from the registration server
+      # load migration products for the installed products from the registration server,
+      # loads online or offline migrations depending on the system state
       # @return [Symbol] workflow symbol (:next or :abort)
       def load_migration_products
-        log.info "Loading migration products from server"
+        if Yast::Stage.initial
+          load_migration_products_offline
+        else
+          load_migration_products_online
+        end
+      end
+
+      # load migration products for the installed products from the registration server
+      # for the currently running system (online migration)
+      # @return [Symbol] workflow symbol (:next or :abort)
+      def load_migration_products_online
+        log.info "Loading online migration products from the server..."
         self.migrations = registration_ui.migration_products(products)
 
         if migrations.empty?
           # TRANSLATORS: Error message
           Yast::Report.Error(_("No migration product found."))
           return :abort
+        end
+
+        :next
+      end
+
+      # load migration products for the installed products from the registration server
+      # on a system that is not running (offline migration)
+      # @return [Symbol] workflow symbol (:next or :abort)
+      def load_migration_products_offline
+        base_product = upgraded_base_product
+        if !base_product
+          # TRANSLATORS: Error message
+          Yast::Report.Error(_("Cannot find a base product to upgrade."))
+          return :empty
+        end
+
+        remote_product = OpenStruct.new(
+          arch:         base_product.arch.to_s,
+          identifier:   base_product.name,
+          version:      base_product.version,
+          # FIXME: not supported by Y2Packager::Product yet
+          release_type: nil
+        )
+
+        log.info "Loading offline migration products from the server..."
+        self.migrations = registration_ui.offline_migration_products(products, remote_product)
+
+        if migrations.empty?
+          # TRANSLATORS: Error message
+          Yast::Report.Error(_("No migration product found."))
+          return :empty
         end
 
         :next
@@ -482,6 +532,21 @@ module Registration
             "will not be updated and the system will be still registered " \
             "using the previous product. The packages from the registration " \
             "repositories can conflict with the new packages.</p>")
+      end
+
+      def upgraded_base_product
+        # temporarily run the update mode to let the solver select the product for upgrade
+        # (this will correctly handle possible product renames)
+        Yast::Pkg.PkgUpdateAll({})
+        product = Y2Packager::Product.selected_base
+
+        # restore the initial status, the package update will be turned on later again
+        Yast::Pkg.PkgReset
+        changed = Yast::Pkg.GetPackages(:removed, true) + Yast::Pkg.GetPackages(:selected, true)
+        changed.each { |p| Yast::Pkg.PkgNeutral(p) }
+
+        log.info("Upgraded base product: #{product.inspect}")
+        product
       end
     end
   end
