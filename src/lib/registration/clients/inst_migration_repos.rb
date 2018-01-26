@@ -39,8 +39,8 @@ module Registration
 
       # Pass the target directory to SUSEConnect
       def set_target_path
-        destdir = Yast::Installation.destdir
-        return if destdir.nil? || destdir == "/"
+        destdir = Yast::Installation.destdir || "/"
+        return if destdir == "/"
 
         log.info("Setting SUSEConnect target directory: #{destdir}")
         SUSE::Connect::System.filesystem_root = destdir

@@ -251,7 +251,7 @@ module Registration
       # loads online or offline migrations depending on the system state
       # @return [Symbol] workflow symbol (:next or :abort)
       def load_migration_products
-        if Yast::Stage.initial && Yast::Mode.update
+        if Yast::Stage.initial
           load_migration_products_offline
         else
           load_migration_products_online
@@ -542,10 +542,8 @@ module Registration
 
         # restore the initial status, the package update will be turned on later again
         Yast::Pkg.PkgReset
-        changed = Yast::Pkg.ResolvableProperties("", :package, "").select do |p|
-          p["status"] != :available || p["status"] != :installed
-        end
-        changed.each { |p| Yast::Pkg.PkgNeutral(p["name"]) }
+        changed = Yast::Pkg.GetPackages(:removed, true) + Yast::Pkg.GetPackages(:selected, true)
+        changed.each { |p| Yast::Pkg.PkgNeutral(p) }
 
         log.info("Upgraded base product: #{product.inspect}")
         product
