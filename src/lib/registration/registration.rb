@@ -208,11 +208,7 @@ module Registration
 
     # Full path to the SCC credentials file.
     def self.credentials_path
-      # Use /mnt only at upgrade, during installation /mnt is not yet mounted
-      # at the registration step, the credentials are later copied to
-      # the target system
-      prefix = (Yast::Stage.initial && Yast::Mode.update) ? Yast::Installation.destdir : "/"
-      File.join(prefix, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+      SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
     end
 
     def self.is_registered?

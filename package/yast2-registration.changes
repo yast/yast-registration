@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb  2 14:20:22 UTC 2018 - lslezak@suse.cz
+
+- Fixes for the SLE11 -> SLE15 offline migration (fate#323395)
+- 4.0.20
+
+-------------------------------------------------------------------
 Fri Jan 26 16:05:55 UTC 2018 - lslezak@suse.cz
 
 - Initial support for the SLE15 offline migration (fate#323163)
