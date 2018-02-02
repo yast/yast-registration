@@ -271,7 +271,7 @@ describe Registration::Registration do
       expect(Registration::Registration.is_registered?).to eq(true)
     end
 
-    it "returns false if the global credentials file exists" do
+    it "returns false if the global credentials file does not exist" do
       expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
         .and_return(false)
       expect(Registration::Registration.is_registered?).to eq(false)
