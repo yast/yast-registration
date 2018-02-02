@@ -77,20 +77,6 @@ describe Registration::Registration do
       expect(registered_service).to eq(service)
     end
 
-    it "honors the target system prefix at upgrade" do
-      expect(Yast::Mode).to receive(:update).and_return(true)
-      expect(Yast::Stage).to receive(:initial).and_return(true)
-      expect(Yast::Installation).to receive(:destdir).and_return(destdir)
-
-      expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}\//)
-        .and_return(true)
-
-      expect(File).to receive(:read).with(/\A#{Regexp.escape(destdir)}\//)
-        .and_return("username=SCC_foo\npassword=bar")
-
-      subject.send(yast_method, product)
-    end
-
     it "does not add the target system prefix if not at upgrade" do
       allow(Yast::Mode).to receive(:update).and_return(false)
       allow(Yast::Stage).to receive(:initial).and_return(false)
@@ -279,23 +265,16 @@ describe Registration::Registration do
   end
 
   describe ".is_registered?" do
-    let(:destdir) { "/foo" }
-
-    it "honors the target system prefix at upgrade" do
-      expect(Yast::Mode).to receive(:update).and_return(true)
-      expect(Yast::Stage).to receive(:initial).and_return(true)
-      expect(Yast::Installation).to receive(:destdir).and_return(destdir)
-      expect(File).to receive(:exist?).with(/\A#{Regexp.escape(destdir)}/)
-      Registration::Registration.is_registered?
-    end
-
-    it "does not add the prefix if not at upgrade" do
-      allow(Yast::Mode).to receive(:update).and_return(false)
-      allow(Yast::Stage).to receive(:initial).and_return(false)
-      expect(Yast::Installation).to_not receive(:destdir)
+    it "returns true if the global credentials file exists" do
       expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-      Registration::Registration.is_registered?
+        .and_return(true)
+      expect(Registration::Registration.is_registered?).to eq(true)
     end
 
+    it "returns false if the global credentials file does not exist" do
+      expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return(false)
+      expect(Registration::Registration.is_registered?).to eq(false)
+    end
   end
 end

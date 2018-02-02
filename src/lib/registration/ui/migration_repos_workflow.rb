@@ -36,6 +36,7 @@ module Registration
       Yast.import "Stage"
       Yast.import "SourceDialogs"
       Yast.import "Linuxrc"
+      Yast.import "Installation"
 
       # the constructor
       def initialize
@@ -215,7 +216,10 @@ module Registration
           return :abort
         end
 
-        merge_registered_addons
+        # do not read addons when upgrading from an NCC based system (SLE11)
+        ncc_file = File.join(Yast::Installation.destdir,
+          SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR, "NCCcredentials")
+        merge_registered_addons unless File.exist?(ncc_file)
 
         log.info "Products to migrate: #{products}"
 
@@ -293,7 +297,8 @@ module Registration
           release_type: nil
         )
 
-        log.info "Loading offline migration products from the server..."
+        log.info "Loading offline migrations for target product: #{remote_product.inspect}"
+        log.info "Installed products: #{products.inspect}"
         self.migrations = registration_ui.offline_migration_products(products, remote_product)
 
         if migrations.empty?
