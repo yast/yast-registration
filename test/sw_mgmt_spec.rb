@@ -456,4 +456,30 @@ describe Registration::SwMgmt do
       end
     end
   end
+
+  describe ".remote_product" do
+    let(:product) do
+      {
+        "name"            => "SLES",
+        "arch"            => "x86_64",
+        "version"         => "12.1-1.47",
+        "version_version" => "12.1",
+        "flavor"          => "DVD"
+      }
+    end
+
+    it "converts a Hash into OpenStruct" do
+      expect(subject.remote_product(product)).to be_an(OpenStruct)
+    end
+
+    it "includes the version release" do
+      v = subject.remote_product(product).version
+      expect(v).to include("-")
+    end
+
+    it "does not includes the version release if 'version_release' parameter is false" do
+      v = subject.remote_product(product, version_release: false).version
+      expect(v).to_not include("-")
+    end
+  end
 end

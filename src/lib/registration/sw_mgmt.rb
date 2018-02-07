@@ -213,11 +213,13 @@ module Registration
     # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
     # @param product [Hash] product Hash obtained from pkg-bindings
     # @return [SUSE::Connect::Remote::Product] the remote product
-    def self.remote_product(product)
+    def self.remote_product(product, version_release: true)
       OpenStruct.new(
         arch:         product["arch"],
         identifier:   product["name"],
-        version:      product["version"],
+        # the "version_version" key does not contain the release number,
+        # e.g. if "version" is "11.4-1.109" then "version_version" is just "11.4"
+        version:      version_release ? product["version"] : product["version_version"],
         release_type: product["release_type"]
       )
     end
