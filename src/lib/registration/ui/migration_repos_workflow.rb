@@ -207,7 +207,8 @@ module Registration
         log.info "Loading installed products"
 
         self.products = ::Registration::SwMgmt.installed_products.map do |product|
-          ::Registration::SwMgmt.remote_product(product)
+          # report the installed products without the version release (bsc#1079051#c11)
+          ::Registration::SwMgmt.remote_product(product, version_release: false)
         end
 
         if products.empty?
