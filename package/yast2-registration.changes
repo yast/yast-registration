@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 19 13:08:55 UTC 2018 - lslezak@suse.cz
+
+- Support for offline migration from SLE11 to SLE15 (fate#323395)
+- 4.0.22
+
+-------------------------------------------------------------------
 Wed Feb  7 12:26:17 UTC 2018 - lslezak@suse.cz
 
 - Do no send the product release version ("11.4-1.109") at upgrade,

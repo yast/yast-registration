@@ -328,7 +328,9 @@ module Registration
       msg = _("Check that this system is known to the registration server.")
 
       # probably missing NCC->SCC sync, display a hint unless SMT is used
-      if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL
+      if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL ||
+          UrlHelpers.registration_url.nil?
+
         msg += "\n\n"
         # TRANSLATORS: additional hint for an error message
         msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \

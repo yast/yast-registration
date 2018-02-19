@@ -80,7 +80,10 @@ module Registration
         log.info "Upgrading product: #{product}"
         service = SUSE::Connect::YaST.upgrade_product(product_ident, params)
         log.info "Upgrade product result: #{service}"
-        set_registered(product_ident)
+        # skip loading the remote addons in offline upgrade, there is a confusion
+        # between installed and the upgraded product, moreover we do not need the
+        # addons list at all
+        set_registered(product_ident) unless Yast::Stage.initial
 
         renames = collect_renames([service.product])
         SwMgmt.update_product_renames(renames)
@@ -170,7 +173,7 @@ module Registration
     def offline_migration_products(installed_products, target_base_product)
       log.info "Offline migration for: #{target_base_product}."
       migration_paths = []
-      ConnectHelpers.catch_registration_errors do
+      ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         migration_paths = SUSE::Connect::YaST
                           .system_offline_migrations(installed_products, target_base_product)
       end

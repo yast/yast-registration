@@ -32,6 +32,7 @@ module Registration
       Yast.import "Report"
       Yast.import "HTML"
       Yast.import "GetInstArgs"
+      Yast.import "AddOnProduct"
 
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
@@ -181,7 +182,11 @@ module Registration
 
         details = sorted_migrations[idx].map do |product|
           installed = installed_products.find do |installed_product|
-            installed_product["name"] == product.identifier
+            product_name = installed_product["name"]
+
+            # the same product or a renamed product
+            product_name == product.identifier ||
+              Yast::AddOnProduct.renamed?(product_name, product.identifier)
           end
 
           products_to_migrate << installed if installed
