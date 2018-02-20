@@ -256,6 +256,12 @@ module Registration
       # loads online or offline migrations depending on the system state
       # @return [Symbol] workflow symbol (:next or :abort)
       def load_migration_products
+        # just for easier debugging log the currently registered products
+        ConnectHelpers.catch_registration_errors do
+          activated = registration.activated_products.map(&:friendly_name)
+          log.info("Activated products: #{activated.inspect}")
+        end
+
         if Yast::Stage.initial
           load_migration_products_offline
         else
