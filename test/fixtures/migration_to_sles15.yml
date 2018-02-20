@@ -1,0 +1,9 @@
+---
+- - !ruby/object:SUSE::Connect::Remote::Product
+    table:
+      :identifier: SLES
+      :version: '15-0'
+      :arch: x86_64
+      :release_type: 
+      :friendly_name: SUSE Linux Enterprise Server 15 x86_64
+      :shortname: SLES15

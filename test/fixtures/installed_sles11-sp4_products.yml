@@ -1,0 +1,48 @@
+---
+- arch: x86_64
+  category: base
+  description: |-
+    SUSE Linux Enterprise offers a comprehensive
+            suite of products built on a single code base.
+            The platform addresses business needs from
+            the smallest thin-client devices to the world’s
+            most powerful high-performance computing
+            and mainframe servers. SUSE Linux Enterprise
+            offers common management tools and technology
+            certifications across the platform, and
+            each product is enterprise-class.
+  display_name: SUSE Linux Enterprise Server 11 SP4
+  download_size: 0
+  eol: 1553990400
+  flags: []
+  flavor: ''
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: SUSE_SLES
+  on_system_by_user: false
+  product_file: "/mnt/etc/products.d/SUSE_SLES.prod"
+  product_line: sles
+  register_flavor: ''
+  register_release: ''
+  register_target: sle-11-x86_64
+  register_urls:
+  - http://register.novell.com/
+  relnotes_url: https://www.suse.com/releasenotes/x86_64/SUSE-SLES/11-SP4/release-notes-sles.rpm
+  relnotes_urls:
+  - https://www.suse.com/releasenotes/x86_64/SUSE-SLES/11-SP4/release-notes-sles.rpm
+  short_name: SLES11_SP4
+  smolt_urls:
+  - http://smolt.novell.com/register.pl
+  source: -1
+  status: :installed
+  summary: SUSE Linux Enterprise Server 11 SP4
+  transact_by: :solver
+  type: base
+  update_urls: []
+  upgrades: []
+  vendor: SUSE LINUX Products GmbH, Nuernberg, Germany
+  version: 11.4-1.109
+  version_epoch: 
+  version_release: '1.109'
+  version_version: '11.4'
