@@ -1,0 +1,121 @@
+---
+- - !ruby/object:OpenStruct
+    table:
+      :friendly_name: SUSE Linux Enterprise Server 15 x86_64
+      :shortname: SLES15
+      :identifier: SLES
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: true
+      :product_type: base
+      :free: false
+      :release_stage: beta
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Basesystem Module 15 x86_64
+      :shortname: Basesystem-Module
+      :identifier: sle-module-basesystem
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Containers Module 15 x86_64
+      :shortname: Containers-Module
+      :identifier: sle-module-containers
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Desktop Applications Module 15 x86_64
+      :shortname: Desktop-Applications-Module
+      :identifier: sle-module-desktop-applications
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Server Applications Module 15 x86_64
+      :shortname: Server-Applications-Module
+      :identifier: sle-module-server-applications
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: SUSE Cloud Application Platform Tools Module 15 x86_64
+      :shortname: SUSE-CAP-Tools-Module
+      :identifier: sle-module-cap-tools
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Development Tools Module 15 x86_64
+      :shortname: Development-Tools-Module
+      :identifier: sle-module-development-tools
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Legacy Module 15 x86_64
+      :shortname: Legacy-Module
+      :identifier: sle-module-legacy
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Public Cloud Module 15 x86_64
+      :shortname: Public-Cloud-Module
+      :identifier: sle-module-public-cloud
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
+  - !ruby/object:OpenStruct
+    table:
+      :friendly_name: Web and Scripting Module 15 x86_64
+      :shortname: Web-Scripting-Module
+      :identifier: sle-module-web-scripting
+      :version: '15'
+      :arch: x86_64
+      :release_type: 
+      :base: false
+      :product_type: module
+      :free: true
+      :release_stage: released
