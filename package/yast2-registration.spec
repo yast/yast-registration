@@ -55,8 +55,8 @@ BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.2.22
 BuildRequires:  yast2-slp >= 3.1.9
-# packager/product_patterns.rb
-BuildRequires:  yast2-packager >= 3.1.95
+# updated product renames
+BuildRequires:  yast2-packager >= 4.0.40
 BuildRequires:  yast2-update >= 3.1.36
 
 BuildArch:      noarch
