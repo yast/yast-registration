@@ -1,0 +1,196 @@
+---
+- arch: x86_64
+  category: addon
+  description: "<p>\n\tSUSE Linux Enterprise Software Development Kit is the Software\n\tDevelopment
+    Kit for the family of SUSE Linux Enterprise products. It is a\n\tfree of charge
+    extension for partners and customers working with SUSE\n\tLinux Enterprise Server
+    and Desktop and derived products.\n\t</p>\n\t<p>\n\tPackages on the SDK are delivered
+    without L3 support; maintenance updates\n\twill be done for  critical security
+    and critical non-security issues, and\n\twhere needed to remain in sync with packages
+    delivered in the SUSE Linux\n\tEnterprise Server and Desktop products.\n\t</p>\n\t<p>\n\tPackages
+    to rebuild SUSE Linux Enterprise Server are not part of the SUSE\n\tLinux Enterprise
+    Software Development Kit.\n\t</p>"
+  display_name: SUSE Linux Enterprise Software Development Kit 12 SP3
+  download_size: 0
+  eol: 1730332800
+  flags: []
+  flavor: POOL
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: sle-sdk
+  on_system_by_user: true
+  product_file: "/mnt/etc/products.d/sle-sdk.prod"
+  product_line: sle
+  register_flavor: extension
+  register_release: ''
+  register_target: sle-12-x86_64
+  relnotes_url: https://www.suse.com/releasenotes/x86_64/SLE-SDK/12-SP3/release-notes-sdk.rpm
+  relnotes_urls:
+  - https://www.suse.com/releasenotes/x86_64/SLE-SDK/12-SP3/release-notes-sdk.rpm
+  short_name: SDK12-SP3
+  source: -1
+  status: :installed
+  summary: SUSE Linux Enterprise Software Development Kit 12 SP3
+  transact_by: :solver
+  type: addon
+  update_urls: []
+  upgrades: []
+  vendor: SUSE
+  version: 12.3-0
+  version_epoch: 
+  version_release: '0'
+  version_version: '12.3'
+- arch: x86_64
+  category: addon
+  description: |-
+    Via this Module you will have access to a more recent GCC and
+    Toolchain in addition to the default compiler of SUSE Linux Enterprise.
+
+    Access to the Toolchain Module is included in your SUSE Linux
+    Enterprise Server subscription. The module has a different lifecycle than SUSE
+    Linux Enterprise Server itself.  Please check the Release Notes for further
+    details.
+  display_name: Toolchain Module
+  download_size: 0
+  eol: 1730332800
+  flags: []
+  flavor: POOL
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: sle-module-toolchain
+  on_system_by_user: true
+  product_file: "/mnt/etc/products.d/sle-module-toolchain.prod"
+  product_line: sle-module-toolchain
+  register_flavor: module
+  register_release: ''
+  register_target: sle-12-x86_64
+  relnotes_url: ''
+  short_name: Toolchain-Module
+  source: -1
+  status: :installed
+  summary: Toolchain Module
+  transact_by: :solver
+  type: addon
+  update_urls: []
+  upgrades: []
+  vendor: SUSE
+  version: 12-0
+  version_epoch: 
+  version_release: '0'
+  version_version: '12'
+- arch: x86_64
+  category: addon
+  description: "<p>This Module contains several packages revolving around containers
+    \n        and related tools. </p>"
+  display_name: Containers module
+  download_size: 0
+  eol: 1561939200
+  flags: []
+  flavor: POOL
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: sle-module-containers
+  on_system_by_user: true
+  product_file: "/mnt/etc/products.d/sle-module-containers.prod"
+  product_line: sle-module-containers
+  register_flavor: module
+  register_release: ''
+  register_target: sle-12-x86_64
+  relnotes_url: ''
+  short_name: containers-module
+  source: -1
+  status: :installed
+  summary: Containers module
+  transact_by: :solver
+  type: addon
+  update_urls: []
+  upgrades: []
+  vendor: SUSE
+  version: 12-0
+  version_epoch: 
+  version_release: '0'
+  version_version: '12'
+- arch: x86_64
+  category: addon
+  description: "<p>\n\tThe Public Cloud Module is a collection of tools that enables
+    you to\n\tcreate and manage cloud images from the commandline on SUSE Linux\n\tEnterprise
+    Server. When building your own images with KIWI or SUSE\n\tStudio, initialization
+    code specific to the target cloud is included in\n\tthat image.\n\t</p>\n\t<p>\n\tAccess
+    to the Public Cloud Module is included in your SUSE Linux\n\tEnterprise Server
+    subscription. The module has a different lifecycle\n\tthan SUSE Linux Enterprise
+    Server itself; please check the Release\n\tNotes for further details.\n\t</p>"
+  display_name: Public Cloud Module
+  download_size: 0
+  eol: 1509408000
+  flags: []
+  flavor: POOL
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: sle-module-public-cloud
+  on_system_by_user: true
+  product_file: "/mnt/etc/products.d/sle-module-public-cloud.prod"
+  product_line: sle-module-public-cloud
+  register_flavor: module
+  register_release: ''
+  register_target: sle-12-x86_64
+  relnotes_url: ''
+  short_name: Public-Cloud-module
+  source: -1
+  status: :installed
+  summary: Public Cloud Module
+  transact_by: :solver
+  type: addon
+  update_urls: []
+  upgrades: []
+  vendor: SUSE
+  version: 12-0
+  version_epoch: 
+  version_release: '0'
+  version_version: '12'
+- arch: x86_64
+  category: base
+  description: |-
+    SUSE Linux Enterprise offers a comprehensive
+            suite of products built on a single code base.
+            The platform addresses business needs from
+            the smallest thin-client devices to the world's
+            most powerful high-performance computing
+            and mainframe servers. SUSE Linux Enterprise
+            offers common management tools and technology
+            certifications across the platform, and
+            each product is enterprise-class.
+  display_name: SUSE Linux Enterprise Server 12 SP3
+  download_size: 0
+  eol: 1730332800
+  flags: []
+  flavor: DVD
+  inst_size: 0
+  locked: false
+  medium_nr: 0
+  name: SLES
+  on_system_by_user: true
+  product_file: "/mnt/etc/products.d/SLES.prod"
+  product_line: sles
+  register_flavor: ''
+  register_release: ''
+  register_target: sle-12-x86_64
+  relnotes_url: https://www.suse.com/releasenotes/x86_64/SUSE-SLES/12-SP3/release-notes-sles.rpm
+  relnotes_urls:
+  - https://www.suse.com/releasenotes/x86_64/SUSE-SLES/12-SP3/release-notes-sles.rpm
+  short_name: SLES12-SP3
+  source: -1
+  status: :installed
+  summary: SUSE Linux Enterprise Server 12 SP3
+  transact_by: :app_high
+  type: base
+  update_urls: []
+  upgrades: []
+  vendor: SUSE
+  version: 12.3-0
+  version_epoch: 
+  version_release: '0'
+  version_version: '12.3'
