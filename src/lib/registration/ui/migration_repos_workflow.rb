@@ -321,6 +321,9 @@ module Registration
 
       # check if the target producte has been already activated, if yes
       # require user confirmation for the migration (though it will very likely fail)
+      # @param base_product [Y2Packager::Product] the base product to which migrate to
+      # @param activations [Array<SUSE::Connect::Remote::Product>] already activated
+      #   products on the server
       # @return [Boolean] true = continue with the migration, false = stop
       def migration_confirmed?(base_product, activations)
         # version without the release, e.g. "15-0" => "15"
