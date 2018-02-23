@@ -201,9 +201,9 @@ module Registration
         end
 
         # TRANSLATORS: RichText header (details for the selected item)
-        det = "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join + "</ul>"
-        puts det
-        det
+        details = "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join("\n") + "</ul>"
+        log.info("Migration summary: #{details}")
+        details
       end
 
       def same_products?(installed, migrated)

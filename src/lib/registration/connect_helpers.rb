@@ -328,8 +328,7 @@ module Registration
       msg = _("Check that this system is known to the registration server.")
 
       # probably missing NCC->SCC sync, display a hint unless SMT is used
-      if UrlHelpers.registration_url == SUSE::Connect::YaST::DEFAULT_URL ||
-          UrlHelpers.registration_url.nil?
+      if [nil, SUSE::Connect::YaST::DEFAULT_URL].include?(UrlHelpers.registration_url)
 
         msg += "\n\n"
         # TRANSLATORS: additional hint for an error message

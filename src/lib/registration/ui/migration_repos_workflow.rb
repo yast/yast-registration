@@ -326,8 +326,8 @@ module Registration
       #   products on the server
       # @return [Boolean] true = continue with the migration, false = stop
       def migration_confirmed?(base_product, activations)
-        # version without the release, e.g. "15-0" => "15"
-        base_product_version = base_product.version.split("-", 2).first
+        # split the release version, e.g. "15-0" => ["15", "0"]
+        base_product_version, _release = base_product.version.split("-", 2)
         activated_base = activations.find do |a|
           a.identifier == base_product.name && a.version == base_product_version
         end
