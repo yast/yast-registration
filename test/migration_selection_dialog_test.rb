@@ -6,6 +6,7 @@ include Yast::UIShortcuts
 describe Registration::UI::MigrationSelectionDialog do
   subject { Registration::UI::MigrationSelectionDialog }
   let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }
+  let(:migration_products_sle15) { load_yaml_fixture("migration_sles15_offline_migrations.yml") }
 
   describe ".run" do
     it "displays the possible migrations and returns the user input" do
@@ -25,6 +26,46 @@ describe Registration::UI::MigrationSelectionDialog do
       end
 
       expect(subject.run(migration_products, [])).to eq(:abort)
+    end
+
+    it "handles product renames in the summary" do
+      # user pressed the "Abort" button, just to get out of the event loop
+      allow(Yast::UI).to receive(:UserInput).and_return(:abort)
+      allow(Yast::Wizard).to receive(:SetContents)
+      # the first migration is selected
+      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem).and_return(0)
+      # check the correct summary
+      expect(Yast::UI).to receive(:ChangeWidget) do |_id, _attr, text|
+        # SLES11 uses "SUSE_SLES" product identifier while SLES15 uses just "SLES",
+        # the summary needs to mention a product upgrade although technically these
+        # are different products with different statuses ("SUSE_SLES" will be uninstalled,
+        # "SLES" will be installed)
+        expect(text).to include("SUSE Linux Enterprise Server 11 SP4 <b>will be " \
+          "upgraded to</b> SUSE Linux Enterprise Server 15")
+      end
+
+      sles11sp4 = load_yaml_fixture("installed_sles11-sp4_products.yml")
+      subject.run(migration_products_sle15, sles11sp4)
+    end
+
+    it "handles product merges in the summary" do
+      # user pressed the "Abort" button, just to get out of the event loop
+      allow(Yast::UI).to receive(:UserInput).and_return(:abort)
+      allow(Yast::Wizard).to receive(:SetContents)
+      # the first migration is selected
+      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem).and_return(0)
+      # check the correct summary
+      expect(Yast::UI).to receive(:ChangeWidget) do |_id, _attr, text|
+        # For SLE15 there are two products (SDK and Toolchain Module) replaced
+        # by single product (Development Tools Module)
+        expect(text).to include("SUSE Linux Enterprise Software Development Kit 12 SP3 "\
+          "<b>will be upgraded to</b> Development Tools Module 15")
+        expect(text).to include("Toolchain Module <b>will be upgraded to</b> " \
+          "Development Tools Module 15")
+      end
+
+      sles12sp3 = load_yaml_fixture("installed_sles12-sp3_products.yml")
+      subject.run(migration_products_sle15, sles12sp3)
     end
 
     it "saves the entered values when clicking Next" do

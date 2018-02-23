@@ -219,4 +219,54 @@ describe Registration::UI::MigrationReposWorkflow do
       end
     end
   end
+
+  describe "#load_migration_products_offline" do
+    let(:activated_products) { load_yaml_fixture("migration_sles15_activated_products.yml") }
+    let(:offline_migrations) { load_yaml_fixture("migration_sles15_offline_migrations.yml") }
+    let(:selected_base) { load_yaml_fixture("migration_sles15_selected_base.yml") }
+
+    before do
+      allow(Y2Packager::Product).to receive(:selected_base).and_return(selected_base)
+      allow_any_instance_of(Registration::RegistrationUI).to receive(:offline_migration_products)
+        .and_return(offline_migrations)
+
+      allow(Yast::Pkg).to receive(:PkgUpdateAll)
+      allow(Yast::Pkg).to receive(:PkgReset)
+      allow(Yast::Pkg).to receive(:GetPackages).and_return([])
+
+      # skip SLP discovery
+      allow(Registration::UrlHelpers).to receive(:registration_url)
+    end
+
+    it "loads the possible migrations from the server" do
+      subject.send(:load_migration_products_offline, activated_products)
+      expect(subject.send(:migrations)).to_not be_empty
+    end
+
+    it "asks for confirmation if the system was already migrated" do
+      # pretend SLES15 is already activated
+      sles15 = SUSE::Connect::Remote::Product.new(
+        arch:       "x86_64",
+        identifier: "SLES",
+        version:    "15"
+      )
+      activated_products2 = [sles15]
+
+      expect(Yast2::Popup).to receive(:show).with(/is already activated/,
+        buttons: :continue_cancel, focus: :cancel)
+      subject.send(:load_migration_products_offline, activated_products2)
+    end
+
+    it "returns :next if a migration is found" do
+      expect(subject.send(:load_migration_products_offline, activated_products)).to eq(:next)
+    end
+
+    it "returns :empty if no migration is found" do
+      allow_any_instance_of(Registration::RegistrationUI).to receive(:offline_migration_products)
+        .and_return([])
+      allow(Yast::Report).to receive(:Error)
+
+      subject.send(:load_migration_products_offline, activated_products)
+    end
+  end
 end

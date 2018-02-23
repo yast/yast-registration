@@ -300,6 +300,24 @@ module Registration
       Yast::Popup.YesNo(msg) ? addons : []
     end
 
+    # Read the activated products for this system
+    # @return [Array] list of activated products
+    def activated_products
+      activations = []
+
+      ConnectHelpers.catch_registration_errors do
+        Yast::Popup.Feedback(
+          _(CONTACTING_MESSAGE),
+          # TRANSLATORS: progress label
+          _("Reading the Activated Products...")
+        ) do
+          activations = registration.activated_products
+        end
+      end
+
+      activations
+    end
+
   private
 
     attr_accessor :registration

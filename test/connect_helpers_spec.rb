@@ -152,7 +152,7 @@ describe Registration::ConnectHelpers do
       end
 
       it "does not display the NCC sync hint when not using SCC" do
-        expect(Registration::UrlHelpers).to receive(:registration_url)
+        expect(Registration::UrlHelpers).to receive(:registration_url).at_least(:once)
           .and_return("https://example.com")
 
         expect(Yast::Report).to_not receive(:Error).with(/Synchronization from NCC to SCC/)

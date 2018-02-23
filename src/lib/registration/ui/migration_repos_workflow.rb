@@ -13,6 +13,7 @@
 #
 
 require "yast"
+require "yast2/popup"
 
 require "registration/registration"
 require "registration/registration_ui"
@@ -256,8 +257,13 @@ module Registration
       # loads online or offline migrations depending on the system state
       # @return [Symbol] workflow symbol (:next or :abort)
       def load_migration_products
+        # just for easier debugging log the currently registered products on the server
+        activated = registration_ui.activated_products
+        log.info("Activated products on this system: #{activated.map(&:friendly_name).inspect}")
+        log.info("Activated: #{activated.inspect}")
+
         if Yast::Stage.initial
-          load_migration_products_offline
+          load_migration_products_offline(activated)
         else
           load_migration_products_online
         end
@@ -282,13 +288,15 @@ module Registration
       # load migration products for the installed products from the registration server
       # on a system that is not running (offline migration)
       # @return [Symbol] workflow symbol (:next or :abort)
-      def load_migration_products_offline
+      def load_migration_products_offline(activations)
         base_product = upgraded_base_product
         if !base_product
           # TRANSLATORS: Error message
           Yast::Report.Error(_("Cannot find a base product to upgrade."))
           return :empty
         end
+
+        return :empty unless migration_confirmed?(base_product, activations)
 
         remote_product = OpenStruct.new(
           arch:         base_product.arch.to_s,
@@ -309,6 +317,33 @@ module Registration
         end
 
         :next
+      end
+
+      # check if the target producte has been already activated, if yes
+      # require user confirmation for the migration (though it will very likely fail)
+      # @param base_product [Y2Packager::Product] the base product to which migrate to
+      # @param activations [Array<SUSE::Connect::Remote::Product>] already activated
+      #   products on the server
+      # @return [Boolean] true = continue with the migration, false = stop
+      def migration_confirmed?(base_product, activations)
+        # split the release version, e.g. "15-0" => ["15", "0"]
+        base_product_version, _release = base_product.version.split("-", 2)
+        activated_base = activations.find do |a|
+          a.identifier == base_product.name && a.version == base_product_version
+        end
+
+        return true unless activated_base
+
+        log.warn("Found already activated base product: #{activated_base.inspect}")
+
+        # TRANSLATORS: Continue/Cancel popup question, confirm the migration by user,
+        # %s is a product name, e.g. "SUSE Linux Enterprise Server 15"
+        message = _("The product %s\nis already activated on this system.\n\n" \
+          "Migrating again to the same product might not work properly.") % base_product.label
+        ui = Yast2::Popup.show(message, buttons: :continue_cancel, focus: :cancel)
+        log.info("Use input: #{ui.inspect}")
+
+        ui == :continue
       end
 
       # run the migration target selection dialog

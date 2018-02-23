@@ -1,0 +1,10 @@
+--- !ruby/object:Y2Packager::Product
+name: SLES
+short_name: SLES15
+display_name: SUSE Linux Enterprise Server 15 Beta7
+version: 15-0
+arch: :x86_64
+category: :addon
+vendor: SUSE LLC <https://www.suse.com/>
+order: 200
+installation_package: skelcd-control-SLES

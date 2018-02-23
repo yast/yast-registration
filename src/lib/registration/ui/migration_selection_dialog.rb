@@ -32,6 +32,7 @@ module Registration
       Yast.import "Report"
       Yast.import "HTML"
       Yast.import "GetInstArgs"
+      Yast.import "AddOnProduct"
 
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
@@ -181,7 +182,7 @@ module Registration
 
         details = sorted_migrations[idx].map do |product|
           installed = installed_products.find do |installed_product|
-            installed_product["name"] == product.identifier
+            same_products?(installed_product, product)
           end
 
           products_to_migrate << installed if installed
@@ -192,11 +193,24 @@ module Registration
         installed_products.each do |installed_product|
           next if products_to_migrate.include?(installed_product)
 
-          details << "<li>" + product_summary(nil, installed_product) + "</li>"
+          migrated_product = sorted_migrations[idx].find do |product|
+            same_products?(installed_product, product)
+          end
+
+          details << "<li>" + product_summary(migrated_product, installed_product) + "</li>"
         end
 
         # TRANSLATORS: RichText header (details for the selected item)
-        "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join + "</ul>"
+        details = "<h3>" + _("Migration Summary") + "</h3><ul>" + details.join("\n") + "</ul>"
+        log.info("Migration summary: #{details}")
+        details
+      end
+
+      def same_products?(installed, migrated)
+        product_name = installed["name"]
+        # the same product or a renamed product
+        product_name == migrated.identifier ||
+          Yast::AddOnProduct.renamed?(product_name, migrated.identifier)
       end
 
       # create a product summary for the details widget
