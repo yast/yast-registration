@@ -121,11 +121,11 @@ module Registration
         false
       rescue ::Registration::ServiceError => e
         log.error("Service error: #{e.message % e.service}")
-        Yast::Report.Error(_(e.message) % e.service)
+        report_pkg_error(_(e.message) % e.service)
         false
       rescue ::Registration::PkgError => e
         log.error("Pkg error: #{e.message}")
-        Yast::Report.Error(_(e.message))
+        report_pkg_error(_(e.message))
         false
       rescue OpenSSL::SSL::SSLError => e
         log.error "OpenSSL error: #{e}"
@@ -153,6 +153,13 @@ module Registration
 
     def self.report_error(msg, error_message)
       Yast::Report.Error(error_with_details(msg, error_message))
+    end
+
+    # Report a pkg-bindings error. Display a message with error details from
+    # libzypp.
+    # @param msg [String] error message (translated)
+    def self.report_pkg_error(msg)
+      report_error(msg, Yast::Pkg.LastError)
     end
 
     def self.error_with_details(error, details)

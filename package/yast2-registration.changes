@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar  5 10:14:28 UTC 2018 - lslezak@suse.cz
+
+- Display additional error details when refreshing a service fails
+  (related to bsc#1083503)
+- 4.0.23
+
+-------------------------------------------------------------------
 Mon Feb 19 13:08:55 UTC 2018 - lslezak@suse.cz
 
 - Support for offline migration from SLE11 to SLE15 (fate#323395)

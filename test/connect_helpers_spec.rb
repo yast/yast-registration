@@ -169,6 +169,20 @@ describe Registration::ConnectHelpers do
     exceptions.each do |exception|
       context "exception #{exception} is raised" do
         include_examples "reports error and returns false", exception
+
+        it "reports an error with Pkg details" do
+          expect(Yast::Pkg).to receive(:LastError).and_return("PkgLastError")
+          expect(Yast::Report).to receive(:Error).with(/Details: PkgLastError/)
+
+          helpers.catch_registration_errors { raise exception }
+        end
+
+        it "reports an error without Pkg details if it is empty" do
+          expect(Yast::Pkg).to receive(:LastError).and_return("")
+          expect(Yast::Report).to_not receive(:Error).with(/Details:/)
+
+          helpers.catch_registration_errors { raise exception }
+        end
       end
     end
 
