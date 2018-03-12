@@ -19,6 +19,9 @@ module Registration
     # This class handles offline migration workflow,
     # it is a wrapper around "migration_repos" client
     class OfflineMigrationWorkflow
+      include Yast::I18n
+      include Yast::Logger
+
       # the constructor
       def initialize
         textdomain "registration"
