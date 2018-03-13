@@ -191,6 +191,7 @@ module Registration
     # @see SUSE::Connect::Yast.list_installer_updates
     def get_updates_list
       product = SwMgmt.base_product_to_register
+      return [] unless product
       id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
       if !id.empty?
         log.info "Using self update id from control file #{id.inspect}"

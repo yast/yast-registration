@@ -162,6 +162,7 @@ module Registration
         Yast.import "AutoinstFunctions"
         # note: AutoinstFunctions.selected_product should never be nil when
         # AY let it pass here
+        return false unless AutoinstFunctions.selected_product
         p["name"] == AutoinstFunctions.selected_product.name
       elsif Stage.initial && !Mode.update
         # during installation the ["type"] value is not valid yet yet
@@ -237,6 +238,8 @@ module Registration
     def self.base_product_to_register
       # use FAKE_BASE_PRODUCT just for debugging
       base_product = ENV["FAKE_BASE_PRODUCT"] ? FAKE_BASE_PRODUCT : find_base_product
+
+      return unless base_product
 
       # filter out not needed data
       product_info = {
