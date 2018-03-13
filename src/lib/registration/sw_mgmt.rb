@@ -162,6 +162,7 @@ module Registration
         Yast.import "AutoinstFunctions"
         # note: AutoinstFunctions.selected_product should never be nil when
         # AY let it pass here
+        return false unless AutoinstFunctions.selected_product
         p["name"] == AutoinstFunctions.selected_product.name
       elsif Stage.initial && !Mode.update
         # during installation the ["type"] value is not valid yet yet
