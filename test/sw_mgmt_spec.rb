@@ -106,6 +106,12 @@ describe Registration::SwMgmt do
   end
 
   describe ".base_product_to_register" do
+    it "returns nil if not able to find a product" do
+      expect(subject).to receive(:find_base_product).and_return(nil)
+
+      expect(subject.base_product_to_register).to eq(nil)
+    end
+
     it "returns base product base version and release_type" do
       expect(subject).to(receive(:find_base_product)
         .and_return("name" => "SLES", "arch" => "x86_64",

@@ -239,6 +239,8 @@ module Registration
       # use FAKE_BASE_PRODUCT just for debugging
       base_product = ENV["FAKE_BASE_PRODUCT"] ? FAKE_BASE_PRODUCT : find_base_product
 
+      return unless base_product
+
       # filter out not needed data
       product_info = {
         "name"         => base_product["name"],

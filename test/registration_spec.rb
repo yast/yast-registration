@@ -229,6 +229,11 @@ describe Registration::Registration do
         .and_return(updates)
       expect(subject.get_updates_list).to eq(updates)
     end
+
+    it "returns an empty list if no base product is selected" do
+      allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(nil)
+      expect(subject.get_updates_list).to eq([])
+    end
   end
 
   describe "#synchronize_products" do
