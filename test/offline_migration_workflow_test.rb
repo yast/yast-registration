@@ -4,19 +4,20 @@ require_relative "spec_helper"
 
 describe Registration::UI::OfflineMigrationWorkflow do
   describe "#main" do
-    it "runs the 'migration_repos' client" do
-      expect(Yast::WFM).to receive(:CallFunction).with("migration_repos", anything)
+    it "runs the 'inst_migration_repos' client" do
+      expect(Yast::WFM).to receive(:CallFunction).with("inst_migration_repos", anything)
       subject.main
     end
 
-    it "returns the 'migration_repos' result" do
-      expect(Yast::WFM).to receive(:CallFunction).with("migration_repos", anything).and_return(:foo)
+    it "returns the 'inst_migration_repos' result" do
+      expect(Yast::WFM).to receive(:CallFunction).with("inst_migration_repos", anything)
+        .and_return(:foo)
       expect(subject.main).to eq(:foo)
     end
 
-    context "the 'migration_repos' client returns :rollback" do
+    context "the 'inst_migration_repos' client returns :rollback" do
       before do
-        expect(Yast::WFM).to receive(:CallFunction).with("migration_repos", anything)
+        expect(Yast::WFM).to receive(:CallFunction).with("inst_migration_repos", anything)
           .and_return(:rollback)
         allow(Yast::WFM).to receive(:CallFunction).with("registration_sync")
       end

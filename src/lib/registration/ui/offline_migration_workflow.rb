@@ -22,6 +22,9 @@ module Registration
       include Yast::I18n
       include Yast::Logger
 
+      Yast.import "GetInstArgs"
+      Yast.import "Packages"
+
       # the constructor
       def initialize
         textdomain "registration"
@@ -37,14 +40,25 @@ module Registration
       def main
         log.info "Starting offline migration sequence"
 
+        if Yast::GetInstArgs.going_back
+          log.info("Going back")
+
+          if Registration.is_registered?
+            log.info("Restoring the previous registration")
+            rollback
+          end
+
+          return :back
+        end
+
+        # run the main registration migration
         ui = migration_repos
 
-        if ui == :rollback
-          rollback
-          # always go back in the upgrade workflow, maybe the user just selected
-          #  a wrong partition to upgrade
-          ui = :back
-        end
+        rollback if ui == :rollback
+
+        # go back in the upgrade workflow after rollback or abort,
+        # maybe the user justelected a wrong partition to upgrade
+        ui = :back if ui == :abort || ui == :rollback
 
         log.info "Offline migration result: #{ui}"
         ui
@@ -54,10 +68,14 @@ module Registration
 
       def rollback
         Yast::WFM.CallFunction("registration_sync")
+        # the rollback removes the initial installation repository with
+        # the base product, initialize it again
+        Yast::Packages.init_called = false
+        Yast::Packages.Init
       end
 
       def migration_repos
-        Yast::WFM.CallFunction("migration_repos", [{ "enable_back" => true }])
+        Yast::WFM.CallFunction("inst_migration_repos", [{ "enable_back" => true }])
       end
     end
   end
