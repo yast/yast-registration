@@ -24,6 +24,9 @@ module Registration
 
       Yast.import "GetInstArgs"
       Yast.import "Packages"
+      Yast.import "Installation"
+      Yast.import "Wizard"
+      Yast.import "Pkg"
 
       # the constructor
       def initialize
@@ -40,15 +43,21 @@ module Registration
       def main
         log.info "Starting offline migration sequence"
 
+        # display an empty dialog just to hide the content of the previous step
+        Yast::Wizard.ClearContents
+
         if Yast::GetInstArgs.going_back
           log.info("Going back")
 
           if Registration.is_registered?
             log.info("Restoring the previous registration")
             rollback
+            restore_installation_repos
           end
 
           return :back
+        else
+          backup_installation_repos
         end
 
         # run the main registration migration
@@ -68,14 +77,33 @@ module Registration
 
       def rollback
         Yast::WFM.CallFunction("registration_sync")
-        # the rollback removes the initial installation repository with
-        # the base product, initialize it again
-        Yast::Packages.init_called = false
-        Yast::Packages.Init
+
+        if Yast::Stage.initial && File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+          log.info("Removing #{SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE}...")
+          File.delete(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        end
       end
 
       def migration_repos
         Yast::WFM.CallFunction("inst_migration_repos", [{ "enable_back" => true }])
+      end
+
+      def backup_installation_repos
+        ids = Yast::Pkg.SourceGetCurrent(false)
+        @@repos_backup = ids.map { |r| Yast::Pkg.SourceGeneralData(r) }
+      end
+
+      def restore_installation_repos
+        return unless @@repos_backup
+        Yast::Pkg.SourceFinishAll
+        Yast::Pkg.TargetFinish
+        Yast::Pkg.TargetInitialize("/")
+
+        @@repos_backup.each { |r| Yast::Pkg.RepositoryAdd(r) }
+
+        Yast::Pkg.SourceLoad
+        Yast::Pkg.TargetFinish
+        Yast::Pkg.TargetInitialize(Yast::Installation.destdir)
       end
     end
   end

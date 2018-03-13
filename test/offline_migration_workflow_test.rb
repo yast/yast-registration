@@ -4,6 +4,12 @@ require_relative "spec_helper"
 
 describe Registration::UI::OfflineMigrationWorkflow do
   describe "#main" do
+    before do
+      allow(Yast::Wizard).to receive(:SetContents)
+      allow(Yast::Packages).to receive(:init_called=)
+      allow(Yast::Packages).to receive(:Initialize)
+    end
+
     it "runs the 'inst_migration_repos' client" do
       expect(Yast::WFM).to receive(:CallFunction).with("inst_migration_repos", anything)
       subject.main
