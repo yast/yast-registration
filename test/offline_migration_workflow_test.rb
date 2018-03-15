@@ -5,9 +5,12 @@ require_relative "spec_helper"
 describe Registration::UI::OfflineMigrationWorkflow do
   describe "#main" do
     before do
-      allow(Yast::Wizard).to receive(:SetContents)
+      allow(Yast::Wizard).to receive(:ClearContents)
       allow(Yast::Packages).to receive(:init_called=)
       allow(Yast::Packages).to receive(:Initialize)
+      allow(Yast::GetInstArgs).to receive(:going_back)
+      allow(Yast::AddOnProduct).to receive(:add_on_products).and_return([])
+      allow(File).to receive(:delete)
     end
 
     it "runs the 'inst_migration_repos' client" do

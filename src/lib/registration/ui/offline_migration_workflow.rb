@@ -13,6 +13,7 @@
 #
 
 require "yast"
+require "uri"
 
 module Registration
   module UI
@@ -27,6 +28,7 @@ module Registration
       Yast.import "Installation"
       Yast.import "Wizard"
       Yast.import "Pkg"
+      Yast.import "AddOnProduct"
 
       # the constructor
       def initialize
@@ -52,18 +54,18 @@ module Registration
           if Registration.is_registered?
             log.info("Restoring the previous registration")
             rollback
-            restore_installation_repos
           end
 
           return :back
-        else
-          backup_installation_repos
         end
 
         # run the main registration migration
         ui = migration_repos
 
         rollback if ui == :rollback
+
+        # refresh the add-on records
+        update_addon_records
 
         # go back in the upgrade workflow after rollback or abort,
         # maybe the user justelected a wrong partition to upgrade
@@ -78,6 +80,8 @@ module Registration
       def rollback
         Yast::WFM.CallFunction("registration_sync")
 
+        # remove the copied credentials file from the target system to not be
+        # used again by mistake (skip if accidentally called in a running system)
         if Yast::Stage.initial && File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
           log.info("Removing #{SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE}...")
           File.delete(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
@@ -88,22 +92,38 @@ module Registration
         Yast::WFM.CallFunction("inst_migration_repos", [{ "enable_back" => true }])
       end
 
-      def backup_installation_repos
-        ids = Yast::Pkg.SourceGetCurrent(false)
-        @@repos_backup = ids.map { |r| Yast::Pkg.SourceGeneralData(r) }
-      end
+      # update the repository IDs in the AddOnProduct records
+      def update_addon_records
+        Yast::AddOnProduct.add_on_products.each do |addon|
+          next unless addon["media_url"]
 
-      def restore_installation_repos
-        return unless @@repos_backup
-        Yast::Pkg.SourceFinishAll
-        Yast::Pkg.TargetFinish
-        Yast::Pkg.TargetInitialize("/")
+          url = URI(addon["media_url"])
+          dir = addon["product_dir"]
+          log.info("Refreshing repository ID for addon #{addon["product"]} (#{url})")
 
-        @@repos_backup.each { |r| Yast::Pkg.RepositoryAdd(r) }
+          # remove the alias from the URL if it is preset, it is removed by Pkg bindings
+          # when adding the repository so it would not match
+          if url.query
+            # params is a list of pairs, "foo=bar" => [["foo, "bar]]
+            params = URI.decode_www_form(url.query)
+            params.reject! { |p| p.first == "alias" }
+            # avoid empty query after "?" in URL
+            url.query = params.empty? ? nil : URI.encode_www_form(params)
+          end
 
-        Yast::Pkg.SourceLoad
-        Yast::Pkg.TargetFinish
-        Yast::Pkg.TargetInitialize(Yast::Installation.destdir)
+          new_id = Yast::Pkg.SourceGetCurrent(false).find do |repo|
+            data = Yast::Pkg.SourceGeneralData(repo)
+            # the same URL and product dir
+            URI(data["url"]) == url && data["product_dir"] == dir
+          end
+
+          if new_id
+            log.info("Updating ID: #{addon["media"]} -> #{new_id}")
+            addon["media"] = new_id
+          else
+            log.warn("Addon not found")
+          end
+        end
       end
     end
   end
