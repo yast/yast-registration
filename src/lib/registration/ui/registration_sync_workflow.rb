@@ -30,7 +30,6 @@ module Registration
       Yast.import "Pkg"
       Yast.import "Update"
       Yast.import "Installation"
-      Yast.import "Stage"
 
       # the constructor
       def initialize

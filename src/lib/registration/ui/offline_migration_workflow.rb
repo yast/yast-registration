@@ -68,7 +68,7 @@ module Registration
         update_addon_records
 
         # go back in the upgrade workflow after rollback or abort,
-        # maybe the user justelected a wrong partition to upgrade
+        # maybe the user just selected a wrong partition to upgrade
         ui = :back if ui == :abort || ui == :rollback
 
         log.info "Offline migration result: #{ui}"
@@ -92,7 +92,8 @@ module Registration
         Yast::WFM.CallFunction("inst_migration_repos", [{ "enable_back" => true }])
       end
 
-      # update the repository IDs in the AddOnProduct records
+      # update the repository IDs in the AddOnProduct records, the migration
+      # updates the repository setup and the source IDs might not match anymore
       def update_addon_records
         Yast::AddOnProduct.add_on_products.each do |addon|
           next unless addon["media_url"]
