@@ -11,7 +11,7 @@ describe Registration::Clients::InstMigrationRepos do
   end
 
   it "runs the standard \"migration_repos\" client" do
-    expect(Yast::WFM).to receive(:call).with("migration_repos")
+    expect(Yast::WFM).to receive(:call).with("migration_repos", anything)
     subject.main
   end
 end

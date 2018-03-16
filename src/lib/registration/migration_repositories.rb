@@ -22,6 +22,7 @@ module Registration
     include Yast::Logger
 
     Yast.import "Pkg"
+    Yast.import "Stage"
 
     # reset the libzypp migration setup
     def self.reset
@@ -101,6 +102,9 @@ module Registration
     # set the solver flags for online migration
     # @see https://fate.suse.com/319138
     def set_solver
+      # skip in offline migration
+      return if Yast::Stage.initial
+
       log.info "Setting the solver flags for online migration"
       Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true,
                                "dupAllowVendorChange"     => false)

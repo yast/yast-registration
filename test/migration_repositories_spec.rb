@@ -14,6 +14,7 @@ describe Registration::MigrationRepositories do
 
   describe "#activate_services" do
     before do
+      expect(Yast::Stage).to receive(:initial).and_return(false)
       expect(Yast::Pkg).to receive(:SetSolverFlags).with("ignoreAlreadyRecommended" => true,
                                                          "dupAllowVendorChange"     => false)
       expect(Yast::Pkg).to receive(:PkgSolve)

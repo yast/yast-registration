@@ -32,7 +32,7 @@ module Registration
         set_target_path
 
         # call the normal client
-        Yast::WFM.call("migration_repos")
+        Yast::WFM.call("migration_repos", [{ "enable_back" => true }])
       end
 
     private
