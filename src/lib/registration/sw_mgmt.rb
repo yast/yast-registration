@@ -116,6 +116,33 @@ module Registration
       true
     end
 
+    # Prepare a pkg-binding product hash using the first base product available
+    # as a template and with the given self_update_id as the product name.
+    #
+    # With a media containing multiple products it is expected that all the
+    # products use the same version and arch.
+    #
+    # @param self_update_id [String] product name to be used for get the installer updates
+    # @return product [Hash,nil] with pkg-binding format; return nil if the
+    # given self_update_id is empty or there is no base product available
+    def self.installer_update_base_product(self_update_id)
+      return if self_update_id.empty?
+      base_product = Y2Packager::Product.available_base_products.first
+      return unless base_product
+
+      # filter out not needed data
+      product_info = {
+        "name"         => selt_update_id,
+        "arch"         => base_product.arch,
+        "version"      => base_product.version,
+        "release_type" => nil
+      }
+
+      log.info("Base product for installer update: #{product_info}")
+
+      product_info
+    end
+
     def self.find_base_product
       # FIXME: refactor the code to use Y2Packager::Product
 
