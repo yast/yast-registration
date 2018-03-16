@@ -105,6 +105,44 @@ describe Registration::SwMgmt do
     end
   end
 
+  describe ".installer_update_base_product" do
+    let(:base_product) do
+      instance_double(Y2Packager::Product, name: "dummy", version: "15.0", arch: "x86_64")
+    end
+    let(:available_products) { [base_product] }
+
+    before do
+      allow(Y2Packager::Product).to receive(:available_base_products).and_return(available_products)
+    end
+
+    it "returns nil if the given self_update_id is empty" do
+      expect(subject.installer_update_base_product("")).to eq(nil)
+    end
+
+    context "when there is no base product available" do
+      let(:available_products) { [] }
+
+      it "returns nil" do
+        allow(Y2Packager::Product).to receive(:available_base_products).and_return([])
+        expect(subject.installer_update_base_product("self_update_id")).to eq(nil)
+      end
+    end
+
+    context "when there is some product available" do
+      it "returns a hash with the product keys 'name', 'version', 'arch' and 'release_type' " do
+        product = subject.installer_update_base_product("self_update_id")
+        expect(product).to be_a(Hash)
+        expect(product.keys.size).to eq(4)
+        expect(product).to include("name", "version", "arch", "release_type")
+      end
+
+      it "uses the given self_update_id as the product name returned" do
+        product = subject.installer_update_base_product("self_update_id")
+        expect(product["name"]).to eq("self_update_id")
+      end
+    end
+  end
+
   describe ".base_product_to_register" do
     it "returns nil if not able to find a product" do
       expect(subject).to receive(:find_base_product).and_return(nil)

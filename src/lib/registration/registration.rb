@@ -190,17 +190,9 @@ module Registration
     # @see SwMgmt.remote_product
     # @see SUSE::Connect::Yast.list_installer_updates
     def get_updates_list
-      product = SwMgmt.base_product_to_register
-      return [] unless product
       id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
-      if !id.empty?
-        log.info "Using self update id from control file #{id.inspect}"
-        # It replaces only name of product. It keeps version and arch of base product.
-        # For arch we are sure it is safe. For version it can be issue if media contain products
-        # in different versions, but we do not expect it as it share same installer and should be
-        # based on same base system and service pack.
-        product["name"] = id
-      end
+      product = SwMgmt.installer_update_base_product(id) || SwMgmt.base_product_to_register
+      return [] unless product
 
       log.info "Reading available updates for product: #{product["name"]}"
       remote_product = SwMgmt.remote_product(product)
