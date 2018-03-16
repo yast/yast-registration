@@ -49,13 +49,7 @@ module Registration
         Yast::Wizard.ClearContents
 
         if Yast::GetInstArgs.going_back
-          log.info("Going back")
-
-          if Registration.is_registered?
-            log.info("Restoring the previous registration")
-            rollback
-          end
-
+          going_back
           return :back
         end
 
@@ -76,6 +70,15 @@ module Registration
       end
 
     private
+
+      def going_back
+        log.info("Going back")
+
+        if Registration.is_registered?
+          log.info("Restoring the previous registration")
+          rollback
+        end
+      end
 
       def rollback
         Yast::WFM.CallFunction("registration_sync")
@@ -99,31 +102,51 @@ module Registration
           next unless addon["media_url"]
 
           url = URI(addon["media_url"])
-          dir = addon["product_dir"]
           log.info("Refreshing repository ID for addon #{addon["product"]} (#{url})")
 
           # remove the alias from the URL if it is preset, it is removed by Pkg bindings
           # when adding the repository so it would not match
-          if url.query
-            # params is a list of pairs, "foo=bar" => [["foo, "bar]]
-            params = URI.decode_www_form(url.query)
-            params.reject! { |p| p.first == "alias" }
-            # avoid empty query after "?" in URL
-            url.query = params.empty? ? nil : URI.encode_www_form(params)
-          end
+          remove_alias(url)
 
-          new_id = Yast::Pkg.SourceGetCurrent(false).find do |repo|
-            data = Yast::Pkg.SourceGeneralData(repo)
-            # the same URL and product dir
-            URI(data["url"]) == url && data["product_dir"] == dir
-          end
+          update_addon(addon, url)
+        end
+      end
 
-          if new_id
-            log.info("Updating ID: #{addon["media"]} -> #{new_id}")
-            addon["media"] = new_id
-          else
-            log.warn("Addon not found")
-          end
+      # remove the "alias" query URL parameter from the URL if it is present
+      # @param url [URI] input URL
+      def remove_alias(url)
+        if url.query
+          # params is a list of pairs, "foo=bar" => [["foo, "bar]]
+          params = URI.decode_www_form(url.query)
+          params.reject! { |p| p.first == "alias" }
+          # avoid empty query after "?" in URL
+          url.query = params.empty? ? nil : URI.encode_www_form(params)
+        end
+      end
+
+      # Find the repository ID for the URL and product dir
+      # @param url [URI] repository URL
+      # @param dir [String] product directory
+      # @return [Integer,nil] repository ID
+      def find_repo_id(url, dir)
+        Yast::Pkg.SourceGetCurrent(false).find do |repo|
+          data = Yast::Pkg.SourceGeneralData(repo)
+          # the same URL and product dir
+          URI(data["url"]) == url && data["product_dir"] == dir
+        end
+      end
+
+      # update an addon record
+      # @param addon [Hash] an addon record
+      # @param url [URI] URL of the addon (without "alias")
+      def update_addon(addon, url)
+        new_id = find_repo_id(url, addon["product_dir"])
+
+        if new_id
+          log.info("Updating ID: #{addon["media"]} -> #{new_id}")
+          addon["media"] = new_id
+        else
+          log.warn("Addon not found")
         end
       end
     end
