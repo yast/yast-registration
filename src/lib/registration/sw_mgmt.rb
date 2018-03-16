@@ -132,7 +132,7 @@ module Registration
 
       # filter out not needed data
       product_info = {
-        "name"         => selt_update_id,
+        "name"         => self_update_id,
         "arch"         => base_product.arch,
         "version"      => base_product.version,
         "release_type" => nil
