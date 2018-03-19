@@ -44,6 +44,21 @@ module Registration
 
         # copy the old NCC/SCC credentials to inst-sys
         SwMgmt.copy_old_credentials(destdir)
+
+        # import the SMT certificate to inst-sys
+        import_ssl_certificate
+      end
+
+      # import the old SSL certificate if present
+      def import_ssl_certificate
+        cert_file = File.join(Yast::Installation.destdir, SUSE::Connect::YaST::SERVER_CERT_FILE)
+        # TODO: handle the SLE11 path as well
+        return unless File.exist?(cert_file)
+
+        log.info("Importing the SSL certificate from the old system (#{cert_file})...")
+        cert = SslCertificate.load_file(cert_file)
+        # in Stage.initial this imports to the inst-sys
+        cert.import
       end
     end
   end
