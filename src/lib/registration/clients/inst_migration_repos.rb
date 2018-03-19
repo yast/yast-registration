@@ -49,11 +49,19 @@ module Registration
         import_ssl_certificate
       end
 
-      # import the old SSL certificate if present
+      # Import the old SSL certificate if present. Tries both SLE12 nad SLE11
+      # file locations.
       def import_ssl_certificate
+        # SLE12 certificate path
         cert_file = File.join(Yast::Installation.destdir, SUSE::Connect::YaST::SERVER_CERT_FILE)
-        # TODO: handle the SLE11 path as well
-        return unless File.exist?(cert_file)
+
+        if !File.exist?(cert_file)
+          # try the the SLE11 certificate path as well
+          # see https://github.com/yast/yast-registration/blob/Code-11-SP3/src/modules/Register.ycp#L296-L297
+          cert_file = File.join(Yast::Installation.destdir,
+            "/etc/ssl/certs/registration-server.pem")
+          return unless File.exist?(cert_file)
+        end
 
         log.info("Importing the SSL certificate from the old system (#{cert_file})...")
         cert = SslCertificate.load_file(cert_file)
