@@ -69,7 +69,8 @@ module Registration
         self.class.filter_beta = enable
         if enable
           @addons = @all_addons.select do |a|
-            a.registered? || a.selected? || !a.beta_release?
+            a.registered? || a.selected? || a.auto_selected? ||
+              !a.beta_release?
           end
         else
           @addons = @all_addons
