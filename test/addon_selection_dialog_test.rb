@@ -216,6 +216,17 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         allow(subject).to receive(:RichText).and_call_original
         dialog.run
       end
+
+      it "displays auto-selected beta add-ons" do
+        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:registered?).and_return(false)
+        allow(addon).to receive(:recommended).and_return(false)
+        allow(addon).to receive(:auto_selected?).and_return(true)
+        allow(Registration::Addon).to receive(:find_all).and_return([addon])
+        expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
+        allow(subject).to receive(:RichText).and_call_original
+        dialog.run
+      end
     end
 
     context "when there is no beta versions to filter" do
