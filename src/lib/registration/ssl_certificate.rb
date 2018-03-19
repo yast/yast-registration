@@ -13,6 +13,9 @@ module Registration
 
     # Path to the registration certificate in the instsys
     INSTSYS_SERVER_CERT_FILE = "/etc/pki/trust/anchors/registration_server.pem".freeze
+    # the SLE11 certificate path, see
+    # https://github.com/yast/yast-registration/blob/Code-11-SP3/src/modules/Register.ycp#L296-L297
+    SLE11_SERVER_CERT_FILE = "/etc/ssl/certs/registration-server.pem".freeze
     # Path to system CA certificates
     CA_CERTS_DIR = "/var/lib/ca-certificates".freeze
 
