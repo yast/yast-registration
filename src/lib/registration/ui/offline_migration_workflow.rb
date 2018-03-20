@@ -103,10 +103,30 @@ module Registration
         # remove the SSL certificate from the inst-sys
         if File.exist?(SslCertificate::INSTSYS_SERVER_CERT_FILE)
           log.info("Removing the imported SSL certificate from the inst-sys...")
+
+          # Update database
+          Yast::Execute.locally("trust", "extract", "--format=openssl-directory",
+            "--filter=ca-anchors", "--overwrite", SslCertificate::TMP_CA_CERTS_DIR)
+
+          # Copy certificates/links
+          files = Dir[File.join(SslCertificate::TMP_CA_CERTS_DIR, "*")]
+          targets = ["pem", "openssl"].map { |d| File.join(SslCertificate::CA_CERTS_DIR, d) }
+
+          targets.each do |subdir|
+            files.each do |file|
+              path = File.join(subdir, File.basename(file))
+              if File.exist?(path)
+                log.info("Removing #{path}")
+                File.delete(path)
+              end
+            end
+          end
+
+          log.info("Removing #{SslCertificate::INSTSYS_SERVER_CERT_FILE}")
           File.delete(SslCertificate::INSTSYS_SERVER_CERT_FILE)
-          # FIXME: this does not remove the already imported certificate from
-          # /var/lib/ca-certificates
-          SslCertificate.update_instsys_ca
+
+          # Cleanup
+          FileUtils.rm_rf(SslCertificate::TMP_CA_CERTS_DIR)
         end
       end
 
