@@ -254,7 +254,7 @@ module Registration
       # progress label
       result = Yast::Popup.Feedback(_("Importing the SSL certificate"),
         _("Importing '%s' certificate...") % cn) do
-        cert.import
+        SslCertificateImporter.new(cert).import
       end
 
       # remember the imported certificate fingerprint for Autoyast export
