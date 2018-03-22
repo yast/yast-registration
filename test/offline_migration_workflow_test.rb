@@ -10,7 +10,32 @@ describe Registration::UI::OfflineMigrationWorkflow do
       allow(Yast::Packages).to receive(:Initialize)
       allow(Yast::GetInstArgs).to receive(:going_back)
       allow(File).to receive(:delete)
+      allow(File).to receive(:exist?)
       allow(Yast::WFM).to receive(:CallFunction)
+      allow(Yast::Stage).to receive(:initial).and_return(true)
+    end
+
+    shared_examples "certificate cleanup" do
+      it "removes the SSL ceritificate from inst-sys" do
+        expect(File).to receive(:exist?)
+          .with(Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE)
+          .and_return(true)
+        expect(Yast::Execute).to receive(:locally).with("trust", "extract",
+          "--format=openssl-directory", "--filter=ca-anchors", "--overwrite",
+          Registration::SslCertificate::TMP_CA_CERTS_DIR)
+        expect(Dir).to receive(:[])
+          .with(File.join(Registration::SslCertificate::TMP_CA_CERTS_DIR, "*"))
+          .and_return([File.join(Registration::SslCertificate::TMP_CA_CERTS_DIR, "smt.pem")])
+
+        var_lib_cert = File.join(Registration::SslCertificate::CA_CERTS_DIR, "/openssl/smt.pem")
+        expect(File).to receive(:exist?).with(var_lib_cert).and_return(true)
+        expect(File).to receive(:delete).with(var_lib_cert)
+
+        expect(File).to receive(:delete)
+          .with(Registration::SslCertificate::INSTSYS_SERVER_CERT_FILE)
+        expect(FileUtils).to receive(:rm_rf).with(Registration::SslCertificate::TMP_CA_CERTS_DIR)
+        subject.main
+      end
     end
 
     context "when going back" do
@@ -34,15 +59,14 @@ describe Registration::UI::OfflineMigrationWorkflow do
           allow(Yast::WFM).to receive(:CallFunction).with("registration_sync")
         end
 
+        include_examples "certificate cleanup"
+
         it "runs rollback" do
           expect(Yast::WFM).to receive(:CallFunction).with("registration_sync")
           subject.main
         end
 
         it "removes the copied credentials" do
-          expect(Yast::Stage).to receive(:initial).and_return(true)
-          # allow the other cases
-          allow(File).to receive(:exist?)
           expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
             .and_return(true)
           expect(File).to receive(:delete).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
@@ -116,6 +140,8 @@ describe Registration::UI::OfflineMigrationWorkflow do
           .and_return(:rollback)
         allow(Yast::WFM).to receive(:CallFunction).with("registration_sync")
       end
+
+      include_examples "certificate cleanup"
 
       it "runs the 'registration_sync' client" do
         expect(Yast::WFM).to receive(:CallFunction).with("registration_sync")

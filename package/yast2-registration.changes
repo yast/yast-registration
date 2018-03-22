@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 21 16:40:25 UTC 2018 - lslezak@suse.cz
+
+- Import the SMT SSL certificate at offline upgrade into
+  the inst-sys so the SMT server can be accessed (bsc#1080518)
+- 4.0.28
+
+-------------------------------------------------------------------
 Mon Mar 19 10:39:30 UTC 2018 - jreidinger@suse.com
 
 - Do not hide beta addons that are preselected (bsc#1066216,

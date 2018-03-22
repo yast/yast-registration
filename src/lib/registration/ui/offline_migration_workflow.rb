@@ -61,9 +61,12 @@ module Registration
         # refresh the add-on records
         update_addon_records
 
-        # go back in the upgrade workflow after rollback or abort,
-        # maybe the user just selected a wrong partition to upgrade
-        ui = :back if ui == :abort || ui == :rollback
+        if [:back, :abort, :rollback].include?(ui)
+          inst_sys_cleanup
+          # go back in the upgrade workflow after rollback or abort,
+          # maybe the user just selected a wrong partition to upgrade
+          ui = :back
+        end
 
         log.info "Offline migration result: #{ui}"
         ui
@@ -78,17 +81,55 @@ module Registration
           log.info("Restoring the previous registration")
           rollback
         end
+
+        inst_sys_cleanup
       end
 
       def rollback
         Yast::WFM.CallFunction("registration_sync")
+      end
 
-        # remove the copied credentials file from the target system to not be
-        # used again by mistake (skip if accidentally called in a running system)
-        if Yast::Stage.initial && File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+      # cleanup the inst-sys, remove the files copied from the target system
+      def inst_sys_cleanup
+        # skip inst-sys cleanup if accidentally called in a running system
+        return unless Yast::Stage.initial
+
+        # remove the copied credentials file from the inst-sys
+        if File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
           log.info("Removing #{SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE}...")
           File.delete(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
         end
+
+        certificate_cleanup if File.exist?(SslCertificate::INSTSYS_SERVER_CERT_FILE)
+      end
+
+      # remove the SSL certificate from the inst-sys
+      def certificate_cleanup
+        log.info("Removing the imported SSL certificate from the inst-sys...")
+
+        # Update database
+        Yast::Execute.locally("trust", "extract", "--format=openssl-directory",
+          "--filter=ca-anchors", "--overwrite", SslCertificate::TMP_CA_CERTS_DIR)
+
+        # Copy certificates/links
+        files = Dir[File.join(SslCertificate::TMP_CA_CERTS_DIR, "*")]
+        targets = ["pem", "openssl"].map { |d| File.join(SslCertificate::CA_CERTS_DIR, d) }
+
+        targets.each do |subdir|
+          files.each do |file|
+            path = File.join(subdir, File.basename(file))
+            if File.exist?(path)
+              log.info("Removing #{path}")
+              File.delete(path)
+            end
+          end
+        end
+
+        log.info("Removing #{SslCertificate::INSTSYS_SERVER_CERT_FILE}")
+        File.delete(SslCertificate::INSTSYS_SERVER_CERT_FILE)
+
+        # Cleanup
+        FileUtils.rm_rf(SslCertificate::TMP_CA_CERTS_DIR)
       end
 
       def migration_repos
