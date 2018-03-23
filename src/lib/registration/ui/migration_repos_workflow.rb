@@ -14,6 +14,7 @@
 
 require "yast"
 require "yast2/popup"
+require "y2packager/product_upgrade"
 
 require "registration/registration"
 require "registration/registration_ui"
@@ -289,7 +290,7 @@ module Registration
       # on a system that is not running (offline migration)
       # @return [Symbol] workflow symbol (:next or :abort)
       def load_migration_products_offline(activations)
-        base_product = upgraded_base_product
+        base_product = Y2Packager::ProductUpgrade.new_base_product
         if !base_product
           # TRANSLATORS: Error message
           Yast::Report.Error(_("Cannot find a base product to upgrade."))
@@ -573,21 +574,6 @@ module Registration
             "will not be updated and the system will be still registered " \
             "using the previous product. The packages from the registration " \
             "repositories can conflict with the new packages.</p>")
-      end
-
-      def upgraded_base_product
-        # temporarily run the update mode to let the solver select the product for upgrade
-        # (this will correctly handle possible product renames)
-        Yast::Pkg.PkgUpdateAll({})
-        product = Y2Packager::Product.selected_base
-
-        # restore the initial status, the package update will be turned on later again
-        Yast::Pkg.PkgReset
-        changed = Yast::Pkg.GetPackages(:removed, true) + Yast::Pkg.GetPackages(:selected, true)
-        changed.each { |p| Yast::Pkg.PkgNeutral(p) }
-
-        log.info("Upgraded base product: #{product.inspect}")
-        product
       end
     end
   end
