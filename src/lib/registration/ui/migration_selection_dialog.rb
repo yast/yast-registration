@@ -157,7 +157,7 @@ module Registration
       # @return [Array<Yast::Term>] widget content
       def migration_items
         sorted_migrations.map.with_index do |arr, idx|
-          base_product = arr.find { |p| p.base }
+          base_product = arr.find(&:base)
           base_product_text = base_product.friendly_name || base_product.short_name ||
             (base_product.identifier + "-" + base_product.version)
           extensions = arr.select { |p| p.product_type == "extension" }
