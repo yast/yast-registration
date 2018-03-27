@@ -189,25 +189,21 @@ module Registration
       # @return [String] textual representation of extensions living in arr
       def extensions_text_for(arr)
         extensions = arr.select { |p| p.product_type == "extension" }
-        if extensions.empty?
-          ""
-        else
-          # TRANLATORS: number of extensions to upgrade. Will be used later to
-          #   construct whole status of upgrade
-          format(n_("%i extension", "%i extensions", extensions.size), extensions.size)
-        end
+        return "" if extensions.empty?
+
+        # TRANLATORS: number of extensions to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i extension", "%i extensions", extensions.size), extensions.size)
       end
 
       # @return [String] textual representation of modules living in arr
       def modules_text_for(arr)
         modules = arr.select { |p| p.product_type == "module" }
-        if modules.empty?
-          ""
-        else
-          # TRANLATORS: number of modules to upgrade. Will be used later to
-          #   construct whole status of upgrade
-          format(n_("%i module", "%i modules", modules.size), modules.size)
-        end
+        return "" if modules.empty?
+
+        # TRANLATORS: number of modules to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i module", "%i modules", modules.size), modules.size)
       end
 
       # update details about the selected migration
