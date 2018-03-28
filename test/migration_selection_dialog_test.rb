@@ -15,7 +15,7 @@ describe Registration::UI::MigrationSelectionDialog do
 
       # check the displayed content
       expect(Yast::Wizard).to receive(:SetContents) do |_title, content, _help, _back, _next|
-        expected_list_item = Item(Id(0), "SLES12-SP1")
+        expected_list_item = Item(Id(0), "SUSE Linux Enterprise Server SP1 x86_64")
 
         term = content.nested_find do |t|
           t.respond_to?(:value) && t.value == :SelectionBox &&

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 27 14:58:42 UTC 2018 - jreidinger@suse.com
+
+- Improve text for migration targets (bsc#1079075)
+- 4.0.29
+
+-------------------------------------------------------------------
 Wed Mar 21 16:40:25 UTC 2018 - lslezak@suse.cz
 
 - Import the SMT SSL certificate at offline upgrade into

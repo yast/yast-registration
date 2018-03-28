@@ -157,12 +157,53 @@ module Registration
       # @return [Array<Yast::Term>] widget content
       def migration_items
         sorted_migrations.map.with_index do |arr, idx|
-          products = arr.map do |product|
-            product.shortname || "#{product.identifier}-#{product.version}"
-          end
-
-          Item(Id(idx), products.join(", "))
+          base_product_text = base_product_text_for(arr)
+          extensions_text = extensions_text_for(arr)
+          modules_text = modules_text_for(arr)
+          text =
+            if extensions_text.empty? && modules_text.empty?
+              base_product_text
+            elsif extensions_text.empty? || modules_text.empty?
+              additional_text = extensions_text.empty? ? modules_text : extensions_text
+              # TRANSLATORS: Upgrade target. The first %s stands for base product name and
+              # the second for extensions or modules count.
+              # Example: SUSE Linux Enterprise Server 15 x86_64 including 8 modules
+              format(_("%s including %s"), base_product_text, additional_text)
+            else
+              # TRANSLATORS: Upgrade target. The first %s stands for base product name,
+              # the second for modules count and the third for extensions count.
+              # Example: SUSE Linux Enterprise Server 15 x86_64 including 8 modules and 2 extensions
+              format(_("%s including %s and %s"), base_product_text, modules_text, extensions_text)
+            end
+          Item(Id(idx), text)
         end
+      end
+
+      # @return [String] textual representation of base product living in arr
+      def base_product_text_for(arr)
+        base_product = arr.find(&:base)
+        base_product.friendly_name || base_product.short_name ||
+          (base_product.identifier + "-" + base_product.version)
+      end
+
+      # @return [String] textual representation of extensions living in arr
+      def extensions_text_for(arr)
+        extensions = arr.select { |p| p.product_type == "extension" }
+        return "" if extensions.empty?
+
+        # TRANSLATORS: number of extensions to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i extension", "%i extensions", extensions.size), extensions.size)
+      end
+
+      # @return [String] textual representation of modules living in arr
+      def modules_text_for(arr)
+        modules = arr.select { |p| p.product_type == "module" }
+        return "" if modules.empty?
+
+        # TRANSLATORS: number of modules to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i module", "%i modules", modules.size), modules.size)
       end
 
       # update details about the selected migration
