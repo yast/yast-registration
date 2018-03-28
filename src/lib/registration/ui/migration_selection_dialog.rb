@@ -191,7 +191,7 @@ module Registration
         extensions = arr.select { |p| p.product_type == "extension" }
         return "" if extensions.empty?
 
-        # TRANLATORS: number of extensions to upgrade. Will be used later to
+        # TRANSLATORS: number of extensions to upgrade. Will be used later to
         #   construct whole status of upgrade
         format(n_("%i extension", "%i extensions", extensions.size), extensions.size)
       end
@@ -201,7 +201,7 @@ module Registration
         modules = arr.select { |p| p.product_type == "module" }
         return "" if modules.empty?
 
-        # TRANLATORS: number of modules to upgrade. Will be used later to
+        # TRANSLATORS: number of modules to upgrade. Will be used later to
         #   construct whole status of upgrade
         format(n_("%i module", "%i modules", modules.size), modules.size)
       end
