@@ -226,7 +226,7 @@ describe Registration::UI::MigrationReposWorkflow do
     let(:selected_base) { load_yaml_fixture("migration_sles15_selected_base.yml") }
 
     before do
-      allow(Y2Packager::Product).to receive(:selected_base).and_return(selected_base)
+      allow(Y2Packager::ProductUpgrade).to receive(:new_base_product).and_return(selected_base)
       allow_any_instance_of(Registration::RegistrationUI).to receive(:offline_migration_products)
         .and_return(offline_migrations)
 

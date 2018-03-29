@@ -3,6 +3,9 @@ require "pathname"
 TESTS_PATH = Pathname.new(File.dirname(__FILE__))
 FIXTURES_PATH = TESTS_PATH.join("fixtures")
 
+# run tests in English locale (to avoid problems with translations)
+ENV["LC_ALL"] = "en_US.UTF-8"
+
 if ENV["COVERAGE"]
   require "simplecov"
 
