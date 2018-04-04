@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Apr  3 15:44:53 UTC 2018 - lslezak@suse.cz
+
+- Better evaluate the product to upgrade, do not use the package
+  solver if there is only one base product to install, use some
+  fallbacks when the solver fails (bsc#1086259)
+- 4.0.30
+
+-------------------------------------------------------------------
 Tue Mar 27 14:58:42 UTC 2018 - jreidinger@suse.com
 
 - Improve text for migration targets (bsc#1079075)
