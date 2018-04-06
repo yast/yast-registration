@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.0.30
+Version:        4.0.31
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -26,8 +26,8 @@ Source0:        %{name}-%{version}.tar.bz2
 Group:          System/YaST
 License:        GPL-2.0
 
-# Y2Packager::ProductUpgrad
-Requires:       yast2 >= 4.0.62
+# Y2Packager::ProductLicense
+Requires:       yast2 >= 4.0.63
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
@@ -48,8 +48,8 @@ Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-packager >= 3.1.95
 Requires:       yast2-update >= 3.1.36
 
-# Y2Packager::ProductUpgrade
-BuildRequires:  yast2 >= 4.0.62
+# Y2Packager::ProductLicense
+BuildRequires:  yast2 >= 4.0.63
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5

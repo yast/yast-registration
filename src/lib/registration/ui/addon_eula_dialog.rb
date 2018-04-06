@@ -3,6 +3,7 @@ require "yast"
 require "registration/eula_downloader"
 require "registration/eula_reader"
 require "registration/helpers"
+require "y2packager/product_license"
 
 module Registration
   module UI
@@ -127,9 +128,13 @@ module Registration
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           return :back unless download_eula(addon, tmpdir)
           eula_reader = EulaReader.new(tmpdir)
+          license = find_license(addon, eula_reader)
+          return :accepted if license && license.accepted?
 
           setup_eula_dialog(addon, eula_reader, tmpdir)
-          run_eula_dialog(eula_reader)
+          ret = run_eula_dialog(eula_reader)
+          license.accept! if ret == :accepted
+          ret
         end
       ensure
         Yast::ProductLicense.CleanUp()
@@ -139,6 +144,15 @@ module Registration
       # @param info_file [String] the message is read from this file
       def display_optional_info(info_file)
         Yast::InstShowInfo.show_info_txt(info_file) if File.exist?(info_file)
+      end
+
+      def find_license(addon, eula_reader)
+        license_file = eula_reader.licenses[Y2Packager::License::DEFAULT_LANG]
+        return nil unless license_file
+        content = Yast::SCR.Read(path(".target.string"), license_file)
+        return nil unless content
+
+        Y2Packager::ProductLicense.find(addon.identifier, content: content)
       end
     end
   end
