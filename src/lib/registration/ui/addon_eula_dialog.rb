@@ -148,9 +148,9 @@ module Registration
 
       def find_license(addon, eula_reader)
         license_file = eula_reader.licenses[Y2Packager::License::DEFAULT_LANG]
-        return false unless license_file
+        return nil unless license_file
         content = Yast::SCR.Read(path(".target.string"), license_file)
-        return false unless content
+        return nil unless content
 
         Y2Packager::ProductLicense.find(addon.identifier, content: content)
       end
