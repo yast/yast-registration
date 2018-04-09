@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.0.31
+Version:        4.0.32
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -61,6 +61,9 @@ BuildRequires:  yast2-packager >= 4.0.40
 BuildRequires:  yast2-update >= 3.1.36
 
 BuildArch:      noarch
+# SUSEConnect does not build for i586 and s390 and is not supported on those architectures
+# bsc#1088552
+ExcludeArch:    %ix86 s390
 
 # FIXME: it seems can we cannot move it to macros.yast, the yast-rake-ci is not
 # installed into the chroot, the build fails...
