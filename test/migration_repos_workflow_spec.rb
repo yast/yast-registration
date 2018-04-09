@@ -247,6 +247,23 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Registration::UrlHelpers).to receive(:registration_url)
     end
 
+    context "no migration product found" do
+      before do
+        expect(Y2Packager::ProductUpgrade).to receive(:new_base_product).and_return(nil)
+        allow(Yast::Report).to receive(:Error)
+      end
+
+      it "displays a warning popup" do
+        expect(Yast::Report).to receive(:Error).with(/Cannot find a base product/)
+        subject.send(:load_migration_products_offline, activated_products)
+      end
+
+      it "returns :empty" do
+        ret = subject.send(:load_migration_products_offline, activated_products)
+        expect(ret).to eq(:empty)
+      end
+    end
+
     it "loads the possible migrations from the server" do
       subject.send(:load_migration_products_offline, activated_products)
       expect(subject.send(:migrations)).to_not be_empty
