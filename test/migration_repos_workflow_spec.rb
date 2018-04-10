@@ -151,6 +151,12 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run_sequence).to eq(:next)
       end
 
+      it "selects products to install" do
+        set_success_expectations
+        expect(Yast::Pkg).to receive(:ResolvableInstall).with("SLES", :product)
+        subject.run_sequence
+      end
+
       it "displays the custom repository selection if required" do
         set_success_expectations
 
@@ -178,6 +184,8 @@ describe Registration::UI::MigrationReposWorkflow do
           receive(:install_updates=).with(false)
         expect(subject.run).to eq(:next)
       end
+
+      it "selects "
 
       it "reports error and aborts when no installed product is found" do
         expect(Registration::SwMgmt).to receive(:installed_products)
