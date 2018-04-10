@@ -353,7 +353,7 @@ module Registration
 
     # Register those of *selected_addons* that we can without asking
     # the user for a reg code. The remaining ones are returned.
-    # @param product [Array<Addon>]
+    # @param selected_addons [Array<Addon>]
     # @param known_reg_codes [Hash{String => String}] addon id -> reg code
     # @return [Array<Addon>] the remaining addons
     def try_register_addons(selected_addons, known_reg_codes)

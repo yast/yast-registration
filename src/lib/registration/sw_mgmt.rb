@@ -123,7 +123,7 @@ module Registration
     # products use the same version and arch.
     #
     # @param self_update_id [String] product name to be used for get the installer updates
-    # @return product [Hash,nil] with pkg-binding format; return nil if the
+    # @return [Hash,nil] with pkg-binding format; return nil if the
     # given self_update_id is empty or there is no base product available
     def self.installer_update_base_product(self_update_id)
       return if self_update_id.empty?
