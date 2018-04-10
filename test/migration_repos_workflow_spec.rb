@@ -153,7 +153,10 @@ describe Registration::UI::MigrationReposWorkflow do
 
       it "selects products to install" do
         set_success_expectations
-        expect(Yast::Pkg).to receive(:ResolvableInstall).with("SLES", :product)
+        expect(Registration::SwMgmt).to receive(:select_addon_products) do |services|
+          expect(services.first.id).to eq(1311)
+        end
+
         subject.run_sequence
       end
 

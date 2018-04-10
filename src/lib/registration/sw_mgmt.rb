@@ -508,9 +508,12 @@ module Registration
     end
 
     # select products for new added extensions/modules
+    #
+    # @param addon_services [Array<SUSE::Connect::Remote::Service] List of services
+    #   If it is not specified, it falls back to {Registration::Storage::Cache#addon_services}.
     # @return [Boolean] true on success
-    def self.select_addon_products
-      addon_services = ::Registration::Storage::Cache.instance.addon_services
+    def self.select_addon_products(addon_services = nil)
+      addon_services ||= ::Registration::Storage::Cache.instance.addon_services
       log.info "New addon services: #{addon_services}"
 
       new_repos = addon_services.reduce([]) do |acc, service|
@@ -530,13 +533,18 @@ module Registration
 
       ret = products.all? { |product| Pkg.ResolvableInstall(product, :product) }
 
+      select_default_product_patterns unless Mode.update
+
+      ret
+    end
+
+    # Select default product patterns
+    def self.select_default_product_patterns
       # preselect the default product patterns (FATE#320199)
       # note: must be called *after* selecting the products
       product_patterns = ProductPatterns.new
       log.info "Selecting the default product patterns: #{product_patterns.names}"
       product_patterns.select
-
-      ret
     end
 
     # select remote addons matching the product resolvables

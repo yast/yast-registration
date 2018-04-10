@@ -475,9 +475,7 @@ module Registration
       # It causes the *-release packages to be installed (see bsc#1086818 for
       # further details).
       def select_products
-        selected_migration.map(&:identifier).each do |name|
-          Yast::Pkg.ResolvableInstall(name, :product)
-        end
+        SwMgmt.select_addon_products(registered_services)
         :next
       end
 
