@@ -185,8 +185,6 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run).to eq(:next)
       end
 
-      it "selects "
-
       it "reports error and aborts when no installed product is found" do
         expect(Registration::SwMgmt).to receive(:installed_products)
           .and_return([])
