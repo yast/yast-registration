@@ -151,6 +151,15 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(subject.run_sequence).to eq(:next)
       end
 
+      it "selects products to install" do
+        set_success_expectations
+        expect(Registration::SwMgmt).to receive(:select_addon_products) do |services|
+          expect(services.first.id).to eq(1311)
+        end
+
+        subject.run_sequence
+      end
+
       it "displays the custom repository selection if required" do
         set_success_expectations
 

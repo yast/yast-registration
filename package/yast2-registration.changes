@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr 10 13:43:12 UTC 2018 - igonzalezsosa@suse.com
+
+- Select wanted release packages during SCC based offline
+  migration (bsc#1086818)
+- 4.0.33
+
+-------------------------------------------------------------------
 Mon Apr  9 09:47:09 UTC 2018 - jsrain@suse.cz
 
 - do not build on 32-bit architectures (bsc#1088552)

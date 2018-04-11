@@ -85,7 +85,7 @@ module Registration
       # It's needed because the "scc" option is not a proper service, just a
       # special value.
       #
-      # @param  [SlpServiceClass::Service,String] Service to describe
+      # @param  service [SlpServiceClass::Service,String] Service to describe
       # @return [String] Service description
       #
       # @see Yast::Dialogs::ServiceSelection#service_to_description

@@ -84,6 +84,7 @@ module Registration
           "register_migration_products"  => [->() { register_migration_products }, true],
           "activate_migration_repos"     => [->() { activate_migration_repos }, true],
           "select_migration_repos"       => ->() { select_migration_repos },
+          "select_products"              => ->() { select_products },
           "store_repos_state"            => ->() { store_repos_state }
         }
 
@@ -138,12 +139,15 @@ module Registration
           abort:          :rollback,
           cancel:         :rollback,
           repo_selection: "select_migration_repos",
-          next:           "store_repos_state"
+          next:           "select_products"
         },
         "select_migration_repos"       => {
           abort:  :rollback,
           cancel: :rollback,
-          next:   "store_repos_state"
+          next:   "select_products"
+        },
+        "select_products"              => {
+          next: "store_repos_state"
         },
         "store_repos_state"            => {
           next: :next
@@ -464,6 +468,15 @@ module Registration
       # @return [Symbol] the UI symbol (:abort, :next)
       def select_migration_repos
         UI::MigrationReposSelectionDialog.run
+      end
+
+      # Select products for migration
+      #
+      # It causes the *-release packages to be installed (see bsc#1086818 for
+      # further details).
+      def select_products
+        SwMgmt.select_addon_products(registered_services)
+        :next
       end
 
       def store_repos_state
