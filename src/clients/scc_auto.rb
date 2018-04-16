@@ -219,10 +219,8 @@ module Yast
       old = Dir[File.join(Installation.destdir, "/etc/zypp/repos.d/*")] +
         Dir[File.join(Installation.destdir, "/etc/zypp/services.d/*")]
 
-      old.each do |f|
-        log.info "Removing #{f}"
-        ::FileUtils.rm_rf(f)
-      end
+      log.info "Removing #{old}"
+      ::FileUtils.rm_rf(old)
     end
 
     # finish the registration process

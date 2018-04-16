@@ -374,17 +374,7 @@ module Registration
       # run the migration target selection dialog
       # @return [Symbol] workflow symbol (:next or :abort)
       def select_migration_products
-        if Yast::Mode.auto
-          # TODO: for now simply select the first found migration (bsc#1087206#c7)
-          # later we can improve this (either choose the migration with higher product versions
-          # or allow selecting the migration in the AY profile)
-          self.selected_migration = migrations.first
-          self.manual_repo_selection = false
-          log.warn "More than one migration available, usign the first one" if migrations.size > 1
-          log.info "Selected migration: #{selected_migration}"
-
-          return :next
-        end
+        return select_migration_products_autoyast if Yast::Mode.auto
 
         log.info "Displaying migration target selection dialog"
         dialog = MigrationSelectionDialog.new(migrations, SwMgmt.installed_products)
@@ -397,6 +387,20 @@ module Registration
         end
 
         ret
+      end
+
+      # Select the migration product in the AutoYaST mode
+      # @return [Symbol] workflow symbol (:next)
+      def select_migration_products_autoyast
+        # TODO: for now simply select the first found migration (bsc#1087206#c7)
+        # later we can improve this (either choose the migration with higher product versions
+        # or allow selecting the migration in the AY profile)
+        self.selected_migration = migrations.first
+        self.manual_repo_selection = false
+        log.warn "More than one migration available, using the first one" if migrations.size > 1
+        log.info "Selected migration: #{selected_migration}"
+
+        :next
       end
 
       # collect products to migrate
