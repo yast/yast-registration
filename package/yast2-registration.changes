@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr 16 11:39:41 UTC 2018 - lslezak@suse.cz
+
+- Reimplemented AutoYaST autoupgrade, use the same API and workflow
+  like in a manual upgrade (bsc#1087206)
+- 4.0.34
+
+-------------------------------------------------------------------
 Tue Apr 10 13:43:12 UTC 2018 - igonzalezsosa@suse.com
 
 - Select wanted release packages during SCC based offline

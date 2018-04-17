@@ -26,6 +26,7 @@
 #
 #
 
+require "fileutils"
 require "yast/suse_connect"
 
 require "registration/storage"
@@ -38,6 +39,7 @@ require "registration/connect_helpers"
 require "registration/ssl_certificate"
 require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
+require "registration/ui/offline_migration_workflow"
 require "registration/erb_renderer.rb"
 
 module Yast
@@ -187,9 +189,15 @@ module Yast
 
       # update the registration in AutoUpgrade mode if the old system was registered
       if Mode.update && old_system_registered?
-        updated = update_registration
-        log.info "Registration updated: #{updated}"
-        return updated
+        # drop all obsolete repositories and services (manual upgrade contains a dialog
+        # where the old repositories are deleted, in AY we need to do it automatically here)
+        # Note: the Update module creates automatically a backup which is restored
+        # when upgrade is aborted or crashes.
+        repo_cleanup
+
+        ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
+        log.info "Migration result: #{ret}"
+        return ret == :next
       end
 
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
@@ -202,6 +210,17 @@ module Yast
       finish_registration
 
       true
+    end
+
+    # delete all previous services and repositories
+    def repo_cleanup
+      # we cannot use pkg-bindings here because loading services would trigger
+      # service and repository refresh which we want to avoid (it might easily fail)
+      old = Dir[File.join(Installation.destdir, "/etc/zypp/repos.d/*")] +
+        Dir[File.join(Installation.destdir, "/etc/zypp/services.d/*")]
+
+      log.info "Removing #{old}"
+      ::FileUtils.rm_rf(old)
     end
 
     # finish the registration process
@@ -298,10 +317,8 @@ module Yast
     # update the registration (system, the base product, the installed extensions)
     def update_registration
       return false unless update_system_registration
-      return false unless update_base_product
-      return false unless update_addons
 
-      # register additional addons (e.g. originally not present in SLE11)
+      # register additional addons (e.g. originally not present in SLE11/SLE12)
       register_addons
     end
 
@@ -346,12 +363,6 @@ module Yast
       registration_ui.update_system
     end
 
-    # update the base product registration
-    # @return [Boolean] true on success
-    def update_base_product
-      handle_product_service { registration_ui.update_base_product }
-    end
-
     # @yieldreturn [Boolean, SUSE::Connect::Remote::Product] success flag and
     #   remote product pair
     # @return [Boolean] true on success
@@ -363,15 +374,6 @@ module Yast
       return true if @config.install_updates || !product_service
 
       registration_ui.disable_update_repos(product_service)
-    end
-
-    # @return [Boolean] true on success
-    # FIXME: share with inst_scc.rb
-    def update_addons
-      addons = registration_ui.get_available_addons
-
-      failed_addons = registration_ui.update_addons(addons, enable_updates: @config.install_updates)
-      failed_addons.empty?
     end
   end unless defined?(SccAutoClient)
 end

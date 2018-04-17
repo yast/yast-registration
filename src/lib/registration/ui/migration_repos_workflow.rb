@@ -158,11 +158,8 @@ module Registration
       # if the system is not registered
       # @return [Symbol] workflow symbol, :next if registered, :abort when not
       def registration_check
-        # handle system upgrade (fate#323163)
-        if Yast::Stage.initial && Yast::Mode.update
-          log.info "System upgrade mode detected"
-          return system_upgrade_check
-        end
+        ret = registration_check_at_installation
+        return ret if ret
 
         return :next if Registration.is_registered?
 
@@ -176,6 +173,23 @@ module Registration
         return :abort unless register
 
         register_system
+      end
+
+      # check the current registration status
+      # @return [nil, Symbol] the workflow symbol (:next, :skip) or nil if not
+      #   in an installation
+      def registration_check_at_installation
+        # handle system upgrade (fate#323163)
+        return nil unless Yast::Stage.initial
+        # test autoupgrade first, Mode.update covers the autoupgrade as well
+        return registration_check_at_autoupgrade if Yast::Mode.autoupgrade
+        return system_upgrade_check if Yast::Mode.update
+
+        nil
+      end
+
+      def registration_check_at_autoupgrade
+        Registration.is_registered? ? :next : :skip
       end
 
       # run the registration module to register the system
@@ -250,9 +264,11 @@ module Registration
 
         addons =
           Addon.registered_not_installed.each_with_object([]) do |addon, result|
-            if Yast::Popup.YesNoHeadline(addon.friendly_name, (msg % addon.friendly_name))
-              result << SwMgmt.remote_product(addon.to_h)
-            end
+            next unless Yast::Mode.auto || Yast::Popup.YesNoHeadline(
+              addon.friendly_name, (msg % addon.friendly_name)
+            )
+
+            result << SwMgmt.remote_product(addon.to_h)
           end
 
         products.concat(addons)
@@ -311,6 +327,10 @@ module Registration
           release_type: nil
         )
 
+        load_migrations_for_products(products, remote_product)
+      end
+
+      def load_migrations_for_products(products, remote_product)
         log.info "Loading offline migrations for target product: #{remote_product.inspect}"
         log.info "Installed products: #{products.inspect}"
         self.migrations = registration_ui.offline_migration_products(products, remote_product)
@@ -318,7 +338,7 @@ module Registration
         if migrations.empty?
           # TRANSLATORS: Error message
           Yast::Report.Error(_("No migration product found."))
-          return :empty
+          return Yast::Mode.auto ? :abort : :empty
         end
 
         :next
@@ -354,6 +374,8 @@ module Registration
       # run the migration target selection dialog
       # @return [Symbol] workflow symbol (:next or :abort)
       def select_migration_products
+        return select_migration_products_autoyast if Yast::Mode.auto
+
         log.info "Displaying migration target selection dialog"
         dialog = MigrationSelectionDialog.new(migrations, SwMgmt.installed_products)
         ret = dialog.run
@@ -365,6 +387,20 @@ module Registration
         end
 
         ret
+      end
+
+      # Select the migration product in the AutoYaST mode
+      # @return [Symbol] workflow symbol (:next)
+      def select_migration_products_autoyast
+        # TODO: for now simply select the first found migration (bsc#1087206#c7)
+        # later we can improve this (either choose the migration with higher product versions
+        # or allow selecting the migration in the AY profile)
+        self.selected_migration = migrations.first
+        self.manual_repo_selection = false
+        log.warn "More than one migration available, using the first one" if migrations.size > 1
+        log.info "Selected migration: #{selected_migration}"
+
+        :next
       end
 
       # collect products to migrate
@@ -455,7 +491,9 @@ module Registration
           migration_repos.services << service
         end
 
-        if migration_repos.service_with_update_repo?
+        if Yast::Mode.auto
+          migration_repos.install_updates = ::Registration::Storage::Config.instance.install_updates
+        elsif migration_repos.service_with_update_repo?
           migration_repos.install_updates = registration_ui.install_updates?
         end
 
@@ -504,6 +542,7 @@ module Registration
       #   (unregistered system or explicitly requested by user), :next =>
       #   continue with the SCC/SMT based upgrade
       def system_upgrade_check
+        log.info "System upgrade mode detected"
         # media based upgrade requested by user
         if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
           explicit_media_upgrade
