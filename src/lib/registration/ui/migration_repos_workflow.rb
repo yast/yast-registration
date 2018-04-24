@@ -26,6 +26,8 @@ require "registration/ui/wizard_client"
 require "registration/ui/migration_selection_dialog"
 require "registration/ui/migration_repos_selection_dialog"
 require "registration/ui/not_installed_products_dialog"
+require "registration/rollback_script"
+require "registration/storage"
 
 module Registration
   module UI
@@ -422,6 +424,7 @@ module Registration
       # @return [Symbol] workflow symbol (:next)
       def register_migration_products
         migration_progress
+        install_rollback_script if Yast::Stage.initial
 
         begin
           log.info "Registering the migration target products"
@@ -626,6 +629,18 @@ module Registration
             "will not be updated and the system will be still registered " \
             "using the previous product. The packages from the registration " \
             "repositories can conflict with the new packages.</p>")
+      end
+
+      # install the rollback script so the registration is rolled back
+      # when the upgrade is aborted or YaST crashes
+      def install_rollback_script
+        rollback = RollbackScript.new(root: Yast::Installation.destdir)
+        if rollback.applicable?
+          rollback.create
+          Storage::Cache.instance.rollback = rollback
+        else
+          log.info("The rollback script is not applicable")
+        end
       end
     end
   end

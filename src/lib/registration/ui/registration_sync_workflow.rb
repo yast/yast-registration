@@ -18,6 +18,7 @@ require "registration/registration"
 require "registration/registration_ui"
 require "registration/releasever"
 require "registration/sw_mgmt"
+require "registration/storage"
 require "registration/url_helpers"
 require "registration/ui/wizard_client"
 
@@ -63,6 +64,7 @@ module Registration
 
         # downgrade all installed products
         return :abort unless downgrade_products(products)
+        remove_rollback_script
 
         reload_repos
 
@@ -106,6 +108,17 @@ module Registration
           success, _service = registration_ui.downgrade_product(product)
           success
         end
+      end
+
+      # remove the rollback script after doing the rollback by YaST
+      # (avoid double rollback)
+      def remove_rollback_script
+        rollback = Storage::Cache.instance.rollback
+        return unless rollback
+
+        # remove the saved script and drop the cache
+        rollback.delete
+        Storage::Cache.instance.rollback = nil
       end
     end
   end
