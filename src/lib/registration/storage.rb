@@ -61,7 +61,7 @@ module Registration
     end
 
     class Cache < Struct.new(:first_run, :addon_services,
-      :reg_url, :reg_url_cached, :upgrade_failed)
+      :reg_url, :reg_url_cached, :rollback, :upgrade_failed)
 
       include Singleton
 
