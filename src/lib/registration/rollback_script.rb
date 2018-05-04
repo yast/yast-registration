@@ -29,12 +29,10 @@ module Registration
 
     SUSE_CONNECT = "/usr/sbin/SUSEConnect".freeze
 
-    attr_reader :name, :root
+    attr_reader :root
 
-    # @param name [String] script name
     # @param root [String] target root
-    def initialize(name: DEFAULT_SCRIPT_NAME, root: "/mnt")
-      @name = name
+    def initialize(root: "/mnt")
       @root = root
     end
 
@@ -66,7 +64,7 @@ module Registration
     # full path to the script
     # @return [String] path
     def script_path
-      @path ||= File.join(root, BACKUP_DIR, name)
+      @path ||= File.join(root, BACKUP_DIR, DEFAULT_SCRIPT_NAME)
     end
   end
 end

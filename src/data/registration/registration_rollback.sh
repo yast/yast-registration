@@ -1,6 +1,8 @@
 #! /bin/sh
 
 # This script rolls back the registration status on the server
+# You can optionally pass the target chroot directory as a parameter,
+# the default is "/".
 
 ROOT=${1:-/}
 
