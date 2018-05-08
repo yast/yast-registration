@@ -178,7 +178,8 @@ module Registration
       migration_paths = []
       ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         migration_paths = SUSE::Connect::YaST
-                          .system_offline_migrations(installed_products, target_base_product, connect_params)
+                          .system_offline_migrations(installed_products,
+                            target_base_product, connect_params)
       end
 
       log.info "Received possible migrations paths: #{migration_paths}"

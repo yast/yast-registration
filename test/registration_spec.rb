@@ -192,7 +192,7 @@ describe Registration::Registration do
 
     before do
       allow_any_instance_of(Registration::Registration).to receive(:connect_params)
-       .and_return({})
+        .and_return({})
     end
 
     it "returns migration products from the server" do
@@ -254,7 +254,7 @@ describe Registration::Registration do
   describe "#synchronize_products" do
     before do
       allow_any_instance_of(Registration::Registration).to receive(:connect_params)
-       .and_return({})
+        .and_return({})
     end
 
     it "synchronizes the local products with the server" do
@@ -275,7 +275,7 @@ describe Registration::Registration do
   describe "#downgrade_product" do
     before do
       allow_any_instance_of(Registration::Registration).to receive(:connect_params)
-       .and_return(anything)
+        .and_return(anything)
     end
 
     it "downgrades the product registration" do

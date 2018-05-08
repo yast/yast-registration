@@ -242,7 +242,7 @@ module Registration
     # @param product [Hash] product Hash obtained from pkg-bindings
     # @return [SUSE::Connect::Remote::Product] the remote product
     def self.remote_product(product, version_release: true)
-      #default value if it does not exist
+      # default value if it does not exist
       product["version_version"] ||= product["version"]
       OpenStruct.new(
         arch:         product["arch"],
