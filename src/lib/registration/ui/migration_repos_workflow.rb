@@ -321,12 +321,17 @@ module Registration
 
         return :empty unless migration_confirmed?(base_product, activations)
 
+        # evaluate pkg.product for version_version
+        pkg_product = Yast::Pkg.ResolvableProperties(base_product.name,
+          :product, base_product.version).find_all.first
+
         remote_product = OpenStruct.new(
-          arch:         base_product.arch.to_s,
-          identifier:   base_product.name,
-          version:      base_product.version,
+          arch:            base_product.arch.to_s,
+          identifier:      base_product.name,
+          version:         base_product.version,
+          version_version: pkg_product ? pkg_product["version_version"] : "",
           # FIXME: not supported by Y2Packager::Product yet
-          release_type: nil
+          release_type:    nil
         )
 
         load_migrations_for_products(products, remote_product)
