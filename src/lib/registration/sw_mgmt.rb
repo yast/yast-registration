@@ -134,7 +134,7 @@ module Registration
       product_info = {
         "name"         => self_update_id,
         "arch"         => base_product.arch,
-        "version"      => base_product.version,
+        "version"      => version_without_release(base_product),
         "release_type" => nil
       }
 
@@ -252,6 +252,15 @@ module Registration
         version:      version_release ? product["version"] : product["version_version"],
         release_type: product["release_type"]
       )
+    end
+
+    # remove relase string from version. E.g.: "15-0" --> "15"
+    # @param product [Y2Packager::Product] product
+    # @return [String] version
+    def self.version_without_release(product)
+      pkg_product = Yast::Pkg.ResolvableProperties(product.name,
+        :product, product.version).find_all.first
+      pkg_product ? pkg_product["version_version"] : product.version
     end
 
     # create UI label for a base product
