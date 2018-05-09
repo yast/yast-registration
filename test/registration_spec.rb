@@ -275,7 +275,7 @@ describe Registration::Registration do
   describe "#downgrade_product" do
     before do
       allow_any_instance_of(Registration::Registration).to receive(:connect_params)
-        .and_return(anything)
+        .and_return({})
     end
 
     it "downgrades the product registration" do
@@ -287,7 +287,7 @@ describe Registration::Registration do
             version:      "12",
             release_type: nil
           ),
-          anything
+          {}
         )
 
       expect(subject.downgrade_product(installed_sles))
