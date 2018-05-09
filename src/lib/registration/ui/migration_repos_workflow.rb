@@ -327,11 +327,11 @@ module Registration
           :product, base_product.version).find_all.first
 
         remote_product = OpenStruct.new(
-          arch:            base_product.arch.to_s,
-          identifier:      base_product.name,
-          version:         pkg_product ? pkg_product["version_version"] : base_product.version,
+          arch:         base_product.arch.to_s,
+          identifier:   base_product.name,
+          version:      pkg_product ? pkg_product["version_version"] : base_product.version,
           # FIXME: not supported by Y2Packager::Product yet
-          release_type:    nil
+          release_type: nil
         )
 
         load_migrations_for_products(products, remote_product)
