@@ -171,9 +171,6 @@ module Registration
     end
 
     def offline_migration_products(installed_products, target_base_product)
-      # convert a libzypp Version to SUSE::Connect::Remote::Product version
-      target_base_product.version = target_base_product.version_version
-
       log.info "Offline migration for: #{target_base_product}."
       migration_paths = []
       ConnectHelpers.catch_registration_errors(show_update_hint: true) do

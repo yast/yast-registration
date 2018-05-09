@@ -321,15 +321,15 @@ module Registration
 
         return :empty unless migration_confirmed?(base_product, activations)
 
-        # evaluate pkg.product for version_version
+        # evaluate pkg.product for version_version in order to use e.g. version "152 instead of "15-0"
+        # So converting a libzypp Version to SUSE::Connect::Remote::Product version
         pkg_product = Yast::Pkg.ResolvableProperties(base_product.name,
           :product, base_product.version).find_all.first
 
         remote_product = OpenStruct.new(
           arch:            base_product.arch.to_s,
           identifier:      base_product.name,
-          version:         base_product.version,
-          version_version: pkg_product ? pkg_product["version_version"] : "",
+          version:         pkg_product ? pkg_product["version_version"] : base_product.version,
           # FIXME: not supported by Y2Packager::Product yet
           release_type:    nil
         )
