@@ -259,7 +259,7 @@ module Registration
     # @return [String] version
     def self.version_without_release(product)
       pkg_product = Yast::Pkg.ResolvableProperties(product.name,
-        :product, product.version).find_all.first
+        :product, product.version).first
       pkg_product ? pkg_product["version_version"] : product.version
     end
 
