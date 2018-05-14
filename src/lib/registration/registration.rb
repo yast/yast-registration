@@ -118,7 +118,7 @@ module Registration
         )
       end
       log.info "Synchronizing products: #{remote_products}"
-      SUSE::Connect::YaST.synchronize(remote_products)
+      SUSE::Connect::YaST.synchronize(remote_products, connect_params)
     end
 
     # @param [String] target_distro new target distribution
@@ -163,7 +163,7 @@ module Registration
       migrations = []
 
       ConnectHelpers.catch_registration_errors do
-        migrations = SUSE::Connect::YaST.system_migrations(installed_products)
+        migrations = SUSE::Connect::YaST.system_migrations(installed_products, connect_params)
       end
 
       log.info "Received system migrations: #{migrations}"
@@ -175,7 +175,8 @@ module Registration
       migration_paths = []
       ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         migration_paths = SUSE::Connect::YaST
-                          .system_offline_migrations(installed_products, target_base_product)
+                          .system_offline_migrations(installed_products,
+                            target_base_product, connect_params)
       end
 
       log.info "Received possible migrations paths: #{migration_paths}"
@@ -227,7 +228,7 @@ module Registration
 
     def service_for_product(product, &block)
       remote_product = if product.is_a?(Hash)
-        SwMgmt.remote_product(product)
+        SwMgmt.remote_product(product, version_release: false)
       else
         product
       end

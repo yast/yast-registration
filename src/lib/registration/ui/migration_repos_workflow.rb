@@ -324,7 +324,7 @@ module Registration
         remote_product = OpenStruct.new(
           arch:         base_product.arch.to_s,
           identifier:   base_product.name,
-          version:      base_product.version,
+          version:      SwMgmt.version_without_release(base_product),
           # FIXME: not supported by Y2Packager::Product yet
           release_type: nil
         )

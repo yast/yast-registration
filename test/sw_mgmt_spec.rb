@@ -550,4 +550,37 @@ describe Registration::SwMgmt do
       expect(v).to_not include("-")
     end
   end
+
+  describe ".version_without_release" do
+    let(:libzypp_product) do
+      {
+        "name"            => "SLESS",
+        "arch"            => "x86_64",
+        "version"         => "12.1-1.47",
+        "version_version" => "12.1",
+        "flavor"          => "DVD"
+      }
+    end
+    let(:base_product) do
+      instance_double(Y2Packager::Product, name: "SLES", version: "12.1-1.47", arch: "x86_64")
+    end
+
+    context "product can be found in libzypp stack" do
+
+      it "returns version number without release" do
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return([libzypp_product])
+        expect(subject.version_without_release(base_product))
+          .to eq(libzypp_product["version_version"])
+      end
+    end
+
+    context "product cannot be found in libzypp stack" do
+
+      it "returns original version number at least" do
+        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return([])
+        expect(subject.version_without_release(base_product)).to eq(libzypp_product["version"])
+      end
+    end
+  end
+
 end
