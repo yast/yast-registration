@@ -163,7 +163,7 @@ module Registration
       # The base product must be marked by the "system-installation()" provides
       # by some package.
       products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Stage.initial && !system_products.include?(p["name"])
+        if Stage.initial && !Mode.update && !system_products.include?(p["name"])
           log.info("Skipping product #{p["name"].inspect}, no system-installation() provides")
           next false
         end
