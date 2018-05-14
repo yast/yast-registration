@@ -569,7 +569,8 @@ describe Registration::SwMgmt do
 
       it "returns version number without release" do
         expect(Yast::Pkg).to receive(:ResolvableProperties).and_return([libzypp_product])
-        expect(subject.version_without_release(base_product)).to eq(libzypp_product["version_version"])
+        expect(subject.version_without_release(base_product))
+          .to eq(libzypp_product["version_version"])
       end
     end
 
