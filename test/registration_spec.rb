@@ -190,9 +190,14 @@ describe Registration::Registration do
     let(:installed_products) { load_yaml_fixture("installed_sles12_product.yml") }
     let(:migration_products) { load_yaml_fixture("migration_to_sles12_sp1.yml") }
 
+    before do
+      allow_any_instance_of(Registration::Registration).to receive(:connect_params)
+        .and_return({})
+    end
+
     it "returns migration products from the server" do
       expect(SUSE::Connect::YaST).to receive(:system_migrations)
-        .with(installed_products)
+        .with(installed_products, {})
         .and_return(migration_products)
       result = Registration::Registration.new.migration_products(installed_products)
       expect(result).to eq(migration_products)
@@ -247,6 +252,11 @@ describe Registration::Registration do
   end
 
   describe "#synchronize_products" do
+    before do
+      allow_any_instance_of(Registration::Registration).to receive(:connect_params)
+        .and_return({})
+    end
+
     it "synchronizes the local products with the server" do
       expect(SUSE::Connect::YaST).to receive(:synchronize)
         .with([
@@ -256,23 +266,28 @@ describe Registration::Registration do
                   version:      "12",
                   release_type: nil
                 )
-              ])
+              ], {})
 
       subject.synchronize_products([installed_sles])
     end
   end
 
   describe "#downgrade_product" do
+    before do
+      allow_any_instance_of(Registration::Registration).to receive(:connect_params)
+        .and_return({})
+    end
+
     it "downgrades the product registration" do
       expect(SUSE::Connect::YaST).to receive(:downgrade_product)
         .with(
           OpenStruct.new(
             arch:         "x86_64",
             identifier:   "SLES",
-            version:      "12-0",
+            version:      "12",
             release_type: nil
           ),
-          anything
+          {}
         )
 
       expect(subject.downgrade_product(installed_sles))

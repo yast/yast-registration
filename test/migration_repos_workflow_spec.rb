@@ -124,6 +124,7 @@ describe Registration::UI::MigrationReposWorkflow do
       before do
         expect(Registration::SwMgmt).to receive(:init).at_least(1)
         allow_any_instance_of(Registration::RepoStateStorage).to receive(:write)
+        allow_any_instance_of(Registration::RollbackScript).to receive(:create)
       end
 
       let(:set_success_expectations) do

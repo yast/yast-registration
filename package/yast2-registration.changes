@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Tue May  8 17:27:36 CEST 2018 - schubi@suse.de
+
+- Fixed: Offline migration against RMT sends some requests to 
+  SCC instead (bnc#1090911)
+- 4.0.36
+
+-------------------------------------------------------------------
+Fri Apr 27 15:44:43 UTC 2018 - lslezak@suse.cz
+
+- Install a registration rollback script to rollback the
+  registration in case YaST is aborted or crashes during upgrade
+  (bsc#1089643)
+- 4.0.35
+
+-------------------------------------------------------------------
 Mon Apr 16 11:39:41 UTC 2018 - lslezak@suse.cz
 
 - Reimplemented AutoYaST autoupgrade, use the same API and workflow
