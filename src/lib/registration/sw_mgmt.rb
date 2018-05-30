@@ -444,18 +444,22 @@ module Registration
         ::FileUtils.mkdir_p(dir)
       end
 
-      # check for NCC credentials
-      ncc_file = File.join(source_dir, dir, "NCCcredentials")
-      copy_old_credentials_file(ncc_file)
+      Dir[File.join(source_dir, dir, "*")].each do |path|
+        # skip non-files or NCCcredentials, they are handled differently
+        next if !File.file?(path) || File.basename(path) == "NCCcredentials"
 
-      scc_file = File.join(source_dir, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-      copy_old_credentials_file(scc_file)
+        new_path = File.join(dir, File.basename(path))
+        copy_old_credentials_file(path, new_path)
+      end
+
+      # check for the NCC credentials, we need to save them as the SCC credentials
+      ncc_file = File.join(source_dir, dir, "NCCcredentials")
+      copy_old_credentials_file(ncc_file, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
-    def self.copy_old_credentials_file(file)
+    def self.copy_old_credentials_file(file, new_file)
       return unless File.exist?(file)
 
-      new_file = SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
 
