@@ -46,6 +46,7 @@ module Registration
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
   Yast.import "Popup"
+  Yast.import "Product"
 
   class SwMgmt
     include Yast
@@ -72,7 +73,7 @@ module Registration
       # display progress when refreshing repositories
       PackageCallbacks.InitPackageCallbacks
 
-      raise_pkg_exception unless Pkg.TargetInitialize(Installation.destdir)
+      raise_pkg_exception unless init_target(Installation.destdir)
       raise_pkg_exception unless Pkg.TargetLoad
       raise_pkg_exception(SourceRestoreError) unless Pkg.SourceRestore
 
@@ -611,6 +612,35 @@ module Registration
       raise klass, Pkg.LastError
     end
 
-    private_class_method :each_repo
+    # initialize the libzypp target
+    # @param destdir [String] the target directory
+    # @return [Boolean] true on sucess, false otherwise
+    def self.init_target(destdir)
+      if Stage.initial && Mode.update
+        # at upgrade we need to override the target_distro otherwise libzypp
+        # will use the old value from the upgraded system which might not
+        # match the new target_distro from the media and might result in ignoring
+        # service repositories (bsc#1094865)
+        options = { "target_distro" => target_distribution }
+        Pkg.TargetInitializeOptions(destdir, options)
+      else
+        Pkg.TargetInitialize(destdir)
+      end
+    end
+
+    # get the target distribution for the new base product
+    # @return [String] target distribution name or empty string if not found
+    def self.target_distribution
+      base_products = Product.FindBaseProducts
+
+      # empty target distribution disables service compatibility check in case
+      # the base product cannot be found
+      target_distro = base_products ? base_products.first["register_target"] : ""
+      log.info "Base product target distribution: #{target_distro.inspect}"
+
+      target_distro
+    end
+
+    private_class_method :each_repo, :init_target, :target_distribution
   end
 end
