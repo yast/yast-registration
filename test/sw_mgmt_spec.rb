@@ -250,6 +250,20 @@ describe Registration::SwMgmt do
 
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
     end
+
+    it "copies old SCC credentials at upgrade" do
+      smt_credentials = File.join(root_dir, target_dir, "SMT-http_smt_example_com")
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([smt_credentials])
+      expect(File).to receive(:exist?).with(smt_credentials).and_return(true)
+      expect(File).to receive(:exist?).with(ncc_credentials).and_return(false)
+
+      expect(subject).to receive(:`).with("cp -a " + smt_credentials + " " +
+        File.join(target_dir, "SMT-http_smt_example_com"))
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
+
+      subject.copy_old_credentials(root_dir)
+    end
   end
 
   describe ".find_addon_updates" do

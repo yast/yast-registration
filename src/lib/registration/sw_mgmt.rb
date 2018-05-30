@@ -470,6 +470,8 @@ module Registration
 
       credentials = SUSE::Connect::YaST.credentials(new_file)
       log.info "Using previous credentials (username): #{credentials.username}"
+    rescue SUSE::Connect::MalformedSccCredentialsFile
+      log.warn "Cannot parse the credentials file"
     end
 
     private_class_method :copy_old_credentials_file
