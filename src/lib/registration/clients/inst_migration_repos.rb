@@ -52,21 +52,19 @@ module Registration
       # Import the old SSL certificate if present. Tries both SLE12 nad SLE11
       # file locations.
       def import_ssl_certificate
-        # SLE12 certificate path
-        cert_file = File.join(Yast::Installation.destdir, SUSE::Connect::YaST::SERVER_CERT_FILE)
+        # add the /mnt prefix
+        target_files = SslCertificate::PATHS.map { |f| File.join(Yast::Installation.destdir, f) }
+        # find existing file
+        cert_file = target_files.find { |f| File.exist?(f) }
 
-        if !File.exist?(cert_file)
-          # try the the SLE11 certificate path as well
-          cert_file = File.join(Yast::Installation.destdir,
-            SslCertificate::SLE11_SERVER_CERT_FILE)
-
-          return unless File.exist?(cert_file)
+        if cert_file
+          log.info("Importing the SSL certificate from the old system (#{cert_file})...")
+          cert = SslCertificate.load_file(cert_file)
+          # in Stage.initial this imports to the inst-sys
+          cert.import
+        else
+          log.info("No custom SSL certificate found in the system")
         end
-
-        log.info("Importing the SSL certificate from the old system (#{cert_file})...")
-        cert = SslCertificate.load_file(cert_file)
-        # in Stage.initial this imports to the inst-sys
-        cert.import
       end
     end
   end

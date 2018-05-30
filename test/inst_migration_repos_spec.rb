@@ -7,7 +7,7 @@ require "registration/clients/inst_migration_repos"
 describe Registration::Clients::InstMigrationRepos do
   let(:destdir) { "/mnt" }
   let(:sle12_cert) { File.join(destdir, SUSE::Connect::YaST::SERVER_CERT_FILE) }
-  let(:sle11_cert) { File.join(destdir, Registration::SslCertificate::SLE11_SERVER_CERT_FILE) }
+  let(:sle11_cert) { File.join(destdir, "/etc/ssl/certs/registration-server.pem") }
 
   before do
     allow(Yast::WFM).to receive(:call)
