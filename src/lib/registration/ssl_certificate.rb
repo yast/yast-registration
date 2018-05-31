@@ -192,7 +192,7 @@ module Registration
     # to import certificates to a installed system.
     #
     # @param target_path [String] where the imported certificate will be saved,
-    #   the pathe should contain the INSTSYS_CERT_DIR prefix otherwise it might
+    #   the path should contain the INSTSYS_CERT_DIR prefix otherwise it might
     #   not work correctly.
     # @return [Boolean] true if import was successful; false otherwise.
     #
