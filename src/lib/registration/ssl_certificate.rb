@@ -12,8 +12,8 @@ module Registration
     Yast.import "Stage"
 
     # Path to the registration certificate in the instsys
-    INSTSYS_CERT_DIR = "/etc/pki/trust/anchors/".freeze
-    INSTSYS_SERVER_CERT_FILE = "#{INSTSYS_CERT_DIR}/registration_server.pem".freeze
+    INSTSYS_CERT_DIR = "/etc/pki/trust/anchors".freeze
+    INSTSYS_SERVER_CERT_FILE = File.join(INSTSYS_CERT_DIR, "registration_server.pem").freeze
     # Path to system CA certificates
     CA_CERTS_DIR = "/var/lib/ca-certificates".freeze
 

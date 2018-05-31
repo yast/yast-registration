@@ -61,7 +61,7 @@ module Registration
             target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
             cert.import_to_instsys(target_path)
           else
-            log.info("SSL certificate (#{prefix})#{file} not found in the system")
+            log.debug("SSL certificate (#{prefix})#{file} not found in the system")
           end
         end
       end
