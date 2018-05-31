@@ -217,7 +217,6 @@ describe Registration::SwMgmt do
     it "does not fail when the old credentials are missing" do
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([])
-      expect(File).to receive(:exist?).with(ncc_credentials).and_return(false)
 
       # no copy
       expect(FileUtils).to receive(:cp).never
@@ -228,7 +227,6 @@ describe Registration::SwMgmt do
     it "copies old NCC credentials at upgrade" do
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([ncc_credentials])
-      expect(File).to receive(:exist?).with(ncc_credentials).and_return(true)
 
       expect(subject).to receive(:`).with("cp -a " + ncc_credentials + " " +
         File.join(target_dir, "SCCcredentials"))
@@ -241,8 +239,6 @@ describe Registration::SwMgmt do
       scc_credentials = File.join(root_dir, target_dir, "SCCcredentials")
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([scc_credentials])
-      expect(File).to receive(:exist?).with(scc_credentials).and_return(true)
-      expect(File).to receive(:exist?).with(ncc_credentials).and_return(false)
 
       expect(subject).to receive(:`).with("cp -a " + scc_credentials + " " +
         File.join(target_dir, "SCCcredentials"))
@@ -251,12 +247,10 @@ describe Registration::SwMgmt do
       expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
     end
 
-    it "copies old SCC credentials at upgrade" do
+    it "copies old SMT credentials at upgrade" do
       smt_credentials = File.join(root_dir, target_dir, "SMT-http_smt_example_com")
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([smt_credentials])
-      expect(File).to receive(:exist?).with(smt_credentials).and_return(true)
-      expect(File).to receive(:exist?).with(ncc_credentials).and_return(false)
 
       expect(subject).to receive(:`).with("cp -a " + smt_credentials + " " +
         File.join(target_dir, "SMT-http_smt_example_com"))

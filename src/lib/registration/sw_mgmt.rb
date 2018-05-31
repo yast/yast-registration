@@ -185,7 +185,7 @@ module Registration
     # @param selected [Boolean,nil] is any product selected?
     # @param installed [Boolean,nil] is any product istalled?
     # @return [Boolean] true if it is a base product
-    def self.evaluate_product(p, selected, installed)
+    private_class_method def self.evaluate_product(p, selected, installed)
       if Stage.initial && Mode.auto
         Yast.import "AutoinstFunctions"
         # note: AutoinstFunctions.selected_product should never be nil when
@@ -212,8 +212,6 @@ module Registration
         p["status"] == :installed && p["type"] == "base"
       end
     end
-
-    private_class_method :evaluate_product
 
     # Any product selected to install?
     # @return [Boolean] true if at least one product is selected to install
@@ -445,21 +443,21 @@ module Registration
       end
 
       Dir[File.join(source_dir, dir, "*")].each do |path|
-        # skip non-files or NCCcredentials, they are handled differently
-        next if !File.file?(path) || File.basename(path) == "NCCcredentials"
+        # skip non-files
+        next unless File.file?(path)
 
-        new_path = File.join(dir, File.basename(path))
+        # check for the NCC credentials, we need to save them as the SCC credentials
+        new_path = if File.basename(path) == "NCCcredentials"
+          SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
+        else
+          File.join(dir, File.basename(path))
+        end
+
         copy_old_credentials_file(path, new_path)
       end
-
-      # check for the NCC credentials, we need to save them as the SCC credentials
-      ncc_file = File.join(source_dir, dir, "NCCcredentials")
-      copy_old_credentials_file(ncc_file, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
     end
 
-    def self.copy_old_credentials_file(file, new_file)
-      return unless File.exist?(file)
-
+    private_class_method def self.copy_old_credentials_file(file, new_file)
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
 
@@ -470,11 +468,9 @@ module Registration
 
       credentials = SUSE::Connect::YaST.credentials(new_file)
       log.info "Using previous credentials (username): #{credentials.username}"
-    rescue SUSE::Connect::MalformedSccCredentialsFile
-      log.warn "Cannot parse the credentials file"
+    rescue SUSE::Connect::MalformedSccCredentialsFile => e
+      log.warn "Cannot parse the credentials file: #{e.inspect}"
     end
-
-    private_class_method :copy_old_credentials_file
 
     def self.find_addon_updates(addons)
       log.info "Available addons: #{addons.map(&:identifier)}"
@@ -508,7 +504,7 @@ module Registration
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository
-    def self.each_repo(repo_aliases, &block)
+    private_class_method def self.each_repo(repo_aliases, &block)
       all_repos = Pkg.SourceGetCurrent(false)
 
       repo_aliases.each do |repo_alias|
@@ -621,7 +617,7 @@ module Registration
     # initialize the libzypp target
     # @param destdir [String] the target directory
     # @return [Boolean] true on sucess, false otherwise
-    def self.init_target(destdir)
+    private_class_method def self.init_target(destdir)
       if Stage.initial && Mode.update
         # at upgrade we need to override the target_distro otherwise libzypp
         # will use the old value from the upgraded system which might not
@@ -636,7 +632,7 @@ module Registration
 
     # get the target distribution for the new base product
     # @return [String] target distribution name or empty string if not found
-    def self.target_distribution
+    private_class_method def self.target_distribution
       base_products = Product.FindBaseProducts
 
       # empty target distribution disables service compatibility check in case
@@ -646,7 +642,5 @@ module Registration
 
       target_distro
     end
-
-    private_class_method :each_repo, :init_target, :target_distribution
   end
 end

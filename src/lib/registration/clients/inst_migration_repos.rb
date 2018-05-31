@@ -56,7 +56,7 @@ module Registration
         SslCertificate::PATHS.each do |file|
           cert_file = File.join(prefix, file)
           if File.exist?(cert_file)
-            log.info("Importing the SSL certificate from the old system ((#{prefix})#{file})...")
+            log.info("Importing the SSL certificate from the old system: (#{prefix})#{file} ...")
             cert = SslCertificate.load_file(cert_file)
             target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
             cert.import_to_instsys(target_path)
