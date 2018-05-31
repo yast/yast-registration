@@ -32,7 +32,7 @@ describe Registration::Clients::InstMigrationRepos do
     expect(File).to receive(:read).with(sle12_cert).and_return(
       File.read(fixtures_file("test.pem"))
     )
-    expect_any_instance_of(Registration::SslCertificate).to receive(:import)
+    expect_any_instance_of(Registration::SslCertificate).to receive(:import_to_instsys)
 
     subject.main
   end
@@ -42,7 +42,7 @@ describe Registration::Clients::InstMigrationRepos do
     expect(File).to receive(:read).with(sle11_cert).and_return(
       File.read(fixtures_file("test.pem"))
     )
-    expect_any_instance_of(Registration::SslCertificate).to receive(:import)
+    expect_any_instance_of(Registration::SslCertificate).to receive(:import_to_instsys)
 
     subject.main
   end

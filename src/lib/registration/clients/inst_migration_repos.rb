@@ -46,24 +46,23 @@ module Registration
         SwMgmt.copy_old_credentials(destdir)
 
         # import the SMT certificate to inst-sys
-        import_ssl_certificate
+        import_ssl_certificates
       end
 
-      # Import the old SSL certificate if present. Tries both SLE12 nad SLE11
-      # file locations.
-      def import_ssl_certificate
-        # add the /mnt prefix
-        target_files = SslCertificate::PATHS.map { |f| File.join(Yast::Installation.destdir, f) }
-        # find existing file
-        cert_file = target_files.find { |f| File.exist?(f) }
+      # Import the old SSL certificate if present. Tries all known locations.
+      def import_ssl_certificates
+        prefix = Yast::Installation.destdir
 
-        if cert_file
-          log.info("Importing the SSL certificate from the old system (#{cert_file})...")
-          cert = SslCertificate.load_file(cert_file)
-          # in Stage.initial this imports to the inst-sys
-          cert.import
-        else
-          log.info("No custom SSL certificate found in the system")
+        SslCertificate::PATHS.each do |file|
+          cert_file = File.join(prefix, file)
+          if File.exist?(cert_file)
+            log.info("Importing the SSL certificate from the old system ((#{prefix})#{file})...")
+            cert = SslCertificate.load_file(cert_file)
+            target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
+            cert.import_to_instsys(target_path)
+          else
+            log.info("SSL certificate (#{prefix})#{file} not found in the system")
+          end
         end
       end
     end
