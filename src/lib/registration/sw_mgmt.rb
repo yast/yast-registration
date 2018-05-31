@@ -46,6 +46,7 @@ module Registration
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
   Yast.import "Popup"
+  Yast.import "Product"
 
   class SwMgmt
     include Yast
@@ -72,7 +73,7 @@ module Registration
       # display progress when refreshing repositories
       PackageCallbacks.InitPackageCallbacks
 
-      raise_pkg_exception unless Pkg.TargetInitialize(Installation.destdir)
+      raise_pkg_exception unless init_target(Installation.destdir)
       raise_pkg_exception unless Pkg.TargetLoad
       raise_pkg_exception(SourceRestoreError) unless Pkg.SourceRestore
 
@@ -443,18 +444,22 @@ module Registration
         ::FileUtils.mkdir_p(dir)
       end
 
-      # check for NCC credentials
-      ncc_file = File.join(source_dir, dir, "NCCcredentials")
-      copy_old_credentials_file(ncc_file)
+      Dir[File.join(source_dir, dir, "*")].each do |path|
+        # skip non-files
+        next unless File.file?(path)
 
-      scc_file = File.join(source_dir, SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-      copy_old_credentials_file(scc_file)
+        # check for the NCC credentials, we need to save them as the SCC credentials
+        new_path = if File.basename(path) == "NCCcredentials"
+          SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
+        else
+          File.join(dir, File.basename(path))
+        end
+
+        copy_old_credentials_file(path, new_path)
+      end
     end
 
-    def self.copy_old_credentials_file(file)
-      return unless File.exist?(file)
-
-      new_file = SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
+    private_class_method def self.copy_old_credentials_file(file, new_file)
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
 
@@ -465,9 +470,9 @@ module Registration
 
       credentials = SUSE::Connect::YaST.credentials(new_file)
       log.info "Using previous credentials (username): #{credentials.username}"
+    rescue SUSE::Connect::MalformedSccCredentialsFile => e
+      log.warn "Cannot parse the credentials file: #{e.inspect}"
     end
-
-    private_class_method :copy_old_credentials_file
 
     def self.find_addon_updates(addons)
       log.info "Available addons: #{addons.map(&:identifier)}"
@@ -501,7 +506,7 @@ module Registration
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository
-    def self.each_repo(repo_aliases, &block)
+    private_class_method def self.each_repo(repo_aliases, &block)
       all_repos = Pkg.SourceGetCurrent(false)
 
       repo_aliases.each do |repo_alias|
@@ -611,6 +616,35 @@ module Registration
       raise klass, Pkg.LastError
     end
 
-    private_class_method :each_repo
+    # initialize the libzypp target
+    # @param destdir [String] the target directory
+    # @return [Boolean] true on sucess, false otherwise
+    def self.init_target(destdir)
+      if Stage.initial && Mode.update
+        # at upgrade we need to override the target_distro otherwise libzypp
+        # will use the old value from the upgraded system which might not
+        # match the new target_distro from the media and might result in ignoring
+        # service repositories (bsc#1094865)
+        options = { "target_distro" => target_distribution }
+        Pkg.TargetInitializeOptions(destdir, options)
+      else
+        Pkg.TargetInitialize(destdir)
+      end
+    end
+
+    # get the target distribution for the new base product
+    # @return [String] target distribution name or empty string if not found
+    def self.target_distribution
+      base_products = Product.FindBaseProducts
+
+      # empty target distribution disables service compatibility check in case
+      # the base product cannot be found
+      target_distro = base_products ? base_products.first["register_target"] : ""
+      log.info "Base product target distribution: #{target_distro.inspect}"
+
+      target_distro
+    end
+
+    private_class_method :init_target, :target_distribution
   end
 end
