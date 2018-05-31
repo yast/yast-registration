@@ -185,7 +185,7 @@ module Registration
     # @param selected [Boolean,nil] is any product selected?
     # @param installed [Boolean,nil] is any product istalled?
     # @return [Boolean] true if it is a base product
-    private_class_method def self.evaluate_product(p, selected, installed)
+    def self.evaluate_product(p, selected, installed)
       if Stage.initial && Mode.auto
         Yast.import "AutoinstFunctions"
         # note: AutoinstFunctions.selected_product should never be nil when
@@ -212,6 +212,8 @@ module Registration
         p["status"] == :installed && p["type"] == "base"
       end
     end
+
+    private_class_method :evaluate_product
 
     # Any product selected to install?
     # @return [Boolean] true if at least one product is selected to install
@@ -617,7 +619,7 @@ module Registration
     # initialize the libzypp target
     # @param destdir [String] the target directory
     # @return [Boolean] true on sucess, false otherwise
-    private_class_method def self.init_target(destdir)
+    def self.init_target(destdir)
       if Stage.initial && Mode.update
         # at upgrade we need to override the target_distro otherwise libzypp
         # will use the old value from the upgraded system which might not
@@ -632,7 +634,7 @@ module Registration
 
     # get the target distribution for the new base product
     # @return [String] target distribution name or empty string if not found
-    private_class_method def self.target_distribution
+    def self.target_distribution
       base_products = Product.FindBaseProducts
 
       # empty target distribution disables service compatibility check in case
@@ -642,5 +644,7 @@ module Registration
 
       target_distro
     end
+
+    private_class_method :init_target, :target_distribution
   end
 end
