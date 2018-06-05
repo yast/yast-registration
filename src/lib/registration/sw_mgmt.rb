@@ -232,7 +232,8 @@ module Registration
       return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
 
       products = Pkg.ResolvableProperties("", :product, "").select do |p|
-        p["status"] == :installed
+        # installed or installed marked for removal (at upgrade)
+        p["status"] == :installed || p["status"] == :removed
       end
 
       log.info "Found installed products: #{products.map { |p| p["name"] }}"
