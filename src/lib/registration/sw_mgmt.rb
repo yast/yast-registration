@@ -231,7 +231,10 @@ module Registration
       # just for testing/debugging
       return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
 
-      products = Pkg.ResolvableProperties("", :product, "").select do |p|
+      all_products = Pkg.ResolvableProperties("", :product, "")
+      log.info("Evaluating products: #{all_products}")
+
+      products = all_products.select do |p|
         # installed or installed marked for removal (at upgrade)
         p["status"] == :installed || p["status"] == :removed
       end
