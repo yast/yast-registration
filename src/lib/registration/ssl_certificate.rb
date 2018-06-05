@@ -12,12 +12,28 @@ module Registration
     Yast.import "Stage"
 
     # Path to the registration certificate in the instsys
-    INSTSYS_SERVER_CERT_FILE = "/etc/pki/trust/anchors/registration_server.pem".freeze
-    # the SLE11 certificate path, see
-    # https://github.com/yast/yast-registration/blob/Code-11-SP3/src/modules/Register.ycp#L296-L297
-    SLE11_SERVER_CERT_FILE = "/etc/ssl/certs/registration-server.pem".freeze
+    INSTSYS_CERT_DIR = "/etc/pki/trust/anchors".freeze
+    INSTSYS_SERVER_CERT_FILE = File.join(INSTSYS_CERT_DIR, "registration_server.pem").freeze
     # Path to system CA certificates
     CA_CERTS_DIR = "/var/lib/ca-certificates".freeze
+
+    # all used certificate paths, this is used during upgrade to import
+    # the old certificate into the inst-sys, put the older paths at the end
+    # so the newer paths are checked first
+    PATHS = [
+      # the YaST (SUSEConnect) current default path
+      # /usr/share/pki/trust/anchors/registration_server.pem
+      SUSE::Connect::YaST::SERVER_CERT_FILE,
+      # RMT certificate
+      # https://github.com/SUSE/rmt/blob/b240ce577bd1637cfb57548f2741a1925cf3e4ee/public/tools/rmt-client-setup#L214
+      "/etc/pki/trust/anchors/rmt-server.pem",
+      # SMT certificate
+      # https://github.com/SUSE/smt/blob/SMT12/script/clientSetup4SMT.sh#L245
+      "/etc/pki/trust/anchors/registration-server.pem",
+      # the SLE11 path (for both YaST and the clientSetup4SMT.sh script)
+      # https://github.com/yast/yast-registration/blob/Code-11-SP3/src/modules/Register.ycp#L296-L297
+      "/etc/ssl/certs/registration-server.pem"
+    ].freeze
 
     attr_reader :x509_cert
 
@@ -175,12 +191,15 @@ module Registration
     # to installation system is slightly different to the one followed
     # to import certificates to a installed system.
     #
+    # @param target_path [String] where the imported certificate will be saved,
+    #   the path should contain the INSTSYS_CERT_DIR prefix otherwise it might
+    #   not work correctly.
     # @return [Boolean] true if import was successful; false otherwise.
     #
     # @see update_instsys_ca
-    def import_to_instsys
+    def import_to_instsys(target_path = self.class.default_certificate_path)
       # Copy certificate
-      File.write(self.class.default_certificate_path, x509_cert.to_pem)
+      File.write(target_path, x509_cert.to_pem)
 
       # Update database
       self.class.update_instsys_ca
