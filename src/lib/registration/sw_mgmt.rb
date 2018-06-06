@@ -200,8 +200,9 @@ module Registration
       elsif Stage.initial
         # during upgrade it depends on whether target is already initialized,
         # use the product from the medium for the self-update step
+        # (during upgrade the installed product might me already selected for removal)
         if installed
-          p["status"] == :installed && p["type"] == "base"
+          (p["status"] == :installed || p["status"] == :removed) && p["type"] == "base"
         elsif selected
           p["status"] == :selected
         else
@@ -209,7 +210,7 @@ module Registration
         end
       else
         # in installed system or at upgrade the base product has valid type
-        p["status"] == :installed && p["type"] == "base"
+        (p["status"] == :installed || p["status"] == :removed) && p["type"] == "base"
       end
     end
 
@@ -224,7 +225,9 @@ module Registration
     # Any product installed? (e.g. during upgrade)
     # @return [Boolean] true if at least one product is installed
     def self.product_installed?
-      Pkg.ResolvableProperties("", :product, "").any? { |p| p["status"] == :installed }
+      Pkg.ResolvableProperties("", :product, "").any? do |p|
+        p["status"] == :installed || p["status"] == :removed
+      end
     end
 
     def self.installed_products
@@ -484,7 +487,8 @@ module Registration
       products = Pkg.ResolvableProperties("", :product, "")
 
       installed_addons = products.select do |product|
-        product["status"] == :installed && product["type"] != "base"
+        (product["status"] == :installed || product["status"] == :removed) &&
+          product["type"] != "base"
       end
 
       product_names = installed_addons.map { |a| "#{a["name"]}-#{a["version"]}-#{a["release"]}" }
