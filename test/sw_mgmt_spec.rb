@@ -241,7 +241,7 @@ describe Registration::SwMgmt do
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([scc_credentials, ncc_credentials])
 
-      # copy the credentials in the NCC, SCC order
+      # copy the credentials in the NCC, SCC order (bsc#1096813)
       expect(subject).to receive(:`).with("cp -a " + ncc_credentials + " " +
         File.join(target_dir, "SCCcredentials")).ordered
       expect(subject).to receive(:`).with("cp -a " + scc_credentials + " " +

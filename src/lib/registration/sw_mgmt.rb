@@ -451,7 +451,12 @@ module Registration
         ::FileUtils.mkdir_p(dir)
       end
 
-      Dir[File.join(source_dir, dir, "*")].each do |path|
+      # if the system contains both NCC and SCC credentials then the SCC ones
+      # should be preferred (bsc#1096813)
+      # take advantage that "NCCcredentials" is alphabetically before
+      # "SCCcredentials" so it is enough to just sort the files and then the
+      # SCC credentials will simply overwrite the NCC credentials
+      Dir[File.join(source_dir, dir, "*")].sort.each do |path|
         # skip non-files
         next unless File.file?(path)
 
