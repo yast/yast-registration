@@ -207,6 +207,7 @@ describe Registration::SwMgmt do
     let(:root_dir) { "/mnt" }
     let(:target_dir) { SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR }
     let(:ncc_credentials) { File.join(root_dir, target_dir, "NCCcredentials") }
+    let(:scc_credentials) { File.join(root_dir, target_dir, "SCCcredentials") }
 
     before do
       expect(File).to receive(:exist?).with(target_dir).and_return(false)
@@ -232,11 +233,26 @@ describe Registration::SwMgmt do
         File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
-      expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
+      subject.copy_old_credentials(root_dir)
+    end
+
+    it "prefers the SCC credentials if both NCC and SCC credentials are present" do
+      # deliberately return the SCC credentials first here
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([scc_credentials, ncc_credentials])
+
+      # copy the credentials in the NCC, SCC order (bsc#1096813)
+      expect(subject).to receive(:`).with("cp -a " + ncc_credentials + " " +
+        File.join(target_dir, "SCCcredentials")).ordered
+      expect(subject).to receive(:`).with("cp -a " + scc_credentials + " " +
+        File.join(target_dir, "SCCcredentials")).ordered
+
+      allow(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
+
+      subject.copy_old_credentials(root_dir)
     end
 
     it "copies old SCC credentials at upgrade" do
-      scc_credentials = File.join(root_dir, target_dir, "SCCcredentials")
       expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
         .and_return([scc_credentials])
 
@@ -244,7 +260,7 @@ describe Registration::SwMgmt do
         File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
-      expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
+      subject.copy_old_credentials(root_dir)
     end
 
     it "copies old SMT credentials at upgrade" do
