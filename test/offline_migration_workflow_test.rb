@@ -26,6 +26,9 @@ describe Registration::UI::OfflineMigrationWorkflow do
         expect(Dir).to receive(:[])
           .with(File.join(Registration::SslCertificate::TMP_CA_CERTS_DIR, "*"))
           .and_return([File.join(Registration::SslCertificate::TMP_CA_CERTS_DIR, "smt.pem")])
+        expect(Dir).to receive(:[])
+          .with("/etc/pki/trust/anchors/*.pem")
+          .and_return(["/etc/pki/trust/anchors/registration_server.pem"])
 
         var_lib_cert = File.join(Registration::SslCertificate::CA_CERTS_DIR, "/openssl/smt.pem")
         expect(File).to receive(:exist?).with(var_lib_cert).and_return(true)

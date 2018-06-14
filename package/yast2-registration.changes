@@ -1,4 +1,37 @@
 -------------------------------------------------------------------
+Wed Jun 13 14:00:30 UTC 2018 - lslezak@suse.cz
+
+- Prefer the SCC credentials at upgrade when both NCC and SCC
+  credentials are present in the system (bsc#1096813)
+- 4.0.40
+
+-------------------------------------------------------------------
+Wed Jun  6 07:33:07 UTC 2018 - lslezak@suse.cz
+
+- Fixed also the another places detecting the installed product
+  (bsc#1095702)
+- 4.0.39
+
+-------------------------------------------------------------------
+Tue Jun  5 10:12:07 UTC 2018 - lslezak@suse.cz
+
+- Fixed evaluating the installed product (the installed upgraded
+  products are marked as "removed") (bsc#1095702)
+- 4.0.38
+
+-------------------------------------------------------------------
+Wed May 30 12:26:23 UTC 2018 - lslezak@suse.cz
+
+- Fixes for upgrade via SMT (bsc#1094865):
+  - Set the new "target_distro" for libzypp also after reloading
+    the target otherwise libzypp might reject the new repositories
+  - Copy also the SMT credentials into the installation system,
+    not only the SCC ones
+  - Copy the SMT (and also the RMT) SSL certificate into the
+    installation system (for HTTPS communication)
+- 4.0.37
+
+-------------------------------------------------------------------
 Tue May  8 17:27:36 CEST 2018 - schubi@suse.de
 
 - Fixed: Offline migration against RMT sends some requests to 

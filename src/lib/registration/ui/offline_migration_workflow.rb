@@ -125,8 +125,9 @@ module Registration
           end
         end
 
-        log.info("Removing #{SslCertificate::INSTSYS_SERVER_CERT_FILE}")
-        File.delete(SslCertificate::INSTSYS_SERVER_CERT_FILE)
+        files = Dir[File.join(SslCertificate::INSTSYS_CERT_DIR, "*.pem")]
+        log.info("Removing files: #{files.inspect}")
+        File.delete(*files)
 
         # Cleanup
         FileUtils.rm_rf(SslCertificate::TMP_CA_CERTS_DIR)

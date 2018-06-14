@@ -206,17 +206,18 @@ describe Registration::SwMgmt do
   describe ".copy_old_credentials" do
     let(:root_dir) { "/mnt" }
     let(:target_dir) { SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR }
+    let(:ncc_credentials) { File.join(root_dir, target_dir, "NCCcredentials") }
+    let(:scc_credentials) { File.join(root_dir, target_dir, "SCCcredentials") }
 
     before do
       expect(File).to receive(:exist?).with(target_dir).and_return(false)
+      allow(File).to receive(:file?).and_return(true)
       expect(FileUtils).to receive(:mkdir_p).with(target_dir)
     end
 
     it "does not fail when the old credentials are missing" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
-        .and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
-        .and_return(false)
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([])
 
       # no copy
       expect(FileUtils).to receive(:cp).never
@@ -225,29 +226,53 @@ describe Registration::SwMgmt do
     end
 
     it "copies old NCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
-        .and_return(true)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
-        .and_return(false)
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([ncc_credentials])
 
-      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
-        "NCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
+      expect(subject).to receive(:`).with("cp -a " + ncc_credentials + " " +
+        File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
-      expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
+      subject.copy_old_credentials(root_dir)
+    end
+
+    it "prefers the SCC credentials if both NCC and SCC credentials are present" do
+      # deliberately return the SCC credentials first here
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([scc_credentials, ncc_credentials])
+
+      # copy the credentials in the NCC, SCC order (bsc#1096813)
+      expect(subject).to receive(:`).with("cp -a " + ncc_credentials + " " +
+        File.join(target_dir, "SCCcredentials")).ordered
+      expect(subject).to receive(:`).with("cp -a " + scc_credentials + " " +
+        File.join(target_dir, "SCCcredentials")).ordered
+
+      allow(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
+
+      subject.copy_old_credentials(root_dir)
     end
 
     it "copies old SCC credentials at upgrade" do
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "NCCcredentials"))
-        .and_return(false)
-      expect(File).to receive(:exist?).with(File.join(root_dir, target_dir, "SCCcredentials"))
-        .and_return(true)
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([scc_credentials])
 
-      expect(subject).to receive(:`).with("cp -a " + File.join(root_dir, target_dir,
-        "SCCcredentials") + " " + File.join(target_dir, "SCCcredentials"))
+      expect(subject).to receive(:`).with("cp -a " + scc_credentials + " " +
+        File.join(target_dir, "SCCcredentials"))
       expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
-      expect { subject.copy_old_credentials(root_dir) }.to_not raise_error
+      subject.copy_old_credentials(root_dir)
+    end
+
+    it "copies old SMT credentials at upgrade" do
+      smt_credentials = File.join(root_dir, target_dir, "SMT-http_smt_example_com")
+      expect(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
+        .and_return([smt_credentials])
+
+      expect(subject).to receive(:`).with("cp -a " + smt_credentials + " " +
+        File.join(target_dir, "SMT-http_smt_example_com"))
+      expect(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
+
+      subject.copy_old_credentials(root_dir)
     end
   end
 
