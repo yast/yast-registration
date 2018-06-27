@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun 27 13:10:18 CEST 2018 - schubi@suse.de
+
+- Added additional searchkeys to desktop file (fate#321043).
+- 4.0.41
+
+-------------------------------------------------------------------
 Wed Jun 13 14:00:30 UTC 2018 - lslezak@suse.cz
 
 - Prefer the SCC credentials at upgrade when both NCC and SCC
