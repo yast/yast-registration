@@ -6,7 +6,7 @@ X-SuSE-YaST-Call=scc
 X-SuSE-YaST-Argument=select_extensions
 X-SuSE-YaST-RootOnly=yes
 X-SuSE-YaST-Group=Software
-X-SuSE-YaST-Keywords=extensions,modules,software,registration,scc
+X-SuSE-YaST-Keywords=extensions,modules,software,registration,scc,package,repositories
 
 Icon=yast-addon
 Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc select_extensions"
