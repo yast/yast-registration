@@ -11,6 +11,7 @@ X-SuSE-YaST-AutoInstClonable=false
 X-SuSE-YaST-AutoInstRequires=lan,proxy
 X-SuSE-YaST-AutoInstSchema=registration.rnc
 X-SuSE-YaST-AutoInstResource=suse_register
+X-SuSE-YaST-Keywords=scc,software,registration,smt,rmt
 
 Icon=yast-product-registration
 Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc"
