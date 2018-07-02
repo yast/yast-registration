@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jul  2 17:05:19 CEST 2018 - schubi@suse.de
+
+- Added additional searchkeys to desktop file (fate#321043).
+- 4.0.42
+
+-------------------------------------------------------------------
 Wed Jun 27 13:10:18 CEST 2018 - schubi@suse.de
 
 - Added additional searchkeys to desktop file (fate#321043).
