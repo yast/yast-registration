@@ -42,6 +42,8 @@ module Registration
   class DownloadError < RuntimeError
   end
 
+  # User decision to abort because libzypp has already been
+  # locked by another application.
   class PkgAborted < RuntimeError
   end
 end
