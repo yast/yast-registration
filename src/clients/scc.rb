@@ -52,6 +52,8 @@ module Yast
           return WFM.call("inst_scc", WFM.Args)
         rescue Registration::SourceRestoreError => e
           retry if fix_repositories(e.message)
+        rescue Registration::PkgAborted => e
+          log.info "User abort..."
         ensure
           Wizard.CloseDialog
         end

@@ -41,4 +41,8 @@ module Registration
   # generic download error
   class DownloadError < RuntimeError
   end
+
+  class PkgAborted < RuntimeError
+  end
+
 end
