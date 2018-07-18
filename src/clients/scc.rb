@@ -52,6 +52,12 @@ module Yast
           return WFM.call("inst_scc", WFM.Args)
         rescue Registration::SourceRestoreError => e
           retry if fix_repositories(e.message)
+        rescue Registration::PkgAborted => e
+          # Libzypp init has failed because another application
+          # has already locked the zypp stack. The user has already
+          # decided to exit the module. So nothing more has to be
+          # done here.
+          log.info "User abort..."
         ensure
           Wizard.CloseDialog
         end
