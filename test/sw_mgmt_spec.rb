@@ -51,7 +51,7 @@ describe Registration::SwMgmt do
   describe ".init" do
     before do
       allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected,
-        "aborted" => aborted)
+                                                               "aborted"   => aborted)
     end
 
     context "when the libzypp lock can be obtained" do

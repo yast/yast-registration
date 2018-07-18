@@ -44,5 +44,4 @@ module Registration
 
   class PkgAborted < RuntimeError
   end
-
 end
