@@ -68,6 +68,9 @@ module Registration
     def self.init(load_packages = false)
       # false = do not allow continuing without the libzypp lock
       lock = PackageLock.Connect(false)
+      # User would like to abort
+      raise_pkg_exception(PkgAborted) if lock["aborted"]
+      # locking has failed
       raise_pkg_exception unless lock["connected"]
 
       # display progress when refreshing repositories

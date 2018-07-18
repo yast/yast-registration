@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jul 18 10:45:15 CEST 2018 - schubi@suse.de
+
+- Do not crash if getting zypp lock failed. (bnc#1043125)
+- 4.0.43
+
+-------------------------------------------------------------------
 Mon Jul  2 17:05:19 CEST 2018 - schubi@suse.de
 
 - Added more searchkeys to desktop file (fate#321043).
