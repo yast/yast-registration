@@ -50,11 +50,13 @@ describe Registration::SwMgmt do
 
   describe ".init" do
     before do
-      allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected)
+      allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected,
+                                                               "aborted"   => aborted)
     end
 
     context "when the libzypp lock can be obtained" do
       let(:connected) { true }
+      let(:aborted) { false }
 
       before do
         expect(Yast::PackageCallbacks).to receive(:InitPackageCallbacks)
@@ -76,10 +78,22 @@ describe Registration::SwMgmt do
     end
 
     context "when the libzypp lock cannot be obtained" do
-      let(:connected) { false }
+      context "when user has NOT aborted" do
+        let(:connected) { false }
+        let(:aborted) { false }
 
-      it "raises an PkgError exception" do
-        expect { subject.init }.to raise_error(Registration::PkgError)
+        it "raises an PkgError exception" do
+          expect { subject.init }.to raise_error(Registration::PkgError)
+        end
+      end
+
+      context "when user has aborted" do
+        let(:connected) { false }
+        let(:aborted) { true }
+
+        it "raises an PkgAborted exception" do
+          expect { subject.init }.to raise_error(Registration::PkgAborted)
+        end
       end
     end
   end

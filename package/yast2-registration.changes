@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Jul 25 11:58:13 UTC 2018 - lslezak@suse.com
+
+- Updated the unit test to pass with the latest SUSEConnect
+  (bsc#1102540)
+- 3.2.14
+
+-------------------------------------------------------------------
+Wed Jul 18 10:45:15 CEST 2018 - schubi@suse.de
+
+- Do not crash if getting zypp lock failed. (bnc#1043125)
+- 3.2.13
+
+-------------------------------------------------------------------
 Thu Jun 22 13:46:00 UTC 2017 - lslezak@suse.cz
 
 - Do not display a hint about the old registration server when

@@ -4,7 +4,7 @@ require_relative "spec_helper"
 require "registration/connect_helpers"
 
 # helper for creating the SCC API error exceptions
-def api_error(code: 400, headers: {}, body: "")
+def api_error(code: 400, headers: {}, body: {})
   SUSE::Connect::ApiError.new(
     OpenStruct.new(
       code:    code,
