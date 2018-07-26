@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 26 09:25:16 UTC 2018 - lslezak@suse.cz
+
+- Do not build on 32-bit archs, SUSEConnect is not available
+  there (bsc#1088552)
+- 3.2.15
+
+-------------------------------------------------------------------
 Wed Jul 25 11:58:13 UTC 2018 - lslezak@suse.com
 
 - Updated the unit test to pass with the latest SUSEConnect
