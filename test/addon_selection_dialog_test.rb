@@ -18,13 +18,13 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
   end
 
   describe "#initialize" do
-    it "sets the beta filter to the previous state" do
+    it "sets the development filter to the previous state" do
       fake_ref = double.as_null_object
       registration = double(activated_products: [], get_addon_list: [])
       res = described_class.new(registration)
-      res.send(:filter_beta_releases, false)
+      res.send(:filter_devel_releases, false)
 
-      expect_any_instance_of(described_class).to receive(:filter_beta_releases).with(false)
+      expect_any_instance_of(described_class).to receive(:filter_devel_releases).with(false)
       described_class.new(fake_ref)
     end
   end
@@ -33,11 +33,11 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     subject { Registration::UI::AddonSelectionRegistrationDialog }
 
     let(:registration) { double(activated_products: [], get_addon_list: []) }
-    let(:filter_beta) { false }
+    let(:filter_devel) { false }
     let(:recommended_addon) { addon_generator("recommended" => true) }
 
     before do
-      allow(described_class).to receive(:filter_beta).and_return(filter_beta)
+      allow(described_class).to receive(:filter_devel).and_return(filter_devel)
       allow(Yast::UI).to receive(:TextMode).and_return(false)
       allow(Yast::UI).to receive(:UserInput).and_return(:next)
       allow_any_instance_of(described_class).to receive(:RichText).and_call_original
@@ -142,26 +142,26 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       expect(child.auto_selected?).to eq true
     end
 
-    context "when beta versions are not filtered" do
+    context "when development versions are not filtered" do
       let(:addon) do
         Registration::Addon.new(
           addon_generator
         )
       end
       subject(:dialog) { described_class.new(registration) }
-      let(:filter_beta) { false }
+      let(:filter_devel) { false }
 
       it "sets the filter as not checked in the UI" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
-          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .with(Yast::Term.new(:id, :filter_devel), anything, anything, filter_devel)
           .and_call_original
         dialog.run
       end
 
-      it "displays beta add-ons" do
+      it "displays development add-ons" do
         allow(addon).to receive(:released?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
@@ -170,26 +170,26 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
     end
 
-    context "when beta versions are filtered" do
+    context "when development versions are filtered" do
       let(:addon) do
         Registration::Addon.new(
           addon_generator
         )
       end
       subject(:dialog) { described_class.new(registration) }
-      let(:filter_beta) { true }
+      let(:filter_devel) { true }
 
       it "sets the filter as checked in the UI" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
-          .with(Yast::Term.new(:id, :filter_beta), anything, anything, filter_beta)
+          .with(Yast::Term.new(:id, :filter_devel), anything, anything, filter_devel)
           .and_call_original
         dialog.run
       end
 
-      it "does not display beta add-ons that are not registered" do
+      it "does not display development add-ons that are not registered" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
@@ -198,7 +198,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         dialog.run
       end
 
-      it "display registered beta add-ons" do
+      it "display registered development add-ons" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(true)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
@@ -207,7 +207,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         dialog.run
       end
 
-      it "displays recommended beta add-ons" do
+      it "displays recommended development add-ons" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(addon).to receive(:recommended).and_return(true)
@@ -217,7 +217,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
         dialog.run
       end
 
-      it "displays auto-selected beta add-ons" do
+      it "displays auto-selected development add-ons" do
         allow(addon).to receive(:released?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(addon).to receive(:recommended).and_return(false)
@@ -229,7 +229,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
     end
 
-    context "when there is no beta versions to filter" do
+    context "when there is no development versions to filter" do
       subject(:dialog) { described_class.new(registration) }
 
       it "shows no filter in the UI" do
@@ -245,13 +245,13 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       Registration::UI::AddonSelectionRegistrationDialog.new(registration)
     end
 
-    it "filters beta releases" do
-      expect(Yast::UI).to receive(:UserInput).and_return(:filter_beta, :next)
+    it "filters development releases" do
+      expect(Yast::UI).to receive(:UserInput).and_return(:filter_devel, :next)
 
       expect(Yast::UI).to receive(:QueryWidget)
-        .with(Yast::Term.new(:id, :filter_beta), :Value)
+        .with(Yast::Term.new(:id, :filter_devel), :Value)
         .and_return(true)
-      expect(subject).to receive(:filter_beta_releases).with(true)
+      expect(subject).to receive(:filter_devel_releases).with(true)
 
       expect(subject.send(:handle_dialog)).to_not eq :back
     end
