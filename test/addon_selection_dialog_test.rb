@@ -152,7 +152,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       let(:filter_beta) { false }
 
       it "sets the filter as not checked in the UI" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
@@ -162,7 +162,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
 
       it "displays beta add-ons" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
         allow(subject).to receive(:RichText).and_call_original
@@ -180,7 +180,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       let(:filter_beta) { true }
 
       it "sets the filter as checked in the UI" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(dialog).to receive(:CheckBox)
@@ -190,7 +190,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
 
       it "does not display beta add-ons that are not registered" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), "")
@@ -199,7 +199,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
 
       it "display registered beta add-ons" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(true)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
         expect(subject).to receive(:RichText).with(Yast::Term.new(:id, :items), /#{addon.name}/)
@@ -208,7 +208,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
 
       it "displays recommended beta add-ons" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(addon).to receive(:recommended).and_return(true)
         allow(Registration::Addon).to receive(:find_all).and_return([addon])
@@ -218,7 +218,7 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
       end
 
       it "displays auto-selected beta add-ons" do
-        allow(addon).to receive(:beta_release?).and_return(true)
+        allow(addon).to receive(:supported_release?).and_return(false)
         allow(addon).to receive(:registered?).and_return(false)
         allow(addon).to receive(:recommended).and_return(false)
         allow(addon).to receive(:auto_selected?).and_return(true)

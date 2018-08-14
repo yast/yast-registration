@@ -70,7 +70,7 @@ module Registration
         if enable
           @addons = @all_addons.select do |a|
             a.registered? || a.selected? || a.auto_selected? ||
-              !a.beta_release?
+              a.supported_release?
           end
         else
           @addons = @all_addons
@@ -92,9 +92,9 @@ module Registration
         vbox_elements = [Left(Heading(heading))]
         available_addons = @all_addons.reject(&:registered?)
 
-        unless available_addons.empty? || available_addons.select(&:beta_release?).empty?
+        unless available_addons.empty? || available_addons.all?(&:supported_release?)
           vbox_elements.push(Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Hide Beta Versions"), check_filter)))
+            _("&Hide Development Versions"), check_filter)))
         end
 
         vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
