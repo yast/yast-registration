@@ -268,8 +268,8 @@ module Registration
 
     DEVELOPMENT_STAGES = ["alpha", "beta"].freeze
 
-    def supported_release?
-      !DEVELOPMENT_STAGES.include?(release_stage)
+    def released?
+      release_stage == "released"
     end
 
     # get a product printable name (long name if present, fallbacks to the short name)
