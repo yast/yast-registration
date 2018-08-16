@@ -95,7 +95,7 @@ module Registration
         unless available_addons.empty? || available_addons.all?(&:released?)
           vbox_elements.push(Left(CheckBox(Id(:filter_devel), Opt(:notify),
             # TRANSLATORS: Checkbox label, hides alpha or beta versions (not released yet)
-            _("&Hide Testing Versions"), check_filter)))
+            _("&Hide Development Versions"), check_filter)))
         end
 
         vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
