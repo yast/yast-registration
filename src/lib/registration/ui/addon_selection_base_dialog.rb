@@ -24,10 +24,10 @@ module Registration
       Yast.import "Arch"
 
       class << self
-        attr_accessor :filter_beta
+        attr_accessor :filter_devel
       end
 
-      FILTER_BETAS_INITIALLY = true
+      FILTER_DEVEL_INITIALLY = true
 
       # constructor
       # @param registration [Registration::Registration] use this Registration object for
@@ -39,10 +39,9 @@ module Registration
         # sort the addons
         @all_addons.sort!(&::Registration::ADDON_SORTER)
 
-        self.class.filter_beta = FILTER_BETAS_INITIALLY if self.class.filter_beta.nil?
-
+        self.class.filter_devel = FILTER_DEVEL_INITIALLY if self.class.filter_devel.nil?
         preselect_recommended
-        filter_beta_releases(self.class.filter_beta)
+        filter_devel_releases(self.class.filter_devel)
 
         @old_selection = Addon.selected.dup
       end
@@ -63,14 +62,14 @@ module Registration
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
       end
 
-      # Enables or disables beta addons filtering
-      # @param [Boolean] enable true for filtering beta releases
-      def filter_beta_releases(enable)
-        self.class.filter_beta = enable
+      # Enables or disables devel addons filtering
+      # @param [Boolean] enable true for filtering devel releases
+      def filter_devel_releases(enable)
+        self.class.filter_devel = enable
         if enable
           @addons = @all_addons.select do |a|
             a.registered? || a.selected? || a.auto_selected? ||
-              !a.beta_release?
+              a.released?
           end
         else
           @addons = @all_addons
@@ -88,13 +87,15 @@ module Registration
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
-        check_filter = self.class.filter_beta.nil? ? FILTER_BETAS_INITIALLY : self.class.filter_beta
+        check_filter =
+          self.class.filter_devel.nil? ? FILTER_DEVEL_INITIALLY : self.class.filter_devel
         vbox_elements = [Left(Heading(heading))]
         available_addons = @all_addons.reject(&:registered?)
 
-        unless available_addons.empty? || available_addons.select(&:beta_release?).empty?
-          vbox_elements.push(Left(CheckBox(Id(:filter_beta), Opt(:notify),
-            _("&Hide Beta Versions"), check_filter)))
+        unless available_addons.empty? || available_addons.all?(&:released?)
+          vbox_elements.push(Left(CheckBox(Id(:filter_devel), Opt(:notify),
+            # TRANSLATORS: Checkbox label, hides alpha or beta versions (not released yet)
+            _("&Hide Development Versions"), check_filter)))
         end
 
         vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
@@ -215,8 +216,8 @@ module Registration
             ret = Stage.initial && !AbortConfirmation.run ? nil : :abort
             # when canceled switch to old selection
             Addon.selected.replace(@old_selection) if ret == :abort
-          when :filter_beta
-            filter_beta_releases(Yast::UI.QueryWidget(Id(ret), :Value))
+          when :filter_devel
+            filter_devel_releases(Yast::UI.QueryWidget(Id(ret), :Value))
             show_addons
           else
             handle_addon_selection(ret)

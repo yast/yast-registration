@@ -196,19 +196,22 @@ describe Registration::Addon do
     end
   end
 
-  describe "#beta_release?" do
-    it "returns true if addon is beta release" do
-      product = addon_generator("release_stage" => "beta")
-      addon = Registration::Addon.new(product)
+  describe "#released?" do
+    it "returns false if addon is a testing release" do
+      alpha_product = addon_generator("release_stage" => "alpha")
+      alpha_addon = Registration::Addon.new(alpha_product)
+      beta_product = addon_generator("release_stage" => "beta")
+      beta_addon = Registration::Addon.new(beta_product)
 
-      expect(addon.beta_release?).to eq(true)
+      expect(alpha_addon.released?).to eq(false)
+      expect(beta_addon.released?).to eq(false)
     end
 
-    it "returns false if addon is not beta release" do
-      product = addon_generator("release_stage" => "production")
+    it "returns true if addon is a supported release" do
+      product = addon_generator("release_stage" => "released")
       addon = Registration::Addon.new(product)
 
-      expect(addon.beta_release?).to eq(false)
+      expect(addon.released?).to eq(true)
     end
   end
 

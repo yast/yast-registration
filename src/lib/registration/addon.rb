@@ -266,8 +266,10 @@ module Registration
       Addon.registered.delete(self) if registered?
     end
 
-    def beta_release?
-      release_stage == "beta"
+    DEVELOPMENT_STAGES = ["alpha", "beta"].freeze
+
+    def released?
+      release_stage == "released"
     end
 
     # get a product printable name (long name if present, fallbacks to the short name)
