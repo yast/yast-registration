@@ -24,7 +24,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
 
 Group:          System/YaST
-License:        GPL-2.0
+License:        GPL-2.0-only
 
 # Y2Packager::ProductLicense
 Requires:       yast2 >= 4.0.63
