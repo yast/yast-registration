@@ -130,10 +130,7 @@ module Registration
       # run the system and the base product registration
       # @return [Boolean] true on success
       def register_system_and_base_product
-        url = UrlHelpers.registration_url
-        return false if UrlHelpers.registration_url == :cancel
-
-        registration    = Registration.new(url)
+        registration    = Registration.new(options.custom_url)
         registration_ui = RegistrationUI.new(registration)
 
         success, product_service = registration_ui.register_system_and_base_product
