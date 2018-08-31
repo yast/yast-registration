@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug 31 10:12:16 UTC 2018 - lslezak@suse.cz
+
+- Better check the not installed addon products, some specific
+  repositories do not provide any product
+- Fixes online migration on PPC (bsc#1103412)
+- 3.2.16
+
+-------------------------------------------------------------------
 Thu Jul 26 09:25:16 UTC 2018 - lslezak@suse.cz
 
 - Do not build on 32-bit archs, SUSEConnect is not available
