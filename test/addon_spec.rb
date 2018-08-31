@@ -119,10 +119,28 @@ describe Registration::Addon do
       addon2 = addons.find { |addon| addon.name == "prod2" }
 
       expect(Registration::SwMgmt).to receive(:installed_products).and_return([])
+      expect(Yast::Pkg).to receive(:ResolvableProperties).with(prod2.identifier, :product, "")
+        .and_return(["status" => :available])
       reg_not_installed_addons = Registration::Addon.registered_not_installed
 
       expect(reg_not_installed_addons.size).to eql(1)
       expect(reg_not_installed_addons.first.name).to eql(addon2.name)
+    end
+
+    it "does not return addons without available products" do
+      prod = addon_generator("name" => "prod")
+      registration = double(
+        activated_products: [prod],
+        get_addon_list:     [prod]
+      )
+
+      Registration::Addon.find_all(registration)
+
+      expect(Registration::SwMgmt).to receive(:installed_products).and_return([])
+      expect(Yast::Pkg).to receive(:ResolvableProperties).with(prod.identifier, :product, "")
+        .and_return([])
+
+      expect(Registration::Addon.registered_not_installed).to be_empty
     end
   end
 
