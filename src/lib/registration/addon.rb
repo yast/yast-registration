@@ -65,14 +65,21 @@ module Registration
       end
 
       # return add-ons which are registered but not installed in the system
+      # and are available to install
       # @return [Array<Addon>] the list of add-ons
       def registered_not_installed
         registered.select do |addon|
-          !SwMgmt.installed_products.find do |product|
+          installed = SwMgmt.installed_products.find do |product|
             product["name"] == addon.identifier &&
               product["version_version"] == addon.version &&
               product["arch"] == addon.arch
           end
+
+          available = Yast::Pkg.ResolvableProperties(addon.identifier, :product, "").find do |p|
+            p["status"] == :available
+          end
+
+          !installed && available
         end
       end
 
