@@ -113,7 +113,7 @@ describe Registration::Addon do
       expect(reg_not_installed_addons.first.name).to eql(addon2.name)
     end
 
-    it "does not return not addons with not available products" do
+    it "does not return addons without available products" do
       prod = addon_generator("name" => "prod")
       registration = double(
         activated_products: [prod],
