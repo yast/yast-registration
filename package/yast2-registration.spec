@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.0.43
+Version:        4.0.44
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -54,7 +54,7 @@ BuildRequires:  update-desktop-files
 BuildRequires:  yast2-devtools >= 3.1.39
 BuildRequires:  rubygem(yast-rake) >= 0.2.5
 BuildRequires:  rubygem(rspec)
-BuildRequires:  rubygem(suse-connect) >= 0.2.22
+BuildRequires:  rubygem(suse-connect) >= 0.3.11
 BuildRequires:  yast2-slp >= 3.1.9
 # updated product renames
 BuildRequires:  yast2-packager >= 4.0.40
