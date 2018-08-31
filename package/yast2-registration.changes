@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug 31 10:12:16 UTC 2018 - lslezak@suse.cz
+
+- Better check the not installed addon products, some specific
+  repositories do not provide any product
+- Fixes online migration on PPC (bsc#1103412)
+- 4.1.1
+
+-------------------------------------------------------------------
 Mon Aug 20 09:28:58 CEST 2018 - schubi@suse.de
 
 - Switched license in spec file from SPDX2 to SPDX3 format.
