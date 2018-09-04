@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep  4 08:34:31 UTC 2018 - dgonzalez@suse.com
+
+- Limit the registration code size to 512 characters (bsc#1098576)
+- 4.1.2
+
+-------------------------------------------------------------------
 Fri Aug 31 10:12:16 UTC 2018 - lslezak@suse.cz
 
 - Better check the not installed addon products, some specific

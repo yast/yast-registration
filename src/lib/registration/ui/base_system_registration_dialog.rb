@@ -65,6 +65,9 @@ module Registration
           Yast::GetInstArgs.enable_next || Yast::Mode.normal
         )
 
+        # Limit the reg_code InputField to 512 (bsc#1098576)
+        Yast::UI.ChangeWidget(:reg_code, :InputMaxLength, 512)
+
         # Set default action
         self.action = initial_action
         set_focus

@@ -32,6 +32,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       allow(Yast::Mode).to receive(:mode).and_return(mode)
       allow(Registration::Registration).to receive(:is_registered?).and_return(registered?)
       allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
+      allow(Yast::UI).to receive(:ChangeWidget)
     end
 
     context "when system is not registered" do
@@ -42,6 +43,14 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         allow(Registration::UrlHelpers).to receive(:registration_url).and_return(nil)
         allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
         allow(Registration::Helpers).to receive(:reset_registration_status)
+      end
+
+      it "limits the reg_code InputField to 512" do
+        allow(subject).to receive(:event_loop).and_return(nil)
+
+        expect(Yast::UI).to receive(:ChangeWidget).with(:reg_code, :InputMaxLength, 512)
+
+        subject.run
       end
 
       context "when user enters a correct regcode" do
