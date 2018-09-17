@@ -371,7 +371,7 @@ module Registration
           "%{media_name} media from %{download_url}.\n" \
           "Without these media only a minimum system is available\n" \
           "in this installation.") %
-          { media_name: "SLE-15-Packages", download_url: "https://download.suse.com" }
+          { media_name: "SLE-15-SP1-Packages", download_url: "https://download.suse.com" }
         Yast::Popup.Warning(warning)
       end
 
