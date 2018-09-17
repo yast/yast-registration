@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep 17 08:54:19 UTC 2018 - lslezak@suse.cz
+
+- Suggest downloading the "SLE-15-SP1-Packages" medium instead of
+  the old "SLE-15-Packages" (bsc#1108620)
+- 4.1.3
+
+-------------------------------------------------------------------
 Tue Sep  4 08:34:31 UTC 2018 - dgonzalez@suse.com
 
 - Limit the registration code size to 512 characters (bsc#1098576)
