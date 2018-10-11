@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 11 14:55:15 UTC 2018 - lslezak@suse.cz
+
+- CRLF control characters cannot be included in the registration
+  code, added validation check (bsc#1111419)
+- 4.1.4
+
+-------------------------------------------------------------------
 Mon Sep 17 08:54:19 UTC 2018 - lslezak@suse.cz
 
 - Suggest downloading the "SLE-15-SP1-Packages" medium instead of
