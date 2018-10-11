@@ -49,7 +49,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(Yast::UI).to receive(:QueryWidget).with(:email, :Value)
             .and_return(email)
           expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value)
-            .and_return(reg_code)
+            .and_return(reg_code).twice
           expect(Yast::UI).to receive(:UserInput).and_return(:next)
 
           options = Registration::Storage::InstallationOptions.instance
@@ -73,7 +73,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(Yast::UI).to receive(:QueryWidget).with(:email, :Value)
             .and_return(email)
           expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value)
-            .and_return(reg_code)
+            .and_return(reg_code).twice
           expect(Yast::UI).to receive(:UserInput).and_return(:next, :abort)
           expect(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
 
@@ -90,6 +90,23 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         end
       end
 
+      context "when user enters an invalid regcode" do
+        # include CRLF characters which are not allowed
+        let(:reg_code) { "\nmy-reg-code\r" }
+        it "displays error popup and does not register the system" do
+          expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value)
+            .and_return(reg_code)
+
+          expect(Yast::UI).to receive(:UserInput).and_return(:next, :abort)
+          expect(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
+
+          expect(Yast::Report).to receive(:Error).with(/Invalid registration code/)
+          expect(registration_ui).to_not receive(:register_system_and_base_product)
+
+          expect(subject.run).to eq(:abort)
+        end
+      end
+
       context "when user sets a registration URL through regurl= parameter" do
         let(:regurl) { "https://example.suse.net" }
 
@@ -101,7 +118,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(Yast::UI).to receive(:QueryWidget).with(:email, :Value)
             .and_return(email)
           expect(Yast::UI).to receive(:QueryWidget).with(:reg_code, :Value)
-            .and_return(reg_code)
+            .and_return(reg_code).twice
           expect(Yast::UI).to receive(:UserInput).and_return(:next)
 
           options = Registration::Storage::InstallationOptions.instance
