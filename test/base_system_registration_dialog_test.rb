@@ -180,9 +180,9 @@ describe Registration::UI::BaseSystemRegistrationDialog do
                 " is NOT defined in control.xml" do
           it "does not mention any media information" do
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_media_name").and_return(nil)
+              .with("globals", "full_system_media_name").and_return("")
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_download_url").and_return(nil)
+              .with("globals", "full_system_download_url").and_return("")
             expect(Yast::Popup).to receive(:Warning).with(/Without registration/)
               .and_return(true)
             expect(Yast::Popup).not_to receive(:Warning).with(/Without these media only/)
