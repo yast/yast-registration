@@ -375,28 +375,14 @@ module Registration
         # TRANSLATORS:
         # %{media_name} is the media name (e.g. SLE-15-Packages),
         # %{download_url} is an URL link (e.g. https://download.suse.com)
-        if media_name && !media_name.empty? &&
-            download_url && !download_url.empty?
+        if !media_name.empty? && #cannot be nil
+            !download_url.empty? #cannot be nil
           warning += "\n\n" +
             _("A full system can be installed using the\n" \
-            "%{media_name} media from %{download_url}.") %
+              "%{media_name} media from %{download_url}.\n" \
+              "Without these media only a minimum system is available\n" \
+             "in this installation." ) %
             { media_name: media_name, download_url: download_url }
-        elsif media_name && !media_name.empty?
-          warning += "\n\n" +
-            _("A full system can be installed using the\n" \
-            "%{media_name} media.") %
-            { media_name: media_name }
-        elsif download_url && !download_url.empty?
-          warning += "\n\n" +
-            _("A full system can be installed using a media from\n" \
-            "%{download_url}.") %
-            { download_url: download_url }
-        end
-        if media_name && !media_name.empty? ||
-            download_url && !download_url.empty?
-          warning += "\n" +
-            _("Without these media only a minimum system is available\n" \
-              "in this installation.")
         end
 
         Yast::Popup.Warning(warning)
