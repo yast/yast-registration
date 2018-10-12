@@ -164,7 +164,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           expect(subject.run).to eq(:skip)
         end
 
-        context "when full_system_media_name and full_system_download_url is defined in control.xml" do
+        context "when full_system_media_name and full_system_download_url" \
+                " is defined in control.xml" do
           it "reports the media name and the regarding download url to the user" do
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
               .with("globals", "full_system_media_name").and_return("SLE-15-Packages")
@@ -175,7 +176,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           end
         end
 
-        context "when full_system_media_name and full_system_download_url is NOT defined in control.xml" do
+        context "when full_system_media_name and full_system_download_url" \
+                " is NOT defined in control.xml" do
           it "does not mention any media information" do
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
               .with("globals", "full_system_media_name").and_return(nil)

@@ -386,8 +386,7 @@ module Registration
             _("A full system can be installed using the\n" \
             "%{media_name} media.") %
             { media_name: media_name }
-        elsif
-          download_url && !download_url.empty?
+        elsif download_url && !download_url.empty?
           warning += "\n\n" +
             _("A full system can be installed using a media from\n" \
             "%{download_url}.") %
