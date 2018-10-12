@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Oct 12 10:41:27 CEST 2018 - schubi@suse.de
+
+- Added tags full_system_media_name and full_system_download_url
+  in control.xml which describe the location for the
+  "all-packages" medium. This information will be shown if the
+  registration has been scipped by the user. No hint will be shown
+  if these tags have not been defined. (fate#325834)
+- 4.0.45
+
+-------------------------------------------------------------------
 Fri Aug 31 10:12:16 UTC 2018 - lslezak@suse.cz
 
 - Better check the not installed addon products, some specific

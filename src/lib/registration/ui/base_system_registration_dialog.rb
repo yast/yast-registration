@@ -31,6 +31,7 @@ module Registration
       Yast.import "Wizard"
       Yast.import "Popup"
       Yast.import "Report"
+      Yast.import "ProductFeatures"
 
       WIDGETS = {
         register_scc:      [:email, :reg_code],
@@ -358,17 +359,47 @@ module Registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
+        media_name = ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_media_name"
+        )
+        download_url = ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_download_url"
+        )
+
+        warning = _("Without registration, update channels will not be\n" \
+          "configured. This disables updates and security fixes.")
+
         # Popup question: confirm skipping the registration
         # TRANSLATORS:
         # %{media_name} is the media name (e.g. SLE-15-Packages),
         # %{download_url} is an URL link (e.g. https://download.suse.com)
-        warning = _("Without registration, update channels will not be\n" \
-          "configured. This disables updates and security fixes.\n\n" \
-          "A full system can be installed using the\n" \
-          "%{media_name} media from %{download_url}.\n" \
-          "Without these media only a minimum system is available\n" \
-          "in this installation.") %
-          { media_name: "SLE-15-Packages", download_url: "https://download.suse.com" }
+        if media_name && !media_name.empty? &&
+           download_url && !download_url.empty?
+          warning += "\n\n" +
+            _("A full system can be installed using the\n" \
+            "%{media_name} media from %{download_url}.") %
+          { media_name: media_name, download_url: download_url }
+        elsif media_name && !media_name.empty?
+          warning += "\n\n" +
+            _("A full system can be installed using the\n" \
+            "%{media_name} media.") %
+          { media_name: media_name }
+        elsif
+          download_url && !download_url.empty?
+          warning += "\n\n" +
+            _("A full system can be installed using a media from\n" \
+            "%{download_url}.") %
+          { download_url: download_url }
+        end
+        if media_name && !media_name.empty? ||
+           download_url && !download_url.empty?
+          warning += "\n" +
+            _("Without these media only a minimum system is available\n" \
+              "in this installation.")
+        end
+
         Yast::Popup.Warning(warning)
       end
 
