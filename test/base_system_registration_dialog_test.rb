@@ -167,9 +167,9 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         context "when full_system_media_name and full_system_download_url is defined in control.xml" do
           it "reports the media name and the regarding download url to the user" do
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-                                              .with("globals","full_system_media_name").and_return("SLE-15-Packages")
+              .with("globals", "full_system_media_name").and_return("SLE-15-Packages")
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-                                               .with("globals","full_system_download_url").and_return("https://download.suse.com")
+              .with("globals", "full_system_download_url").and_return("https://download.suse.com")
             expect(Yast::Popup).to receive(:Warning).with(/SLE-15-Packages.*download.suse.com/)
             expect(subject.run).to eq(:skip)
           end
@@ -178,9 +178,9 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         context "when full_system_media_name and full_system_download_url is NOT defined in control.xml" do
           it "does not mention any media information" do
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-                                              .with("globals","full_system_media_name").and_return(nil)
+              .with("globals", "full_system_media_name").and_return(nil)
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
-                                               .with("globals","full_system_download_url").and_return(nil)
+              .with("globals", "full_system_download_url").and_return(nil)
             expect(Yast::Popup).to receive(:Warning).with(/Without registration/)
               .and_return(true)
             expect(Yast::Popup).not_to receive(:Warning).with(/Without these media only/)
