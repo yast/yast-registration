@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 16 15:35:43 CEST 2018 - schubi@suse.de
+
+- Added license file to spec.
+
+-------------------------------------------------------------------
 Fri Oct 12 10:41:27 CEST 2018 - schubi@suse.de
 
 - Added tags full_system_media_name and full_system_download_url
