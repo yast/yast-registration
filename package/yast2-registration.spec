@@ -100,5 +100,6 @@ source (mirror) automatically.
 %{yast_libdir}/yast
 %{yast_libdir}/yast/suse_connect.rb
 %doc %{yast_docdir}
+%license COPYING
 
 %changelog
