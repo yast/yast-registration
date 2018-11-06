@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Nov  6 13:56:48 UTC 2018 - dgonzalez@suse.com
+
+- Do not display a connection error when automatically trying to
+  use the base product registration code for the extensions
+  (bsc#1091825).
+- 4.1.6
+
+-------------------------------------------------------------------
 Tue Oct 16 15:35:43 CEST 2018 - schubi@suse.de
 
 - Added license file to spec.

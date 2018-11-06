@@ -113,29 +113,49 @@ describe Registration::ConnectHelpers do
       include_examples  "old registration server", JSON::ParserError.new("error message")
     end
 
-    context "error 404 is received" do
-      include_examples  "old registration server", api_error(code: 404)
-    end
+    [400, 401, 500, 42].each do |error_code|
+      exception = api_error(code: error_code)
 
-    [400, 401, 422, 500, 42].each do |error_code|
       context "error #{error_code} is received" do
-        include_examples "reports error and returns false", api_error(code: error_code)
+        include_examples "reports error and returns false", exception
+
+        it "logs the exception" do
+          expect(helpers.log).to receive(:error).with(/#{exception.response.inspect}/)
+
+          helpers.catch_registration_errors { raise exception }
+        end
       end
     end
 
-    context "'silent_reg_code_mismatch' parameter is set and a mismatch error occurs" do
-      before do
-        allow(Registration::UrlHelpers).to receive(:registration_url)
-          .and_return(SUSE::Connect::YaST::DEFAULT_URL)
+    context "error 404 is received" do
+      include_examples "old registration server", api_error(code: 404)
+    end
+
+    context "error 422 is received" do
+      context "and 'silent_reg_code_mismatch' param is not set" do
+        include_examples "reports error and returns false", api_error(code: 422)
       end
 
-      it "does not report an error and returns false" do
-        msg = "Subscription does not include the requested product 'Fountain Wristwatch'"
-        exc = api_error(code: 422, body: { "error" => msg })
+      context "and 'silent_reg_code_mismatch' param is set" do
+        let(:error_msg) { "Something went wrong" }
+        let(:exception) { api_error(code: 422, body: { "error" => error_msg }) }
 
-        expect(Yast::Report).to_not receive(:Error)
-        expect(helpers.catch_registration_errors(silent_reg_code_mismatch: true) { raise exc })
-          .to eq(false)
+        before do
+          allow(Registration::UrlHelpers).to receive(:registration_url)
+            .and_return(SUSE::Connect::YaST::DEFAULT_URL)
+        end
+
+        it "does not report an error" do
+          expect(Yast::Report).to_not receive(:Error)
+
+          helpers.catch_registration_errors(silent_reg_code_mismatch: true) { raise exception }
+        end
+
+        it "returns false" do
+          expect(
+            helpers.catch_registration_errors(silent_reg_code_mismatch: true) { raise exception }
+          ).to eq(false)
+        end
       end
     end
 
