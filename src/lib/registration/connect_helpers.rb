@@ -103,9 +103,8 @@ module Registration
           check_smt_api(error_msg)
           report_error(message_prefix + _("Connection to registration server failed."), error_msg)
         when 422
-          if silent_reg_code_mismatch && e.response.body["error"] =~
-              /does not include the requested product/
-            log.info "Reg code does not work for this product, that's OK"
+          if silent_reg_code_mismatch
+            log.info "Reg code does not work for this product."
           else
             # Error popup
             report_error(message_prefix + _("Connection to registration server failed."), error_msg)
