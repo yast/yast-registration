@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Nov  7 12:27:19 UTC 2018 - dgonzalez@suse.com
+
+- Do not display a connection error when automatically trying to
+  use the base product registration code for the extensions
+  (bsc#1091825).
+- 4.0.46
+
+-------------------------------------------------------------------
 Fri Oct 12 10:41:27 CEST 2018 - schubi@suse.de
 
 - Added tags full_system_media_name and full_system_download_url
