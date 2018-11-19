@@ -95,7 +95,7 @@ module Registration
         log.error "Received error: #{e.response.inspect}"
         error_msg = e.message || ""
         # TRANSLATORS: %d is an integer
-        error_code_message = _("Error code: '%d'. ") % e.code
+        error_code_message = _("HTTP error code: %d\n") % e.code
         case e.code
         when 401
           add_update_hint(error_msg) if show_update_hint
@@ -145,9 +145,7 @@ module Registration
         log.error "JSON parse error"
         # update the message when an old SMT server is found
         check_smt_api(e.message)
-
-        report_error(message_prefix + _("Connection to registration server failed."),
-          _("Error while parsing JSON return value. ") + e.message)
+        report_error(message_prefix + _("Cannot parse the data from server."), e.message)
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
