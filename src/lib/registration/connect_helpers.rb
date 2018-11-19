@@ -94,28 +94,35 @@ module Registration
       rescue SUSE::Connect::ApiError => e
         log.error "Received error: #{e.response.inspect}"
         error_msg = e.message || ""
+        # TRANSLATORS: %d is an integer
+        error_code_message = _("Error code: '%d'. ") % e.code
         case e.code
         when 401
           add_update_hint(error_msg) if show_update_hint
-          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          report_error(message_prefix + _("Connection to registration server failed."),
+            error_code_message + error_msg)
         when 404
           # update the message when an old SMT server is found
           check_smt_api(error_msg)
-          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          report_error(message_prefix + _("Connection to registration server failed."),
+            error_code_message + error_msg)
         when 422
           if silent_reg_code_mismatch
             log.info "Reg code does not work for this product."
           else
             # Error popup
-            report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+            report_error(message_prefix + _("Connection to registration server failed."),
+              error_code_message + error_msg)
           end
         when 400..499
-          report_error(message_prefix + _("Registration client error."), error_msg)
+          report_error(message_prefix + _("Registration client error."),
+            error_code_message + error_msg)
         when 500..599
           report_error(message_prefix + _("Registration server error.\n" \
                 "Retry the operation later."), error_msg)
         else
-          report_error(message_prefix + _("Connection to registration server failed."), error_msg)
+          report_error(message_prefix + _("Connection to registration server failed."),
+            error_code_message + error_msg)
         end
         false
       rescue ::Registration::ServiceError => e
@@ -139,7 +146,8 @@ module Registration
         # update the message when an old SMT server is found
         check_smt_api(e.message)
 
-        report_error(message_prefix + _("Connection to registration server failed."), e.message)
+        report_error(message_prefix + _("Connection to registration server failed."),
+          _("Error while parsing JSON return value. ") + e.message)
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
