@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov 19 16:11:29 CET 2018 - schubi@suse.de
+
+- Improved error messages (bsc#1060151).
+- 4.0.47
+
+-------------------------------------------------------------------
 Wed Nov  7 12:27:19 UTC 2018 - dgonzalez@suse.com
 
 - Do not display a connection error when automatically trying to
