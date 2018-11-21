@@ -22,7 +22,7 @@ module Registration
       log.info "Checking NCC API presence: #{download_url}"
 
       begin
-        Downloader.download(download_url, insecure: insecure)
+        Downloader.download(download_url, insecure: insecure, allow_redirect: false)
         log.info "NCC API found"
         return true
       rescue DownloadError

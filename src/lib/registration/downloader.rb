@@ -39,9 +39,16 @@ module Registration
     # is reached the download fails with RuntimeError exception
     # @param file_url [String, URI] URL of the file to download
     # @param insecure [Boolean] if true the SSL verification errors are ignored
+    # @param allow_redirect [Boolean] true: redirection will be followed
     # @return [String] the contents of the downloaded file
-    def self.download(file_url, insecure: false)
-      download_file(file_url, insecure: insecure)
+    def self.download(file_url, insecure: false, allow_redirect: true)
+      if allow_redirect
+        # Taking default value for redirection_count
+        download_file(file_url, insecure: insecure)
+      else
+        # Do not allow redirection
+        download_file(file_url, insecure: insecure, redirection_count: 0)
+      end
     end
 
     # internal method which handles HTTP redirects
@@ -51,7 +58,7 @@ module Registration
     #   the download fails with RuntimeError exception
     # @return [String] the contents of the downloaded file
     def self.download_file(file_url, insecure: false, redirection_count: 10)
-      raise "Redirection limit reached, download aborted" if redirection_count <= 0
+      raise DownloadError, "Redirection not allowed or limit has been reached" if redirection_count < 0
 
       file_url = URI(file_url) unless file_url.is_a?(URI)
       http = Net::HTTP.new(file_url.host, file_url.port)

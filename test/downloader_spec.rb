@@ -63,6 +63,19 @@ describe "Registration::Downloader" do
       expect(Registration::Downloader.download(url)).to eq("response")
     end
 
+    it "can block HTTP redirection" do
+      index = Net::HTTPRedirection.new("1.1", 302, "Found")
+      index["location"] = "http://redirected.example.com"
+
+      http = double
+      expect(Net::HTTP).to receive(:new).and_return(http)
+      expect(http).to receive(:request).and_return(index)
+      expect(http).to receive(:proxy?).and_return(false)
+      expect { Registration::Downloader.download(url, allow_redirect: false) }.to raise_error(
+        Registration::DownloadError, "Redirection not allowed or limit has been reached"
+      )
+    end
+
     it "reads proxy credentials when proxy is used" do
       user = "proxy_user"
       password = "proxy_password"
