@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov 21 16:39:02 CET 2018 - schubi@suse.de
+
+- Do not allow redirection while checking via HTTP request if
+  (old) NCC API is present at the server (bsc#1111404).
+- 4.1.8
+
+-------------------------------------------------------------------
 Mon Nov 19 16:11:29 CET 2018 - schubi@suse.de
 
 - Improved error messages (bsc#1060151).
