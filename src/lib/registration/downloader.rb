@@ -58,7 +58,8 @@ module Registration
     #   the download fails with RuntimeError exception
     # @return [String] the contents of the downloaded file
     def self.download_file(file_url, insecure: false, redirection_count: 10)
-      raise DownloadError, "Redirection not allowed or limit has been reached" if redirection_count < 0
+      raise DownloadError,
+        "Redirection not allowed or limit has been reached" if redirection_count < 0
 
       file_url = URI(file_url) unless file_url.is_a?(URI)
       http = Net::HTTP.new(file_url.host, file_url.port)
