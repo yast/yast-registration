@@ -55,7 +55,7 @@ module Registration
     # @param file_url [String, URI] URL of the file to download
     # @param insecure [Boolean] if true the SSL verification errors are ignored
     # @param redirection_count [Numeric] current redirection count, when zero
-    #   the download fails with RuntimeError exception
+    #   the download fails with DownloadError exception
     # @return [String] the contents of the downloaded file
     def self.download_file(file_url, insecure: false, redirection_count: 10)
       raise DownloadError,
