@@ -11,7 +11,7 @@ describe "Registration::SmtStatus" do
 
     it "returns true when /center/regsvc?command=listproducts returns OK" do
       expect(Registration::Downloader).to receive(:download)
-        .with(expected_url, insecure: false)
+        .with(expected_url, insecure: false, allow_redirect: false)
         .and_return(true)
 
       expect(subject.ncc_api_present?).to eq(true)
@@ -19,7 +19,7 @@ describe "Registration::SmtStatus" do
 
     it "returns false otherwise" do
       expect(Registration::Downloader).to receive(:download)
-        .with(expected_url, insecure: false)
+        .with(expected_url, insecure: false, allow_redirect: false)
         .and_raise(Registration::DownloadError)
 
       expect(subject.ncc_api_present?).to eq(false)
