@@ -99,7 +99,7 @@ source (mirror) automatically.
 %{yast_libdir}/registration
 %{yast_libdir}/yast
 %{yast_libdir}/yast/suse_connect.rb
-%{_datadir}/icons/*
+%{yast_icondir}
 %doc %{yast_docdir}
 %license COPYING
 
