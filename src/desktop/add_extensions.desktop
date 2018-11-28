@@ -8,7 +8,7 @@ X-SuSE-YaST-RootOnly=yes
 X-SuSE-YaST-Group=Software
 X-SuSE-YaST-Keywords=extensions,modules,software,registration,scc,package,repositories
 
-Icon=yast-addon
+Icon=yast-addon-extension
 Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc select_extensions"
 
 Name=Add System Extensions or Modules

@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.1.8
+Version:        4.1.9
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -99,6 +99,7 @@ source (mirror) automatically.
 %{yast_libdir}/registration
 %{yast_libdir}/yast
 %{yast_libdir}/yast/suse_connect.rb
+%{yast_icondir}
 %doc %{yast_docdir}
 %license COPYING
 
