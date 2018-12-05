@@ -204,48 +204,72 @@ describe Registration::Registration do
     end
   end
 
+  # TODO: improve this test
   describe "#get_updates_list" do
     let(:self_update_id) { "SLES" }
     let(:base_product) { { "name" => "base" } }
     let(:installer_update_base_product) { { "name" => self_update_id } }
-    let(:remote_product) { { "name" => "base" } }
+    let(:remote_product) { OpenStruct.new("identifier" => remote_product_identifier) }
     let(:updates) { ["http://updates.suse.com/sles12/"] }
     let(:suse_connect) { double("suse_connect") }
 
     before do
       allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
+      allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+
       stub_const("SUSE::Connect::YaST", suse_connect)
     end
 
-    it "returns an empty list if no base product is available or selected" do
-      allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(nil)
-      allow(Registration::SwMgmt).to receive(:installer_update_base_product).and_return(nil)
-      expect(subject.get_updates_list).to eq([])
+    context "when no base product available or selected" do
+      before do
+        allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(nil)
+        allow(Registration::SwMgmt).to receive(:installer_update_base_product).and_return(nil)
+      end
+
+      it "returns an empty list" do
+        expect(subject.get_updates_list).to eq([])
+      end
     end
 
     context "when the control file defines a self_update_id" do
-      it "returns updates list from the server for the self update id" do
+      let(:remote_product_identifier) { self_update_id }
+
+      before do
         allow(Yast::ProductFeatures).to receive(:GetStringFeature)
           .with("globals", "self_update_id").and_return(self_update_id)
-        expect(Registration::SwMgmt).to receive(:installer_update_base_product)
-          .with(self_update_id).and_return(installer_update_base_product)
-        expect(Registration::SwMgmt).to receive(:remote_product)
-          .with(installer_update_base_product).and_return(installer_update_base_product)
-        expect(suse_connect).to receive(:list_installer_updates)
-          .with(installer_update_base_product, anything)
+
+        allow(Registration::SwMgmt).to receive(:installer_update_base_product)
+          .with(self_update_id, anything)
+          .and_return(installer_update_base_product)
+        allow(Registration::SwMgmt).to receive(:remote_product)
+          .with(installer_update_base_product)
+          .and_return(remote_product)
+        allow(suse_connect).to receive(:list_installer_updates)
+          .with(remote_product, anything)
           .and_return(updates)
+      end
+
+      it "returns updates list from the server for the product identify by self_update_id" do
         expect(subject.get_updates_list).to eq(updates)
       end
     end
 
     context "when the control file does not define a self_update_id" do
-      it "returns updates list from the server for the base product" do
+      let(:remote_product_identifier) { "base" }
+
+      before do
         allow(Yast::ProductFeatures).to receive(:GetStringFeature)
           .with("globals", "self_update_id").and_return("")
-        expect(Registration::SwMgmt).to receive(:remote_product).with(base_product)
+
+        allow(Registration::SwMgmt).to receive(:remote_product)
+          .with(base_product)
           .and_return(remote_product)
-        expect(suse_connect).to receive(:list_installer_updates).with(remote_product, anything)
+        allow(suse_connect).to receive(:list_installer_updates)
+          .with(remote_product, anything)
           .and_return(updates)
+      end
+
+      it "returns updates list from the server for the base product" do
         expect(subject.get_updates_list).to eq(updates)
       end
     end
