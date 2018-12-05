@@ -183,19 +183,22 @@ module Registration
       migration_paths
     end
 
-    # Get the list of updates for a base product or self_update_id if defined
-    #
-    # @return [Array<String>] List of URLs of updates repositories.
+    # Get the list of updates for a self_update product (if defined) or base product
     #
     # @see SwMgmt.base_product_to_register
     # @see SwMgmt.remote_product
     # @see SUSE::Connect::Yast.list_installer_updates
+    #
+    # @return [Array<String>] List of URLs of updates repositories.
     def get_updates_list
       id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
-      product = SwMgmt.installer_update_base_product(id) || SwMgmt.base_product_to_register
+      version = Yast::ProductFeatures.GetStringFeature("globals", "self_update_version")
+
+      product = SwMgmt.installer_update_base_product(id, version) || SwMgmt.base_product_to_register
       return [] unless product
 
       log.info "Reading available updates for product: #{product["name"]}"
+
       remote_product = SwMgmt.remote_product(product)
       updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
 

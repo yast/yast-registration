@@ -123,36 +123,56 @@ describe Registration::SwMgmt do
     let(:base_product) do
       instance_double(Y2Packager::Product, name: "dummy", version: "15.0", arch: "x86_64")
     end
+    let(:architecture) { "aarch64" }
     let(:available_products) { [base_product] }
+    let(:self_update_id) { "DummyProductName" }
+    let(:self_update_version) { "DummyProductVersion" }
+    let(:result) { subject.installer_update_base_product(self_update_id, self_update_version) }
 
     before do
       allow(Y2Packager::Product).to receive(:available_base_products).and_return(available_products)
+      allow(Yast::Arch).to receive(:architecture).and_return(architecture)
     end
 
-    it "returns nil if the given self_update_id is empty" do
-      expect(subject.installer_update_base_product("")).to eq(nil)
+    context "when an empty self_update_id is given" do
+      let(:self_update_id) { "" }
+
+      it "returns nil" do
+        expect(result).to eq(nil)
+      end
     end
 
     context "when there is no base product available" do
       let(:available_products) { [] }
 
-      it "returns nil" do
-        allow(Y2Packager::Product).to receive(:available_base_products).and_return([])
-        expect(subject.installer_update_base_product("self_update_id")).to eq(nil)
+      it "returns the product info hash" do
+        expect(result).to include(
+          "name"         => self_update_id,
+          "version"      => self_update_version,
+          "arch"         => architecture,
+          "release_type" => nil
+        )
+      end
+
+      context "and the given self_update_version is empty" do
+        let(:self_update_version) { "" }
+
+        it "returns nil" do
+          expect(result).to eq(nil)
+        end
       end
     end
 
     context "when there is some product available" do
-      it "returns a hash with the product keys 'name', 'version', 'arch' and 'release_type' " do
-        product = subject.installer_update_base_product("self_update_id")
-        expect(product).to be_a(Hash)
-        expect(product.keys.size).to eq(4)
-        expect(product).to include("name", "version", "arch", "release_type")
-      end
+      let(:self_update_version) { "" }
 
-      it "uses the given self_update_id as the product name returned" do
-        product = subject.installer_update_base_product("self_update_id")
-        expect(product["name"]).to eq("self_update_id")
+      it "builts the product info hash based on it (using the self_update_id as name)" do
+        expect(result).to include(
+          "name"         => "DummyProductName",
+          "version"      => "15.0",
+          "arch"         => "x86_64",
+          "release_type" => nil
+        )
       end
     end
   end

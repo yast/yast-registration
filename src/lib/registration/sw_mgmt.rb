@@ -120,25 +120,29 @@ module Registration
       true
     end
 
-    # Prepare a pkg-binding product hash using the first base product available
-    # as a template and with the given self_update_id as the product name.
+    # Prepare a pkg-binding product info hash
     #
-    # With a media containing multiple products it is expected that all the
-    # products use the same version and arch.
+    # If there is available products in the media, the first of them will be used as a template,
+    # keeping the self_update_id as the product name, since it is expected that all of them use the
+    # same version and arch.
     #
     # @param self_update_id [String] product name to be used for get the installer updates
-    # @return [Hash,nil] with pkg-binding format; return nil if the
-    # given self_update_id is empty or there is no base product available
-    def self.installer_update_base_product(self_update_id)
-      return if self_update_id.empty?
+    # @param self_update_version [String] product version to be used for get the installer updates
+    #
+    # @return [Hash,nil] with pkg-binding format; nil if the given self_update_id is empty or there
+    #                    is no base product available
+    def self.installer_update_base_product(self_update_id, self_update_version)
       base_product = Y2Packager::Product.available_base_products.first
-      return unless base_product
 
-      # filter out not needed data
+      name = self_update_id.to_s
+      version = base_product ? version_without_release(base_product) : self_update_version.to_s
+
+      return if name.empty? || version.empty?
+
       product_info = {
         "name"         => self_update_id,
-        "arch"         => base_product.arch,
-        "version"      => version_without_release(base_product),
+        "version"      => version,
+        "arch"         => base_product ? base_product.arch : Yast::Arch.architecture,
         "release_type" => nil
       }
 
@@ -249,12 +253,14 @@ module Registration
       products
     end
 
-    # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
+    # Convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
+    #
     # @param product [Hash] product Hash obtained from pkg-bindings
-    # @return [SUSE::Connect::Remote::Product] the remote product
+    # @return [OpenStruct] a remote product representation
     def self.remote_product(product, version_release: true)
       # default value if it does not exist
       product["version_version"] ||= product["version"]
+
       OpenStruct.new(
         arch:         product["arch"],
         identifier:   product["name"],
