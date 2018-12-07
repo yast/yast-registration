@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Dec  7 09:20:02 UTC 2018 - dgonzalez@suse.com
+
+- Állow the self update without having repositories in the
+  installation media (fate#325482).
+- 4.1.10
+
+-------------------------------------------------------------------
 Mon Nov 26 01:17:32 UTC 2018 - Noah Davis <noahadvs@gmail.com>
 
 - Provide icon with module (boo#1109310)
