@@ -25,7 +25,6 @@ require "yast"
 
 require "tmpdir"
 require "fileutils"
-require "shellwords"
 require "ostruct"
 
 require "registration/exceptions"
@@ -35,6 +34,7 @@ require "registration/repo_state"
 
 require "packager/product_patterns"
 require "y2packager/product_reader"
+require "yast2/execute"
 
 module Registration
   Yast.import "AddOnProduct"
@@ -481,13 +481,27 @@ module Registration
       # SMT uses extra ACL permissions, make sure they are kept in the copied file,
       # (use "cp -a ", ::FileUtils.cp(..., preserve: true) cannot be used as it preserves only
       # the traditional Unix file permissions, the extended ACLs are NOT copied!)
-      `cp -a #{Shellwords.escape(file)} #{Shellwords.escape(new_file)}`
+      Yast::Execute.locally!("cp", "-a", file, new_file)
 
-      credentials = SUSE::Connect::YaST.credentials(new_file)
+      use_credentials(new_file)
+    rescue Cheetah::ExecutionFailed => error
+      log.warn "Cannot copy the old credentials file #{file} to #{new_file}: #{error.message}"
+    end
+
+    # Use credentials from a file
+    #
+    # @param filename [String] credentials filename.
+    # @return [Boolean] true if credentials can be used; false otherwise.
+    def self.use_credentials(filename)
+      credentials = SUSE::Connect::YaST.credentials(filename)
       log.info "Using previous credentials (username): #{credentials.username}"
+      true
     rescue SUSE::Connect::MalformedSccCredentialsFile => e
       log.warn "Cannot parse the credentials file: #{e.inspect}"
+      false
     end
+
+    private_class_method :use_credentials
 
     def self.find_addon_updates(addons)
       log.info "Available addons: #{addons.map(&:identifier)}"
