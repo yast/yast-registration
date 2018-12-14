@@ -188,7 +188,7 @@ module Yast
         return Mode.normal ? :abort : :auto
       end
 
-      if Mode.update
+      if Stage.initial
         Wizard.SetContents(
           _("Registration"),
           Empty(),
@@ -197,7 +197,9 @@ module Yast
           false,
           false
         )
+      end
 
+      if Mode.update
         ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
         if File.exist?(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
@@ -319,6 +321,8 @@ module Yast
     # which dialog should be displayed at start
     def workflow_start
       log.debug "WFM.Args: #{WFM.Args}"
+
+      Yast::Wizard.ClearContents
 
       if WFM.Args.include?("select_extensions") && Registration::Registration.is_registered?
         "select_addons"
