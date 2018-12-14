@@ -322,8 +322,6 @@ module Yast
     def workflow_start
       log.debug "WFM.Args: #{WFM.Args}"
 
-      Yast::Wizard.ClearContents
-
       if WFM.Args.include?("select_extensions") && Registration::Registration.is_registered?
         "select_addons"
       else
