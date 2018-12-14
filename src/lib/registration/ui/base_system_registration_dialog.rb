@@ -74,6 +74,8 @@ module Registration
         set_focus
 
         event_loop
+      ensure
+        Yast::Wizard.ClearContents
       end
 
       # Set the initial action
