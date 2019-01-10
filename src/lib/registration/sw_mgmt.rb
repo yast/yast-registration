@@ -655,7 +655,7 @@ module Registration
         # will use the old value from the upgraded system which might not
         # match the new target_distro from the media and might result in ignoring
         # service repositories (bsc#1094865)
-        options = { "target_distro" => target_distribution }
+        options = { "target_distro" => target_distribution(destdir) }
         Pkg.TargetInitializeOptions(destdir, options)
       else
         Pkg.TargetInitialize(destdir)
@@ -663,14 +663,22 @@ module Registration
     end
 
     # get the target distribution for the new base product
+    # @param destdir [String] the target directory
     # @return [String] target distribution name or empty string if not found
-    def self.target_distribution
+    def self.target_distribution(destdir)
+      # ensure the target is initialized
+      Pkg.TargetInitialize(destdir)
+      # the sources are initialized by the Product.FindBaseProducts call internally
       base_products = Product.FindBaseProducts
 
       # empty target distribution disables service compatibility check in case
       # the base product cannot be found
       target_distro = base_products ? base_products.first["register_target"] : ""
       log.info "Base product target distribution: #{target_distro.inspect}"
+
+      # close both target and sources to fully reinitialize later
+      Pkg.SourceFinishAll
+      Pkg.TargetFinish
 
       target_distro
     end
