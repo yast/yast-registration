@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan 16 08:53:13 UTC 2019 - lslezak@suse.cz
+
+- Do not crash when no base product to register is found
+  (bsc#1122011)
+- 4.1.13
+
+-------------------------------------------------------------------
 Thu Jan 10 09:58:10 UTC 2019 - lslezak@suse.cz
 
 - Properly restart the package management to avoid using a possibly
