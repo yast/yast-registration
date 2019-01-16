@@ -127,15 +127,19 @@ describe Registration::Registration do
       }
     end
     before do
-      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
+      remote_product = load_yaml_fixture("remote_product.yml")
+      allow(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
+      # no product renames defined
+      allow(Registration::SwMgmt).to receive(:update_product_renames).with({})
+    end
+
+    it "returns empty list if no base product is found" do
+      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(nil)
+      expect(Registration::Registration.new.get_addon_list).to eq([])
     end
 
     it "downloads available extensions" do
-      remote_product = load_yaml_fixture("remote_product.yml")
-      expect(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
-      # no product renames defined
-      expect(Registration::SwMgmt).to receive(:update_product_renames).with({})
-
+      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
       addons = Registration::Registration.new.get_addon_list
 
       # HA-GEO is extension for HA so it's not included in the list
