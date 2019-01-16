@@ -131,6 +131,7 @@ module Registration
     end
 
     # Get the list of addons
+    #
     # @return [Array<Addon>] List of addons, empty if no base product is found
     def get_addon_list
       # extensions for base product
