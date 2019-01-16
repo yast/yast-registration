@@ -130,9 +130,17 @@ module Registration
       ret
     end
 
+    # Get the list of addons
+    #
+    # @return [Array<Addon>] List of addons, empty if no base product is found
     def get_addon_list
       # extensions for base product
       base_product = ::Registration::SwMgmt.base_product_to_register
+
+      if !base_product
+        log.warn "No base product, skipping addons"
+        return []
+      end
 
       log.info "Reading available addons for product: #{base_product["name"]}"
 

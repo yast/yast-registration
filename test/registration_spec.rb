@@ -118,31 +118,41 @@ describe Registration::Registration do
   end
 
   describe "#get_addon_list" do
-    let(:base_product) do
-      {
-        "name"         => "SLES",
-        "version"      => "12",
-        "arch"         => "x86_64",
-        "release_type" => "DVD"
-      }
-    end
     before do
-      expect(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
+      remote_product = load_yaml_fixture("remote_product.yml")
+      allow(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
+      # no product renames defined
+      allow(Registration::SwMgmt).to receive(:update_product_renames).with({})
+      allow(Registration::SwMgmt).to receive(:base_product_to_register).and_return(base_product)
     end
 
-    it "downloads available extensions" do
-      remote_product = load_yaml_fixture("remote_product.yml")
-      expect(SUSE::Connect::YaST).to receive(:show_product).and_return(remote_product)
-      # no product renames defined
-      expect(Registration::SwMgmt).to receive(:update_product_renames).with({})
+    context "no base product found" do
+      let(:base_product) { nil }
 
-      addons = Registration::Registration.new.get_addon_list
+      it "returns empty list if no base product is found" do
+        expect(Registration::Registration.new.get_addon_list).to eq([])
+      end
+    end
 
-      # HA-GEO is extension for HA so it's not included in the list
-      # also the base product must not be included in the list
-      expect(addons.map(&:identifier)).to include("sle-we", "sle-sdk",
-        "sle-module-legacy", "sle-module-web-scripting", "sle-module-public-cloud",
-        "sle-module-adv-systems-management", "sle-hae")
+    context "a base product is found" do
+      let(:base_product) do
+        {
+          "name"         => "SLES",
+          "version"      => "12",
+          "arch"         => "x86_64",
+          "release_type" => "DVD"
+        }
+      end
+
+      it "downloads available extensions" do
+        addons = Registration::Registration.new.get_addon_list
+
+        # HA-GEO is extension for HA so it's not included in the list
+        # also the base product must not be included in the list
+        expect(addons.map(&:identifier)).to include("sle-we", "sle-sdk",
+          "sle-module-legacy", "sle-module-web-scripting", "sle-module-public-cloud",
+          "sle-module-adv-systems-management", "sle-hae")
+      end
     end
   end
 
