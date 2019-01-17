@@ -676,6 +676,8 @@ module Registration
       target_distro = base_products ? base_products.first["register_target"] : ""
       log.info "Base product target distribution: #{target_distro.inspect}"
 
+      # Save the current repositories so they are not lost
+      Pkg.SourceSaveAll
       # close both target and sources to fully reinitialize later
       Pkg.SourceFinishAll
       Pkg.TargetFinish
