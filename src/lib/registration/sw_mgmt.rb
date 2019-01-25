@@ -387,6 +387,14 @@ module Registration
       end
     end
 
+    # Check if a libzypp service is installed
+    # @param [String] name name of the service
+    def self.service_installed?(name)
+      ret = Pkg.ServiceAliases.include?(name)
+      log.info "Service #{name} is installed: #{ret}"
+      ret
+    end
+
     # get list of repositories belonging to registered services
     # @param product_service [SUSE::Connect::Remote::Service] added service
     # @param only_updates [Boolean] return only update repositories
