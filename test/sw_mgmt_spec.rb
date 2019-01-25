@@ -499,6 +499,22 @@ describe Registration::SwMgmt do
     end
   end
 
+  describe ".service_installed?" do
+    let(:service) { "service" }
+
+    it "returns true if the service is installed" do
+      expect(Yast::Pkg).to receive(:ServiceAliases).and_return(["service"])
+
+      expect(subject.service_installed?(service)).to eq true
+    end
+
+    it "returns false if the service is not installed" do
+      expect(Yast::Pkg).to receive(:ServiceAliases).and_return(["wrong_service"])
+
+      expect(subject.service_installed?(service)).to eq false
+    end
+  end
+
   describe ".set_repos_state" do
     it "sets the repository state and stores the original state" do
       repos = [{ "SrcId" => 42, "enabled" => true }]
