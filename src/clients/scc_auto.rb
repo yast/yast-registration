@@ -217,7 +217,8 @@ module Yast
       # we cannot use pkg-bindings here because loading services would trigger
       # service and repository refresh which we want to avoid (it might easily fail)
       old = Dir[File.join(Installation.destdir, "/etc/zypp/repos.d/*")] +
-        Dir[File.join(Installation.destdir, "/etc/zypp/services.d/*")]
+        Dir[File.join(Installation.destdir, "/etc/zypp/services.d/*")] +
+        Dir[File.join(Installation.destdir, "/var/cache/zypp/*")]
 
       log.info "Removing #{old}"
       ::FileUtils.rm_rf(old)

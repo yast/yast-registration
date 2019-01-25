@@ -254,8 +254,12 @@ module Registration
       old_service = product_service.obsoleted_service_name
       # sanity check
       if old_service && !old_service.empty? && old_service != product_service.name
-        log.info "Found obsoleted service: #{old_service}"
-        ::Registration::SwMgmt.remove_service(old_service)
+        # old_service comes from SCC. So it could be that we have already removed
+        # this service from the system meanwhile --> checking first.
+        if ::Registration::SwMgmt.service_installed?(old_service)
+          log.info "Found obsoleted service: #{old_service}"
+          ::Registration::SwMgmt.remove_service(old_service)
+        end
       end
 
       # read the global credentials
