@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Feb  1 12:18:35 UTC 2019 - lslezak@suse.cz
+
+- Use the old message when skipping registration, the new tags are
+  not present in SLE15-GA and it also broke the translations
+  (bsc#1122608, reverts 4.0.45)
+- 4.0.49
+
+-------------------------------------------------------------------
 Fri Jan 25 10:52:15 CET 2019 - schubi@suse.de
 
 - Do not try to remove services which have already been deleted.
