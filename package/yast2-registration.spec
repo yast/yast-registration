@@ -62,13 +62,6 @@ BuildArch:      noarch
 # bsc#1088552
 ExcludeArch:    %ix86 s390
 
-# FIXME: it seems can we cannot move it to macros.yast, the yast-rake-ci is not
-# installed into the chroot, the build fails...
-%bcond_with yast_run_ci_tests
-%if %{with yast_run_ci_tests}
-BuildRequires:  rubygem(yast-rake-ci)
-%endif
-
 Summary:        YaST2 - Registration Module
 License:        GPL-2.0-only
 Group:          System/YaST
