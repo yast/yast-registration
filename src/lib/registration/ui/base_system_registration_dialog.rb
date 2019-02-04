@@ -360,19 +360,34 @@ module Registration
             "get updates and extensions.")
       end
 
+      #
+      # Read the full media name from the product control file
+      #
+      # @return [String] the name or empty string if not set
+      #
+      def media_name
+        ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_media_name"
+        )
+      end
+
+      #
+      # Read the full media download URL from the product control file
+      #
+      # @return [String] the URL or empty string if not set
+      #
+      def download_url
+        ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_download_url"
+        )
+      end
+
       # Show a warning about skipping the registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
-        media_name = ProductFeatures.GetStringFeature(
-          "globals",
-          "full_system_media_name"
-        )
-        download_url = ProductFeatures.GetStringFeature(
-          "globals",
-          "full_system_download_url"
-        )
-
         # TRANSLATORS:
         # Popup question (1/1): confirm skipping the registration
         warning = _("You are skipping registration.\n"\
