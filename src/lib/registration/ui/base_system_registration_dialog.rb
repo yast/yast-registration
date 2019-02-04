@@ -360,33 +360,56 @@ module Registration
             "get updates and extensions.")
       end
 
+      #
+      # Read the full media name from the product control file
+      #
+      # @return [String] the name or empty string if not set
+      #
+      def media_name
+        ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_media_name"
+        )
+      end
+
+      #
+      # Read the full media download URL from the product control file
+      #
+      # @return [String] the URL or empty string if not set
+      #
+      def download_url
+        ProductFeatures.GetStringFeature(
+          "globals",
+          "full_system_download_url"
+        )
+      end
+
       # Show a warning about skipping the registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
-        media_name = ProductFeatures.GetStringFeature(
-          "globals",
-          "full_system_media_name"
-        )
-        download_url = ProductFeatures.GetStringFeature(
-          "globals",
-          "full_system_download_url"
-        )
-
-        warning = _("Without registration, update channels will not be\n" \
-          "configured. This disables updates and security fixes.")
-
-        # Popup question: confirm skipping the registration
         # TRANSLATORS:
+        # Popup question (1/1): confirm skipping the registration
+        warning = _("You are skipping registration.\n"\
+          "Please configure access to packages medium in the next step.\n"\
+          "\n"\
+          "Without registration update-channels will not be configured.\n"\
+          "This will disable the updates and security fixes.")
+
+        # TRANSLATORS:
+        # Popup question (2/2): confirm skipping the registration
         # %{media_name} is the media name (e.g. SLE-15-Packages),
         # %{download_url} is an URL link (e.g. https://download.suse.com)
         if !media_name.empty? && # cannot be nil
             !download_url.empty? # cannot be nil
           warning += "\n\n" +
-            _("A full system can be installed using the\n" \
-              "%{media_name} media from %{download_url}.\n" \
-              "Without these media only a minimum system is available\n" \
-             "in this installation.") %
+            _("If you do not register AND do not use the %{media_name}\n"\
+              "medium from %{download_url}\n"\
+              "then only an installation system is installed.\n"\
+              "\n"\
+              "The installation system is not intended to be used as\n"\
+              "an operational system. The installation system can only\n"\
+              "be used to install a working system.") %
             { media_name: media_name, download_url: download_url }
         end
 

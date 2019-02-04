@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-registration
 #
-# Copyright (c) 2014 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2019 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -17,14 +17,11 @@
 
 
 Name:           yast2-registration
-Version:        4.1.15
+Version:        4.1.16
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
-
-Group:          System/YaST
-License:        GPL-2.0-only
 
 # Y2Packager::ProductLicense
 Requires:       yast2 >= 4.0.63
@@ -42,20 +39,20 @@ Requires:       rubygem(suse-connect) >= 0.2.37
 # suse-connect gem.
 Requires:       SUSEConnect >= 0.2.37
 
-Requires:       yast2-slp >= 3.1.9
 Requires:       yast2-add-on >= 3.1.8
+Requires:       yast2-slp >= 3.1.9
 # packager/product_patterns.rb
 Requires:       yast2-packager >= 3.1.95
 Requires:       yast2-update >= 3.1.36
 
 # Y2Packager::ProductLicense
-BuildRequires:  yast2 >= 4.0.63
 BuildRequires:  update-desktop-files
+BuildRequires:  yast2 >= 4.0.63
 BuildRequires:  yast2-devtools >= 3.1.39
-BuildRequires:  rubygem(yast-rake) >= 0.2.5
+BuildRequires:  yast2-slp >= 3.1.9
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.3.11
-BuildRequires:  yast2-slp >= 3.1.9
+BuildRequires:  rubygem(yast-rake) >= 0.2.5
 # updated product renames
 BuildRequires:  yast2-packager >= 4.0.40
 BuildRequires:  yast2-update >= 3.1.36
@@ -65,14 +62,9 @@ BuildArch:      noarch
 # bsc#1088552
 ExcludeArch:    %ix86 s390
 
-# FIXME: it seems can we cannot move it to macros.yast, the yast-rake-ci is not
-# installed into the chroot, the build fails...
-%bcond_with yast_run_ci_tests
-%if %{with yast_run_ci_tests}
-BuildRequires: rubygem(yast-rake-ci)
-%endif
-
 Summary:        YaST2 - Registration Module
+License:        GPL-2.0-only
+Group:          System/YaST
 Url:            https://github.com/yast/yast-registration
 
 %description
