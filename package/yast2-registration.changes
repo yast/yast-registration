@@ -1,9 +1,8 @@
 -------------------------------------------------------------------
 Fri Feb  1 12:18:35 UTC 2019 - lslezak@suse.cz
 
-- Use the old message when skipping registration, the new tags are
-  not present in SLE15-GA and it also broke the translations
-  (bsc#1122608, reverts 4.0.45)
+- Improved the message in the registration skipping dialog
+  (bsc#1122608)
 - 4.0.49
 
 -------------------------------------------------------------------
