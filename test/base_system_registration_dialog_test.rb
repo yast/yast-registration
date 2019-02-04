@@ -196,7 +196,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
               .with("globals", "full_system_media_name").and_return("SLE-15-Packages")
             expect(Yast::ProductFeatures).to receive(:GetStringFeature)
               .with("globals", "full_system_download_url").and_return("https://download.suse.com")
-            expect(Yast::Popup).to receive(:Warning).with(/SLE-15-Packages.*download.suse.com/)
+            expect(Yast::Popup).to receive(:Warning).with(/SLE-15-Packages.*download.suse.com/m)
             expect(subject.run).to eq(:skip)
           end
         end
