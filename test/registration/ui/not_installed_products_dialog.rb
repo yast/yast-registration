@@ -28,7 +28,7 @@ describe Registration::UI::NotInstalledProductsDialog do
       allow(subject).to receive(:_), &:freeze
     end
 
-    context "when the there is an registered but not installed product" do
+    context "when there is a registered but not installed product" do
       before do
         allow(Registration::Addon).to receive(:registered_not_installed).and_return(
           [
