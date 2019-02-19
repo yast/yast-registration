@@ -44,8 +44,6 @@ module Registration
 
       REGISTRATION_CHECK_MSG = N_("Checking registration status")
 
-      attr_accessor :registration, :registration_ui
-
       def self.run
         dialog = NotInstalledProductsDialog.new
         dialog.run
@@ -53,9 +51,6 @@ module Registration
 
       def initialize
         textdomain "registration"
-
-        self.registration = Registration.new(UrlHelpers.registration_url)
-        self.registration_ui = RegistrationUI.new(registration)
       end
 
       def run
@@ -73,6 +68,14 @@ module Registration
       end
 
     private
+
+      def registration
+        @registration ||= Registration.new(UrlHelpers.registration_url)
+      end
+
+      def registration_ui
+        @registration_ui ||= RegistrationUI.new(registration)
+      end
 
       def content
         VBox(
@@ -152,11 +155,11 @@ module Registration
         #   not installed. (1/2)
         summary = _("<p>The addons listed below are registered but not installed: </p>")
 
-        summary << "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join("")}</ul>"
+        summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join("")}</ul>"
 
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)
-        summary << _("<p>It's preferable to <b>deactivate</b> your products at your " \
+        summary += _("<p>It's preferable to <b>deactivate</b> your products at your " \
                      "registration server if you don't plan to use them anymore.</p>")
 
         summary
