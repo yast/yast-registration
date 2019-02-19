@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Feb 18 13:11:12 UTC 2019 - lslezak@suse.cz
+
+- Fixed "can't modify frozen String" crash (bsc#1125006)
+- CRLF control characters cannot be included in the registration
+  code, added validation check (bsc#1111419)
+- 4.0.50
+
+-------------------------------------------------------------------
 Fri Feb  1 12:18:35 UTC 2019 - lslezak@suse.cz
 
 - Improved the message in the registration skipping dialog

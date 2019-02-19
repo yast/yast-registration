@@ -553,6 +553,19 @@ module Registration
         end
       end
 
+      def validate_register_scc
+        reg_code = Yast::UI.QueryWidget(:reg_code, :Value)
+
+        # no CR or LF control characters, they cannot be used in HTTP header fields
+        if reg_code.include?("\n") || reg_code.include?("\r")
+          # TRANSLATORS: error message, the entered registration code is not valid.
+          Yast::Report.Error(_("Invalid registration code.\nCRLF characters are not allowed."))
+          false
+        else
+          true
+        end
+      end
+
       VALID_CUSTOM_URL_SCHEMES = ["http", "https"].freeze
 
       # Determine whether an URL is valid and suitable to be used as local SMT server
