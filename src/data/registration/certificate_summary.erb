@@ -42,7 +42,7 @@ textdomain "registration"
   <%# label followed by the certificate serial number (in HEX format, e.g. AB:CD:42:FF...) %>
   <b><%= _("Serial Number: ") %></b><%= h(certificate.serial) %><br>
   <b><%= _("SHA1 Fingerprint: ") %></b>
-  <%= h(certificate.fingerprint(::Registration::Fingerprint::SHA1).value) %>
+  <%= h(certificate.fingerprint(::Registration::Fingerprint::SHA1).value) %><br>
   <b><%= _("SHA256 Fingerprint: ") %></b>
   <%= h(certificate.fingerprint(::Registration::Fingerprint::SHA256).value) %>
 </p>

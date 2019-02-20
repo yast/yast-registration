@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb 25 12:32:35 UTC 2019 - lslezak@suse.cz
+
+- Better handle the SSL certificates signed by an uknown CA
+  (bsc#1124992)
+    - Display details in a scrollable widget
+    - Display hints how to install the certificate manually
+- 4.1.18
+
+-------------------------------------------------------------------
 Mon Feb 18 13:11:12 UTC 2019 - lslezak@suse.cz
 
 - Fixed "can't modify frozen String" crash (bsc#1125006)

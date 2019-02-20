@@ -1,0 +1,48 @@
+#! /usr/bin/env ruby
+
+# ------------------------------------------------------------------------------
+# Copyright (c) 2019 SUSE LLC
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of version 2 of the GNU General Public License as published by the
+# Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# ------------------------------------------------------------------------------
+#
+
+# This is a helper script which to import the SSL certificates into inst-sys
+# during installation. (But is should work also in installed system.)
+#
+# It is intended for user convenience, this script just call the YaST
+# functions, it not used by YaST itself.
+
+require "English"
+require "yast"
+require "registration/ssl_certificate"
+
+dir = Registration::SslCertificate::INSTSYS_CERT_DIR
+if Dir.empty?(dir)
+  puts "ERROR: Empty #{dir} directory, put your SSL certificate there."
+  exit 1
+end
+
+# in installed system just call the update-ca-certificates script
+if ENV["YAST_IS_RUNNING"] != "instsys"
+  puts "Updating the installed SSL certificates..."
+  system("/usr/sbin/update-ca-certificates")
+  puts $CHILD_STATUS.success? ? "Done" : "Failed!"
+  exit $CHILD_STATUS.exitstatus
+end
+
+# import into the inst-sys
+puts "Updating the inst-sys SSL certificates..."
+if Registration::SslCertificate.update_instsys_ca
+  puts "Done"
+else
+  puts "Failed!"
+  exit 1
+end

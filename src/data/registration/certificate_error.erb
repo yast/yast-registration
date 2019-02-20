@@ -2,15 +2,48 @@
 textdomain "registration"
 %>
 
-<%# dialog heading %>
+<%# TRANSLATORS: dialog heading %>
 <h2><%= _("Secure Connection Error") %></h2>
 
 <p>
-  <%# label followed by error details %>
-  <%= _("Details:") %> <%= _(OPENSSL_ERROR_MESSAGES[Storage::SSLErrors.instance.ssl_error_code]) %>
+  <%# TRANSLATORS: label followed by error details %>
+  <%= _("Details:") %> <%= h(@url) %>: <%= h(@msg) %>
 </p>
 
-<%# dialog sub-heading %>
+<%# display a special help with description how to install the certificate manually %>
+<% if error_code == SslErrorCodes::NO_LOCAL_ISSUER_CERTIFICATE %>
+
+<p>
+  <%# TRANSLATORS: error description %>
+  <%= _("The issuer certificate cannot be found, "\
+    "it needs to be installed manually.") %>
+</p>
+
+<p>
+  <ul>
+    <li>
+      <%# TRANSLATORS: %{file} is replaced by the certificate file name %>
+      <%= _("Save the server certificate in PEM format to file %{file}") %
+            { file: "<tt>#{h(SslCertificate::INSTSYS_SERVER_CERT_FILE)}</tt>" } %>
+    </li>
+
+    <li>
+      <%# TRANSLATORS: suggestion for user, followed by a command to run %>
+      <%= _("Run command:") %> <tt><%= h(import_command) %></tt>
+    </li>
+
+    <li>
+      <%# TRANSLATORS: suggestion to run the registration again %>
+      <%= _("Run registration again") %>
+    </li>
+  </ul>
+</p>
+
+<hr>
+
+<% end %>
+
+<%# TRANSLATORS: dialog sub-heading %>
 <h3><%= _("Failed Certificate Details") %></h3>
 
 <%= SslCertificateDetails.new(certificate).richtext_summary %>
