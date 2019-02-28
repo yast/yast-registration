@@ -35,7 +35,10 @@ module Registration
       Yast.import "Directory"
 
       # create and display the error popup
+      # @param msg [String,nil] the original OpenSSL error message
+      #   (used as a fallback when a translated message is not found)
       # @param cert [Registration::SslCertitificate] certificate to display
+      # @param error_code [Integer] OpenSSL error code
       def self.show(msg, cert, error_code)
         popup = FailedCertificatePopup.new(msg, cert, error_code)
         popup.show

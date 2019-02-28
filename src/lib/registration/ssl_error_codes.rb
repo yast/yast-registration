@@ -18,7 +18,7 @@ module Registration
   # This class defines constants and translations for the most common OpenSSL errors
   # @see https://www.openssl.org/docs/apps/verify.html
   # @see https://github.com/openssl/openssl/blob/2c75f03b39de2fa7d006bc0f0d7c58235a54d9bb/include/openssl/x509_vfy.h#L99-L189
-  class SslErrorCodes
+  module SslErrorCodes
     extend Yast::I18n
     textdomain "registration"
 

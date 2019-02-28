@@ -32,6 +32,7 @@ module Registration
 
       # the constructor
       # @param cert [Registration::SslCertitificate] certificate to display
+      # @param error_code [Integer] OpenSSL error code
       def initialize(cert, error_code)
         textdomain "registration"
         @certificate = cert
