@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.1.17
+Version:        4.1.18
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -84,6 +84,7 @@ source (mirror) automatically.
 
 %files
 %defattr(-,root,root)
+%{yast_ybindir}/*
 %{yast_desktopdir}/*.desktop
 %{yast_clientdir}/*.rb
 %{yast_ydatadir}/registration

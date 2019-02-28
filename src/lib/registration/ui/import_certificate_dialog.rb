@@ -1,31 +1,23 @@
 
+require "erb"
 require "yast"
 
 require "registration/fingerprint"
 require "registration/ssl_certificate_details"
+require "registration/ssl_error_codes"
+require "registration/url_helpers"
 
 module Registration
   module UI
     # this class displays and runs the dialog for importing a SSL certificate
     class ImportCertificateDialog
+      include ERB::Util
       include Yast::Logger
       include Yast::I18n
       extend Yast::I18n
       include Yast::UIShortcuts
 
-      attr_accessor :certificate
-
-      # error code => translatable error message
-      # @see https://www.openssl.org/docs/apps/verify.html
-      # @note the text messages need to be translated at runtime via _() call
-      OPENSSL_ERROR_MESSAGES = {
-        # SSL error message
-        10 => N_("Certificate has expired"),
-        # SSL error message
-        18 => N_("Self signed certificate"),
-        # SSL error message
-        19 => N_("Self signed certificate in certificate chain")
-      }.freeze
+      attr_accessor :certificate, :error_code
 
       Yast.import "UI"
       Yast.import "Label"
@@ -33,16 +25,18 @@ module Registration
       # create a new dialog for importing a SSL certificate and run it
       # @param cert [Registration::SslCertitificate] certificate to display
       # @return [Symbol] user input (:import, :cancel)
-      def self.run(cert)
-        dialog = ImportCertificateDialog.new(cert)
+      def self.run(cert, error_code)
+        dialog = ImportCertificateDialog.new(cert, error_code)
         dialog.run
       end
 
       # the constructor
       # @param cert [Registration::SslCertitificate] certificate to display
-      def initialize(cert)
+      # @param error_code [Integer] OpenSSL error code
+      def initialize(cert, error_code)
         textdomain "registration"
         @certificate = cert
+        @error_code = error_code
       end
 
       # display the dialog and wait for a button click
@@ -89,7 +83,7 @@ module Registration
         hide_help = displayinfo["TextMode"] && displayinfo["Width"] < 105
 
         window_height = displayinfo["Height"]
-        window_height = 25 if window_height > 25
+        window_height = 26 if window_height > 26
 
         HBox(
           VSpacing(window_height),
@@ -111,8 +105,14 @@ module Registration
 
       # render Richtext description with the certificate details
       def certificate_description
+        msg = _(SslErrorCodes::OPENSSL_ERROR_MESSAGES[error_code])
+        url = UrlHelpers.registration_url || SUSE::Connect::YaST::DEFAULT_URL
         details = SslCertificateDetails.new(certificate)
-        details.richtext_summary
+
+        "<h2>#{_("Secure Connection Error")}</h2>\n" \
+          "<p>#{_("Details:")} #{h(url)}: #{h(msg)}</p>\n" \
+          "<h3>#{_("Failed Certificate Details")}</h3>\n" +
+          details.richtext_summary
       end
 
       # inline help text displayed in the import dialog

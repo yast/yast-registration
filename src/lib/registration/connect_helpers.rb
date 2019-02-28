@@ -25,14 +25,16 @@ require "yast"
 require "suse/connect"
 require "ui/text_helpers"
 
-require "registration/helpers"
 require "registration/exceptions"
-require "registration/storage"
+require "registration/helpers"
 require "registration/smt_status"
 require "registration/ssl_certificate"
 require "registration/ssl_certificate_details"
-require "registration/url_helpers"
+require "registration/ssl_error_codes"
+require "registration/storage"
 require "registration/ui/import_certificate_dialog"
+require "registration/ui/failed_certificate_popup"
+require "registration/url_helpers"
 
 module Registration
   # FIXME: change to a module and include it in the clients
@@ -40,11 +42,6 @@ module Registration
     include Yast::Logger
     extend ::UI::TextHelpers
     extend Yast::I18n
-
-    # openSSL error codes for which the import SSL certificate dialog is shown,
-    # for the other error codes just the error message is displayed
-    # (importing the certificate would not help)
-    IMPORT_ERROR_CODES = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES.keys
 
     textdomain "registration"
 
@@ -191,9 +188,9 @@ module Registration
       expected_cert_type = Storage::Config.instance.reg_server_cert_fingerprint_type
 
       # in non-AutoYast mode ask the user to import the certificate
-      if !Yast::Mode.autoinst && cert && IMPORT_ERROR_CODES.include?(error_code)
+      if !Yast::Mode.autoinst && cert && SslErrorCodes::IMPORT_ERROR_CODES.include?(error_code)
         # retry after successfull import
-        return true if ask_import_ssl_certificate(cert)
+        return true if ask_import_ssl_certificate(cert, error_code)
       # in AutoYast mode check whether the certificate fingerprint match
       # the configured value (if present)
       elsif Yast::Mode.autoinst && cert && expected_cert_type && !expected_cert_type.empty?
@@ -207,28 +204,21 @@ module Registration
             return true
           end
 
-          report_ssl_error(error.message, cert)
+          report_ssl_error(error.message, cert, error_code)
         else
           # error message
           Yast::Report.Error(_("Received SSL Certificate does not match " \
                 "the expected certificate."))
         end
       else
-        report_ssl_error(error.message, cert)
+        report_ssl_error(error.message, cert, error_code)
       end
       false
     end
 
-    def self.ssl_error_details(cert)
-      return "" if cert.nil?
-
-      details = SslCertificateDetails.new(cert)
-      details.summary
-    end
-
-    def self.ask_import_ssl_certificate(cert)
+    def self.ask_import_ssl_certificate(cert, error_code)
       # run the import dialog, check the user selection
-      if UI::ImportCertificateDialog.run(cert) != :import
+      if UI::ImportCertificateDialog.run(cert, error_code) != :import
         log.info "Certificate import rejected"
         return false
       end
@@ -270,20 +260,8 @@ module Registration
       result
     end
 
-    def self.report_ssl_error(message, cert)
-      # try to use a translatable message first, if not found then use
-      # the original error message from openSSL
-      error_code = Storage::SSLErrors.instance.ssl_error_code
-      msg = UI::ImportCertificateDialog::OPENSSL_ERROR_MESSAGES[error_code]
-      msg = msg ? _(msg) : Storage::SSLErrors.instance.ssl_error_msg
-      msg = message if msg.nil? || msg.empty?
-
-      url = UrlHelpers.registration_url || SUSE::Connect::YaST::DEFAULT_URL
-      msg = url + ": " + msg # workaround after string freeze
-
-      Yast::Report.Error(
-        error_with_details(_("Secure connection error: %s") % msg, ssl_error_details(cert))
-      )
+    def self.report_ssl_error(message, cert, error_code)
+      UI::FailedCertificatePopup.show(message, cert, error_code)
     end
 
     # Check whether the registration server provides the old NCC API,
@@ -359,7 +337,7 @@ module Registration
       error_msg << msg
     end
 
-    private_class_method :report_error, :error_with_details, :ssl_error_details,
-      :import_ssl_certificate, :report_ssl_error, :check_smt_api, :handle_network_error
+    private_class_method :report_error, :error_with_details, :import_ssl_certificate,
+      :report_ssl_error, :check_smt_api, :handle_network_error
   end
 end
