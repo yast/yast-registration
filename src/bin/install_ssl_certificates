@@ -26,7 +26,7 @@ require "registration/ssl_certificate"
 
 dir = Registration::SslCertificate::INSTSYS_CERT_DIR
 if Dir.empty?(dir)
-  puts "ERROR: Empty #{dir} directory, put your SSL certificate there."
+  $stderr.puts "ERROR: Empty #{dir} directory, put your SSL certificate there."
   exit 1
 end
 
@@ -34,7 +34,13 @@ end
 if ENV["YAST_IS_RUNNING"] != "instsys"
   puts "Updating the installed SSL certificates..."
   system("/usr/sbin/update-ca-certificates")
-  puts $CHILD_STATUS.success? ? "Done" : "Failed!"
+
+  if $CHILD_STATUS.success?
+    puts "Done"
+  else
+    $stderr.puts "Failed!"
+  end
+
   exit $CHILD_STATUS.exitstatus
 end
 
@@ -43,6 +49,6 @@ puts "Updating the inst-sys SSL certificates..."
 if Registration::SslCertificate.update_instsys_ca
   puts "Done"
 else
-  puts "Failed!"
+  $stderr.puts "Failed!"
   exit 1
 end

@@ -34,7 +34,7 @@ module Registration
       Yast.import "Stage"
       Yast.import "Directory"
 
-      # create a display the error popup
+      # create and display the error popup
       # @param cert [Registration::SslCertitificate] certificate to display
       def self.show(msg, cert, error_code)
         popup = FailedCertificatePopup.new(msg, cert, error_code)
