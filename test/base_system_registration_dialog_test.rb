@@ -220,11 +220,19 @@ describe Registration::UI::BaseSystemRegistrationDialog do
     context "when system is already registered" do
       let(:registered?) { true }
 
+      before do
+        allow(subject).to receive(:event_loop).and_return(nil)
+      end
+
       context "in installation mode" do
         it "disables widgets" do
           expect(Yast::UI).to receive(:ChangeWidget).with(Id(:action), :Enabled, false)
           allow(Yast::UI).to receive(:ChangeWidget).and_call_original
-          allow(subject).to receive(:event_loop).and_return(nil)
+          subject.run
+        end
+
+        it "skips the SLP discovery" do
+          expect(Registration::UrlHelpers).to_not receive(:slp_discovery_feedback)
           subject.run
         end
       end

@@ -290,8 +290,9 @@ module Registration
       def register_local_option
         # If not special URL is used, probe with SLP
         if using_default_url?
-          services = UrlHelpers.slp_discovery_feedback
-          urls = services.map { |svc| UrlHelpers.service_url(svc.slp_url) }
+          # skip SLP discovery if the system is already registered
+          # during installation (the user is just going back)
+          urls = (Registration.is_registered? && !Yast::Mode.normal) ? [] : slp_urls
           urls = [EXAMPLE_SMT_URL] if urls.empty?
         else
           urls = [reg_options[:custom_url]]
@@ -555,6 +556,16 @@ module Registration
       # @return [Boolean] True if the default URL is used; false otherwise.
       def using_default_url?
         reg_options[:custom_url] == default_url
+      end
+
+      #
+      # Scan the network for SLP registration servers
+      #
+      # @return [Array<String>] The list of found URLs
+      #
+      def slp_urls
+        services = UrlHelpers.slp_discovery_feedback
+        services.map { |svc| UrlHelpers.service_url(svc.slp_url) }
       end
 
       # This method check whether the input is valid
