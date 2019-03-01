@@ -288,16 +288,6 @@ module Registration
       #
       # @return [Yast::Term] UI terms
       def register_local_option
-        # If not special URL is used, probe with SLP
-        if using_default_url?
-          # skip SLP discovery if the system is already registered
-          # during installation (the user is just going back)
-          urls = (Registration.is_registered? && !Yast::Mode.normal) ? [] : slp_urls
-          urls = [EXAMPLE_SMT_URL] if urls.empty?
-        else
-          urls = [reg_options[:custom_url]]
-        end
-
         VBox(
           Left(
             RadioButton(
@@ -315,7 +305,7 @@ module Registration
               VBox(
                 MinWidth(REG_CODE_WIDTH,
                   ComboBox(Id(:custom_url), Opt(:editable),
-                    _("&Local Registration Server URL"), urls))
+                    _("&Local Registration Server URL"), local_registration_urls))
               )
             )
           ),
@@ -564,6 +554,9 @@ module Registration
       # @return [Array<String>] The list of found URLs
       #
       def slp_urls
+        # do not scan again if the system has been registered during installation
+        # (the user is going back)
+        return [] if Registration.is_registered? && !Yast::Mode.normal
         services = UrlHelpers.slp_discovery_feedback
         services.map { |svc| UrlHelpers.service_url(svc.slp_url) }
       end
@@ -623,6 +616,21 @@ module Registration
         VALID_CUSTOM_URL_SCHEMES.include?(uri.scheme)
       rescue URI::InvalidURIError
         false
+      end
+
+      #
+      # List of offered local registration servers
+      #
+      # @return [Array<String>] List of URLs, contains an example URL
+      #  if no local registration server was found
+      #
+      def local_registration_urls
+        # If no special URL is used, probe with SLP
+        return [reg_options[:custom_url]] unless using_default_url?
+
+        # use an example URL if no server was found via SLP
+        urls = slp_urls
+        urls.empty? ? [EXAMPLE_SMT_URL] : urls
       end
     end
   end
