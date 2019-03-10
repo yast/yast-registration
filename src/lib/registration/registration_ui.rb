@@ -54,8 +54,9 @@ module Registration
     #   items: boolean (true on success), remote service (or nil)
     def register_system_and_base_product
       product_service = nil
+      error_options = { message_prefix: "The registration failed.", retry_block: true }
 
-      success = ConnectHelpers.catch_registration_errors do
+      success = ConnectHelpers.catch_registration_errors(error_options) do
         register_system if !Registration.is_registered?
 
         # then register the product(s)

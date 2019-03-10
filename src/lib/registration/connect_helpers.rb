@@ -63,6 +63,7 @@ module Registration
     def self.catch_registration_errors(message_prefix: "",
       show_update_hint: false,
       silent_reg_code_mismatch: false,
+      retry_block: false,
       &block)
       # import the SSL certificate just once to avoid an infinite loop
       certificate_imported = false
@@ -82,11 +83,16 @@ module Registration
         log.error "Timeout error: #{e.message}"
         # FIXME: to not break existing translation, this typo should be fixed
         # later after SP2: time -> timed
-        Yast::Report.Error(
-          error_with_details(message_prefix + _("Connection time out.") + "\n",
+        if retry_block
+          retry if report_error_and_retry?(message_prefix + _("Connection time out."),
             _("Make sure that the registration server is reachable and\n" \
               "the connection is reliable."))
-        )
+        else
+          report_error(message_prefix + _("Connection time out.") + "\n",
+            _("Make sure that the registration server is reachable and\n" \
+              "the connection is reliable."))
+        end
+
         false
       rescue SUSE::Connect::ApiError => e
         log.error "Received error: #{e.response.inspect}"
@@ -142,7 +148,12 @@ module Registration
         log.error "JSON parse error"
         # update the message when an old SMT server is found
         check_smt_api(e.message)
-        report_error(message_prefix + _("Cannot parse the data from server."), e.message)
+        msg = message_prefix + _("Cannot parse the data from server.")
+        if retry_block
+          retry if report_error_and_retry?(msg, e.message)
+        else
+          report_error(msg, e.message)
+        end
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
@@ -155,6 +166,15 @@ module Registration
 
     def self.report_error(msg, error_message)
       Yast::Report.Error(error_with_details(msg, error_message))
+    end
+
+    def self.retry_error(msg, error_message)
+      buttons = { retry: _("Retry"), cancel: _("Cancel") }
+      Yast2::Popup.show(msg, details: error_message, headline: :error, buttons: buttons)
+    end
+
+    def self.report_error_and_retry?(msg, details_message)
+      retry_error(msg, details_message) == :retry
     end
 
     # Report a pkg-bindings error. Display a message with error details from
@@ -338,6 +358,7 @@ module Registration
     end
 
     private_class_method :report_error, :error_with_details, :import_ssl_certificate,
-      :report_ssl_error, :check_smt_api, :handle_network_error
+      :report_ssl_error, :check_smt_api, :handle_network_error, :retry_error,
+      :report_error_and_retry?
   end
 end

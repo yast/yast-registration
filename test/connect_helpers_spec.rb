@@ -46,18 +46,44 @@ describe Registration::ConnectHelpers do
       expect(ret).to eq(false)
     end
 
-    it "reports an error with details on timeout" do
-      details = _("Make sure that the registration server is reachable and\n" \
-        "the connection is reliable.")
+    context "on timeout" do
+      let(:details) do
+        _("Make sure that the registration server is reachable and\n" \
+          "the connection is reliable.")
+      end
 
-      expect(subject).to receive(:wrap_text).with("Details: #{details}", screen_width - 4)
-        .and_return("Details wrapped text")
-      expect(Yast::Report).to receive(:Error).with(
-        "Registration: " + _("Connection time out.") + "\n\n\nDetails wrapped text"
-      )
+      context "and retry_block disabled" do
+        it "reports an error with details on timeout" do
+          expect(subject).to receive(:wrap_text).with("Details: #{details}", screen_width - 4)
+            .and_return("Details wrapped text")
+          expect(Yast::Report).to receive(:Error).with(
+            "Registration: " + _("Connection time out.") + "\n\n\nDetails wrapped text"
+          )
 
-      helpers.catch_registration_errors(message_prefix: "Registration: ") do
-        raise Timeout::Error
+          helpers.catch_registration_errors(message_prefix: "Registration: ") do
+            raise Timeout::Error
+          end
+        end
+      end
+
+      context "and with retry_block enabled" do
+        it "shows an error dialog with a retry and details button" do
+          expect(helpers).to receive(:report_error_and_retry?)
+            .with("Registration: " + _("Connection time out."), details)
+
+          helpers.catch_registration_errors(message_prefix: "Registration: ", retry_block: true) do
+            raise Timeout::Error
+          end
+        end
+
+        it "retries the given block if selected by the user" do
+          expect(helpers).to receive(:report_error_and_retry?).twice
+            .with("Registration: " + _("Connection time out."), details).and_return(true, false)
+
+          helpers.catch_registration_errors(message_prefix: "Registration: ", retry_block: true) do
+            raise Timeout::Error
+          end
+        end
       end
     end
 
@@ -111,6 +137,35 @@ describe Registration::ConnectHelpers do
 
     context "JSON parse error is received" do
       include_examples  "old registration server", JSON::ParserError.new("error message")
+
+      let(:details) { "server error response details" }
+      let(:exception) { JSON::ParserError.new(details) }
+
+      context "and with retry_block enabled" do
+        before do
+          allow(Registration::UrlHelpers).to receive(:registration_url)
+            .and_return(SUSE::Connect::YaST::DEFAULT_URL)
+        end
+
+        it "shows an error dialog with a retry and details button" do
+          expect(helpers).to receive(:report_error_and_retry?)
+            .with("Registration: " + _("Cannot parse the data from server."), details)
+
+          helpers.catch_registration_errors(message_prefix: "Registration: ", retry_block: true) do
+            raise exception
+          end
+        end
+
+        it "retries the given block if selected by the user" do
+          expect(helpers).to receive(:report_error_and_retry?).twice
+            .with("Registration: " + _("Cannot parse the data from server."), details)
+            .and_return(true, false)
+
+          helpers.catch_registration_errors(message_prefix: "Registration: ", retry_block: true) do
+            raise exception
+          end
+        end
+      end
     end
 
     [400, 401, 500, 42].each do |error_code|
