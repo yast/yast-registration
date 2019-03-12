@@ -157,10 +157,15 @@ module Registration
     end
 
     def self.details_error(msg, error_message, retry_button: false)
-      if Yast::Mode.autoinst || Yast::Mode.autoupgrade
+      if Yast::Mode.auto
         report_error(msg, error_message)
       else
-        buttons = retry_button ? { retry: _("Retry"), cancel: _("Cancel") } : :ok
+        buttons =
+          if retry_button
+            { retry: Yast::Label.RetryButton, cancel: Yast::Label.CancelButton }
+          else
+            :ok
+          end
         Yast2::Popup.show(msg, details: error_message, headline: :error, buttons: buttons)
       end
     end
@@ -307,7 +312,7 @@ module Registration
       if Yast::NetworkService.isNetworkRunning
         # FIXME: use a better message, this one has been reused after the text freeze
         report_error(message_prefix + _("Invalid URL."), e.message)
-      elsif Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+      elsif Helpers.network_configurable && !Yast::Mode.auto
         if Yast::Popup.YesNo(
           # Error popup
           _("Network is not configured, the registration server cannot be reached.\n" \
