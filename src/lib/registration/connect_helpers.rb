@@ -142,6 +142,7 @@ module Registration
         # update the message when an old SMT server is found
         check_smt_api(e.message)
         details_error(message_prefix + _("Cannot parse the data from server."), e.message)
+        false
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
