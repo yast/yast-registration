@@ -82,11 +82,10 @@ module Registration
         log.error "Timeout error: #{e.message}"
         # FIXME: to not break existing translation, this typo should be fixed
         # later after SP2: time -> timed
-        Yast::Report.Error(
-          error_with_details(message_prefix + _("Connection time out.") + "\n",
-            _("Make sure that the registration server is reachable and\n" \
-              "the connection is reliable."))
-        )
+        retry if report_error_and_retry?(message_prefix + _("Connection time out."),
+          _("Make sure that the registration server is reachable and\n" \
+            "the connection is reliable."))
+
         false
       rescue SUSE::Connect::ApiError => e
         log.error "Received error: #{e.response.inspect}"
@@ -142,7 +141,8 @@ module Registration
         log.error "JSON parse error"
         # update the message when an old SMT server is found
         check_smt_api(e.message)
-        report_error(message_prefix + _("Cannot parse the data from server."), e.message)
+        details_error(message_prefix + _("Cannot parse the data from server."), e.message)
+        false
       rescue StandardError => e
         log.error("SCC registration failed: #{e.class}: #{e}, #{e.backtrace}")
         Yast::Report.Error(
@@ -155,6 +155,24 @@ module Registration
 
     def self.report_error(msg, error_message)
       Yast::Report.Error(error_with_details(msg, error_message))
+    end
+
+    def self.details_error(msg, error_message, retry_button: false)
+      if Yast::Mode.auto
+        report_error(msg, error_message)
+      else
+        buttons =
+          if retry_button
+            { retry: Yast::Label.RetryButton, cancel: Yast::Label.CancelButton }
+          else
+            :ok
+          end
+        Yast2::Popup.show(msg, details: error_message, headline: :error, buttons: buttons)
+      end
+    end
+
+    def self.report_error_and_retry?(msg, details_message)
+      details_error(msg, details_message, retry_button: true) == :retry
     end
 
     # Report a pkg-bindings error. Display a message with error details from
@@ -295,7 +313,7 @@ module Registration
       if Yast::NetworkService.isNetworkRunning
         # FIXME: use a better message, this one has been reused after the text freeze
         report_error(message_prefix + _("Invalid URL."), e.message)
-      elsif Helpers.network_configurable && !(Yast::Mode.autoinst || Yast::Mode.autoupgrade)
+      elsif Helpers.network_configurable && !Yast::Mode.auto
         if Yast::Popup.YesNo(
           # Error popup
           _("Network is not configured, the registration server cannot be reached.\n" \
@@ -338,6 +356,7 @@ module Registration
     end
 
     private_class_method :report_error, :error_with_details, :import_ssl_certificate,
-      :report_ssl_error, :check_smt_api, :handle_network_error
+      :report_ssl_error, :check_smt_api, :handle_network_error, :details_error,
+      :report_error_and_retry?
   end
 end
