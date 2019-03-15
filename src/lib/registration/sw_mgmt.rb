@@ -589,6 +589,9 @@ module Registration
 
       select_default_product_patterns unless Mode.update
 
+      # run the solver to recalculate the product statuses
+      Pkg.PkgSolve(false)
+
       ret
     end
 

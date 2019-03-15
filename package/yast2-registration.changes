@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 15 18:03:43 UTC 2019 - Ladislav Slezak <lslezak@suse.cz>
+
+- Run the solver to correctly initialize the product statuses
+  (fixes displaying SUMA RN during a SLES upgrade) (bsc#1129029)
+
+-------------------------------------------------------------------
 Sun Mar 10 18:58:40 UTC 2019 - knut.anderssen@suse.com
 
 - Permit to retry the registration in case of a timeout or a json
