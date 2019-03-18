@@ -34,6 +34,7 @@ describe Registration::UI::FailedCertificatePopup do
   before do
     allow(Yast::Report).to receive(:LongError)
     allow(Yast::Stage).to receive(:initial).and_return(false)
+    allow(Registration::UrlHelpers).to receive(:registration_url)
   end
 
   # the instance method
