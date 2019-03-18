@@ -336,6 +336,7 @@ describe Registration::SwMgmt do
       allow(Yast::Pkg).to receive(:ResolvableProperties)
         .and_return(load_yaml_fixture("products_legacy_installation.yml"))
       allow(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
+      allow(Yast::Pkg).to receive(:PkgSolve)
     end
 
     it "selects new addon products for installation" do
@@ -346,6 +347,12 @@ describe Registration::SwMgmt do
 
     it "selects the default patterns for the selected products" do
       expect_any_instance_of(Yast::ProductPatterns).to receive(:select)
+
+      subject.select_addon_products(legacy_services)
+    end
+
+    it "runs the solver to initialize the product statuses" do
+      expect(Yast::Pkg).to receive(:PkgSolve)
 
       subject.select_addon_products(legacy_services)
     end
