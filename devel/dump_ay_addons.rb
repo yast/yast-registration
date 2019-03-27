@@ -10,21 +10,26 @@ require "registration/addon_sorter"
 
 require_relative "yaml_workaround"
 
-INDENT_WIDTH = 4
+INDENT_WIDTH = 2
 
 # convert addon data to an XML document snippet
 def dump_addon(a)
-  prefix = " " * INDENT_WIDTH
+  prefix = " " * INDENT_WIDTH * 2
+  prefix_outer = " " * INDENT_WIDTH
 
-  ret = prefix + "<!-- #{a.name} -->\n"
+  ret = prefix_outer + "<addon>\n"
+
+  ret += prefix + "<!-- #{a.name} -->\n"
 
   ret += prefix + "<!-- Depends on: #{a.depends_on.name} -->\n" if a.depends_on
 
-  ret += prefix + "<name>#{a.identifier}</name>\n" +
-    prefix + "<version>#{a.version}</version>\n" +
-    prefix + "<arch>#{a.arch}</arch>\n"
+  ret += prefix + "<name>#{a.identifier.encode(xml: :text)}</name>\n" +
+    prefix + "<version>#{a.version.encode(xml: :text)}</version>\n" +
+    prefix + "<arch>#{a.arch.encode(xml: :text)}</arch>\n"
 
   ret += prefix + "<reg_code>REG_CODE_REQUIRED</reg_code>\n" unless a.free
+
+  ret += prefix_outer + "</addon>\n"
 
   ret
 end
