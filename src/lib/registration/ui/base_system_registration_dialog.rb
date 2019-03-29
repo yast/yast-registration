@@ -142,7 +142,7 @@ module Registration
         self.action = :register_scc
       end
 
-      # Handle selection the 'Register System via local SMT Server' option
+      # Handle selection the 'Register System via local SMT/RMT Server' option
       #
       # Set the dialog's action to :register_local
       def register_local_handler
@@ -294,7 +294,7 @@ module Registration
               Id(:register_local),
               Opt(:notify),
               # TRANSLATORS: radio button
-              _("Register System via local SMT Server"),
+              _("Register System via local SMT/RMT Server"),
               action == :register_local
             )
           ),
@@ -608,7 +608,7 @@ module Registration
 
       VALID_CUSTOM_URL_SCHEMES = ["http", "https"].freeze
 
-      # Determine whether an URL is valid and suitable to be used as local SMT server
+      # Determine whether an URL is valid and suitable to be used as local SMT/RMT server
       #
       # @return [Boolean] true if it's valid; false otherwise.
       def valid_custom_url?(custom_url)
