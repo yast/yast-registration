@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 29 14:34:42 UTC 2019 - David Diaz <dgonzalez@suse.com>
+
+- Update the  label used for the option to register the system
+  via local server (bsc#1129206).
+- 4.2.0
+
+-------------------------------------------------------------------
 Fri Mar 15 18:03:43 UTC 2019 - Ladislav Slezak <lslezak@suse.cz>
 
 - Run the solver to correctly initialize the product statuses
