@@ -18,7 +18,7 @@ require "slp/dialogs/service_selection"
 
 module Registration
   module UI
-    # This class implements a SCC/SMT service selection dialog.
+    # This class implements a SCC/RMT service selection dialog.
     class RegserviceSelectionDialog < Yast::Dialogs::ServiceSelection
       Yast.import "UI"
       Yast.import "Label"
@@ -27,14 +27,14 @@ module Registration
       # Run dialog
       #
       # The return value will be:
-      # * A service in case one SMT server was selected
+      # * A service in case one RMT server was selected
       # * :scc symbol if default SCC was selected
       # * :cancel symbol if the SCC was canceled (pressing the 'cancel' button)
       #
       # @example Select the default SCC service
       #   Registration::UI::SelectionServiceDialog.run(services) #=> :scc
       #
-      # @example Select some SMT service
+      # @example Select some RMT service
       #   Registration::UI::SelectionServiceDialog.run(services)
       #     #=> #<Yast::SlpServiceClass::Service...>
       #

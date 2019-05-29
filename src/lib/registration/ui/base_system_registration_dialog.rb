@@ -142,7 +142,7 @@ module Registration
         self.action = :register_scc
       end
 
-      # Handle selection the 'Register System via local SMT/RMT Server' option
+      # Handle selection the 'Register System via local RMT Server' option
       #
       # Set the dialog's action to :register_local
       def register_local_handler
@@ -282,7 +282,7 @@ module Registration
       end
 
       # Example URL to be used in the :register_local UI
-      EXAMPLE_SMT_URL = "https://smt.example.com".freeze
+      EXAMPLE_RMT_URL = "https://rmt.example.com".freeze
 
       # Widgets for :register_local action
       #
@@ -294,7 +294,7 @@ module Registration
               Id(:register_local),
               Opt(:notify),
               # TRANSLATORS: radio button
-              _("Register System via local SMT/RMT Server"),
+              _("Register System via local RMT Server"),
               action == :register_local
             )
           ),
@@ -608,7 +608,7 @@ module Registration
 
       VALID_CUSTOM_URL_SCHEMES = ["http", "https"].freeze
 
-      # Determine whether an URL is valid and suitable to be used as local SMT/RMT server
+      # Determine whether an URL is valid and suitable to be used as local RMT server
       #
       # @return [Boolean] true if it's valid; false otherwise.
       def valid_custom_url?(custom_url)
@@ -630,7 +630,7 @@ module Registration
 
         # use an example URL if no server was found via SLP
         urls = slp_urls
-        urls.empty? ? [EXAMPLE_SMT_URL] : urls
+        urls.empty? ? [EXAMPLE_RMT_URL] : urls
       end
     end
   end
