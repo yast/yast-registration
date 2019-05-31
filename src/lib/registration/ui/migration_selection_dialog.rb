@@ -312,7 +312,8 @@ module Registration
         new_product_name = CGI.escapeHTML(new_product.friendly_name)
         installed_version = old_product["version_version"]
 
-        if installed_version == new_product.version
+        # check also the product name (when upgrading Leap 15.1 to SLES15-SP1 both are 15.1)
+        if installed_version == new_product.version && new_product.identifier == old_product["name"]
           # TRANSLATORS: Summary message, rich text format
           # %s is a product name, e.g. "SUSE Linux Enterprise Server 12"
           return _("%s <b>stays unchanged.</b>") % new_product_name
@@ -320,8 +321,9 @@ module Registration
 
         old_product_name = SwMgmt.product_label(old_product)
 
-        # use Gem::Version for version compare
-        if Gem::Version.new(installed_version) < Gem::Version.new(new_product.version)
+        # use Gem::Version for version compare, the versions might be the same
+        # if the products are different
+        if Gem::Version.new(installed_version) <= Gem::Version.new(new_product.version)
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} is a product name, e.g. "SUSE Linux Enterprise Server 12"
           # %{new_product} is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
