@@ -40,6 +40,12 @@ module Registration
         self.registration_ui = RegistrationUI.new(registration)
       end
 
+      # workaround for rollback from the Leap => SLES migration,
+      # maps installed => activated product
+      SYNC_FALLBACKS = {
+        "openSUSE" => "SLES"
+      }.freeze
+
       # restore the registration status
       # @return [Symbol] :next on sucess, :abort on error
       def run_sequence
@@ -52,7 +58,9 @@ module Registration
         activated = registration.activated_products.map(&:identifier)
         products =
           SwMgmt.installed_products.each_with_object([]) do |product, result|
-            result << product if activated.include?(product["name"])
+            name = product["name"]
+            next unless activated.include?(name) || activated.include?(SYNC_FALLBACKS[name])
+            result << product
           end
 
         # Ask the user about adding all the registered but not installed addons
