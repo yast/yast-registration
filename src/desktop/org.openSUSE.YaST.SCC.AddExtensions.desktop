@@ -11,6 +11,7 @@ X-SuSE-YaST-Keywords=extensions,modules,software,registration,scc,package,reposi
 Icon=yast-addon-extension
 Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc select_extensions"
 
-Name=Add System Extensions or Modules
-GenericName=Add System Extensions or Modules
+Name=YaST System Extensions
+GenericName=System Extensions
+Comment=Select System Extensions or Modules
 StartupNotify=true
