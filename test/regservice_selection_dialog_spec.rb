@@ -30,7 +30,7 @@ describe Registration::UI::RegserviceSelectionDialog do
     allow(Yast::SlpServiceClass::DnsCache).to receive(:resolve)
       .and_return("somehost")
     allow(Yast::SLP).to receive(:GetUnicastAttrMap)
-      .and_return(type: "server", description: "SMT")
+      .and_return(type: "server", description: "RMT")
   end
 
   describe "#run" do

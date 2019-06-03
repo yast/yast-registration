@@ -541,16 +541,16 @@ module Registration
       end
 
       # check the system status at upgrade and return the symbol for the next step
-      # @return [Symabol] workflow symbol, :skip => do not use the SCC/SMT upgrade
+      # @return [Symabol] workflow symbol, :skip => do not use the SCC/SMT/RMT upgrade
       #   (unregistered system or explicitly requested by user), :next =>
-      #   continue with the SCC/SMT based upgrade
+      #   continue with the SCC/SMT/RMT based upgrade
       def system_upgrade_check
         log.info "System upgrade mode detected"
         # media based upgrade requested by user
         if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
           explicit_media_upgrade
           return :skip
-        # the system is registered, continue with the SCC/SMT based upgrade
+        # the system is registered, continue with the SCC/SMT/RMT based upgrade
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
           return :next
@@ -611,7 +611,7 @@ module Registration
       # @return [String] translated message
       def media_upgrade(registered)
         # TRANSLATORS: Media based upgrade requested by user (1/3)
-        #   User requested media based upgrade which does not use SCC/SMT
+        #   User requested media based upgrade which does not use SCC/SMT/RMT
         #   but the downloaded media (physical DVD or shared repo on a local server).
         ret = _("<h2>Media Based Upgrade</h2><p>The media based upgrade is requested. " \
           "In this mode YaST will not contact the registration server to obtain " \

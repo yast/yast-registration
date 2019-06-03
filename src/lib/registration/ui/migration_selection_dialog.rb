@@ -273,17 +273,17 @@ module Registration
         product_name = CGI.escapeHTML(product.friendly_name)
 
         # explicitly check for false, the flag is not returned by SCC, this is
-        # a SMT specific check (in SCC all products are implicitly available)
+        # a SMT/RMT specific check (in SCC all products are implicitly available)
         if product.available == false
-          # a product can be unavailable only when using SMT, the default
+          # a product can be unavailable only when using SMT/RMT, the default
           # SCC URL should be never used
           url = UrlHelpers.registration_url || SUSE::Connect::YaST::DEFAULT_URL
 
           # TRANSLATORS: An error message displayed in the migration details.
-          # The product has not been mirrored to the SMT server and cannot be used
-          # for migration. The SMT admin has to mirror the product to allow
+          # The product has not been mirrored to the SMT/RMT server and cannot be used
+          # for migration. The SMT/RMT admin has to mirror the product to allow
           # using the selected migration.
-          # %{url} is the URL of the registration server (SMT)
+          # %{url} is the URL of the SMT/RMT registration server
           # %{product} is a full product name, e.g. "SUSE Linux Enterprise Server 12"
           return Yast::HTML.Colorize(
             _("ERROR: Product <b>%{product}</b> is not available at the " \

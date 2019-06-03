@@ -45,7 +45,7 @@ module Registration
         # copy the old NCC/SCC credentials to inst-sys
         SwMgmt.copy_old_credentials(destdir)
 
-        # import the SMT certificate to inst-sys
+        # import the SMT/RMT certificate to inst-sys
         import_ssl_certificates
       end
 

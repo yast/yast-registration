@@ -62,8 +62,8 @@ module Registration
         )
         help_text += _(
           "<p>If your network deploys a custom registration server, set the " \
-          "correct URL of the server\nand the location of the SMT " \
-          "certificate in <b>SMT Server Settings</b>. Refer\nto your SMT " \
+          "correct URL of the server\nand the location of the RMT " \
+          "certificate in <b>RMT Server Settings</b>. Refer\nto your RMT " \
           "manual for further assistance.</p>"
         )
 

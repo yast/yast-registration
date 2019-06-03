@@ -158,13 +158,13 @@ describe "Registration::UrlHelpers" do
         end
       end
 
-      context " when the system has been already registered with SMT server" do
+      context "when the system has been already registered with RMT server" do
         before do
           allow(File).to receive(:exist?)
             .with("/mnt/etc/SUSEConnect").and_return(true)
         end
 
-        it "returns URL of SMT server" do
+        it "returns URL of RMT server" do
           expect(File).to receive(:exist?).with(fixtures_file("SUSEConnect")).and_return(true)
           expect(SUSE::Connect::Config).to receive(:new).with(suse_connect)
             .and_return(SUSE::Connect::Config.new(fixtures_file("SUSEConnect")))
