@@ -29,7 +29,7 @@ Source0:        %{name}-%{version}.tar.bz2
 # Y2Packager::ProductLicense
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2 >= 4.0.63
-BuildRequires:  yast2-devtools >= 3.1.39
+BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-slp >= 3.1.9
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(suse-connect) >= 0.3.11
