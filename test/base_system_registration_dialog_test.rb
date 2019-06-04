@@ -145,8 +145,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         end
       end
 
-      context "when user enters a local SMT server" do
-        it "registers the system via local SMT server" do
+      context "when user enters a local RMT server" do
+        it "registers the system via local RMT server" do
           allow(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
             .and_return(custom_url)
           expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next)
@@ -165,10 +165,10 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         end
       end
 
-      context "when user enters an invalid local SMT server" do
+      context "when user enters an invalid local RMT server" do
         it "shows an error and does not try to register the system" do
           allow(Yast::UI).to receive(:QueryWidget).with(:custom_url, :Value)
-            .and_return("ftp://smt.suse.com")
+            .and_return("ftp://rmt.suse.com")
           expect(Yast::UI).to receive(:UserInput).and_return(:register_local, :next, :abort)
           expect(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
           expect(Yast::Report).to receive(:Error).with(_("Invalid URL.")).and_return(true)

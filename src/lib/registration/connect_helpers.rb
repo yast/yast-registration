@@ -98,7 +98,7 @@ module Registration
           report_error(message_prefix + _("Connection to registration server failed."),
             error_code_message + error_msg)
         when 404
-          # update the message when an old SMT server is found
+          # update the message when an old SMT/RMT server is found
           check_smt_api(error_msg)
           report_error(message_prefix + _("Connection to registration server failed."),
             error_code_message + error_msg)
@@ -139,7 +139,7 @@ module Registration
         false
       rescue JSON::ParserError => e
         log.error "JSON parse error"
-        # update the message when an old SMT server is found
+        # update the message when an old SMT/RMT server is found
         check_smt_api(e.message)
         details_error(message_prefix + _("Cannot parse the data from server."), e.message)
         false
@@ -287,10 +287,10 @@ module Registration
     # @param error_msg [String] the received error message, the content might be replaced
     def self.check_smt_api(error_msg)
       url = UrlHelpers.registration_url
-      # no SMT/custom server used
+      # no SMT/RMT/custom server used
       return if url == SUSE::Connect::YaST::DEFAULT_URL
 
-      # test old SMT instance
+      # test old SMT/RMT instance
       smt_status = SmtStatus.new(url, insecure: Helpers.insecure_registration)
       return unless smt_status.ncc_api_present?
 
@@ -335,7 +335,7 @@ module Registration
       # TRANSLATORS: additional hint for an error message
       msg = _("Check that this system is known to the registration server.")
 
-      # probably missing NCC->SCC sync, display a hint unless SMT is used
+      # probably missing NCC->SCC sync, display a hint unless SMT/RMT is used
       if [nil, SUSE::Connect::YaST::DEFAULT_URL].include?(UrlHelpers.registration_url)
 
         msg += "\n\n"

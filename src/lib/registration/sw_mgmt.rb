@@ -486,7 +486,7 @@ module Registration
       log.info "Copying the old credentials from previous installation"
       log.info "Copying #{file} to #{new_file}"
 
-      # SMT uses extra ACL permissions, make sure they are kept in the copied file,
+      # SMT/RMT uses extra ACL permissions, make sure they are kept in the copied file,
       # (use "cp -a ", ::FileUtils.cp(..., preserve: true) cannot be used as it preserves only
       # the traditional Unix file permissions, the extended ACLs are NOT copied!)
       Yast::Execute.locally!("cp", "-a", file, new_file)

@@ -309,12 +309,12 @@ module Registration
       }
     end
 
-    # is the addon available? SMT may have mirrored only some extensions,
+    # is the addon available? SMT/RMT may have mirrored only some extensions,
     # the not mirrored extensions are marked as not available
     # @return [Boolean] true if the addon is available to register
     def available?
       # explicitly check for false, undefined (nil) means it is available,
-      # it's only reported by SMT
+      # it's only reported by SMT/RMT
       @pure_addon.available != false
     end
 

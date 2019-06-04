@@ -35,7 +35,7 @@ module Registration
       end
 
       def label
-        _("Registration Code or SMT Server URL")
+        _("Registration Code or RMT Server URL")
       end
 
       # Initialize the widget with stored values
@@ -59,7 +59,7 @@ module Registration
         register
       end
 
-      # Try to register the system against SCC or a custom SMT depending on if
+      # Try to register the system against SCC or a custom RMT depending on if
       # the value is an URL or not.
       #
       # @return [Boolean] false if not attempted or failed and true if success
@@ -95,7 +95,7 @@ module Registration
       def help
         _(
           "<p>\n" \
-          "The SMT Server URL must use http or https protocol, " \
+          "The RMT Server URL must use http or https protocol, " \
           "other schemes are not supported." \
           "</p>\n"
         )

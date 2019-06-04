@@ -294,15 +294,15 @@ describe Registration::SwMgmt do
       subject.copy_old_credentials(root_dir)
     end
 
-    it "copies old SMT credentials at upgrade" do
-      smt_credentials = File.join(root_dir, target_dir, "SMT-http_smt_example_com")
+    it "copies old SMT/RMT credentials at upgrade" do
+      credentials = File.join(root_dir, target_dir, "RMT-http_example_com")
       allow(Dir).to receive(:[]).with(File.join(root_dir, target_dir, "*"))
-        .and_return([smt_credentials])
+        .and_return([credentials])
 
       allow(SUSE::Connect::YaST).to receive(:credentials).and_return(OpenStruct.new)
 
       expect(Yast::Execute).to receive(:locally!)
-        .with("cp", "-a", smt_credentials, File.join(target_dir, "SMT-http_smt_example_com"))
+        .with("cp", "-a", credentials, File.join(target_dir, "RMT-http_example_com"))
 
       subject.copy_old_credentials(root_dir)
     end
