@@ -16,6 +16,7 @@ X-SuSE-YaST-Keywords=scc,software,registration,smt,rmt,module,extension
 Icon=yast-product-registration
 Exec=/usr/bin/xdg-su -c "/sbin/yast2 scc"
 
-Name=Product Registration
+Name=YaST Product Registration
 GenericName=Product Registration
+Comment=Register your Product with the Vendor
 StartupNotify=true
