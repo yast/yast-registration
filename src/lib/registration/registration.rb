@@ -181,14 +181,19 @@ module Registration
     def offline_migration_products(installed_products, target_base_product)
       log.info "Offline migration for: #{target_base_product}."
       migration_paths = []
-      ConnectHelpers.catch_registration_errors(show_update_hint: true) do
-        migration_paths = SUSE::Connect::YaST
-                          .system_offline_migrations(installed_products,
-                            target_base_product, connect_params)
+
+      installed_products.each do |product|
+        ConnectHelpers.catch_registration_errors(show_update_hint: true) do
+          migration_paths << SUSE::Connect::YaST.system_offline_migrations(
+            [product],
+            target_base_product,
+            connect_params
+          )
+        end
       end
 
       log.info "Received possible migrations paths: #{migration_paths}"
-      migration_paths
+      migration_paths.flatten(1)
     end
 
     # Get the list of updates for a base product or self_update_id if defined
