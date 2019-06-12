@@ -342,10 +342,11 @@ module Registration
           msg = [
             # TRANSLATORS. Error message
             _("No migration product found."),
-            # TRANSLATORS: Help message
+            # TRANSLATORS: Help message, %{product} is the product name
             _("Please, boot the original system and make sure " \
-              "that it and all registerable products are correctly registered.\n" \
-              "Also check that the installed system is supported for upgrade to this new product.")
+              "that all registerable products are correctly registered.\n" \
+              "Also check that the installed system is supported for upgrade to \n" \
+              "%{product}.") % { product: Y2Packager::ProductUpgrade.new_base_product.display_name }
           ]
 
           Yast::Report.Error(msg.join("\n\n"))
