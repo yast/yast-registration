@@ -335,11 +335,21 @@ module Registration
       def load_migrations_for_products(products, remote_product)
         log.info "Loading offline migrations for target product: #{remote_product.inspect}"
         log.info "Installed products: #{products.inspect}"
+
         self.migrations = registration_ui.offline_migration_products(products, remote_product)
 
         if migrations.empty?
-          # TRANSLATORS: Error message
-          Yast::Report.Error(_("No migration product found."))
+          msg = [
+            # TRANSLATORS. Error message
+            _("No migration product found."),
+            # TRANSLATORS: Help message
+            _("Please, boot the original system and make sure " \
+              "that it and all registerable products are correctly registered.\n" \
+              "Also check that the installed system is supported for upgrade to this new product.")
+          ]
+
+          Yast::Report.Error(msg.join("\n\n"))
+
           return Yast::Mode.auto ? :abort : :empty
         end
 
