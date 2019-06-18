@@ -140,11 +140,11 @@ describe Registration::Addon do
     let(:registered) { Registration::Addon.new(addon_generator(params)) }
     let(:not_selected) { Registration::Addon.new(addon_generator(params)) }
     let(:available_addons) { [wo_eula, refused, accepted, registered, not_selected] }
-
-    let(:registration) { double(
-      get_addon_list: available_addons
+    let(:registration) do
+      double(
+        get_addon_list: available_addons
       )
-    }
+    end
 
     before do
       available_addons.each(&:selected)

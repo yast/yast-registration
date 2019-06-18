@@ -71,6 +71,13 @@ module Registration
         selected.reject(&:eula_refused?)
       end
 
+      # Returns only those selected addons with accepted EULA but pending to be registered
+      #
+      # @return [Array<Addon>]
+      def to_register
+        accepted - registered
+      end
+
       # return add-ons which are registered but not installed in the system
       # and are available to install
       # @return [Array<Addon>] the list of add-ons
