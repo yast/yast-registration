@@ -204,7 +204,7 @@ module Yast
 
     # display EULAs for the selected addons
     def addon_eula
-      ::Registration::UI::AddonEulaDialog.run(@selected_addons)
+      ::Registration::UI::AddonEulaDialog.run(Registration::Addon.selected)
     end
 
     # remember the user entered values so they can be stored to the AutoYast
