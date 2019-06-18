@@ -161,7 +161,8 @@ module Yast
     # back returns directly to the extensions selection
     def register_addons
       return false if init_registration == :cancel
-      ret = registration_ui.register_addons(@selected_addons, @known_reg_codes)
+
+      ret = registration_ui.register_addons(Registration::Addon.to_register, @known_reg_codes)
       ret = :extensions if ret == :back
       ret
     end
