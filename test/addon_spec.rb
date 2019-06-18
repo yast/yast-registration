@@ -85,6 +85,101 @@ describe Registration::Addon do
     end
   end
 
+  describe ".accepted" do
+    let(:eula_url) { "http://example.eula.url" }
+    let(:params) { { "eula_url" => eula_url } }
+    let(:wo_eula) { Registration::Addon.new(addon_generator) }
+    let(:refused) { Registration::Addon.new(addon_generator(params)) }
+    let(:accepted) { Registration::Addon.new(addon_generator(params)) }
+    let(:not_selected) { Registration::Addon.new(addon_generator(params)) }
+    let(:registration) do
+      double(
+        get_addon_list: [wo_eula, refused, accepted, not_selected]
+      )
+    end
+
+    before do
+      wo_eula.selected
+
+      refused.selected
+      refused.refuse_eula
+
+      accepted.selected
+      accepted.accept_eula
+
+      not_selected.accept_eula
+    end
+
+    it "returns a collection" do
+      expect(described_class.accepted).to be_a(Array)
+    end
+
+    it "includes selected addons w/o required EULA" do
+      expect(described_class.accepted).to include(wo_eula)
+    end
+
+    it "includes selected addons with accepted EULA" do
+      expect(described_class.accepted).to include(accepted)
+    end
+
+    it "does not includes selected addons with refused EULA" do
+      expect(described_class.accepted).to_not include(refused)
+    end
+
+    it "does not includes not selected addons" do
+      expect(described_class.accepted).to_not include(not_selected)
+    end
+  end
+
+  describe ".to_register" do
+    let(:eula_url) { "http://example.eula.url" }
+    let(:params) { { "eula_url" => eula_url } }
+    let(:wo_eula) { Registration::Addon.new(addon_generator) }
+    let(:refused) { Registration::Addon.new(addon_generator(params)) }
+    let(:accepted) { Registration::Addon.new(addon_generator(params)) }
+    let(:registered) { Registration::Addon.new(addon_generator(params)) }
+    let(:not_selected) { Registration::Addon.new(addon_generator(params)) }
+    let(:available_addons) { [wo_eula, refused, accepted, registered, not_selected] }
+
+    let(:registration) { double(
+      get_addon_list: available_addons
+      )
+    }
+
+    before do
+      available_addons.each(&:selected)
+
+      refused.refuse_eula
+      accepted.accept_eula
+      registered.accept_eula
+      registered.registered
+    end
+
+    it "returns a collection" do
+      expect(described_class.accepted).to be_a(Array)
+    end
+
+    it "includes selected addons w/o required EULA" do
+      expect(described_class.accepted).to include(wo_eula)
+    end
+
+    it "includes selected addons with accepted EULA" do
+      expect(described_class.accepted).to include(accepted)
+    end
+
+    it "does not include selected addons with refused EULA" do
+      expect(described_class.to_register).to_not include(refused)
+    end
+
+    it "does not includes not selected addons" do
+      expect(described_class.accepted).to_not include(not_selected)
+    end
+
+    it "does not include already registered addons" do
+      expect(described_class.to_register).to_not include(registered)
+    end
+  end
+
   describe ".registered" do
     it "returns array of already registered addons" do
       expect(Registration::Addon.registered).to be_a(Array)

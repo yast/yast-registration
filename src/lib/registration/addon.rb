@@ -64,6 +64,13 @@ module Registration
         @selected ||= []
       end
 
+      # Returns only those selected addons with accepted EULA
+      #
+      # @return [Array<Addon>]
+      def accepted
+        selected.reject(&:eula_refused?)
+      end
+
       # return add-ons which are registered but not installed in the system
       # and are available to install
       # @return [Array<Addon>] the list of add-ons
