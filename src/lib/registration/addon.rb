@@ -105,7 +105,7 @@ module Registration
 
     extend Forwardable
 
-    attr_reader :children
+    attr_reader :children, :eula_accepted
     attr_accessor :depends_on, :regcode
 
     # delegate methods to underlaying suse connect object
@@ -128,6 +128,7 @@ module Registration
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
+      @eula_accepted = nil
       @children = []
     end
 
@@ -230,6 +231,30 @@ module Registration
       [:arch, :identifier, :version, :release_type].all? do |attr|
         send(attr) == remote_product.send(attr)
       end
+    end
+
+    # Set the EULA as accepted
+    def accept_eula
+      @eula_accepted = true
+    end
+
+    # Set the EULA as not accepted
+    def refuse_eula
+      @eula_accepted = false
+    end
+
+    # Whether the eula has been refused
+    #
+    # @return [Boolean] true if EULA acceptance was required but refused; false otherwise
+    def eula_refused?
+      eula_acceptance_needed? && !eula_accepted
+    end
+
+    # Whether the EULA acceptance is required
+    #
+    # @return [Boolean] true if a not empty EULA url is present; false otherwise
+    def eula_acceptance_needed?
+      !eula_url.to_s.strip.empty?
     end
   end
 end

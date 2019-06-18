@@ -130,6 +130,86 @@ describe Registration::Addon do
     end
   end
 
+  describe "#accept_eula" do
+    it "sets EULA as accepted" do
+      addon.accept_eula
+
+      expect(addon.eula_accepted).to eq(true)
+    end
+  end
+
+  describe "#refuse_eula" do
+    it "sets EULA as not accepted" do
+      addon.refuse_eula
+
+      expect(addon.eula_accepted).to eq(false)
+    end
+  end
+
+  describe "#eula_refused?" do
+    context "when EULA acceptance is not required" do
+      before do
+        allow(addon).to receive(:eula_acceptance_needed?).and_return(false)
+      end
+
+      it "returns false" do
+        expect(addon.eula_refused?).to eq(false)
+      end
+    end
+
+    context "when EULA acceptance is required" do
+      before do
+        allow(addon).to receive(:eula_acceptance_needed?).and_return(true)
+      end
+
+      context "and the license was accepted" do
+        it "returns false" do
+          addon.accept_eula
+
+          expect(addon.eula_refused?).to eq(false)
+        end
+      end
+
+      context "and the license was refused" do
+        it "returns true" do
+          addon.refuse_eula
+
+          expect(addon.eula_refused?).to eq(true)
+        end
+      end
+    end
+  end
+
+  context "#eula_acceptance_needed" do
+    let(:eula_url) { nil }
+
+    before do
+      allow(addon).to receive(:eula_url).and_return(eula_url)
+    end
+
+    context "when there is not an EULA url" do
+      it "returns false" do
+        expect(addon.eula_acceptance_needed?).to eq(false)
+      end
+    end
+
+    context "when there is an empty EULA url" do
+      let(:eula_url) { "  " }
+
+      it "returns false" do
+        expect(addon.eula_acceptance_needed?).to eq(false)
+      end
+    end
+
+    context "when there is a NOT empty EULA url" do
+      let(:eula_url) { "http://example.eula.url" }
+
+      it "returns true" do
+        expect(addon.eula_acceptance_needed?).to eq(true)
+      end
+    end
+  end
+
   describe "#unregistered" do
     it "marks addon as unregistered" do
       Registration::Addon.registered << addon
