@@ -129,13 +129,18 @@ module Registration
 
           eula_reader = EulaReader.new(tmpdir)
           setup_eula_dialog(addon, eula_reader, tmpdir)
+          result = run_eula_dialog(eula_reader)
 
-          response = run_eula_dialog(eula_reader)
-
-          addon.accept_eula if response == :accepted
-          addon.refuse_eula if response == :refuse
-
-          [:accepted, :refuse].include?(response) ? :next : response
+          case result
+          when :accepted
+            addon.accept_eula
+            :next
+          when :refuse
+            addon.refuse_eula
+            :next
+          else
+            result
+          end
         end
       ensure
         Yast::ProductLicense.CleanUp()
