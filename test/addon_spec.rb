@@ -282,7 +282,7 @@ describe Registration::Addon do
       allow(addon).to receive(:eula_url).and_return(eula_url)
     end
 
-    context "when there is not an EULA url" do
+    context "when the EULA URL is nil" do
       it "returns false" do
         expect(addon.eula_acceptance_needed?).to eq(false)
       end
