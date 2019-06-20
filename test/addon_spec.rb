@@ -100,13 +100,10 @@ describe Registration::Addon do
 
     before do
       wo_eula.selected
-
       refused.selected
-      refused.refuse_eula
-
       accepted.selected
-      accepted.accept_eula
 
+      accepted.accept_eula
       not_selected.accept_eula
     end
 
@@ -149,7 +146,6 @@ describe Registration::Addon do
     before do
       available_addons.each(&:selected)
 
-      refused.refuse_eula
       accepted.accept_eula
       registered.accept_eula
       registered.registered
@@ -233,14 +229,6 @@ describe Registration::Addon do
     end
   end
 
-  describe "#refuse_eula" do
-    it "sets EULA as not accepted" do
-      addon.refuse_eula
-
-      expect(addon.eula_accepted).to eq(false)
-    end
-  end
-
   describe "#eula_refused?" do
     context "when EULA acceptance is not required" do
       before do
@@ -265,10 +253,8 @@ describe Registration::Addon do
         end
       end
 
-      context "and the license was refused" do
+      context "and the license was not accepted" do
         it "returns true" do
-          addon.refuse_eula
-
           expect(addon.eula_refused?).to eq(true)
         end
       end

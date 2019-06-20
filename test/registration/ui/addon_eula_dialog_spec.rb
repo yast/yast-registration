@@ -101,9 +101,7 @@ describe Registration::UI::AddonEulaDialog do
       end
 
       it "sets it as accepted" do
-        expect(addon_with_eula).to receive(:accept_eula)
-
-        eula_dialog.run
+        expect { eula_dialog.run }.to change { addon_with_eula.eula_accepted? }.from(false).to(true)
       end
 
       it "returns :next" do
@@ -119,10 +117,8 @@ describe Registration::UI::AddonEulaDialog do
           .and_return(:refuse)
       end
 
-      it "sets it as not accepted" do
-        expect(addon_with_eula).to receive(:refuse_eula)
-
-        eula_dialog.run
+      it "does not set it as accepted" do
+        expect { eula_dialog.run }.to_not change { addon_with_eula.eula_accepted? }
       end
 
       it "returns :next" do

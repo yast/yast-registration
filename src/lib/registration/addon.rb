@@ -122,6 +122,8 @@ module Registration
     attr_reader :children, :eula_accepted
     attr_accessor :depends_on, :regcode
 
+    alias_method :eula_accepted?, :eula_accepted
+
     # delegate methods to underlaying suse connect object
     def_delegators :@pure_addon,
       :arch,
@@ -142,7 +144,7 @@ module Registration
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
-      @eula_accepted = nil
+      @eula_accepted = false
       @children = []
     end
 
@@ -250,11 +252,6 @@ module Registration
     # Set the EULA as accepted
     def accept_eula
       @eula_accepted = true
-    end
-
-    # Set the EULA as not accepted
-    def refuse_eula
-      @eula_accepted = false
     end
 
     # Whether the eula has been refused
