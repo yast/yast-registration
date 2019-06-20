@@ -331,6 +331,13 @@ module Registration
       end
     end
 
+    # Whether the EULA acceptance is required
+    #
+    # @return [Boolean] true if a not empty EULA url is present; false otherwise
+    def eula_acceptance_needed?
+      !eula_url.to_s.strip.empty?
+    end
+
     def self.dump_addons
       # dump the downloaded data to a file for easier debugging,
       # avoid write failures when running as an unprivileged user (rspec tests)
