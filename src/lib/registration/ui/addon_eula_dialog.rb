@@ -133,7 +133,7 @@ module Registration
           result = run_eula_dialog(eula_reader)
           addon.accept_eula if result == :accepted
 
-          return :next if [:accepted, :refuse].include?(result)
+          return :next if [:accepted, :refused].include?(result)
           result
         end
       ensure

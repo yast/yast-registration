@@ -51,7 +51,7 @@ describe Registration::UI::AddonEulaDialog do
 
     context "when there are EULA acceptances pending" do
       let(:addons) { [addon_with_eula, second_addon_with_eula] }
-      let(:first_dialog_response) { :refuse }
+      let(:first_dialog_response) { :refused }
       let(:second_dialog_response) { :accepted }
 
       before do
@@ -114,7 +114,7 @@ describe Registration::UI::AddonEulaDialog do
 
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
-          .and_return(:refuse)
+          .and_return(:refused)
       end
 
       it "does not set it as accepted" do
