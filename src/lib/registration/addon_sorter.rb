@@ -1,3 +1,4 @@
+# typed: true
 
 module Registration
   # Sorter for sorting Addons in required display order

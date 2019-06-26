@@ -1,4 +1,5 @@
 #!/usr/bin/env rspec
+# typed: false
 
 require_relative "spec_helper"
 require "registration/widgets/registration_code"

@@ -1,3 +1,4 @@
+# typed: false
 
 require "yast"
 require "registration/ui/abort_confirmation"

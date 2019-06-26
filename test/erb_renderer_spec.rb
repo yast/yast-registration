@@ -1,3 +1,4 @@
+# typed: false
 require_relative "spec_helper"
 
 require "registration/erb_renderer.rb"

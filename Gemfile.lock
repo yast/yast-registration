@@ -1,0 +1,17 @@
+GIT
+  remote: https://github.com/SUSE/connect
+  revision: 14aeaf689622d4f6a9279c91b56a9b3547e75084
+  specs:
+    suse-connect (0.3.18)
+
+GEM
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  suse-connect!
+
+BUNDLED WITH
+   1.16.3

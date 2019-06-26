@@ -1,3 +1,4 @@
+# typed: strict
 # Monkey Patch to workaround issue in ruby 2.4 Psych (bsc#1048526)
 # when fixed or if suseconnect is changed then remove
 # (copied from test/spec_helper.rb)

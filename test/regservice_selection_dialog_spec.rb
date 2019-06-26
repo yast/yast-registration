@@ -1,3 +1,4 @@
+# typed: false
 require_relative "spec_helper"
 require "registration/ui/regservice_selection_dialog"
 

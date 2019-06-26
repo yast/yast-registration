@@ -1,3 +1,4 @@
+# typed: false
 require "pathname"
 
 TESTS_PATH = Pathname.new(File.dirname(__FILE__))

@@ -1,4 +1,5 @@
 #!/usr/bin/env rspec
+# typed: ignore
 # ------------------------------------------------------------------------------
 # Copyright (c) 2018 SUSE LLC, All Rights Reserved.
 #

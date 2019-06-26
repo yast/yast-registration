@@ -1,4 +1,5 @@
 #! /usr/bin/ruby
+# typed: false
 
 # This is a simple reader for the addons dumps,
 # tweak it as needed to display more details about the addons.

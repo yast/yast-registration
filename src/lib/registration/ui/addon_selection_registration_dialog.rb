@@ -1,3 +1,4 @@
+# typed: false
 # Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 
 require "registration/ui/addon_selection_base_dialog"

@@ -1,3 +1,4 @@
+# typed: true
 require "registration/addon"
 require "suse/connect"
 

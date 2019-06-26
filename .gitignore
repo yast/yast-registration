@@ -5,3 +5,5 @@ package/*.bz2
 /nbproject/
 test-driver
 .yardoc/
+/.bundle/
+/vendor/

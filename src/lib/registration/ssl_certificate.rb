@@ -1,3 +1,4 @@
+# typed: false
 
 require "openssl"
 require "suse/connect"

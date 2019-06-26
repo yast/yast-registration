@@ -1,4 +1,5 @@
 #! /usr/bin/ruby
+# typed: strict
 
 # This is a simple generator for creating the addons list displayed at
 # https://github.com/yast/yast-registration/wiki/Available-SCC-Extensions-for-Use-in-Autoyast
