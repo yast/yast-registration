@@ -85,6 +85,97 @@ describe Registration::Addon do
     end
   end
 
+  describe ".accepted" do
+    let(:eula_url) { "http://example.eula.url" }
+    let(:params) { { "eula_url" => eula_url } }
+    let(:wo_eula) { Registration::Addon.new(addon_generator) }
+    let(:refused) { Registration::Addon.new(addon_generator(params)) }
+    let(:accepted) { Registration::Addon.new(addon_generator(params)) }
+    let(:not_selected) { Registration::Addon.new(addon_generator(params)) }
+    let(:registration) do
+      double(
+        get_addon_list: [wo_eula, refused, accepted, not_selected]
+      )
+    end
+
+    before do
+      wo_eula.selected
+      refused.selected
+      accepted.selected
+
+      accepted.accept_eula
+      not_selected.accept_eula
+    end
+
+    it "returns a collection" do
+      expect(described_class.accepted).to be_a(Array)
+    end
+
+    it "includes selected addons w/o required EULA" do
+      expect(described_class.accepted).to include(wo_eula)
+    end
+
+    it "includes selected addons with accepted EULA" do
+      expect(described_class.accepted).to include(accepted)
+    end
+
+    it "does not includes selected addons with refused EULA" do
+      expect(described_class.accepted).to_not include(refused)
+    end
+
+    it "does not includes not selected addons" do
+      expect(described_class.accepted).to_not include(not_selected)
+    end
+  end
+
+  describe ".to_register" do
+    let(:eula_url) { "http://example.eula.url" }
+    let(:params) { { "eula_url" => eula_url } }
+    let(:wo_eula) { Registration::Addon.new(addon_generator) }
+    let(:refused) { Registration::Addon.new(addon_generator(params)) }
+    let(:accepted) { Registration::Addon.new(addon_generator(params)) }
+    let(:registered) { Registration::Addon.new(addon_generator(params)) }
+    let(:not_selected) { Registration::Addon.new(addon_generator(params)) }
+    let(:available_addons) { [wo_eula, refused, accepted, registered, not_selected] }
+    let(:registration) do
+      double(
+        get_addon_list: available_addons
+      )
+    end
+
+    before do
+      available_addons.each(&:selected)
+
+      accepted.accept_eula
+      registered.accept_eula
+      registered.registered
+    end
+
+    it "returns a collection" do
+      expect(described_class.accepted).to be_a(Array)
+    end
+
+    it "includes selected addons w/o required EULA" do
+      expect(described_class.accepted).to include(wo_eula)
+    end
+
+    it "includes selected addons with accepted EULA" do
+      expect(described_class.accepted).to include(accepted)
+    end
+
+    it "does not include selected addons with refused EULA" do
+      expect(described_class.to_register).to_not include(refused)
+    end
+
+    it "does not includes not selected addons" do
+      expect(described_class.accepted).to_not include(not_selected)
+    end
+
+    it "does not include already registered addons" do
+      expect(described_class.to_register).to_not include(registered)
+    end
+  end
+
   describe ".registered" do
     it "returns array of already registered addons" do
       expect(Registration::Addon.registered).to be_a(Array)
@@ -127,6 +218,76 @@ describe Registration::Addon do
         .and_return([])
 
       expect(Registration::Addon.registered_not_installed).to be_empty
+    end
+  end
+
+  describe "#accept_eula" do
+    it "sets EULA as accepted" do
+      addon.accept_eula
+
+      expect(addon.eula_accepted).to eq(true)
+    end
+  end
+
+  describe "#eula_refused?" do
+    context "when EULA acceptance is not required" do
+      before do
+        allow(addon).to receive(:eula_acceptance_needed?).and_return(false)
+      end
+
+      it "returns false" do
+        expect(addon.eula_refused?).to eq(false)
+      end
+    end
+
+    context "when EULA acceptance is required" do
+      before do
+        allow(addon).to receive(:eula_acceptance_needed?).and_return(true)
+      end
+
+      context "and the license was accepted" do
+        it "returns false" do
+          addon.accept_eula
+
+          expect(addon.eula_refused?).to eq(false)
+        end
+      end
+
+      context "and the license was not accepted" do
+        it "returns true" do
+          expect(addon.eula_refused?).to eq(true)
+        end
+      end
+    end
+  end
+
+  context "#eula_acceptance_needed" do
+    let(:eula_url) { nil }
+
+    before do
+      allow(addon).to receive(:eula_url).and_return(eula_url)
+    end
+
+    context "when the EULA URL is nil" do
+      it "returns false" do
+        expect(addon.eula_acceptance_needed?).to eq(false)
+      end
+    end
+
+    context "when there is an empty EULA url" do
+      let(:eula_url) { "  " }
+
+      it "returns false" do
+        expect(addon.eula_acceptance_needed?).to eq(false)
+      end
+    end
+
+    context "when there is a NOT empty EULA url" do
+      let(:eula_url) { "http://example.eula.url" }
+
+      it "returns true" do
+        expect(addon.eula_acceptance_needed?).to eq(true)
+      end
     end
   end
 

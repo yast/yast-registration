@@ -135,9 +135,6 @@ module Yast
       # FIXME: available_addons is called just to fill cache with popup
       return :cancel if get_available_addons == :cancel
 
-      # FIXME: workaround to reference between old way and new storage in Addon metaclass
-      @selected_addons = Registration::Addon.selected
-      ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
       Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
     end
 
@@ -161,7 +158,8 @@ module Yast
     # back returns directly to the extensions selection
     def register_addons
       return false if init_registration == :cancel
-      ret = registration_ui.register_addons(@selected_addons, @known_reg_codes)
+
+      ret = registration_ui.register_addons(Registration::Addon.to_register, @known_reg_codes)
       ret = :extensions if ret == :back
       ret
     end
@@ -204,7 +202,7 @@ module Yast
 
     # display EULAs for the selected addons
     def addon_eula
-      ::Registration::UI::AddonEulaDialog.run(@selected_addons)
+      ::Registration::UI::AddonEulaDialog.run(Registration::Addon.selected)
     end
 
     # remember the user entered values so they can be stored to the AutoYast

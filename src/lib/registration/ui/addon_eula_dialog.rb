@@ -35,7 +35,8 @@ module Registration
         @addons = selected_addons
       end
 
-      # display the EULA for each extension and wait for a button click
+      # Display the EULA for each extension and wait for a button click
+      #
       # @return [Symbol] user input (:next, :back, :abort, :halt)
       def run
         Yast::Wizard.SetContents(
@@ -47,22 +48,17 @@ module Registration
           false
         )
 
-        # Default: no EULA specified => accepted
-        eula_ret = :accepted
-
         addons.each do |addon|
-          next unless addon.eula_url && !addon.eula_url.empty?
+          next unless addon.eula_acceptance_needed?
+          next if addon.registered?
 
           log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
-          eula_ret = accept_eula(addon)
+          result = accept_eula(addon)
 
-          # any declined license needs to be handled separately
-          break if eula_ret != :accepted
+          return result unless result == :next
         end
 
-        # go back or abort if any EULA has not been accepted, let the user
-        # deselect the not accepted extension
-        eula_ret == :accepted ? :next : eula_ret
+        :next
       end
 
     private
@@ -116,23 +112,29 @@ module Registration
       # @return [Symbol] :accepted, :back, :abort, :halt - user input
       def run_eula_dialog(eula_reader)
         base_product = false
-        cancel_action = "abort"
+        cancel_action = "refuse"
         ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eula_reader.licenses),
           base_product, cancel_action)
         log.debug "EULA dialog result: #{ret}"
+
         ret
       end
 
       # ask user to accept an addon EULA
       # @param [Addon] addon the addon
-      # @return [Symbol] :accepted, :back, :abort, :halt
+      # @return [Symbol] :next, :back, :abort, :halt
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           return :back unless download_eula(addon, tmpdir)
-          eula_reader = EulaReader.new(tmpdir)
 
+          eula_reader = EulaReader.new(tmpdir)
           setup_eula_dialog(addon, eula_reader, tmpdir)
-          run_eula_dialog(eula_reader)
+
+          result = run_eula_dialog(eula_reader)
+          addon.accept_eula if result == :accepted
+
+          return :next if [:accepted, :refused].include?(result)
+          result
         end
       ensure
         Yast::ProductLicense.CleanUp()

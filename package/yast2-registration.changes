@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jun 14 07:15:21 UTC 2019 - David Diaz <dgonzalez@suse.com>
+
+- Do not abort when an addon license is refused (bsc#1114018).
+- 3.3.0
+
+-------------------------------------------------------------------
 Mon Feb 18 13:11:12 UTC 2019 - lslezak@suse.cz
 
 - Fixed "can't modify frozen String" crash (bsc#1125006)

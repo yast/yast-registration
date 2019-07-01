@@ -64,6 +64,20 @@ module Registration
         @selected ||= []
       end
 
+      # Returns only those selected addons with accepted EULA
+      #
+      # @return [Array<Addon>]
+      def accepted
+        selected.reject(&:eula_refused?)
+      end
+
+      # Returns only those selected addons with accepted EULA but pending to be registered
+      #
+      # @return [Array<Addon>]
+      def to_register
+        accepted - registered
+      end
+
       # return add-ons which are registered but not installed in the system
       # and are available to install
       # @return [Array<Addon>] the list of add-ons
@@ -105,8 +119,10 @@ module Registration
 
     extend Forwardable
 
-    attr_reader :children
+    attr_reader :children, :eula_accepted
     attr_accessor :depends_on, :regcode
+
+    alias_method :eula_accepted?, :eula_accepted
 
     # delegate methods to underlaying suse connect object
     def_delegators :@pure_addon,
@@ -128,6 +144,7 @@ module Registration
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
       @pure_addon = pure_addon
+      @eula_accepted = false
       @children = []
     end
 
@@ -230,6 +247,25 @@ module Registration
       [:arch, :identifier, :version, :release_type].all? do |attr|
         send(attr) == remote_product.send(attr)
       end
+    end
+
+    # Set the EULA as accepted
+    def accept_eula
+      @eula_accepted = true
+    end
+
+    # Whether the eula has been refused
+    #
+    # @return [Boolean] true if EULA acceptance was required but refused; false otherwise
+    def eula_refused?
+      eula_acceptance_needed? && !eula_accepted
+    end
+
+    # Whether the EULA acceptance is required
+    #
+    # @return [Boolean] true if a not empty EULA url is present; false otherwise
+    def eula_acceptance_needed?
+      !eula_url.to_s.strip.empty?
     end
   end
 end
