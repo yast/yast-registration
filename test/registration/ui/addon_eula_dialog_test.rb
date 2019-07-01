@@ -40,7 +40,7 @@ describe Registration::UI::AddonEulaDialog do
     context "when there are no EULA acceptances to show" do
       let(:addons) { [registered_addon, addon_wo_eula] }
 
-      it "does not display the eula dialog" do
+      it "does not display the EULA dialog" do
         expect(Yast::ProductLicense).to_not receive(:DisplayLicenseDialogWithTitle)
 
         dialog.run
