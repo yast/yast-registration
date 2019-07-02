@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.2.4
+Version:        4.2.5
 Release:        0
 Summary:        YaST2 - Registration Module
 License:        GPL-2.0-only
@@ -54,8 +54,8 @@ Requires:       rubygem(suse-connect) >= 0.2.37
 Requires:       SUSEConnect >= 0.2.37
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-slp >= 3.1.9
-# packager/product_patterns.rb
-Requires:       yast2-packager >= 3.1.95
+# Packager ProductLicense#HandleLicenseDialogRet allowing "refuse" action
+Requires:       yast2-packager >= 4.2.16
 Requires:       yast2-update >= 3.1.36
 
 BuildArch:      noarch
