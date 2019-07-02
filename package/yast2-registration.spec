@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.1.22
+Version:        4.1.23
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -41,8 +41,8 @@ Requires:       SUSEConnect >= 0.2.37
 
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-slp >= 3.1.9
-# packager/product_patterns.rb
-Requires:       yast2-packager >= 3.1.95
+# Packager ProductLicense#HandleLicenseDialogRet allowing "refuse" action
+Requires:       yast2-packager >= 4.1.47
 Requires:       yast2-update >= 3.1.36
 
 # Y2Packager::ProductLicense
