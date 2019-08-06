@@ -37,6 +37,10 @@ describe Registration::UI::AddonEulaDialog do
       registered_addon.registered
     end
 
+    after do
+      Registration::Addon.reset!
+    end
+
     context "when there are no EULA acceptances to show" do
       let(:addons) { [registered_addon, addon_wo_eula] }
 

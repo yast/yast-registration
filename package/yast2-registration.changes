@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug  6 17:05:32 UTC 2019 - Ladislav Slezák <lslezak@suse.cz>
+
+- Fixed unit test, reset the mocked addons in the
+  addon_eula_dialog_test.rb test (bsc#1144550)
+- 4.2.6
+
+-------------------------------------------------------------------
 Thu Jun 20 14:15:48 UTC 2019 - David Diaz <dgonzalez@suse.com>
 
 - Do not abort when an addon license is refused (bsc#1114018).
