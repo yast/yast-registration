@@ -33,6 +33,8 @@ require "registration/url_helpers"
 require "registration/repo_state"
 
 require "packager/product_patterns"
+require "y2packager/medium_type"
+require "y2packager/product_control_product"
 require "y2packager/product_reader"
 require "yast2/execute"
 
@@ -147,11 +149,28 @@ module Registration
       product_info
     end
 
+    # Product to register for the online installation medium
+    # @return [Hash] The product Hash
+    def self.online_base_product
+      prod = Y2Packager::ProductControlProduct.selected
+      raise "No base product selected from control.xml!" unless prod
+
+      {
+        "name"            => prod.name,
+        "version_version" => prod.version,
+        "arch"            => prod.arch,
+        "display_name"    => prod.label,
+        "register_target" => prod.register_target
+      }
+    end
+
     def self.find_base_product
       # FIXME: refactor the code to use Y2Packager::Product
 
       # just for debugging:
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
+
+      return online_base_product if Y2Packager::MediumType.online?
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial

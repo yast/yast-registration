@@ -44,6 +44,8 @@ require "registration/ui/base_system_registration_dialog"
 require "registration/ui/registration_update_dialog"
 require "registration/ui/media_addon_workflow"
 
+require "y2packager/medium_type"
+
 # TODO: move to the "Registration" name space
 module Yast
   class InstSccClient < Client
@@ -54,6 +56,11 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
+      if Y2Packager::MediumType.skip_step?
+        log.info "Skipping the client on the #{Y2Packager::MediumType.type} medium"
+        return :auto
+      end
+
       textdomain "registration"
       import_modules
 
@@ -182,8 +189,11 @@ module Yast
       # Go back if the user clicked 'back' in the registration dialog
       return :back if @back_from_register
 
-      # check the base product at start to avoid problems later
-      if ::Registration::SwMgmt.find_base_product.nil?
+      # check the base product at start to avoid problems later,
+      # skip the check on the online medium, it does not contain any repo (or a base product)
+      if !(Stage.initial && Y2Packager::MediumType.online?) &&
+          ::Registration::SwMgmt.find_base_product.nil?
+
         ::Registration::Helpers.report_no_base_product
         return Mode.normal ? :abort : :auto
       end
