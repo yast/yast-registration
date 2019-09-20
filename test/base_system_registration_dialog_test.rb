@@ -10,6 +10,10 @@ describe Registration::UI::BaseSystemRegistrationDialog do
   let(:custom_url) { "http://smt.example.com/" }
   let(:default_url) { SUSE::Connect::Config.new.url }
 
+  before do
+    allow(Yast::Packages).to receive(:ImportGPGKeys)
+  end
+
   describe ".run" do
     let(:instance) { double("dialog") }
 

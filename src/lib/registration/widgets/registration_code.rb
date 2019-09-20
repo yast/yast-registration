@@ -35,6 +35,7 @@ module Registration
       end
 
       def label
+        # TRANSLATORS: input field label
         _("Registration Code or RMT Server URL")
       end
 

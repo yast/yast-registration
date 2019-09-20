@@ -51,6 +51,7 @@ module Registration
         email: email
       )
 
+      log.info "Announcing system with distro_target: #{distro_target}"
       login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
       log.info "Global SCC credentials (username): #{login}"
 

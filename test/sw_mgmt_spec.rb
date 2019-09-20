@@ -435,6 +435,7 @@ describe Registration::SwMgmt do
         .and_return("SLES"     => "skelcd-control-SLES",
                     "SLED"     => "skelcd-control-SLED",
                     "SLES_SAP" => "skelcd-control-SLES_SAP")
+      allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
     end
 
     context "in installed system" do
@@ -482,6 +483,38 @@ describe Registration::SwMgmt do
         expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products3).exactly(3).times
         # the selected product is ignored, the result is nil
         expect(subject.find_base_product).to eq(products3[1])
+      end
+    end
+
+    context "on the online installation medium" do
+      before do
+        allow(Yast::Stage).to receive(:initial).and_return(true)
+        allow(Y2Packager::MediumType).to receive(:online?).and_return(true)
+      end
+
+      it "reads the base product from control.xml" do
+        data =
+          {
+            "arch"            => "x86_64",
+            "display_name"    => "SUSE Linux Enterprise Server 15 SP2",
+            "name"            => "SLES",
+            "register_target" => "sle-15-x86_64",
+            "version_version" => "15.2"
+          }
+
+        selected = Y2Packager::ProductControlProduct.new(
+          arch:            data["arch"],
+          label:           data["display_name"],
+          license_url:     "",
+          name:            data["name"],
+          register_target: data["register_target"],
+          version:         data["version_version"]
+        )
+
+        expect(Y2Packager::ProductControlProduct).to receive(:selected)
+          .and_return(selected)
+
+        expect(subject.find_base_product).to eq(data)
       end
     end
   end

@@ -16,6 +16,7 @@ describe Yast::InstSccClient do
     allow(Yast::UI).to receive(:ReplaceWidget)
     allow(Yast::Mode).to receive(:update).and_return(false)
     allow(Yast::SlpService).to receive(:all).and_return([])
+    allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
   end
 
   context "the system is already registered" do

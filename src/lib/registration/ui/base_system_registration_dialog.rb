@@ -11,6 +11,7 @@ require "registration/sw_mgmt"
 require "registration/helpers"
 require "registration/url_helpers"
 require "registration/ui/abort_confirmation"
+require "y2packager/medium_type"
 
 module Registration
   module UI
@@ -32,6 +33,7 @@ module Registration
       Yast.import "Popup"
       Yast.import "Report"
       Yast.import "ProductFeatures"
+      Yast.import "Stage"
 
       WIDGETS = {
         register_scc:      [:email, :reg_code],
@@ -443,6 +445,10 @@ module Registration
       # @return [Boolean] true on success
       def register_system_and_base_product
         registration_ui = RegistrationUI.new(registration)
+
+        # ensure the GPG keys from inst-sys are imported to the package manager,
+        # on the online installation medium the package manager is initialized later
+        Yast::Packages.ImportGPGKeys if Yast::Stage.initial && Y2Packager::MediumType.online?
 
         success, product_service = registration_ui.register_system_and_base_product
 
