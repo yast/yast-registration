@@ -22,8 +22,11 @@ module Registration
     # so the newer paths are checked first
     PATHS = [
       # the YaST (SUSEConnect) current default path
-      # /usr/share/pki/trust/anchors/registration_server.pem
+      # /etc/pki/trust/anchors/registration_server.pem
       SUSE::Connect::YaST::SERVER_CERT_FILE,
+      # old location of the certificate (before moved to /etc)
+      # https://bugzilla.suse.com/show_bug.cgi?id=1130864
+      "/usr/share/pki/trust/anchors/registration_server.pem",
       # RMT certificate
       # https://github.com/SUSE/rmt/blob/b240ce577bd1637cfb57548f2741a1925cf3e4ee/public/tools/rmt-client-setup#L214
       "/etc/pki/trust/anchors/rmt-server.pem",
