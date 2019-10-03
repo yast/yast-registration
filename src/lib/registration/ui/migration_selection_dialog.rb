@@ -266,7 +266,7 @@ module Registration
           return _("The registration server does not offer migrations for Product " \
                    "<b>%s</b> so it will <b>stay unchanged</b>. We recommend you " \
                    "to check if it's correct and to configure the repositories " \
-                   "manually in case of needed.") % product_name
+                   "manually when needed.") % product_name
 
         end
 
