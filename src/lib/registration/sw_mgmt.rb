@@ -170,7 +170,7 @@ module Registration
       # just for debugging:
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
-      return online_base_product if Y2Packager::MediumType.online?
+      return online_base_product if Stage.initial && Y2Packager::MediumType.online?
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial
