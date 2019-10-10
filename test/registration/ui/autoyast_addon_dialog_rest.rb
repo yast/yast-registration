@@ -24,7 +24,7 @@ describe Registration::UI::AutoyastAddonDialog do
       "name"         => "free_cool_in_addon",
       "version"      => "666",
       "arch"         => "s390x",
-      "release_type" => "the best",
+      "release_type" => nil,
       "reg_code"     => "hell_driven_delevopment"
     }
   end
