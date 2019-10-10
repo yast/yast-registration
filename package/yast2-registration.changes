@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 10 13:39:18 UTC 2019 - Josef Reidinger <jreidinger@suse.com>
+
+- fix crash of autoyast config dialog (bsc#1152913)
+- 3.2.19
+
+-------------------------------------------------------------------
 Mon Feb 18 13:11:12 UTC 2019 - lslezak@suse.cz
 
 - Fixed "can't modify frozen String" crash (bsc#1125006)
