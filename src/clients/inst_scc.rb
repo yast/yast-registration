@@ -11,7 +11,6 @@
 #
 # ------------------------------------------------------------------------------
 #
-
 require "registration/clients/inst_scc"
 
 Yast::InstSccClient.new.main
