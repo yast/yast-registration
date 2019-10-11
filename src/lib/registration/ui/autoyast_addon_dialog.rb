@@ -92,6 +92,8 @@ module Registration
       # the main event loop
       # @return [Symbol] the user input
       def handle_dialog
+        ret = nil
+
         loop do
           refresh_buttons
 

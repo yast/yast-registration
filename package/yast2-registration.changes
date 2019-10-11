@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 10 13:39:18 UTC 2019 - Josef Reidinger <jreidinger@suse.com>
+
+- fix crash of autoyast config dialog (bsc#1152913)
+- 4.1.24
+
+-------------------------------------------------------------------
 Thu Jun 20 14:15:48 UTC 2019 - David Diaz <dgonzalez@suse.com>
 
 - Do not abort when an addon license is refused (bsc#1114018).
