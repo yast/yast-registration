@@ -696,21 +696,33 @@ module Registration
     # @param destdir [String] the target directory
     # @return [String] target distribution name or empty string if not found
     def self.target_distribution(destdir)
-      # ensure the target is initialized
-      Pkg.TargetInitialize(destdir)
-      # the sources are initialized by the Product.FindBaseProducts call internally
-      base_products = Product.FindBaseProducts
+      if Y2Packager::MediumType.online?
+        control_products = Y2Packager::ProductControlProduct.products
 
-      # empty target distribution disables service compatibility check in case
-      # the base product cannot be found
-      target_distro = base_products ? base_products.first["register_target"] : ""
+        if control_products.empty?
+          target_distro = ""
+        else
+          # curently all products have the same "register_target" value
+          target_distro = control_products.first.register_target || ""
+        end
+      else
+        # ensure the target is initialized
+        Pkg.TargetInitialize(destdir)
+        # the sources are initialized by the Product.FindBaseProducts call internally
+        base_products = Product.FindBaseProducts
+
+        # empty target distribution disables service compatibility check in case
+        # the base product cannot be found
+        target_distro = base_products ? base_products.first["register_target"] : ""
+
+        # Save the current repositories so they are not lost
+        Pkg.SourceSaveAll
+        # close both target and sources to fully reinitialize later
+        Pkg.SourceFinishAll
+        Pkg.TargetFinish
+      end
+
       log.info "Base product target distribution: #{target_distro.inspect}"
-
-      # Save the current repositories so they are not lost
-      Pkg.SourceSaveAll
-      # close both target and sources to fully reinitialize later
-      Pkg.SourceFinishAll
-      Pkg.TargetFinish
 
       target_distro
     end
