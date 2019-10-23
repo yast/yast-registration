@@ -152,8 +152,16 @@ module Registration
     # Product to register for the online installation medium
     # @return [Hash] The product Hash
     def self.online_base_product
-      prod = Y2Packager::ProductControlProduct.selected
-      raise "No base product selected from control.xml!" unless prod
+      if Mode.update
+        prods = Y2Packager::ProductControlProduct.products
+        installed_names = installed_products.map { |p| p["name"] }
+        prod = prods.find { |p| installed_names.include?(p.name) }
+        log.info "selecting product from control #{prod}"
+        raise "No base product selected from control.xml matching installed products!" unless prod
+      else
+        prod = Y2Packager::ProductControlProduct.selected
+        raise "No base product selected from control.xml!" unless prod
+      end
 
       {
         "name"            => prod.name,
