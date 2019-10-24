@@ -133,10 +133,16 @@ module Registration
 
     # Get the list of addons
     #
+    # @param product [Symbol] possible values are `:to_register` for addons for new product ( e.g. during upgrade )
+    #   and `:installed` for old base product.
     # @return [Array<Addon>] List of addons, empty if no base product is found
-    def get_addon_list
+    def get_addon_list(product = :to_register)
       # extensions for base product
-      base_product = ::Registration::SwMgmt.base_product_to_register
+      base_product = if product == :to_register
+        ::Registration::SwMgmt.base_product_to_register
+      else
+        ::Registration::SwMgmt.installed_base_product
+      end
 
       if !base_product
         log.warn "No base product, skipping addons"

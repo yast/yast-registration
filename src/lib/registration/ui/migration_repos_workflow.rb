@@ -254,7 +254,7 @@ module Registration
       # @return [Array<Hash>] installed products and addons selected to be installed
       def merge_registered_addons
         # load the extensions to merge the registered but not installed extensions
-        Addon.find_all(registration)
+        Addon.find_all(registration, :installed)
 
         # TRANSLATORS: Popup question, merge this addon that are registered but not
         # installed to the current migration products list.
@@ -274,6 +274,7 @@ module Registration
           end
 
         products.concat(addons)
+        Addon.reset! # clear cache as we need to refill it with to_register addons soon
       end
 
       # load migration products for the installed products from the registration server,
@@ -322,7 +323,8 @@ module Registration
         return :empty unless migration_confirmed?(base_product, activations)
 
         remote_product = OpenStruct.new(
-          arch:         base_product.arch.to_s,
+#          arch:         base_product.arch.to_s,
+          arch:         "x86_64", # FIXME:
           identifier:   base_product.name,
           version:      SwMgmt.version_without_release(base_product),
           # FIXME: not supported by Y2Packager::Product yet

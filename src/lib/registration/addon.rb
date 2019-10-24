@@ -31,10 +31,10 @@ module Registration
       # read the remote add-on from the registration server
       # @param registration [Registration::Registration] use this object for
       #  reading the remote add-ons
-      def find_all(registration)
+      def find_all(registration, product = :to_register)
         return @cached_addons if @cached_addons
 
-        @cached_addons = load_addons(registration)
+        @cached_addons = load_addons(registration, product)
 
         dump_addons
 
@@ -138,8 +138,8 @@ module Registration
         result
       end
 
-      def load_addons(registration)
-        pure_addons = registration.get_addon_list
+      def load_addons(registration, product)
+        pure_addons = registration.get_addon_list(product)
         # get IDs of the already activated addons
         activated_addon_ids = registration.activated_products.map(&:id)
 

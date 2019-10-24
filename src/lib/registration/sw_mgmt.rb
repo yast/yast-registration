@@ -209,6 +209,11 @@ module Registration
       products.first
     end
 
+    def self.installed_base_product
+      reader = Y2Packager::ProductReader.new
+      reader.installed_base_product.resolvable_properties
+    end
+
     # Evaluate the product if it is a base product depending on the current
     # system status.
     # @param p [Hash] the product from pkg-bindings
