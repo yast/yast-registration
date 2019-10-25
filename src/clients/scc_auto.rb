@@ -41,6 +41,8 @@ require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 require "registration/ui/offline_migration_workflow"
 require "registration/erb_renderer.rb"
+require "y2packager/product_control_product"
+require "y2packager/medium_type"
 
 module Yast
   class SccAutoClient < Client
@@ -76,6 +78,9 @@ module Yast
       Yast.import "Label"
       Yast.import "Report"
       Yast.import "Popup"
+      Yast.import "Profile"
+      Yast.import "Packages"
+      Yast.import "Report"
       Yast.import "Installation"
     end
 
@@ -200,6 +205,12 @@ module Yast
         return ret == :next
       end
 
+      # special handling for the online installation medium,
+      # we need to evaluate the base products defined in the control.xml
+      if Y2Packager::MediumType.online?
+        return false unless online_medium_config
+      end
+
       ret = ::Registration::ConnectHelpers.catch_registration_errors do
         import_certificate(@config.reg_server_cert)
         register_base_product && register_addons
@@ -208,6 +219,35 @@ module Yast
       return false unless ret
 
       finish_registration
+
+      true
+    end
+
+    # Select the product from the control.xml (for the online installation medium)
+    # @return [Boolean] true on success, false on failure
+    def online_medium_config
+      # import the GPG keys before refreshing the repositories
+      Yast::Packages.ImportGPGKeys
+
+      products = Y2Packager::ProductControlProduct.products
+      ay_product = Profile.current.fetch("software", {}).fetch("products", []).first
+
+      if !ay_product
+        # TRANSLATORS: error message, %s is the XML path, e.g. "software/products"
+        Report.Error(_("Missing product specification in the %s section") % "software/products")
+        return false
+      end
+
+      control_product = products.find { |p| p.name == ay_product }
+
+      if !control_product
+        # TRANSLATORS: error message, %s is a product ID, e.g. "SLES"
+        Report.Error(_("Product %s not found") % ay_product)
+        return false
+      end
+
+      # mark the control file product as selected
+      Y2Packager::ProductControlProduct.selected = control_product
 
       true
     end
