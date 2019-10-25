@@ -322,8 +322,7 @@ module Registration
         return :empty unless migration_confirmed?(base_product, activations)
 
         remote_product = OpenStruct.new(
-#          arch:         base_product.arch.to_s,
-          arch:         "x86_64", # FIXME:
+          arch:         base_product.arch.to_s,
           identifier:   base_product.name,
           version:      SwMgmt.version_without_release(base_product),
           # FIXME: not supported by Y2Packager::Product yet
