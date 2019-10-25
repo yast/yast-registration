@@ -152,8 +152,16 @@ module Registration
     # Product to register for the online installation medium
     # @return [Hash] The product Hash
     def self.online_base_product
-      prod = Y2Packager::ProductControlProduct.selected
-      raise "No base product selected from control.xml!" unless prod
+      if Mode.update
+        prods = Y2Packager::ProductControlProduct.products
+        installed_names = installed_products.map { |p| p["name"] }
+        prod = prods.find { |p| installed_names.include?(p.name) }
+        log.info "selecting product from control #{prod}"
+        raise "No base product selected from control.xml matching installed products!" unless prod
+      else
+        prod = Y2Packager::ProductControlProduct.selected
+        raise "No base product selected from control.xml!" unless prod
+      end
 
       {
         "name"            => prod.name,
@@ -199,6 +207,11 @@ module Registration
       log.warn "More than one base product found!" if products.size > 1
 
       products.first
+    end
+
+    def self.installed_base_product
+      reader = Y2Packager::ProductReader.new
+      reader.installed_base_product.resolvable_properties
     end
 
     # Evaluate the product if it is a base product depending on the current
@@ -696,21 +709,33 @@ module Registration
     # @param destdir [String] the target directory
     # @return [String] target distribution name or empty string if not found
     def self.target_distribution(destdir)
-      # ensure the target is initialized
-      Pkg.TargetInitialize(destdir)
-      # the sources are initialized by the Product.FindBaseProducts call internally
-      base_products = Product.FindBaseProducts
+      if Y2Packager::MediumType.online?
+        control_products = Y2Packager::ProductControlProduct.products
 
-      # empty target distribution disables service compatibility check in case
-      # the base product cannot be found
-      target_distro = base_products ? base_products.first["register_target"] : ""
+        target_distro = if control_products.empty?
+          ""
+        else
+          # curently all products have the same "register_target" value
+          control_products.first.register_target || ""
+        end
+      else
+        # ensure the target is initialized
+        Pkg.TargetInitialize(destdir)
+        # the sources are initialized by the Product.FindBaseProducts call internally
+        base_products = Product.FindBaseProducts
+
+        # empty target distribution disables service compatibility check in case
+        # the base product cannot be found
+        target_distro = base_products ? base_products.first["register_target"] : ""
+
+        # Save the current repositories so they are not lost
+        Pkg.SourceSaveAll
+        # close both target and sources to fully reinitialize later
+        Pkg.SourceFinishAll
+        Pkg.TargetFinish
+      end
+
       log.info "Base product target distribution: #{target_distro.inspect}"
-
-      # Save the current repositories so they are not lost
-      Pkg.SourceSaveAll
-      # close both target and sources to fully reinitialize later
-      Pkg.SourceFinishAll
-      Pkg.TargetFinish
 
       target_distro
     end

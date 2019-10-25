@@ -211,12 +211,12 @@ module Registration
       end
 
       def not_installed_products_check
-        SwMgmt.init(true)
-
         # FIXME: do the check also at offline upgrade?
         # Currently it reads the addons for the new SLES15 which is not
         # registered yet and fails.
         return :next if Yast::Stage.initial
+
+        SwMgmt.init(true)
 
         Addon.find_all(registration)
 
