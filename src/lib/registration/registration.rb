@@ -133,10 +133,8 @@ module Registration
 
     # Get the list of addons
     #
-    # @param product [Symbol] possible values are `:to_register` for addons for new product ( e.g. during upgrade )
-    #   and `:installed` for old base product.
     # @return [Array<Addon>] List of addons, empty if no base product is found
-    def get_addon_list(product = :to_register)
+    def get_addon_list
       # extensions for base product
       base_product = if Yast::Mode.update
         ::Registration::SwMgmt.installed_base_product

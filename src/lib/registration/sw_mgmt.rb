@@ -712,11 +712,11 @@ module Registration
       if Y2Packager::MediumType.online?
         control_products = Y2Packager::ProductControlProduct.products
 
-        if control_products.empty?
-          target_distro = ""
+        target_distro = if control_products.empty?
+          ""
         else
           # curently all products have the same "register_target" value
-          target_distro = control_products.first.register_target || ""
+          control_products.first.register_target || ""
         end
       else
         # ensure the target is initialized
