@@ -138,10 +138,10 @@ module Registration
     # @return [Array<Addon>] List of addons, empty if no base product is found
     def get_addon_list(product = :to_register)
       # extensions for base product
-      base_product = if product == :to_register
-        ::Registration::SwMgmt.base_product_to_register
-      else
+      base_product = if Yast::Mode.update
         ::Registration::SwMgmt.installed_base_product
+      else
+        ::Registration::SwMgmt.base_product_to_register
       end
 
       if !base_product

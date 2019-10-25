@@ -211,12 +211,12 @@ module Registration
       end
 
       def not_installed_products_check
-        SwMgmt.init(true)
-
         # FIXME: do the check also at offline upgrade?
         # Currently it reads the addons for the new SLES15 which is not
         # registered yet and fails.
         return :next if Yast::Stage.initial
+
+        SwMgmt.init(true)
 
         Addon.find_all(registration)
 
@@ -254,7 +254,7 @@ module Registration
       # @return [Array<Hash>] installed products and addons selected to be installed
       def merge_registered_addons
         # load the extensions to merge the registered but not installed extensions
-        Addon.find_all(registration, :installed)
+        Addon.find_all(registration)
 
         # TRANSLATORS: Popup question, merge this addon that are registered but not
         # installed to the current migration products list.
@@ -274,7 +274,6 @@ module Registration
           end
 
         products.concat(addons)
-        Addon.reset! # clear cache as we need to refill it with to_register addons soon
       end
 
       # load migration products for the installed products from the registration server,
