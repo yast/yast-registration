@@ -135,10 +135,10 @@ module Registration
       return if self_update_id.empty?
       # TODO: does offline makes sense for self update?
       base_product = if Y2Packager::MediumType.online? || Y2Packager::MediumType.offline?
-          Y2Packager::ProductControlProduct.products.first
-        else
-          Y2Packager::Product.available_base_products.first
-        end
+        Y2Packager::ProductControlProduct.products.first
+      else
+        Y2Packager::Product.available_base_products.first
+      end
       return unless base_product
 
       # filter out not needed data
