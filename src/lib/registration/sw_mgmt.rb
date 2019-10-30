@@ -134,7 +134,7 @@ module Registration
     def self.installer_update_base_product(self_update_id)
       return if self_update_id.empty?
       base_product =
-        Y2Packager::ProductControlProduct.products.find {|p| p.name == self_update_id }
+        Y2Packager::ProductControlProduct.products.find { |p| p.name == self_update_id }
       return unless base_product
 
       # filter out not needed data
