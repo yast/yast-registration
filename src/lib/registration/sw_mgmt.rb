@@ -133,14 +133,15 @@ module Registration
     # given self_update_id is empty or there is no base product available
     def self.installer_update_base_product(self_update_id)
       return if self_update_id.empty?
-      base_product = Y2Packager::Product.available_base_products.first
+      base_product =
+        Y2Packager::ProductControlProduct.products.find {|p| p.name == self_update_id }
       return unless base_product
 
       # filter out not needed data
       product_info = {
         "name"         => self_update_id,
         "arch"         => base_product.arch,
-        "version"      => version_without_release(base_product),
+        "version"      => base_product.version,
         "release_type" => nil
       }
 
