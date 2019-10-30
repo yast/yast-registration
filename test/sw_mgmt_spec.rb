@@ -127,6 +127,8 @@ describe Registration::SwMgmt do
 
     before do
       allow(Y2Packager::Product).to receive(:available_base_products).and_return(available_products)
+      allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
+      allow(Y2Packager::MediumType).to receive(:offline?).and_return(false)
     end
 
     it "returns nil if the given self_update_id is empty" do

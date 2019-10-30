@@ -133,7 +133,12 @@ module Registration
     # given self_update_id is empty or there is no base product available
     def self.installer_update_base_product(self_update_id)
       return if self_update_id.empty?
-      base_product = Y2Packager::Product.available_base_products.first
+      # TODO: does offline makes sense for self update?
+      base_product = if Y2Packager::MediumType.online? || Y2Packager::MediumType.offline?
+          Y2Packager::ProductControlProduct.products.first
+        else
+          Y2Packager::Product.available_base_products.first
+        end
       return unless base_product
 
       # filter out not needed data
