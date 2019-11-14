@@ -260,14 +260,14 @@ module Registration
     # Any product selected to install?
     # @return [Boolean] true if at least one product is selected to install
     def self.product_selected?
-      Y2Packager::Resolvable.any?(kind: :product, :status :selected)
+      Y2Packager::Resolvable.any?(kind: :product, status: :selected)
     end
 
     # Any product installed? (e.g. during upgrade)
     # @return [Boolean] true if at least one product is installed
     def self.product_installed?
-      Y2Packager::Resolvable.any?(kind: :product, :status :installed) ||
-      Y2Packager::Resolvable.any?(kind: :product, :status :removed)
+      Y2Packager::Resolvable.any?(kind: :product, status: :installed) ||
+      Y2Packager::Resolvable.any?(kind: :product, status: :removed)
     end
 
     def self.installed_products
