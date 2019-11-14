@@ -618,38 +618,91 @@ module Registration
         Yast::SourceDialogs.SetURL("dvd://")
       end
 
+      # Add and initialize the respective base product repository from the Full medium
+      # for upgrade, select the new base product to install.
       def add_offline_base_product
-        # in offline upgrade add the repository with the selected base product
-        # FIXME: similar to clients/inst_complex_welcome.rb and widgets/product_selector.rb
-        url = Yast::InstURL.installInf2Url("")
-        base_products = Y2Packager::ProductLocation
-                        .scan(url)
-                        .select { |p| p.details && p.details.base }
-        log.info "Found base products on the offline medium: #{base_products.pretty_inspect}"
-
         # find the installed base product
         installed_base = Y2Packager::Resolvable.find(
           kind: :product, status: :installed, type: "base"
         ).first
+
         if !installed_base
           log.error("Installed base product not found")
           return
         end
 
-        # FIXME: handle also the product renames
-        new_base = base_products.find { |p| p.details && p.details.product == installed_base.name }
+        new_base = full_medium_upgrade_product(installed_base)
+
         if !new_base
           log.error("New base product not found")
           return
         end
 
+        new_product = new_base.details && new_base.details.product
+        log.info("Upgrading product #{installed_base.name.inspect} to #{new_product.inspect}")
+
+        add_full_medium_repository(new_product, new_base.dir)
+      end
+
+      #
+      # Scan the installation repository and return the found product directories.
+      #
+      # @return [Array<Y2Packager::ProductLocation>] the found product directories
+      def full_medium_products
+        # in offline upgrade add the repository with the selected base product
+        # FIXME: similar to clients/inst_complex_welcome.rb and widgets/product_selector.rb
+        url = Yast::InstURL.installInf2Url("")
+        products = Y2Packager::ProductLocation
+                   .scan(url)
+                   .select { |p| p.details && p.details.base }
+        log.info("Found base products on the offline medium: #{products.pretty_inspect}")
+        products
+      end
+
+      #
+      # Find the upgrade base product from the Full medium for the installed
+      # base product.
+      #
+      # @param installed_base [<Y2Packager::Resolvable>] the installed base product
+      # @return [Y2Packager::ProductLocation, nil] The location of the new base product on
+      #  the Full installation medium, nil if no suitable upgrade product is found
+      def full_medium_upgrade_product(installed_base)
+        new_base = nil
+        base_products = full_medium_products
+        installed_names = Y2Packager::Resolvable.find(kind: :product, status: :installed)
+                                                .map(&:name)
+        # first check if there is a product rename defined for the installed products
+        # and the new renamed base product is available
+        # key in the mapping: list of installed products, value: the new base product
+        Y2Packager::ProductUpgrade::MAPPING.each do |k, v|
+          if (k - installed_names).empty?
+            new_base = base_products.find { |p| p.details && p.details.product == v }
+          end
+        end
+
+        # if no product rename was found then use the 1:1 upgrade
+        new_base ||= base_products.find do |p|
+          p.details && p.details.product == installed_base.name
+        end
+
+        new_base
+      end
+
+      #
+      # Initialize the base product repository and select the base product
+      # to install.
+      #
+      # @param new_product [String] Name of the product to install
+      # @param dir [String] Directory on the medium with the selected base product repository
+      def add_full_medium_repository(new_product, dir)
         # FIXME: this is the same as in installation/widgets/product_selector.rb and other places
         show_popup = true
+        url = Yast::InstURL.installInf2Url("")
         log_url = Yast::URL.HidePassword(url)
-        Yast::Packages.Initialize_StageInitial(show_popup, url, log_url, new_base.dir)
+        Yast::Packages.Initialize_StageInitial(show_popup, url, log_url, dir)
 
         # select the product to install
-        Yast::Pkg.ResolvableInstall(new_base.details && new_base.details.product, :product, "")
+        Yast::Pkg.ResolvableInstall(new_product, :product, "") if new_product
         # initialize addons and the workflow manager
         Yast::AddOnProduct.SetBaseProductURL(url)
         Yast::WorkflowManager.SetBaseWorkflow(false)
