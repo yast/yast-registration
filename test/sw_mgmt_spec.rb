@@ -313,8 +313,8 @@ describe Registration::SwMgmt do
   describe ".find_addon_updates" do
     it "returns new available addons for installed addons" do
       # installed: SLES11-SP2 + SLE11-SP2-SDK + SLE11-SP2-Webyast
-      expect(Yast::Pkg).to receive(:ResolvableProperties).with("", :product, "") \
-        .and_return(load_yaml_fixture("products_sp2_update.yml"))
+      expect(Y2Packager::Resolvable).to receive(:find).with(kind: :product) \
+        .and_return(load_resolvable("products_sp2_update.yml"))
       # available: SDK, HA, HA-GEO, ...
       available_addons = load_yaml_fixture("available_addons.yml")
 
@@ -335,8 +335,8 @@ describe Registration::SwMgmt do
 
       allow(subject).to receive(:service_repos).with(legacy_services.first)
         .and_return(load_yaml_fixture("legacy_module_repositories.yml"))
-      allow(Yast::Pkg).to receive(:ResolvableProperties)
-        .and_return(load_yaml_fixture("products_legacy_installation.yml"))
+      allow(Y2Packager::Resolvable).to receive(:find)
+        .and_return(load_resolvable("products_legacy_installation.yml"))
       allow(Yast::Pkg).to receive(:ResolvableInstall).with("sle-module-legacy", :product)
       allow(Yast::Pkg).to receive(:PkgSolve)
     end
@@ -387,8 +387,8 @@ describe Registration::SwMgmt do
 
   describe ".products_from_repo" do
     before do
-      expect(Yast::Pkg).to receive(:ResolvableProperties)
-        .and_return(load_yaml_fixture("products_legacy_installation.yml"))
+      expect(Y2Packager::Resolvable).to receive(:find)
+        .and_return(load_resolvable("products_legacy_installation.yml"))
     end
 
     it "Returns product resolvables from the specified repository" do
@@ -402,7 +402,7 @@ describe Registration::SwMgmt do
 
   describe ".select_product_addons" do
     # just the sle-module-legacy product
-    let(:products) { [load_yaml_fixture("products_legacy_installation.yml").first] }
+    let(:products) { [load_resolvable("products_legacy_installation.yml").first] }
 
     it "selects remote addons matching the product resolvables" do
       available_addons = load_yaml_fixture("available_addons.yml")
@@ -421,10 +421,10 @@ describe Registration::SwMgmt do
   end
 
   describe ".installed_products" do
-    let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+    let(:products) { load_resolvable("products_legacy_installation.yml") }
 
     it "returns installed products" do
-      expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+      expect(Y2Packager::Resolvable).to receive(:find).and_return(products)
       # only the SLES product in the list is installed
       expect(subject.installed_products).to eq([products[1]])
     end
@@ -441,24 +441,24 @@ describe Registration::SwMgmt do
     end
 
     context "in installed system" do
-      let(:products) { load_yaml_fixture("products_legacy_installation.yml") }
+      let(:products) { load_resolvable("products_legacy_installation.yml") }
       it "returns installed products" do
         allow(Yast::Stage).to receive(:initial).and_return(false)
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products)
+        expect(Y2Packager::Resolvable).to receive(:find).and_return(products)
         # the SLES product in the list is installed
         expect(subject.find_base_product).to eq(products[1])
       end
     end
 
     context "at installation" do
-      let(:products) { load_yaml_fixture("products_sp2_update.yml") }
+      let(:products) { load_resolvable("products_sp2_update.yml") }
 
       before do
         allow(Yast::Stage).to receive(:initial).and_return(true)
       end
 
       it "returns the selected product if a product is selected" do
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products).exactly(3).times
+        expect(Y2Packager::Resolvable).to receive(:find).and_return(products).exactly(3).times
         # sanity check: just make sure the fixture contains the expected data
         expect(products.any? { |p| p["status"] == :selected })
 
@@ -473,7 +473,7 @@ describe Registration::SwMgmt do
         # sanity check: just make sure the fixture was patched correctly
         expect(products2.none? { |p| p["status"] == :selected })
 
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products2).exactly(3).times
+        expect(Y2Packager::Resolvable).to receive(:find).and_return(products2).exactly(3).times
         # the SLES product in the list is installed
         expect(subject.find_base_product).to eq(products[3])
       end
@@ -482,7 +482,7 @@ describe Registration::SwMgmt do
         products3 = [{ "name" => "foo", "status" => :selected },
                      { "name" => "SLES", "status" => :selected }]
 
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return(products3).exactly(3).times
+        expect(Y2Packager::Resolvable).to receive(:find).and_return(products3).exactly(3).times
         # the selected product is ignored, the result is nil
         expect(subject.find_base_product).to eq(products3[1])
       end
@@ -683,7 +683,7 @@ describe Registration::SwMgmt do
     context "product can be found in libzypp stack" do
 
       it "returns version number without release" do
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return([libzypp_product])
+        expect(Y2Packager::Resolvable).to receive(:find).and_return([libzypp_product])
         expect(subject.version_without_release(base_product))
           .to eq(libzypp_product["version_version"])
       end
@@ -692,7 +692,7 @@ describe Registration::SwMgmt do
     context "product cannot be found in libzypp stack" do
 
       it "returns original version number at least" do
-        expect(Yast::Pkg).to receive(:ResolvableProperties).and_return([])
+        expect(Y2Packager::Resolvable).to receive(:find).and_return([])
         expect(subject.version_without_release(base_product)).to eq(libzypp_product["version"])
       end
     end

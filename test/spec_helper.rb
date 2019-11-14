@@ -79,6 +79,11 @@ def stub_product_selection
   }
 end
 
+require "y2packager/resolvable"
+def load_resolvable(filename)
+  load_yaml_fixture(filename).map { |p| Y2Packager::Resolvable.new(p) }  
+end
+
 stub_product_selection
 
 # stub module to prevent its Import
