@@ -12,9 +12,14 @@
 # ------------------------------------------------------------------------------
 #
 
+require "pp"
+
 require "yast"
 require "yast2/popup"
+require "y2packager/medium_type"
+require "y2packager/product_location"
 require "y2packager/product_upgrade"
+require "y2packager/resolvable"
 
 require "registration/registration"
 require "registration/registration_ui"
@@ -41,6 +46,12 @@ module Registration
       Yast.import "SourceDialogs"
       Yast.import "Linuxrc"
       Yast.import "Installation"
+      Yast.import "AddOnProduct"
+      Yast.import "InstURL"
+      Yast.import "Packages"
+      Yast.import "Pkg"
+      Yast.import "URL"
+      Yast.import "WorkflowManager"
 
       # the constructor
       def initialize
@@ -211,12 +222,12 @@ module Registration
       end
 
       def not_installed_products_check
-        SwMgmt.init(true)
-
         # FIXME: do the check also at offline upgrade?
         # Currently it reads the addons for the new SLES15 which is not
         # registered yet and fails.
         return :next if Yast::Stage.initial
+
+        SwMgmt.init(true)
 
         Addon.find_all(registration)
 
@@ -586,10 +597,17 @@ module Registration
       # implicit media upgrade for an unregistered system
       def unregistered_media_upgrade
         log.info "The system is NOT registered, activating the media based upgrade"
-        # we do not support registering the old system at upgrade, that must
-        # be done before the upgrade, skip registration in that case
-        Yast::Popup.LongMessage(unregistered_message)
-        prepare_media_upgrade
+
+        if Y2Packager::MediumType.offline?
+          # Add the Full medium base product repository
+          # TODO: move somewhere else?
+          add_offline_base_product
+        else
+          # we do not support registering the old system at upgrade, that must
+          # be done before the upgrade, skip registration in that case
+          Yast::Popup.LongMessage(unregistered_message)
+          prepare_media_upgrade
+        end
       end
 
       def prepare_media_upgrade
@@ -598,6 +616,43 @@ module Registration
         Yast::SourceDialogs.display_addon_checkbox = false
         # preselect the DVD repository type
         Yast::SourceDialogs.SetURL("dvd://")
+      end
+
+      def add_offline_base_product
+        # in offline upgrade add the repository with the selected base product
+        # FIXME: similar to clients/inst_complex_welcome.rb and widgets/product_selector.rb
+        url = Yast::InstURL.installInf2Url("")
+        base_products = Y2Packager::ProductLocation
+                        .scan(url)
+                        .select { |p| p.details && p.details.base }
+        log.info "Found base products on the offline medium: #{base_products.pretty_inspect}"
+
+        # find the installed base product
+        installed_base = Y2Packager::Resolvable.find(
+          kind: :product, status: :installed, type: "base"
+        ).first
+        if !installed_base
+          log.error("Installed base product not found")
+          return
+        end
+
+        # FIXME: handle also the product renames
+        new_base = base_products.find { |p| p.details && p.details.product == installed_base.name }
+        if !new_base
+          log.error("New base product not found")
+          return
+        end
+
+        # FIXME: this is the same as in installation/widgets/product_selector.rb and other places
+        show_popup = true
+        log_url = Yast::URL.HidePassword(url)
+        Yast::Packages.Initialize_StageInitial(show_popup, url, log_url, new_base.dir)
+
+        # select the product to install
+        Yast::Pkg.ResolvableInstall(new_base.details && new_base.details.product, :product, "")
+        # initialize addons and the workflow manager
+        Yast::AddOnProduct.SetBaseProductURL(url)
+        Yast::WorkflowManager.SetBaseWorkflow(false)
       end
 
       # Informative message
