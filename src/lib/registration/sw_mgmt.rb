@@ -204,12 +204,11 @@ module Registration
           log.info("Skipping product #{p.name}, no system-installation() provides")
           next false
         end
-
         evaluate_product(p, selected, installed)
       end
 
       log.debug "Found base products: #{products}"
-      log.info "Found base products: #{products.map { |p| p["name"] }}"
+      log.info "Found base products: #{products.map { |p| p.name }}"
       log.warn "More than one base product found!" if products.size > 1
 
       products.first
@@ -557,8 +556,7 @@ module Registration
         (product.status == :installed || product.status == :removed) &&
           product.type != "base"
       end
-
-      product_names = installed_addons.map { |a| "#{a.name}-#{a.version}-#{a.release}" }
+      product_names = installed_addons.map { |a| "#{a.name}-#{a.version}" }
       log.info "Installed addons: #{product_names}"
 
       ret = addons.select do |addon|
@@ -646,20 +644,19 @@ module Registration
       addons.each do |addon|
         log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
       end
-
       # select a remote addon for each product
       products.each do |product|
         remote_addon = addons.find do |addon|
-          product["name"] == addon.identifier &&
-            product["version_version"] == addon.version &&
-            product["arch"] == addon.arch
+          product.name == addon.identifier &&
+            product.version_version == addon.version &&
+            product.arch == addon.arch
         end
 
         if remote_addon
           remote_addon.selected
         else
-          product_label = "#{product["display_name"]} (#{product["name"]}" \
-            "-#{product["version_version"]}-#{product["arch"]})"
+          product_label = "#{product.display_name} (#{product.name}" \
+            "-#{product.version_version}-#{product.arch})"
 
           # TRANSLATORS: %s is a product name
           Report.Error(_("Cannot find remote product %s.\n" \

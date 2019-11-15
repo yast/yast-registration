@@ -1,6 +1,7 @@
 ---
 - arch: x86_64
   category: base
+  kind: :product
   description: |-
     SUSE Linux Enterprise offers a comprehensive
             suite of products built on a single code base.
@@ -41,6 +42,7 @@
   version: 11.2-1.513
 - arch: x86_64
   category: addon
+  kind: :product  
   description: WebYaST for SLE-11-SP2
   display_name: WebYaST for SLE-11-SP2
   download_size: 0
@@ -68,6 +70,7 @@
   version: 1.2-1.4
 - arch: x86_64
   category: addon
+  kind: :product  
   description: This is the SUSE Linux Enterprise Software Development Kit
   display_name: SUSE Linux Enterprise Software Development Kit 11 SP2
   download_size: 0
@@ -93,6 +96,7 @@
   version: 11.2-1.66
 - arch: x86_64
   category: addon
+  kind: :product  
   description: |-
     SUSE Linux Enterprise offers a comprehensive
             suite of products built on a single code base.
