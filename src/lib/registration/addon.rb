@@ -319,7 +319,7 @@ module Registration
     end
 
     # Checks whether this addon updates an old addon
-    # @param [Hash] old_addon addon received from pkg-bindings
+    # @param [Hash] old_addon Hash addon received from pkg-bindings
     # @return [Boolean] true if it updates the old addon, false otherwise
     def updates_addon?(old_addon)
       old_addon["name"] == identifier || old_addon["name"] == @pure_addon.former_identifier

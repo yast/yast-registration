@@ -668,9 +668,7 @@ module Registration
     # find the product resolvables from the specified repository
     def self.products_from_repo(repo_id)
       # TODO: only installed products??
-      Y2Packager::Resolvable.find(kind: :product).select do |product|
-        product.source == repo_id
-      end
+      Y2Packager::Resolvable.find(kind: :product, source: repo_id)
     end
 
     def self.get_release_type(product)
