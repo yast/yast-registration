@@ -386,16 +386,17 @@ describe Registration::SwMgmt do
   end
 
   describe ".products_from_repo" do
-    before do
-      expect(Y2Packager::Resolvable).to receive(:find)
-        .and_return(load_resolvable("products_legacy_installation.yml"))
-    end
-
     it "Returns product resolvables from the specified repository" do
+      expect(Y2Packager::Resolvable).to receive(:find)
+        .with(kind: :product, source: 5)
+        .and_return([load_resolvable("products_legacy_installation.yml").first])
       expect(subject.products_from_repo(5).size).to eq 1
     end
 
     it "Returns empty list if not product is found" do
+      expect(Y2Packager::Resolvable).to receive(:find)
+        .with(kind: :product, source: 255)
+        .and_return([])
       expect(subject.products_from_repo(255)).to be_empty
     end
   end
