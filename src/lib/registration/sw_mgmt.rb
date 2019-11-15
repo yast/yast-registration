@@ -561,7 +561,7 @@ module Registration
 
       ret = addons.select do |addon|
         installed_addons.any? do |installed_addon|
-          addon.updates_addon?(installed_addon)
+          addon.updates_addon?({"name" => installed_addon.name})
         end
       end
 
