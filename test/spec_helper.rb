@@ -81,7 +81,7 @@ end
 
 require "y2packager/resolvable"
 def load_resolvable(filename)
-  load_yaml_fixture(filename).map { |p| Y2Packager::Resolvable.new(p) }  
+  load_yaml_fixture(filename).map { |p| Y2Packager::Resolvable.new(p) }
 end
 
 stub_product_selection

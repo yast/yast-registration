@@ -455,19 +455,19 @@ describe Registration::SwMgmt do
 
       before do
         allow(Yast::Stage).to receive(:initial).and_return(true)
-        allow(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :removed).                                            
-          and_return(false)
-        allow(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :installed).                                            
-          and_return(true)
+        allow(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :removed)
+          .and_return(false)
+        allow(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :installed)
+          .and_return(true)
       end
 
       it "returns the selected product if a product is selected" do
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products).at_least(:once)
-        expect(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :selected).                                            
-          and_return(true).at_least(:once)
+        expect(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :selected)
+          .and_return(true).at_least(:once)
 
         # the SLES product in the list is installed
         expect(subject.find_base_product.name).to eq(products[3].name)
@@ -479,11 +479,11 @@ describe Registration::SwMgmt do
         products2_hash[3]["status"] = :available
         products2 = products2_hash.map { |p| Y2Packager::Resolvable.new(p) }
 
-        # all products are not selected        
-        expect(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :selected).                                            
-          and_return(false).at_least(:once)
-        
+        # all products are not selected
+        expect(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :selected)
+          .and_return(false).at_least(:once)
+
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products2).at_least(:once)
         # the SLES product in the list is installed
         expect(subject.find_base_product.name).to eq(products[3].name)
@@ -500,7 +500,7 @@ describe Registration::SwMgmt do
             "flavor"          => "DVD",
             "status"          => :selected,
             "source"          => 1
-          ),          
+          ),
           Y2Packager::Resolvable.new(
             "name"            => "SLES",
             "arch"            => "x86_64",
@@ -514,14 +514,14 @@ describe Registration::SwMgmt do
         ]
 
         # All products are selected
-        expect(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :selected).                                            
-          and_return(true).at_least(:once)
+        expect(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :selected)
+          .and_return(true).at_least(:once)
         # None product is installed
-        expect(Y2Packager::Resolvable).to receive(:any?).
-          with(kind: :product, status: :installed).                                            
-          and_return(false).at_least(:once)        
-        
+        expect(Y2Packager::Resolvable).to receive(:any?)
+          .with(kind: :product, status: :installed)
+          .and_return(false).at_least(:once)
+
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products3).at_least(:once)
         # the selected product is ignored, the result is nil
         expect(subject.find_base_product.name).to eq(products3[1].name)

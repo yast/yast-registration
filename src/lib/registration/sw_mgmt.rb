@@ -208,7 +208,7 @@ module Registration
       end
 
       log.debug "Found base products: #{products}"
-      log.info "Found base products: #{products.map { |p| p.name }}"
+      log.info "Found base products: #{products.map(&:name)}"
       log.warn "More than one base product found!" if products.size > 1
 
       products.first
@@ -266,7 +266,7 @@ module Registration
     # @return [Boolean] true if at least one product is installed
     def self.product_installed?
       Y2Packager::Resolvable.any?(kind: :product, status: :installed) ||
-      Y2Packager::Resolvable.any?(kind: :product, status: :removed)
+        Y2Packager::Resolvable.any?(kind: :product, status: :removed)
     end
 
     def self.installed_products
@@ -281,7 +281,7 @@ module Registration
         p.status == :installed || p.status == :removed
       end
 
-      log.info "Found installed products: #{products.map { |p| p.name }}"
+      log.info "Found installed products: #{products.map(&:name)}"
       products
     end
 
@@ -561,7 +561,7 @@ module Registration
 
       ret = addons.select do |addon|
         installed_addons.any? do |installed_addon|
-          addon.updates_addon?({"name" => installed_addon.name})
+          addon.updates_addon?("name" => installed_addon.name)
         end
       end
 
@@ -616,7 +616,7 @@ module Registration
         product.status == :available &&
           new_repos.any? { |new_repo| product.source == new_repo["SrcId"] }
       end
-      products.map! { |product| product.name }
+      products.map!(&:name)
 
       log.info "Products to install: #{products}"
 
