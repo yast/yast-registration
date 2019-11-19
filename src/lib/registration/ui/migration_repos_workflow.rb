@@ -685,6 +685,8 @@ module Registration
           p.details && p.details.product == installed_base.name
         end
 
+        log.info("Found upgrade product on the full medium: #{new_base}")
+
         new_base
       end
 
