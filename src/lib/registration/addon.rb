@@ -23,6 +23,7 @@ require "yast"
 require "forwardable"
 require "set"
 require "registration/sw_mgmt"
+require "y2packager/resolvable"
 
 module Registration
   # this is a wrapper class around SUSE::Connect::Product object
@@ -81,9 +82,8 @@ module Registration
               product["arch"] == addon.arch
           end
 
-          available = Yast::Pkg.ResolvableProperties(addon.identifier, :product, "").find do |p|
-            p["status"] == :available
-          end
+          available = Y2Packager::Resolvable.any?(kind: :product,
+            name: addon.identifier, status: :available)
 
           !installed && available
         end
