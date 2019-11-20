@@ -139,7 +139,7 @@ describe Registration::Addon do
 
       expect(Registration::SwMgmt).to receive(:installed_products).and_return([])
       expect(Y2Packager::Resolvable).to receive(:any?).with(kind: :product,
-        name: prod2.identifier, status: :available)
+        name: prod.identifier, status: :available)
         .and_return(false)
 
       expect(Registration::Addon.registered_not_installed).to be_empty
