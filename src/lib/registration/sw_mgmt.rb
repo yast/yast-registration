@@ -204,6 +204,7 @@ module Registration
           log.info("Skipping product #{p.name}, no system-installation() provides")
           next false
         end
+
         evaluate_product(p, selected, installed)
       end
 
@@ -556,6 +557,7 @@ module Registration
         (product.status == :installed || product.status == :removed) &&
           product.type != "base"
       end
+
       product_names = installed_addons.map { |a| "#{a.name}-#{a.version}" }
       log.info "Installed addons: #{product_names}"
 
