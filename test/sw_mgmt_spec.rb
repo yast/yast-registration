@@ -556,8 +556,7 @@ describe Registration::SwMgmt do
 
         expect(Y2Packager::ProductControlProduct).to receive(:selected)
           .and_return(selected)
-
-        expect(subject.find_base_product).to eq(data)
+        expect(subject.find_base_product.name).to eq(data["name"])
       end
     end
   end
