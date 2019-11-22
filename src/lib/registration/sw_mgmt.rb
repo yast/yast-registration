@@ -60,9 +60,11 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp".freeze
 
-    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
+    FAKE_BASE_PRODUCT = { "kind" => :product,
+      "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
       "flavor" => "DVD", "version_version" => "12", "register_release" => "",
       "register_target" => "sle-12-x86_64" }.freeze
+    @fake_base_product = Y2Packager::Resolvable.new(FAKE_BASE_PRODUCT)
 
     OEM_DIR = "/var/lib/suseRegister/OEM".freeze
 
@@ -156,7 +158,7 @@ module Registration
     end
 
     # Product to register for the online installation medium
-    # @return [Hash] The product Hash
+    # @return [Y2Packager::Resolvable] The product
     def self.online_base_product
       if Mode.update
         prods = Y2Packager::ProductControlProduct.products
@@ -169,20 +171,21 @@ module Registration
         raise "No base product selected from control.xml!" unless prod
       end
 
-      {
+      Y2Packager::Resolvable.new(
+        "kind"            => :product,
         "name"            => prod.name,
         "version_version" => prod.version,
         "arch"            => prod.arch,
         "display_name"    => prod.label,
         "register_target" => prod.register_target
-      }
+      )
     end
 
     def self.find_base_product
       # FIXME: refactor the code to use Y2Packager::Product
 
       # just for debugging:
-      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
+      return @fake_base_product if ENV["FAKE_BASE_PRODUCT"]
 
       return online_base_product if Stage.initial && Y2Packager::MediumType.online?
 
@@ -272,10 +275,10 @@ module Registration
 
     def self.installed_products
       # just for testing/debugging
-      return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
+      return [@fake_base_product] if ENV["FAKE_BASE_PRODUCT"]
 
       all_products = Y2Packager::Resolvable.find(kind: :product)
-      log.info("Evaluating products: #{all_products}")
+      log.info("Evaluating products: #{all_products.map(&:name)}")
 
       products = all_products.select do |p|
         # installed or installed marked for removal (at upgrade)
