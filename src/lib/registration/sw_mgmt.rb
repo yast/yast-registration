@@ -60,10 +60,9 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp".freeze
 
-    FAKE_BASE_PRODUCT = Y2Packager::Resolvable.new( "kind" => :product,
-      "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
+    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
       "flavor" => "DVD", "version_version" => "12", "register_release" => "",
-      "register_target" => "sle-12-x86_64")
+      "register_target" => "sle-12-x86_64" }.freeze
 
     OEM_DIR = "/var/lib/suseRegister/OEM".freeze
 
@@ -156,12 +155,27 @@ module Registration
       product_info
     end
 
+    # Converts Y2Packager::Resolvable product to hash
+    # @param [Y2Packager::Resolvable] product
+    # @return [Hash] The product hash
+    def self.resolvable_to_h(product)
+      { "name"             => product.name,
+        "version_version"  => product.version_version,
+        "version"          => product.version,
+        "arch"             => product.arch,
+        "display_name"     => product.label,
+        "register_target"  => product.register_target,
+        "register_release" => product.register_release,
+        "product_line"     => product.product_line,
+        "flavor"           => product.flavor }
+    end
+
     # Product to register for the online installation medium
-    # @return [Y2Packager::Resolvable] The product
+    # @return [Hash] The product
     def self.online_base_product
       if Mode.update
         prods = Y2Packager::ProductControlProduct.products
-        installed_names = installed_products.map { |p| p.name }
+        installed_names = installed_products.map { |p| p["name"] }
         prod = prods.find { |p| installed_names.include?(p.name) }
         log.info "selecting product from control #{prod}"
         raise "No base product selected from control.xml matching installed products!" unless prod
@@ -170,16 +184,15 @@ module Registration
         raise "No base product selected from control.xml!" unless prod
       end
 
-      Y2Packager::Resolvable.new(
-        "kind"            => :product,
-        "name"            => prod.name,
+      { "name"            => prod.name,
         "version_version" => prod.version,
         "arch"            => prod.arch,
         "display_name"    => prod.label,
-        "register_target" => prod.register_target
-      )
+        "register_target" => prod.register_target }
     end
 
+    # Product to register for the online installation medium
+    # @return [Hash] base product
     def self.find_base_product
       # FIXME: refactor the code to use Y2Packager::Product
 
@@ -214,7 +227,7 @@ module Registration
       log.info "Found base products: #{products.map(&:name)}"
       log.warn "More than one base product found!" if products.size > 1
 
-      products.first
+      products.first ? resolvable_to_h(products.first) : {}
     end
 
     def self.installed_base_product
@@ -272,6 +285,8 @@ module Registration
         Y2Packager::Resolvable.any?(kind: :product, status: :removed)
     end
 
+    # Evaluates all installed products
+    # @return [Array<Hash>] product Hash
     def self.installed_products
       # just for testing/debugging
       return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
@@ -285,7 +300,7 @@ module Registration
       end
 
       log.info "Found installed products: #{products.map(&:name)}"
-      products
+      products.map { |p| resolvable_to_h(p) }
     end
 
     # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
@@ -323,16 +338,18 @@ module Registration
         _("Unknown product")
     end
 
+    # Find base product to register
+    # @return [Hash] base product
     def self.base_product_to_register
       base_product = find_base_product
 
-      return unless base_product
+      return unless base_product.empty?
 
       # filter out not needed data
       product_info = {
-        "name"         => base_product.name,
-        "arch"         => base_product.arch,
-        "version"      => base_product.version_version,
+        "name"         => base_product["name"],
+        "arch"         => base_product["arch"],
+        "version"      => base_product["version_version"],
         "release_type" => get_release_type(base_product)
       }
 
@@ -643,6 +660,8 @@ module Registration
     end
 
     # select remote addons matching the product resolvables
+    # @param products [Array<Hash>] products
+    # @param addons [Array<Addon>] addons
     def self.select_product_addons(products, addons)
       addons.each do |addon|
         log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
@@ -650,16 +669,16 @@ module Registration
       # select a remote addon for each product
       products.each do |product|
         remote_addon = addons.find do |addon|
-          product.name == addon.identifier &&
-            product.version_version == addon.version &&
-            product.arch == addon.arch
+          product["name"] == addon.identifier &&
+            product["version_version"] == addon.version &&
+            product["arch"] == addon.arch
         end
 
         if remote_addon
           remote_addon.selected
         else
-          product_label = "#{product.display_name} (#{product.name}" \
-            "-#{product.version_version}-#{product.arch})"
+          product_label = "#{product["display_name"]} (#{product["name"]}" \
+            "-#{product["version_version"]}-#{product["arch"]})"
 
           # TRANSLATORS: %s is a product name
           Report.Error(_("Cannot find remote product %s.\n" \
@@ -669,14 +688,19 @@ module Registration
     end
 
     # find the product resolvables from the specified repository
+    # @return [Array<Hash>] products in Hash format
     def self.products_from_repo(repo_id)
       # TODO: only installed products??
-      Y2Packager::Resolvable.find(kind: :product, source: repo_id)
+      products = Y2Packager::Resolvable.find(kind: :product, source: repo_id)
+      prodcuts.map { |p| resolvable_to_h(p) }
     end
 
+    # Return release type
+    # @param product [Hash] Product (hash from pkg-bindings)
+    # @return [String] release type
     def self.get_release_type(product)
-      if product.product_line
-        oem_file = File.join(OEM_DIR, product.product_line)
+      if product["product_line"] && !product["product_line"].empty?
+        oem_file = File.join(OEM_DIR, product["product_line"])
 
         if File.exist?(oem_file)
           # read only the first line
@@ -685,7 +709,7 @@ module Registration
         end
       end
 
-      product.register_release
+      product["register_release"]
     end
 
     def self.raise_pkg_exception(klass = PkgError)
