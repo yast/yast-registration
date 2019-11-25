@@ -60,11 +60,10 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp".freeze
 
-    FAKE_BASE_PRODUCT = { "kind" => :product,
+    FAKE_BASE_PRODUCT = Y2Packager::Resolvable.new( "kind" => :product,
       "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
       "flavor" => "DVD", "version_version" => "12", "register_release" => "",
-      "register_target" => "sle-12-x86_64" }.freeze
-    @fake_base_product = Y2Packager::Resolvable.new(FAKE_BASE_PRODUCT)
+      "register_target" => "sle-12-x86_64")
 
     OEM_DIR = "/var/lib/suseRegister/OEM".freeze
 
@@ -162,7 +161,7 @@ module Registration
     def self.online_base_product
       if Mode.update
         prods = Y2Packager::ProductControlProduct.products
-        installed_names = installed_products.map { |p| p["name"] }
+        installed_names = installed_products.map { |p| p.name }
         prod = prods.find { |p| installed_names.include?(p.name) }
         log.info "selecting product from control #{prod}"
         raise "No base product selected from control.xml matching installed products!" unless prod
@@ -185,7 +184,7 @@ module Registration
       # FIXME: refactor the code to use Y2Packager::Product
 
       # just for debugging:
-      return @fake_base_product if ENV["FAKE_BASE_PRODUCT"]
+      return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       return online_base_product if Stage.initial && Y2Packager::MediumType.online?
 
@@ -275,7 +274,7 @@ module Registration
 
     def self.installed_products
       # just for testing/debugging
-      return [@fake_base_product] if ENV["FAKE_BASE_PRODUCT"]
+      return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
 
       all_products = Y2Packager::Resolvable.find(kind: :product)
       log.info("Evaluating products: #{all_products.map(&:name)}")
@@ -325,16 +324,15 @@ module Registration
     end
 
     def self.base_product_to_register
-      # use FAKE_BASE_PRODUCT just for debugging
-      base_product = ENV["FAKE_BASE_PRODUCT"] ? FAKE_BASE_PRODUCT : find_base_product
+      base_product = find_base_product
 
       return unless base_product
 
       # filter out not needed data
       product_info = {
-        "name"         => base_product["name"],
-        "arch"         => base_product["arch"],
-        "version"      => base_product["version_version"],
+        "name"         => base_product.name,
+        "arch"         => base_product.arch,
+        "version"      => base_product.version_version,
         "release_type" => get_release_type(base_product)
       }
 
@@ -677,8 +675,8 @@ module Registration
     end
 
     def self.get_release_type(product)
-      if product["product_line"]
-        oem_file = File.join(OEM_DIR, product["product_line"])
+      if product.product_line
+        oem_file = File.join(OEM_DIR, product.product_line)
 
         if File.exist?(oem_file)
           # read only the first line
@@ -687,7 +685,7 @@ module Registration
         end
       end
 
-      product["register_release"]
+      product.register_release
     end
 
     def self.raise_pkg_exception(klass = PkgError)
