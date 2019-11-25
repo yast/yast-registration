@@ -692,7 +692,7 @@ module Registration
     def self.products_from_repo(repo_id)
       # TODO: only installed products??
       products = Y2Packager::Resolvable.find(kind: :product, source: repo_id)
-      prodcuts.map { |p| resolvable_to_h(p) }
+      products.map { |p| resolvable_to_h(p) }
     end
 
     # Return release type
