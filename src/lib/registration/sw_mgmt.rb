@@ -163,7 +163,7 @@ module Registration
         "version_version"  => product.version_version,
         "version"          => product.version,
         "arch"             => product.arch,
-        "display_name"     => product.label,
+        "display_name"     => product.display_name,
         "register_target"  => product.register_target,
         "register_release" => product.register_release,
         "product_line"     => product.product_line,
@@ -339,11 +339,11 @@ module Registration
     end
 
     # Find base product to register
-    # @return [Hash] base product
+    # @return [Hash] base product or nil if not found
     def self.base_product_to_register
       base_product = find_base_product
 
-      return unless base_product.empty?
+      return if !base_product || base_product.empty?
 
       # filter out not needed data
       product_info = {

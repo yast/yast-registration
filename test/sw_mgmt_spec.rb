@@ -403,7 +403,7 @@ describe Registration::SwMgmt do
 
   describe ".select_product_addons" do
     # just the sle-module-legacy product
-    let(:products) { [load_resolvable("products_legacy_installation.yml").first] }
+    let(:products) { [load_yaml_fixture("products_legacy_installation.yml").first] }
 
     it "selects remote addons matching the product resolvables" do
       available_addons = load_yaml_fixture("available_addons.yml")
@@ -427,7 +427,7 @@ describe Registration::SwMgmt do
     it "returns installed products" do
       expect(Y2Packager::Resolvable).to receive(:find).and_return(products)
       # only the SLES product in the list is installed
-      expect(subject.installed_products).to eq([products[1]])
+      expect(subject.installed_products.first["name"]).to eq(products[1].name)
     end
   end
 
@@ -447,7 +447,7 @@ describe Registration::SwMgmt do
         allow(Yast::Stage).to receive(:initial).and_return(false)
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products)
         # the SLES product in the list is installed
-        expect(subject.find_base_product).to eq(products[1])
+        expect(subject.find_base_product["name"]).to eq(products[1].name)
       end
     end
 
@@ -471,7 +471,7 @@ describe Registration::SwMgmt do
           .and_return(true).at_least(:once)
 
         # the SLES product in the list is installed
-        expect(subject.find_base_product.name).to eq(products[3].name)
+        expect(subject.find_base_product["name"]).to eq(products[3].name)
       end
 
       it "returns the product from the installation medium if no product is selected" do
@@ -487,30 +487,38 @@ describe Registration::SwMgmt do
 
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products2).at_least(:once)
         # the SLES product in the list is installed
-        expect(subject.find_base_product.name).to eq(products[3].name)
+        expect(subject.find_base_product["name"]).to eq(products[3].name)
       end
 
       it "ignores a selected product not marked by the `system-installation()` provides" do
         products3 = [
           Y2Packager::Resolvable.new(
-            "name"            => "foo",
-            "arch"            => "x86_64",
-            "kind"            => :product,
-            "version"         => "12.1-1.47",
-            "version_version" => "12.1",
-            "flavor"          => "DVD",
-            "status"          => :selected,
-            "source"          => 1
+            "name"             => "foo",
+            "arch"             => "x86_64",
+            "kind"             => :product,
+            "version"          => "12.1-1.47",
+            "version_version"  => "12.1",
+            "flavor"           => "DVD",
+            "status"           => :selected,
+            "display_name"     => "display_name",
+            "register_target"  => "register_target",
+            "register_release" => "register_release",
+            "product_line"     => "product_line",
+            "source"           => 1
           ),
           Y2Packager::Resolvable.new(
-            "name"            => "SLES",
-            "arch"            => "x86_64",
-            "kind"            => :product,
-            "version"         => "12.1-1.47",
-            "version_version" => "12.1",
-            "flavor"          => "DVD",
-            "status"          => :selected,
-            "source"          => 1
+            "name"             => "SLES",
+            "arch"             => "x86_64",
+            "kind"             => :product,
+            "version"          => "12.1-1.47",
+            "version_version"  => "12.1",
+            "flavor"           => "DVD",
+            "status"           => :selected,
+            "display_name"     => "display_name",
+            "register_target"  => "register_target",
+            "register_release" => "register_release",
+            "product_line"     => "product_line",
+            "source"           => 1
           )
         ]
 
@@ -525,7 +533,7 @@ describe Registration::SwMgmt do
 
         expect(Y2Packager::Resolvable).to receive(:find).and_return(products3).at_least(:once)
         # the selected product is ignored, the result is nil
-        expect(subject.find_base_product.name).to eq(products3[1].name)
+        expect(subject.find_base_product["name"]).to eq(products3[1].name)
       end
     end
 
@@ -556,7 +564,7 @@ describe Registration::SwMgmt do
 
         expect(Y2Packager::ProductControlProduct).to receive(:selected)
           .and_return(selected)
-        expect(subject.find_base_product.name).to eq(data["name"])
+        expect(subject.find_base_product["name"]).to eq(data["name"])
       end
     end
   end
@@ -709,13 +717,17 @@ describe Registration::SwMgmt do
   describe ".version_without_release" do
     let(:libzypp_product) do
       Y2Packager::Resolvable.new(
-        "name"            => "SLESS",
-        "arch"            => "x86_64",
-        "kind"            => :product,
-        "version"         => "12.1-1.47",
-        "version_version" => "12.1",
-        "flavor"          => "DVD",
-        "source"          => 1
+        "name"             => "SLESS",
+        "arch"             => "x86_64",
+        "kind"             => :product,
+        "version"          => "12.1-1.47",
+        "version_version"  => "12.1",
+        "flavor"           => "DVD",
+        "display_name"     => "display_name",
+        "register_target"  => "register_target",
+        "register_release" => "register_release",
+        "product_line"     => "product_line",
+        "source"           => 1
       )
     end
     let(:base_product) do
