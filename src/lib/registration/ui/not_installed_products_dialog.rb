@@ -22,6 +22,7 @@
 require "yast"
 require "registration/sw_mgmt"
 require "registration/helpers"
+require "y2packager/resolvable"
 require "uri"
 
 module Registration
@@ -193,7 +194,7 @@ module Registration
       # @return [Boolean] true if the given addon is installable
       def addon_product_installable?(addon)
         product = product_from_addon_repos(addon)
-        return false if !product || !Yast::Pkg.ResolvableInstall(product["name"], :product)
+        return false if !product || !Yast::Pkg.ResolvableInstall(product.name, :product)
 
         if !Yast::Pkg.PkgSolve(true)
           return false if Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept
@@ -206,12 +207,12 @@ module Registration
       # ones.
       #
       # @param addon [Registration::Addon]
-      # @return [Hash] product which repository url match with addon ones
+      # @return [Y2Packager::Resolvable] product which repository url match with addon ones
       def product_from_addon_repos(addon)
-        Yast::Pkg.ResolvableProperties("", :product, "").find do |product|
-          return false if product["status"] != :available
+        Y2Packager::Resolvable.find(kind: :product).find do |product|
+          return false if product.status != :available
 
-          product_url = SwMgmt.repository_data(product["source"]).fetch("url", "")
+          product_url = SwMgmt.repository_data(product.source).fetch("url", "")
 
           addon.repositories.any? { |r| no_query_uri(product_url) == no_query_uri(r["url"]) }
         end

@@ -37,6 +37,7 @@ require "y2packager/medium_type"
 require "y2packager/product_control_product"
 require "y2packager/product_reader"
 require "yast2/execute"
+require "y2packager/resolvable"
 
 module Registration
   Yast.import "AddOnProduct"
@@ -154,8 +155,23 @@ module Registration
       product_info
     end
 
+    # Converts Y2Packager::Resolvable product to hash
+    # @param [Y2Packager::Resolvable] product
+    # @return [Hash] The product hash
+    def self.resolvable_to_h(product)
+      { "name"             => product.name,
+        "version_version"  => product.version_version,
+        "version"          => product.version,
+        "arch"             => product.arch,
+        "display_name"     => product.display_name,
+        "register_target"  => product.register_target,
+        "register_release" => product.register_release,
+        "product_line"     => product.product_line,
+        "flavor"           => product.flavor }
+    end
+
     # Product to register for the online installation medium
-    # @return [Hash] The product Hash
+    # @return [Hash] The product
     def self.online_base_product
       if Mode.update
         prods = Y2Packager::ProductControlProduct.products
@@ -168,15 +184,15 @@ module Registration
         raise "No base product selected from control.xml!" unless prod
       end
 
-      {
-        "name"            => prod.name,
+      { "name"            => prod.name,
         "version_version" => prod.version,
         "arch"            => prod.arch,
         "display_name"    => prod.label,
-        "register_target" => prod.register_target
-      }
+        "register_target" => prod.register_target }
     end
 
+    # Product to register for the online installation medium
+    # @return [Hash] base product
     def self.find_base_product
       # FIXME: refactor the code to use Y2Packager::Product
 
@@ -198,9 +214,9 @@ module Registration
       # during upgrade use the newer selected product (same as in installation)
       # The base product must be marked by the "system-installation()" provides
       # by some package.
-      products = Pkg.ResolvableProperties("", :product, "").find_all do |p|
-        if Stage.initial && !system_products.include?(p["name"])
-          log.info("Skipping product #{p["name"].inspect}, no system-installation() provides")
+      products = Y2Packager::Resolvable.find(kind: :product).find_all do |p|
+        if Stage.initial && !system_products.include?(p.name)
+          log.info("Skipping product #{p.name}, no system-installation() provides")
           next false
         end
 
@@ -208,10 +224,10 @@ module Registration
       end
 
       log.debug "Found base products: #{products}"
-      log.info "Found base products: #{products.map { |p| p["name"] }}"
+      log.info "Found base products: #{products.map(&:name)}"
       log.warn "More than one base product found!" if products.size > 1
 
-      products.first
+      products.first ? resolvable_to_h(products.first) : {}
     end
 
     def self.installed_base_product
@@ -221,7 +237,7 @@ module Registration
 
     # Evaluate the product if it is a base product depending on the current
     # system status.
-    # @param p [Hash] the product from pkg-bindings
+    # @param p [Y2Packager::Resolvable] the product from pkg-bindings
     # @param selected [Boolean,nil] is any product selected?
     # @param installed [Boolean,nil] is any product istalled?
     # @return [Boolean] true if it is a base product
@@ -231,26 +247,26 @@ module Registration
         # note: AutoinstFunctions.selected_product should never be nil when
         # AY let it pass here
         return false unless AutoinstFunctions.selected_product
-        p["name"] == AutoinstFunctions.selected_product.name
+        p.name == AutoinstFunctions.selected_product.name
       elsif Stage.initial && !Mode.update
         # during installation the ["type"] value is not valid yet yet
         # (the base product is determined by /etc/products.d/baseproduct symlink)
         # use the selected or available product
-        p["status"] == (selected ? :selected : :available)
+        p.status == (selected ? :selected : :available)
       elsif Stage.initial
         # during upgrade it depends on whether target is already initialized,
         # use the product from the medium for the self-update step
         # (during upgrade the installed product might me already selected for removal)
         if installed
-          (p["status"] == :installed || p["status"] == :removed) && p["type"] == "base"
+          (p.status == :installed || p.status == :removed) && p.type == "base"
         elsif selected
-          p["status"] == :selected
+          p.status == :selected
         else
-          p["status"] == :available
+          p.status == :available
         end
       else
         # in installed system or at upgrade the base product has valid type
-        (p["status"] == :installed || p["status"] == :removed) && p["type"] == "base"
+        (p.status == :installed || p.status == :removed) && p.type == "base"
       end
     end
 
@@ -259,31 +275,32 @@ module Registration
     # Any product selected to install?
     # @return [Boolean] true if at least one product is selected to install
     def self.product_selected?
-      Pkg.ResolvableProperties("", :product, "").any? { |p| p["status"] == :selected }
+      Y2Packager::Resolvable.any?(kind: :product, status: :selected)
     end
 
     # Any product installed? (e.g. during upgrade)
     # @return [Boolean] true if at least one product is installed
     def self.product_installed?
-      Pkg.ResolvableProperties("", :product, "").any? do |p|
-        p["status"] == :installed || p["status"] == :removed
-      end
+      Y2Packager::Resolvable.any?(kind: :product, status: :installed) ||
+        Y2Packager::Resolvable.any?(kind: :product, status: :removed)
     end
 
+    # Evaluates all installed products
+    # @return [Array<Hash>] product Hash
     def self.installed_products
       # just for testing/debugging
       return [FAKE_BASE_PRODUCT] if ENV["FAKE_BASE_PRODUCT"]
 
-      all_products = Pkg.ResolvableProperties("", :product, "")
-      log.info("Evaluating products: #{all_products}")
+      all_products = Y2Packager::Resolvable.find(kind: :product)
+      log.info("Evaluating products: #{all_products.map(&:name)}")
 
       products = all_products.select do |p|
         # installed or installed marked for removal (at upgrade)
-        p["status"] == :installed || p["status"] == :removed
+        p.status == :installed || p.status == :removed
       end
 
-      log.info "Found installed products: #{products.map { |p| p["name"] }}"
-      products
+      log.info "Found installed products: #{products.map(&:name)}"
+      products.map { |p| resolvable_to_h(p) }
     end
 
     # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
@@ -306,9 +323,9 @@ module Registration
     # @param product [Y2Packager::Product] product
     # @return [String] version
     def self.version_without_release(product)
-      pkg_product = Yast::Pkg.ResolvableProperties(product.name,
-        :product, product.version).first
-      pkg_product ? pkg_product["version_version"] : product.version
+      pkg_product = Y2Packager::Resolvable.find(kind: :product,
+        name: product.name, version: product.version).first
+      pkg_product ? pkg_product.version_version : product.version
     end
 
     # create UI label for a base product
@@ -321,11 +338,12 @@ module Registration
         _("Unknown product")
     end
 
+    # Find base product to register
+    # @return [Hash] base product or nil if not found
     def self.base_product_to_register
-      # use FAKE_BASE_PRODUCT just for debugging
-      base_product = ENV["FAKE_BASE_PRODUCT"] ? FAKE_BASE_PRODUCT : find_base_product
+      base_product = find_base_product
 
-      return unless base_product
+      return if !base_product || base_product.empty?
 
       # filter out not needed data
       product_info = {
@@ -551,19 +569,19 @@ module Registration
     def self.find_addon_updates(addons)
       log.info "Available addons: #{addons.map(&:identifier)}"
 
-      products = Pkg.ResolvableProperties("", :product, "")
+      products = Y2Packager::Resolvable.find(kind: :product)
 
       installed_addons = products.select do |product|
-        (product["status"] == :installed || product["status"] == :removed) &&
-          product["type"] != "base"
+        (product.status == :installed || product.status == :removed) &&
+          product.type != "base"
       end
 
-      product_names = installed_addons.map { |a| "#{a["name"]}-#{a["version"]}-#{a["release"]}" }
+      product_names = installed_addons.map { |a| "#{a.name}-#{a.version}" }
       log.info "Installed addons: #{product_names}"
 
       ret = addons.select do |addon|
         installed_addons.any? do |installed_addon|
-          addon.updates_addon?(installed_addon)
+          addon.updates_addon?("name" => installed_addon.name)
         end
       end
 
@@ -613,12 +631,12 @@ module Registration
 
       return true if new_repos.empty?
 
-      products = Pkg.ResolvableProperties("", :product, "")
+      products = Y2Packager::Resolvable.find(kind: :product)
       products.select! do |product|
-        product["status"] == :available &&
-          new_repos.any? { |new_repo| product["source"] == new_repo["SrcId"] }
+        product.status == :available &&
+          new_repos.any? { |new_repo| product.source == new_repo["SrcId"] }
       end
-      products.map! { |product| product["name"] }
+      products.map!(&:name)
 
       log.info "Products to install: #{products}"
 
@@ -642,11 +660,12 @@ module Registration
     end
 
     # select remote addons matching the product resolvables
+    # @param products [Array<Hash>] products
+    # @param addons [Array<Addon>] addons
     def self.select_product_addons(products, addons)
       addons.each do |addon|
         log.info "Found remote addon: #{addon.identifier}-#{addon.version}-#{addon.arch}"
       end
-
       # select a remote addon for each product
       products.each do |product|
         remote_addon = addons.find do |addon|
@@ -669,15 +688,18 @@ module Registration
     end
 
     # find the product resolvables from the specified repository
+    # @return [Array<Hash>] products in Hash format
     def self.products_from_repo(repo_id)
       # TODO: only installed products??
-      Pkg.ResolvableProperties("", :product, "").select do |product|
-        product["source"] == repo_id
-      end
+      products = Y2Packager::Resolvable.find(kind: :product, source: repo_id)
+      products.map { |p| resolvable_to_h(p) }
     end
 
+    # Return release type
+    # @param product [Hash] Product (hash from pkg-bindings)
+    # @return [String] release type
     def self.get_release_type(product)
-      if product["product_line"]
+      if product["product_line"] && !product["product_line"].empty?
         oem_file = File.join(OEM_DIR, product["product_line"])
 
         if File.exist?(oem_file)
