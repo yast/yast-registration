@@ -596,7 +596,7 @@ module Registration
       end
 
       # Convenience method for disabling / enabling the wizard next button
-      # @param [Boolean] true for disabling, false for enabling
+      # @param status [Boolean] true for disabling, false for enabling
       def disable_next(status)
         status ? Yast::Wizard.DisableNextButton : Yast::Wizard.EnableNextButton
       end
