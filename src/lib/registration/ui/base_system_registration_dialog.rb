@@ -417,11 +417,27 @@ module Registration
               "be used to install a working system.") %
             { media_name: media_name, download_url: download_url }
         end
+
+        warning
       end
 
       # TODO: define the warning for online media
       def online_skipping_text
-        default_skipping_text
+        warning = _("This medium does not permit to skip the registration.")
+
+        # TRANSLATORS:
+        # Popup warning the user that skipping the registration is not allowed
+        # %{media_name} is the media name (e.g. SLE-15-Packages),
+        # %{download_url} is an URL link (e.g. https://download.suse.com)
+        if !media_name.empty? && # cannot be nil
+            !download_url.empty? # cannot be nil
+          warning += "\n\n" +
+            _("For installing without registering the system use the\n"\
+              "%{media_name} from %{download_url}.") %
+            { media_name: media_name, download_url: download_url }
+        end
+
+        warning
       end
 
       # UI term for the network configuration button (or empty if not needed)
