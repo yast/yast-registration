@@ -40,6 +40,7 @@ module Registration
         register_local:    [:custom_url],
         skip_registration: []
       }.freeze
+
       private_constant :WIDGETS
 
       # create and run the dialog for registering the base system
@@ -107,7 +108,7 @@ module Registration
           case action
           when :skip_registration
             log.info "Skipping registration on user request"
-            :skip
+            handle_skipping_registration
           when :register_scc, :register_local
             handle_registration
           end
@@ -381,6 +382,18 @@ module Registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
+        warning = medium_warning_text
+
+        Yast::Popup.Warning(warning)
+      end
+
+      # Convenience method to obtain the medium warning text depending on the
+      # medium type
+      def medium_warning_text
+        Y2Packager::MediumType.online? ? online_skipping_text : default_skipping_text
+      end
+
+      def default_skipping_text
         # TRANSLATORS:
         # Popup question (1/1): confirm skipping the registration
         warning = _("You are skipping registration.\n"\
@@ -405,8 +418,11 @@ module Registration
               "be used to install a working system.") %
             { media_name: media_name, download_url: download_url }
         end
+      end
 
-        Yast::Popup.Warning(warning)
+      # TODO: define the warning for online media
+      def online_skipping_text
+        default_skipping_text
       end
 
       # UI term for the network configuration button (or empty if not needed)
@@ -415,6 +431,18 @@ module Registration
         return Empty() unless Helpers.network_configurable && Stage.initial
 
         Right(PushButton(Id(:network), _("Net&work Configuration...")))
+      end
+
+      # Will show the skipping registration in case of the online medium
+      # returning nil or will return :skip otherwise
+      #
+      # @return [Symbol, nil] :skip if not the online medium
+      def handle_skipping_registration
+        return :skip unless Y2Packager::MediumType.online?
+
+        show_skipping_warning
+
+        nil
       end
 
       # run the registration
