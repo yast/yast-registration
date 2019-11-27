@@ -359,6 +359,9 @@ module Registration
       # @return [String] the name or empty string if not set
       #
       def media_name
+        # FIXME: temporal force of name
+        return _("Full media") if Y2Packager::MediumType.online?
+
         ProductFeatures.GetStringFeature(
           "globals",
           "full_system_media_name"
