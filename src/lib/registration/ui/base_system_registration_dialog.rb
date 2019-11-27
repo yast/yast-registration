@@ -40,6 +40,7 @@ module Registration
         register_local:    [:custom_url],
         skip_registration: []
       }.freeze
+
       private_constant :WIDGETS
 
       # create and run the dialog for registering the base system
@@ -106,8 +107,7 @@ module Registration
         result =
           case action
           when :skip_registration
-            log.info "Skipping registration on user request"
-            :skip
+            handle_skipping_registration
           when :register_scc, :register_local
             handle_registration
           end
@@ -359,6 +359,9 @@ module Registration
       # @return [String] the name or empty string if not set
       #
       def media_name
+        # FIXME: temporal force of name
+        return _("Full media") if Y2Packager::MediumType.online?
+
         ProductFeatures.GetStringFeature(
           "globals",
           "full_system_media_name"
@@ -381,6 +384,18 @@ module Registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
+        warning = medium_warning_text
+
+        Yast::Popup.Warning(warning)
+      end
+
+      # Convenience method to obtain the medium warning text depending on the
+      # medium type
+      def medium_warning_text
+        Y2Packager::MediumType.online? ? online_skipping_text : default_skipping_text
+      end
+
+      def default_skipping_text
         # TRANSLATORS:
         # Popup question (1/1): confirm skipping the registration
         warning = _("You are skipping registration.\n"\
@@ -406,7 +421,26 @@ module Registration
             { media_name: media_name, download_url: download_url }
         end
 
-        Yast::Popup.Warning(warning)
+        warning
+      end
+
+      # TODO: define the warning for online media
+      def online_skipping_text
+        warning = _("This medium does not permit to skip the registration.")
+
+        # TRANSLATORS:
+        # Popup warning the user that skipping the registration is not allowed
+        # %{media_name} is the media name (e.g. SLE-15-Packages),
+        # %{download_url} is an URL link (e.g. https://download.suse.com)
+        if !media_name.empty? && # cannot be nil
+            !download_url.empty? # cannot be nil
+          warning += "\n\n" +
+            _("For installing without registering the system use the\n"\
+              "%{media_name} from %{download_url}.") %
+            { media_name: media_name, download_url: download_url }
+        end
+
+        warning
       end
 
       # UI term for the network configuration button (or empty if not needed)
@@ -415,6 +449,21 @@ module Registration
         return Empty() unless Helpers.network_configurable && Stage.initial
 
         Right(PushButton(Id(:network), _("Net&work Configuration...")))
+      end
+
+      # Will show the skipping registration in case of the online medium
+      # returning nil or will return :skip otherwise
+      #
+      # @return [Symbol, nil] :skip if not the online medium
+      def handle_skipping_registration
+        unless Y2Packager::MediumType.online?
+          log.info "Skipping registration on user request"
+          return :skip
+        end
+
+        show_skipping_warning
+
+        nil
       end
 
       # run the registration
@@ -523,6 +572,7 @@ module Registration
       # @see #action
       def refresh
         Yast::UI.ChangeWidget(Id(:action), :Value, action)
+        refresh_next
 
         # disable the input fields when already registered
         return disable_widgets if Registration.is_registered? && !Yast::Mode.normal
@@ -535,6 +585,20 @@ module Registration
       # Disable all input widgets
       def disable_widgets
         Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
+      end
+
+      # In an online medium it disables the next button when skipping the
+      # registration and enable it in any other selected action
+      def refresh_next
+        return unless Y2Packager::MediumType.online?
+
+        disable_next(action == :skip_registration)
+      end
+
+      # Convenience method for disabling / enabling the wizard next button
+      # @param status [Boolean] true for disabling, false for enabling
+      def disable_next(status)
+        status ? Yast::Wizard.DisableNextButton : Yast::Wizard.EnableNextButton
       end
 
       # Set focus
