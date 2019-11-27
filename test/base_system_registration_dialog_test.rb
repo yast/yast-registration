@@ -9,9 +9,11 @@ describe Registration::UI::BaseSystemRegistrationDialog do
   let(:reg_code) { "my-reg-code" }
   let(:custom_url) { "http://smt.example.com/" }
   let(:default_url) { SUSE::Connect::Config.new.url }
+  let(:online?) { false }
 
   before do
     allow(Yast::Packages).to receive(:ImportGPGKeys)
+    allow(Y2Packager::MediumType).to receive(:online?).and_return(online?)
   end
 
   describe ".run" do
