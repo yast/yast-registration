@@ -107,7 +107,6 @@ module Registration
         result =
           case action
           when :skip_registration
-            log.info "Skipping registration on user request"
             handle_skipping_registration
           when :register_scc, :register_local
             handle_registration
@@ -438,7 +437,10 @@ module Registration
       #
       # @return [Symbol, nil] :skip if not the online medium
       def handle_skipping_registration
-        return :skip unless Y2Packager::MediumType.online?
+        unless Y2Packager::MediumType.online?
+          log.info "Skipping registration on user request"
+          return :skip
+        end
 
         show_skipping_warning
 
@@ -551,6 +553,7 @@ module Registration
       # @see #action
       def refresh
         Yast::UI.ChangeWidget(Id(:action), :Value, action)
+        refresh_next
 
         # disable the input fields when already registered
         return disable_widgets if Registration.is_registered? && !Yast::Mode.normal
@@ -563,6 +566,20 @@ module Registration
       # Disable all input widgets
       def disable_widgets
         Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
+      end
+
+      # In an online medium it disables the next button when skipping the
+      # registration and enable it in any other selected action
+      def refresh_next
+        return unless Y2Packager::MediumType.online?
+
+        disable_next(action == :skip_registration)
+      end
+
+      # Convenience method for disabling / enabling the wizard next button
+      # @param [Boolean] true for disabling, false for enabling
+      def disable_next(status)
+        status ? Yast::Wizard.DisableNextButton : Yast::Wizard.EnableNextButton
       end
 
       # Set focus
