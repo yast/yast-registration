@@ -39,6 +39,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
       allow(Registration::Registration).to receive(:is_registered?).and_return(registered?)
       allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
       allow(Yast::UI).to receive(:ChangeWidget)
+      # confirm abort
+      allow(Registration::UI::AbortConfirmation).to receive(:run).and_return(true)
     end
 
     context "when system is not registered" do
@@ -186,39 +188,71 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
       context "when user skips registration" do
         before do
-          allow(Yast::UI).to receive(:UserInput).and_return(:skip_registration, :next)
+          allow(Yast::Stage).to receive(:initial).and_return(true)
+          allow(Yast::Stage).to receive(:normal).and_return(false)
+          allow(Yast::UI).to receive(:UserInput).and_return(:skip_registration, :abort)
         end
 
-        it "does not try to register the system and close the dialog" do
-          expect(Yast::Popup).to receive(:Warning).with(/Without registration/)
-            .and_return(true)
-          expect(subject.run).to eq(:skip)
-        end
+        context "Online installation medium" do
+          let(:online?) { true }
 
-        context "when full_system_media_name and full_system_download_url" \
-                " is defined in control.xml" do
-          it "reports the media name and the regarding download url to the user" do
-            allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_media_name").and_return("SLE-15-Packages")
-            allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_download_url").and_return("https://download.suse.com")
-            expect(Yast::Popup).to receive(:Warning).with(/SLE-15-Packages.*download.suse.com/m)
-            expect(subject.run).to eq(:skip)
+          context "when full_system_media_name and full_system_download_url" \
+          " is defined in control.xml" do
+            before do
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_media_name").and_return("SLE-15-SP2-Full")
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_download_url").and_return("https://download.suse.com")
+            end
+
+            it "reports the media name and the download url to the user" do
+              expect(Yast2::Popup).to receive(:show).with(
+                /SLE-15-SP2-Full.*download.suse.com/m,
+                anything
+              ).and_return(true)
+              expect(subject.run).to eq(:abort)
+            end
+          end
+
+          context "when full_system_media_name and full_system_download_url" \
+                  " is NOT defined in control.xml" do
+            before do
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_media_name").and_return("")
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_download_url").and_return("")
+            end
+
+            it "does not mention any media information" do
+              expect(Yast2::Popup).to receive(:show).with(
+                /repositories will be accessible after registering/, anything
+              )
+                .and_return(true)
+              expect(Yast2::Popup).not_to receive(:show).with(
+                /installation without registering/, anything
+              )
+              expect(subject.run).to eq(:abort)
+            end
           end
         end
 
-        context "when full_system_media_name and full_system_download_url" \
-                " is NOT defined in control.xml" do
-          it "does not mention any media information" do
-            allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_media_name").and_return("")
-            allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-              .with("globals", "full_system_download_url").and_return("")
-            expect(Yast::Popup).to receive(:Warning).with(/Without registration/)
+        context "Full installation medium" do
+          let(:online?) { false }
+
+          it "suggests selecting the repositories from the medium" do
+            expect(Yast2::Popup).to receive(:show).with(
+              /configure access to packages medium in the next step/, anything
+            )
               .and_return(true)
-            expect(Yast::Popup).not_to receive(:Warning).with(/Without these media only/)
-            expect(subject.run).to eq(:skip)
+            expect(subject.run).to eq(:abort)
           end
+        end
+
+        it "does not try to register the system and closes the dialog" do
+          expect(registration_ui).to_not receive(:register_system_and_base_product)
+          expect(Yast2::Popup).to receive(:show).with(/skipping registration/, anything)
+            .and_return(true)
+          expect(subject.run).to eq(:abort)
         end
       end
     end
