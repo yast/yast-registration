@@ -746,7 +746,7 @@ module Registration
           # TRANSLATORS: Unregistered system message (2/3)
           _("<p>Please use Full media instead of Online one.</p>") +
           # TRANSLATORS: Unregistered system message (3/3)
-          _("<p>Another option is booting the original system and register it.</p>")
+          _("<p>Another option is booting the original system and registering it.</p>")
       end
 
       # Informative message
