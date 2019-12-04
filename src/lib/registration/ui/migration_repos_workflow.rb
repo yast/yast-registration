@@ -607,7 +607,7 @@ module Registration
           # TODO: move somewhere else?
           add_offline_base_product
         else
-          # FIXME can be removed when old media format removed from SLE as opensuse
+          # FIXME: can be removed when old media format removed from SLE as opensuse
           # does not have registration and online is handled above
           # we do not support registering the old system at upgrade, that must
           # be done before the upgrade, skip registration in that case
