@@ -576,6 +576,10 @@ module Registration
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
           return :next
+        elsif Y2Packager::MediumType.online?
+          log.warn "The system is NOT registered for online medium. Stopping"
+          Yast::Popup.LongMessage(unregistered_online_message)
+          return :abort
         else
           # the system is unregistered we can only upgrade via media
           unregistered_media_upgrade
@@ -603,6 +607,8 @@ module Registration
           # TODO: move somewhere else?
           add_offline_base_product
         else
+          # FIXME can be removed when old media format removed from SLE as opensuse
+          # does not have registration and online is handled above
           # we do not support registering the old system at upgrade, that must
           # be done before the upgrade, skip registration in that case
           Yast::Popup.LongMessage(unregistered_message)
@@ -725,6 +731,22 @@ module Registration
           # TRANSLATORS: Unregistered system message (3/3)
           _("<p>If you cannot provide the installation media you can abort the migration " \
           "and boot the original system to register it. Then start the migration again.</p>")
+      end
+
+      # Informative message
+      # @return [String] translated message
+      def unregistered_online_message
+        # TRANSLATORS: Unregistered system message (1/3)
+        #   Message displayed during upgrade for unregistered systems.
+        #   The user can either boot the old system and register it or use the
+        #   Full media for upgrade. Use the RichText format.
+        _("<h2>Unregistered System</h2><p>The system is not registered, that means " \
+          "the installer cannot add the new software repositories required for migration " \
+          "automatically.</p>") +
+          # TRANSLATORS: Unregistered system message (2/3)
+          _("<p>Please use Full media instead of Online one.</p>") +
+          # TRANSLATORS: Unregistered system message (3/3)
+          _("<p>Another option is booting the original system and register it.</p>") +
       end
 
       # Informative message
