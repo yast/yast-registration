@@ -400,7 +400,7 @@ module Registration
 
       def online_skipping_headline
         # TRANSLATORS: popup header
-        _("Registration Cannot be Skipped")
+        _("Registration Cannot Be Skipped")
       end
 
       def default_skipping_headline
