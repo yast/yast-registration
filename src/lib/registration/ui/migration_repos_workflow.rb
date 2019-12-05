@@ -575,6 +575,10 @@ module Registration
         # the system is registered, continue with the SCC/SMT/RMT based upgrade
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
+          # act during upgrade for registered system like online even when medium is Full
+          if Yast::Stage.initial && Y2Packager::MediumType.offline?
+            Y2Packager::MediumType.type = :online
+          end
           return :next
         elsif Y2Packager::MediumType.online?
           log.warn "The system is NOT registered for online medium. Stopping"

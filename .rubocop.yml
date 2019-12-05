@@ -12,7 +12,7 @@ Metrics/BlockNesting:
 
 # TODO: this need some non-trivial refactoring...
 Metrics/ClassLength:
-  Max: 460
+  Max: 470
 
 # TODO: this need some non-trivial refactoring...
 Metrics/CyclomaticComplexity:
