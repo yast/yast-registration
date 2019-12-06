@@ -205,9 +205,9 @@ module Yast
           log.info "Migration result: #{ret}"
           return ret == :next
         else
-          # profile wants to do registration, but old system is not registered. So complain.
           # Intentionally use blocking popup as it is fatal error that stops installation.
           Popup.Error(
+            # TRANSLATORS: profile wants to do registration, but old system is not registered.
             _("Old system is not registered and autoyast profile require registration." \
               "Either register the old system before running the upgrade or " \
               "remove the registration section from the AutoYaST profile " \
