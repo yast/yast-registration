@@ -12,6 +12,7 @@ require "registration/helpers"
 require "registration/url_helpers"
 require "registration/ui/abort_confirmation"
 require "y2packager/medium_type"
+require "yast2/popup"
 
 module Registration
   module UI
@@ -315,8 +316,11 @@ module Registration
         )
       end
 
+      # widget for skipping the registration
+      # @return [Yast::Term]  UI term
       def skip_option
-        return Empty() if Registration.is_registered?
+        # do not display it in an installed system or when already registered
+        return Empty() if Stage.normal || Registration.is_registered?
         Left(
           RadioButton(
             Id(:skip_registration),
@@ -359,9 +363,6 @@ module Registration
       # @return [String] the name or empty string if not set
       #
       def media_name
-        # FIXME: temporal force of name
-        return _("Full media") if Y2Packager::MediumType.online?
-
         ProductFeatures.GetStringFeature(
           "globals",
           "full_system_media_name"
@@ -384,9 +385,7 @@ module Registration
       #
       # @return [Boolean] true when skipping has been confirmed
       def show_skipping_warning
-        warning = medium_warning_text
-
-        Yast::Popup.Warning(warning)
+        Yast2::Popup.show(medium_warning_text, richtext: true, headline: medium_warning_headline)
       end
 
       # Convenience method to obtain the medium warning text depending on the
@@ -395,49 +394,54 @@ module Registration
         Y2Packager::MediumType.online? ? online_skipping_text : default_skipping_text
       end
 
-      def default_skipping_text
-        # TRANSLATORS:
-        # Popup question (1/1): confirm skipping the registration
-        warning = _("You are skipping registration.\n"\
-          "Please configure access to packages medium in the next step.\n"\
-          "\n"\
-          "Without registration update-channels will not be configured.\n"\
-          "This will disable the updates and security fixes.")
-
-        # TRANSLATORS:
-        # Popup question (2/2): confirm skipping the registration
-        # %{media_name} is the media name (e.g. SLE-15-Packages),
-        # %{download_url} is an URL link (e.g. https://download.suse.com)
-        if !media_name.empty? && # cannot be nil
-            !download_url.empty? # cannot be nil
-          warning += "\n\n" +
-            _("If you do not register AND do not use the %{media_name}\n"\
-              "medium from %{download_url}\n"\
-              "then only an installation system is installed.\n"\
-              "\n"\
-              "The installation system is not intended to be used as\n"\
-              "an operational system. The installation system can only\n"\
-              "be used to install a working system.") %
-            { media_name: media_name, download_url: download_url }
-        end
-
-        warning
+      def medium_warning_headline
+        Y2Packager::MediumType.online? ? online_skipping_headline : default_skipping_headline
       end
 
-      # TODO: define the warning for online media
-      def online_skipping_text
-        warning = _("This medium does not permit to skip the registration.")
+      def online_skipping_headline
+        # TRANSLATORS: popup header
+        _("Registration Cannot Be Skipped")
+      end
 
+      def default_skipping_headline
+        # TRANSLATORS: popup header
+        _("Skipping Registration")
+      end
+
+      def default_skipping_text
         # TRANSLATORS:
-        # Popup warning the user that skipping the registration is not allowed
-        # %{media_name} is the media name (e.g. SLE-15-Packages),
-        # %{download_url} is an URL link (e.g. https://download.suse.com)
-        if !media_name.empty? && # cannot be nil
-            !download_url.empty? # cannot be nil
+        # Popup question: confirm skipping the registration on the Full medium
+        _("<p>You are skipping registration.\n"\
+          "Please configure access to packages medium in the next step.</p>"\
+          "<p>Without registration update-channels will not be configured.\n"\
+          "This will disable the updates and security fixes.</p>")
+      end
+
+      # the warning for the Online media
+      # @return [String]
+      def online_skipping_text
+        # TRANSLATORS: a popup message (1/3) the user wants to skip the registration,
+        # on the Online installation medium which is not possible
+        warning = _("<p>The installation medium does not contain any package\n" \
+          "repository, the repositories will be accessible after registering\n" \
+          "the system.</p>" \
+          "<p>Registration additionally enables access to the updates\n" \
+          "and security fixes.</p>")
+
+        # these cannot be nil
+        if !media_name.empty? && !download_url.empty?
+          # TRANSLATORS: a popup message (2/3) the user wants to skip the registration
+          # %{media_name} is the media name (e.g. SLE-15-SP2-Full),
+          # %{download_url} is an URL link (e.g. https://download.suse.com)
           warning += "\n\n" +
-            _("For installing without registering the system use the\n"\
-              "%{media_name} from %{download_url}.") %
+            _("<p>For installation without registering the system use the\n"\
+              "%{media_name} medium from %{download_url}.</p>") %
             { media_name: media_name, download_url: download_url }
+
+          # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
+          warning += "\n" +
+            _("<p>However, without registration the system will not have access\n"  \
+                "to the updates and security fixes.</p>")
         end
 
         warning
@@ -590,7 +594,7 @@ module Registration
       # In an online medium it disables the next button when skipping the
       # registration and enable it in any other selected action
       def refresh_next
-        return unless Y2Packager::MediumType.online?
+        return unless Stage.initial && Y2Packager::MediumType.online?
 
         disable_next(action == :skip_registration)
       end
