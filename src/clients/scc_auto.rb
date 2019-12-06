@@ -209,9 +209,9 @@ module Yast
           # Intentionally use blocking popup as it is fatal error that stops installation.
           Popup.Error(
             _("Old system is not registered and autoyast profile require registration." \
-              "Either register the old system before running the upgrade or remove the registration section from the AutoYaST profile " \
-              "and use full medium."
-            )
+              "Either register the old system before running the upgrade or " \
+              "remove the registration section from the AutoYaST profile " \
+              "and use full medium.")
           )
           return false
         end
