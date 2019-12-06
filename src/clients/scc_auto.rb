@@ -193,16 +193,28 @@ module Yast
       return false unless set_registration_url
 
       # update the registration in AutoUpgrade mode if the old system was registered
-      if Mode.update && old_system_registered?
-        # drop all obsolete repositories and services (manual upgrade contains a dialog
-        # where the old repositories are deleted, in AY we need to do it automatically here)
-        # Note: the Update module creates automatically a backup which is restored
-        # when upgrade is aborted or crashes.
-        repo_cleanup
+      if Mode.update
+        if old_system_registered?
+          # drop all obsolete repositories and services (manual upgrade contains a dialog
+          # where the old repositories are deleted, in AY we need to do it automatically here)
+          # Note: the Update module creates automatically a backup which is restored
+          # when upgrade is aborted or crashes.
+          repo_cleanup
 
-        ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
-        log.info "Migration result: #{ret}"
-        return ret == :next
+          ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
+          log.info "Migration result: #{ret}"
+          return ret == :next
+        else
+          # profile wants to do registration, but old system is not registered. So complain.
+          # Intentionally use blocking popup as it is fatal error that stops installation.
+          Popup.Error(
+            _("Old system is not registered and autoyast profile require registration." \
+              "Either register old system or remove registration from autoyast profile " \
+              "and use full medium."
+            )
+          )
+          return false
+        end
       end
 
       # special handling for the online installation medium,
