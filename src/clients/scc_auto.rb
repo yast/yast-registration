@@ -184,7 +184,7 @@ module Yast
     # return true on success
     def write
       # registration disabled, nothing to do
-      return true unless @config.do_registration
+      return true if !@config.do_registration && !Yast::Mode.update
 
       # initialize libzypp if applying settings in installed system or
       # in AutoYast configuration mode ("Apply to System")
@@ -204,6 +204,9 @@ module Yast
           ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
           log.info "Migration result: #{ret}"
           return ret == :next
+        # Full medium we can upgrade without registration
+        elsif Y2Packager::MediumType::offline?
+          return true
         else
           # Intentionally use blocking popup as it is fatal error that stops installation.
           Popup.Error(
