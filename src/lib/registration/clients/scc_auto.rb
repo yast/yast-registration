@@ -374,6 +374,9 @@ module Registration
       # migrate registration if applicable or skip or report issue.
       def migrate_reg
         if old_system_registered?
+          # act always like we have online only repo for registered system
+          Y2Packager::MediumType.type = :online
+
           # drop all obsolete repositories and services (manual upgrade contains a dialog
           # where the old repositories are deleted, in AY we need to do it automatically here)
           # Note: the Update module creates automatically a backup which is restored
