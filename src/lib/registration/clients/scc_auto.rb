@@ -123,32 +123,7 @@ module Registration
         return false unless set_registration_url
 
         # update the registration in AutoUpgrade mode if the old system was registered
-        if Yast::Mode.update
-          if old_system_registered?
-            # drop all obsolete repositories and services (manual upgrade contains a dialog
-            # where the old repositories are deleted, in AY we need to do it automatically here)
-            # Note: the Update module creates automatically a backup which is restored
-            # when upgrade is aborted or crashes.
-            repo_cleanup
-
-            ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
-            log.info "Migration result: #{ret}"
-            return ret == :next
-          # Full medium we can upgrade without registration
-          elsif Y2Packager::MediumType.offline?
-            return true
-          else
-            # Intentionally use blocking popup as it is fatal error that stops installation.
-            Yast::Popup.Error(
-              # TRANSLATORS: profile wants to do registration, but old system is not registered.
-              _("Old system is not registered and autoyast profile require registration." \
-                "Either register the old system before running the upgrade or " \
-                "remove the registration section from the AutoYaST profile " \
-                "and use full medium.")
-            )
-            return false
-          end
-        end
+        return migrate_reg if Yast::Mode.update
 
         # special handling for the online installation medium,
         # we need to evaluate the base products defined in the control.xml
@@ -394,6 +369,34 @@ module Registration
         return true if @config.install_updates || !product_service
 
         registration_ui.disable_update_repos(product_service)
+      end
+
+      # migrate registration if applicable or skip or report issue.
+      def migrate_reg
+        if old_system_registered?
+          # drop all obsolete repositories and services (manual upgrade contains a dialog
+          # where the old repositories are deleted, in AY we need to do it automatically here)
+          # Note: the Update module creates automatically a backup which is restored
+          # when upgrade is aborted or crashes.
+          repo_cleanup
+
+          ret = ::Registration::UI::OfflineMigrationWorkflow.new.main
+          log.info "Migration result: #{ret}"
+          ret == :next
+        # Full medium we can upgrade without registration
+        elsif Y2Packager::MediumType.offline?
+          true
+        else
+          # Intentionally use blocking popup as it is fatal error that stops installation.
+          Yast::Popup.Error(
+            # TRANSLATORS: profile wants to do registration, but old system is not registered.
+            _("Old system is not registered and autoyast profile require registration." \
+              "Either register the old system before running the upgrade or " \
+              "remove the registration section from the AutoYaST profile " \
+              "and use full medium.")
+          )
+          false
+        end
       end
     end
   end
