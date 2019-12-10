@@ -135,7 +135,7 @@ module Registration
             log.info "Migration result: #{ret}"
             return ret == :next
           # Full medium we can upgrade without registration
-          elsif Y2Packager::MediumType::offline?
+          elsif Y2Packager::MediumType.offline?
             return true
           else
             # Intentionally use blocking popup as it is fatal error that stops installation.
@@ -224,7 +224,9 @@ module Registration
 
         if !ay_product
           # TRANSLATORS: error message, %s is the XML path, e.g. "software/products"
-          Yast::Report.Error(_("Missing product specification in the %s section") % "software/products")
+          Yast::Report.Error(
+            _("Missing product specification in the %s section") % "software/products"
+          )
           return false
         end
 

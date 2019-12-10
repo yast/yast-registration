@@ -40,7 +40,7 @@ describe Registration::Clients::SCCAuto do
 
   describe "#import" do
     it "imports given hash" do
-      expect{subject.import({})}.to_not raise_error
+      expect { subject.import({}) }.to_not raise_error
     end
   end
 
@@ -107,8 +107,8 @@ describe Registration::Clients::SCCAuto do
       end
 
       it "runs offline migration workflow if system is registered" do
-        expect(::Registration::UI::OfflineMigrationWorkflow).to receive(:new).
-          and_return(double(main: :next))
+        expect(::Registration::UI::OfflineMigrationWorkflow).to receive(:new)
+          .and_return(double(main: :next))
         allow(subject).to receive(:old_system_registered?).and_return(true)
 
         subject.write
