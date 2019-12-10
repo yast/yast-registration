@@ -87,6 +87,9 @@ module Registration
       # (For use by autoinstallation.)
       # param [Hash] settings The structure to be imported.
       def import(settings)
+        # if there is no registration section like can happen during auto upgrade
+        return unless settings
+
         Yast.import "AutoinstFunctions"
 
         # merge reg code if not defined in the profile but
