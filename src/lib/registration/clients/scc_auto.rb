@@ -396,7 +396,7 @@ module Registration
           # Intentionally use blocking popup as it is fatal error that stops installation.
           Yast::Popup.Error(
             # TRANSLATORS: profile wants to do registration, but old system is not registered.
-            _("Old system is not registered and autoyast profile require registration.\n" \
+            _("The old system is not registered and the AutoYaST profile requires registration.\n" \
               "Either register the old system before running the upgrade or \n" \
               "remove the registration section from the AutoYaST profile \n" \
               "and use full medium.")
