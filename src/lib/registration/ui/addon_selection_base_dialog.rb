@@ -128,17 +128,17 @@ module Registration
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
       IMAGES = {
-        "normal:auto:enabled" => "auto-selected.png",
-        "normal:on:enabled"   => "checkbox-on.png",
-        "normal:off:enabled"  => "checkbox-off.png",
+        "normal:auto:enabled" => "auto-selected.svg",
+        "normal:on:enabled"   => "checkbox-on.svg",
+        "normal:off:enabled"  => "checkbox-off.svg",
         # theme has no special images for disabled checkboxes
-        "normal:on:disabled"  => "checkbox-on.png",
-        "normal:off:disabled" => "checkbox-off.png",
-        "inst:auto:enabled"   => "auto-selected.png",
-        "inst:on:enabled"     => "inst_checkbox-on.png",
-        "inst:off:enabled"    => "inst_checkbox-off.png",
-        "inst:on:disabled"    => "inst_checkbox-on-disabled.png",
-        "inst:off:disabled"   => "inst_checkbox-off-disabled.png"
+        "normal:on:disabled"  => "checkbox-on.svg",
+        "normal:off:disabled" => "checkbox-off.svg",
+        "inst:auto:enabled"   => "auto-selected.svg",
+        "inst:on:enabled"     => "inst_checkbox-on.svg",
+        "inst:off:enabled"    => "inst_checkbox-off.svg",
+        "inst:on:disabled"    => "inst_checkbox-on-disabled.svg",
+        "inst:off:disabled"   => "inst_checkbox-off-disabled.svg"
       }.freeze
 
       INDENT = "&nbsp;".freeze
