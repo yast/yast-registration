@@ -5,11 +5,13 @@ require "registration/ui/abort_confirmation"
 require "registration/addon"
 require "registration/addon_sorter"
 require "registration/sw_mgmt"
+require "ui/text_helpers"
 
 module Registration
   module UI
     # this class displays and runs the dialog with addon selection
     class AddonSelectionBaseDialog
+      include ::UI::TextHelpers
       include Yast::Logger
       include Yast::I18n
       include Yast::UIShortcuts
@@ -87,115 +89,99 @@ module Registration
       # create the main dialog definition
       # @return [Yast::Term] the main UI dialog term
       def content
-        check_filter =
-          self.class.filter_devel.nil? ? FILTER_DEVEL_INITIALLY : self.class.filter_devel
-        vbox_elements = [Left(Heading(heading))]
-        available_addons = @all_addons.reject(&:registered?)
+        elements = [title]
+        elements << devel_filter if include_devel_filter?
+        elements << addons_box
 
-        unless available_addons.empty? || available_addons.all?(&:released?)
-          vbox_elements.push(Left(CheckBox(Id(:filter_devel), Opt(:notify),
-            # TRANSLATORS: Checkbox label, hides alpha or beta versions (not released yet)
-            _("&Hide Development Versions"), check_filter)))
-        end
-
-        vbox_elements.concat([addons_box, Left(Label(_("Details (English only)"))), details_widget])
-        VBox(*vbox_elements)
+        VBox(*elements)
       end
 
-      # addon description widget
-      # @return [Yast::Term] the addon details widget
-      def details_widget
-        MinHeight(8,
-          VWeight(25, RichText(Id(:details), Opt(:disabled), "<small>" +
-                _("Select an extension or a module to show details here") + "</small>")))
+      def title
+        Left(Heading(heading))
       end
 
-      # @return [String] a Value for a RichText
-      def addon_checkboxes
-        @addons.map { |a| addon_checkbox(a) }.join("\n")
+      def devel_filter
+        checked = self.class.filter_devel.nil? ? FILTER_DEVEL_INITIALLY : self.class.filter_devel
+
+        Left(
+          # TRANSLATORS: Checkbox label, hides alpha or beta versions (not released yet)
+          CheckBox( Id(:filter_devel), Opt(:notify), _("&Hide Development Versions"), checked)
+        )
       end
 
-      # @param [<Addon>] addon the addon
-      # @return [String] a Value for a RichText
-      def addon_checkbox(addon)
-        # checkbox label for an unavailable extension
-        # (%s is an extension name)
-        label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
-        richtext_checkbox(id:     addon_widget_id(addon),
-                          label:  label,
-                          status: addon.status)
-      end
-
-      IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
-      IMAGES = {
-        "normal:auto:enabled" => "auto-selected.svg",
-        "normal:on:enabled"   => "checkbox-on.svg",
-        "normal:off:enabled"  => "checkbox-off.svg",
-        # theme has no special images for disabled checkboxes
-        "normal:on:disabled"  => "checkbox-on.svg",
-        "normal:off:disabled" => "checkbox-off.svg",
-        "inst:auto:enabled"   => "auto-selected.svg",
-        "inst:on:enabled"     => "inst_checkbox-on.svg",
-        "inst:off:enabled"    => "inst_checkbox-off.svg",
-        "inst:on:disabled"    => "inst_checkbox-on-disabled.svg",
-        "inst:off:disabled"   => "inst_checkbox-off-disabled.svg"
-      }.freeze
-
-      INDENT = "&nbsp;".freeze
-
-      # Make a simulation of a CheckBox displayed in a RichText
-      # @param id [String]
-      # @param label [String]
-      # @param status [Symbol]
-      # @return [String] a Value for a RichText
-      def richtext_checkbox(id:, label:, status:)
-        enabled = [:selected, :auto_selected, :available].include?(status)
-        if Yast::UI.TextMode
-          check = case status
-          when :selected, :registered
-            "[x]"
-          when :auto_selected
-            "[a]"
-          else
-            "[ ]"
-          end
-          widget = "#{check} #{label}"
-          enabled_widget = enabled ? "<a href=\"#{id}\">#{widget}</a>" : widget
-          "#{INDENT}#{enabled_widget}<br>"
-        else
-          # check for installation style, which is dark, FIXME: find better way
-          installation = ENV["Y2STYLE"] == "installation.qss"
-
-          selected = case status
-          when :selected, :registered
-            "on"
-          when :auto_selected
-            "auto"
-          else
-            "off"
-          end
-
-          image = (installation ? "inst:" : "normal:") +
-            selected + ":" + (enabled ? "enabled" : "disabled")
-          color = installation ? "white" : "black"
-
-          check = "<img src='#{IMAGE_DIR}/#{IMAGES[image]}'></img>"
-          widget = "#{check} #{label}"
-          enabled_widget = if enabled
-            "<a href='#{id}' style='text-decoration:none; color:#{color}'>#{widget}</a>"
-          else
-            "<span style='color:grey'>#{widget}</span>"
-          end
-          "<p>#{INDENT}#{enabled_widget}</p>"
-        end
-      end
-
-      # create UI box with addon check boxes
+      # Create the UI box with addon check boxes
+      #
       # @return [Yast::Term] the main UI dialog term
       def addons_box
-        content = RichText(Id(:items), addon_checkboxes)
+        # FIXME: the items will be added via UI.ChangeWidget; see #show_addons and
+        # AddonSelectionRegistratioDialog#run
+        content = CustomStatusItemSelector(Id(:items), Opt(:notify), custom_states, addons_items)
 
-        VWeight(75, MinHeight(12, content))
+        content
+      end
+
+      # Build the items to be used by the addons selector
+      #
+      # @see #addons_box
+      #
+      # @return [Array<Yast::Term>] items for the addons selector.
+      def addons_items
+        @addons.map do |addon|
+          label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
+          # FIXME: move this sanitation to the wrap_text helper?
+          description = addon.description.gsub("<br>", "\n").gsub("</p>", "\n\n").gsub("<p>", "").chomp
+
+          # TODO: tell the addon status as 4th parameter, once Item supports non-boolean values
+          Item(
+            Id(addon_widget_id(addon)),
+            addon.label,
+            wrap_text(description, 110)
+          )
+        end
+      end
+
+      # Build the map of addons states
+      #
+      # @see #show_addons
+      #
+      # @return [Hash<String => Integer>]
+      def addons_states
+        @addons.reduce({}) do |states, addon|
+          states[addon_widget_id(addon)] =
+            case addon.status
+            when :selected, :registered
+              MOD_INSTALL
+            when :auto_selected
+              MOD_AUTOINSTALL
+            else
+              MOD_DONT_INSTALL
+            end
+
+          states
+        end
+      end
+
+      MOD_DONT_INSTALL = 0
+      private_constant :MOD_DONT_INSTALL
+      MOD_INSTALL      = 1
+      private_constant :MOD_INSTALL
+      MOD_AUTOINSTALL  = 2
+      private_constant :MOD_AUTOINSTALL
+
+      def custom_states
+        [
+          # icon, NCurses indicator, next status (optional)
+          ["checkbox-off",           "[ ]", MOD_INSTALL     ],
+          ["checkbox-on",            "[x]", MOD_DONT_INSTALL],
+          ["checkbox-auto-selected", "[a]", MOD_DONT_INSTALL]
+        ]
+      end
+
+      # Whether the devel filter should be included or not
+      #
+      # @return [Boolean] true when there are not registered or released addons; false otherwise
+      def include_devel_filter?
+        !@all_addons.reject { |addon| addon.registered? || addon.released? }.empty?
       end
 
       # the main event loop - handle the user in put in the dialog
@@ -244,21 +230,15 @@ module Registration
         return unless addon
 
         addon.toggle_selected
-        show_addon_details(addon)
         show_addons
       end
 
-      # update addon details after changing the current addon in the UI
-      # @param addon []
-      def show_addon_details(addon)
-        # addon description is a rich text
-        Yast::UI.ChangeWidget(Id(:details), :Value, addon.description)
-        Yast::UI.ChangeWidget(Id(:details), :Enabled, true)
-      end
-
-      # show the addon list when some are filtered, enabled, selected
+      # Show the addon list
+      #
+      # Useful when items are added, filtered, enabled, disabled, selected, or unselected
       def show_addons
-        Yast::UI.ChangeWidget(Id(:items), :Value, addon_checkboxes)
+        Yast::UI.ChangeWidget(Id(:items), :Items, addons_items)
+        Yast::UI.ChangeWidget(Id(:items), :ItemStatus, addons_states)
       end
 
       # the maximum number of reg. codes displayed vertically,
@@ -290,37 +270,6 @@ module Registration
           # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log "\
               "into the SUSE Customer Center and remove them manually there.</p>")
-      end
-
-      def checkboxes_help
-        header = _("<p>The extensions and modules can have several states depending " \
-          "how they were selected.</p>")
-
-        # TRANSLATORS: help text for checked check box
-        selected = _("The extension or module is selected to install by user or is " \
-          "pre-selected as a recommended addon.") + "<br>"
-        # TRANSLATORS: help text for unchecked check box
-        deselected = _("The extension or module is not selected to install.") + "<br>"
-        # TRANSLATORS: help text for automatically checked check box (it has a
-        # different look that a user selected check box)
-        auto_selected = _("The extension or module was selected automatically as a dependency " \
-          "of another extension or module.")
-
-        if Yast::UI.TextMode
-          return header + "<p>" \
-              "[x] = " + selected +
-              "[ ] = " + deselected +
-              "[a] = " + auto_selected +
-              "</p>"
-        end
-
-        mode = (ENV["Y2STYLE"] == "installation.qss") ? "inst" : "normal"
-
-        header + "<p>" \
-          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:on:enabled"]}'></img> = " + selected +
-          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:off:enabled"]}'></img> = " + deselected +
-          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:auto:enabled"]}'></img> = " + auto_selected +
-          "</p>"
       end
 
       def preselect_recommended
