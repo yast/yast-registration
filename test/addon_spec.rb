@@ -78,6 +78,36 @@ describe Registration::Addon do
     end
   end
 
+  describe "#find_by_id" do
+    before do
+      registration = double(
+        activated_products: [],
+        get_addon_list:     load_yaml_fixture("pure_addons.yml")
+      )
+      Registration::Addon.find_all(registration)
+    end
+
+    it "returns the addon witht the given ID" do
+      addon = described_class.find_by_id(1222)
+      expect(addon.identifier).to eq("sle-we")
+    end
+
+    it "returns nil if the addon does not exist" do
+      expect(described_class.find_by_id(1)).to be_nil
+    end
+
+    context "when no addons were read" do
+      before do
+        described_class.reset!
+      end
+
+      it "raises an exception" do
+        expect { described_class.find_by_id(1) }
+          .to raise_error(Registration::Addon::AddonsNotLoaded)
+      end
+    end
+  end
+
   describe ".registration_order" do
     it "returns addons sorted in the registration order" do
       addons = load_yaml_fixture("sle15_addons.yaml")
