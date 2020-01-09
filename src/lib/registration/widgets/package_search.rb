@@ -1,0 +1,197 @@
+# Copyright (c) [2019] SUSE LLC
+#
+# All Rights Reserved.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of version 2 of the GNU General Public License as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, contact SUSE LLC.
+#
+# To contact SUSE LLC about this file by physical or electronic mail, you may
+# find current contact information at www.suse.com.
+
+require "yast"
+require "cwm/custom_widget"
+require "registration/widgets/package_search_form"
+require "registration/widgets/remote_packages_table"
+require "registration/widgets/remote_package_details"
+require "registration/package_search"
+
+Yast.import "Popup"
+
+module Registration
+  module Widgets
+    # Online package search widget
+    #
+    # This widget offers a UI to search for packages using the SCC API. It features
+    # a search form ({PackageSearchForm}), a list of results ({RemotePackagesTable})
+    # and the details of the selected package ({RemotePackageDetails}).
+    #
+    # Additionally, it allows the user to select/unselect packages for installation.
+    class PackageSearch < CWM::CustomWidget
+      include Yast::Logger
+
+      # @return [Array<String>] List of selected packages
+      attr_reader :selected_packages
+
+      # @return [::Registration::PackageSearch,nil] Current search
+      attr_reader :search
+
+      # Constructor
+      def initialize
+        textdomain "registration"
+        self.handle_all_events = true
+        @selected_packages = [] # list of selected packages
+        super
+      end
+
+      # @macro seeAbstractWidget
+      def contents
+        MarginBox(
+          0.5,
+          0.5,
+          HBox(
+            VBox(
+              search_form,
+              VStretch()
+            ),
+            MinWidth(
+              60,
+              VBox(
+                packages_table,
+                PushButton(Id(:toggle_package), _("Toggle package")),
+                package_details
+              )
+            )
+          )
+        )
+      end
+
+      # @macro seeAbstractWidget
+      def handle(event)
+        if event["WidgetID"] == :search_button
+          search_package(search_form.text)
+        elsif event["WidgetID"] == :toggle_package
+          toggle_package
+        elsif event["EventReason"] == "SelectionChanged"
+          update_details
+        end
+        log.debug "Event handled #{event.inspect}"
+        nil
+      end
+
+    private
+
+      # Search form widget
+      #
+      # @return [PackageSearchForm] Search form widget instance
+      def search_form
+        @search_form ||= PackageSearchForm.new
+      end
+
+      # Packages table widget
+      #
+      # This widget is used to display the result of the search.
+      #
+      # @return [RemotePackagesTable] Packages table widget
+      def packages_table
+        @packages_table ||= RemotePackagesTable.new
+      end
+
+      # Package details widget
+      #
+      # This widget displays the details of the package which is selected in the
+      # table.
+      #
+      # @return [RemotePackageDetails] Package details widget.
+      def package_details
+        @package_details ||= RemotePackageDetails.new
+      end
+
+      # Performs the search and updates the packages table
+      #
+      # @param text [String] Text to search for
+      def search_package(text)
+        @search = ::Registration::PackageSearch.new(text: text)
+        Yast::Popup.Feedback(_("Searching..."), _("Searching for packages with the given name")) do
+          selected_package_names = @selected_packages.map(&:name)
+          @search.packages.each do |pkg|
+            pkg.select! if selected_package_names.include?(pkg.name)
+          end
+        end
+        update_packages_table
+        update_details unless search.packages.empty?
+      end
+
+      # Finds out the current package which is selected in the packages table
+      #
+      # @return [RemotePackage,nil]
+      def find_current_package
+        return unless search && packages_table.value
+        search.packages.find { |p| p.name == packages_table.value }
+      end
+
+      def toggle_package
+        package = find_current_package
+        return unless package
+
+        if package.selected?
+          unselect_package(package)
+        else
+          select_package(package)
+        end
+      end
+
+      # Selects the current package for installation
+      #
+      # If required, it selects the addon for registration.
+      def select_package(package)
+        addon = package.addon
+        return unless addon.registered? || addon.selected? || enable_addon?(addon)
+
+        addon.selected unless addon.selected?
+        package.select!
+        @selected_packages << package
+        update_packages_table
+      end
+
+      def unselect_package(package)
+        package.unselect!
+        @selected_packages.delete(package)
+
+        update_packages_table
+      end
+
+      # Updates the packages table
+      def update_packages_table
+        packages_table.change_items(search.packages)
+      end
+
+      # Updates the package details widget
+      def update_details
+        current_package = find_current_package
+        package_details.update(current_package) if current_package
+      end
+
+      # Asks the user to enable the addon
+      #
+      # It omits the question if the addon is already registered or selected for registration.
+      #
+      # @param addon [Addon] Addon to ask about
+      def enable_addon?(addon)
+        message = format(
+          _("'%{name}' module is not enabled for this system.\nDo you want to enable it?"),
+          name: addon.name
+        )
+        Yast::Popup.YesNo(message)
+      end
+    end
+  end
+end
