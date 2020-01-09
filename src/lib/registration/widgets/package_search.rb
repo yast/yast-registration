@@ -34,7 +34,7 @@ module Registration
     # a search form ({PackageSearchForm}), a list of results ({RemotePackagesTable})
     # and the details of the selected package ({RemotePackageDetails}).
     #
-    # Additionally, it allows the user to select/unselect packages for installation.
+    # Additionally, it allows the user to select packages for installation.
     class PackageSearch < CWM::CustomWidget
       include Yast::Logger
 
