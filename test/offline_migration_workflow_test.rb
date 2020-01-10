@@ -13,6 +13,8 @@ describe Registration::UI::OfflineMigrationWorkflow do
       allow(File).to receive(:exist?)
       allow(Yast::WFM).to receive(:CallFunction)
       allow(Yast::Stage).to receive(:initial).and_return(true)
+      allow(Yast::Pkg).to receive(:SourceFinishAll)
+      allow(Yast::Pkg).to receive(:SourceRestore)
     end
 
     shared_examples "certificate cleanup" do
@@ -80,6 +82,13 @@ describe Registration::UI::OfflineMigrationWorkflow do
 
     it "runs the 'inst_migration_repos' client" do
       expect(Yast::WFM).to receive(:CallFunction).with("inst_migration_repos", anything)
+      subject.main
+    end
+
+    it "loads the libzypp repositories" do
+      expect(Yast::Pkg).to receive(:SourceFinishAll)
+      expect(Yast::Pkg).to receive(:SourceRestore)
+
       subject.main
     end
 

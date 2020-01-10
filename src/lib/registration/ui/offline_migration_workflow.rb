@@ -53,6 +53,8 @@ module Registration
           return :back
         end
 
+        reinit_repos
+
         # run the main registration migration
         ui = migration_repos
 
@@ -73,6 +75,13 @@ module Registration
       end
 
     private
+
+      # force reloading of the old repositories so we can detect and remove the obsoleted
+      # services during migration (bsc#1159433)
+      def reinit_repos
+        Yast::Pkg.SourceFinishAll
+        Yast::Pkg.SourceRestore
+      end
 
       def going_back
         log.info("Going back")
