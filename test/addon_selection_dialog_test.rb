@@ -1,7 +1,7 @@
 require_relative "spec_helper"
 require "registration/addon"
 
-describe Registration::UI::AddonSelectionRegistrationDialog do
+xdescribe Registration::UI::AddonSelectionRegistrationDialog do
   before(:each) do
     # generic UI stubs for the wizard dialog
     allow(Yast::UI).to receive(:WizardCommand)

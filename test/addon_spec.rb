@@ -3,7 +3,7 @@
 require_relative "spec_helper"
 require "yaml"
 
-describe Registration::Addon do
+xdescribe Registration::Addon do
   before(:each) do
     addon_reset_cache
   end
