@@ -39,8 +39,21 @@ module Registration
       @addon = addon
     end
 
+    def full_version
+      "#{version}-#{release}"
+    end
+
     def select!
+      @old_status = @status
       @status = :selected
+    end
+
+    def unselect!
+      @status = @old_status if selected?
+    end
+
+    def installed?
+      status == :installed
     end
 
     def selected?
