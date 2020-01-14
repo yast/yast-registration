@@ -324,9 +324,8 @@ module Registration
 
       def register_base_product
         handle_product_service do
-          options = ::Registration::Storage::InstallationOptions.instance
-          options.email = @config.email
-          options.reg_code = @config.reg_code
+          options_instance.email = @config.email
+          options_instance.reg_code = @config.reg_code
 
           registration_ui.register_system_and_base_product
         end
@@ -335,8 +334,7 @@ module Registration
       # register the addons specified in the profile
       def register_addons
         # set the option for installing the updates for addons
-        options = Registration::Storage::InstallationOptions.instance
-        options.install_updates = @config.install_updates
+        options_instance.install_updates = @config.install_updates
 
         ay_addons_handler = Registration::AutoyastAddons.new(@config.addons, registration)
         ay_addons_handler.select
@@ -344,6 +342,11 @@ module Registration
 
         # select the new products to install
         ::Registration::SwMgmt.select_addon_products
+      end
+
+      # Singleton instance of Registration::Storage::InstallationOptions
+      def options_instance
+        ::Registration::Storage::InstallationOptions.instance
       end
 
       # was the system already registered?
