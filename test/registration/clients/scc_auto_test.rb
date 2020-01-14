@@ -105,8 +105,8 @@ describe Registration::Clients::SCCAuto do
       allow(Yast::Mode).to receive(:update).and_return(false)
       subject.import(
         "do_registration" => true,
-        "addons" => [{
-          "name" => "sle-module-basesystem",
+        "addons"          => [{
+          "name"    => "sle-module-basesystem",
           "version" => "15.2",
           "arch"    => "x86_64"
         }]
