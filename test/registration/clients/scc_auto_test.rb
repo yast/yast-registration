@@ -101,6 +101,28 @@ describe Registration::Clients::SCCAuto do
       subject.write
     end
 
+    it "registers previously registered base system and addons" do
+      allow(Yast::Mode).to receive(:update).and_return(false)
+      subject.import(
+        "do_registration" => true,
+        "addons" => [{
+          "name" => "sle-module-basesystem",
+          "version" => "15.2",
+          "arch"    => "x86_64"
+        }]
+      )
+
+      allow(subject).to receive(:registration_ui).and_return(
+        double(register_system_and_base_product: true, disable_update_repos: true)
+      )
+
+      addon = double.as_null_object
+      expect(Registration::AutoyastAddons).to receive(:new).and_return(addon)
+      expect(addon).to receive(:register)
+
+      subject.write
+    end
+
     context "in autoupgrade mode" do
       before do
         allow(Yast::Mode).to receive(:update).and_return(true)
