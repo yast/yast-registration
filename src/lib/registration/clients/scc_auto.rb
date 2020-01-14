@@ -130,7 +130,7 @@ module Registration
 
         # special handling for the online installation medium,
         # we need to evaluate the base products defined in the control.xml
-        if Y2Packager::MediumType.online?
+        if Yast::Stage.initial && Y2Packager::MediumType.online?
           return false unless online_medium_config
         end
 
@@ -335,10 +335,10 @@ module Registration
       # register the addons specified in the profile
       def register_addons
         # set the option for installing the updates for addons
-        options = Registration::Storage::InstallationOptions.instance
+        options = ::Registration::Storage::InstallationOptions.instance
         options.install_updates = @config.install_updates
 
-        ay_addons_handler = Registration::AutoyastAddons.new(@config.addons, registration)
+        ay_addons_handler = ::Registration::AutoyastAddons.new(@config.addons, registration)
         ay_addons_handler.select
         ay_addons_handler.register
 
