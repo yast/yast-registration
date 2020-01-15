@@ -80,9 +80,7 @@ module Registration
       rescue Timeout::Error => e
         # Error popup
         log.error "Timeout error: #{e.message}"
-        # FIXME: to not break existing translation, this typo should be fixed
-        # later after SP2: time -> timed
-        retry if report_error_and_retry?(message_prefix + _("Connection time out."),
+        retry if report_error_and_retry?(message_prefix + _("Connection timed out."),
           _("Make sure that the registration server is reachable and\n" \
             "the connection is reliable."))
 
@@ -158,7 +156,8 @@ module Registration
     end
 
     def self.details_error(msg, error_message, retry_button: false)
-      if Yast::Mode.auto
+      if Yast::Mode.auto && !retry_button
+        # AY mode and no retry button available
         report_error(msg, error_message)
       else
         buttons =

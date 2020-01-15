@@ -52,7 +52,11 @@ module Registration
       )
 
       log.info "Announcing system with distro_target: #{distro_target}"
-      login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
+      login = ""
+      password = ""
+      ConnectHelpers.catch_registration_errors do
+        login, password = SUSE::Connect::YaST.announce_system(settings, distro_target)
+      end
       log.info "Global SCC credentials (username): #{login}"
 
       # write the global credentials
@@ -210,7 +214,10 @@ module Registration
 
       log.info "Reading available updates for product: #{product["name"]}"
       remote_product = SwMgmt.remote_product(product)
-      updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
+      updates = []
+      ConnectHelpers.catch_registration_errors do
+        updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
+      end
 
       log.info "Updates for '#{product["name"]}' are available at '#{updates}'"
       updates
