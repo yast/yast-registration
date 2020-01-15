@@ -205,7 +205,7 @@ describe Registration::UI::MigrationReposWorkflow do
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
         expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)
           .and_return([])
-        expect(Yast::Report).to receive(:Error)
+        expect(Yast::Report).to receive(:Error).at_least(:once)
 
         expect(subject.run).to eq(:abort)
       end
