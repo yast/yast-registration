@@ -59,13 +59,10 @@ describe Registration::ConnectHelpers do
 
       context "and in AutoYaST mode" do
         let(:autoinst?) { true }
-
-        it "reports an error with details on timeout" do
-          expect(subject).to receive(:wrap_text).with("Details: #{details}", screen_width - 4)
-            .and_return("Details wrapped text")
-          expect(Yast::Report).to receive(:Error).with(
-            "Registration: " + _("Connection time out.") + "\n\nDetails wrapped text"
-          )
+        it "shows an error dialog with a retry and details button" do
+          expect(Yast2::Popup).to receive(:show)
+          # A retry should be provided. So no "common" AY error report.
+          expect(Yast::Report).not_to receive(:Error)
 
           helpers.catch_registration_errors(message_prefix: "Registration: ") do
             raise Timeout::Error
@@ -76,7 +73,7 @@ describe Registration::ConnectHelpers do
       context "and in a common installation" do
         it "shows an error dialog with a retry and details button" do
           expect(helpers).to receive(:report_error_and_retry?)
-            .with("Registration: " + _("Connection time out."), details)
+            .with("Registration: " + _("Connection timed out."), details)
 
           helpers.catch_registration_errors(message_prefix: "Registration: ") do
             raise Timeout::Error
@@ -85,7 +82,7 @@ describe Registration::ConnectHelpers do
 
         it "retries the given block if selected by the user" do
           expect(helpers).to receive(:report_error_and_retry?).twice
-            .with("Registration: " + _("Connection time out."), details).and_return(true, false)
+            .with("Registration: " + _("Connection timed out."), details).and_return(true, false)
 
           helpers.catch_registration_errors(message_prefix: "Registration: ") do
             raise Timeout::Error
