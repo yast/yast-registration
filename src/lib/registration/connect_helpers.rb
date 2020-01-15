@@ -159,15 +159,16 @@ module Registration
       if Yast::Mode.auto && !retry_button
         # AY mode and no retry button available
         report_error(msg, error_message)
-      else
-        buttons =
-          if retry_button
-            { retry: Yast::Label.RetryButton, cancel: Yast::Label.CancelButton }
-          else
-            :ok
-          end
-        Yast2::Popup.show(msg, details: error_message, headline: :error, buttons: buttons)
+        return
       end
+
+      buttons =
+        if retry_button
+          { retry: Yast::Label.RetryButton, cancel: Yast::Label.CancelButton }
+        else
+          :ok
+        end
+      Yast2::Popup.show(msg, details: error_message, headline: :error, buttons: buttons)
     end
 
     def self.report_error_and_retry?(msg, details_message)
