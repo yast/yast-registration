@@ -219,6 +219,7 @@ module Registration
     # the constructor
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
+      textdomain "registration"
       @pure_addon = pure_addon
     end
 
