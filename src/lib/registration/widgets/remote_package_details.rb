@@ -41,11 +41,10 @@ module Registration
         ]
 
         if package.addon
-          lines.concat(
-            [
-              format(_("<b>Product:</b> %{name}"), name: package.addon.name),
-              format(_("<b>Product Status:</b> %{status}"), status: addon_status(package.addon))
-            ]
+          lines << format(
+            _("<b>Product:</b> %{name} (%{status})"),
+            name:   package.addon.name,
+            status: addon_status(package.addon)
           )
         end
 
@@ -60,11 +59,11 @@ module Registration
       # @return [String]
       def addon_status(addon)
         if addon.registered?
-          _("Registered")
+          _("registered")
         elsif addon.selected?
-          _("To be registered")
+          _("to be registered")
         else
-          _("Not registered")
+          _("not registered")
         end
       end
     end

@@ -29,6 +29,7 @@ module Registration
       # Constructor
       def initialize
         textdomain "registration"
+        self.widget_id = "remote_packages_table"
         super
       end
 
@@ -44,7 +45,7 @@ module Registration
 
       # @macro seeTable
       def header
-        [_("Status"), _("Name"), _("Product Status"), _("Product")]
+        [_("Status"), _("Name"), _("Product")]
       end
 
       # @macro seeTable
@@ -69,8 +70,7 @@ module Registration
             Id(item.name),
             package_status(item),
             item.name,
-            addon_status(item.addon),
-            item.addon.name
+            addon_column(item.addon)
           )
         end
       end
@@ -92,14 +92,13 @@ module Registration
       #
       # @param addon [Addon] Addon to display the status for
       # @return [String]
-      def addon_status(addon)
-        if addon.registered?
-          "r"
-        elsif addon.selected?
-          "+"
-        else
-          ""
-        end
+      def addon_column(addon)
+        format(
+          # TRANSLATORS: product name and status
+          _("%{product} (%{status})"),
+          product: addon.name,
+          status:  addon.status_to_human
+        )
       end
     end
   end

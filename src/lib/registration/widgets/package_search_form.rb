@@ -36,9 +36,9 @@ module Registration
         Frame(
           _("Search"),
           VBox(
-            InputField(Id(:search_text), Opt(:hstretch, :notify, :immediate), _("Search Phrase")),
-            Left(CheckBox(Id(:search_ignore_case), _("Ignore Case"), true)),
-            Right(PushButton(Id(:search_button), Opt(:default), _("Search")))
+            InputField(Id("search_form_text"), Opt(:hstretch, :notify, :immediate), _("Package Name")),
+            Left(CheckBox(Id("search_form_ignore_case"), _("Ignore Case"), true)),
+            Right(PushButton(Id("search_form_button"), Opt(:default), _("Search")))
           )
         )
       end
@@ -47,14 +47,14 @@ module Registration
       #
       # @return [String]
       def text
-        Yast::UI.QueryWidget(Id(:search_text), :Value)
+        Yast::UI.QueryWidget(Id("search_form_text"), :Value)
       end
 
       # Whether the search is case sensitive or not
       #
       # @return [Boolean]
       def ignore_case
-        Yast::UI.QueryWidget(Id(:search_ignore_case), :Value)
+        Yast::UI.QueryWidget(Id("search_form_ignore_case"), :Value)
       end
     end
   end

@@ -23,5 +23,29 @@ require "registration/widgets/package_search_form"
 require "cwm/rspec"
 
 describe Registration::Widgets::PackageSearchForm do
+  include Yast::UIShortcuts
+
   include_examples "CWM::CustomWidget"
+
+  describe "#text" do
+    before do
+      allow(Yast::UI).to receive(:QueryWidget)
+        .with(Id("search_form_text"), :Value).and_return("foo")
+    end
+
+    it "returns the content of the text widget" do
+      expect(subject.text).to eq("foo")
+    end
+  end
+
+  describe "#ignore_case" do
+    before do
+      allow(Yast::UI).to receive(:QueryWidget)
+        .with(Id("search_form_ignore_case"), :Value).and_return(true)
+    end
+
+    it "returns the content of the text widget" do
+      expect(subject.ignore_case).to eq(true)
+    end
+  end
 end

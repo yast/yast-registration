@@ -28,6 +28,9 @@ require "y2packager/resolvable"
 module Registration
   # this is a wrapper class around SUSE::Connect::Product object
   class Addon
+    extend Yast::I18n
+    include Yast::I18n
+
     # The list of addons has not been loaded
     class AddonsNotLoaded < StandardError; end
 
@@ -350,6 +353,22 @@ module Registration
     # @return [Boolean] true if a not empty EULA url is present; false otherwise
     def eula_acceptance_needed?
       !eula_url.to_s.strip.empty?
+    end
+
+    STATUS_TRANSLATIONS = {
+      registered:    N_("registered"),
+      selected:      N_("to be registered"),
+      auto_selected: N_("to be registered"),
+      available:     N_("not registered yet"),
+      unknown:       N_("unknown")
+    }.freeze
+    private_constant :STATUS_TRANSLATIONS
+
+    # Translates the status into a translated and human readable string
+    #
+    # @return [String]
+    def status_to_human
+      _(STATUS_TRANSLATIONS[status])
     end
 
     def self.dump_addons

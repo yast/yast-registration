@@ -27,8 +27,13 @@ describe Registration::Widgets::PackageSearch do
 
   let(:packages_table) do
     instance_double(
-      Registration::Widgets::RemotePackagesTable, value: package.name, change_items: nil
+      Registration::Widgets::RemotePackagesTable, value: package.name, change_items: nil,
+      selected_item: package
     )
+  end
+
+  let(:package_details) do
+    instance_double(Registration::Widgets::RemotePackageDetails, update: nil)
   end
 
   let(:package) do
@@ -51,12 +56,40 @@ describe Registration::Widgets::PackageSearch do
   before do
     allow(Registration::Widgets::RemotePackagesTable).to receive(:new)
       .and_return(packages_table)
+    allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
+      .and_return(package_details)
     allow(subject).to receive(:search).and_return(search)
   end
 
   describe "#handle" do
-    context "when a package is selected" do
-      let(:event) { { "WidgetID" => :toggle_package } }
+    context "when the user asks for a package" do
+      let(:event) { { "WidgetID" => "search_form_button" } }
+
+      let(:search_form) do
+        instance_double(Registration::Widgets::PackageSearchForm, text: "gnome")
+      end
+
+      before do
+        allow(Registration::Widgets::PackageSearchForm).to receive(:new)
+          .and_return(search_form)
+        allow(Registration::PackageSearch).to receive(:new).and_return(search)
+      end
+
+      it "searches for the package in SCC" do
+        expect(Registration::PackageSearch).to receive(:new)
+          .with(text: "gnome").and_return(search)
+        subject.handle(event)
+      end
+
+      it "updates the table and the package details" do
+        expect(packages_table).to receive(:change_items).with([package])
+        expect(package_details).to receive(:update).with(package)
+        subject.handle(event)
+      end
+    end
+
+    context "when a package is selected for installation" do
+      let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
 
       context "and the addon is already registered" do
         before do
@@ -117,6 +150,15 @@ describe Registration::Widgets::PackageSearch do
           subject.handle(event)
           expect(subject.selected_packages).to eq([package])
         end
+      end
+    end
+
+    context "when the user selects a different package in the table" do
+      let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "SelectionChanged" } }
+
+      it "updates the package details" do
+        expect(package_details).to receive(:update).with(package)
+        subject.handle(event)
       end
     end
   end

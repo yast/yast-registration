@@ -66,7 +66,6 @@ module Registration
               60,
               VBox(
                 packages_table,
-                PushButton(Id(:toggle_package), _("Toggle package")),
                 package_details
               )
             )
@@ -76,13 +75,12 @@ module Registration
 
       # @macro seeAbstractWidget
       def handle(event)
-        if event["WidgetID"] == :search_button
+        if start_search_event?(event)
           search_package(search_form.text)
-        elsif event["WidgetID"] == :toggle_package
-          toggle_package
-        elsif event["EventReason"] == "SelectionChanged"
-          update_details
+        elsif event["WidgetID"] == "remote_packages_table"
+          handle_packages_table_event(event)
         end
+
         log.debug "Event handled #{event.inspect}"
         nil
       end
@@ -113,6 +111,27 @@ module Registration
       # @return [RemotePackageDetails] Package details widget.
       def package_details
         @package_details ||= RemotePackageDetails.new
+      end
+
+      # Handles remote packages table events
+      #
+      # @param event [Hash] Widget event to process
+      def handle_packages_table_event(event)
+        case event["EventReason"]
+        when "Activated"
+          toggle_package
+        when "SelectionChanged"
+          update_details
+        end
+      end
+
+      # Determines whether the event should start the search
+      #
+      # @param event [Hash] UI event to check
+      # @return [Boolean]
+      def start_search_event?(event)
+        event["WidgetID"] == "search_form_button" ||
+          (event["WidgetID"] == "search_form_text" && event["EventReason"] == "Activated")
       end
 
       # Performs the search and updates the packages table
