@@ -36,7 +36,9 @@ module Registration
         Frame(
           _("Search"),
           VBox(
-            InputField(Id("search_form_text"), Opt(:hstretch, :notify, :immediate), _("Package Name")),
+            InputField(
+              Id("search_form_text"), Opt(:hstretch, :notify, :immediate), _("Package Name")
+            ),
             Left(CheckBox(Id("search_form_ignore_case"), _("Ignore Case"), true)),
             Right(PushButton(Id("search_form_button"), Opt(:default), _("Search")))
           )
