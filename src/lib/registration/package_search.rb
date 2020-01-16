@@ -50,9 +50,7 @@ module Registration
     #
     # @return [Array<RemotePackage>] Packages search result
     def packages
-      return @results if @results
-
-      @results = find_packages(text).each_with_object([]) do |pkg, all|
+      @packages ||= find_packages(text).each_with_object([]) do |pkg, all|
         next unless ignore_case || pkg["name"].include?(text)
 
         remote_packages = pkg["products"].map do |product|
