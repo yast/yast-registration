@@ -78,9 +78,10 @@ module Registration
       # Package status indicator
       #
       # @param package [RemotePackage] Package to display the status for
+      # @return [String]
       def package_status(package)
         if package.installed?
-          "i"
+          Yast::UI.Glyph(:CheckMark)
         elsif package.selected?
           "+"
         else
