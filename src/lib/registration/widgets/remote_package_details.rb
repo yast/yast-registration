@@ -35,7 +35,7 @@ module Registration
       # @param package [RemotePackage] Package obtained via online search
       def update(package)
         lines = [
-          format(_("<b>Name:</b> %{package_name}"), package_name: package.name),
+          format(_("<b>Name:</b> %{package_name}"), package_name: ERB::Util.h(package.name)),
           format(_("<b>Version:</b> %{package_version}"), package_version: package.full_version),
           format(_("<b>Architecture:</b> %{package_arch}"), package_arch: package.arch)
         ]
@@ -43,7 +43,7 @@ module Registration
         if package.addon
           lines << format(
             _("<b>Product:</b> %{name} (%{status})"),
-            name:   package.addon.name,
+            name:   ERB::Util.h(package.addon.name),
             status: addon_status(package.addon)
           )
         end
