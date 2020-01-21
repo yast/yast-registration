@@ -18,6 +18,7 @@
 # find current contact information at www.suse.com.
 
 require "suse/connect"
+require "y2packager/product"
 require "registration/addon"
 require "registration/remote_package"
 
@@ -41,16 +42,19 @@ module Registration
     #
     # @param text        [String] Text to search for
     # @param ignore_case [Boolean] Whether the search is case sensitive or not
-    def initialize(text:, ignore_case: true)
+    # @param product     [Y2Packager::Product] Base product to find the packages for. By default,
+    #   it uses the installed base product.
+    def initialize(text:, ignore_case: true, product: Y2Packager::Product.installed_base_product)
       @text = text
       @ignore_case = ignore_case
+      @product = product
     end
 
     # Returns search results
     #
     # @return [Array<RemotePackage>] Packages search result
     def packages
-      @packages ||= find_packages(text).each_with_object([]) do |pkg, all|
+      @packages ||= find_packages(text, product).each_with_object([]) do |pkg, all|
         next unless ignore_case || pkg["name"].include?(text)
 
         remote_packages = pkg["products"].map do |product|
@@ -68,11 +72,29 @@ module Registration
 
   private
 
-    def find_packages(text)
-      ::FileUtils.mv("/var/run/zypp.pid", "/var/run/zypp.save") if File.exist?("/var/run/zypp.pid")
-      SUSE::Connect::PackageSearch.search(text)
-    ensure
-      ::FileUtils.mv("/var/run/zypp.save", "/var/run/zypp.pid") if File.exist?("/var/run/zypp.save")
+    attr_reader :product
+
+    # Finds the packages using the SUSE/Connect package search feature
+    #
+    # @param text    [String] Query
+    # @param product [Y2Packager::Product] Base product to find the packages for.
+    # @param Array
+    def find_packages(text, product)
+      SUSE::Connect::PackageSearch.search(text, product: connect_product(product))
+    end
+
+    # Returns a SUSE::Connect::Zypper::Product instance to be used in the query
+    #
+    # @param product [Y2Packager::Product] YaST's product representation
+    # @return [SUSE::Connect::Zypper::Product]
+    def connect_product(yast_product)
+      SUSE::Connect::Zypper::Product.new(
+        name:    yast_product.name,
+        arch:    yast_product.arch.to_s,
+        version: yast_product.version_version,
+        isbase:  yast_product.category == :base,
+        summary: yast_product.display_name
+      )
     end
   end
 end

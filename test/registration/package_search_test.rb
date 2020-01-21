@@ -67,16 +67,22 @@ describe Registration::PackageSearch do
     }
   end
 
-  let(:basesystem) do
-    instance_double(Registration::Addon)
+  let(:basesystem) { instance_double(Registration::Addon) }
+  let(:base_product) do
+    Y2Packager::Product.new(
+      name: "SLES", display_name: "SUSE Linux Enterprise 15 SP2", version: "15.2-0",
+      arch: :x86_64, category: :base
+    )
   end
 
   describe "#results" do
     let(:packages) { [pkg1, pkg2] }
 
     before do
+      allow(Y2Packager::Product).to receive(:installed_base_product)
+        .and_return(base_product)
       allow(SUSE::Connect::PackageSearch).to receive(:search)
-        .with(text).and_return(packages)
+        .with(text, product: SUSE::Connect::Zypper::Product).and_return(packages)
       allow(Registration::Addon).to receive(:find_by_id)
         .with(1946).and_return(basesystem)
       allow(Registration::Addon).to receive(:find_by_id)
@@ -100,6 +106,14 @@ describe Registration::PackageSearch do
           addon:   basesystem
         )
       )
+    end
+
+    it "limits the search to the given product" do
+      expect(SUSE::Connect::PackageSearch).to receive(:search) do |_name, product:|
+        expect(product.to_triplet).to eq("SLES/15.2/x86_64")
+        packages
+      end
+      subject.packages
     end
 
     context "when the search is case sensitive" do
