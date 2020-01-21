@@ -28,7 +28,7 @@ describe Registration::Widgets::PackageSearch do
   let(:packages_table) do
     instance_double(
       Registration::Widgets::RemotePackagesTable, value: package.name, change_items: nil,
-      selected_item: package
+      update_item: nil, selected_item: package
     )
   end
 
@@ -39,9 +39,11 @@ describe Registration::Widgets::PackageSearch do
   let(:package) do
     instance_double(
       Registration::RemotePackage, name: "gnome-desktop", addon: addon,
-      selected?: false, select!: nil
+      selected?: false, select!: nil, installed?: installed?
     )
   end
+
+  let(:installed?) { false }
 
   let(:addon) do
     instance_double(
@@ -150,6 +152,26 @@ describe Registration::Widgets::PackageSearch do
           subject.handle(event)
           expect(subject.selected_packages).to eq([package])
         end
+      end
+
+      it "updates the table and the package details" do
+        expect(packages_table).to receive(:update_item).with(package)
+        expect(package_details).to receive(:update).with(package)
+        subject.handle(event)
+      end
+    end
+
+    context "when an already installed package is selected for installation" do
+      let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
+      let(:installed?) { true }
+
+      before do
+        allow(addon).to receive(:registered?).and_return(true)
+      end
+
+      it "does not select the package" do
+        subject.handle(event)
+        expect(subject.selected_packages).to be_empty
       end
     end
 

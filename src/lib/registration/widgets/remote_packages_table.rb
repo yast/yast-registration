@@ -33,25 +33,14 @@ module Registration
         super
       end
 
-      # @macro seeTable
-      def items
-        @items ||= []
-      end
-
       # @macro seeAbstractWidget
       def opt
-        [:notify, :immediate]
+        [:notify, :immediate, :keepSorting]
       end
 
       # @macro seeTable
       def header
-        [_("Status"), _("Name"), _("Product")]
-      end
-
-      # @macro seeTable
-      def change_items(items_list)
-        @items = items_list
-        super
+        [Center(_("Status")), _("Name"), _("Product")]
       end
 
       # Returns the selected item
@@ -61,18 +50,30 @@ module Registration
         items.find { |i| i.name == value }
       end
 
+      # Updates the information for the given package
+      #
+      # @param item [RemotePackage] Package to update
+      def update_item(item)
+        columns_for_item(item).each_with_index do |content, idx|
+          change_cell(Id(item.name), idx, content)
+        end
+      end
+
     private
 
       # @see http://www.rubydoc.info/github/yast/yast-yast2/CWM%2FTable
       def format_items(items)
         items.map do |item|
-          Item(
-            Id(item.name),
-            package_status(item),
-            item.name,
-            addon_column(item.addon)
-          )
+          columns = [Id(item.name)] + columns_for_item(item)
+          Item(*columns)
         end
+      end
+
+      # Returns the content for the given item
+      #
+      # @param item [RemotePackage]
+      def columns_for_item(item)
+        [package_status(item), item.name, addon_column(item.addon)]
       end
 
       # Package status indicator

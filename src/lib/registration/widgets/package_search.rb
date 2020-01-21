@@ -145,8 +145,8 @@ module Registration
             pkg.select! if selected_package_names.include?(pkg.name)
           end
         end
-        update_packages_table
-        update_details unless search.packages.empty?
+        packages_table.change_items(@search.packages)
+        update_details
       end
 
       # Finds out the current package which is selected in the packages table
@@ -157,15 +157,21 @@ module Registration
         search.packages.find { |p| p.name == packages_table.value }
       end
 
+      # Selects/unselects the current package for installation
+      #
+      # It does nothing if the package is already installed.
       def toggle_package
         package = find_current_package
-        return unless package
+        return if package.nil? || package.installed?
 
         if package.selected?
           unselect_package(package)
         else
           select_package(package)
         end
+
+        packages_table.update_item(package)
+        update_details
       end
 
       # Selects the current package for installation
@@ -178,19 +184,12 @@ module Registration
         addon.selected unless addon.selected?
         package.select!
         @selected_packages << package
-        update_packages_table
       end
 
+      # Unselects the current package for installation
       def unselect_package(package)
         package.unselect!
         @selected_packages.delete(package)
-
-        update_packages_table
-      end
-
-      # Updates the packages table
-      def update_packages_table
-        packages_table.change_items(search.packages)
       end
 
       # Updates the package details widget

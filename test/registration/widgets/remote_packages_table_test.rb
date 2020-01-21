@@ -23,5 +23,7 @@ require "registration/widgets/remote_packages_table"
 require "cwm/rspec"
 
 describe Registration::Widgets::RemotePackagesTable do
-  include_examples "CWM::Table"
+  # the test for the #header method included in CWM::Table
+  # does not apply
+  include_examples "CWM::AbstractWidget"
 end
