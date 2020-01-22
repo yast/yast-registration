@@ -48,8 +48,12 @@ describe Registration::Clients::OnlineSearch do
     end
 
     context "when an addon is selected" do
-      let(:addon_1) { instance_double(Registration::Addon) }
-      let(:addon_2) { instance_double(Registration::Addon) }
+      let(:addon_1) do
+        instance_double(Registration::Addon, depends_on: [], eula_acceptance_needed?: false)
+      end
+      let(:addon_2) do
+        instance_double(Registration::Addon, depends_on: [], eula_acceptance_needed?: false)
+      end
 
       before do
         allow(Registration::Addon).to receive(:selected).and_return([addon_1])
@@ -59,6 +63,19 @@ describe Registration::Clients::OnlineSearch do
       it "registers the addon" do
         expect(registration_ui).to receive(:register_addons).with([addon_1, addon_2], {})
         subject.run
+      end
+
+      context "when accepting an EULA is required" do
+        let(:addon_1) do
+          instance_double(Registration::Addon, depends_on: [], eula_acceptance_needed?: true)
+        end
+
+        it "asks for EULA acceptance" do
+          expect(::Registration::UI::AddonEulaDialog).to receive(:run)
+            .with([addon_1, addon_2]).and_return(:next)
+          expect(registration_ui).to receive(:register_addons).with([addon_1, addon_2], {})
+          subject.run
+        end
       end
 
       context "when the addon registration fails" do

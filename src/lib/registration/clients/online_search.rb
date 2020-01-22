@@ -22,6 +22,7 @@ require "registration/dialogs/online_search"
 require "registration/addon"
 require "registration/registration"
 require "registration/registration_ui"
+require "registration/ui/addon_eula_dialog"
 require "registration/url_helpers"
 
 Yast.import "Installation"
@@ -58,6 +59,7 @@ module Registration
         {
           "find_addons"     => ->() { find_addons },
           "search"          => ->() { search_packages },
+          "display_eula"    => ->() { display_eula },
           "register_system" => ->() { register_system },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
@@ -82,6 +84,10 @@ module Registration
             next:  "search"
           },
           "search"          => {
+            abort: :abort,
+            next:  "display_eula"
+          },
+          "display_eula"    => {
             abort: :abort,
             next:  "register_system"
           },
@@ -112,6 +118,7 @@ module Registration
 
       # Opens the online search dialog
       def search_packages
+        reset_selected_addons_cache!
         package_search_dialog.run
       end
 
@@ -120,6 +127,12 @@ module Registration
         return :next if ::Registration::Registration.is_registered? || selected_addons.empty?
         success = registration_ui.register_system_and_base_product.first
         success ? :next : :abort
+      end
+
+      # display EULAs for the selected addons
+      def display_eula
+        return :next if selected_addons.empty?
+        ::Registration::UI::AddonEulaDialog.run(selected_addons)
       end
 
       def register_addons
@@ -149,7 +162,13 @@ module Registration
       end
 
       def selected_addons
-        @selected_addons ||= ::Registration::Addon.selected + ::Registration::Addon.auto_selected
+        return @selected_addons if @selected_addons
+        addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
+        @selected_addons = ::Registration::Addon.registration_order(addons)
+      end
+
+      def reset_selected_addons_cache!
+        @selected_addons = nil
       end
     end
   end
