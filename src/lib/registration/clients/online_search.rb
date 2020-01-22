@@ -22,7 +22,6 @@ require "registration/dialogs/online_search"
 require "registration/addon"
 require "registration/registration"
 require "registration/registration_ui"
-require "registration/sw_mgmt"
 require "registration/url_helpers"
 
 Yast.import "Installation"
@@ -102,7 +101,6 @@ module Registration
     private
 
       def find_addons
-        ::Registration::SwMgmt.init
         ::Registration::Addon.find_all(registration)
         :next
       end

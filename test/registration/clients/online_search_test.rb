@@ -38,7 +38,6 @@ describe Registration::Clients::OnlineSearch do
     let(:registration_result) { :next }
 
     before do
-      allow(Registration::SwMgmt).to receive(:init)
       allow(Registration::Addon).to receive(:find_all)
       allow(Registration::Dialogs::OnlineSearch).to receive(:new).and_return(search_dialog)
       allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
