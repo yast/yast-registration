@@ -26,7 +26,6 @@ require "registration/sw_mgmt"
 require "registration/ui/addon_eula_dialog"
 require "registration/url_helpers"
 
-Yast.import "Installation"
 Yast.import "Pkg"
 Yast.import "Sequencer"
 
