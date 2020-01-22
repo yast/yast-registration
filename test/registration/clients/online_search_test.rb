@@ -36,6 +36,7 @@ describe Registration::Clients::OnlineSearch do
     let(:package) { instance_double(Registration::RemotePackage, name: "gnome-desktop") }
     let(:search_result) { :next }
     let(:registration_result) { :next }
+    let(:registered_system?) { true }
 
     before do
       allow(Registration::Addon).to receive(:find_all)
@@ -43,6 +44,7 @@ describe Registration::Clients::OnlineSearch do
       allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
       allow(Registration::UrlHelpers).to receive(:registration_url)
         .and_return("https://scc.suse.com") # speed up the test
+      allow(Registration::Registration).to receive(:is_registered?).and_return(registered_system?)
     end
 
     context "when an addon is selected" do
@@ -53,12 +55,13 @@ describe Registration::Clients::OnlineSearch do
         allow(Registration::Addon).to receive(:selected).and_return([addon_1])
         allow(Registration::Addon).to receive(:auto_selected).and_return([addon_2])
       end
+
       it "registers the addon" do
         expect(registration_ui).to receive(:register_addons).with([addon_1, addon_2], {})
         subject.run
       end
 
-      context "when the registration fails" do
+      context "when the addon registration fails" do
         let(:registration_result) { :abort }
 
         it "returns :abort" do
@@ -68,6 +71,27 @@ describe Registration::Clients::OnlineSearch do
         it "does not select any package" do
           expect(Yast::Pkg).to_not receive(:PkgInstall)
           subject.run
+        end
+      end
+
+      context "and the system is not registered" do
+        let(:registered_system?) { false }
+
+        it "registers the system and the base product" do
+          expect(registration_ui).to receive(:register_system_and_base_product)
+            .and_return([true, double("service")])
+          subject.run
+        end
+
+        context "and the system registration fails" do
+          before do
+            allow(registration_ui).to receive(:register_system_and_base_product)
+              .and_return([false, double("service")])
+          end
+
+          it "returns :abort" do
+            expect(subject.run).to eq(:abort)
+          end
         end
       end
     end
@@ -81,6 +105,15 @@ describe Registration::Clients::OnlineSearch do
       it "does not register any addon" do
         expect(registration_ui).to_not receive(:register_addons)
         subject.run
+      end
+
+      context "and the system is not registered" do
+        let(:registered_system?) { false }
+
+        it "registers the system and the base product" do
+          expect(registration_ui).to_not receive(:register_system_and_base_product)
+          subject.run
+        end
       end
     end
 

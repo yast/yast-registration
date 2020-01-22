@@ -58,6 +58,7 @@ module Registration
         {
           "find_addons"     => ->() { find_addons },
           "search"          => ->() { search_packages },
+          "register_system" => ->() { register_system },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
         }
@@ -81,6 +82,10 @@ module Registration
             next:  "search"
           },
           "search"          => {
+            abort: :abort,
+            next:  "register_system"
+          },
+          "register_system" => {
             abort: :abort,
             next:  "register_addons"
           },
@@ -110,9 +115,14 @@ module Registration
         package_search_dialog.run
       end
 
+      # Registers the system and the base product
+      def register_system
+        return :next if ::Registration::Registration.is_registered? || selected_addons.empty?
+        success = registration_ui.register_system_and_base_product.first
+        success ? :next : :abort
+      end
+
       def register_addons
-        registration_ui = ::Registration::RegistrationUI.new(registration)
-        selected_addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
         return :next if selected_addons.empty?
         registration_ui.register_addons(selected_addons, {})
       end
@@ -128,10 +138,18 @@ module Registration
         @package_search_dialog ||= ::Registration::Dialogs::OnlineSearch.new
       end
 
+      def registration_ui
+        @registration_ui ||= ::Registration::RegistrationUI.new(registration)
+      end
+
       def registration
         return @registration if @registration
         url = ::Registration::UrlHelpers.registration_url
         @registration = ::Registration::Registration.new(url)
+      end
+
+      def selected_addons
+        @selected_addons ||= ::Registration::Addon.selected + ::Registration::Addon.auto_selected
       end
     end
   end
