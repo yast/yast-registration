@@ -40,7 +40,7 @@ BuildRequires:  yast2-update >= 3.1.36
 
 
 # Yast::OSReleaseClass.ReleaseVersionHumanReadable
-dRequires:      yast2 >= 4.2.56
+Requires:       yast2 >= 4.2.56
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
