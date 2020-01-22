@@ -22,6 +22,7 @@ require "registration/dialogs/online_search"
 require "registration/addon"
 require "registration/registration"
 require "registration/registration_ui"
+require "registration/sw_mgmt"
 require "registration/ui/addon_eula_dialog"
 require "registration/url_helpers"
 
@@ -141,6 +142,7 @@ module Registration
       end
 
       def select_packages
+        ::Registration::SwMgmt.select_addon_products
         package_search_dialog.selected_packages.each do |pkg|
           Yast::Pkg.PkgInstall(pkg.name)
         end
