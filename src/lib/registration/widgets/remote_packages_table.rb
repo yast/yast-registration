@@ -73,7 +73,7 @@ module Registration
       #
       # @param item [RemotePackage]
       def columns_for_item(item)
-        [package_status(item), item.name, addon_column(item.addon)]
+        [package_status(item), item.name, item.addon.name]
       end
 
       # Package status indicator
@@ -88,19 +88,6 @@ module Registration
         else
           ""
         end
-      end
-
-      # Product status indicator
-      #
-      # @param addon [Addon] Addon to display the status for
-      # @return [String]
-      def addon_column(addon)
-        format(
-          # TRANSLATORS: product name and status
-          _("%{product} (%{status})"),
-          product: addon.name,
-          status:  addon.status_to_human
-        )
       end
     end
   end
