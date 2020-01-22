@@ -200,9 +200,10 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           " is defined in control.xml" do
             before do
               allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-                .with("globals", "full_system_media_name").and_return("SLE-15-SP2-Full")
+                .with("globals", "full_system_media_name").and_return("SLE-$os_release_version-Full")
               allow(Yast::ProductFeatures).to receive(:GetStringFeature)
                 .with("globals", "full_system_download_url").and_return("https://download.suse.com")
+              allow(Yast::OSRelease).to receive(:ReleaseVersionHumanReadable).and_return("15-SP2")
             end
 
             it "reports the media name and the download url to the user" do
