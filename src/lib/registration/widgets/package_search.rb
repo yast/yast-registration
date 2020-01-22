@@ -181,7 +181,7 @@ module Registration
         addon = package.addon
         return unless addon.registered? || addon.selected? || enable_addon?(addon)
 
-        addon.selected unless addon.selected?
+        addon.selected unless addon.registered? || addon.selected?
         package.select!
         @selected_packages << package
       end
