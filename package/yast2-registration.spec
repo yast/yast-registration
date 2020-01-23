@@ -27,7 +27,7 @@ Url:            https://github.com/yast/yast-registration
 Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  update-desktop-files
-# Yast::OSReleaseClass.ReleaseVersionHumanReadable
+# Yast::OSRelease.ReleaseVersionHumanReadable
 BuildRequires:  yast2 >= 4.2.56
 BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-slp >= 3.1.9
@@ -39,7 +39,7 @@ BuildRequires:  yast2-packager >= 4.2.37
 BuildRequires:  yast2-update >= 3.1.36
 
 
-# Yast::OSReleaseClass.ReleaseVersionHumanReadable
+# Yast::OSRelease.ReleaseVersionHumanReadable
 Requires:       yast2 >= 4.2.56
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34

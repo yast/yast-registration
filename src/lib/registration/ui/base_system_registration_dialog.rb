@@ -35,7 +35,7 @@ module Registration
       Yast.import "Report"
       Yast.import "ProductFeatures"
       Yast.import "Stage"
-      Yast.import "OSReleaseClass"
+      Yast.import "OSRelease"
 
       WIDGETS = {
         register_scc:      [:email, :reg_code],
