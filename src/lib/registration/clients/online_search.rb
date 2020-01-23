@@ -60,7 +60,6 @@ module Registration
           "find_addons"     => ->() { find_addons },
           "search"          => ->() { search_packages },
           "display_eula"    => ->() { display_eula },
-          "register_system" => ->() { register_system },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
         }
@@ -89,10 +88,6 @@ module Registration
           },
           "display_eula"    => {
             abort: :abort,
-            next:  "register_system"
-          },
-          "register_system" => {
-            abort: :abort,
             next:  "register_addons"
           },
           "register_addons" => {
@@ -120,13 +115,6 @@ module Registration
       def search_packages
         reset_selected_addons_cache!
         package_search_dialog.run
-      end
-
-      # Registers the system and the base product
-      def register_system
-        return :next if ::Registration::Registration.is_registered? || selected_addons.empty?
-        success = registration_ui.register_system_and_base_product.first
-        success ? :next : :abort
       end
 
       # display EULAs for the selected addons
