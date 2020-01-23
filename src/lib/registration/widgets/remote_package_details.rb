@@ -1,4 +1,4 @@
-# Copyright (c) [2019] SUSE LLC
+# Copyright (c) [2020] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -36,15 +36,15 @@ module Registration
       def update(package)
         lines = [
           format(_("<b>Name:</b> %{package_name}"), package_name: ERB::Util.h(package.name)),
-          format(_("<b>Version:</b> %{package_version}"), package_version: package.full_version),
-          format(_("<b>Architecture:</b> %{package_arch}"), package_arch: package.arch)
+          format(_("<b>Version:</b> %{package_version}"), package_version: ERB::Util.h(package.full_version)),
+          format(_("<b>Architecture:</b> %{package_arch}"), package_arch: ERB::Util.h(package.arch))
         ]
 
         if package.addon
           lines << format(
-            _("<b>Product:</b> %{name} (%{status})"),
+            _("<b>Module/Extension:</b> %{name} (%{status})"),
             name:   ERB::Util.h(package.addon.name),
-            status: addon_status(package.addon)
+            status: ERB::Util.h(addon_status(package.addon))
           )
         end
 
@@ -59,10 +59,13 @@ module Registration
       # @return [String]
       def addon_status(addon)
         if addon.registered?
+          # TRANSLATORS: module/extension status
           _("registered")
         elsif addon.selected?
-          _("to be registered")
+          # TRANSLATORS: module/extension status (to be registered after confirmation)
+          _("selected for registration")
         else
+          # TRANSLATORS: module/extension status
           _("not registered")
         end
       end

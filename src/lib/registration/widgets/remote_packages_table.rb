@@ -1,4 +1,4 @@
-# Copyright (c) [2019] SUSE LLC
+# Copyright (c) [2020] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -40,7 +40,16 @@ module Registration
 
       # @macro seeTable
       def header
-        [Center(_("Status")), _("Name"), _("Product")]
+        [
+          Center(
+            # TRANSLATORS: package status (installed, selected, etc.)
+            _("Status")
+          ),
+          # TRANSLATORS: package name
+          _("Name"),
+          # TRANSLATORS: module or extension name
+          _("Module/Extension")
+        ]
       end
 
       # Returns the selected item
@@ -61,7 +70,7 @@ module Registration
 
     private
 
-      # @see http://www.rubydoc.info/github/yast/yast-yast2/CWM%2FTable
+      # @see https://www.rubydoc.info/github/yast/yast-yast2/CWM%2FTable
       def format_items(items)
         items.map do |item|
           columns = [Id(item.name)] + columns_for_item(item)

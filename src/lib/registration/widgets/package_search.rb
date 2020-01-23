@@ -1,4 +1,4 @@
-# Copyright (c) [2019] SUSE LLC
+# Copyright (c) [2020] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -139,7 +139,8 @@ module Registration
       # @param text [String] Text to search for
       def search_package(text)
         @search = ::Registration::PackageSearch.new(text: text)
-        Yast::Popup.Feedback(_("Searching..."), _("Searching for packages with the given name")) do
+        # TRANSLATORS: searching for packages
+        Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
           selected_package_names = @selected_packages.map(&:name)
           @search.packages.each do |pkg|
             pkg.select! if selected_package_names.include?(pkg.name)
@@ -205,7 +206,8 @@ module Registration
       # @param addon [Addon] Addon to ask about
       def enable_addon?(addon)
         message = format(
-          _("'%{name}' module is not enabled for this system.\nDo you want to enable it?"),
+          _("'%{name}' module/extension is not enabled for this system.\n" \
+            "Do you want to enable it?"),
           name: addon.name
         )
         Yast::Popup.YesNo(message)

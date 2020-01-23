@@ -1,4 +1,4 @@
-# Copyright (c) [2019] SUSE LLC
+# Copyright (c) [2020] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -34,6 +34,7 @@ module Registration
 
       def contents
         Frame(
+          # TRANSLATORS: text for labels and push buttons
           _("Search"),
           VBox(
             InputField(

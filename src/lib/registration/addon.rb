@@ -356,22 +356,6 @@ module Registration
       !eula_url.to_s.strip.empty?
     end
 
-    STATUS_TRANSLATIONS = {
-      registered:    N_("registered"),
-      selected:      N_("to be registered"),
-      auto_selected: N_("to be registered"),
-      available:     N_("not registered yet"),
-      unknown:       N_("unknown")
-    }.freeze
-    private_constant :STATUS_TRANSLATIONS
-
-    # Translates the status into a translated and human readable string
-    #
-    # @return [String]
-    def status_to_human
-      _(STATUS_TRANSLATIONS[status])
-    end
-
     def self.dump_addons
       # dump the downloaded data to a file for easier debugging,
       # avoid write failures when running as an unprivileged user (rspec tests)

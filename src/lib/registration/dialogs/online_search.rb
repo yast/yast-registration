@@ -1,4 +1,4 @@
-# Copyright (c) [2019] SUSE LLC
+# Copyright (c) [2020] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -40,6 +40,7 @@ module Registration
 
       # @macro seeAbstractWidget
       def title
+        # TRANSLATORS: title for the dialog to search for package through all modules/extensions
         _("Online Search")
       end
 
