@@ -35,6 +35,7 @@ module Registration
       Yast.import "Report"
       Yast.import "ProductFeatures"
       Yast.import "Stage"
+      Yast.import "OSRelease"
 
       WIDGETS = {
         register_scc:      [:email, :reg_code],
@@ -359,14 +360,18 @@ module Registration
 
       #
       # Read the full media name from the product control file
+      # Substituting $os_release_version pattern with the release
+      # of the current system.
       #
       # @return [String] the name or empty string if not set
       #
       def media_name
-        ProductFeatures.GetStringFeature(
+        name = ProductFeatures.GetStringFeature(
           "globals",
           "full_system_media_name"
         )
+        name.gsub(/\$os_release_version\b/,
+          Yast::OSRelease.ReleaseVersionHumanReadable)
       end
 
       #
