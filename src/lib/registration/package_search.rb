@@ -78,14 +78,14 @@ module Registration
     #
     # @param text    [String] Query
     # @param product [Y2Packager::Product] Base product to find the packages for.
-    # @param Array
+    # @return [Array<Hash>] Search results
     def find_packages(text, product)
       SUSE::Connect::PackageSearch.search(text, product: connect_product(product))
     end
 
     # Returns a SUSE::Connect::Zypper::Product instance to be used in the query
     #
-    # @param product [Y2Packager::Product] YaST's product representation
+    # @param yast_product [Y2Packager::Product] YaST's product representation
     # @return [SUSE::Connect::Zypper::Product]
     def connect_product(yast_product)
       SUSE::Connect::Zypper::Product.new(
