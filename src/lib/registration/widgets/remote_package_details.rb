@@ -36,7 +36,10 @@ module Registration
       def update(package)
         lines = [
           format(_("<b>Name:</b> %{package_name}"), package_name: ERB::Util.h(package.name)),
-          format(_("<b>Version:</b> %{package_version}"), package_version: ERB::Util.h(package.full_version)),
+          format(
+            _("<b>Version:</b> %{package_version}"),
+            package_version: ERB::Util.h(package.full_version)
+          ),
           format(_("<b>Architecture:</b> %{package_arch}"), package_arch: ERB::Util.h(package.arch))
         ]
 
