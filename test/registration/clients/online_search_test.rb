@@ -41,6 +41,7 @@ describe Registration::Clients::OnlineSearch do
       allow(Registration::Addon).to receive(:find_all)
       allow(Registration::Dialogs::OnlineSearch).to receive(:new).and_return(search_dialog)
       allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
+      allow(Registration::SwMgmt).to receive(:select_addon_products)
       allow(Registration::UrlHelpers).to receive(:registration_url)
         .and_return("https://scc.suse.com") # speed up the test
     end
@@ -60,6 +61,11 @@ describe Registration::Clients::OnlineSearch do
 
       it "registers the addon" do
         expect(registration_ui).to receive(:register_addons).with([addon_1, addon_2], {})
+        subject.run
+      end
+
+      it "selects the addon product package" do
+        expect(Registration::SwMgmt).to receive(:select_addon_products)
         subject.run
       end
 
