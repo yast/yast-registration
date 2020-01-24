@@ -28,6 +28,12 @@ require "y2packager/resolvable"
 module Registration
   # this is a wrapper class around SUSE::Connect::Product object
   class Addon
+    extend Yast::I18n
+    include Yast::I18n
+
+    # The list of addons has not been loaded
+    class AddonsNotLoaded < StandardError; end
+
     class << self
       # read the remote add-on from the registration server
       # @param registration [Registration::Registration] use this object for
@@ -40,6 +46,17 @@ module Registration
         dump_addons
 
         @cached_addons
+      end
+
+      # Find an addon using its ID
+      #
+      # @note This method needs #find_all to be call previously.
+      #
+      # @param id [Integer] Addon's ID
+      # @return [Addon,nil] The addon with the given ID or nil if it was not found
+      def find_by_id(id)
+        raise AddonsNotLoaded unless @cached_addons
+        @cached_addons.find { |a| a.id == id }
       end
 
       def reset!
@@ -202,6 +219,7 @@ module Registration
     # the constructor
     # @param pure_addon [SUSE::Connect::Product] a pure add-on from the registration server
     def initialize(pure_addon)
+      textdomain "registration"
       @pure_addon = pure_addon
     end
 
