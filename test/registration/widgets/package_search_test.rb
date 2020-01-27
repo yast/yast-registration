@@ -66,9 +66,10 @@ describe Registration::Widgets::PackageSearch do
   describe "#handle" do
     context "when the user asks for a package" do
       let(:event) { { "WidgetID" => "search_form_button" } }
+      let(:text) { "gnome" }
 
       let(:search_form) do
-        instance_double(Registration::Widgets::PackageSearchForm, text: "gnome")
+        instance_double(Registration::Widgets::PackageSearchForm, text: text)
       end
 
       before do
@@ -79,7 +80,7 @@ describe Registration::Widgets::PackageSearch do
 
       it "searches for the package in SCC" do
         expect(Registration::PackageSearch).to receive(:new)
-          .with(text: "gnome").and_return(search)
+          .with(text: text).and_return(search)
         subject.handle(event)
       end
 
@@ -87,6 +88,16 @@ describe Registration::Widgets::PackageSearch do
         expect(packages_table).to receive(:change_items).with([package])
         expect(package_details).to receive(:update).with(package)
         subject.handle(event)
+      end
+
+      context "when the search text is not enough" do
+        let(:text) { "g" }
+
+        it "asks the user to introduce some text" do
+          expect(Yast2::Popup).to receive(:show)
+            .with(/at least/)
+          subject.handle(event)
+        end
       end
     end
 

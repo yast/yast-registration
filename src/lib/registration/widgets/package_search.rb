@@ -23,6 +23,7 @@ require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
 require "registration/package_search"
+require "yast2/popup"
 
 Yast.import "Popup"
 
@@ -138,6 +139,7 @@ module Registration
       #
       # @param text [String] Text to search for
       def search_package(text)
+        return unless valid_search_text?(text)
         @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
@@ -226,6 +228,23 @@ module Registration
           name: addon.name
         )
         Yast::Popup.YesNo(message)
+      end
+
+      MINIMAL_SEARCH_TEXT_SIZE = 2
+
+      # Determines whether the search text is valid or not
+      #
+      # @param text [String] Text to search for
+      def valid_search_text?(text)
+        return true if text.to_s.size >= MINIMAL_SEARCH_TEXT_SIZE
+        Yast2::Popup.show(
+          format(
+            # TRANSLATORS: the minimal size of the text to search for package names
+            _("Please, type at least %{minimal_size} characters to search for."),
+            minimal_size: MINIMAL_SEARCH_TEXT_SIZE
+          )
+        )
+        false
       end
 
       # Determines whether the addon is still needed
