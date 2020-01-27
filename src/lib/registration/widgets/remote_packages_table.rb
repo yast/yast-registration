@@ -82,7 +82,11 @@ module Registration
       #
       # @param item [RemotePackage]
       def columns_for_item(item)
-        [package_status(item), item.name, item.addon.name]
+        [
+          package_status(item),
+          item.name,
+          item.addon ? item.addon.name : ""
+        ]
       end
 
       # Package status indicator
