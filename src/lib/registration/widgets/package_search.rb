@@ -179,25 +179,62 @@ module Registration
 
       # Selects the current package for installation
       #
-      # If required, it selects the addon for registration.
+      # If required, it selects the corresponding addon
+      #
+      # @param package [RemotePackage] Package to select
       def select_package(package)
         addon = package.addon
-        # FIXME: it will crash if addon.nil?
-        return unless addon.registered? || addon.selected? || enable_addon?(addon)
+        select_addon(addon) if addon
+        set_package_as_selected(package) if addon.nil? || addon.selected? || addon.registered?
+      end
 
-        addon.selected unless addon.registered? || addon.selected?
+      # Unselects the current package for installation
+      #
+      # If not needed, unselects the corresponding addon
+      #
+      # @parm package [RemotePackage] Package to unselect
+      #
+      # @see #unselect_addon
+      # @see #unselect_package!
+      def unselect_package(package)
+        unset_package_as_selected(package)
+        unselect_addon(package.addon) if package.addon
+      end
+
+      # Selects the given addon if needed
+      #
+      # @param addon [Addon] Addon to select
+      def select_addon(addon)
+        return if addon.registered? || addon.selected? || addon.auto_selected?
+        addon.selected if enable_addon?(addon)
+      end
+
+      # Unselects the given addon if required
+      #
+      # @param addon [Addon] Addon to unselect
+      def unselect_addon(addon)
+        return if addon.registered? || needed_addon?(addon)
+        addon.unselected if disable_addon?(addon)
+      end
+
+      # Sets the package as selected
+      #
+      # Marks the package as selected and adds it to the list of selected packages.
+      #
+      # @param package [RemotePackage] Package to add
+      def set_package_as_selected(package)
         package.select!
         selected_packages << package
       end
 
-      # Unselects the current package for installation
-      def unselect_package(package)
+      # Unsets the package as selected
+      #
+      # Marks the package as not selected and removes it from the list of selected packages.
+      #
+      # @param package [RemotePackage] Package to remove
+      def unset_package_as_selected(package)
         package.unselect!
         selected_packages.delete(package)
-        addon = package.addon
-        return unless addon
-
-        addon.unselected unless needed_addon?(package.addon) || !disable_addon?(addon)
       end
 
       # Updates the package details widget

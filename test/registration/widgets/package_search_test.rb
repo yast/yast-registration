@@ -47,7 +47,8 @@ describe Registration::Widgets::PackageSearch do
 
   let(:addon) do
     instance_double(
-      Registration::Addon, name: "desktop", registered?: false, selected?: false, selected: nil
+      Registration::Addon, name: "desktop", registered?: false, selected?: false,
+      auto_selected?: nil, selected: nil, unselected: nil, dependencies: []
     )
   end
 
@@ -173,6 +174,11 @@ describe Registration::Widgets::PackageSearch do
       context "when the addon is not registered" do
         before do
           allow(Yast::Popup).to receive(:YesNo).and_return(register?)
+        end
+
+        let(:addon) do
+          pure_addon = load_yaml_fixture("pure_addons.yml").first
+          Registration::Addon.new(pure_addon)
         end
 
         context "but the user accepts to register the addon" do
