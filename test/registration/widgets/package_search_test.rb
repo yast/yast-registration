@@ -93,6 +93,61 @@ describe Registration::Widgets::PackageSearch do
     context "when a package is selected for installation" do
       let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
 
+      context "and the package is already selected" do
+        let(:package) do
+          instance_double(
+            Registration::RemotePackage, name: "gnome-desktop", addon: addon,
+            selected?: true, unselect!: nil, installed?: false
+          )
+        end
+
+        it "unselects the package" do
+          expect(package).to receive(:unselect!)
+          subject.handle(event)
+        end
+
+        context "and the addon is still needed" do
+          let(:another_package) do
+            instance_double(Registration::RemotePackage, name: "eog", addon: addon)
+          end
+
+          before do
+            allow(subject).to receive(:selected_packages).and_return([package, another_package])
+            subject.handle(event)
+          end
+
+          it "does not unselect the addon" do
+            expect(Yast::Popup).to_not receive(:YesNo)
+            expect(addon).to_not receive(:unselected)
+            subject.handle(event)
+          end
+        end
+
+        context "and the addon is not needed anymore" do
+          before do
+            allow(Yast::Popup).to receive(:YesNo).and_return(unselect?)
+          end
+
+          context "and the user agrees to unselect it" do
+            let(:unselect?) { true }
+
+            it "unselects the addon" do
+              expect(addon).to receive(:unselected)
+              subject.handle(event)
+            end
+          end
+
+          context "and the user wants to keep the addon" do
+            let(:unselect?) { false }
+
+            it "does not unselect the addon" do
+              expect(addon).to_not receive(:unselected)
+              subject.handle(event)
+            end
+          end
+        end
+      end
+
       context "and the addon is already registered" do
         before do
           allow(addon).to receive(:registered?).and_return(true)

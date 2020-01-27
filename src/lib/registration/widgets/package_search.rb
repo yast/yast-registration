@@ -141,7 +141,7 @@ module Registration
         @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          selected_package_names = @selected_packages.map(&:name)
+          selected_package_names = selected_packages.map(&:name)
           @search.packages.each do |pkg|
             pkg.select! if selected_package_names.include?(pkg.name)
           end
@@ -180,17 +180,22 @@ module Registration
       # If required, it selects the addon for registration.
       def select_package(package)
         addon = package.addon
+        # FIXME: it will crash if addon.nil?
         return unless addon.registered? || addon.selected? || enable_addon?(addon)
 
         addon.selected unless addon.registered? || addon.selected?
         package.select!
-        @selected_packages << package
+        selected_packages << package
       end
 
       # Unselects the current package for installation
       def unselect_package(package)
         package.unselect!
-        @selected_packages.delete(package)
+        selected_packages.delete(package)
+        addon = package.addon
+        return unless addon
+
+        addon.unselected unless needed_addon?(package.addon) || !disable_addon?(addon)
       end
 
       # Updates the package details widget
@@ -201,8 +206,6 @@ module Registration
 
       # Asks the user to enable the addon
       #
-      # It omits the question if the addon is already registered or selected for registration.
-      #
       # @param addon [Addon] Addon to ask about
       def enable_addon?(addon)
         message = format(
@@ -211,6 +214,23 @@ module Registration
           name: addon.name
         )
         Yast::Popup.YesNo(message)
+      end
+
+      # Asks the user to disable the addon
+      #
+      # @param addon [Addon] Addon to ask about
+      def disable_addon?(addon)
+        message = format(
+          _("'%{name}' module/extension is not needed anymore.\n" \
+            "Do you want to unselect it?"),
+          name: addon.name
+        )
+        Yast::Popup.YesNo(message)
+      end
+
+      # Determines whether the addon is still needed
+      def needed_addon?(addon)
+        selected_packages.any? { |pkg| pkg.addon == addon }
       end
     end
   end
