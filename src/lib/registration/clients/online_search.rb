@@ -54,12 +54,14 @@ module Registration
       # Sequence workflow aliases
       #
       # @see #find_addons
-      # @see #package_search
-      # @see #commit
+      # @see #search_packages
+      # @see #display_eula
+      # @see #register_addons
+      # @see #select_packages
       def workflow_aliases
         {
           "find_addons"     => ->() { find_addons },
-          "search"          => ->() { search_packages },
+          "search_packages" => ->() { search_packages },
           "display_eula"    => ->() { display_eula },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
@@ -73,7 +75,8 @@ module Registration
       #   1. Find the addons
       #   2. Search for packages (UI)
       #   3. Register the addons
-      #   4. Select the packages for installation
+      #   4. Display the EULA if needed
+      #   5. Select the packages for installation
       #
       # @return [Symbol] Sequence's result (:next or :abort)
       def run
@@ -81,9 +84,9 @@ module Registration
           "ws_start"        => "find_addons",
           "find_addons"     => {
             abort: :abort,
-            next:  "search"
+            next:  "search_packages"
           },
-          "search"          => {
+          "search_packages" => {
             abort: :abort,
             next:  "display_eula"
           },
@@ -107,28 +110,46 @@ module Registration
 
     private
 
+      # Find all available addons
+      #
+      # @return [:next]
       def find_addons
         ::Registration::Addon.find_all(registration)
         :next
       end
 
       # Opens the online search dialog
+      #
+      # @return [:next]
       def search_packages
         reset_selected_addons_cache!
         package_search_dialog.run
       end
 
-      # display EULAs for the selected addons
+      # Display EULAs for the selected addons
+      #
+      # @return [Symbol] User input (:next, :back, :abort)
+      #   or :next if there are not licenses to accept
+      #
       def display_eula
         return :next if selected_addons.empty?
         ::Registration::UI::AddonEulaDialog.run(selected_addons)
       end
 
+      # Registers addons
+      #
+      # @return [Symbol] User input (:next, :back, :abort)
+      #   or :next if there are not licenses to accept
       def register_addons
         return :next if selected_addons.empty?
         registration_ui.register_addons(selected_addons, {})
       end
 
+      # Selects packages for installation
+      #
+      # It displays an error when a package cannot be selected.
+      #
+      # @return [:next]
       def select_packages
         ::Registration::SwMgmt.select_addon_products
         package_search_dialog.selected_packages.each do |pkg|
