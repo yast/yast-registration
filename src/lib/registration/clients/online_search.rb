@@ -18,6 +18,7 @@
 # find current contact information at www.suse.com.
 
 require "yast"
+require "yast2/popup"
 require "registration/dialogs/online_search"
 require "registration/addon"
 require "registration/registration"
@@ -131,7 +132,7 @@ module Registration
       def select_packages
         ::Registration::SwMgmt.select_addon_products
         package_search_dialog.selected_packages.each do |pkg|
-          Yast::Pkg.PkgInstall(pkg.name)
+          pkg_install_error_message(pkg.name) unless Yast::Pkg.PkgInstall(pkg.name)
         end
         :next
       end
@@ -158,6 +159,17 @@ module Registration
 
       def reset_selected_addons_cache!
         @selected_addons = nil
+      end
+
+      def pkg_install_error_message(name)
+        Yast2::Popup.show(
+          format(
+            # TRANSLATORS: 'name' is the package's name
+            _("Package %{name} could not be selected for installation."),
+            name: name
+          ),
+          headline: :error
+        )
       end
     end
   end

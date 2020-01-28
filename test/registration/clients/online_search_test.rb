@@ -44,6 +44,7 @@ describe Registration::Clients::OnlineSearch do
       allow(Registration::SwMgmt).to receive(:select_addon_products)
       allow(Registration::UrlHelpers).to receive(:registration_url)
         .and_return("https://scc.suse.com") # speed up the test
+      allow(Yast::Pkg).to receive(:PkgInstall).and_return(true)
     end
 
     context "when an addon is selected" do
@@ -110,8 +111,19 @@ describe Registration::Clients::OnlineSearch do
 
     context "when a package is selected" do
       it "selects the package for installation" do
-        expect(Yast::Pkg).to receive(:PkgInstall).with(package.name)
+        expect(Yast::Pkg).to receive(:PkgInstall).with(package.name).and_return(true)
         subject.run
+      end
+
+      context "but the package is not found" do
+        before do
+          allow(Yast::Pkg).to receive(:PkgInstall).and_return(false)
+        end
+
+        it "warns the user" do
+          expect(Yast2::Popup).to receive(:show).with(/could not be selected/, headline: :error)
+          subject.run
+        end
       end
     end
 
