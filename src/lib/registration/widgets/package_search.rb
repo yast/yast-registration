@@ -143,9 +143,9 @@ module Registration
         @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          selected_package_names = selected_packages.map(&:name)
+          selected_package_ids = selected_packages.map(&:id)
           @search.packages.each do |pkg|
-            pkg.select! if selected_package_names.include?(pkg.name)
+            pkg.select! if selected_package_ids.include?(pkg.id)
           end
         end
         packages_table.change_items(@search.packages)
@@ -157,7 +157,8 @@ module Registration
       # @return [RemotePackage,nil]
       def find_current_package
         return unless search && packages_table.value
-        search.packages.find { |p| p.name == packages_table.value }
+        selected_id = packages_table.value
+        search.packages.find { |p| p.id == selected_id }
       end
 
       # Selects/unselects the current package for installation

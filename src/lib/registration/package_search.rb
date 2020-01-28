@@ -59,6 +59,7 @@ module Registration
 
         remote_packages = pkg["products"].map do |product|
           RemotePackage.new(
+            id:      pkg["id"],
             name:    pkg["name"],
             version: pkg["version"],
             release: pkg["release"],

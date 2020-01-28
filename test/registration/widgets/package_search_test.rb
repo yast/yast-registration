@@ -27,8 +27,8 @@ describe Registration::Widgets::PackageSearch do
 
   let(:packages_table) do
     instance_double(
-      Registration::Widgets::RemotePackagesTable, value: package.name, change_items: nil,
-      update_item: nil, selected_item: package
+      Registration::Widgets::RemotePackagesTable, value: package.id,
+      change_items: nil, update_item: nil
     )
   end
 
@@ -38,7 +38,7 @@ describe Registration::Widgets::PackageSearch do
 
   let(:package) do
     instance_double(
-      Registration::RemotePackage, name: "gnome-desktop", addon: addon,
+      Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
       selected?: false, select!: nil, installed?: installed?
     )
   end
@@ -108,7 +108,7 @@ describe Registration::Widgets::PackageSearch do
       context "and the package is already selected" do
         let(:package) do
           instance_double(
-            Registration::RemotePackage, name: "gnome-desktop", addon: addon,
+            Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
             selected?: true, unselect!: nil, installed?: false
           )
         end
