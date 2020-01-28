@@ -194,7 +194,7 @@ module Registration
       #
       # If not needed, unselects the corresponding addon
       #
-      # @parm package [RemotePackage] Package to unselect
+      # @param package [RemotePackage] Package to unselect
       #
       # @see #unselect_addon
       # @see #unselect_package!
