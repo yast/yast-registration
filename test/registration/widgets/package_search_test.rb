@@ -114,6 +114,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         it "unselects the package" do
+          allow(Yast2::Popup).to receive(:show).and_return(:yes)
           expect(package).to receive(:unselect!)
           subject.handle(event)
         end
@@ -129,7 +130,6 @@ describe Registration::Widgets::PackageSearch do
           end
 
           it "does not unselect the addon" do
-            expect(Yast::Popup).to_not receive(:YesNo)
             expect(addon).to_not receive(:unselected)
             subject.handle(event)
           end
@@ -137,11 +137,11 @@ describe Registration::Widgets::PackageSearch do
 
         context "and the addon is not needed anymore" do
           before do
-            allow(Yast::Popup).to receive(:YesNo).and_return(unselect?)
+            allow(Yast2::Popup).to receive(:show).and_return(unselect?)
           end
 
           context "and the user agrees to unselect it" do
-            let(:unselect?) { true }
+            let(:unselect?) { :yes }
 
             it "unselects the addon" do
               expect(addon).to receive(:unselected)
@@ -150,7 +150,7 @@ describe Registration::Widgets::PackageSearch do
           end
 
           context "and the user wants to keep the addon" do
-            let(:unselect?) { false }
+            let(:unselect?) { :no }
 
             it "does not unselect the addon" do
               expect(addon).to_not receive(:unselected)
@@ -173,7 +173,7 @@ describe Registration::Widgets::PackageSearch do
 
       context "when the addon is not registered" do
         before do
-          allow(Yast::Popup).to receive(:YesNo).and_return(register?)
+          allow(Yast2::Popup).to receive(:show).and_return(register?)
         end
 
         let(:addon) do
@@ -182,7 +182,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         context "but the user accepts to register the addon" do
-          let(:register?) { true }
+          let(:register?) { :yes }
 
           it "adds the package to the list of packages to install" do
             subject.handle(event)
@@ -196,7 +196,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         context "and the user refuses to register the addon" do
-          let(:register?) { false }
+          let(:register?) { :no }
 
           it "does not add the package to the list of packages to install" do
             subject.handle(event)
@@ -216,7 +216,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         it "does not ask about registering the addon" do
-          expect(Yast::Popup).to_not receive(:YesNo)
+          expect(Yast2::Popup).to_not receive(:show)
           subject.handle(event)
         end
 
@@ -227,6 +227,7 @@ describe Registration::Widgets::PackageSearch do
       end
 
       it "updates the table and the package details" do
+        allow(Yast2::Popup).to receive(:show)
         expect(packages_table).to receive(:update_item).with(package)
         expect(package_details).to receive(:update).with(package)
         subject.handle(event)

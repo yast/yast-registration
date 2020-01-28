@@ -374,4 +374,26 @@ describe Registration::Addon do
       expect(addon.to_h).to be_a(Hash)
     end
   end
+
+  describe "#dependencies" do
+    let(:registration) do
+      instance_double(
+        Registration::Registration,
+        activated_products: load_yaml_fixture("activated_products.yml"),
+        get_addon_list:     load_yaml_fixture("pure_addons.yml")
+      )
+    end
+
+    let(:addons) do
+      Registration::Addon.find_all(registration)
+    end
+
+    subject(:addon) do
+      addons.find { |a| a.identifier == "sle-ha-geo" }
+    end
+
+    it "returns all addon dependencies" do
+      expect(addon.dependencies.map(&:identifier)).to eq(["sle-ha"])
+    end
+  end
 end

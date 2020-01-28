@@ -26,6 +26,7 @@ require "registration/package_search"
 require "yast2/popup"
 
 Yast.import "Popup"
+Yast.import "HTML"
 
 module Registration
   module Widgets
@@ -248,12 +249,28 @@ module Registration
       #
       # @param addon [Addon] Addon to ask about
       def enable_addon?(addon)
-        message = format(
-          _("'%{name}' module/extension is not enabled for this system.\n" \
-            "Do you want to enable it?"),
-          name: addon.name
+        description = Yast::HTML.Para(
+          format(
+            _("The selected package is provided by the '%{name}' module/extension, " \
+              "which is not enabled on this system yet."),
+            name: addon.name
+          )
         )
-        Yast::Popup.YesNo(message)
+
+        unselected_deps = addon.dependencies.reject { |d| d.selected? || d.registered? }
+        if !unselected_deps.empty?
+          description << Yast::HTML.Para(
+            format(
+              _("Additionally, '%{name}' depends on the following modules/extensions:"),
+              name: addon.name
+            )
+          )
+          description << Yast::HTML.List(unselected_deps.map(&:name))
+        end
+        question = n_(
+          "Do you want to enable it?", "Do you want to enable them?", unselected_deps.size + 1
+        )
+        yes_no_popup(description + question)
       end
 
       # Asks the user to disable the addon
@@ -261,11 +278,11 @@ module Registration
       # @param addon [Addon] Addon to ask about
       def disable_addon?(addon)
         message = format(
-          _("'%{name}' module/extension is not needed anymore.\n" \
+          _("The '%{name}' module/extension is not needed anymore.\n" \
             "Do you want to unselect it?"),
           name: addon.name
         )
-        Yast::Popup.YesNo(message)
+        yes_no_popup(message)
       end
 
       MINIMAL_SEARCH_TEXT_SIZE = 2
@@ -288,6 +305,14 @@ module Registration
       # Determines whether the addon is still needed
       def needed_addon?(addon)
         selected_packages.any? { |pkg| pkg.addon == addon }
+      end
+
+      # Asks a yes/no question
+      #
+      # @return [Boolean] true if the answer is affirmative; false otherwise
+      def yes_no_popup(message)
+        ret = Yast2::Popup.show(message, richtext: true, buttons: :yes_no)
+        ret == :yes
       end
     end
   end
