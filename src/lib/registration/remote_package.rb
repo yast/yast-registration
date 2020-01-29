@@ -24,20 +24,24 @@ module Registration
   #
   # @example Find the status
   class RemotePackage
-    attr_reader :name, :arch, :version, :release, :addon
+    attr_reader :id, :name, :arch, :version, :release, :addon
 
+    # @param id      [Integer] Package ID
     # @param name    [String] Package name
     # @param arch    [String] Architecture
     # @param version [String] Version number
     # @param release [String] Release number
     # @param addon   [Addon]  Addon which the package belongs to
-    def initialize(name:, arch:, version:, release:, addon:)
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(id:, name:, arch:, version:, release:, addon:)
+      @id = id
       @name = name
       @arch = arch
       @version = version
       @release = release
       @addon = addon
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def full_version
       "#{version}-#{release}"

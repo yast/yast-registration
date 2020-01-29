@@ -27,8 +27,8 @@ describe Registration::Widgets::PackageSearch do
 
   let(:packages_table) do
     instance_double(
-      Registration::Widgets::RemotePackagesTable, value: package.name, change_items: nil,
-      update_item: nil, selected_item: package
+      Registration::Widgets::RemotePackagesTable, value: package.id,
+      change_items: nil, update_item: nil
     )
   end
 
@@ -38,7 +38,7 @@ describe Registration::Widgets::PackageSearch do
 
   let(:package) do
     instance_double(
-      Registration::RemotePackage, name: "gnome-desktop", addon: addon,
+      Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
       selected?: false, select!: nil, installed?: installed?
     )
   end
@@ -47,7 +47,8 @@ describe Registration::Widgets::PackageSearch do
 
   let(:addon) do
     instance_double(
-      Registration::Addon, name: "desktop", registered?: false, selected?: false, selected: nil
+      Registration::Addon, name: "desktop", registered?: false, selected?: false,
+      auto_selected?: nil, selected: nil, unselected: nil, dependencies: []
     )
   end
 
@@ -66,9 +67,10 @@ describe Registration::Widgets::PackageSearch do
   describe "#handle" do
     context "when the user asks for a package" do
       let(:event) { { "WidgetID" => "search_form_button" } }
+      let(:text) { "gnome" }
 
       let(:search_form) do
-        instance_double(Registration::Widgets::PackageSearchForm, text: "gnome")
+        instance_double(Registration::Widgets::PackageSearchForm, text: text)
       end
 
       before do
@@ -79,7 +81,7 @@ describe Registration::Widgets::PackageSearch do
 
       it "searches for the package in SCC" do
         expect(Registration::PackageSearch).to receive(:new)
-          .with(text: "gnome").and_return(search)
+          .with(text: text).and_return(search)
         subject.handle(event)
       end
 
@@ -88,10 +90,75 @@ describe Registration::Widgets::PackageSearch do
         expect(package_details).to receive(:update).with(package)
         subject.handle(event)
       end
+
+      context "when the search text is not enough" do
+        let(:text) { "g" }
+
+        it "asks the user to introduce some text" do
+          expect(Yast2::Popup).to receive(:show)
+            .with(/at least/)
+          subject.handle(event)
+        end
+      end
     end
 
     context "when a package is selected for installation" do
       let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
+
+      context "and the package is already selected" do
+        let(:package) do
+          instance_double(
+            Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
+            selected?: true, unselect!: nil, installed?: false
+          )
+        end
+
+        it "unselects the package" do
+          allow(Yast2::Popup).to receive(:show).and_return(:yes)
+          expect(package).to receive(:unselect!)
+          subject.handle(event)
+        end
+
+        context "and the addon is still needed" do
+          let(:another_package) do
+            instance_double(Registration::RemotePackage, name: "eog", addon: addon)
+          end
+
+          before do
+            allow(subject).to receive(:selected_packages).and_return([package, another_package])
+            subject.handle(event)
+          end
+
+          it "does not unselect the addon" do
+            expect(addon).to_not receive(:unselected)
+            subject.handle(event)
+          end
+        end
+
+        context "and the addon is not needed anymore" do
+          before do
+            allow(Yast2::Popup).to receive(:show).and_return(unselect?)
+          end
+
+          context "and the user agrees to unselect it" do
+            let(:unselect?) { :yes }
+
+            it "unselects the addon" do
+              expect(addon).to receive(:unselected)
+              subject.handle(event)
+            end
+          end
+
+          context "and the user wants to keep the addon" do
+            let(:unselect?) { :no }
+
+            it "does not unselect the addon" do
+              expect(addon).to_not receive(:unselected)
+              subject.handle(event)
+            end
+          end
+        end
+      end
 
       context "and the addon is already registered" do
         before do
@@ -106,11 +173,16 @@ describe Registration::Widgets::PackageSearch do
 
       context "when the addon is not registered" do
         before do
-          allow(Yast::Popup).to receive(:YesNo).and_return(register?)
+          allow(Yast2::Popup).to receive(:show).and_return(register?)
+        end
+
+        let(:addon) do
+          pure_addon = load_yaml_fixture("pure_addons.yml").first
+          Registration::Addon.new(pure_addon)
         end
 
         context "but the user accepts to register the addon" do
-          let(:register?) { true }
+          let(:register?) { :yes }
 
           it "adds the package to the list of packages to install" do
             subject.handle(event)
@@ -124,7 +196,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         context "and the user refuses to register the addon" do
-          let(:register?) { false }
+          let(:register?) { :no }
 
           it "does not add the package to the list of packages to install" do
             subject.handle(event)
@@ -144,7 +216,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         it "does not ask about registering the addon" do
-          expect(Yast::Popup).to_not receive(:YesNo)
+          expect(Yast2::Popup).to_not receive(:show)
           subject.handle(event)
         end
 
@@ -155,6 +227,7 @@ describe Registration::Widgets::PackageSearch do
       end
 
       it "updates the table and the package details" do
+        allow(Yast2::Popup).to receive(:show)
         expect(packages_table).to receive(:update_item).with(package)
         expect(package_details).to receive(:update).with(package)
         subject.handle(event)

@@ -61,6 +61,11 @@ module Registration
         ret
       end
 
+      # @macro seeDialog
+      def back_button
+        ""
+      end
+
     private
 
       # Package search widget

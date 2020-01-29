@@ -23,8 +23,10 @@ require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
 require "registration/package_search"
+require "yast2/popup"
 
 Yast.import "Popup"
+Yast.import "HTML"
 
 module Registration
   module Widgets
@@ -138,12 +140,13 @@ module Registration
       #
       # @param text [String] Text to search for
       def search_package(text)
+        return unless valid_search_text?(text)
         @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          selected_package_names = @selected_packages.map(&:name)
+          selected_package_ids = selected_packages.map(&:id)
           @search.packages.each do |pkg|
-            pkg.select! if selected_package_names.include?(pkg.name)
+            pkg.select! if selected_package_ids.include?(pkg.id)
           end
         end
         packages_table.change_items(@search.packages)
@@ -155,7 +158,8 @@ module Registration
       # @return [RemotePackage,nil]
       def find_current_package
         return unless search && packages_table.value
-        search.packages.find { |p| p.name == packages_table.value }
+        selected_id = packages_table.value
+        search.packages.find { |p| p.id == selected_id }
       end
 
       # Selects/unselects the current package for installation
@@ -177,20 +181,62 @@ module Registration
 
       # Selects the current package for installation
       #
-      # If required, it selects the addon for registration.
+      # If required, it selects the corresponding addon
+      #
+      # @param package [RemotePackage] Package to select
       def select_package(package)
         addon = package.addon
-        return unless addon.registered? || addon.selected? || enable_addon?(addon)
-
-        addon.selected unless addon.registered? || addon.selected?
-        package.select!
-        @selected_packages << package
+        select_addon(addon) if addon
+        set_package_as_selected(package) if addon.nil? || addon.selected? || addon.registered?
       end
 
       # Unselects the current package for installation
+      #
+      # If not needed, unselects the corresponding addon
+      #
+      # @param package [RemotePackage] Package to unselect
+      #
+      # @see #unselect_addon
+      # @see #unselect_package!
       def unselect_package(package)
+        unset_package_as_selected(package)
+        unselect_addon(package.addon) if package.addon
+      end
+
+      # Selects the given addon if needed
+      #
+      # @param addon [Addon] Addon to select
+      def select_addon(addon)
+        return if addon.registered? || addon.selected? || addon.auto_selected?
+        addon.selected if enable_addon?(addon)
+      end
+
+      # Unselects the given addon if required
+      #
+      # @param addon [Addon] Addon to unselect
+      def unselect_addon(addon)
+        return if addon.registered? || needed_addon?(addon)
+        addon.unselected if disable_addon?(addon)
+      end
+
+      # Sets the package as selected
+      #
+      # Marks the package as selected and adds it to the list of selected packages.
+      #
+      # @param package [RemotePackage] Package to add
+      def set_package_as_selected(package)
+        package.select!
+        selected_packages << package
+      end
+
+      # Unsets the package as selected
+      #
+      # Marks the package as not selected and removes it from the list of selected packages.
+      #
+      # @param package [RemotePackage] Package to remove
+      def unset_package_as_selected(package)
         package.unselect!
-        @selected_packages.delete(package)
+        selected_packages.delete(package)
       end
 
       # Updates the package details widget
@@ -201,16 +247,73 @@ module Registration
 
       # Asks the user to enable the addon
       #
-      # It omits the question if the addon is already registered or selected for registration.
-      #
       # @param addon [Addon] Addon to ask about
       def enable_addon?(addon)
+        description = Yast::HTML.Para(
+          format(
+            _("The selected package is provided by the '%{name}', " \
+              "which is not enabled on this system yet."),
+            name: addon.name
+          )
+        )
+
+        unselected_deps = addon.dependencies.reject { |d| d.selected? || d.registered? }
+        if !unselected_deps.empty?
+          description << Yast::HTML.Para(
+            format(
+              _("Additionally, '%{name}' depends on the following modules/extensions:"),
+              name: addon.name
+            )
+          )
+          description << Yast::HTML.List(unselected_deps.map(&:name))
+        end
+        # TRANSLATORS: 'it' and 'them' refers to the modules/extensions to enable
+        question = n_(
+          "Do you want to enable it?", "Do you want to enable them?", unselected_deps.size + 1
+        )
+        yes_no_popup(description + question)
+      end
+
+      # Asks the user to disable the addon
+      #
+      # @param addon [Addon] Addon to ask about
+      def disable_addon?(addon)
         message = format(
-          _("'%{name}' module/extension is not enabled for this system.\n" \
-            "Do you want to enable it?"),
+          _("The '%{name}' is not needed anymore.\n" \
+            "Do you want to unselect it?"),
           name: addon.name
         )
-        Yast::Popup.YesNo(message)
+        yes_no_popup(message)
+      end
+
+      MINIMAL_SEARCH_TEXT_SIZE = 2
+
+      # Determines whether the search text is valid or not
+      #
+      # @param text [String] Text to search for
+      def valid_search_text?(text)
+        return true if text.to_s.size >= MINIMAL_SEARCH_TEXT_SIZE
+        Yast2::Popup.show(
+          format(
+            # TRANSLATORS: the minimal size of the text to search for package names
+            _("Please, type at least %{minimal_size} characters to search for."),
+            minimal_size: MINIMAL_SEARCH_TEXT_SIZE
+          )
+        )
+        false
+      end
+
+      # Determines whether the addon is still needed
+      def needed_addon?(addon)
+        selected_packages.any? { |pkg| pkg.addon == addon }
+      end
+
+      # Asks a yes/no question
+      #
+      # @return [Boolean] true if the answer is affirmative; false otherwise
+      def yes_no_popup(message)
+        ret = Yast2::Popup.show(message, richtext: true, buttons: :yes_no)
+        ret == :yes
       end
     end
   end

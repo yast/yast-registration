@@ -356,6 +356,17 @@ module Registration
       !eula_url.to_s.strip.empty?
     end
 
+    # Returns all the dependencies
+    #
+    # Includes all dependencies in a recursive way.
+    #
+    # @return [Array<Addon>]
+    def dependencies
+      return [] if depends_on.nil?
+
+      [depends_on] + depends_on.dependencies
+    end
+
     def self.dump_addons
       # dump the downloaded data to a file for easier debugging,
       # avoid write failures when running as an unprivileged user (rspec tests)

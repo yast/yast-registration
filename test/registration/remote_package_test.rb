@@ -24,7 +24,7 @@ require "registration/addon"
 describe Registration::RemotePackage do
   subject(:package) do
     described_class.new(
-      name: "foobar", arch: :x86_64, version: "1.0", release: "1", addon: nil
+      id: 1, name: "foobar", arch: :x86_64, version: "1.0", release: "1", addon: nil
     )
   end
 
