@@ -278,7 +278,7 @@ module Registration
       # @param addon [Addon] Addon to ask about
       def disable_addon?(addon)
         message = format(
-          _("The '%{name}' module/extension is not needed anymore.\n" \
+          _("The '%{name}' is not needed anymore.\n" \
             "Do you want to unselect it?"),
           name: addon.name
         )
