@@ -251,7 +251,7 @@ module Registration
       def enable_addon?(addon)
         description = Yast::HTML.Para(
           format(
-            _("The selected package is provided by the '%{name}' module/extension, " \
+            _("The selected package is provided by the '%{name}', " \
               "which is not enabled on this system yet."),
             name: addon.name
           )
