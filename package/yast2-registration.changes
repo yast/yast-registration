@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 29 14:26:12 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Fix random building problems (bsc#1162122).
+- 4.2.30
+
+-------------------------------------------------------------------
 Tue Jan 28 16:19:45 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Improves the online search mechanism (jsc#SLE-9109):
