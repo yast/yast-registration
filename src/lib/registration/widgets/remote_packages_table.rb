@@ -78,7 +78,7 @@ module Registration
         [
           package_status(item),
           item.name,
-          item.addon&.name.to_s
+          item.addon ? item.addon.name : ""
         ]
       end
 
