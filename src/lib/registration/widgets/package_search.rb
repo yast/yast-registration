@@ -267,6 +267,7 @@ module Registration
           )
           description << Yast::HTML.List(unselected_deps.map(&:name))
         end
+        # TRANSLATORS: 'it' and 'them' refers to the modules/extensions to enable
         question = n_(
           "Do you want to enable it?", "Do you want to enable them?", unselected_deps.size + 1
         )
