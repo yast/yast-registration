@@ -22,11 +22,9 @@ require "cwm/custom_widget"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
-require "registration/package_search"
 require "yast2/popup"
 
 Yast.import "Popup"
-Yast.import "HTML"
 
 module Registration
   module Widgets
@@ -40,18 +38,18 @@ module Registration
     class PackageSearch < CWM::CustomWidget
       include Yast::Logger
 
-      # @return [Array<String>] List of selected packages
-      attr_reader :selected_packages
-
-      # @return [::Registration::PackageSearch,nil] Current search
-      attr_reader :search
+      # @return [Array<RemotePackage>] Packages found in the current search
+      attr_reader :packages
 
       # Constructor
-      def initialize
+      #
+      # @param controller [Registration::Controllers::PackageSearch] Package search controller
+      def initialize(controller)
         textdomain "registration"
         self.handle_all_events = true
-        @selected_packages = [] # list of selected packages
-        super
+        @controller = controller
+        @packages = []
+        super()
       end
 
       # @macro seeAbstractWidget
@@ -88,6 +86,9 @@ module Registration
       end
 
     private
+
+      # @return [Registration::Controllers::PackageSearch] Widget's controller
+      attr_reader :controller
 
       # Search form widget
       #
@@ -141,15 +142,15 @@ module Registration
       # @param text [String] Text to search for
       def search_package(text)
         return unless valid_search_text?(text)
-        @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          selected_package_ids = selected_packages.map(&:id)
-          @search.packages.each do |pkg|
+          @packages = controller.search(text)
+          selected_package_ids = controller.selected_packages.map(&:id)
+          @packages.each do |pkg|
             pkg.select! if selected_package_ids.include?(pkg.id)
           end
         end
-        packages_table.change_items(@search.packages)
+        packages_table.change_items(packages)
         update_details
       end
 
@@ -157,133 +158,22 @@ module Registration
       #
       # @return [RemotePackage,nil]
       def find_current_package
-        return unless search && packages_table.value
-        selected_id = packages_table.value
-        search.packages.find { |p| p.id == selected_id }
+        packages.find { |p| p.id == packages_table.value }
       end
 
       # Selects/unselects the current package for installation
-      #
-      # It does nothing if the package is already installed.
       def toggle_package
         package = find_current_package
-        return if package.nil? || package.installed?
-
-        if package.selected?
-          unselect_package(package)
-        else
-          select_package(package)
-        end
-
+        controller.toggle_package(package)
         packages_table.update_item(package)
         update_details
       end
 
-      # Selects the current package for installation
-      #
-      # If required, it selects the corresponding addon
-      #
-      # @param package [RemotePackage] Package to select
-      def select_package(package)
-        addon = package.addon
-        select_addon(addon) if addon
-        set_package_as_selected(package) if addon.nil? || addon.selected? || addon.registered?
-      end
-
-      # Unselects the current package for installation
-      #
-      # If not needed, unselects the corresponding addon
-      #
-      # @param package [RemotePackage] Package to unselect
-      #
-      # @see #unselect_addon
-      # @see #unselect_package!
-      def unselect_package(package)
-        unset_package_as_selected(package)
-        unselect_addon(package.addon) if package.addon
-      end
-
-      # Selects the given addon if needed
-      #
-      # @param addon [Addon] Addon to select
-      def select_addon(addon)
-        return if addon.registered? || addon.selected? || addon.auto_selected?
-        addon.selected if enable_addon?(addon)
-      end
-
-      # Unselects the given addon if required
-      #
-      # @param addon [Addon] Addon to unselect
-      def unselect_addon(addon)
-        return if addon.registered? || needed_addon?(addon)
-        addon.unselected if disable_addon?(addon)
-      end
-
-      # Sets the package as selected
-      #
-      # Marks the package as selected and adds it to the list of selected packages.
-      #
-      # @param package [RemotePackage] Package to add
-      def set_package_as_selected(package)
-        package.select!
-        selected_packages << package
-      end
-
-      # Unsets the package as selected
-      #
-      # Marks the package as not selected and removes it from the list of selected packages.
-      #
-      # @param package [RemotePackage] Package to remove
-      def unset_package_as_selected(package)
-        package.unselect!
-        selected_packages.delete(package)
-      end
-
       # Updates the package details widget
       def update_details
+        # FIXME: remove the content if the current package is nil
         current_package = find_current_package
         package_details.update(current_package) if current_package
-      end
-
-      # Asks the user to enable the addon
-      #
-      # @param addon [Addon] Addon to ask about
-      def enable_addon?(addon)
-        description = Yast::HTML.Para(
-          format(
-            _("The selected package is provided by the '%{name}', " \
-              "which is not enabled on this system yet."),
-            name: addon.name
-          )
-        )
-
-        unselected_deps = addon.dependencies.reject { |d| d.selected? || d.registered? }
-        if !unselected_deps.empty?
-          description << Yast::HTML.Para(
-            format(
-              _("Additionally, '%{name}' depends on the following modules/extensions:"),
-              name: addon.name
-            )
-          )
-          description << Yast::HTML.List(unselected_deps.map(&:name))
-        end
-        # TRANSLATORS: 'it' and 'them' refers to the modules/extensions to enable
-        question = n_(
-          "Do you want to enable it?", "Do you want to enable them?", unselected_deps.size + 1
-        )
-        yes_no_popup(description + question)
-      end
-
-      # Asks the user to disable the addon
-      #
-      # @param addon [Addon] Addon to ask about
-      def disable_addon?(addon)
-        message = format(
-          _("The '%{name}' is not needed anymore.\n" \
-            "Do you want to unselect it?"),
-          name: addon.name
-        )
-        yes_no_popup(message)
       end
 
       MINIMAL_SEARCH_TEXT_SIZE = 2
@@ -301,19 +191,6 @@ module Registration
           )
         )
         false
-      end
-
-      # Determines whether the addon is still needed
-      def needed_addon?(addon)
-        selected_packages.any? { |pkg| pkg.addon == addon }
-      end
-
-      # Asks a yes/no question
-      #
-      # @return [Boolean] true if the answer is affirmative; false otherwise
-      def yes_no_popup(message)
-        ret = Yast2::Popup.show(message, richtext: true, buttons: :yes_no)
-        ret == :yes
       end
     end
   end
