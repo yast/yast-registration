@@ -68,6 +68,7 @@ module Registration
       #
       # @param package [RemotePackage] Package to select
       def select_package(package)
+        log.info "Selecting package: #{package.inspect}"
         addon = package.addon
         select_addon(addon) if addon
         set_package_as_selected(package) if addon.nil? || addon.selected? || addon.registered?
@@ -82,6 +83,7 @@ module Registration
       # @see #unselect_addon
       # @see #unselect_package!
       def unselect_package(package)
+        log.info "Unselecting package: #{package.inspect}"
         unset_package_as_selected(package)
         unselect_addon(package.addon) if package.addon
       end
@@ -93,6 +95,7 @@ module Registration
       #
       # @param addon [Addon] Addon to select
       def select_addon(addon)
+        log_addon("selecting the addon", addon)
         return if addon.registered? || addon.selected?
         addon.selected if addon.auto_selected? || enable_addon?(addon)
       end
@@ -101,6 +104,7 @@ module Registration
       #
       # @param addon [Addon] Addon to unselect
       def unselect_addon(addon)
+        log_addon("unselecting the addon", addon)
         return if addon.registered? || needed_addon?(addon)
         addon.unselected if disable_addon?(addon)
       end
@@ -176,7 +180,17 @@ module Registration
       # @return [Boolean] true if the answer is affirmative; false otherwise
       def yes_no_popup(message)
         ret = Yast2::Popup.show(message, richtext: true, buttons: :yes_no)
+        log.info "yes/no pop-up. The answer is '#{ret}"
         ret == :yes
+      end
+
+      # Logs information about a given addon
+      #
+      # @param msg [String] Message to display at the beginning of the line
+      # @param addon [Registration::Addon]
+      def log_addon(msg, addon)
+        log.info "#{msg}: #{addon.inspect}, registered=#{addon.registered?}, selected=#{addon.selected?}" \
+          "auto_selected=#{addon.auto_selected?}"
       end
     end
   end
