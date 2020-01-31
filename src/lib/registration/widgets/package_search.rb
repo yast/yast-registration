@@ -19,14 +19,13 @@
 
 require "yast"
 require "cwm/custom_widget"
+require "registration/controllers/package_search"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
-require "registration/package_search"
 require "yast2/popup"
 
 Yast.import "Popup"
-Yast.import "HTML"
 
 module Registration
   module Widgets
@@ -43,15 +42,13 @@ module Registration
       # @return [Array<String>] List of selected packages
       attr_reader :selected_packages
 
-      # @return [::Registration::PackageSearch,nil] Current search
-      attr_reader :search
-
       # Constructor
-      def initialize
+      def initialize(controller = ::Registration::Controllers::PackageSearch.new)
         textdomain "registration"
         self.handle_all_events = true
+        @controller = controller
         @selected_packages = [] # list of selected packages
-        super
+        super()
       end
 
       # @macro seeAbstractWidget
@@ -88,6 +85,9 @@ module Registration
       end
 
     private
+
+      # @return [Registration::Controllers::PackageSearch] Widget's controller
+      attr_reader :controller
 
       # Search form widget
       #
@@ -141,15 +141,11 @@ module Registration
       # @param text [String] Text to search for
       def search_package(text)
         return unless valid_search_text?(text)
-        @search = ::Registration::PackageSearch.new(text: text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          selected_package_ids = selected_packages.map(&:id)
-          @search.packages.each do |pkg|
-            pkg.select! if selected_package_ids.include?(pkg.id)
-          end
+          controller.search(text)
         end
-        packages_table.change_items(@search.packages)
+        packages_table.change_items(controller.packages)
         update_details
       end
 
@@ -157,9 +153,8 @@ module Registration
       #
       # @return [RemotePackage,nil]
       def find_current_package
-        return unless search && packages_table.value
-        selected_id = packages_table.value
-        search.packages.find { |p| p.id == selected_id }
+        return unless packages_table.value
+        controller.packages.find { |p| p.id == packages_table.value }
       end
 
       # Selects/unselects the current package for installation
@@ -241,6 +236,7 @@ module Registration
 
       # Updates the package details widget
       def update_details
+        # FIXME: remove the content if the current package is nil
         current_package = find_current_package
         package_details.update(current_package) if current_package
       end

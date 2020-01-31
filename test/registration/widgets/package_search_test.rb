@@ -25,6 +25,12 @@ require "cwm/rspec"
 describe Registration::Widgets::PackageSearch do
   include_examples "CWM::CustomWidget"
 
+  subject { described_class.new(controller) }
+
+  let(:controller) do
+    instance_double(Registration::Controllers::PackageSearch, packages: [package], search: nil)
+  end
+
   let(:packages_table) do
     instance_double(
       Registration::Widgets::RemotePackagesTable, value: package.id,
@@ -52,16 +58,11 @@ describe Registration::Widgets::PackageSearch do
     )
   end
 
-  let(:search) do
-    instance_double(Registration::PackageSearch, packages: [package])
-  end
-
   before do
     allow(Registration::Widgets::RemotePackagesTable).to receive(:new)
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
-    allow(subject).to receive(:search).and_return(search)
   end
 
   describe "#handle" do
@@ -76,12 +77,10 @@ describe Registration::Widgets::PackageSearch do
       before do
         allow(Registration::Widgets::PackageSearchForm).to receive(:new)
           .and_return(search_form)
-        allow(Registration::PackageSearch).to receive(:new).and_return(search)
       end
 
       it "searches for the package in SCC" do
-        expect(Registration::PackageSearch).to receive(:new)
-          .with(text: text).and_return(search)
+        expect(controller).to receive(:search).with(text)
         subject.handle(event)
       end
 
