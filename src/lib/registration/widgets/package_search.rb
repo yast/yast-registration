@@ -19,7 +19,6 @@
 
 require "yast"
 require "cwm/custom_widget"
-require "registration/controllers/package_search"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
@@ -40,7 +39,9 @@ module Registration
       include Yast::Logger
 
       # Constructor
-      def initialize(controller = ::Registration::Controllers::PackageSearch.new)
+      #
+      # @param controller [Registration::Controllers::PackageSearch] Package search controller
+      def initialize(controller)
         textdomain "registration"
         self.handle_all_events = true
         @controller = controller

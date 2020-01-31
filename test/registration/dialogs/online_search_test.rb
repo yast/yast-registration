@@ -26,7 +26,11 @@ describe Registration::Dialogs::OnlineSearch do
 
   describe "#selected_packages" do
     let(:search_widget) do
-      Registration::Widgets::PackageSearch.new
+      Registration::Widgets::PackageSearch.new(controller)
+    end
+
+    let(:controller) do
+      Registration::Controllers::PackageSearch.new
     end
 
     let(:package) do
@@ -36,7 +40,9 @@ describe Registration::Dialogs::OnlineSearch do
     before do
       allow(Registration::Widgets::PackageSearch).to receive(:new)
         .and_return(search_widget)
-      allow(search_widget).to receive(:selected_packages).and_return([package])
+      allow(Registration::Controllers::PackageSearch).to receive(:new)
+        .and_return(controller)
+      allow(controller).to receive(:selected_packages).and_return([package])
       allow(subject).to receive(:cwm_show).and_return(result)
     end
 

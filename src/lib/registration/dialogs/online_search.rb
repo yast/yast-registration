@@ -19,6 +19,7 @@
 
 require "yast"
 require "cwm/dialog"
+require "registration/controllers/package_search"
 require "registration/widgets/package_search"
 
 module Registration
@@ -57,7 +58,7 @@ module Registration
       # @macro seeAbstractWidget
       def run
         ret = super
-        @selected_packages = ret == :next ? package_search_widget.selected_packages : []
+        @selected_packages = ret == :next ? controller.selected_packages : []
         ret
       end
 
@@ -72,7 +73,14 @@ module Registration
       #
       # @return [Registration::Widgets::PackageSearch]
       def package_search_widget
-        @package_search_widget ||= ::Registration::Widgets::PackageSearch.new
+        @package_search_widget ||= ::Registration::Widgets::PackageSearch.new(controller)
+      end
+
+      # Package search controller
+      #
+      # @return [Registration::Controllers::PackageSearch]
+      def controller
+        @controller ||= ::Registration::Controllers::PackageSearch.new
       end
     end
   end
