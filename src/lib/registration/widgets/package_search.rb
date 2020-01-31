@@ -158,15 +158,12 @@ module Registration
       #
       # @return [RemotePackage,nil]
       def find_current_package
-        return unless packages_table.value
         packages.find { |p| p.id == packages_table.value }
       end
 
       # Selects/unselects the current package for installation
       def toggle_package
         package = find_current_package
-        return if package.nil?
-
         controller.toggle_package(package)
         packages_table.update_item(package)
         update_details
