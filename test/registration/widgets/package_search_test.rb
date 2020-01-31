@@ -28,10 +28,7 @@ describe Registration::Widgets::PackageSearch do
   subject { described_class.new(controller) }
 
   let(:controller) do
-    instance_double(
-      Registration::Controllers::PackageSearch, packages: [package], search: nil,
-      toggle_package: nil
-    )
+    Registration::Controllers::PackageSearch.new
   end
 
   let(:packages_table) do
@@ -66,12 +63,14 @@ describe Registration::Widgets::PackageSearch do
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
+    allow(controller).to receive(:search).and_return([package])
   end
 
   describe "#handle" do
+    let(:text) { "gnome" }
+
     context "when the user asks for a package" do
       let(:event) { { "WidgetID" => "search_form_button" } }
-      let(:text) { "gnome" }
 
       let(:search_form) do
         instance_double(Registration::Widgets::PackageSearchForm, text: text)
@@ -107,6 +106,10 @@ describe Registration::Widgets::PackageSearch do
     context "when a package is selected for installation" do
       let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
 
+      before do
+        allow(subject).to receive(:packages).and_return([package])
+      end
+
       it "toggles the selected package" do
         expect(controller).to receive(:toggle_package).with(package)
         subject.handle(event)
@@ -122,6 +125,10 @@ describe Registration::Widgets::PackageSearch do
 
     context "when the user selects a different package in the table" do
       let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "SelectionChanged" } }
+
+      before do
+        allow(subject).to receive(:packages).and_return([package])
+      end
 
       it "updates the package details" do
         expect(package_details).to receive(:update).with(package)

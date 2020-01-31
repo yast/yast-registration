@@ -38,6 +38,9 @@ module Registration
     class PackageSearch < CWM::CustomWidget
       include Yast::Logger
 
+      # @return [Array<RemotePackage>] Packages found in the current search
+      attr_reader :packages
+
       # Constructor
       #
       # @param controller [Registration::Controllers::PackageSearch] Package search controller
@@ -45,7 +48,7 @@ module Registration
         textdomain "registration"
         self.handle_all_events = true
         @controller = controller
-        @selected_packages = [] # list of selected packages
+        @packages = []
         super()
       end
 
@@ -141,9 +144,13 @@ module Registration
         return unless valid_search_text?(text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          controller.search(text)
+          @packages = controller.search(text)
+          selected_package_ids = controller.selected_packages.map(&:id)
+          @packages.each do |pkg|
+            pkg.select! if selected_package_ids.include?(pkg.id)
+          end
         end
-        packages_table.change_items(controller.packages)
+        packages_table.change_items(packages)
         update_details
       end
 
@@ -152,7 +159,7 @@ module Registration
       # @return [RemotePackage,nil]
       def find_current_package
         return unless packages_table.value
-        controller.packages.find { |p| p.id == packages_table.value }
+        packages.find { |p| p.id == packages_table.value }
       end
 
       # Selects/unselects the current package for installation

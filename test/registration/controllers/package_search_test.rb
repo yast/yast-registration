@@ -51,29 +51,8 @@ describe Registration::Controllers::PackageSearch do
   end
 
   describe "#search" do
-    it "updates the list of packages with results from SCC" do
-      expect { controller.search(text) }.to change { controller.packages }
-        .from([]).to([package])
-    end
-  end
-
-  describe "#packages" do
-    context "when no search has been peformed" do
-      it "returns an empty array" do
-        expect(controller.packages).to eq([])
-      end
-    end
-
-    context "when there are search results" do
-      before do
-        allow(Registration::PackageSearch).to receive(:new)
-          .and_return(search)
-        controller.search(text)
-      end
-
-      it "returns the search results" do
-        expect(controller.packages).to eq([package])
-      end
+    it "returns the list of packages from SCC" do
+      expect(controller.search(text)).to eq([package])
     end
   end
 

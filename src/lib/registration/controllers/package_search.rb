@@ -38,22 +38,13 @@ module Registration
         @selected_packages = []
       end
 
-      # Returns the list of the current search
-      #
-      # @return [Array<RemotePackage>] List of found packages
-      def packages
-        @search ? @search.packages : []
-      end
-
       # Performs a package search
       #
       # @param text [String] Term to search for
+      # @return [Array<Registration::RemotePackage>] List of packages
       def search(text)
         @search = ::Registration::PackageSearch.new(text: text)
-        selected_package_ids = selected_packages.map(&:id)
-        @search.packages.each do |pkg|
-          pkg.select! if selected_package_ids.include?(pkg.id)
-        end
+        @search.packages
       end
 
       # Selects/unselects the current package for installation
