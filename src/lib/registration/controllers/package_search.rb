@@ -88,10 +88,13 @@ module Registration
 
       # Selects the given addon if needed
       #
+      # If the addon is registered or selected, does nothing. If the addon
+      # was auto selected, it will be marked as selected.
+      #
       # @param addon [Addon] Addon to select
       def select_addon(addon)
-        return if addon.registered? || addon.selected? || addon.auto_selected?
-        addon.selected if enable_addon?(addon)
+        return if addon.registered? || addon.selected?
+        addon.selected if addon.auto_selected? || enable_addon?(addon)
       end
 
       # Unselects the given addon if required
