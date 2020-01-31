@@ -123,6 +123,32 @@ describe Registration::Controllers::PackageSearch do
           expect(subject.selected_packages).to eq([package])
         end
       end
+
+      context "when the addon is auto selected for registration" do
+        let(:addon) do
+          pure_addon = load_yaml_fixture("pure_addons.yml").first
+          Registration::Addon.new(pure_addon)
+        end
+
+        before do
+          allow(addon).to receive(:auto_selected?).and_return(true)
+        end
+
+        it "does not ask about registering the addon" do
+          expect(Yast2::Popup).to_not receive(:show)
+          subject.toggle_package(package)
+        end
+
+        it "selects the addon" do
+          expect(addon).to receive(:selected)
+          subject.toggle_package(package)
+        end
+
+        it "adds the package to the list of packages to install" do
+          subject.toggle_package(package)
+          expect(subject.selected_packages).to eq([package])
+        end
+      end
     end
 
     context "when the package is already selected for installation" do
