@@ -40,6 +40,7 @@ describe Registration::Clients::OnlineSearch do
     before do
       allow(Registration::Addon).to receive(:find_all)
       allow(Registration::Dialogs::OnlineSearch).to receive(:new).and_return(search_dialog)
+      allow(Registration::Dialogs::OnlineSearchSummary).to receive(:run).and_return(:next)
       allow(Registration::RegistrationUI).to receive(:new).and_return(registration_ui)
       allow(Registration::UI::AddonEulaDialog).to receive(:run).and_return(:next)
       allow(Registration::SwMgmt).to receive(:select_addon_products)

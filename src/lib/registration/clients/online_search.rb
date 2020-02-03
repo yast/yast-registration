@@ -20,6 +20,7 @@
 require "yast"
 require "yast2/popup"
 require "registration/dialogs/online_search"
+require "registration/dialogs/online_search_summary"
 require "registration/addon"
 require "registration/registration"
 require "registration/registration_ui"
@@ -55,6 +56,7 @@ module Registration
       #
       # @see #find_addons
       # @see #search_packages
+      # @see #display_summary
       # @see #display_eula
       # @see #register_addons
       # @see #select_packages
@@ -62,6 +64,7 @@ module Registration
         {
           "find_addons"     => ->() { find_addons },
           "search_packages" => ->() { search_packages },
+          "display_summary" => ->() { display_summary },
           "display_eula"    => ->() { display_eula },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
@@ -87,6 +90,10 @@ module Registration
             next:  "search_packages"
           },
           "search_packages" => {
+            abort: :abort,
+            next:  "display_summary"
+          },
+          "display_summary" => {
             abort: :abort,
             next:  "display_eula"
           },
@@ -126,7 +133,17 @@ module Registration
         package_search_dialog.run
       end
 
-      # Display EULAs for the selected addons
+      # Displays a summary of the module/extensions to register and packages to install
+      #
+      # @return [:next]
+      def display_summary
+        return :next if selected_addons.empty?
+        ::Registration::Dialogs::OnlineSearchSummary.run(
+          selected_packages, selected_addons
+        )
+      end
+
+      # Displays EULAs for the selected addons
       #
       # @return [Symbol] User input (:next, :back, :abort)
       #   or :next if there are not licenses to accept
@@ -152,7 +169,7 @@ module Registration
       # @return [:next]
       def select_packages
         ::Registration::SwMgmt.select_addon_products
-        package_search_dialog.selected_packages.each do |pkg|
+        selected_packages.each do |pkg|
           pkg_install_error_message(pkg.name) unless Yast::Pkg.PkgInstall(pkg.name)
         end
         :next
@@ -176,6 +193,10 @@ module Registration
         return @selected_addons if @selected_addons
         addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
         @selected_addons = ::Registration::Addon.registration_order(addons)
+      end
+
+      def selected_packages
+        package_search_dialog.selected_packages
       end
 
       def reset_selected_addons_cache!
