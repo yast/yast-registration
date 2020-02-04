@@ -63,6 +63,11 @@ module Registration
       end
 
       # @macro seeDialog
+      def abort_button
+        Yast::Label.CancelButton
+      end
+
+      # @macro seeDialog
       def back_button
         ""
       end
