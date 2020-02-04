@@ -30,6 +30,7 @@ require "registration/url_helpers"
 
 Yast.import "Pkg"
 Yast.import "Sequencer"
+Yast.import "Popup"
 
 module Registration
   module Clients
@@ -121,7 +122,10 @@ module Registration
       #
       # @return [:next]
       def find_addons
-        ::Registration::Addon.find_all(registration)
+        Yast::Popup.Feedback(_("Initializing..."), _("Fetching the list of known modules/extensions")) do
+          ::Registration::Addon.reset!
+          ::Registration::Addon.find_all(registration)
+        end
         :next
       end
 
