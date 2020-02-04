@@ -171,8 +171,10 @@ module Registration
       end
 
       # Determines whether the addon is still needed
+      #
+      # @param addon [Addon] Addon to compare with
       def needed_addon?(addon)
-        selected_packages.any? { |pkg| pkg.addon == addon }
+        selected_packages.any? { |pkg| pkg.addon && pkg.addon.id == addon.id }
       end
 
       # Asks a yes/no question
