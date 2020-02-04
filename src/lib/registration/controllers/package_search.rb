@@ -126,7 +126,7 @@ module Registration
       # @param package [RemotePackage] Package to remove
       def unset_package_as_selected(package)
         package.unselect!
-        selected_packages.delete(package)
+        selected_packages.reject! { |p| p.id == package.id }
       end
 
       # Asks the user to enable the addon
