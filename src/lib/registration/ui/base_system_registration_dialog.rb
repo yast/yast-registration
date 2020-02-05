@@ -396,11 +396,19 @@ module Registration
       # Convenience method to obtain the medium warning text depending on the
       # medium type
       def medium_warning_text
-        Y2Packager::MediumType.online? ? online_skipping_text : default_skipping_text
+        if Yast::Stage.initial && Y2Packager::MediumType.online?
+          online_skipping_text
+        else
+          default_skipping_text
+        end
       end
 
       def medium_warning_headline
-        Y2Packager::MediumType.online? ? online_skipping_headline : default_skipping_headline
+        if Yast::Stage.initial && Y2Packager::MediumType.online?
+          online_skipping_headline
+        else
+          default_skipping_headline
+        end
       end
 
       def online_skipping_headline
@@ -465,7 +473,7 @@ module Registration
       #
       # @return [Symbol, nil] :skip if not the online medium
       def handle_skipping_registration
-        unless Y2Packager::MediumType.online?
+        if !Yast::Stage.initial || !Y2Packager::MediumType.online?
           log.info "Skipping registration on user request"
           return :skip
         end
