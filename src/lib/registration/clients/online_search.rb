@@ -19,7 +19,9 @@
 
 require "yast"
 require "yast2/popup"
+require "ui/text_helpers"
 require "registration/dialogs/online_search"
+require "registration/dialogs/online_search_summary"
 require "registration/addon"
 require "registration/registration"
 require "registration/registration_ui"
@@ -29,6 +31,7 @@ require "registration/url_helpers"
 
 Yast.import "Pkg"
 Yast.import "Sequencer"
+Yast.import "Popup"
 
 module Registration
   module Clients
@@ -46,6 +49,7 @@ module Registration
       include Yast::I18n
       extend Yast::I18n
       include Yast::Logger
+      include ::UI::TextHelpers
 
       def initialize
         textdomain "registration"
@@ -55,13 +59,16 @@ module Registration
       #
       # @see #find_addons
       # @see #search_packages
+      # @see #display_summary
       # @see #display_eula
       # @see #register_addons
       # @see #select_packages
       def workflow_aliases
         {
+          "check_support"   => ->() { check_support },
           "find_addons"     => ->() { find_addons },
           "search_packages" => ->() { search_packages },
+          "display_summary" => ->() { display_summary },
           "display_eula"    => ->() { display_eula },
           "register_addons" => ->() { register_addons },
           "select_packages" => ->() { select_packages }
@@ -81,12 +88,20 @@ module Registration
       # @return [Symbol] Sequence's result (:next or :abort)
       def run
         sequence = {
-          "ws_start"        => "find_addons",
+          "ws_start"        => "check_support",
+          "check_support"   => {
+            abort: :abort,
+            next:  "find_addons"
+          },
           "find_addons"     => {
             abort: :abort,
             next:  "search_packages"
           },
           "search_packages" => {
+            abort: :abort,
+            next:  "display_summary"
+          },
+          "display_summary" => {
             abort: :abort,
             next:  "display_eula"
           },
@@ -110,11 +125,32 @@ module Registration
 
     private
 
+      # Determines whether the online search is supported in the running system
+      #
+      # @return [:next,:abort]
+      def check_support
+        unless ::Registration::Registration.is_registered?
+          registration_required_message
+          return :abort
+        end
+        unless ::Registration::UrlHelpers.default_registration_url?
+          smt_not_supported_message
+          return :abort
+        end
+
+        :next
+      end
+
       # Find all available addons
       #
       # @return [:next]
       def find_addons
-        ::Registration::Addon.find_all(registration)
+        Yast::Popup.Feedback(
+          _("Initializing..."), _("Fetching the list of known modules/extensions")
+        ) do
+          ::Registration::Addon.reset!
+          ::Registration::Addon.find_all(registration)
+        end
         :next
       end
 
@@ -126,7 +162,17 @@ module Registration
         package_search_dialog.run
       end
 
-      # Display EULAs for the selected addons
+      # Displays a summary of the module/extensions to register and packages to install
+      #
+      # @return [:next]
+      def display_summary
+        return :next if selected_packages.empty?
+        ::Registration::Dialogs::OnlineSearchSummary.run(
+          selected_packages, selected_addons
+        )
+      end
+
+      # Displays EULAs for the selected addons
       #
       # @return [Symbol] User input (:next, :back, :abort)
       #   or :next if there are not licenses to accept
@@ -152,7 +198,7 @@ module Registration
       # @return [:next]
       def select_packages
         ::Registration::SwMgmt.select_addon_products
-        package_search_dialog.selected_packages.each do |pkg|
+        selected_packages.each do |pkg|
           pkg_install_error_message(pkg.name) unless Yast::Pkg.PkgInstall(pkg.name)
         end
         :next
@@ -178,6 +224,10 @@ module Registration
         @selected_addons = ::Registration::Addon.registration_order(addons)
       end
 
+      def selected_packages
+        package_search_dialog.selected_packages
+      end
+
       def reset_selected_addons_cache!
         @selected_addons = nil
       end
@@ -188,6 +238,35 @@ module Registration
             # TRANSLATORS: 'name' is the package's name
             _("Package %{name} could not be selected for installation."),
             name: name
+          ),
+          headline: :error
+        )
+      end
+
+      # Returns a message about unregistered systems not being able to use the online search feature
+      #
+      # @return [String]
+      def registration_required_message
+        Yast2::Popup.show(
+          wrap_text(
+            _("YaST requires your system to be registered in order to " \
+              "perform an online search. Alternatively, use the web" \
+              "version at 'https://scc.suse.com/packages/'.")
+          ),
+          headline: :error
+        )
+      end
+
+      # Returns a message about SMT/RMT not supporting the online search feature
+      #
+      # @return [String]
+      def smt_not_supported_message
+        Yast2::Popup.show(
+          wrap_text(
+            _("This system is registered through an SMT/RMT server. " \
+              "Unfortunately, the online search feature is not supported " \
+              "in this scenario. Alternatively, use the web version at" \
+              "'https://scc.suse.com/packages/'.")
           ),
           headline: :error
         )

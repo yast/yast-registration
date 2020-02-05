@@ -3,6 +3,7 @@
 require_relative "spec_helper"
 
 describe "Registration::UrlHelpers" do
+
   describe ".registration_url" do
     before do
       # reset the cache before each test
@@ -209,6 +210,36 @@ describe "Registration::UrlHelpers" do
 
       it "returns nil (default URL)" do
         expect(Registration::UrlHelpers.registration_url).to be_nil
+      end
+    end
+  end
+
+  describe ".default_registration_url?" do
+    before do
+      allow(Registration::UrlHelpers).to receive(:registration_url).and_return(url)
+    end
+
+    context "when the registration_url is nil" do
+      let(:url) { nil }
+
+      it "returns true" do
+        expect(Registration::UrlHelpers.default_registration_url?).to eq(true)
+      end
+    end
+
+    context "when the registration_url is the default one" do
+      let(:url) { SUSE::Connect::YaST::DEFAULT_URL }
+
+      it "returns true" do
+        expect(Registration::UrlHelpers.default_registration_url?).to eq(true)
+      end
+    end
+
+    context "when the registration_url is not nil nor the default one" do
+      let(:url) { "https://smt.example.net" }
+
+      it "returns false" do
+        expect(Registration::UrlHelpers.default_registration_url?).to eq(false)
       end
     end
   end

@@ -152,11 +152,27 @@ describe Registration::Controllers::PackageSearch do
     end
 
     context "when the package is already selected for installation" do
+      let(:selected_package) do
+        Registration::RemotePackage.new(
+          id: 1, name: "gnome-desktop", arch: :x86_64, version: "3.34", release: "1.1", addon: addon
+        )
+      end
+
+      let(:addon) do
+        pure_addon = load_yaml_fixture("pure_addons.yml").first
+        Registration::Addon.new(pure_addon)
+      end
+
+      before do
+        allow(Yast2::Popup).to receive(:show).and_return(:yes)
+        subject.toggle_package(selected_package)
+      end
+
       context "and the package is already selected" do
         let(:package) do
           instance_double(
-            Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
-            selected?: true, unselect!: nil, installed?: false
+            Registration::RemotePackage, id: 1, selected?: true,
+            installed?: false, unselect!: nil, addon: addon
           )
         end
 
@@ -164,11 +180,12 @@ describe Registration::Controllers::PackageSearch do
           allow(Yast2::Popup).to receive(:show).and_return(:yes)
           expect(package).to receive(:unselect!)
           subject.toggle_package(package)
+          expect(subject.selected_packages).to be_empty
         end
 
         context "and the addon is still needed" do
           let(:another_package) do
-            instance_double(Registration::RemotePackage, name: "eog", addon: addon)
+            instance_double(Registration::RemotePackage, id: 2, name: "eog", addon: addon)
           end
 
           before do

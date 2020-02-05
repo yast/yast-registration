@@ -65,7 +65,7 @@ module Registration
             MinWidth(
               60,
               VBox(
-                packages_table,
+                MinHeight(14, packages_table),
                 package_details
               )
             )
