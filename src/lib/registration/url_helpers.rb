@@ -84,6 +84,10 @@ module Registration
       url
     end
 
+    def self.default_registration_url?
+      [nil, SUSE::Connect::YaST::DEFAULT_URL].include?(registration_url)
+    end
+
     # @return [void]
     def self.reset_registration_url
       ::Registration::Storage::Cache.instance.reg_url = nil

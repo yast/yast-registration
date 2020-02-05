@@ -36,6 +36,7 @@ describe Registration::Clients::OnlineSearch do
     let(:package) { instance_double(Registration::RemotePackage, name: "gnome-desktop") }
     let(:search_result) { :next }
     let(:registration_result) { :next }
+    let(:registration_url) { SUSE::Connect::YaST::DEFAULT_URL }
 
     before do
       allow(Registration::Addon).to receive(:find_all)
@@ -45,8 +46,9 @@ describe Registration::Clients::OnlineSearch do
       allow(Registration::UI::AddonEulaDialog).to receive(:run).and_return(:next)
       allow(Registration::SwMgmt).to receive(:select_addon_products)
       allow(Registration::UrlHelpers).to receive(:registration_url)
-        .and_return("https://scc.suse.com") # speed up the test
+        .and_return(registration_url) # speed up the test
       allow(Yast::Pkg).to receive(:PkgInstall).and_return(true)
+      allow(Registration::Registration).to receive(:is_registered?).and_return(true)
     end
 
     context "when an addon is selected" do
@@ -131,6 +133,39 @@ describe Registration::Clients::OnlineSearch do
 
     context "when the user aborts the search" do
       let(:search_result) { :abort }
+
+      it "returns :abort" do
+        expect(subject.run).to eq(:abort)
+      end
+    end
+
+    context "when the system is not registered" do
+      before do
+        allow(Registration::Registration).to receive(:is_registered?).and_return(false)
+        allow(Yast2::Popup).to receive(:show)
+      end
+
+      it "displays a message" do
+        expect(Yast2::Popup).to receive(:show).with(/to be registered/, headline: :error)
+        subject.run
+      end
+
+      it "returns :abort" do
+        expect(subject.run).to eq(:abort)
+      end
+    end
+
+    context "when an SMT/RMT server was used" do
+      let(:registration_url) { "https://smt.example.net" }
+
+      before do
+        allow(Yast2::Popup).to receive(:show)
+      end
+
+      it "displays a message" do
+        expect(Yast2::Popup).to receive(:show).with(/SMT/, headline: :error)
+        subject.run
+      end
 
       it "returns :abort" do
         expect(subject.run).to eq(:abort)
