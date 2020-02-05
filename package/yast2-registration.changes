@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Wed Feb  5 14:35:00 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Improves online search mechanism UI (jsc#SLE-9109):
+  - Add a summary screen that enumerates which changes will
+    take place (addons and packages).
+  - Fix the 'Cancel' button label.
+  - Improve feedback when waiting for network I/O.
+  - Inform users about unsupported scenarios: unregistered and
+    SMT/RMT registered systems.
+- 4.2.31
+
+-------------------------------------------------------------------
 Wed Jan 29 14:26:12 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Fix random building problems (bsc#1162122).
