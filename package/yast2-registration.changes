@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb  6 10:07:27 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Improves online search mechanism UI (jsc#SLE-9109):
+  - Fix the "ignore case" checkbox behaviour.
+  - Add a help text.
+- 4.2.33
+
+-------------------------------------------------------------------
 Wed Feb  5 14:35:00 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Improves online search mechanism UI (jsc#SLE-9109):
