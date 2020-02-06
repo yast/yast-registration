@@ -72,6 +72,16 @@ module Registration
         ""
       end
 
+      # @macro seeDialog
+      def help
+        _("The online search feature allows the user to search for packages across all " \
+          "modules and extensions, including those that have not been activated for this " \
+          "system.\n\nOnce the wanted package is found, the user can select it for " \
+          "installation. If it belongs to a not activated module, YaST will allow activating " \
+          "the module/extension. Bear in mind that the activation will take place at the end, " \
+          "after the user clicks the Next button.")
+      end
+
     private
 
       # Package search widget
