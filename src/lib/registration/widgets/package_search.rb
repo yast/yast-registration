@@ -76,7 +76,7 @@ module Registration
       # @macro seeAbstractWidget
       def handle(event)
         if start_search_event?(event)
-          search_package(search_form.text)
+          search_package(search_form.text, search_form.ignore_case)
         elsif event["WidgetID"] == "remote_packages_table"
           handle_packages_table_event(event)
         end
@@ -139,12 +139,13 @@ module Registration
 
       # Performs the search and updates the packages table
       #
-      # @param text [String] Text to search for
-      def search_package(text)
+      # @param text        [String] Text to search for
+      # @param ignore_case [Boolean] Whether the search is case sensitive or not
+      def search_package(text, ignore_case)
         return unless valid_search_text?(text)
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
-          @packages = controller.search(text)
+          @packages = controller.search(text, ignore_case)
           selected_package_ids = controller.selected_packages.map(&:id)
           @packages.each do |pkg|
             pkg.select! if selected_package_ids.include?(pkg.id)

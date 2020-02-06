@@ -41,9 +41,10 @@ module Registration
       # Performs a package search
       #
       # @param text [String] Term to search for
+      # @param ignore_case [Boolean] Whether the search is case sensitive or not
       # @return [Array<Registration::RemotePackage>] List of packages
-      def search(text)
-        @search = ::Registration::PackageSearch.new(text: text)
+      def search(text, ignore_case)
+        @search = ::Registration::PackageSearch.new(text: text, ignore_case: ignore_case)
         @search.packages
       end
 

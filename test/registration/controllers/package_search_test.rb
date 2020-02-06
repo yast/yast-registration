@@ -45,14 +45,16 @@ describe Registration::Controllers::PackageSearch do
 
   let(:text) { "gnome" }
 
+  let(:ignore_case) { true }
+
   before do
     allow(Registration::PackageSearch).to receive(:new)
-      .with(text: text).and_return(search)
+      .with(text: text, ignore_case: ignore_case).and_return(search)
   end
 
   describe "#search" do
     it "returns the list of packages from SCC" do
-      expect(controller.search(text)).to eq([package])
+      expect(controller.search(text, ignore_case)).to eq([package])
     end
   end
 
