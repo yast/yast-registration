@@ -68,12 +68,15 @@ describe Registration::Widgets::PackageSearch do
 
   describe "#handle" do
     let(:text) { "gnome" }
+    let(:ignore_case) { true }
 
     context "when the user asks for a package" do
       let(:event) { { "WidgetID" => "search_form_button" } }
 
       let(:search_form) do
-        instance_double(Registration::Widgets::PackageSearchForm, text: text)
+        instance_double(
+          Registration::Widgets::PackageSearchForm, text: text, ignore_case: ignore_case
+        )
       end
 
       before do
@@ -82,7 +85,7 @@ describe Registration::Widgets::PackageSearch do
       end
 
       it "searches for the package in SCC" do
-        expect(controller).to receive(:search).with(text)
+        expect(controller).to receive(:search).with(text, ignore_case)
         subject.handle(event)
       end
 
