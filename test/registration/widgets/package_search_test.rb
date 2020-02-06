@@ -74,7 +74,9 @@ describe Registration::Widgets::PackageSearch do
       let(:event) { { "WidgetID" => "search_form_button" } }
 
       let(:search_form) do
-        instance_double(Registration::Widgets::PackageSearchForm, text: text, ignore_case: ignore_case)
+        instance_double(
+          Registration::Widgets::PackageSearchForm, text: text, ignore_case: ignore_case
+        )
       end
 
       before do
