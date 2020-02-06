@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb  6 14:26:29 UTC 2020 - David Diaz <dgonzalez@suse.com>
+
+- WIP: Improving the Addons dialog
+- 4.2.43
+
+-------------------------------------------------------------------
 Thu Feb  6 10:07:27 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Improves online search mechanism UI (jsc#SLE-9109):
