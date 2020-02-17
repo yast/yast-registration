@@ -250,7 +250,7 @@ module Registration
         Yast2::Popup.show(
           wrap_text(
             _("YaST requires your system to be registered in order to " \
-              "perform an online search. Alternatively, use the web" \
+              "perform an online search. Alternatively, use the web " \
               "version at 'https://scc.suse.com/packages/'.")
           ),
           headline: :error
