@@ -215,9 +215,7 @@ module Registration
       log.info "Reading available updates for product: #{product["name"]}"
       remote_product = SwMgmt.remote_product(product)
       updates = []
-      ConnectHelpers.catch_registration_errors do
-        updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
-      end
+      updates = SUSE::Connect::YaST.list_installer_updates(remote_product, connect_params)
 
       log.info "Updates for '#{product["name"]}' are available at '#{updates}'"
       updates
