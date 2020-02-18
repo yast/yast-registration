@@ -260,7 +260,7 @@ describe Registration::Registration do
       end
     end
 
-    context "when an exception connecting to the server occurs" do
+    context "when an exception connecting to the server takes place" do
       before do
         allow(suse_connect).to receive(:list_installer_updates).and_raise(Timeout::Error)
       end
