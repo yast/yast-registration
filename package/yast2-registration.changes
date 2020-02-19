@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Feb 18 16:34:38 UTC 2020 - Knut Anderssen <kanderssen@suse.com>
+
+- Do not catch exceptions when getting the updates list from the
+  registration server (bsc#1162903)
+- 4.2.35
+
+-------------------------------------------------------------------
 Mon Feb 17 06:51:38 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Fix a typo in the online search UI (jsc#SLE-9109).

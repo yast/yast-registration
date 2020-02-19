@@ -259,6 +259,16 @@ describe Registration::Registration do
         expect(subject.get_updates_list).to eq(updates)
       end
     end
+
+    context "when an exception connecting to the server takes place" do
+      before do
+        allow(suse_connect).to receive(:list_installer_updates).and_raise(Timeout::Error)
+      end
+
+      it "does not catch the error" do
+        expect { subject.get_updates_list }.to raise_error(Timeout::Error)
+      end
+    end
   end
 
   describe "#synchronize_products" do
