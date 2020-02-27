@@ -77,13 +77,42 @@ module Registration
         help_text.join
       end
 
-      # Returns the icon to be used for an item with given status
+      # Returns the icon to be used for an item with given status and state
       #
-      # @see #icon
+      # @see .value_for
       #
-      # @return [String]
-      def self.icon_for(status)
-        new(nil, nil, status).icon
+      # @param status [Symbol] the item status (e.g., :selected, :registered, :auto_selected)
+      # @param mode [String] the running mode, "normal" or "inst"
+      # @param state [String] the item state, "enabled" or "disabled"
+      #
+      # @return [String] an <img> tag when running in GUI mode; plain text otherwise
+      def self.icon_for(status, mode: "normal", state: "enabled")
+        value = value_for(status)
+
+        if Yast::UI.TextMode
+          value
+        else
+          # an image key looks like "inst:[a]:enabled"
+          image_key = [mode, value, state].join(":")
+
+          "<img src=\"#{IMAGES_DIR}/#{IMAGES[image_key]}\">"
+        end
+      end
+
+      # Returns the status string representation
+      #
+      # @param status [Symbol]
+      #
+      # @return [String] the status text representation
+      def self.value_for(status)
+        case status
+        when :selected, :registered
+          "[x]"
+        when :auto_selected
+          "[a]"
+        else
+          "[ ]"
+        end
       end
 
       # Constructor
@@ -108,20 +137,6 @@ module Registration
         "#{checkbox} #{label}"
       end
 
-      # Builds the icon simulating a checkbox input
-      #
-      # @return [String] an <img> tag when running in GUI mode; plain text otherwise
-      def icon
-        if Yast::UI.TextMode
-          value
-        else
-          # an image key looks like "inst:[a]:enabled"
-          image_key = [mode, value, state].join(":")
-
-          "<img src=\"#{IMAGES_DIR}/#{IMAGES[image_key]}\">"
-        end
-      end
-
     private
 
       attr_reader :id, :text, :status, :enabled
@@ -137,6 +152,11 @@ module Registration
         end
       end
 
+      # @see .icon_for
+      def icon
+        self.class.icon_for(status, mode: mode, state: state)
+      end
+
       # Builds the checkbox label representation
       #
       # @return [String]
@@ -145,22 +165,6 @@ module Registration
           "<a href=\"#{id}#checkbox#label\" style=\"#{text_style}\">#{text}</a>"
         else
           "<span style\"#{text_style}\">#{text}</a>"
-        end
-      end
-
-      # Returns the status string representation
-      #
-      # In text mode it matches with the icon.
-      #
-      # @return [String] the status text representation
-      def value
-        case status
-        when :selected, :registered
-          "[x]"
-        when :auto_selected
-          "[a]"
-        else
-          "[ ]"
         end
       end
 
