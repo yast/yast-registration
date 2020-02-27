@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Feb 27 03:30:26 UTC 2020 - David Diaz <dgonzalez@suse.com>
+
+- Improves the addons selection dialog:
+  - Avoid the scroll reset after (un)selecting and addon
+    (bsc#1049965).
+  - Avoid the need to(un)select an addon to see its description
+    (bsc#1161200).
+- 4.2.36
+
+-------------------------------------------------------------------
 Tue Feb 18 16:34:38 UTC 2020 - Knut Anderssen <kanderssen@suse.com>
 
 - Do not catch exceptions when getting the updates list from the
