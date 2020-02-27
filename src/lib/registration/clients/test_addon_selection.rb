@@ -18,7 +18,6 @@
 # find current contact information at www.suse.com.
 
 require "suse/connect"
-require "registration/ui/addon_selection_registration_dialog"
 require "registration/dialogs/addons_selection"
 
 class RegistrationMock
