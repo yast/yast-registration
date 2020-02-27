@@ -164,7 +164,7 @@ module Registration
         separator = Yast::UI.TextMode ? "<br />" : ""
 
         checkboxes = controller.items.map do |item|
-          item = CheckboxItem.new(item.id, item.label, item.status)
+          item = CheckboxItem.new(item.id, item.label, item.status, item.enabled)
           item = "<p>#{item}</p>" unless Yast::UI.TextMode
           item
         end

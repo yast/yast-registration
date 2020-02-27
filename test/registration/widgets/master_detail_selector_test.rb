@@ -40,7 +40,13 @@ describe Registration::Widgets::MasterDetailSelector do
   end
 
   let(:item) do
-    double(id: 1, label: "Fake item", status: :whatever, description: "Fake addon item")
+    double(
+      id:          1,
+      label:       "Fake item",
+      status:      :whatever,
+      description: "Fake addon item",
+      enabled:     true
+    )
   end
 
   let(:include_filter) { true }

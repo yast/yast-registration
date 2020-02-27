@@ -22,34 +22,58 @@ require_relative "../../spec_helper"
 require "registration/widgets/checkbox_item"
 
 describe Registration::Widgets::CheckboxItem do
-  subject { described_class.new(item.id, item.label, item.status) }
+  subject { described_class.new(item.id, item.label, item.status, item.enabled) }
 
   let(:item) do
     double(
       "Item",
-      id:     "whatever",
-      label:  "Text uses as label",
-      status: status
+      id:      "whatever",
+      label:   "Text uses as label",
+      status:  status,
+      enabled: enabled
     )
   end
 
   let(:status) { :selected }
+  let(:enabled) { true }
 
   describe "#to_s" do
     it "returns a string" do
       expect(subject.to_s).to be_a(String)
     end
 
-    it "includes a link for the input" do
-      expect(subject.to_s).to match(/.*href="whatever#checkbox#input".*/)
+    context "when the item is enabled" do
+      it "includes a link for the input" do
+        expect(subject.to_s).to match(/.*href="whatever#checkbox#input".*/)
+      end
+
+      it "includes a link for the label" do
+        expect(subject.to_s).to match(/.*href="whatever#checkbox#label".*/)
+      end
+
+      it "includes the item label" do
+        expect(subject.to_s).to include(item.label)
+      end
     end
 
-    it "includes a link for the label" do
-      expect(subject.to_s).to match(/.*href="whatever#checkbox#label".*/)
-    end
+    context "when the item is not enabled" do
+      let(:enabled) { false }
 
-    it "includes the item label" do
-      expect(subject.to_s).to include(item.label)
+      it "uses a grey color" do
+        expect(subject.to_s).to match(/.*color: grey.*/)
+      end
+
+      it "includes the item label" do
+        expect(subject.to_s).to include(item.label)
+      end
+
+      it "does not include a link for the input" do
+        expect(subject.to_s).to_not match(/.*href="whatever#checkbox#input".*/)
+      end
+
+      it "does not include a link for the label" do
+        expect(subject.to_s).to_not match(/.*href="whatever#checkbox#label".*/)
+      end
     end
 
     context "when running in text mode" do

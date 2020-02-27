@@ -23,8 +23,6 @@ module Registration
   module Widgets
     # A plain Ruby object in charge to build an item "checkbox" representation to be used by
     # {MasterDetailSelector} widget in a RichText widget.
-    #
-    # FIXME: give support for disabled items; see #icon
     class CheckboxItem
       extend Yast::I18n
 
@@ -41,8 +39,8 @@ module Registration
       IMAGES = {
         "inst:[a]:enabled"    => "auto-selected.svg",
         "inst:[x]:enabled"    => "inst_checkbox-on.svg",
+        "inst:[x]:disabled"   => "inst_checkbox-on-disabled.svg",
         "inst:[ ]:enabled"    => "inst_checkbox-off.svg",
-        "inst:[x]disabled"    => "inst_checkbox-on-disabled.svg",
         "inst:[ ]:disabled"   => "inst_checkbox-off-disabled.svg",
         "normal:[a]:enabled"  => "auto-selected.svg",
         "normal:[x]:enabled"  => "checkbox-on.svg",
@@ -93,10 +91,12 @@ module Registration
       # @param id [String, Integer] the representing the item
       # @param text [String] the text to be displayed
       # @param status [String, Symbol] the item status
-      def initialize(id, text, status)
+      # @param enabled [Boolean] if the item should be enabled or not
+      def initialize(id, text, status, enabled = true)
         @id = id
         @text = text
         @status = status
+        @enabled = enabled
       end
 
       # Returns the checkbox representation for the item
@@ -116,7 +116,7 @@ module Registration
           value
         else
           # an image key looks like "inst:[a]:enabled"
-          image_key = [mode, value, "enabled"].join(":")
+          image_key = [mode, value, state].join(":")
 
           "<img src=\"#{IMAGES_DIR}/#{IMAGES[image_key]}\">"
         end
@@ -124,20 +124,28 @@ module Registration
 
     private
 
-      attr_reader :id, :text, :status
+      attr_reader :id, :text, :status, :enabled
 
       # Builds the checkbox input representation
       #
       # @return [String]
       def checkbox
-        "<a href=\"#{id}#checkbox#input\" style=\"#{text_style}\">#{icon}</a>"
+        if enabled
+          "<a href=\"#{id}#checkbox#input\" style=\"#{text_style}\">#{icon}</a>"
+        else
+          "<span style\"#{text_style}\">#{icon}</a>"
+        end
       end
 
       # Builds the checkbox label representation
       #
       # @return [String]
       def label
-        "<a href=\"#{id}#checkbox#label\" style=\"#{text_style}\">#{text}</a>"
+        if enabled
+          "<a href=\"#{id}#checkbox#label\" style=\"#{text_style}\">#{text}</a>"
+        else
+          "<span style\"#{text_style}\">#{text}</a>"
+        end
       end
 
       # Returns the status string representation
@@ -156,13 +164,6 @@ module Registration
         end
       end
 
-      # Returns style rules for the text
-      #
-      # @return [String] the status text representation
-      def text_style
-        "text-decoration: none; color: #{color}"
-      end
-
       # Returns the current mode
       #
       # @return [String] "normal" in a running system; "inst" during the installation
@@ -170,11 +171,30 @@ module Registration
         installation? ? "inst" : "normal"
       end
 
+      # Returns the current input state
+      #
+      # @return [String] "enabled" when item must be enabled; "disabled" otherwise
+      def state
+        enabled ? "enabled" : "disabled"
+      end
+
+      # Returns style rules for the text
+      #
+      # @return [String] the status text representation
+      def text_style
+        "text-decoration: none; color: #{color}"
+      end
+
       # Determines the color for the text
       #
-      # @return [String] "black" in a running system; "white" during the isntallation
+      # @return [String] "grey" for a disabled item;
+      #                  "white" when enabled and running in installation mode;
+      #                  "black" otherwise
       def color
-        installation? ? "white" : "black"
+        return "grey" unless enabled
+        return "white" if installation?
+
+        "black"
       end
 
       # Determines whether running in installation mode

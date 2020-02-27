@@ -128,6 +128,55 @@ describe Registration::Controllers::AddonsSelection do
     end
   end
 
+  describe "#item_for" do
+    let(:addon) { Registration::Addon.new(addon_generator) }
+    let(:item) { subject.send(:item_for, addon) }
+
+    before do
+      allow(addon).to receive(:available?).and_return(available)
+      allow(addon).to receive(:selected?).and_return(selected)
+      allow(addon).to receive(:auto_selected?).and_return(auto_selected)
+    end
+
+    let(:available) { false }
+    let(:selected) { false }
+    let(:auto_selected) { false }
+
+    context "when an available addon is given" do
+      let(:available) { true }
+
+      it "returns an enabled item" do
+        expect(item.enabled).to eq(true)
+      end
+    end
+
+    context "when a not available addon is given" do
+      it "returns a not enabled item" do
+        expect(item.enabled).to eq(false)
+      end
+
+      it "includes the 'not available' suffix in the label" do
+        expect(item.label).to match(/not available/)
+      end
+
+      context "but it is selected" do
+        let(:selected) { true }
+
+        it "returns an enabled item" do
+          expect(item.enabled).to eq(true)
+        end
+      end
+
+      context "but it is auto-selected" do
+        let(:auto_selected) { true }
+
+        it "returns an enabled item" do
+          expect(item.enabled).to eq(true)
+        end
+      end
+    end
+  end
+
   describe "#find_item" do
     let(:item) { subject.items.first }
 

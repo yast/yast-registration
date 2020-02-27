@@ -35,7 +35,7 @@ module Registration
       end
 
       # A checkbox item representation, see {Widgets::CheckboxItem}
-      Item = Struct.new(:id, :label, :status, :description)
+      Item = Struct.new(:id, :label, :status, :description, :enabled)
 
       # Constructor
       #
@@ -199,9 +199,11 @@ module Registration
       def item_for(addon)
         Item.new(
           item_id_for(addon),
-          addon.label,
+          item_label_for(addon),
           addon.status,
-          "<h3>#{addon.friendly_name}</h3>#{addon.description}"
+          "<h3>#{addon.friendly_name}</h3>#{addon.description}",
+          # the item will be enabled if the addon is selected, auto-selected or available
+          addon.selected? || addon.auto_selected? || addon.available?
         )
       end
 
@@ -242,6 +244,17 @@ module Registration
       # @return [String] an Item id
       def item_id_for(addon)
         "#{addon.identifier}-#{addon.version}-#{addon.arch}"
+      end
+
+      # Build the Item label based on the addon availability
+      #
+      # @return [String] the addon label with the "not available" suffix when proceed
+      def item_label_for(addon)
+        if addon.available?
+          addon.label
+        else
+          _("%s (not available)") % addon.label
+        end
       end
 
       # Pre-selects recommended addons if there is none selected/registered yet
