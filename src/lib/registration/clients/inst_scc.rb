@@ -146,9 +146,9 @@ module Yast
       return :cancel if get_available_addons == :cancel
 
       # FIXME: workaround to reference between old way and new storage in Addon metaclass
-      @selected_addons = Registration::Addon.selected
+      @selected_addons = ::Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-      Registration::Dialogs::AddonsSelection.run(@registration)
+      ::Registration::Dialogs::AddonsSelection.run(@registration)
     end
 
     # load available addons from SCC server
@@ -158,26 +158,26 @@ module Yast
       # cache the available addons
       return :cancel if init_registration == :cancel
 
-      if !Registration::SwMgmt.find_base_product
-        Registration::Helpers.report_no_base_product
+      if !::Registration::SwMgmt.find_base_product
+        ::Registration::Helpers.report_no_base_product
         return :cancel
       end
 
-      addons_loaded = Registration::ConnectHelpers.catch_registration_errors do
+      addons_loaded = ::Registration::ConnectHelpers.catch_registration_errors do
         registration_ui.get_available_addons
       end
 
       return :cancel unless addons_loaded
 
-      @addons_registered_orig = Registration::Addon.registered.dup
+      @addons_registered_orig = ::Registration::Addon.registered.dup
     end
 
     # register all selected addons
     # back returns directly to the extensions selection
     def register_addons
       return false if init_registration == :cancel
-      addons = Registration::Addon.selected + Registration::Addon.auto_selected
-      addons = Registration::Addon.registration_order(addons)
+      addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
+      addons = ::Registration::Addon.registration_order(addons)
       ret = registration_ui.register_addons(addons, @known_reg_codes)
       ret = :extensions if ret == :back
       ret
@@ -226,7 +226,7 @@ module Yast
 
     # display EULAs for the selected addons
     def addon_eula
-      new_addons = Registration::Addon.selected + Registration::Addon.auto_selected
+      new_addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
       ::Registration::UI::AddonEulaDialog.run(new_addons)
     end
 
@@ -248,7 +248,7 @@ module Yast
       ::Registration::SwMgmt.select_addon_products
 
       # run the package manager only in installed system and if a new addon was registered
-      if Mode.normal && Registration::Addon.registered != @addons_registered_orig
+      if Mode.normal && ::Registration::Addon.registered != @addons_registered_orig
         WFM.call("sw_single")
       else
         :next
@@ -332,7 +332,7 @@ module Yast
     def workflow_start
       log.debug "WFM.Args: #{WFM.Args}"
 
-      if WFM.Args.include?("select_extensions") && Registration::Registration.is_registered?
+      if WFM.Args.include?("select_extensions") && ::Registration::Registration.is_registered?
         "select_addons"
       else
         "check"
