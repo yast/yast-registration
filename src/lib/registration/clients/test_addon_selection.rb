@@ -19,6 +19,7 @@
 
 require "suse/connect"
 require "registration/ui/addon_selection_registration_dialog"
+require "registration/dialogs/addons_selection"
 
 class RegistrationMock
   def activated_products
@@ -41,14 +42,13 @@ module Yast
       Yast.import "Stage"
       Yast.import "Wizard"
 
-
       Stage.Set("continue")
       Mode.SetMode("installation")
 
       Wizard.CreateDialog
 
       registration = RegistrationMock.new
-      Registration::UI::AddonSelectionRegistrationDialog.run(registration)
+      Registration::Dialogs::AddonsSelection.new(registration).run
 
       Wizard.CloseDialog
 
