@@ -43,8 +43,6 @@ module Registration
         @initial_addons_selection = Addon.selected.dup
 
         preselect_recommended_addons
-
-        super()
       end
 
       # @macro seeDialog
