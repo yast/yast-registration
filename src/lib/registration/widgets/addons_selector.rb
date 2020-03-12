@@ -32,6 +32,7 @@ module Registration
     class AddonsSelector < CWM::MultiStatusSelector
       include Yast::Logger
       include Yast::UIShortcuts
+      include Yast::I18n
 
       class << self
         # @return [Boolean] When not released addons (i.e., alpha or beta versions) can be shown
@@ -42,6 +43,8 @@ module Registration
       #
       # @param addons [Array<Addon>] an addons collection
       def initialize(addons)
+        textdomain "registration"
+
         @items = addons.map { |addon| Item.new(addon) }
         self.class.release_only = true if self.class.release_only.nil?
       end
@@ -54,7 +57,7 @@ module Registration
           VWeight(
             40,
             VBox(
-              Left(Label("Details (English only)")),
+              Left(Label(_("Details (English only)"))),
               details_widget
             )
           )
@@ -83,7 +86,7 @@ module Registration
       # @return [Array<Item>]
       def items
         if self.class.release_only
-          # When filtering, not already selected or auto-selected developments addons will be hide.
+          # When filtering, not already selected or auto-selected developments addons will be hidden
           @items.select(&:visible?)
         else
           @items
@@ -146,6 +149,7 @@ module Registration
 
         # @macro seeAbstractWidget
         def label
+          # TRANSLATORS: check box label
           _("&Hide Development Versions")
         end
 
@@ -196,6 +200,8 @@ module Registration
             if addon.available?
               addon.label
             else
+              # TRANSLATORS: label for a not available module/extension, %s is replaced by the
+              # module/extension name
               _("%s (not available)") % addon.label
             end
         end
