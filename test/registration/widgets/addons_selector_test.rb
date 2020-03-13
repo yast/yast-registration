@@ -62,6 +62,40 @@ describe Registration::Widgets::AddonsSelector do
     end
   end
 
+  describe "#init" do
+    let(:details_area) do
+      subject.contents.nested_find { |i| i.is_a?(CWM::RichText) && i.widget_id == "details_area" }
+    end
+    let(:first_item) { subject.items.first }
+
+    context "when there are no items to display" do
+      before do
+        allow(subject).to receive(:items).and_return([])
+      end
+
+      it "displays nothing" do
+        expect(details_area).to receive(:value=).with("")
+
+        subject.init
+      end
+    end
+
+    # Check that the behavior introduced in version yast2-packager 4.2.55 is emulated here
+    context "when there are items to display" do
+      before do
+        allow(sle_we_addon).to receive(:released?).and_return(true)
+        allow(basesystem_module_addon).to receive(:released?).and_return(true)
+      end
+
+      it "displays the first item description" do
+        expect(details_area).to receive(:value=).with(first_item.description)
+
+        subject.init
+      end
+    end
+
+  end
+
   describe "#items" do
     context "when not filtering unreleased addons" do
       before do

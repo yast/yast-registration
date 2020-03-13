@@ -49,6 +49,13 @@ module Registration
         self.class.release_only = true if self.class.release_only.nil?
       end
 
+      def init
+        super
+
+        # Emulates the same behavior than yast2-packager >= 4.2.55
+        details_widget.value = default_details
+      end
+
       # @macro seeAbstractWidget
       def contents
         VBox(
@@ -72,7 +79,7 @@ module Registration
           self.class.release_only = filter_widget.checked?
 
           refresh
-          details_widget.value = items.first ? items.first.description : ""
+          details_widget.value = default_details
         end
 
         nil
@@ -99,6 +106,15 @@ module Registration
       end
 
     private
+
+      # Returns the details to be shown by default
+      #
+      # To be used mainly during the initialization or after toggling the filter.
+      #
+      # @return [String] the first item description or an empty string if none
+      def default_details
+        items.first ? items.first.description : ""
+      end
 
       # (see CWM::MultiStatusSelector#input_event_handler)
       def input_event_handler(item)
@@ -130,7 +146,12 @@ module Registration
       #
       # @return [CWM::RichText]
       def details_widget
-        @details_widget ||= CWM::RichText.new
+        @details_widget ||=
+          begin
+            w = CWM::RichText.new
+            w.widget_id = "details_area"
+            w
+          end
       end
 
       # Convenience widget to build the filter
