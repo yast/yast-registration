@@ -75,6 +75,7 @@ module Registration
       #
       # @return [String] text containing the list of packages
       def packages_text
+        return "" if packages.empty?
         heading = format(_("Selected packages (%{count})"), count: packages.size)
         Yast::HTML.Heading(heading) + Yast::HTML.List(packages.map(&:name).sort)
       end

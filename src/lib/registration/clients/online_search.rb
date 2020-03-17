@@ -166,7 +166,7 @@ module Registration
       #
       # @return [:next]
       def display_summary
-        return :next if selected_packages.empty?
+        return :next if selected_addons.empty? && selected_packages.empty?
         ::Registration::Dialogs::OnlineSearchSummary.run(
           selected_packages, selected_addons
         )
