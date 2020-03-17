@@ -172,9 +172,13 @@ module Registration
 
       # Updates the package details widget
       def update_details
-        # FIXME: remove the content if the current package is nil
         current_package = find_current_package
-        package_details.update(current_package) if current_package
+
+        if current_package
+          package_details.update(current_package)
+        else
+          package_details.clear
+        end
       end
 
       MINIMAL_SEARCH_TEXT_SIZE = 2

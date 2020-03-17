@@ -39,7 +39,7 @@ describe Registration::Widgets::PackageSearch do
   end
 
   let(:package_details) do
-    instance_double(Registration::Widgets::RemotePackageDetails, update: nil)
+    instance_double(Registration::Widgets::RemotePackageDetails, update: nil, clear: nil)
   end
 
   let(:package) do
@@ -58,19 +58,21 @@ describe Registration::Widgets::PackageSearch do
     )
   end
 
+  let(:search_result) { [package] }
+
   before do
     allow(Registration::Widgets::RemotePackagesTable).to receive(:new)
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
-    allow(controller).to receive(:search).and_return([package])
+    allow(controller).to receive(:search).and_return(search_result)
   end
 
   describe "#handle" do
     let(:text) { "gnome" }
     let(:ignore_case) { true }
 
-    context "when the user asks for a package" do
+    context "when handling a package search" do
       let(:event) { { "WidgetID" => "search_form_button" } }
 
       let(:search_form) do
@@ -89,18 +91,36 @@ describe Registration::Widgets::PackageSearch do
         subject.handle(event)
       end
 
-      it "updates the table and the package details" do
-        expect(packages_table).to receive(:change_items).with([package])
-        expect(package_details).to receive(:update).with(package)
-        subject.handle(event)
-      end
-
-      context "when the search text is not enough" do
+      context "but the search text is not enough" do
         let(:text) { "g" }
 
         it "asks the user to introduce some text" do
           expect(Yast2::Popup).to receive(:show)
             .with(/at least/)
+          subject.handle(event)
+        end
+      end
+
+      context "and there are results" do
+        it "updates the table and the package details" do
+          expect(packages_table).to receive(:change_items).with([package])
+          expect(package_details).to receive(:update).with(package)
+          subject.handle(event)
+        end
+      end
+
+      context "but there are no results" do
+        let(:search_result) { [] }
+
+        it "updates the table" do
+          expect(packages_table).to receive(:change_items).with([])
+
+          subject.handle(event)
+        end
+
+        it "clears the package details" do
+          expect(package_details).to receive(:clear)
+
           subject.handle(event)
         end
       end

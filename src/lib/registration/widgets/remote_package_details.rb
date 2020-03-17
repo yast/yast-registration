@@ -54,6 +54,11 @@ module Registration
         self.value = lines.join("<br>")
       end
 
+      # Clears the widget's content
+      def clear
+        self.value = ""
+      end
+
     private
 
       # Displays the status of the given addon
