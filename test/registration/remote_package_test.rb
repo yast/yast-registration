@@ -24,26 +24,37 @@ require "registration/addon"
 describe Registration::RemotePackage do
   subject(:package) do
     described_class.new(
-      id: 1, name: "foobar", arch: :x86_64, version: "1.0", release: "1", addon: nil
+      id: 1, name: "foobar", arch: :x86_64, version: "1.0",
+      release: "1", addon: nil, status: :available
     )
   end
 
-  describe "#status" do
-    let(:libzypp_package) { instance_double(Y2Packager::Package, status: :available) }
+  describe "#full_version" do
+    it "returns a version including the version number and the release" do
+      expect(package.full_version).to eq("1.0-1")
+    end
+  end
 
-    before do
-      allow(package).to receive(:libzypp_package).and_return(libzypp_package)
+  describe "#select!" do
+    it "sets the package as selected" do
+      expect { package.select! }.to change { package.selected? }.from(false).to(true)
+    end
+  end
+
+  describe "#unselect!" do
+    context "when the package was selected" do
+      before do
+        package.select!
+      end
+
+      it "reverts the package to the previous status" do
+        expect { package.unselect! }.to change { package.status }.from(:selected).to(:available)
+      end
     end
 
-    it "returns the libzypp counterpart status" do
-      expect(package.status).to eq(:available)
-    end
-
-    context "when there is no libzypp counterpart" do
-      let(:libzypp_package) { nil }
-
-      it "returns :unknown" do
-        expect(package.status).to eq(:unknown)
+    context "when the package is not selected" do
+      it "does not modify the status" do
+        expect { package.unselect! }.to_not change { package.status }
       end
     end
   end

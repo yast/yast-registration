@@ -64,7 +64,8 @@ module Registration
             version: pkg["version"],
             release: pkg["release"],
             arch:    pkg["arch"],
-            addon:   ::Registration::Addon.find_by_id(product["id"])
+            addon:   ::Registration::Addon.find_by_id(product["id"]),
+            status:  status_for(pkg["name"])
           )
         end
         all.concat(remote_packages)
@@ -96,6 +97,31 @@ module Registration
         isbase:  yast_product.category == :base,
         summary: yast_product.display_name
       )
+    end
+
+    # Returns the status for a given package
+    #
+    # Finding out the status of a package requires to ask libzypp through Yast::Pkg.
+    # If there are many results, it might time quite some time. So in order to speed
+    # up the operation, a status cache is built (see #status_map).
+    #
+    # @param pkg_name [String] Package name
+    def status_for(pkg_name)
+      status_map[pkg_name] || :unknown
+    end
+
+    # Returns a memoized status cache
+    #
+    # @return [Hash<String,Symbol>]
+    def status_map
+      return @status_map if @status_map
+      pkgs = Yast::Pkg.Resolvables(
+        { kind: :package }, [:name, :status]
+      )
+      @status_map = pkgs.each_with_object({}) do |pkg, all|
+        next if all.key?(pkg["name"])
+        all[pkg["name"]] = pkg["status"]
+      end
     end
   end
 end
