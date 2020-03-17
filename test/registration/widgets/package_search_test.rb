@@ -126,6 +126,19 @@ describe Registration::Widgets::PackageSearch do
       end
     end
 
+    context "when handling a toggle package status request" do
+      let(:event) { { "WidgetID" => "toggle_package_status" } }
+
+      before do
+        allow(subject).to receive(:packages).and_return([package])
+      end
+
+      it "toggles the selected package" do
+        expect(controller).to receive(:toggle_package).with(package)
+        subject.handle(event)
+      end
+    end
+
     context "when a package is selected for installation" do
       let(:event) { { "WidgetID" => "remote_packages_table", "EventReason" => "Activated" } }
 

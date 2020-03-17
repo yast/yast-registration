@@ -22,6 +22,7 @@ require "cwm/custom_widget"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
+require "registration/widgets/toggle_package_status"
 require "yast2/popup"
 
 Yast.import "Popup"
@@ -66,6 +67,7 @@ module Registration
               60,
               VBox(
                 MinHeight(14, packages_table),
+                HBox(Right(toggle_package_status)),
                 package_details
               )
             )
@@ -79,6 +81,8 @@ module Registration
           search_package(search_form.text, search_form.ignore_case)
         elsif event["WidgetID"] == "remote_packages_table"
           handle_packages_table_event(event)
+        elsif event["WidgetID"] == "toggle_package_status"
+          toggle_package
         end
 
         log.debug "Event handled #{event.inspect}"
@@ -116,6 +120,13 @@ module Registration
         @package_details ||= RemotePackageDetails.new
       end
 
+      # Package status toggle widget
+      #
+      # @return [TogglePackageStatus] a button to toggle, if possible, the status of current package
+      def toggle_package_status
+        @toggle_package_status ||= TogglePackageStatus.new
+      end
+
       # Handles remote packages table events
       #
       # @param event [Hash] Widget event to process
@@ -124,7 +135,7 @@ module Registration
         when "Activated"
           toggle_package
         when "SelectionChanged"
-          update_details
+          update
         end
       end
 
@@ -152,7 +163,7 @@ module Registration
           end
         end
         packages_table.change_items(packages)
-        update_details
+        update
       end
 
       # Finds out the current package which is selected in the packages table
@@ -165,14 +176,22 @@ module Registration
       # Selects/unselects the current package for installation
       def toggle_package
         package = find_current_package
+
+        return unless package
+
         controller.toggle_package(package)
         packages_table.update_item(package)
-        update_details
+        update
       end
 
-      # Updates the package details widget
-      def update_details
+      # Updates the UI according to selected package
+      #
+      # Updating the package details and actions
+      def update
         current_package = find_current_package
+
+        toggle_package_status.package = current_package
+        toggle_package_status.refresh
 
         if current_package
           package_details.update(current_package)
