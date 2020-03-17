@@ -181,7 +181,9 @@ module Registration
       #
       # @return [RemotePackage,nil]
       def find_current_package
-        packages.find { |p| p.id == packages_table.value }
+        # PackagesTable#value might be slow, so let's avoid to call it too many times
+        packages_table_value = packages_table.value
+        packages.find { |p| p.id == packages_table_value }
       end
 
       # Selects/unselects the current package for installation
