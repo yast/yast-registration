@@ -166,7 +166,7 @@ module Registration
       def search_package(text, ignore_case)
         return unless valid_search_text?(text)
         # TRANSLATORS: searching for packages
-        Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
+        Yast::Popup.Feedback(searching_message, searching_header) do
           @packages = controller.search(text, ignore_case)
           selected_package_ids = controller.selected_packages.map(&:id)
           @packages.each do |pkg|
@@ -230,6 +230,20 @@ module Registration
           )
         )
         false
+      end
+
+      # Returns the header to display in the feedback window while searching for packages
+      #
+      # @return [String]
+      def searching_header
+        _("Contacting the SUSE Customer Center. This may take a few seconds.\n")
+      end
+
+      # Returns the message to display in the feedback window while searching for packages
+      #
+      # @return [String]
+      def searching_message
+        _("Searching for packages")
       end
     end
   end
