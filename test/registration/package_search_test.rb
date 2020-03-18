@@ -91,7 +91,7 @@ describe Registration::PackageSearch do
         .with(1946).and_return(basesystem)
       allow(Registration::Addon).to receive(:find_by_id)
         .with(1963).and_return(nil)
-      allow(Yast::Pkg).to receive(:Resolvables).with({ kind: :package}, [:name, :status])
+      allow(Yast::Pkg).to receive(:Resolvables).with({ kind: :package }, [:name, :status])
         .and_return([libzypp_pkgs])
     end
 
