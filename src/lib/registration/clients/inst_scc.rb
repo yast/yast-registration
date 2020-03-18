@@ -36,8 +36,8 @@ require "registration/storage"
 require "registration/url_helpers"
 require "registration/registration"
 require "registration/registration_ui"
+require "registration/dialogs/addons_selection"
 require "registration/ui/addon_eula_dialog"
-require "registration/ui/addon_selection_registration_dialog"
 require "registration/ui/addon_reg_codes_dialog"
 require "registration/ui/registered_system_dialog"
 require "registration/ui/base_system_registration_dialog"
@@ -148,7 +148,7 @@ module Yast
       # FIXME: workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-      Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
+      Registration::Dialogs::AddonsSelection.run(@registration)
     end
 
     # load available addons from SCC server
