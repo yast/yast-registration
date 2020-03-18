@@ -42,6 +42,10 @@ describe Registration::Widgets::PackageSearch do
     instance_double(Registration::Widgets::RemotePackageDetails, update: nil, clear: nil)
   end
 
+  let(:toggle_package_status) do
+    instance_double(Registration::Widgets::TogglePackageStatus, :package= => nil, refresh: nil)
+  end
+
   let(:search_results_info) do
     instance_double(Registration::Widgets::SearchResultsInfo, update: nil)
   end
@@ -69,6 +73,8 @@ describe Registration::Widgets::PackageSearch do
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
+    allow(Registration::Widgets::TogglePackageStatus).to receive(:new)
+      .and_return(toggle_package_status)
     allow(Registration::Widgets::SearchResultsInfo).to receive(:new)
       .and_return(search_results_info)
     allow(controller).to receive(:search).and_return(search_result)
@@ -116,6 +122,13 @@ describe Registration::Widgets::PackageSearch do
 
         it "updates the package details" do
           expect(package_details).to receive(:update).with(package)
+
+          subject.handle(event)
+        end
+
+        it "updates the toggle status button" do
+          expect(toggle_package_status).to receive(:package=).with(package)
+          expect(toggle_package_status).to receive(:refresh)
 
           subject.handle(event)
         end
