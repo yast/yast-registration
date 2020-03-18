@@ -50,8 +50,10 @@ module Registration
       #
       # @return [String] the buttons label
       def label
+        return labels[:select] unless package
+
         key =
-          if !package || package.installed?
+          if package.installed?
             :installed
           elsif package.selected?
             :unselect
