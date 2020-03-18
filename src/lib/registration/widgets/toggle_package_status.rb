@@ -40,21 +40,26 @@ module Registration
       def refresh
         Yast::UI.ChangeWidget(Id(widget_id), :Label, label)
         Yast::UI.ChangeWidget(Id(widget_id), :Enabled, enabled?)
+
+        # Ensures that label will be fully visible,
+        # even after changing to a longer one
+        Yast::UI::RecalcLayout()
       end
 
       # Returns button text based on the current package status
       #
       # @return [String] the buttons label
       def label
-        return _("Select") unless package
+        key =
+          if !package || package.installed?
+            :installed
+          elsif package.selected?
+            :unselect
+          else
+            :select
+          end
 
-        if package.installed?
-          _("Installed")
-        elsif package.selected?
-          _("Unselect")
-        else
-          _("Select")
-        end
+        labels[key]
       end
 
       # (see CWM::AbstractWidget#widget_id)
@@ -70,6 +75,17 @@ module Registration
       end
 
     private
+
+      # Possible labels for the button
+      #
+      # @return [Hash<String>] all possible labels
+      def labels
+        @labels ||= {
+          select:    _("Select"),
+          unselect:  _("Unselect"),
+          installed: _("Installed")
+        }
+      end
 
       # Whether the button should be enabled or not
       #
