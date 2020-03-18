@@ -42,6 +42,10 @@ describe Registration::Widgets::PackageSearch do
     instance_double(Registration::Widgets::RemotePackageDetails, update: nil, clear: nil)
   end
 
+  let(:search_results_info) do
+    instance_double(Registration::Widgets::SearchResultsInfo, update: nil)
+  end
+
   let(:package) do
     instance_double(
       Registration::RemotePackage, id: 1, name: "gnome-desktop", addon: addon,
@@ -65,6 +69,8 @@ describe Registration::Widgets::PackageSearch do
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
+    allow(Registration::Widgets::SearchResultsInfo).to receive(:new)
+      .and_return(search_results_info)
     allow(controller).to receive(:search).and_return(search_result)
   end
 
@@ -104,7 +110,19 @@ describe Registration::Widgets::PackageSearch do
       context "and there are results" do
         it "updates the table and the package details" do
           expect(packages_table).to receive(:change_items).with([package])
+
+          subject.handle(event)
+        end
+
+        it "updates the package details" do
           expect(package_details).to receive(:update).with(package)
+
+          subject.handle(event)
+        end
+
+        it "updates the search results info message" do
+          expect(search_results_info).to receive(:update).with(search_result.size)
+
           subject.handle(event)
         end
       end
@@ -120,6 +138,12 @@ describe Registration::Widgets::PackageSearch do
 
         it "clears the package details" do
           expect(package_details).to receive(:clear)
+
+          subject.handle(event)
+        end
+
+        it "updates the search results info message" do
+          expect(search_results_info).to receive(:update).with(0)
 
           subject.handle(event)
         end

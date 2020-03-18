@@ -22,6 +22,7 @@ require "cwm/custom_widget"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
+require "registration/widgets/search_results_info"
 require "registration/widgets/toggle_package_status"
 require "yast2/popup"
 
@@ -67,7 +68,10 @@ module Registration
               60,
               VBox(
                 MinHeight(14, packages_table),
-                HBox(Right(toggle_package_status)),
+                HBox(
+                  HWeight(50, search_results),
+                  Right(toggle_package_status)
+                ),
                 package_details
               )
             )
@@ -108,6 +112,13 @@ module Registration
       # @return [RemotePackagesTable] Packages table widget
       def packages_table
         @packages_table ||= RemotePackagesTable.new
+      end
+
+      # Widget to display search information
+      #
+      # @return [SearchResultsInfo] the search results info widget instance
+      def search_results
+        @search_results ||= SearchResultsInfo.new
       end
 
       # Package details widget
@@ -192,6 +203,8 @@ module Registration
 
         toggle_package_status.package = current_package
         toggle_package_status.refresh
+
+        search_results.update(packages.size)
 
         if current_package
           package_details.update(current_package)
