@@ -74,12 +74,19 @@ module Registration
 
       # @macro seeDialog
       def help
-        _("The online search feature allows the user to search for packages across all " \
-          "modules and extensions, including those that have not been activated for this " \
-          "system.\n\nOnce the wanted package is found, the user can select it for " \
-          "installation. If it belongs to a not activated module, YaST will allow activating " \
-          "the module/extension. Bear in mind that the activation will take place at the end, " \
-          "after the user clicks the Next button.")
+        # TRANSLATORS: help text for the main dialog of the online search feature
+        _("<p><b>Online Search</b></p>\n" \
+          "<p>The online search feature allows searching for packages across all modules and " \
+          "extensions, including those not activated for this system.</p>\n" \
+          "<p>To perform a search, just write a term in the <b>Package name</b> input field and " \
+          "press the <b>Search</b> button. YaST then contacts the SUSE Customer Center and, " \
+          "after a few seconds, shows the results in the table, including the module/extension " \
+          "each package belongs to.</p>\n" \
+          "<p>You can select any package for installation by clicking in the corresponding table " \
+          "row and pressing the <b>Select</b> button (or just double-clicking on the row). " \
+          "If the package belongs to a not activated module/extension, YaST asks you about " \
+          "activating it. Bear in mind that the real activation takes place after you click the " \
+          "<b>Next</b> button.</p>\n")
       end
 
     private
