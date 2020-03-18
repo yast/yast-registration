@@ -47,10 +47,22 @@ module Registration
         Yast::Label.CancelButton
       end
 
+      # @macro seeAbstractWidget
       def title
         # TRANSLATORS: title for the dialog which displays modules/extensions to
         # install and packages to register
         _("Changes Summary")
+      end
+
+      # @macro seeAbstractWidget
+      def help
+        # TRANSLATORS: help text for the summary of the online search feature
+        _("<p><b>Online Search Changes Summary</b></p>\n" \
+          "<p>This screen summarizes which modules/extensions are going to be activated and " \
+          "which packages are going to be installed. If you are okay with those changes, click " \
+          "the <b>Next</b> button. However, if you prefer to add or remove any item, click the " \
+          "<b>Back</b> button to get to the search dialog. Finally, if you decide not to perform " \
+          "any change to your system, click the <b>Cancel</b> button.</p>")
       end
 
     private
