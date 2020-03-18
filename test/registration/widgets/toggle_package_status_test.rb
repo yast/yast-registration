@@ -29,26 +29,19 @@ describe Registration::Widgets::TogglePackageStatus do
 
   let(:id) { Id(subject.widget_id) }
 
-  let(:addon) do
-    instance_double(
-      Registration::Addon, name: "Basesystem Module", registered?: true
-    )
-  end
-
   let(:installed) { false }
   let(:selected) { false }
 
   let(:package) do
     instance_double(
       Registration::RemotePackage,
-      name: "yast2", full_version: "4.2.49-1.1", arch: "x86_64", addon: addon,
+      name: "yast2", full_version: "4.2.49-1.1", arch: "x86_64",
       installed?: installed, selected?: selected
     )
   end
 
   describe "#refresh" do
     before do
-      allow(subject).to receive(:package).and_return(package)
       allow(Yast::UI).to receive(:ChangeWidget)
     end
 
@@ -57,22 +50,20 @@ describe Registration::Widgets::TogglePackageStatus do
       # even after changing from a short label to longer one
       expect(Yast::UI).to receive(:RecalcLayout)
 
-      subject.refresh
+      subject.update(package)
     end
 
     context "when a package is not given" do
-      let(:package) { nil }
-
       it "uses 'Select' as label" do
         expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select")
 
-        subject.refresh
+        subject.update(nil)
       end
 
       it "sets as disabled" do
         expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, false)
 
-        subject.refresh
+        subject.update(nil)
       end
     end
 
@@ -83,13 +74,13 @@ describe Registration::Widgets::TogglePackageStatus do
         it "uses 'Installed' as label" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Installed")
 
-          subject.refresh
+          subject.update(package)
         end
 
         it "sets as disabled" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, false)
 
-          subject.refresh
+          subject.update(package)
         end
       end
 
@@ -99,13 +90,13 @@ describe Registration::Widgets::TogglePackageStatus do
         it "uses 'Unselect' as label" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Unselect")
 
-          subject.refresh
+          subject.update(package)
         end
 
         it "sets as enabled" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, true)
 
-          subject.refresh
+          subject.update(package)
         end
       end
 
@@ -113,13 +104,13 @@ describe Registration::Widgets::TogglePackageStatus do
         it "uses 'Select' as label" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select")
 
-          subject.refresh
+          subject.update(package)
         end
 
         it "sets as enabled" do
           expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, true)
 
-          subject.refresh
+          subject.update(package)
         end
       end
     end

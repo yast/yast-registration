@@ -203,10 +203,8 @@ module Registration
       def update
         current_package = find_current_package
 
-        toggle_package_status.package = current_package
-        toggle_package_status.refresh
-
         search_results.update(packages.size)
+        toggle_package_status.update(current_package)
 
         if current_package
           package_details.update(current_package)

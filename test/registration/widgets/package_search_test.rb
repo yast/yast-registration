@@ -43,7 +43,7 @@ describe Registration::Widgets::PackageSearch do
   end
 
   let(:toggle_package_status) do
-    instance_double(Registration::Widgets::TogglePackageStatus, :package= => nil, refresh: nil)
+    instance_double(Registration::Widgets::TogglePackageStatus, update: nil)
   end
 
   let(:search_results_info) do
@@ -127,8 +127,7 @@ describe Registration::Widgets::PackageSearch do
         end
 
         it "updates the toggle status button" do
-          expect(toggle_package_status).to receive(:package=).with(package)
-          expect(toggle_package_status).to receive(:refresh)
+          expect(toggle_package_status).to receive(:update).with(package)
 
           subject.handle(event)
         end
