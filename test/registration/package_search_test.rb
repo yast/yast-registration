@@ -75,8 +75,8 @@ describe Registration::PackageSearch do
     )
   end
 
-  let(:libzypp_pkgs) do
-    { "name" => "SUSEConnect", "status" => :installed }
+  let(:resolvables) do
+    [Y2Packager::Resolvable.new(name: "SUSEConnect", status: :installed)]
   end
 
   describe "#results" do
@@ -91,8 +91,8 @@ describe Registration::PackageSearch do
         .with(1946).and_return(basesystem)
       allow(Registration::Addon).to receive(:find_by_id)
         .with(1963).and_return(nil)
-      allow(Yast::Pkg).to receive(:Resolvables).with({ kind: :package }, [:name, :status])
-        .and_return([libzypp_pkgs])
+      allow(Y2Packager::Resolvable).to receive(:find)
+        .with({ kind: :package }, [:name, :status]).and_return(resolvables)
     end
 
     it "returns packages from SCC containing the given text in their names" do

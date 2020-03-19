@@ -19,6 +19,7 @@
 
 require "suse/connect"
 require "y2packager/product"
+require "y2packager/resolvable"
 require "registration/addon"
 require "registration/remote_package"
 
@@ -115,12 +116,10 @@ module Registration
     # @return [Hash<String,Symbol>]
     def status_map
       return @status_map if @status_map
-      pkgs = Yast::Pkg.Resolvables(
-        { kind: :package }, [:name, :status]
-      )
+      pkgs = Y2Packager::Resolvable.find({ kind: :package }, [:name, :status])
       @status_map = pkgs.each_with_object({}) do |pkg, all|
-        next if all.key?(pkg["name"])
-        all[pkg["name"]] = pkg["status"]
+        next if all.key?(pkg.name)
+        all[pkg.name] = pkg.status
       end
     end
   end
