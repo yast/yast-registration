@@ -30,7 +30,7 @@ describe Registration::Widgets::SearchResultsInfo do
   describe "#update" do
     context "when search does not return pacakges" do
       it "uses a no package info message" do
-        expect(Yast::UI).to receive(:ChangeWidget).with(anything, :Value, /No packages found/)
+        expect(Yast::UI).to receive(:ChangeWidget).with(anything, :Value, /No package found/)
 
         subject.update(0)
       end

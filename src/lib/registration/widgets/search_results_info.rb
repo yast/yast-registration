@@ -40,9 +40,16 @@ module Registration
       def update(results)
         text =
           if results.zero?
+            # TRANSLATORS: the text to indicate that search had no results
             _("No package found")
           else
-            n_("%s package found", "%s packages found", results) % results
+            n_(
+              # TRANSLATORS: text to show the amount of packages found (singular form)
+              "%s package found",
+              # TRANSLATORS: text to show the amount of packages found (plural form)
+              "%s packages found",
+              results
+            ) % results
           end
 
         Yast::UI.ChangeWidget(label_id, :Value, text)
@@ -61,6 +68,7 @@ module Registration
       #
       # @return [String] the text to display initially
       def initial_text
+        # TRANSLATORS: the text to display when the user has not done a search yet
         _("Not results yet")
       end
     end

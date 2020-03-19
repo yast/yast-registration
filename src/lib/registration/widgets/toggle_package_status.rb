@@ -81,9 +81,12 @@ module Registration
       # @return [Hash<String>] all possible labels
       def labels
         @labels ||= {
-          select:    _("Select"),
-          unselect:  _("Unselect"),
-          installed: _("Installed")
+          # TRANSLATORS: the button text for the "Select" package action
+          select:    _("Select package"),
+          # TRANSLATORS: the button text for the "Unselect" package action
+          unselect:  _("Unselect package"),
+          # TRANSLATORS: the button text when the selected package is already installed
+          installed: _("Already installed")
         }
       end
     end

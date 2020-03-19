@@ -55,7 +55,7 @@ describe Registration::Widgets::TogglePackageStatus do
 
     context "when a package is not given" do
       it "uses 'Select' as label" do
-        expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select")
+        expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select package")
 
         subject.update(nil)
       end
@@ -72,7 +72,7 @@ describe Registration::Widgets::TogglePackageStatus do
         let(:installed) { true }
 
         it "uses 'Installed' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Installed")
+          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Already installed")
 
           subject.update(package)
         end
@@ -88,7 +88,7 @@ describe Registration::Widgets::TogglePackageStatus do
         let(:selected) { true }
 
         it "uses 'Unselect' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Unselect")
+          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Unselect package")
 
           subject.update(package)
         end
@@ -102,7 +102,7 @@ describe Registration::Widgets::TogglePackageStatus do
 
       context "and it's unselected" do
         it "uses 'Select' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select")
+          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select package")
 
           subject.update(package)
         end
