@@ -75,21 +75,33 @@ module Registration
 
       # Returns a string that contains a list of addons to register
       #
-      # @return [String] text containing the list of addons; an empty string
-      #   is returned if there are no addons
+      # @see #collection_summary
+      #
+      # @return [String] text containing the list of addons
       def addons_text
-        return "" if addons.empty?
-        heading = format(_("Modules/extensions to register (%{count})"), count: addons.size)
-        Yast::HTML.Heading(heading) + Yast::HTML.List(addons.map(&:name).sort)
+        collection_summary(_("Modules/extensions to register (%{count})"), addons)
       end
 
       # Returns a string that contains the list of packages to select
       #
+      # @see #collection_summary
+      #
       # @return [String] text containing the list of packages
       def packages_text
-        return "" if packages.empty?
-        heading = format(_("Selected packages (%{count})"), count: packages.size)
-        Yast::HTML.Heading(heading) + Yast::HTML.List(packages.map(&:name).sort)
+        collection_summary(_("Selected packages (%{count})"), packages)
+      end
+
+      # Returns a string that contains a list with given collection names
+      #
+      # @param text [String] a translatable text including the %{count} named param
+      # @param collection [Arary<#name>] a collection with objects that responds to `#name`
+      #
+      # @return [String] text list with given collection; an empty string when collection is empty
+      def collection_summary(text, collection)
+        return "" if collection.empty?
+
+        heading = format(text, count: collection.size)
+        Yast::HTML.Heading(heading) + Yast::HTML.List(collection.map(&:name).sort)
       end
     end
   end
