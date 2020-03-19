@@ -40,7 +40,7 @@ module Registration
       def update(results)
         text =
           if results.zero?
-            _("No packages found")
+            _("No package found")
           else
             n_("%s package found", "%s packages found", results) % results
           end

@@ -80,7 +80,7 @@ module Registration
       # This sequence performs the following steps:
       #
       #   1. Check whether the online search is supported in the underlying system
-      #   2. Find the addons
+      #   2. Get the available addons from the registration server
       #   3. Allow the user to search for packages (UI)
       #   4. Display a summary of the changes (addons to register and packages to install)
       #   5. Display the EULAs if needed

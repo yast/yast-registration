@@ -51,7 +51,7 @@ describe Registration::Widgets::RemotePackageDetails do
   end
 
   describe "#clear" do
-    it "empties the widget's content" do
+    it "clears the widget's content" do
       expect(subject).to receive(:value=).with("")
 
       subject.clear

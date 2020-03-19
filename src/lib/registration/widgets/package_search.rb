@@ -232,7 +232,7 @@ module Registration
       #
       # @return [String]
       def searching_header
-        _("Contacting the SUSE Customer Center. This may take a few seconds.\n")
+        _("Contacting the SUSE Customer Center. This may take some time.\n")
       end
 
       # Returns the message to display in the feedback window while searching for packages
