@@ -45,14 +45,6 @@ describe Registration::Widgets::TogglePackageStatus do
       allow(Yast::UI).to receive(:ChangeWidget)
     end
 
-    it "recalculates the layout" do
-      # Ensures that the label is always visible,
-      # even after changing from a short label to longer one
-      expect(Yast::UI).to receive(:RecalcLayout)
-
-      subject.update(package)
-    end
-
     context "when a package is not given" do
       it "uses 'Select' as label" do
         expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select package")

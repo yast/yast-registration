@@ -38,10 +38,6 @@ module Registration
 
         Yast::UI.ChangeWidget(Id(widget_id), :Label, label_for(package))
         Yast::UI.ChangeWidget(Id(widget_id), :Enabled, enabled)
-
-        # Ensures that label will be fully visible,
-        # even after changing to a longer one
-        Yast::UI::RecalcLayout()
       end
 
       # Determines the button label
@@ -60,12 +56,14 @@ module Registration
 
       # Returns the button text for given package
       #
+      # @see #width to understand the reason to use String#center
+      #
       # @param package [Registration::RemotePackage, nil] the represented package, if any
       def label_for(package)
-        return labels[:select] unless package
-
         key =
-          if package.installed?
+          if !package
+            :select
+          elsif package.installed?
             :installed
           elsif package.selected?
             :unselect
@@ -73,7 +71,7 @@ module Registration
             :select
           end
 
-        labels[key]
+        labels[key].center(width)
       end
 
       # Possible labels for the button
@@ -88,6 +86,22 @@ module Registration
           # TRANSLATORS: the button text when the selected package is already installed
           installed: _("Already installed")
         }
+      end
+
+      # Returns the button width
+      #
+      # Using Yast::UI::RecalcLayout() to recalculate the button width each time its label change is
+      # quite expensive. So, the workaround is to get the next odd number for the longest label size
+      # and display the label centered via String#center.
+      #
+      # @return [Integer] the next odd for the longest label size
+      def width
+        @width ||=
+          begin
+            w = labels.values.map(&:size).max
+            w += w % 2
+            w
+          end
       end
     end
   end
