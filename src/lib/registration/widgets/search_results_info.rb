@@ -43,13 +43,8 @@ module Registration
             # TRANSLATORS: the text to indicate that search had no results
             _("No package found")
           else
-            n_(
-              # TRANSLATORS: text to show the amount of packages found (singular form)
-              "%s package found",
-              # TRANSLATORS: text to show the amount of packages found (plural form)
-              "%s packages found",
-              results
-            ) % results
+            # TRANSLATORS: texts to show the amount of packages found (singular and plural forms)
+            n_("%s package found", "%s packages found", results) % results
           end
 
         Yast::UI.ChangeWidget(label_id, :Value, text)
