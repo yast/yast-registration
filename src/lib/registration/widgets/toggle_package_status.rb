@@ -31,6 +31,8 @@ module Registration
       end
 
       # Updates the button label and status
+      #
+      # @param package [Registration::RemotePackage, nil]
       def update(package)
         enabled = package ? !package.installed? : false
 

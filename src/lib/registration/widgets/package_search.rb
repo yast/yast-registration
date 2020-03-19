@@ -198,8 +198,6 @@ module Registration
       end
 
       # Updates the UI according to selected package
-      #
-      # Updating the package details and actions
       def update
         current_package = find_current_package
 
