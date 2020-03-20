@@ -24,7 +24,7 @@ module Registration
   #
   # @example Find the status
   class RemotePackage
-    attr_reader :id, :name, :arch, :version, :release, :addon
+    attr_reader :id, :name, :arch, :version, :release, :addon, :status
 
     # @param id      [Integer] Package ID
     # @param name    [String] Package name
@@ -32,14 +32,16 @@ module Registration
     # @param version [String] Version number
     # @param release [String] Release number
     # @param addon   [Addon]  Addon which the package belongs to
+    # @param status  [Symbol] Package status
     # rubocop:disable Metrics/ParameterLists
-    def initialize(id:, name:, arch:, version:, release:, addon:)
+    def initialize(id:, name:, arch:, version:, release:, addon:, status: nil)
       @id = id
       @name = name
       @arch = arch
       @version = version
       @release = release
       @addon = addon
+      @status = status
     end
     # rubocop:enable Metrics/ParameterLists
 
@@ -48,12 +50,13 @@ module Registration
     end
 
     def select!
+      return if selected?
       @old_status = @status
       @status = :selected
     end
 
     def unselect!
-      @status = @old_status if selected?
+      @status = @old_status || :unknown if selected?
     end
 
     def installed?
@@ -62,28 +65,6 @@ module Registration
 
     def selected?
       @status == :selected
-    end
-
-    # Returns the package's status
-    #
-    # @return [Symbol] Package status (:available, :installed, etc.). :unknown
-    #   when there is no libzypp counterpart.
-    def status
-      return @status if @status
-      # TODO: Determine the correct status when the libzypp_package is not
-      # available. It might depend on whether the addon is registered/selected
-      # or not.
-      return :unknown unless libzypp_package
-      @status ||= libzypp_package.status
-    end
-
-    # @return [Y2Packager::Package,nil] Local package (libzypp) counterpart
-    def libzypp_package
-      return @libzypp_package if @libzypp_package
-      candidates = Y2Packager::Package.find(name)
-      return nil if candidates.nil?
-      # FIXME: Check the version too
-      @libzypp_package = candidates.first
     end
   end
 end

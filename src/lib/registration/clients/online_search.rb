@@ -77,13 +77,15 @@ module Registration
 
       # Runs the sequence
       #
-      # This method performs these steps:
+      # This sequence performs the following steps:
       #
-      #   1. Find the addons
-      #   2. Search for packages (UI)
-      #   3. Register the addons
-      #   4. Display the EULA if needed
-      #   5. Select the packages for installation
+      #   1. Check whether the online search is supported in the underlying system
+      #   2. Get the available addons from the registration server
+      #   3. Allow the user to search for packages (UI)
+      #   4. Display a summary of the changes (addons to register and packages to install)
+      #   5. Display the EULAs if needed
+      #   6. Register the selected addons
+      #   7. Select the packages for installation
       #
       # @return [Symbol] Sequence's result (:next or :abort)
       def run
@@ -166,7 +168,7 @@ module Registration
       #
       # @return [:next]
       def display_summary
-        return :next if selected_packages.empty?
+        return :next if selected_addons.empty? && selected_packages.empty?
         ::Registration::Dialogs::OnlineSearchSummary.run(
           selected_packages, selected_addons
         )

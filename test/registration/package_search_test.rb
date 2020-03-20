@@ -75,6 +75,10 @@ describe Registration::PackageSearch do
     )
   end
 
+  let(:resolvables) do
+    [Y2Packager::Resolvable.new(name: "SUSEConnect", status: :installed)]
+  end
+
   describe "#results" do
     let(:packages) { [pkg1, pkg2] }
 
@@ -87,6 +91,8 @@ describe Registration::PackageSearch do
         .with(1946).and_return(basesystem)
       allow(Registration::Addon).to receive(:find_by_id)
         .with(1963).and_return(nil)
+      allow(Y2Packager::Resolvable).to receive(:find)
+        .with({ kind: :package }, [:name, :status]).and_return(resolvables)
     end
 
     it "returns packages from SCC containing the given text in their names" do
@@ -96,14 +102,16 @@ describe Registration::PackageSearch do
           version: "2.1.0",
           release: "4.6.1",
           arch:    "x86_64",
-          addon:   nil
+          addon:   nil,
+          status:  :unknown
         ),
         an_object_having_attributes(
           name:    "SUSEConnect",
           version: "0.3.23",
           release: "1.6",
           arch:    "x86_64",
-          addon:   basesystem
+          addon:   basesystem,
+          status:  :installed
         )
       )
     end

@@ -22,6 +22,8 @@ require "cwm/custom_widget"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
+require "registration/widgets/search_results_info"
+require "registration/widgets/toggle_package_selection"
 require "yast2/popup"
 
 Yast.import "Popup"
@@ -66,6 +68,10 @@ module Registration
               60,
               VBox(
                 MinHeight(14, packages_table),
+                HBox(
+                  HWeight(50, search_results),
+                  Right(toggle_package_selection)
+                ),
                 package_details
               )
             )
@@ -79,6 +85,8 @@ module Registration
           search_package(search_form.text, search_form.ignore_case)
         elsif event["WidgetID"] == "remote_packages_table"
           handle_packages_table_event(event)
+        elsif event["WidgetID"] == "toggle_package_selection"
+          toggle_package
         end
 
         log.debug "Event handled #{event.inspect}"
@@ -106,6 +114,13 @@ module Registration
         @packages_table ||= RemotePackagesTable.new
       end
 
+      # Widget to display search information
+      #
+      # @return [SearchResultsInfo] the search results info widget instance
+      def search_results
+        @search_results ||= SearchResultsInfo.new
+      end
+
       # Package details widget
       #
       # This widget displays the details of the package which is selected in the
@@ -116,6 +131,13 @@ module Registration
         @package_details ||= RemotePackageDetails.new
       end
 
+      # The button to toggle the selection status for current selected package
+      #
+      # @return [TogglePackageSelection] a toggle package selection button
+      def toggle_package_selection
+        @toggle_package_selection ||= TogglePackageSelection.new
+      end
+
       # Handles remote packages table events
       #
       # @param event [Hash] Widget event to process
@@ -124,7 +146,7 @@ module Registration
         when "Activated"
           toggle_package
         when "SelectionChanged"
-          update_details
+          update
         end
       end
 
@@ -144,7 +166,7 @@ module Registration
       def search_package(text, ignore_case)
         return unless valid_search_text?(text)
         # TRANSLATORS: searching for packages
-        Yast::Popup.Feedback(_("Searching..."), _("Searching for packages")) do
+        Yast::Popup.Feedback(searching_message, searching_header) do
           @packages = controller.search(text, ignore_case)
           selected_package_ids = controller.selected_packages.map(&:id)
           @packages.each do |pkg|
@@ -152,29 +174,42 @@ module Registration
           end
         end
         packages_table.change_items(packages)
-        update_details
+        update
       end
 
       # Finds out the current package which is selected in the packages table
       #
       # @return [RemotePackage,nil]
       def find_current_package
-        packages.find { |p| p.id == packages_table.value }
+        # PackagesTable#value might be slow, so let's avoid to call it too many times
+        packages_table_value = packages_table.value
+        packages.find { |p| p.id == packages_table_value }
       end
 
       # Selects/unselects the current package for installation
       def toggle_package
         package = find_current_package
+
+        return unless package
+
         controller.toggle_package(package)
         packages_table.update_item(package)
-        update_details
+        update
       end
 
-      # Updates the package details widget
-      def update_details
-        # FIXME: remove the content if the current package is nil
+      # Updates the UI according to selected package
+      def update
         current_package = find_current_package
-        package_details.update(current_package) if current_package
+
+        search_results.update(packages.size)
+
+        if current_package
+          package_details.update(current_package)
+          toggle_package_selection.enabled = !current_package.installed?
+        else
+          package_details.clear
+          toggle_package_selection.enabled = false
+        end
       end
 
       MINIMAL_SEARCH_TEXT_SIZE = 2
@@ -192,6 +227,20 @@ module Registration
           )
         )
         false
+      end
+
+      # Returns the header to display in the feedback window while searching for packages
+      #
+      # @return [String]
+      def searching_header
+        _("Contacting the SUSE Customer Center. This may take some time.\n")
+      end
+
+      # Returns the message to display in the feedback window while searching for packages
+      #
+      # @return [String]
+      def searching_message
+        _("Searching for packages")
       end
     end
   end

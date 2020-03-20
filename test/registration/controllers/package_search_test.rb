@@ -56,6 +56,17 @@ describe Registration::Controllers::PackageSearch do
     it "returns the list of packages from SCC" do
       expect(controller.search(text, ignore_case)).to eq([package])
     end
+
+    context "when text contains leading and/or trailing spaces" do
+      let(:text) { "  gnome  " }
+
+      it "performs the package search ignoring them" do
+        expect(Registration::PackageSearch).to receive(:new)
+          .with(text: "gnome", ignore_case: ignore_case).and_return(search)
+
+        controller.search(text, ignore_case)
+      end
+    end
   end
 
   describe "#toggle_package" do

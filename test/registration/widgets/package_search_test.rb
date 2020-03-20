@@ -39,7 +39,15 @@ describe Registration::Widgets::PackageSearch do
   end
 
   let(:package_details) do
-    instance_double(Registration::Widgets::RemotePackageDetails, update: nil)
+    instance_double(Registration::Widgets::RemotePackageDetails, update: nil, clear: nil)
+  end
+
+  let(:toggle_package_selection) do
+    instance_double(Registration::Widgets::TogglePackageSelection, :enabled= => nil)
+  end
+
+  let(:search_results_info) do
+    instance_double(Registration::Widgets::SearchResultsInfo, update: nil)
   end
 
   let(:package) do
@@ -58,19 +66,25 @@ describe Registration::Widgets::PackageSearch do
     )
   end
 
+  let(:search_result) { [package] }
+
   before do
     allow(Registration::Widgets::RemotePackagesTable).to receive(:new)
       .and_return(packages_table)
     allow(Registration::Widgets::RemotePackageDetails).to receive(:new)
       .and_return(package_details)
-    allow(controller).to receive(:search).and_return([package])
+    allow(Registration::Widgets::TogglePackageSelection).to receive(:new)
+      .and_return(toggle_package_selection)
+    allow(Registration::Widgets::SearchResultsInfo).to receive(:new)
+      .and_return(search_results_info)
+    allow(controller).to receive(:search).and_return(search_result)
   end
 
   describe "#handle" do
     let(:text) { "gnome" }
     let(:ignore_case) { true }
 
-    context "when the user asks for a package" do
+    context "when handling a package search" do
       let(:event) { { "WidgetID" => "search_form_button" } }
 
       let(:search_form) do
@@ -89,13 +103,7 @@ describe Registration::Widgets::PackageSearch do
         subject.handle(event)
       end
 
-      it "updates the table and the package details" do
-        expect(packages_table).to receive(:change_items).with([package])
-        expect(package_details).to receive(:update).with(package)
-        subject.handle(event)
-      end
-
-      context "when the search text is not enough" do
+      context "but the search text is not enough" do
         let(:text) { "g" }
 
         it "asks the user to introduce some text" do
@@ -103,6 +111,73 @@ describe Registration::Widgets::PackageSearch do
             .with(/at least/)
           subject.handle(event)
         end
+      end
+
+      context "and there are results" do
+        it "updates the table and the package details" do
+          expect(packages_table).to receive(:change_items).with([package])
+
+          subject.handle(event)
+        end
+
+        it "updates the package details" do
+          expect(package_details).to receive(:update).with(package)
+
+          subject.handle(event)
+        end
+
+        it "updates the search results info message" do
+          expect(search_results_info).to receive(:update).with(search_result.size)
+
+          subject.handle(event)
+        end
+
+        it "updates the toggle selection button" do
+          expect(toggle_package_selection).to receive(:enabled=)
+
+          subject.handle(event)
+        end
+      end
+
+      context "but there are no results" do
+        let(:search_result) { [] }
+
+        it "updates the table" do
+          expect(packages_table).to receive(:change_items).with([])
+
+          subject.handle(event)
+        end
+
+        it "clears the package details" do
+          expect(package_details).to receive(:clear)
+
+          subject.handle(event)
+        end
+
+        it "updates the search results info message" do
+          expect(search_results_info).to receive(:update).with(0)
+
+          subject.handle(event)
+        end
+
+        it "sets the toggle selection button as disabled" do
+          expect(toggle_package_selection).to receive(:enabled=).with(false)
+
+          subject.handle(event)
+        end
+      end
+    end
+
+    context "when handling a toggle package status request" do
+      let(:event) { { "WidgetID" => "toggle_package_selection" } }
+
+      before do
+        allow(subject).to receive(:packages).and_return([package])
+      end
+
+      it "toggles the selected package" do
+        expect(controller).to receive(:toggle_package).with(package)
+        subject.handle(event)
       end
     end
 
@@ -136,6 +211,26 @@ describe Registration::Widgets::PackageSearch do
       it "updates the package details" do
         expect(package_details).to receive(:update).with(package)
         subject.handle(event)
+      end
+
+      context "and the selected package is already installed" do
+        let(:installed?) { true }
+
+        it "sets the toggle selection button as disabled" do
+          expect(toggle_package_selection).to receive(:enabled=).with(false)
+
+          subject.handle(event)
+        end
+      end
+
+      context "and the selected package is not installed" do
+        let(:installed?) { false }
+
+        it "sets the toggle selection button as enabled" do
+          expect(toggle_package_selection).to receive(:enabled=).with(true)
+
+          subject.handle(event)
+        end
       end
     end
   end

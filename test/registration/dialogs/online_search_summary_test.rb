@@ -47,5 +47,13 @@ describe Registration::Dialogs::OnlineSearchSummary do
         expect(subject.contents.to_s).to_not include("Modules")
       end
     end
+
+    context "when the list of packages is empty" do
+      subject { described_class.new([], [addon]) }
+
+      it "does not include a list of packages" do
+        expect(subject.contents.to_s).to_not include("Selected packages")
+      end
+    end
   end
 end
