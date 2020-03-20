@@ -44,7 +44,7 @@ describe Registration::Widgets::TogglePackageStatus do
     context "when a package is not given" do
       let(:package) { nil }
 
-      it "uses 'Select' as label" do
+      it "uses 'Select package' as label" do
         expect(subject.label).to eq("Select package")
       end
     end
@@ -53,7 +53,7 @@ describe Registration::Widgets::TogglePackageStatus do
       context "and it's installed" do
         let(:installed) { true }
 
-        it "uses 'Installed' as label" do
+        it "uses 'Already installed' as label" do
           expect(subject.label).to eq("Already installed")
         end
       end
@@ -61,7 +61,7 @@ describe Registration::Widgets::TogglePackageStatus do
       context "and it's selected" do
         let(:selected) { true }
 
-        it "uses 'Unselect' as label" do
+        it "uses 'Unselect package' as label" do
           expect(subject.label).to eq("Unselect package")
         end
       end

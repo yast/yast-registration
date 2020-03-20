@@ -83,8 +83,8 @@ module Registration
           "after a few seconds, shows the results in the table, including the module/extension " \
           "each package belongs to.</p>\n" \
           "<p>You can select any package for installation by clicking in the corresponding table " \
-          "row and pressing the <b>Select</b> button (or just double-clicking on the row). " \
-          "If the package belongs to a not activated module/extension, YaST asks you about " \
+          "row and pressing the <b>Select package</b> button (or just double-clicking on the " \
+          "row). If the package belongs to a not activated module/extension, YaST asks you about " \
           "activating it. Bear in mind that the real activation takes place after you click the " \
           "<b>Next</b> button.</p>\n")
       end
