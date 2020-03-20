@@ -25,45 +25,23 @@ module Registration
     # Widget representing the button to toggle the status of a package
     class TogglePackageStatus < CWM::PushButton
       # Constructor
-      def initialize
-        textdomain "registration"
-        self.widget_id = "toggle_package_status"
-      end
-
-      # Updates the button label and status
       #
       # @param package [Registration::RemotePackage, nil]
-      def update(package)
-        enabled = package ? !package.installed? : false
+      def initialize(package = nil)
+        textdomain "registration"
+        self.widget_id = "toggle_package_status"
 
-        Yast::UI.ChangeWidget(Id(widget_id), :Label, label_for(package))
-        Yast::UI.ChangeWidget(Id(widget_id), :Enabled, enabled)
+        @package = package
       end
 
       # Determines the button label
       #
       # @return [String] the buttons label
       def label
-        label_for(nil)
-      end
+        return labels[:select] unless package
 
-      # (see CWM::AbstractWidget#opt)
-      def opt
-        [:disabled]
-      end
-
-    private
-
-      # Returns the button text for given package
-      #
-      # @see #width to understand the reason to use String#center
-      #
-      # @param package [Registration::RemotePackage, nil] the represented package, if any
-      def label_for(package)
         key =
-          if !package
-            :select
-          elsif package.installed?
+          if package.installed?
             :installed
           elsif package.selected?
             :unselect
@@ -71,8 +49,19 @@ module Registration
             :select
           end
 
-        labels[key].center(width)
+        labels[key]
       end
+
+      # (see CWM::AbstractWidget#opt)
+      def opt
+        opts = []
+        opts << :disabled if !package || package.installed?
+        opts
+      end
+
+    private
+
+      attr_reader :package
 
       # Possible labels for the button
       #
@@ -86,22 +75,6 @@ module Registration
           # TRANSLATORS: the button text when the selected package is already installed
           installed: _("Already installed")
         }
-      end
-
-      # Returns the button width
-      #
-      # Using Yast::UI::RecalcLayout() to recalculate the button width each time its label change is
-      # quite expensive. So, the workaround is to get the next odd number for the longest label size
-      # and display the label centered via String#center.
-      #
-      # @return [Integer] the next odd for the longest label size
-      def width
-        @width ||=
-          begin
-            w = labels.values.map(&:size).max
-            w += w % 2
-            w
-          end
       end
     end
   end

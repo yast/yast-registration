@@ -42,8 +42,12 @@ describe Registration::Widgets::PackageSearch do
     instance_double(Registration::Widgets::RemotePackageDetails, update: nil, clear: nil)
   end
 
+  let(:package_actions) do
+    instance_double(CWM::ReplacePoint, replace: nil)
+  end
+
   let(:toggle_package_status) do
-    instance_double(Registration::Widgets::TogglePackageStatus, update: nil)
+    instance_double(Registration::Widgets::TogglePackageStatus)
   end
 
   let(:search_results_info) do
@@ -77,6 +81,7 @@ describe Registration::Widgets::PackageSearch do
       .and_return(toggle_package_status)
     allow(Registration::Widgets::SearchResultsInfo).to receive(:new)
       .and_return(search_results_info)
+    allow(subject).to receive(:package_actions).and_return(package_actions)
     allow(controller).to receive(:search).and_return(search_result)
   end
 
@@ -126,8 +131,9 @@ describe Registration::Widgets::PackageSearch do
           subject.handle(event)
         end
 
-        it "updates the toggle status button" do
-          expect(toggle_package_status).to receive(:update).with(package)
+        it "updates the package actions" do
+          expect(Registration::Widgets::TogglePackageStatus).to receive(:new).with(package)
+          expect(package_actions).to receive(:replace).with(toggle_package_status)
 
           subject.handle(event)
         end

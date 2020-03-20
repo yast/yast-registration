@@ -19,6 +19,7 @@
 
 require "yast"
 require "cwm/custom_widget"
+require "cwm/replace_point"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
@@ -70,7 +71,7 @@ module Registration
                 MinHeight(14, packages_table),
                 HBox(
                   HWeight(50, search_results),
-                  Right(toggle_package_status)
+                  Right(package_actions)
                 ),
                 package_details
               )
@@ -131,11 +132,11 @@ module Registration
         @package_details ||= RemotePackageDetails.new
       end
 
-      # Package status toggle widget
+      # The replace point to hold the related package buttons
       #
-      # @return [TogglePackageStatus] a button to toggle, if possible, the status of current package
-      def toggle_package_status
-        @toggle_package_status ||= TogglePackageStatus.new
+      # @return [CWM::ReplacePoint] the replace point for package buttons
+      def package_actions
+        @package_actions ||= CWM::ReplacePoint.new(widget: TogglePackageStatus.new)
       end
 
       # Handles remote packages table events
@@ -202,7 +203,7 @@ module Registration
         current_package = find_current_package
 
         search_results.update(packages.size)
-        toggle_package_status.update(current_package)
+        package_actions.replace(TogglePackageStatus.new(current_package))
 
         if current_package
           package_details.update(current_package)

@@ -25,9 +25,9 @@ require "registration/widgets/toggle_package_status"
 describe Registration::Widgets::TogglePackageStatus do
   include Yast::UIShortcuts
 
-  include_examples "CWM::PushButton"
+  subject { described_class.new(package) }
 
-  let(:id) { Id(subject.widget_id) }
+  include_examples "CWM::PushButton"
 
   let(:installed) { false }
   let(:selected) { false }
@@ -40,22 +40,12 @@ describe Registration::Widgets::TogglePackageStatus do
     )
   end
 
-  describe "#refresh" do
-    before do
-      allow(Yast::UI).to receive(:ChangeWidget)
-    end
-
+  describe "#label" do
     context "when a package is not given" do
+      let(:package) { nil }
+
       it "uses 'Select' as label" do
-        expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select package")
-
-        subject.update(nil)
-      end
-
-      it "sets as disabled" do
-        expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, false)
-
-        subject.update(nil)
+        expect(subject.label).to eq("Select package")
       end
     end
 
@@ -64,15 +54,7 @@ describe Registration::Widgets::TogglePackageStatus do
         let(:installed) { true }
 
         it "uses 'Installed' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Already installed")
-
-          subject.update(package)
-        end
-
-        it "sets as disabled" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, false)
-
-          subject.update(package)
+          expect(subject.label).to eq("Already installed")
         end
       end
 
@@ -80,30 +62,38 @@ describe Registration::Widgets::TogglePackageStatus do
         let(:selected) { true }
 
         it "uses 'Unselect' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Unselect package")
-
-          subject.update(package)
-        end
-
-        it "sets as enabled" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, true)
-
-          subject.update(package)
+          expect(subject.label).to eq("Unselect package")
         end
       end
 
       context "and it's unselected" do
         it "uses 'Select' as label" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Label, "Select package")
-
-          subject.update(package)
+          expect(subject.label).to eq("Select package")
         end
+      end
+    end
+  end
 
-        it "sets as enabled" do
-          expect(Yast::UI).to receive(:ChangeWidget).with(id, :Enabled, true)
+  describe "#opt" do
+    context "when a package is not given" do
+      let(:package) { nil }
 
-          subject.update(package)
-        end
+      it "includes :disabled" do
+        expect(subject.opt).to include(:disabled)
+      end
+    end
+
+    context "when a package is already installed" do
+      let(:installed) { true }
+
+      it "includes :disabled" do
+        expect(subject.opt).to include(:disabled)
+      end
+    end
+
+    context "when a package is not already installed" do
+      it "does not include :disabled" do
+        expect(subject.opt).to_not include(:disabled)
       end
     end
   end
