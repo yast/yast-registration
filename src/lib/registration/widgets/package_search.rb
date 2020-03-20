@@ -19,12 +19,11 @@
 
 require "yast"
 require "cwm/custom_widget"
-require "cwm/replace_point"
 require "registration/widgets/package_search_form"
 require "registration/widgets/remote_packages_table"
 require "registration/widgets/remote_package_details"
 require "registration/widgets/search_results_info"
-require "registration/widgets/toggle_package_status"
+require "registration/widgets/toggle_package_selection"
 require "yast2/popup"
 
 Yast.import "Popup"
@@ -71,7 +70,7 @@ module Registration
                 MinHeight(14, packages_table),
                 HBox(
                   HWeight(50, search_results),
-                  Right(package_actions)
+                  Right(toggle_package_selection)
                 ),
                 package_details
               )
@@ -86,7 +85,7 @@ module Registration
           search_package(search_form.text, search_form.ignore_case)
         elsif event["WidgetID"] == "remote_packages_table"
           handle_packages_table_event(event)
-        elsif event["WidgetID"] == "toggle_package_status"
+        elsif event["WidgetID"] == "toggle_package_selection"
           toggle_package
         end
 
@@ -132,11 +131,11 @@ module Registration
         @package_details ||= RemotePackageDetails.new
       end
 
-      # The replace point to hold the related package buttons
+      # The button to toggle the selection status for current selected package
       #
-      # @return [CWM::ReplacePoint] the replace point for package buttons
-      def package_actions
-        @package_actions ||= CWM::ReplacePoint.new(widget: TogglePackageStatus.new)
+      # @return [TogglePackageSelection] a toggle package selection button
+      def toggle_package_selection
+        @toggle_package_selection ||= TogglePackageSelection.new
       end
 
       # Handles remote packages table events
@@ -203,12 +202,13 @@ module Registration
         current_package = find_current_package
 
         search_results.update(packages.size)
-        package_actions.replace(TogglePackageStatus.new(current_package))
 
         if current_package
           package_details.update(current_package)
+          toggle_package_selection.enabled = !current_package.installed?
         else
           package_details.clear
+          toggle_package_selection.enabled = false
         end
       end
 
