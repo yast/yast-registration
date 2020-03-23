@@ -41,6 +41,7 @@ module Registration
     Yast.import "Installation"
     Yast.import "Linuxrc"
     Yast.import "Mode"
+    Yast.import "Popup"
     Yast.import "Stage"
     Yast.import "Report"
     Yast.import "SlpService"
@@ -91,7 +92,11 @@ module Registration
     # run the network configuration module
     def self.run_network_configuration
       log.info "Running network configuration..."
-      Yast::WFM.call("inst_lan", [{ "skip_detection" => true }])
+      # ensure that no registration feedback is shown
+      # when running network configuration (bsc#1165705)
+      Yast::Popup.SuppressFeedback do
+        Yast::WFM.call("inst_lan", [{ "skip_detection" => true }])
+      end
     end
 
     # check if the network configuration module is present
