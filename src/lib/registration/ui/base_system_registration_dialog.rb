@@ -424,10 +424,8 @@ module Registration
       def default_skipping_text
         # TRANSLATORS:
         # Popup question: confirm skipping the registration on the Full medium
-        _("<p>You are skipping registration.\n"\
-          "Please configure access to packages medium in the next step.</p>"\
-          "<p>Without registration update-channels will not be configured.\n"\
-          "This will disable the updates and security fixes.</p>")
+        _("<p>You are skipping registration. Without registration the system\n" \
+          "will not have access to updates and security fixes.</p>")
       end
 
       # the warning for the Online media
@@ -453,8 +451,8 @@ module Registration
 
           # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
           warning += "\n" +
-            _("<p>However, without registration the system will not have access\n"  \
-                "to the updates and security fixes.</p>")
+            _("<p>However, without registration the system will not have access\n" \
+              "to updates and security fixes.</p>")
         end
 
         warning
