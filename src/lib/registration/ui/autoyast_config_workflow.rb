@@ -6,10 +6,9 @@ require "registration/url_helpers"
 
 require "registration/ui/autoyast_addon_dialog"
 require "registration/ui/autoyast_config_dialog"
+require "registration/ui/addon_selection_registration_dialog"
 require "registration/ui/addon_eula_dialog"
 require "registration/ui/addon_reg_codes_dialog"
-
-require "registration/dialogs/addons_selection"
 
 module Registration
   module UI
@@ -110,7 +109,7 @@ module Registration
             ::Registration::Addon.find_all(registration).each(&:unregistered)
           end
 
-          ret = Dialogs::AddonsSelection.run(registration)
+          ret = AddonSelectionRegistrationDialog.run(registration)
         end
 
         success ? ret : :addons
