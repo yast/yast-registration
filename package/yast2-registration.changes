@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr  9 12:31:01 UTC 2020 - Stefan Hundhammer <shundhammer@suse.com>
+
+- Crash fix backport: Added missing require (bsc#1167945)
+- 4.0.51
+
+-------------------------------------------------------------------
 Mon Feb 18 13:11:12 UTC 2019 - lslezak@suse.cz
 
 - Fixed "can't modify frozen String" crash (bsc#1125006)
