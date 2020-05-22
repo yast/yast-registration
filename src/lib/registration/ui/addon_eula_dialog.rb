@@ -48,6 +48,9 @@ module Registration
           false
         )
 
+        # Default: no EULA specified => accepted
+        eula_ret = :accepted
+
         addons.each do |addon|
           next unless addon.eula_acceptance_needed?
           next if addon.registered?
@@ -55,10 +58,13 @@ module Registration
           log.info "Addon '#{addon.name}' has an EULA at #{addon.eula_url}"
           eula_ret = accept_eula(addon)
 
-          return eula_ret if eula_ret != :next
+          # any declined license needs to be handled separately
+          break if eula_ret != :accepted
         end
 
-        :next
+        # go back if any EULA has not been accepted, let the user
+        # deselect the not accepted extension
+        eula_ret == :accepted ? :next : eula_ret
       end
 
     private
@@ -104,34 +110,35 @@ module Registration
         display_optional_info(File.join(tmpdir, "README.BETA"))
       end
 
-      # run the EULA agreement dialog
+      # Run the EULA agreement dialog.
       # @param [EulaReader] eula_reader read EULAs
-      # @return [Symbol] :accepted, :back, :abort, :halt - user input
+      # @return [Symbol] :accepted, :back
       def run_eula_dialog(eula_reader)
         base_product = false
-        cancel_action = "refuse"
+        cancel_action = "abort"
         ret = Yast::ProductLicense.HandleLicenseDialogRet(arg_ref(eula_reader.licenses),
           base_product, cancel_action)
+        ret = :back if ret == :abort
         log.debug "EULA dialog result: #{ret}"
         ret
       end
 
-      # ask user to accept an addon EULA
+      # Ask user to accept an addon EULA.
+      # Declining (refusing) the license is translated into Back
+      # which will fit nicely from the caller's point of view.
       # @param [Addon] addon the addon
-      # @return [Symbol] :back, :abort, :halt
+      # @return [Symbol] :accepted, :back
       def accept_eula(addon)
         Dir.mktmpdir("extension-eula-") do |tmpdir|
           return :back unless download_eula(addon, tmpdir)
 
           eula_reader = EulaReader.new(tmpdir)
           license = find_license(addon, eula_reader)
-          return :next if license && license.accepted?
+          return :accepted if license && license.accepted?
 
           setup_eula_dialog(addon, eula_reader, tmpdir)
           ret = run_eula_dialog(eula_reader)
           license.accept! if ret == :accepted
-
-          return :next if [:accepted, :refused].include?(ret)
           ret
         end
       ensure
@@ -144,6 +151,7 @@ module Registration
         Yast::InstShowInfo.show_info_txt(info_file) if File.exist?(info_file)
       end
 
+      # @return [Y2Packager::License]
       def find_license(addon, eula_reader)
         license_file = eula_reader.licenses[Y2Packager::License::DEFAULT_LANG]
         return nil unless license_file
