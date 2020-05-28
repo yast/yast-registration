@@ -26,7 +26,8 @@ require "registration/sw_mgmt"
 require "y2packager/resolvable"
 
 module Registration
-  # this is a wrapper class around SUSE::Connect::Product object
+  # A wrapper class around SUSE::Connect::Product object,
+  # https://rubydoc.info/github/SUSE/connect/SUSE/Connect/Product
   class Addon
     extend Yast::I18n
     include Yast::I18n
@@ -38,6 +39,7 @@ module Registration
       # read the remote add-on from the registration server
       # @param registration [Registration::Registration] use this object for
       #  reading the remote add-ons
+      # @return [Array<Addon>]
       def find_all(registration)
         return @cached_addons if @cached_addons
 
@@ -83,7 +85,7 @@ module Registration
         @auto_selected = nil
       end
 
-      # list of auto selected add-ons
+      # @return [Array<Addon>] auto selected add-ons
       def auto_selected
         @auto_selected ||= detect_auto_selection
       end
@@ -155,6 +157,7 @@ module Registration
         result
       end
 
+      # @return [Array<Addon>]
       def load_addons(registration)
         pure_addons = registration.get_addon_list
         # get IDs of the already activated addons
@@ -172,6 +175,7 @@ module Registration
         end
       end
 
+      # @return [Array<Addon>]
       def detect_auto_selection
         required = selected + registered
 
