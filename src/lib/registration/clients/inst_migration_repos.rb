@@ -44,7 +44,7 @@ module Registration
         return if destdir == "/"
 
         # copy the old NCC/SCC credentials to inst-sys
-        SwMgmt.copy_old_credentials(destdir)
+        ::Registration::SwMgmt.copy_old_credentials(destdir)
 
         # import the SMT/RMT certificate to inst-sys
         import_ssl_certificates
