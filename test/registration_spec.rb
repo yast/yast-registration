@@ -153,6 +153,13 @@ describe Registration::Registration do
           "sle-module-legacy", "sle-module-web-scripting", "sle-module-public-cloud",
           "sle-module-adv-systems-management", "sle-hae")
       end
+
+      it "uses version without release for connecting SCC" do
+        expect(Registration::SwMgmt).to receive(:remote_product).with(
+          base_product, version_release: false
+        )
+        Registration::Registration.new.get_addon_list
+      end
     end
   end
 

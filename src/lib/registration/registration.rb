@@ -153,7 +153,10 @@ module Registration
 
       log.info "Reading available addons for product: #{base_product["name"]}"
 
-      remote_product = SwMgmt.remote_product(base_product)
+      # base_product_to_register returns "version_version" for the version
+      # whereas installed_base_product returns "version_release".
+      # SCC needs in this case the version without the release.
+      remote_product = SwMgmt.remote_product(base_product, version_release: false)
       addons = SUSE::Connect::YaST.show_product(remote_product, connect_params).extensions || []
       addons.each { |a| log.info "Found available addon: #{a.inspect}" }
 
