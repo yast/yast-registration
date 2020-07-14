@@ -147,8 +147,8 @@ module Registration
       end
 
       def read
-        log.error "Cloning is not supported by this YaST module"
-        false
+        @config.read
+        true
       end
 
       # return extra packages needed by this module (none so far)
