@@ -100,4 +100,85 @@ describe Registration::Storage::Config do
       expect(subject.addons.size).to eq 1
     end
   end
+
+  describe "#read" do
+    before do
+      subject.reset
+      allow(::Registration::Registration).to receive(:is_registered?).and_return(registered)
+    end
+
+    let(:registered) { true }
+
+    let(:activations) do
+      [basesystem_activation, sles_activation]
+    end
+
+    let(:config) do
+      SUSE::Connect::Config.new(fixtures_file("SUSEConnect"))
+    end
+
+    let(:status) do
+      instance_double(
+        SUSE::Connect::Status,
+        activations:        activations,
+        activated_products: [sles_product, basesystem_product]
+      )
+    end
+
+    let(:sles_activation) do
+      SUSE::Connect::Remote::Activation.new(
+        "regcode" => "0123456789",
+        "service" => {
+          "product" => {
+            "name" => "SUSE Linux Enteprise Server", "identifier" => "SLES", "isbase" => true
+          }
+        }
+      )
+    end
+
+    let(:basesystem_activation) do
+      SUSE::Connect::Remote::Activation.new(
+        "service" => {
+          "product" => {
+            "name" => "Basesystem Module", "identifier" => "sle-basesystem"
+          }
+        }
+      )
+    end
+
+    let(:sles_product) { sles_activation.service.product }
+    let(:basesystem_product) { basesystem_activation.service.product }
+
+    before do
+      allow(SUSE::Connect::Status).to receive(:new).and_return(status)
+      allow(SUSE::Connect::Config).to receive(:new).and_return(config)
+    end
+
+    it "reads the registration information" do
+      subject.read
+      expect(subject.reg_server).to eq(config.url)
+      expect(subject.email).to eq(config.email)
+    end
+
+    it "includes the addons but not the base product" do
+      subject.read
+      expect(subject.addons).to contain_exactly(
+        a_hash_including("name" => "sle-basesystem")
+      )
+    end
+
+    it "sets the configuration as modified" do
+      expect { subject.read }.to change { subject.modified }.from(false).to(true)
+    end
+
+    context "when the system is not registered" do
+      let(:registered) { false }
+
+      it "does not read the registration information" do
+        subject.read
+        expect(subject.reg_server).to be_empty
+        expect(subject.email).to be_empty
+      end
+    end
+  end
 end

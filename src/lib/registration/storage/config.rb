@@ -17,6 +17,9 @@
 # To contact SUSE LLC about this file by physical or electronic mail, you may
 # find current contact information at www.suse.com.
 
+require "suse/connect"
+require "registration/registration"
+
 module Registration
   module Storage
     # AutoYast configuration
@@ -43,6 +46,7 @@ module Registration
         @slp_discovery = false
         @reg_server_cert_fingerprint_type = nil
         @reg_server_cert_fingerprint = ""
+        @connect_status = nil
       end
 
       def export
@@ -80,6 +84,18 @@ module Registration
         @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"] || ""
       end
 
+      # Read configuration settings from the running system
+      def read
+        return unless ::Registration::Registration.is_registered?
+        config = SUSE::Connect::Config.new
+        @email = config.email
+        @reg_server = config.url
+        @reg_code = base_regcode
+        @addons = addons_from_system
+        @modified = true
+        @do_registration = true
+      end
+
     private
 
       def import_addons(settings)
@@ -109,6 +125,37 @@ module Registration
         end
 
         ret
+      end
+
+      # Returns the registration code for the base system
+      #
+      # @return [String,nil]
+      def base_regcode
+        base_activation = connect_status.activations.find do |activation|
+          activation.service&.product&.isbase
+        end
+        base_activation && base_activation.regcode
+      end
+
+      # Returns the elements for the <addons> section
+      #
+      # @return [Array<Hash>]
+      def addons_from_system
+        connect_status.activated_products.each_with_object([]) do |addon, addons|
+          next if addon.isbase
+          addons << {
+            "name"    => addon.identifier,
+            "version" => addon.version,
+            "arch"    => addon.arch
+          }
+        end
+      end
+
+      # SUSE/Connect status information
+      #
+      # @return [SUSE::Connect::Status] Status information from SCC
+      def connect_status
+        @connect_status ||= SUSE::Connect::YaST.status({})
       end
     end
   end
