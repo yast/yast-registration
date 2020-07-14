@@ -2,6 +2,12 @@
 inherit_from:
   /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml
 
+AllCops:
+  TargetRubyVersion: 2.3
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 # TODO: this need some non-trivial refactoring...
 Metrics/AbcSize:
   Max: 111
