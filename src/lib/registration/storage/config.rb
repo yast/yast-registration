@@ -23,6 +23,17 @@ require "registration/registration"
 module Registration
   module Storage
     # AutoYast configuration
+    #
+    # @example Import AutoYaST settings
+    #   config = Registration::Storage::Config.instance
+    #   config.import("do_registration" => true, reg_server" => "https://scc.example.net")
+    #   config.do_registration #=> true
+    #
+    # @example Read configuration from the running system
+    #   config = Registration::Storage::Config.instance
+    #   config.read
+    #   config.reg_server #=> "https://scc.example.net"
+    #   config.modified? #=> true
     class Config
       include Singleton
 
@@ -34,6 +45,7 @@ module Registration
         reset
       end
 
+      # Resets the current instance
       def reset
         @modified = false
         @do_registration = false
@@ -49,6 +61,9 @@ module Registration
         @connect_status = nil
       end
 
+      # Export AutoYaST settings
+      #
+      # @return [Hash<String,Object>] A hash representing AutoYaST settings
       def export
         ret = { "do_registration" => do_registration }
         # export only the boolean flag when registration is disabled,
@@ -69,6 +84,22 @@ module Registration
         ret
       end
 
+      # Imports AutoYaST settings
+      #
+      # @param settings [Hash<String,Object>] Settings
+      # @option settings [Boolean] "do_registration" Whether to register the system
+      # @option settings [String] "reg_server" URL of the registration server
+      # @option settings [Boolean] "slp_discovery" Whether to use SLP to find out the reg_server
+      # @option settings [String] "email" E-mail address related to the registration code
+      # @option settings [String] "reg_code" Registration code
+      # @option settings [String] "reg_server_cert" URL of the registration server certificate
+      # @option settings [String] "reg_server_cert_fingerprint_type" Certificate fingerprint type
+      #   (e.g., "SHA1" or "SHA256")
+      # @option settings [String] "reg_server_cert_fingerprint" Fingerprint of the registration
+      #   server certificate
+      # @option settings [Boolean] "install_updates" Whether to install package updates
+      # @option settings [Array<Hash<String,String>>] "addons" List of add-ons to register.
+      #   Each entry contains "name", "version" and "arch" keys.
       def import(settings)
         reset
 
@@ -84,7 +115,9 @@ module Registration
         @reg_server_cert_fingerprint = settings["reg_server_cert_fingerprint"] || ""
       end
 
-      # Read configuration settings from the running system
+      # Reads configuration settings from the running system
+      #
+      # If the system is not registered, it does nothing
       def read
         return unless ::Registration::Registration.is_registered?
         config = SUSE::Connect::Config.new
@@ -143,6 +176,7 @@ module Registration
       def addons_from_system
         connect_status.activated_products.each_with_object([]) do |addon, addons|
           next if addon.isbase
+          # TODO: release_type and reg_code are missing
           addons << {
             "name"    => addon.identifier,
             "version" => addon.version,
