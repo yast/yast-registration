@@ -89,6 +89,7 @@ module Registration
         # if there is no registration section like can happen during auto upgrade
         return unless settings
 
+        # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
         Yast.import "AutoinstFunctions"
 
         # merge reg code if not defined in the profile but
@@ -198,6 +199,7 @@ module Registration
 
         products = Y2Packager::ProductControlProduct.products
 
+        # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
         Yast.import "AutoinstFunctions"
 
         selected_product = Yast::AutoinstFunctions.selected_product
