@@ -58,6 +58,9 @@ Requires:       yast2-slp >= 3.1.9
 Requires:       yast2-packager >= 4.2.27
 Requires:       yast2-update >= 3.1.36
 
+# new calls in AutoinstGeneral
+Conflicts:      autoyast2 < 4.3.23
+
 BuildArch:      noarch
 # SUSEConnect does not build for i586 and s390 and is not supported on those architectures
 # bsc#1088552
