@@ -175,18 +175,28 @@ module Registration
       # @return [Array<Hash>]
       def addons_from_system
         connect_status.activations.each_with_object([]) do |activation, all|
-          addon = activation&.service&.product
-          next if addon.nil? || addon.isbase
-          # TODO: release_type is missing
-          addon_data = {
-            "name"         => addon.identifier,
-            "version"      => addon.version,
-            "arch"         => addon.arch,
-            "release_type" => addon.release_type
-          }
-          addon_data["reg_code"] = activation.regcode if activation.regcode
-          all << addon_data
+          addon_data = addon_data_from_activation(activation)
+          all << addon_data if addon_data
         end
+      end
+
+      # Returns the addon data from an activation
+      #
+      # @param activation [SUSE::Connect::Remote::Activation] Add-on activation
+      # @return [Hash,nil] Add-on information to be exported in the profile or
+      #   nil if no add-on was related to the given activation
+      def addon_data_from_activation(activation)
+        addon = activation&.service&.product
+        return if addon.nil? || addon.isbase
+
+        addon_data = {
+          "name"         => addon.identifier,
+          "version"      => addon.version,
+          "arch"         => addon.arch,
+          "release_type" => addon.release_type
+        }
+        addon_data["reg_code"] = activation.regcode if activation.regcode
+        addon_data
       end
 
       # SUSE/Connect status information
