@@ -157,7 +157,7 @@ module Registration
           ret["reg_server_cert_fingerprint"] = reg_server_cert_fingerprint
         end
 
-        ret
+        ret.reject { |_k, v| v.empty? }
       end
 
       # Returns the registration code for the base system

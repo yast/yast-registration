@@ -75,12 +75,11 @@ describe Registration::Storage::Config do
       subject.email = "foo@example.com"
       subject.reg_code = "FOOBAR42"
 
-      expect(subject.export).to eq(config)
-    end
-
-    it "exports imported config unmodified" do
-      subject.import(config)
-      expect(subject.export).to eq(config)
+      expect(subject.export).to include(
+        "do_registration" => true,
+        "email"           => "foo@example.com",
+        "reg_code"        => "FOOBAR42"
+      )
     end
   end
 
