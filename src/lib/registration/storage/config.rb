@@ -174,16 +174,18 @@ module Registration
       #
       # @return [Array<Hash>]
       def addons_from_system
-        connect_status.activations.each_with_object([]) do |activation, addons|
+        connect_status.activations.each_with_object([]) do |activation, all|
           addon = activation&.service&.product
           next if addon.nil? || addon.isbase
           # TODO: release_type is missing
-          addons << {
-            "name"     => addon.identifier,
-            "version"  => addon.version,
-            "arch"     => addon.arch,
-            "reg_code" => activation.regcode
+          addon_data = {
+            "name"         => addon.identifier,
+            "version"      => addon.version,
+            "arch"         => addon.arch,
+            "release_type" => addon.release_type
           }
+          addon_data["reg_code"] = activation.regcode if activation.regcode
+          all << addon_data
         end
       end
 
