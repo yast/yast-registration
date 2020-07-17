@@ -110,7 +110,7 @@ describe Registration::Storage::Config do
     let(:registered) { true }
 
     let(:activations) do
-      [basesystem_activation, sles_activation]
+      [basesystem_activation, sles_activation, workstation_activation]
     end
 
     let(:config) do
@@ -121,7 +121,7 @@ describe Registration::Storage::Config do
       instance_double(
         SUSE::Connect::Status,
         activations:        activations,
-        activated_products: [sles_product, basesystem_product]
+        activated_products: [sles_product, basesystem_product, workstation_product]
       )
     end
 
@@ -146,8 +146,20 @@ describe Registration::Storage::Config do
       )
     end
 
+    let(:workstation_activation) do
+      SUSE::Connect::Remote::Activation.new(
+        "regcode" => "ABCDEFGHIJ",
+        "service" => {
+          "product" => {
+            "name" => "Workstation Extension", "identifier" => "sle-we"
+          }
+        }
+      )
+    end
+
     let(:sles_product) { sles_activation.service.product }
     let(:basesystem_product) { basesystem_activation.service.product }
+    let(:workstation_product) { workstation_activation.service.product }
 
     before do
       allow(SUSE::Connect::Status).to receive(:new).and_return(status)
@@ -163,7 +175,8 @@ describe Registration::Storage::Config do
     it "includes the addons but not the base product" do
       subject.read
       expect(subject.addons).to contain_exactly(
-        a_hash_including("name" => "sle-basesystem")
+        a_hash_including("name" => "sle-basesystem"),
+        a_hash_including("name" => "sle-we", "reg_code" => "ABCDEFGHIJ")
       )
     end
 
