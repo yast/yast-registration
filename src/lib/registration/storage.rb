@@ -31,9 +31,11 @@ module Registration
   # a module holding data needed during (auto)installation
   module Storage
     # storage for changed repositories
-    class RegCodes < Struct.new(:reg_codes)
+    class RegCodes
       include Singleton
       include RegistrationCodesLoader
+
+      attr_accessor :reg_codes
 
       def initialize
         self.reg_codes = if Stage.initial
@@ -60,10 +62,11 @@ module Registration
       end
     end
 
-    class Cache < Struct.new(:first_run, :addon_services,
-      :reg_url, :reg_url_cached, :rollback, :upgrade_failed)
-
+    class Cache
       include Singleton
+
+      attr_accessor :first_run, :addon_services,
+        :reg_url, :reg_url_cached, :rollback, :upgrade_failed
 
       def initialize
         self.addon_services = []
@@ -74,8 +77,10 @@ module Registration
 
     # remember the details about SSL verification failure
     # the attributes are read from the SSL error context
-    class SSLErrors < Struct.new(:ssl_error_code, :ssl_error_msg, :ssl_failed_cert)
+    class SSLErrors
       include Singleton
+
+      attr_accessor :ssl_error_code, :ssl_error_msg, :ssl_failed_cert
 
       def reset
         self.ssl_error_code = nil
