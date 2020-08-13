@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Aug 13 11:24:33 UTC 2020 - Ladislav Slezák <lslezak@suse.cz>
+
+- Improved skipping message in the first boot mode, the first boot
+  workflow might not contain the add-on module in the next step
+  (bsc#1174467)
+- 4.3.7
+
+-------------------------------------------------------------------
 Mon Aug 10 16:01:31 CEST 2020 - schubi@suse.de
 
 - AutoYaST: Added supplements: autoyast(suse_register) into the spec file
