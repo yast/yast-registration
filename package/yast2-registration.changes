@@ -1,4 +1,73 @@
 -------------------------------------------------------------------
+Mon Aug 24 11:31:58 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- AutoYaST: the release_type element is not mandatory
+  (bsc#1175682).
+- 4.3.8
+
+-------------------------------------------------------------------
+Thu Aug 13 11:24:33 UTC 2020 - Ladislav Slezák <lslezak@suse.cz>
+
+- Improved skipping message in the first boot mode, the first boot
+  workflow might not contain the add-on module in the next step
+  (bsc#1174467)
+- 4.3.7
+
+-------------------------------------------------------------------
+Mon Aug 10 16:01:31 CEST 2020 - schubi@suse.de
+
+- AutoYaST: Added supplements: autoyast(suse_register) into the spec file
+  in order to install this packages if the section has been defined
+  in the AY configuration file (bsc#1146494).
+- 4.3.6
+
+-------------------------------------------------------------------
+Tue Jul 28 07:20:28 UTC 2020 - Josef Reidinger <jreidinger@suse.com>
+
+- Handle exceptions when parsing xml file (related to bsc#1170886)
+- 4.3.5
+
+-------------------------------------------------------------------
+Fri Jul 17 10:54:41 UTC 2020 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Export the registration settings in the <suse_register/>
+  section when cloning a registered system (bsc#1174202).
+- 4.3.4
+
+-------------------------------------------------------------------
+Wed Jul 15 15:09:50 UTC 2020 - Josef Reidinger <jreidinger@suse.com>
+
+- Do not use Profile.current unless necessary (bsc#1174173)
+- 4.3.3
+
+-------------------------------------------------------------------
+Thu Jul  9 10:31:17 CEST 2020 - schubi@suse.de
+
+- Evaluating addon-list: Uses version without release for
+  connecting SCC (bsc#1162755).
+- 4.3.2
+
+-------------------------------------------------------------------
+Thu May 28 10:50:51 UTC 2020 - Martin Vidner <mvidner@suse.com>
+
+- Declining/refusal of an addon license means canceling all addons.
+  (bsc#1169577)
+- 4.3.1
+
+-------------------------------------------------------------------
+Tue May 12 14:43:44 UTC 2020 - josef Reidinger <jreidinger@localhost>
+
+- Autoyast schema: Allow optional types for string and map objects
+  (bsc#1170886)
+- 4.3.0
+
+-------------------------------------------------------------------
+Thu Apr  9 12:18:33 UTC 2020 - Stefan Hundhammer <shundhammer@suse.com>
+
+- Crash fix: Added missing require (bsc#1167945)
+- 4.2.40
+
+-------------------------------------------------------------------
 Thu Mar 26 12:07:36 UTC 2020 - David Diaz <dgonzalez@suse.com>
 
 - Reverts changes made in 4.2.36 to improve the addons selection,

@@ -143,6 +143,12 @@ describe Registration::RegistrationCodesLoader do
       expect(subject.reg_codes_from_xml("/etc")).to eq(nil)
     end
 
+    it "returns nil if xml is not valid" do
+      allow(Yast::XML).to receive(:XMLToYCPFile).and_raise(Yast::XMLDeserializationError)
+      filename = fixtures_file("regcodes.xml")
+      expect(subject.reg_codes_from_xml(filename)).to eq nil
+    end
+
     it "parses a valid fixture" do
       filename = fixtures_file("regcodes.xml")
       expect(subject.reg_codes_from_xml(filename)).to eq(valid_fixture_codes)

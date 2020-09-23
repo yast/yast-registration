@@ -14,6 +14,7 @@
 
 require "yast"
 require "yast/suse_connect"
+require "registration/sw_mgmt"
 
 module Registration
   module Clients

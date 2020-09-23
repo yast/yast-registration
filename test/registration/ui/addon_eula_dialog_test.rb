@@ -57,7 +57,7 @@ describe Registration::UI::AddonEulaDialog do
 
     context "when there are EULA acceptances pending" do
       let(:addons) { [addon_with_eula, second_addon_with_eula] }
-      let(:first_dialog_response) { :refused }
+      let(:first_dialog_response) { :accepted }
       let(:second_dialog_response) { :accepted }
 
       before do
@@ -76,8 +76,8 @@ describe Registration::UI::AddonEulaDialog do
       context "and the user wants to abort" do
         let(:first_dialog_response) { :abort }
 
-        it "returns :abort" do
-          expect(subject.run).to eq(:abort)
+        it "returns :back anyway" do
+          expect(subject.run).to eq(:back)
         end
       end
 
@@ -124,15 +124,15 @@ describe Registration::UI::AddonEulaDialog do
 
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
-          .and_return(:refused)
+          .and_return(:abort)
       end
 
       it "does not set it as accepted" do
         expect(product_license).to_not receive(:accept!)
       end
 
-      it "returns :next" do
-        expect(dialog.run).to eq(:next)
+      it "returns :back" do
+        expect(dialog.run).to eq(:back)
       end
     end
   end
@@ -198,8 +198,8 @@ describe Registration::UI::AddonEulaDialog do
     context "when the license was previously accepted" do
       let(:accepted?) { true }
 
-      it "returns :next" do
-        expect(dialog.send(:accept_eula, addon)).to eq(:next)
+      it "returns :accepted" do
+        expect(dialog.send(:accept_eula, addon)).to eq(:accepted)
       end
 
       it "does not show the eula" do

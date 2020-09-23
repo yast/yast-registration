@@ -47,7 +47,6 @@ Yast.import "Wizard"
 Yast.import "Label"
 Yast.import "Report"
 Yast.import "Popup"
-Yast.import "Profile"
 Yast.import "Packages"
 Yast.import "Report"
 Yast.import "Installation"
@@ -90,6 +89,7 @@ module Registration
         # if there is no registration section like can happen during auto upgrade
         return unless settings
 
+        # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
         Yast.import "AutoinstFunctions"
 
         # merge reg code if not defined in the profile but
@@ -147,8 +147,8 @@ module Registration
       end
 
       def read
-        log.error "Cloning is not supported by this YaST module"
-        false
+        @config.read
+        true
       end
 
       # return extra packages needed by this module (none so far)
@@ -198,7 +198,17 @@ module Registration
         Yast::Packages.ImportGPGKeys
 
         products = Y2Packager::ProductControlProduct.products
-        ay_product = Yast::Profile.current.fetch("software", {}).fetch("products", []).first
+
+        # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
+        Yast.import "AutoinstFunctions"
+
+        selected_product = Yast::AutoinstFunctions.selected_product
+        log.info "selected product #{selected_product.inspect}"
+        ay_product = if selected_product.respond_to?(:name)
+          selected_product.name
+        else
+          selected_product.details.product
+        end
 
         if !ay_product
           # TRANSLATORS: error message, %s is the XML path, e.g. "software/products"

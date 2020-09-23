@@ -34,6 +34,7 @@ module Registration
   module RegistrationCodesLoader
     include Yast::I18n # missing in yast2-update
     include Yast::Transfer::FileFromUrl
+    include Yast::Logger
 
     REGCODES_NAME_HANDLERS = {
       "regcodes.xml" => :reg_codes_from_xml,
@@ -83,6 +84,9 @@ module Registration
       return nil unless File.readable?(filename) && File.file?(filename)
       xml_hash = Yast::XML.XMLToYCPFile(filename)
       parse_xml(xml_hash)
+    rescue Yast::XMLDeserializationError => e
+      log.error "Invalid reg codes XML: #{e.inspect}"
+      return nil
     end
 
     # @param xml_hash [Hash] as used in AY and returned by Yast::XML.XMLToYCPFile

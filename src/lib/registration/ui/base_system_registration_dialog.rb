@@ -424,8 +424,20 @@ module Registration
       def default_skipping_text
         # TRANSLATORS:
         # Popup question: confirm skipping the registration on the Full medium
-        _("<p>You are skipping registration. Without registration the system\n" \
-          "will not have access to updates and security fixes.</p>")
+        "<p>" + _("You are skipping registration.") + medium_access_text + "</p>" +
+          # TRANSLATORS:
+          # Popup question: confirm skipping the registration on the Full medium
+          _("<p>Without registration the system\n" \
+            "will not have access to updates and security fixes.</p>")
+      end
+
+      def medium_access_text
+        # in the firstboot mode the add-on module might be skipped,
+        # do not display this part there
+        return "" if Stage.firstboot
+        # TRANSLATORS:
+        # Popup question: confirm skipping the registration on the Full medium
+        " " + _("Please configure access to packages medium in the next step.")
       end
 
       # the warning for the Online media

@@ -51,8 +51,9 @@ describe Registration::Clients::SCCAuto do
   end
 
   describe "#read" do
-    it "returns false" do
-      expect(subject.read).to eq false
+    it "returns true" do
+      expect(config).to receive(:read)
+      expect(subject.read).to eq true
     end
   end
 
