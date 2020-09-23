@@ -427,8 +427,8 @@ module Registration
         "<p>" + _("You are skipping registration.") + medium_access_text + "</p>" +
           # TRANSLATORS:
           # Popup question: confirm skipping the registration on the Full medium
-          _("<p>Without registration update-channels will not be configured.\n"\
-            "This will disable the updates and security fixes.</p>")
+          _("<p>Without registration the system\n" \
+            "will not have access to updates and security fixes.</p>")
       end
 
       def medium_access_text
@@ -463,8 +463,8 @@ module Registration
 
           # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
           warning += "\n" +
-            _("<p>However, without registration the system will not have access\n"  \
-                "to the updates and security fixes.</p>")
+            _("<p>However, without registration the system will not have access\n" \
+              "to updates and security fixes.</p>")
         end
 
         warning
