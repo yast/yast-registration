@@ -563,13 +563,24 @@ module Registration
       end
 
       # check the system status at upgrade and return the symbol for the next step
-      # @return [Symabol] workflow symbol, :skip => do not use the SCC/SMT/RMT upgrade
+      # @return [Symbol] workflow symbol, :skip => do not use the SCC/SMT/RMT upgrade
       #   (unregistered system or explicitly requested by user), :next =>
       #   continue with the SCC/SMT/RMT based upgrade
       def system_upgrade_check
         log.info "System upgrade mode detected"
         # media based upgrade requested by user
         if Yast::Linuxrc.InstallInf("MediaUpgrade") == "1"
+          # we cannot do medium based upgrade using the Online medium,
+          # it does not contain any packages
+          if Y2Packager::MediumType.online?
+            log.warn "The Online medium cannot be used with the media_upgrade=1 boot option"
+            Yast::Popup.LongMessage(online_media_upgrade)
+            return :abort
+          end
+
+          # add the Full medium base product repository
+          add_offline_base_product
+
           explicit_media_upgrade
           return :skip
         # the system is registered, continue with the SCC/SMT/RMT based upgrade
@@ -751,6 +762,20 @@ module Registration
           _("<p>Please use Full media instead of Online one.</p>") +
           # TRANSLATORS: Unregistered system message (3/3)
           _("<p>Another option is booting the original system and registering it.</p>")
+      end
+
+      # Informative message
+      # @return [String] translated message
+      def online_media_upgrade
+        # TRANSLATORS: Media upgrade forced but the Online medium was detected (1/2)
+        #   Message displayed during upgrade when the Online medium is used
+        #   with the "media_upgrade=1" boot option. The Online medium does not
+        #   contain any packages and it cannot be used in this case, Full medium
+        #   is required. Use the RichText format.
+        _("<h2>Online Medium</h2><p>The system cannot be upgraded using the Online " \
+          "medium, that medium does not provide any packages to install.</p>") +
+          # TRANSLATORS: Force media upgrade, Online medium detected (2/2)
+          _("<p>Please use the Full medium instead of the Online.</p>")
       end
 
       # Informative message
