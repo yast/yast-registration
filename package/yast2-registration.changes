@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct  1 07:00:08 UTC 2020 - Ladislav Slezák <lslezak@suse.cz>
+
+- Fixed upgrade using the Full medium with the "media_upgrade=1"
+  boot option (bsc#1176563)
+- 4.2.43
+
+-------------------------------------------------------------------
 Thu Jul  9 10:31:17 CEST 2020 - schubi@suse.de
 
 - Evaluating addon-list: Uses version without release for
