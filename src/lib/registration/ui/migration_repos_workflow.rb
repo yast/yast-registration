@@ -772,8 +772,9 @@ module Registration
         #   with the "media_upgrade=1" boot option. The Online medium does not
         #   contain any packages and it cannot be used in this case, Full medium
         #   is required. Use the RichText format.
-        _("<h2>Online Medium</h2><p>The system cannot be upgraded using the Online " \
-          "medium, that medium does not provide any packages to install.</p>") +
+        _("<h2>Online Medium</h2><p>The media based upgrade was requested, "\
+          "but you are using the Online medium which does not provide any packages "\
+          "to install.</p>") +
           # TRANSLATORS: Force media upgrade, Online medium detected (2/2)
           _("<p>Please use the Full medium instead of the Online.</p>")
       end
