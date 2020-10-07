@@ -81,6 +81,17 @@ describe Registration::Storage::Config do
         "reg_code"        => "FOOBAR42"
       )
     end
+
+    context "when the email is nil" do
+      before do
+        subject.do_registration = true
+        subject.email = nil
+      end
+
+      it "does not include the email" do
+        expect(subject.export.keys).to_not include("email")
+      end
+    end
   end
 
   describe "#import" do
