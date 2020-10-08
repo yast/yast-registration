@@ -73,11 +73,10 @@ module Registration
         ret.merge!(
           "reg_server"      => reg_server,
           "slp_discovery"   => slp_discovery,
-          "email"           => email,
           "reg_code"        => reg_code,
           "install_updates" => install_updates
         )
-
+        ret["email"] = email if email
         ret["addons"] = export_addons
         ret.merge!(export_ssl_config)
 
