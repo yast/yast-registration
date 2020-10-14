@@ -227,7 +227,8 @@ module Yast
 
       log.info "The system is already registered, displaying registered dialog"
       ::Registration::UI::RegisteredSystemDialog.run(
-        extensions_enabled: !Registration::Addon.find_all(@registration).empty?)
+        extensions_enabled: !Registration::Addon.find_all(@registration).empty?
+      )
     end
 
     # display EULAs for the selected addons
