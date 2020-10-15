@@ -23,6 +23,7 @@ describe "scc client" do
   context "the system is already registered" do
     before do
       expect(Registration::Registration).to receive(:is_registered?).and_return(true)
+      expect(Registration::Addon).to receive(:find_all).and_return([])
     end
 
     it "returns :abort when closing the status dialog" do

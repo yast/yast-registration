@@ -145,6 +145,11 @@ module Yast
       # FIXME: available_addons is called just to fill cache with popup
       return :cancel if get_available_addons == :cancel
 
+      if Registration::Addon.find_all(@registration).empty?
+        log.info("Skipping an empty add on selection screen.")
+        return :skip
+      end
+
       # FIXME: workaround to reference between old way and new storage in Addon metaclass
       @selected_addons = Registration::Addon.selected
       ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
@@ -221,7 +226,9 @@ module Yast
       return :register unless ::Registration::Registration.is_registered?
 
       log.info "The system is already registered, displaying registered dialog"
-      ::Registration::UI::RegisteredSystemDialog.run
+      ::Registration::UI::RegisteredSystemDialog.run(
+        extensions_enabled: !Registration::Addon.find_all(@registration).empty?
+      )
     end
 
     # display EULAs for the selected addons
