@@ -18,10 +18,12 @@ module Registration
       Yast.import "UI"
 
       # displays and run the status dialog for an already registered system
+      #
+      # @param extensions_enabled [Boolean] select extention buttom enabled
       # @return [Symbol] user input
-      def self.run
+      def self.run(extensions_enabled: true)
         dialog = RegisteredSystemDialog.new
-        dialog.run
+        dialog.run(extensions_enabled: extensions_enabled)
       end
 
       # the constructor
@@ -30,8 +32,10 @@ module Registration
       end
 
       # display and run the dialog
+      #
+      # @param extensions_enabled [Boolean] select extention buttom enabled
       # @return [Symbol] user input
-      def run
+      def run(extensions_enabled: true)
         Wizard.SetContents(
           # dialog title
           _("Registration"),
@@ -46,6 +50,7 @@ module Registration
           true
         )
 
+        Yast::UI.ChangeWidget(Id(:extensions), :Enabled, extensions_enabled)
         Wizard.SetNextButton(:next, Label.FinishButton) if Mode.normal
 
         continue_buttons = [:next, :back, :cancel, :abort, :register, :extensions]
