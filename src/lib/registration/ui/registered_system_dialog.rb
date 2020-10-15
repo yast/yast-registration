@@ -19,7 +19,7 @@ module Registration
 
       # displays and run the status dialog for an already registered system
       #
-      # @param extensions_enabled [Boolean] select extention buttom enabled
+      # @param extensions_enabled [Boolean] select extension button enabled
       # @return [Symbol] user input
       def self.run(extensions_enabled: true)
         dialog = RegisteredSystemDialog.new
@@ -33,7 +33,7 @@ module Registration
 
       # display and run the dialog
       #
-      # @param extensions_enabled [Boolean] select extention buttom enabled
+      # @param extensions_enabled [Boolean] select extension button enabled
       # @return [Symbol] user input
       def run(extensions_enabled: true)
         Wizard.SetContents(
