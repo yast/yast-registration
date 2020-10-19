@@ -21,6 +21,8 @@ module Registration
     attr_accessor :requested_addons, :selected_addons
 
     Yast.import "Report"
+    Yast.import "Pkg"
+    Yast.import "Arch"
 
     # Constructor
     # @param requested_addons [Array<Hash<String,String>>] the addons configuration
@@ -64,9 +66,23 @@ module Registration
     def select_addons(all_addons)
       # select the requested addons from the AY profile
       requested_addons.each do |addon|
-        server_addon = all_addons.find do |a|
-          a.identifier == addon["name"] && a.version == addon["version"] &&
-            a.arch == addon["arch"]
+        requested_arch = addon["arch"] || Yast::Arch.architecture
+        unless addon["version"]
+          # Search the newest addon with the same name and architecture if the
+          # version has not been defined in the AY configuration file.
+          log.info("Select addon with higest version number: #{addon["name"]}-#{addon["arch"]}")
+          server_addons = all_addons.select do |a|
+            a.identifier == addon["name"] && a.arch == requested_arch
+          end
+          server_addon = server_addons.max do |b, c|
+            Yast::Pkg.CompareVersions(b["version"], c["version"])
+          end
+        else
+          log.info("Select addon: #{addon.inspect}")
+          server_addon = all_addons.find do |a|
+            a.identifier == addon["name"] && a.version == addon["version"] &&
+              a.arch == requested_arch
+          end
         end
 
         if server_addon
