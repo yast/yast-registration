@@ -25,8 +25,8 @@ addon = element addon {
   MAP,
   (
     addon_name &
-    addon_version &
-    addon_arch &
+    addon_version? &
+    addon_arch? &
     addon_release_type? &
     addon_reg_code?
   )

@@ -12,6 +12,7 @@
 #
 
 require "yast"
+require "y2packager/product_control_product"
 
 module Registration
   # This class handles the AutoYaST addons
@@ -21,6 +22,8 @@ module Registration
     attr_accessor :requested_addons, :selected_addons
 
     Yast.import "Report"
+    Yast.import "Pkg"
+    Yast.import "Arch"
 
     # Constructor
     # @param requested_addons [Array<Hash<String,String>>] the addons configuration
@@ -64,9 +67,20 @@ module Registration
     def select_addons(all_addons)
       # select the requested addons from the AY profile
       requested_addons.each do |addon|
-        server_addon = all_addons.find do |a|
-          a.identifier == addon["name"] && a.version == addon["version"] &&
-            a.arch == addon["arch"]
+        # Set architecture if it is not defined in the requested addon
+        requested_arch = addon["arch"] ||
+          Y2Packager::ProductControlProduct::REG_ARCH[Yast::Arch.architecture] ||
+          Yast::Arch.architecture
+
+        log.info("Select addon: #{addon.inspect}")
+        server_addons = all_addons.select do |a|
+          a.identifier == addon["name"] &&
+            (!addon["version"] || a.version == addon["version"]) && # version defined ?
+            a.arch == requested_arch
+        end
+        # Select the highest version
+        server_addon = server_addons.max do |b, c|
+          Yast::Pkg.CompareVersions(b.version, c.version)
         end
 
         if server_addon
