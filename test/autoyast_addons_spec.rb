@@ -32,6 +32,11 @@ describe Registration::AutoyastAddons do
     ["name" => "non-existing-module", "version" => "42", "arch" => "x86_64"]
   end
 
+  # only addon name is given
+  let(:addons_only_name) do
+    [{ "name" => "sle-we" }]
+  end
+
   # the addons to register in the expcted correct order
   let(:expected_registration_order) { ["sle-module-basesystem", "sle-module-desktop-applications"] }
 
@@ -65,6 +70,16 @@ describe Registration::AutoyastAddons do
 
       ayaddons = Registration::AutoyastAddons.new(missing_addons, registration)
       ayaddons.select
+    end
+
+    it "selects the newest available addon" do
+      expect(Yast::Arch).to receive(:architecture).and_return("x86_64")
+      ayaddons = Registration::AutoyastAddons.new(addons_only_name, registration)
+      ayaddons.select
+
+      addon = ayaddons.selected_addons.find { |a| a.identifier == addons_only_name.first["name"] }
+      expect(addon.identifier).to eq(addons_only_name.first["name"])
+      expect(addon.version).to eq("16")
     end
   end
 
