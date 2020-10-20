@@ -68,22 +68,16 @@ module Registration
       requested_addons.each do |addon|
         # Set architecture if it is not defined in the requested addon
         requested_arch = addon["arch"] || Yast::Arch.architecture
-        if addon["version"]
-          log.info("Select addon: #{addon.inspect}")
-          server_addon = all_addons.find do |a|
-            a.identifier == addon["name"] && a.version == addon["version"] &&
-              a.arch == requested_arch
-          end
-        else
-          # Search the newest addon with the same name and architecture if the
-          # version has not been defined in the AY configuration file.
-          log.info("Select addon with higest version number: #{addon["name"]}-#{addon["arch"]}")
-          server_addons = all_addons.select do |a|
-            a.identifier == addon["name"] && a.arch == requested_arch
-          end
-          server_addon = server_addons.max do |b, c|
-            Yast::Pkg.CompareVersions(b.version, c.version)
-          end
+
+        log.info("Select addon: #{addon.inspect}")
+        server_addons = all_addons.select do |a|
+          a.identifier == addon["name"] &&
+            (!addon["version"] || a.version == addon["version"]) && # version defined ?
+            a.arch == requested_arch
+        end
+        # Select the highest version
+        server_addon = server_addons.max do |b, c|
+          Yast::Pkg.CompareVersions(b.version, c.version)
         end
 
         if server_addon
