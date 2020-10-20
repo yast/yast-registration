@@ -66,6 +66,7 @@ module Registration
     def select_addons(all_addons)
       # select the requested addons from the AY profile
       requested_addons.each do |addon|
+        # Set architecture if it is not defined in the requested addon
         requested_arch = addon["arch"] || Yast::Arch.architecture
         if addon["version"]
           log.info("Select addon: #{addon.inspect}")
