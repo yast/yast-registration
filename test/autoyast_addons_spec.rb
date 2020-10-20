@@ -73,7 +73,7 @@ describe Registration::AutoyastAddons do
     end
 
     it "selects the newest available addon" do
-      expect(Yast::Arch).to receive(:architecture).and_return("x86_64")
+      expect(Yast::Arch).to receive(:architecture).twice.and_return("x86_64")
       ayaddons = Registration::AutoyastAddons.new(addons_only_name, registration)
       ayaddons.select
 
