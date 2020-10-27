@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct 27 15:50:31 UTC 2020 - Josef Reidinger <jreidinger@suse.com>
+
+- Fix the latest change to work in firstboot when system is
+  registered (bsc#1178128)
+- 4.2.45
+
+-------------------------------------------------------------------
 Wed Oct 14 15:26:24 CEST 2020 - schubi@suse.de
 
 - Showing add-on selection screen only if they are available
