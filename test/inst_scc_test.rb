@@ -48,19 +48,6 @@ describe Yast::InstSccClient do
 
       expect(subject.main).to eq(:abort)
     end
-
-    it "goes back to initial screen when aborting selection of url" do
-      # User clicks on 'select extensions' first time the initial screen is
-      # displayed and 'finish' the second time
-      expect(Yast::UI).to receive(:UserInput).and_return(:extensions, :next)
-      # User cancels the selection of registration url
-      expect(subject).to receive(:init_registration).and_return(:cancel)
-      # Initial screen is displayed twice
-      expect(subject).to receive(:registration_check)
-        .twice.and_call_original
-
-      expect(subject.main).to eq(:next)
-    end
   end
 
   context "the system is updating reusing old credentials" do
