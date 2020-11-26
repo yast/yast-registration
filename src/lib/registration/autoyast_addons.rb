@@ -100,9 +100,9 @@ module Registration
     def report_missing_addon(addon)
       log.error("Unavailable addon: #{addon.inspect}")
       Yast::Report.Error(
-        # TRANSLATORS: %s is an addon name (including version and arch)
+        # TRANSLATORS: %s is an add-on name (including version and arch)
         # from the AutoYast XML installation profile
-        _("Addon '%s'\nis not available for registration.") % \
+        _("Add-on '%s'\nis not available for registration.") % \
           "#{addon["name"]}-#{addon["version"]}-#{addon["arch"]}"
       )
     end
@@ -115,7 +115,7 @@ module Registration
       # include also the automatically selected dependent modules/extensions
       ret = Addon.registration_order(Addon.selected + Addon.auto_selected)
 
-      log.info("Addons to register: #{ret.map(&:label).inspect}")
+      log.info("Add-ons to register: #{ret.map(&:label).inspect}")
 
       ret
     end

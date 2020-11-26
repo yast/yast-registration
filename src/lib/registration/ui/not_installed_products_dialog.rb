@@ -101,9 +101,9 @@ module Registration
           case ui
           when :install
             not_installed = install_products
-            # TRANSLATORS: Popup error showing all the addons that weren't
-            # installed, %s is the addons identifiers.
-            Yast::Popup.Error(_("These addons were not installed:\n\n%s") %
+            # TRANSLATORS: Popup error showing all the add-ons that weren't
+            # installed, %s is the add-ons identifiers.
+            Yast::Popup.Error(_("These add-ons were not installed:\n\n%s") %
                               not_installed.join("\n")) unless not_installed.empty?
             update_summary
           when :sync
@@ -154,7 +154,7 @@ module Registration
       def not_installed_addons_summary
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (1/2)
-        summary = _("<p>The addons listed below are registered but not installed: </p>")
+        summary = _("<p>The add-ons listed below are registered but not installed: </p>")
 
         summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join("")}</ul>"
 
