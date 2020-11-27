@@ -291,11 +291,11 @@ module Registration
 
       addon_names = addons.map { |a| a["display_name"] }
 
-      # TRANSLATORS: Popup question, add registered but not installed addons to
+      # TRANSLATORS: Popup question, add registered but not installed add-ons to
       # the list of products that will be downgraded.
       # %s are all the product names splited by '\n' e.g
       # "SUSE Linux Enterprise Server 12\nSUSE Enterprise Storage 1 x86_64"
-      msg = _("The addons listed below are registered but not installed: \n\n%s\n\n" \
+      msg = _("The add-ons listed below are registered but not installed: \n\n%s\n\n" \
               "Would you like to downgrade also them in the registration server? \n" \
               "If not they will be deactivated. ") % addon_names.join("\n")
 
