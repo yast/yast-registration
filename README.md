@@ -1,8 +1,10 @@
 YaST - Registration Module
 ========================
 
-[![Travis Build Status](https://travis-ci.org/yast/yast-registration.svg?branch=master)](https://travis-ci.org/yast/yast-registration)
-[![Jenkins Build Status](http://ci.opensuse.org/buildStatus/icon?job=yast-registration-master)](http://ci.opensuse.org/view/Yast/job/yast-registration-master/)
+[![Workflow Status](https://github.com/yast/yast-registration/workflows/CI/badge.svg?branch=master)](
+https://github.com/yast/yast-registration/actions?query=branch%3Amaster)
+[![Jenkins Status](https://ci.opensuse.org/buildStatus/icon?job=yast-yast-registration-master)](
+https://ci.opensuse.org/view/Yast/job/yast-yast-registration-master/)
 [![Coverage Status](https://img.shields.io/coveralls/yast/yast-registration.svg)](https://coveralls.io/r/yast/yast-registration?branch=master)
 [![Code Climate](https://codeclimate.com/github/yast/yast-registration/badges/gpa.svg)](https://codeclimate.com/github/yast/yast-registration)
 [![Inline docs](http://inch-ci.org/github/yast/yast-registration.svg?branch=master)](http://inch-ci.org/github/yast/yast-registration)
