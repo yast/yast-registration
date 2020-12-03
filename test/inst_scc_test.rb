@@ -17,6 +17,8 @@ describe Yast::InstSccClient do
     allow(Yast::Mode).to receive(:update).and_return(false)
     allow(Yast::SlpService).to receive(:all).and_return([])
     allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
+    allow(subject).to receive(:init_registration)
+    allow(Registration::Addon).to receive(:find_all).and_return([])
   end
 
   context "the system is already registered" do
@@ -35,16 +37,13 @@ describe Yast::InstSccClient do
 
     it "displays an error when loading the available extensions fails" do
       error = "Invalid system credentials"
-      # click installing extensions, abort the workflow
-      expect(Yast::UI).to receive(:UserInput).and_return(:extensions, :abort)
 
       expect(Yast::Report).to receive(:Error) do |msg|
         # make sure the propoer error is displayed
         expect(msg).to include(error)
       end
 
-      expect_any_instance_of(Registration::RegistrationUI).to receive(:get_available_addons)
-        .and_raise(error)
+      expect(Registration::Addon).to receive(:find_all).and_raise(error)
 
       expect(subject.main).to eq(:abort)
     end

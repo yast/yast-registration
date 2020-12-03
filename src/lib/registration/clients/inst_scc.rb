@@ -228,8 +228,15 @@ module Yast
       log.info "The system is already registered, displaying registered dialog"
       # ensure that @registration is initialized
       return :cancel if init_registration == :cancel
+
+      extensions_enabled = true
+      success = Registration::ConnectHelpers.catch_registration_errors do
+        extensions_enabled = !Registration::Addon.find_all(@registration).empty?
+      end
+      return :abort unless success
+
       ::Registration::UI::RegisteredSystemDialog.run(
-        extensions_enabled: !Registration::Addon.find_all(@registration).empty?
+        extensions_enabled: extensions_enabled
       )
     end
 
