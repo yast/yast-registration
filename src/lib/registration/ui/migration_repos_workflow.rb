@@ -643,9 +643,9 @@ module Registration
       # for upgrade, select the new base product to install.
       def add_offline_base_product
         # find the installed base product
-        installed_base = Y2Packager::Resolvable.find(
-          kind: :product, status: :installed, type: "base"
-        ).first
+        installed = Y2Packager::Resolvable.find(kind: :product, status: :installed)
+        # Resolvable.find cannot filter by product type, run the filter here
+        installed_base = installed.find { |p| p.type == "base" }
 
         if !installed_base
           log.error("Installed base product not found")
