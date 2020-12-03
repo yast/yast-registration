@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Dec  2 14:20:56 UTC 2020 - Ladislav Slezák <lslezak@suse.cz>
+
+- Fixed finding the installed base product when doing upgrade
+  using the Full installation medium (bsc#1178652)
+- 4.2.46
+
+-------------------------------------------------------------------
 Tue Oct 27 15:50:31 UTC 2020 - Josef Reidinger <jreidinger@suse.com>
 
 - Fix the latest change to work in firstboot when system is
