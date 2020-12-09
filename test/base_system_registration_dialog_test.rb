@@ -209,7 +209,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
             it "reports the media name and the download url to the user" do
               expect(Yast2::Popup).to receive(:show).with(
-                /SLE-15-SP2-Full.*download.suse.com/m,
+                /This installation is online only/m,
                 anything
               ).and_return(true)
               expect(subject.run).to eq(:abort)
@@ -235,18 +235,6 @@ describe Registration::UI::BaseSystemRegistrationDialog do
               )
               expect(subject.run).to eq(:abort)
             end
-          end
-        end
-
-        context "Full installation medium" do
-          let(:online?) { false }
-
-          it "suggests selecting the repositories from the medium" do
-            expect(Yast2::Popup).to receive(:show).with(
-              /configure access to packages medium in the next step/, anything
-            )
-              .and_return(true)
-            expect(subject.run).to eq(:abort)
           end
         end
 
