@@ -424,20 +424,19 @@ module Registration
       def default_skipping_text
         # TRANSLATORS:
         # Popup question: confirm skipping the registration on the Full medium
-        _("<P>You are skipping registration. Without registration the system\n"\
-          "will not have access to updates and security fixes.</p>")
+        _("<p>System registration is required for updates and security fixes.\n"\
+          "Please confirm to proceed without updates.\n"\
+          "You may register at a later date for updates and security fixes.</p>")
       end
 
       # the warning for the Online media
       # @return [String]
       def online_skipping_text
         # TRANSLATORS:
-        # Popup question: confirm skipping the registration on the Online medium
-        _("<P>You are trying to skip registration. This media is an Online media\n"\
-          "only which does not contain any package repository. The repositories\n"\
-          "will be accessible after registering the system.\n"\
-          "So either you are registering your system or you are using a Full\n"\
-          "installation medium.</p>")
+        # Popup : Installation cannot be continued without registration.
+        _("<p>This installation is online only which requires registration for "\
+          "package repositories.\nFor installations without registration please "\
+          "install using full installation media.</p>")
       end
 
       # UI term for the network configuration button (or empty if not needed)
