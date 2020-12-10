@@ -196,52 +196,27 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         context "Online installation medium" do
           let(:online?) { true }
 
-          context "when full_system_media_name and full_system_download_url" \
-          " is defined in control.xml" do
-            before do
-              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-                .with("globals", "full_system_media_name")
-                .and_return("SLE-$os_release_version-Full")
-              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-                .with("globals", "full_system_download_url").and_return("https://download.suse.com")
-              allow(Yast::OSRelease).to receive(:ReleaseVersionHumanReadable).and_return("15-SP2")
-            end
-
-            it "reports the media name and the download url to the user" do
-              expect(Yast2::Popup).to receive(:show).with(
-                /This installation is online only/m,
-                anything
-              ).and_return(true)
-              expect(subject.run).to eq(:abort)
-            end
-          end
-
-          context "when full_system_media_name and full_system_download_url" \
-                  " is NOT defined in control.xml" do
-            before do
-              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-                .with("globals", "full_system_media_name").and_return("")
-              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-                .with("globals", "full_system_download_url").and_return("")
-            end
-
-            it "does not mention any media information" do
-              expect(Yast2::Popup).to receive(:show).with(
-                /repositories will be accessible after registering/, anything
-              )
-                .and_return(true)
-              expect(Yast2::Popup).not_to receive(:show).with(
-                /installation without registering/, anything
-              )
-              expect(subject.run).to eq(:abort)
-            end
+          it "reports that this is an online media only" do
+            expect(Yast2::Popup).to receive(:show).with(
+              /This installation is online only/m,
+              anything
+            ).and_return(true)
+            expect(subject.run).to eq(:abort)
           end
         end
 
+        context "Full installation medium" do
+          let(:online?) { false }
+
+          it "asks for confirmation to go on without updates" do
+            expect(Yast2::Popup).to receive(:show).with(/confirm to proceed without updates/, anything)
+            .and_return(true)            
+            expect(subject.run).to eq(:abort)
+          end
+        end      
+
         it "does not try to register the system and closes the dialog" do
           expect(registration_ui).to_not receive(:register_system_and_base_product)
-          expect(Yast2::Popup).to receive(:show).with(/confirm to proceed without updates/, anything)
-            .and_return(true)
           expect(subject.run).to eq(:abort)
         end
       end
