@@ -198,7 +198,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
           it "reports that this is an online media only" do
             expect(Yast2::Popup).to receive(:show).with(
-              /This installation is online only/m,
+              /This installation is online only/,
               anything
             ).and_return(true)
             expect(subject.run).to eq(:abort)
