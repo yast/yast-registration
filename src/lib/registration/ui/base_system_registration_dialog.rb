@@ -424,50 +424,19 @@ module Registration
       def default_skipping_text
         # TRANSLATORS:
         # Popup question: confirm skipping the registration on the Full medium
-        "<p>" + _("You are skipping registration.") + medium_access_text + "</p>" +
-          # TRANSLATORS:
-          # Popup question: confirm skipping the registration on the Full medium
-          _("<p>Without registration the system\n" \
-            "will not have access to updates and security fixes.</p>")
-      end
-
-      def medium_access_text
-        # in the firstboot mode the add-on module might be skipped,
-        # do not display this part there
-        return "" if Stage.firstboot
-        # TRANSLATORS:
-        # Popup question: confirm skipping the registration on the Full medium
-        " " + _("Please configure access to packages medium in the next step.")
+        _("<p>System registration is required for updates and security fixes.\n"\
+          "Please confirm to proceed without updates.\n"\
+          "You may register at a later date for updates and security fixes.</p>")
       end
 
       # the warning for the Online media
       # @return [String]
       def online_skipping_text
-        # TRANSLATORS: a popup message (1/3) the user wants to skip the registration,
-        # on the Online installation medium which is not possible
-        warning = _("<p>The installation medium does not contain any package\n" \
-          "repository, the repositories will be accessible after registering\n" \
-          "the system.</p>" \
-          "<p>Registration additionally enables access to the updates\n" \
-          "and security fixes.</p>")
-
-        # these cannot be nil
-        if !media_name.empty? && !download_url.empty?
-          # TRANSLATORS: a popup message (2/3) the user wants to skip the registration
-          # %{media_name} is the media name (e.g. SLE-15-SP2-Full),
-          # %{download_url} is an URL link (e.g. https://download.suse.com)
-          warning += "\n\n" +
-            _("<p>For installation without registering the system use the\n"\
-              "%{media_name} medium from %{download_url}.</p>") %
-            { media_name: media_name, download_url: download_url }
-
-          # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
-          warning += "\n" +
-            _("<p>However, without registration the system will not have access\n" \
-              "to updates and security fixes.</p>")
-        end
-
-        warning
+        # TRANSLATORS:
+        # Popup : Installation cannot be continued without registration.
+        _("<p>This installation is online only which requires registration for "\
+          "package repositories.\nFor installations without registration please "\
+          "install using full installation media.</p>")
       end
 
       # UI term for the network configuration button (or empty if not needed)
