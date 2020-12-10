@@ -210,12 +210,13 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
           it "asks for confirmation to go on without updates" do
             expect(Yast2::Popup).to receive(:show).with(/confirm to proceed without updates/, anything)
-            .and_return(true)            
+            .and_return(true)
             expect(subject.run).to eq(:abort)
           end
         end      
 
         it "does not try to register the system and closes the dialog" do
+          expect(Yast2::Popup).to receive(:show).and_return(true)       
           expect(registration_ui).to_not receive(:register_system_and_base_product)
           expect(subject.run).to eq(:abort)
         end
