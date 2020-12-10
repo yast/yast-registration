@@ -209,7 +209,8 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           let(:online?) { false }
 
           it "asks for confirmation to go on without updates" do
-            expect(Yast2::Popup).to receive(:show).with(/confirm to proceed without updates/, anything)
+            expect(Yast2::Popup).to receive(:show)
+              .with(/confirm to proceed without updates/, anything)
               .and_return(true)
             expect(subject.run).to eq(:abort)
           end
