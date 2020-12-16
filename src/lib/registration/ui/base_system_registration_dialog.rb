@@ -178,9 +178,9 @@ module Registration
         VBox(
           network_button,
           VStretch(),
-          product_details_widgets,
+          Left(product_details_widgets),
           VSpacing(Yast::UI.TextMode ? 1 : 0),
-          registration_widgets,
+          Left(registration_widgets),
           VStretch()
         )
       end
