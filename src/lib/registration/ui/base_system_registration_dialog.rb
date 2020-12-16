@@ -175,13 +175,14 @@ module Registration
       # content for the main registration dialog
       # @return [Yast::Term]  UI term
       def content
-        VBox(
-          network_button,
-          VStretch(),
-          Left(product_details_widgets),
-          VSpacing(Yast::UI.TextMode ? 1 : 0),
-          Left(registration_widgets),
-          VStretch()
+        MarginBox(5, 5,
+          VBox(
+            network_button,
+            VStretch(),
+            Left(product_details_widgets),
+            Left(registration_widgets),
+            VStretch()
+          )
         )
       end
 
