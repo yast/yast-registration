@@ -175,16 +175,18 @@ module Registration
       # content for the main registration dialog
       # @return [Yast::Term]  UI term
       def content
-        HBox(
-          HStretch(),
-          VBox(
-            network_button,
-            VStretch(),
-            Left(product_details_widgets),
-            Left(registration_widgets),
-            VStretch()
-          ),
-          HStretch()
+        VBox(
+          network_button,
+          HBox(
+            HStretch(),
+            VBox(
+              VStretch(),
+              Left(product_details_widgets),
+              Left(registration_widgets),
+              VStretch()
+            ),
+            HStretch()
+          )
         )
       end
 
