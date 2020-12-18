@@ -448,7 +448,7 @@ module Registration
 
         else
           # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
-          warning += _("For installations without registration please "\
+          warning += _("<p>For installations without registration please "\
             "install using full installation media.</p>")
         end
         warning
