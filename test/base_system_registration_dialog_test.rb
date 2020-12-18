@@ -196,6 +196,44 @@ describe Registration::UI::BaseSystemRegistrationDialog do
         context "Online installation medium" do
           let(:online?) { true }
 
+          context "when full_system_media_name and full_system_download_url" \
+            " is defined in control.xml" do
+            before do
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_media_name")
+                .and_return("SLE-$os_release_version-Full")
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_download_url").and_return("https://download.suse.com")
+              allow(Yast::OSRelease).to receive(:ReleaseVersionHumanReadable).and_return("15-SP2")
+            end
+
+            it "reports the media name and the download url to the user" do
+              expect(Yast2::Popup).to receive(:show).with(
+                /SLE-15-SP2-Full.*download.suse.com/m,
+                anything
+              ).and_return(true)
+              expect(subject.run).to eq(:abort)
+            end
+          end
+
+          context "when full_system_media_name and full_system_download_url" \
+                  " is NOT defined in control.xml" do
+            before do
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_media_name").and_return("")
+              allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+                .with("globals", "full_system_download_url").and_return("")
+            end
+
+            it "does not mention any media information" do
+              expect(Yast2::Popup).to receive(:show).with(
+                /install using full installation media/, anything
+              )
+                .and_return(true)
+              expect(subject.run).to eq(:abort)
+            end
+          end
+
           it "reports that this is an online media only" do
             expect(Yast2::Popup).to receive(:show).with(
               /This installation is online only/,

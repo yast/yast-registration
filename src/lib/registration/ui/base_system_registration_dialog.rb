@@ -433,10 +433,25 @@ module Registration
       # @return [String]
       def online_skipping_text
         # TRANSLATORS:
-        # Popup : Installation cannot be continued without registration.
-        _("<p>This installation is online only which requires registration for "\
-          "package repositories.\nFor installations without registration please "\
-          "install using full installation media.</p>")
+        # Popup (1/3) : Installation cannot be continued without registration.
+        warning = _("<p>This installation is online only which requires registration for "\
+                    "package repositories.</p>")
+
+        # these cannot be nil
+        if !media_name.empty? && !download_url.empty?
+          # TRANSLATORS: a popup message (2/3) the user wants to skip the registration
+          # %{media_name} is the media name (e.g. SLE-15-SP2-Full),
+          # %{download_url} is an URL link (e.g. https://download.suse.com)
+          warning += _("<p>For installation without registering the system please "\
+              "install using the %{media_name} installation media from %{download_url}.</p>") %
+            { media_name: media_name, download_url: download_url } # these cannot be nil
+
+        else
+          # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
+          warning += _("For installations without registration please "\
+            "install using full installation media.</p>")
+        end
+        warning
       end
 
       # UI term for the network configuration button (or empty if not needed)
