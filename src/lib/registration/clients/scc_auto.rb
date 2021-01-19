@@ -147,8 +147,9 @@ module Registration
       end
 
       def read
-        @config.read
-        true
+        ::Registration::ConnectHelpers.catch_registration_errors do
+          @config.read
+        end
       end
 
       # return extra packages needed by this module (none so far)
