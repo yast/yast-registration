@@ -15,6 +15,8 @@
 require "yast"
 require "yast/suse_connect"
 require "registration/sw_mgmt"
+require "registration/ssl_certificate"
+require "registration/ssl_certificate_details"
 
 module Registration
   module Clients
@@ -59,6 +61,8 @@ module Registration
           if File.exist?(cert_file)
             log.info("Importing the SSL certificate from the old system: (#{prefix})#{file} ...")
             cert = SslCertificate.load_file(cert_file)
+            # log the certificate details
+            log.info(SslCertificateDetails.new(cert).summary)
             target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
             cert.import_to_instsys(target_path)
           else
