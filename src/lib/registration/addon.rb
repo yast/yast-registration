@@ -37,9 +37,8 @@ module Registration
     class AddonsNotLoaded < StandardError; end
 
     class << self
-
       ADDON_FILE = "/var/log/YaST2/registration_addons.yml".freeze
-      
+
       # read the remote add-on from the registration server
       # @param registration [Registration::Registration] use this object for
       #  reading the remote add-ons
@@ -48,7 +47,7 @@ module Registration
         return @cached_addons if @cached_addons
 
         set_installation_info_callback
-        
+
         @cached_addons = load_addons(registration)
 
         dump_addons
@@ -135,11 +134,11 @@ module Registration
         result
       end
 
-   private
+    private
 
-      # Register callback for writing info to /var/log/YaST/installation_info   
+      # Register callback for writing info to /var/log/YaST/installation_info
       def set_installation_info_callback
-        func = -> do
+        func = lambda do
           ret = []
           if File.exist?(ADDON_FILE)
             addons = YAML.load_file(ADDON_FILE)
@@ -154,7 +153,7 @@ module Registration
           { "registration_addons" => ret }
         end
         ::Installation::InstallationInfo.instance.add(func)
-      end      
+      end
 
       # create an Addon from a SUSE::Connect::Product
       # @param root [SUSE::Connect::Product] the root add-on object
@@ -402,12 +401,12 @@ module Registration
       return unless File.writable?("/var/log/YaST2")
 
       require "yaml"
-      
+
       header = "# see " \
         "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
         "# for an example how to read this dump file\n"
       File.write(ADDON_FILE,
-                 header + @cached_addons.to_yaml)
+        header + @cached_addons.to_yaml)
     end
   end
 end
