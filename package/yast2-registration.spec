@@ -28,7 +28,7 @@ Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  update-desktop-files
 # callback for /var/log/YaST2/installation_info
-BuildRequires:  yast2 >= 4.3.55
+BuildRequires:  yast2 >= 4.3.56
 BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-slp >= 3.1.9
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
@@ -39,7 +39,7 @@ BuildRequires:  yast2-packager >= 4.2.37
 BuildRequires:  yast2-update >= 3.1.36
 
 # callback for /var/log/YaST2/installation_info
-Requires:       yast2 >= 4.3.55
+Requires:       yast2 >= 4.3.56
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
