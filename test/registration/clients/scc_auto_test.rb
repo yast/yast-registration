@@ -85,6 +85,8 @@ describe Registration::Clients::SCCAuto do
     before do
       Y2Packager::MediumType.type = :online
       allow(Y2Packager::ProductControlProduct).to receive(:products).and_return("SLES")
+      # clean cache
+      ::Registration::Storage::Cache.instance.addon_services = []
     end
 
     it "just returns true if config is not set to register and mode is not update" do
