@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb 15 17:39:06 UTC 2021 - Josef Reidinger <jreidinger@suse.com>
+
+- Adapted unit test to recent changes in Yast::Report (related to
+  bsc#1179893).
+- 4.3.20
+
+-------------------------------------------------------------------
 Mon Feb  8 17:06:54 UTC 2021 - Ladislav Slezák <lslezak@suse.cz>
 
 - Log details about the imported SSL certificate during migration
