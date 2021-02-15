@@ -63,6 +63,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(first_dialog_response, second_dialog_response)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       context "and the user wants to go back" do
@@ -104,6 +105,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(:accepted)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       it "sets it as accepted" do
@@ -125,6 +127,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(:abort)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       it "does not set it as accepted" do
@@ -164,10 +167,17 @@ describe Registration::UI::AddonEulaDialog do
     context "when the eula could not be downloaded" do
       before do
         allow(eula_downloader).to receive(:download).and_raise(StandardError)
+        allow(Yast::Report).to receive(:Error)
       end
 
       it "returns :back" do
         expect(dialog.send(:accept_eula, addon)).to eq(:back)
+      end
+
+      it "shows error" do
+        expect(Yast::Report).to receive(:Error)
+
+        dialog.send(:accept_eula, addon)
       end
     end
 
