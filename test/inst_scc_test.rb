@@ -56,6 +56,7 @@ describe Yast::InstSccClient do
     end
 
     it "switchs to manual registration when aborting selection of url" do
+      allow(Yast::Report).to receive(:Error)
       # User cancels the selection of registration url
       expect_any_instance_of(Registration::UI::RegistrationUpdateDialog).to receive(
         :init_registration

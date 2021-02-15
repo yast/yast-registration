@@ -211,6 +211,7 @@ describe Registration::UI::MigrationReposWorkflow do
       end
 
       it "reports error and indicates needed rollback when upgrading a product fails" do
+        expect(Yast::Report).to receive(:Error)
         # installed SLES12
         allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])

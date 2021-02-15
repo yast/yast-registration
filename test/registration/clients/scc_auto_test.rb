@@ -99,6 +99,10 @@ describe Registration::Clients::SCCAuto do
       allow(Yast::Mode).to receive(:normal).and_return(true)
       expect(::Registration::SwMgmt).to receive(:init)
 
+      allow(subject).to receive(:registration_ui).and_return(
+        double(register_system_and_base_product: true, disable_update_repos: true)
+      )
+
       subject.write
     end
 
