@@ -98,6 +98,7 @@ describe Registration::Clients::SCCAuto do
 
     it "initializes software managent in normal mode" do
       config.do_registration = true
+      allow(subject).to receive(:register_addons) # do not test addons here. It is done below
       allow(Yast::Mode).to receive(:normal).and_return(true)
       expect(::Registration::SwMgmt).to receive(:init)
 
