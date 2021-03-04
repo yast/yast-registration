@@ -2,7 +2,9 @@
 
 require_relative "spec_helper"
 
-describe "Registration::Helpers" do
+describe Registration::Helpers do
+  subject(:helpers) { described_class }
+
   describe ".service_description" do
     let(:slp_url) { "https://example.com/registration" }
     let(:slp_attributes) { double }
@@ -271,6 +273,52 @@ describe "Registration::Helpers" do
       it "Reports an error about missing base product" do
         expect(Yast::Report).to receive(:Error).with(/Make sure a product is installed/)
         Registration::Helpers.report_no_base_product
+      end
+    end
+  end
+
+  describe ".registration_allow?" do
+    let(:mode) { "normal" }
+    let(:stage) { "initial" }
+    let(:registered) { false }
+
+    before do
+      allow(Yast::Mode).to receive(:mode).and_return(mode)
+      allow(Yast::Stage).to receive(:stage).and_return(stage)
+      allow(Registration::Registration).to receive(:is_registered?).and_return(registered)
+    end
+
+    context "when system is not registered yet" do
+      it "returns true" do
+        expect(helpers.registration_allow?).to eq(true)
+      end
+    end
+
+    context "when system is already registered" do
+      let(:registered) { true }
+
+      context "and running in normal mode" do
+        it "returns true" do
+          expect(helpers.registration_allow?).to eq(true)
+        end
+      end
+
+      context "and running in firstboot stage" do
+        let(:mode) { "installation" }
+        let(:stage) { "firstboot" }
+
+        it "returns true" do
+          expect(helpers.registration_allow?).to eq(true)
+        end
+      end
+
+      context "but running neither in normal mode nor in firstboot stage" do
+        let(:mode) { "installation" }
+        let(:stage) { "initial" }
+
+        it "returns false" do
+          expect(helpers.registration_allow?).to eq(false)
+        end
       end
     end
   end

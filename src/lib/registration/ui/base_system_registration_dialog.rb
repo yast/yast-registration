@@ -585,8 +585,8 @@ module Registration
         Yast::UI.ChangeWidget(Id(:action), :Value, action)
         refresh_next
 
-        # disable the input fields when already registered
-        return disable_widgets if disable_registration?
+        # Disable the input fields if system cannot be (re)registered
+        return disable_widgets unless Helpers.registration_allow?
 
         WIDGETS.values.flatten.each do |wgt|
           Yast::UI.ChangeWidget(Id(wgt), :Enabled, WIDGETS[action].include?(wgt))
@@ -596,21 +596,6 @@ module Registration
       # Disable all input widgets
       def disable_widgets
         Yast::UI.ChangeWidget(Id(:action), :Enabled, false)
-      end
-
-      # Whether the registration widgets should be disabled
-      #
-      # The system can be re-registered only when running in normal mode or during the firstboot
-      # stage
-      #
-      # @return [Boolean] false when system is not registered yet;
-      #                   false when running in normal mode or firstboot stage;
-      #                   true otherwise
-      def disable_registration?
-        return false if Yast::Mode.normal || Yast::Stage.firstboot
-        return false unless Registration.is_registered?
-
-        true
       end
 
       # In an online medium it disables the next button when skipping the
