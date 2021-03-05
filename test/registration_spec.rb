@@ -334,4 +334,50 @@ describe Registration::Registration do
       expect(Registration::Registration.is_registered?).to eq(false)
     end
   end
+
+  describe ".allowed?" do
+    let(:mode) { "normal" }
+    let(:stage) { "initial" }
+    let(:registered) { false }
+
+    before do
+      allow(Yast::Mode).to receive(:mode).and_return(mode)
+      allow(Yast::Stage).to receive(:stage).and_return(stage)
+      allow(Registration::Registration).to receive(:is_registered?).and_return(registered)
+    end
+
+    context "when system is not registered yet" do
+      it "returns true" do
+        expect(described_class.allowed?).to eq(true)
+      end
+    end
+
+    context "when system is already registered" do
+      let(:registered) { true }
+
+      context "and running in normal mode" do
+        it "returns true" do
+          expect(described_class.allowed?).to eq(true)
+        end
+      end
+
+      context "and running in firstboot stage" do
+        let(:mode) { "installation" }
+        let(:stage) { "firstboot" }
+
+        it "returns true" do
+          expect(described_class.allowed?).to eq(true)
+        end
+      end
+
+      context "but running neither in normal mode nor in firstboot stage" do
+        let(:mode) { "installation" }
+        let(:stage) { "initial" }
+
+        it "returns false" do
+          expect(described_class.allowed?).to eq(false)
+        end
+      end
+    end
+  end
 end

@@ -586,7 +586,7 @@ module Registration
         refresh_next
 
         # Disable the input fields if system cannot be (re)registered
-        return disable_widgets unless Helpers.registration_allow?
+        return disable_widgets unless Registration.allowed?
 
         WIDGETS.values.flatten.each do |wgt|
           Yast::UI.ChangeWidget(Id(wgt), :Enabled, WIDGETS[action].include?(wgt))
