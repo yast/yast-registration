@@ -101,13 +101,13 @@ module Registration
       # @return [String]
       def actions_help
         if extensions && registration
-          _("<p>You can re-register it again or register additional "\
+          _("<p>You can re-register the system again or register additional "\
             "extension or modules to enhance the functionality of the system.</p>")
         elsif extensions
           _("<p>You can register additional extension or modules "\
             "to enhance the functionality of the system.</p>")
         elsif registration
-          _("<p>You can re-register it again.")
+          _("<p>You can re-register it again.</p>")
         else
           _("<p>At this moment, you can neither re-register it again " \
             "nor register additional extensions</p>")

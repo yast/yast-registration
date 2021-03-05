@@ -99,7 +99,7 @@ describe Registration::UI::RegisteredSystemDialog do
       expect(Yast::Wizard).to receive(:SetContents).with(
         anything,
         anything,
-        /re-register it again/,
+        /re-register the system again/,
         any_args
       )
 
@@ -150,7 +150,7 @@ describe Registration::UI::RegisteredSystemDialog do
         expect(Yast::Wizard).to_not receive(:SetContents).with(
           anything,
           anything,
-          /re-register it again/,
+          /re-register the system again/,
           any_args
         )
 
