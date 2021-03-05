@@ -13,11 +13,12 @@ describe "scc client" do
     allow(Yast::UI).to receive(:SetFocus)
     allow(Yast::UI).to receive(:ReplaceWidget)
     Yast.import "Wizard"
-    expect(Yast::Wizard).to receive(:CreateDialog)
-    expect(Yast::Wizard).to receive(:CloseDialog)
+    allow(Yast::Wizard).to receive(:CreateDialog)
+    allow(Yast::Wizard).to receive(:CloseDialog)
 
-    expect(Registration::SwMgmt).to receive(:init)
-    expect(Registration::SwMgmt).to receive(:find_base_product).and_return("name" => "SLES")
+    allow(Registration::SwMgmt).to receive(:init)
+    allow(Registration::SwMgmt).to receive(:find_base_product).and_return("name" => "SLES")
+    allow(Registration::Registration).to receive(:is_registered?)
   end
 
   context "the system is already registered" do

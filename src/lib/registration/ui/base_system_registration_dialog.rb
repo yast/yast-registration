@@ -585,8 +585,8 @@ module Registration
         Yast::UI.ChangeWidget(Id(:action), :Value, action)
         refresh_next
 
-        # disable the input fields when already registered
-        return disable_widgets if Registration.is_registered? && !Yast::Mode.normal
+        # Disable the input fields if system cannot be (re)registered
+        return disable_widgets unless Registration.allowed?
 
         WIDGETS.values.flatten.each do |wgt|
           Yast::UI.ChangeWidget(Id(wgt), :Enabled, WIDGETS[action].include?(wgt))

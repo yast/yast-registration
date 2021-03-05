@@ -233,6 +233,27 @@ module Registration
       File.exist?(credentials_path)
     end
 
+    # Whether the (re)registration is allowed
+    #
+    # The system can be (re)registered only
+    #
+    #  * when not registered yet, or
+    #  * running in normal mode, or
+    #  * during the firstboot stage
+    #
+    # @return [Boolean] true if system is not registered yet;
+    #                   true when running in normal mode or firstboot stage;
+    #                   false otherwise
+    def self.allowed?
+      # Always true if system is not registered yet
+      return true unless Registration.is_registered?
+
+      # System can be registered again only in normal mode or firstboot stage
+      return true if Yast::Mode.normal || Yast::Stage.firstboot
+
+      false
+    end
+
   private
 
     def set_registered(remote_product)

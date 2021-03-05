@@ -2,7 +2,9 @@
 
 require_relative "spec_helper"
 
-describe "Registration::Helpers" do
+describe Registration::Helpers do
+  subject(:helpers) { described_class }
+
   describe ".service_description" do
     let(:slp_url) { "https://example.com/registration" }
     let(:slp_attributes) { double }

@@ -30,12 +30,14 @@ describe Registration::UI::BaseSystemRegistrationDialog do
   describe "#run" do
     let(:base_product) { Registration::SwMgmt::FAKE_BASE_PRODUCT }
     let(:mode) { "installation" }
+    let(:stage) { "initial" }
 
     before do
       textdomain "registration"
 
       allow(Registration::SwMgmt).to receive(:find_base_product).and_return(base_product)
       allow(Yast::Mode).to receive(:mode).and_return(mode)
+      allow(Yast::Stage).to receive(:stage).and_return(stage)
       allow(Registration::Registration).to receive(:is_registered?).and_return(registered?)
       allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
       allow(Yast::UI).to receive(:ChangeWidget)
@@ -278,6 +280,16 @@ describe Registration::UI::BaseSystemRegistrationDialog do
 
         it "skips the SLP discovery" do
           expect(Registration::UrlHelpers).to_not receive(:slp_discovery_feedback)
+          subject.run
+        end
+      end
+
+      context "during firstboot stage" do
+        let(:stage) { "firstboot" }
+
+        it "does not disable widgets" do
+          expect(Yast::UI).to_not receive(:ChangeWidget).with(Id(:action), :Enabled, false)
+          allow(Yast::UI).to receive(:ChangeWidget).and_call_original
           subject.run
         end
       end
