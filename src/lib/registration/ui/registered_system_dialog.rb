@@ -1,4 +1,3 @@
-
 require "yast"
 
 module Registration
