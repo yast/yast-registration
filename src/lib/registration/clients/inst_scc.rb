@@ -230,13 +230,16 @@ module Yast
       return :cancel if init_registration == :cancel
 
       extensions_enabled = true
+
       success = Registration::ConnectHelpers.catch_registration_errors do
         extensions_enabled = !Registration::Addon.find_all(@registration).empty?
       end
+
       return :abort unless success
 
       ::Registration::UI::RegisteredSystemDialog.run(
-        extensions_enabled: extensions_enabled
+        extensions:   extensions_enabled,
+        registration: ::Registration::Registration.allowed?
       )
     end
 
