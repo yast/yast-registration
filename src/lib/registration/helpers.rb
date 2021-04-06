@@ -92,7 +92,7 @@ module Registration
       # ensure that no registration feedback is shown
       # when running network configuration (bsc#1165705)
       Yast::Popup.SuppressFeedback do
-        Yast::WFM.call("inst_lan", [{ "skip_detection" => true }])
+        Yast::WFM.call("inst_lan", [{ "skip_detection" => true, "hide_abort_button" => true }])
       end
     end
 
