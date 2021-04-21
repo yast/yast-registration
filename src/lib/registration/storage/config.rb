@@ -71,11 +71,11 @@ module Registration
         return ret unless do_registration
 
         ret.merge!(
-          "reg_server"      => reg_server,
           "slp_discovery"   => slp_discovery,
-          "reg_code"        => reg_code,
           "install_updates" => install_updates
         )
+        ret["reg_server"] = reg_server if reg_server
+        ret["reg_code"] = reg_code if reg_code
         ret["email"] = email if email
         ret["addons"] = export_addons
         ret.merge!(export_ssl_config)
