@@ -92,6 +92,28 @@ describe Registration::Storage::Config do
         expect(subject.export.keys).to_not include("email")
       end
     end
+
+    context "when the reg_server is nil" do
+      before do
+        subject.do_registration = true
+        subject.reg_server = nil
+      end
+
+      it "does not include the reg_server" do
+        expect(subject.export.keys).to_not include("reg_server")
+      end
+    end
+
+    context "when the reg_code is nil" do
+      before do
+        subject.do_registration = true
+        subject.reg_code = nil
+      end
+
+      it "does not include the reg_code" do
+        expect(subject.export.keys).to_not include("reg_code")
+      end
+    end
   end
 
   describe "#import" do
