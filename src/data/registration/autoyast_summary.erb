@@ -15,7 +15,7 @@ textdomain "registration"
   <h3><%= _("Registration Settings") %></h3>
   <ul>
     <li><%= _("E-mail Address: %s") % h(@config.email) %></li>
-    <% if !@config.reg_code.empty? %>
+    <% if !@config.reg_code.to_s.empty? %>
       <li><%= _("Registration Code is Configured") %></li>
     <% end %>
 
@@ -26,17 +26,17 @@ textdomain "registration"
 
   <h3><%= _("Registration Server") %></h3>
   <ul>
-    <% if !@config.reg_server.empty? %>
+    <% if !@config.reg_server.to_s.empty? %>
       <li><%= _("Server URL: %s") % h(@config.reg_server) %></li>
     <% elsif @config.slp_discovery %>
       <li><%= (_("Server URL: %s") % _("Use SLP discovery")) %></li>
     <% end %>
 
-    <% if !@config.reg_server_cert.empty? %>
+    <% if !@config.reg_server_cert.to_s.empty? %>
       <li><%= _("SSL Server Certificate URL: %s") % h(@config.reg_server_cert) %></li>
     <% end %>
 
-    <% if @config.reg_server_cert_fingerprint_type && !@config.reg_server_cert_fingerprint_type.empty? %>
+    <% if !@config.reg_server_cert_fingerprint_type.to_s.empty? %>
       <li><%= _("SSL Certificate Fingerprint: %s") % h(
           "#{@config.reg_server_cert_fingerprint} (#{@config.reg_server_cert_fingerprint_type})")
       %></li>
