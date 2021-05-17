@@ -42,6 +42,7 @@ require "registration/ui/base_system_registration_dialog"
 require "registration/ui/registration_update_dialog"
 require "registration/ui/media_addon_workflow"
 
+require "installation/installation_info"
 require "y2packager/medium_type"
 
 # TODO: move to the "Registration" name space
@@ -373,9 +374,25 @@ module Yast
 
       ::Registration::Storage::Cache.instance.first_run = false
 
+      register_installation_info
+
       return unless Stage.initial && ::Registration::Registration.is_registered?
 
       ::Registration::Helpers.reset_registration_status
+    end
+
+    def register_installation_info
+      ::Installation::InstallationInfo.instance.add("registration") do
+        options = ::Registration::Storage::InstallationOptions.instance
+        cache = ::Registration::Storage::Cache.instance
+
+        {
+          "registered" => ::Registration::Registration.is_registered?,
+          "url" => cache.reg_url,
+          "install_updates" => options.install_updates,
+          "selected_addons" => options.selected_addons
+        }
+      end
     end
   end
 end
