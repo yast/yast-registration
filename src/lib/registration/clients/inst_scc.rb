@@ -387,8 +387,8 @@ module Yast
         cache = ::Registration::Storage::Cache.instance
 
         {
-          "registered" => ::Registration::Registration.is_registered?,
-          "url" => cache.reg_url,
+          "registered"      => ::Registration::Registration.is_registered?,
+          "url"             => cache.reg_url,
           "install_updates" => options.install_updates
         }
       end
