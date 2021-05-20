@@ -389,8 +389,7 @@ module Yast
         {
           "registered" => ::Registration::Registration.is_registered?,
           "url" => cache.reg_url,
-          "install_updates" => options.install_updates,
-          "selected_addons" => options.selected_addons
+          "install_updates" => options.install_updates
         }
       end
     end
