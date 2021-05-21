@@ -382,7 +382,7 @@ module Yast
     end
 
     def register_installation_info
-      ::Installation::InstallationInfo.instance.add("registration") do
+      ::Installation::InstallationInfo.instance.add_callback("registration") do
         options = ::Registration::Storage::InstallationOptions.instance
         cache = ::Registration::Storage::Cache.instance
 
