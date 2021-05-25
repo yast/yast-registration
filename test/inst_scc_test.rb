@@ -19,6 +19,7 @@ describe Yast::InstSccClient do
     allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
     allow(subject).to receive(:init_registration)
     allow(Registration::Addon).to receive(:find_all).and_return([])
+    allow(::Installation::InstallationInfo.instance).to receive(:add_callback).with("registration")
   end
 
   context "the system is already registered" do
