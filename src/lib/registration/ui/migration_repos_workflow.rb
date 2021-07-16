@@ -24,6 +24,7 @@ require "y2packager/resolvable"
 require "registration/registration"
 require "registration/registration_ui"
 require "registration/migration_repositories"
+require "registration/connect_helpers"
 require "registration/releasever"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
@@ -264,8 +265,7 @@ module Registration
       #
       # @return [Array<Hash>] installed products and addons selected to be installed
       def merge_registered_addons
-        # load the extensions to merge the registered but not installed extensions
-        Addon.find_all(registration)
+        return unless load_addons
 
         # TRANSLATORS: Popup question, merge this addon that are registered but not
         # installed to the current migration products list.
@@ -285,6 +285,18 @@ module Registration
           end
 
         products.concat(addons)
+      end
+
+      # Tries to load the registered addons
+      #
+      # Registration errors are shown to the user, allowing to retry in some cases.
+      #
+      # @return [Boolean] true on success
+      def load_addons
+        ConnectHelpers.catch_registration_errors do
+          # load the extensions to merge the registered but not installed extensions
+          Addon.find_all(registration)
+        end
       end
 
       # load migration products for the installed products from the registration server,
