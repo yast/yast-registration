@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Sep 22 06:50:30 UTC 2021 - Ladislav Slezák <lslezak@suse.cz>
+
+- Fixed evaluating the update repositories (bsc#1188717),
+  the SUSE Manager update repositories were not disabled
+  when installing the system without updates
+- 4.2.47
+
+-------------------------------------------------------------------
 Wed Dec  2 14:20:56 UTC 2020 - Ladislav Slezák <lslezak@suse.cz>
 
 - Fixed finding the installed base product when doing upgrade

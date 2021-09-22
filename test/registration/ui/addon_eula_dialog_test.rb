@@ -34,6 +34,7 @@ describe Registration::UI::AddonEulaDialog do
       allow(Yast::Wizard).to receive(:SetContents)
       allow(dialog).to receive(:find_license).and_return(product_license)
       allow(dialog).to receive(:download_eula).and_return(true)
+      allow(Yast::Report).to receive(:Error)
       registered_addon.registered
     end
 
@@ -159,6 +160,7 @@ describe Registration::UI::AddonEulaDialog do
         .and_return(license_content)
       allow(dialog).to receive(:setup_eula_dialog)
       allow(dialog).to receive(:run_eula_dialog)
+      allow(Yast::Report).to receive(:Error)
     end
 
     context "when the eula could not be downloaded" do
