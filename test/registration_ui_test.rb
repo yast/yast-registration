@@ -120,6 +120,33 @@ describe "Registration::RegistrationUI" do
 
       # stub the registration
       allow(registration).to receive(:register_product)
+      allow(Registration::SwMgmt).to receive(:service_repos).and_return([])
+      allow(registration_ui).to receive(:handle_updates)
+    end
+
+    it "disables update repositories if requested" do
+      # unmock the call
+      allow(registration_ui).to receive(:handle_updates).and_call_original
+
+      allow(registration_ui).to receive(:try_register_addons).and_return([])
+
+      prod_service = double("Product service")
+      allow(Registration::Storage::Cache.instance).to receive(:addon_services)
+        .and_return([prod_service])
+
+      update_repo = double("Update repo")
+      allow(Registration::SwMgmt).to receive(:service_repos)
+        .with(prod_service, only_updates: true).and_return([update_repo])
+
+      # user does not want to install the updates
+      allow(registration_ui).to receive(:install_updates?).and_return(false)
+
+      # make sure the update repo is disabled
+      expect(Registration::SwMgmt).to receive(:set_repos_state)
+        .with([update_repo], false)
+
+      # Register Legacy module
+      registration_ui.register_addons([addon_legacy], {})
     end
 
     context "when the addons are free" do
