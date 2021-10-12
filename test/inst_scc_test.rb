@@ -20,6 +20,7 @@ describe Yast::InstSccClient do
     allow(subject).to receive(:init_registration)
     allow(Registration::Addon).to receive(:find_all).and_return([])
     allow(::Installation::InstallationInfo.instance).to receive(:add_callback).with("registration")
+    allow(Yast::Report).to receive(:Error)
   end
 
   context "the system is already registered" do

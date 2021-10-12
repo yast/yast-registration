@@ -234,7 +234,12 @@ module Registration
         # Or, try registering the paid add-ons with the base product's key:
         # eg. use SLES4SAP registration for HA.
         selected_addons.replace(try_register_addons(selected_addons, known_reg_codes))
-        return :next if selected_addons.empty?
+
+        if selected_addons.empty?
+          handle_updates
+          return :next
+        end
+
         # cannot be helped by asking for regcodes
         return :back if selected_addons.all?(&:free)
 
@@ -401,9 +406,6 @@ module Registration
           registration.register_product(product_data)
         end
 
-        # select repositories to use in installation (e.g. enable/disable Updates)
-        select_repositories(product_service) if Yast::Mode.installation || Yast::Mode.update
-
         # remember the added service
         Storage::Cache.instance.addon_services << product_service
 
@@ -411,6 +413,17 @@ module Registration
         product.registered
       end
       success
+    end
+
+    # enable/disable update repositories according to the user selection
+    def handle_updates
+      # select repositories to use in installation (e.g. enable/disable Updates)
+      return unless Yast::Mode.installation || Yast::Mode.update
+
+      Storage::Cache.instance.addon_services.each do |product_service|
+        # select repositories to use in installation (e.g. enable/disable Updates)
+        select_repositories(product_service)
+      end
     end
 
     def select_repositories(product_service)
