@@ -20,6 +20,7 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Yast::Linuxrc).to receive(:InstallInf)
       allow(Y2Packager::MediumType).to receive(:offline?).and_return(false)
       allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
+      allow(Yast::Report).to receive(:Error)
     end
 
     shared_examples "media based upgrade" do |popup_method|
