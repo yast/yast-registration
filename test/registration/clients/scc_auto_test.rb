@@ -16,6 +16,10 @@ end
 describe Registration::Clients::SCCAuto do
   let(:config) { ::Registration::Storage::Config.instance }
 
+  before do
+    allow(Yast::Report).to receive(:Error)
+  end
+
   describe "#summary" do
     it "returns string with config description" do
       expect(subject.summary).to be_a(::String)
