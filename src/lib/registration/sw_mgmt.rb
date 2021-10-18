@@ -34,7 +34,7 @@ require "registration/repo_state"
 
 require "packager/product_patterns"
 require "y2packager/medium_type"
-require "y2packager/product_control_product"
+require "y2packager/product_spec"
 require "y2packager/product_reader"
 require "yast2/execute"
 require "y2packager/resolvable"
@@ -134,12 +134,9 @@ module Registration
     # given self_update_id is empty or there is no base product available
     def self.installer_update_base_product(self_update_id)
       return if self_update_id.empty?
+
       # TODO: does offline makes sense for self update?
-      base_product = if Y2Packager::MediumType.online? || Y2Packager::MediumType.offline?
-        Y2Packager::ProductControlProduct.products.first
-      else
-        Y2Packager::Product.available_base_products.first
-      end
+      base_product = Y2Packager::ProductSpec.base_products.first
       return unless base_product
 
       # filter out not needed data
@@ -174,13 +171,13 @@ module Registration
     # @return [Hash] The product
     def self.online_base_product
       if Mode.update
-        prods = Y2Packager::ProductControlProduct.products
+        prods = Y2Packager::ProductSpec.base_products
         installed_names = installed_products.map { |p| p["name"] }
         prod = prods.find { |p| installed_names.include?(p.name) }
         log.info "selecting product from control #{prod}"
         raise "No base product selected from control.xml matching installed products!" unless prod
       else
-        prod = Y2Packager::ProductControlProduct.selected
+        prod = Y2Packager::ProductSpec.selected_base
         raise "No base product selected from control.xml!" unless prod
       end
 
@@ -319,9 +316,9 @@ module Registration
       )
     end
 
-    # remove relase string from version. E.g.: "15-0" --> "15"
-    # @param product [Y2Packager::Product] product
-    # @return [String] version
+    # remove relase string from version. E.g.: "15.3-0" --> "15.3"
+    # @param product [Y2Packager::ProductSpec] Product specification
+    # @return [String] version withouth the "release" part
     def self.version_without_release(product)
       pkg_product = Y2Packager::Resolvable.find(kind: :product,
         name: product.name, version: product.version).first
@@ -737,7 +734,7 @@ module Registration
     # @return [String] target distribution name or empty string if not found
     def self.target_distribution(destdir)
       if Y2Packager::MediumType.online?
-        control_products = Y2Packager::ProductControlProduct.products
+        control_products = Y2Packager::ProductSpec.base_products
 
         target_distro = if control_products.empty?
           ""

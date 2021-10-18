@@ -12,7 +12,6 @@
 #
 
 require "yast"
-require "y2packager/product_control_product"
 
 module Registration
   # This class handles the AutoYaST addons
@@ -68,9 +67,7 @@ module Registration
       # select the requested addons from the AY profile
       requested_addons.each do |addon|
         # Set architecture if it is not defined in the requested addon
-        requested_arch = addon["arch"] ||
-          Y2Packager::ProductControlProduct::REG_ARCH[Yast::Arch.architecture] ||
-          Yast::Arch.architecture
+        requested_arch = addon["arch"] || Yast::Arch.registration_arch
 
         log.info("Select addon: #{addon.inspect}")
         server_addons = all_addons.select do |a|

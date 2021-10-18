@@ -38,7 +38,7 @@ require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 require "registration/ui/offline_migration_workflow"
 require "registration/erb_renderer.rb"
-require "y2packager/product_control_product"
+require "y2packager/product_spec"
 require "y2packager/medium_type"
 
 Yast.import "UI"
@@ -198,7 +198,7 @@ module Registration
         # import the GPG keys before refreshing the repositories
         Yast::Packages.ImportGPGKeys
 
-        products = Y2Packager::ProductControlProduct.products
+        products = Y2Packager::ProductSpec.base_products
 
         # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
         Yast.import "AutoinstFunctions"
@@ -228,7 +228,7 @@ module Registration
         end
 
         # mark the control file product as selected
-        Y2Packager::ProductControlProduct.selected = control_product
+        control_product.select
 
         true
       end
