@@ -686,7 +686,7 @@ module Registration
       # @return [Array<Y2Packager::RepoProductSpec>] the products found in the offline medium
       def full_medium_products
         products = Y2Packager::ProductSpec.base_products
-                                          .select { |p| p.respond_to?(:dir) }
+                                          .select { |p| p.is_a?(Y2Packager::RepoProductSpec) }
         log.info("Found base products on the offline medium: #{products.pretty_inspect}")
         products
       end
