@@ -55,11 +55,6 @@ module Yast
     CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
     def main
-      if Y2Packager::MediumType.skip_step?
-        log.info "Skipping the client on the #{Y2Packager::MediumType.type} medium"
-        return :auto
-      end
-
       textdomain "registration"
       import_modules
 
