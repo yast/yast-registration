@@ -17,9 +17,10 @@ require "pp"
 require "yast"
 require "yast2/popup"
 require "y2packager/medium_type"
-require "y2packager/product_location"
+require "y2packager/product_spec"
 require "y2packager/product_upgrade"
 require "y2packager/resolvable"
+require "y2packager/repo_product_spec"
 
 require "registration/registration"
 require "registration/registration_ui"
@@ -671,23 +672,21 @@ module Registration
           return
         end
 
-        new_product = new_base.details && new_base.details.product
-        log.info("Upgrading product #{installed_base.name.inspect} to #{new_product.inspect}")
+        log.info("Upgrading product #{installed_base.name.inspect} to #{new_base.inspect}")
 
-        add_full_medium_repository(new_product, new_base.dir)
+        add_full_medium_repository(new_base.name, new_base.dir)
       end
 
       #
-      # Scan the installation repository and return the found product directories.
+      # Scan the installation repository and return the found products
       #
-      # @return [Array<Y2Packager::ProductLocation>] the found product directories
+      # This method is called during offline installation, so it is expected to return
+      # RepoProductSpec objects only.
+      #
+      # @return [Array<Y2Packager::RepoProductSpec>] the products found in the offline medium
       def full_medium_products
-        # in offline upgrade add the repository with the selected base product
-        # FIXME: similar to clients/inst_complex_welcome.rb and widgets/product_selector.rb
-        url = Yast::InstURL.installInf2Url("")
-        products = Y2Packager::ProductLocation
-                   .scan(url)
-                   .select { |p| p.details && p.details.base }
+        products = Y2Packager::ProductSpec.base_products
+                                          .select { |p| p.is_a?(Y2Packager::RepoProductSpec) }
         log.info("Found base products on the offline medium: #{products.pretty_inspect}")
         products
       end
@@ -697,7 +696,7 @@ module Registration
       # base product.
       #
       # @param installed_base [<Y2Packager::Resolvable>] the installed base product
-      # @return [Y2Packager::ProductLocation, nil] The location of the new base product on
+      # @return [Y2Packager::ProductSpec, nil] The location of the new base product on
       #  the Full installation medium, nil if no suitable upgrade product is found
       def full_medium_upgrade_product(installed_base)
         new_base = nil
@@ -709,13 +708,13 @@ module Registration
         # key in the mapping: list of installed products, value: the new base product
         Y2Packager::ProductUpgrade::MAPPING.each do |k, v|
           if (k - installed_names).empty?
-            new_base = base_products.find { |p| p.details && p.details.product == v }
+            new_base = base_products.find { |p| p.name == v }
           end
         end
 
         # if no product rename was found then use the 1:1 upgrade
         new_base ||= base_products.find do |p|
-          p.details && p.details.product == installed_base.name
+          p.name == installed_base.name
         end
 
         log.info("Found upgrade product on the full medium: #{new_base}")

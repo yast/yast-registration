@@ -88,7 +88,7 @@ describe Registration::Clients::SCCAuto do
   describe "#write" do
     before do
       Y2Packager::MediumType.type = :online
-      allow(Y2Packager::ProductControlProduct).to receive(:products).and_return("SLES")
+      allow(Y2Packager::ProductSpec).to receive(:base_products).and_return([])
       # clean cache
       ::Registration::Storage::Cache.instance.addon_services = []
     end

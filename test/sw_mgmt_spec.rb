@@ -3,6 +3,9 @@
 require_relative "spec_helper"
 require "yaml"
 
+require "y2packager/product_spec"
+require "y2packager/control_product_spec"
+
 describe Registration::SwMgmt do
   subject { Registration::SwMgmt }
 
@@ -121,12 +124,12 @@ describe Registration::SwMgmt do
 
   describe ".installer_update_base_product" do
     let(:base_product) do
-      instance_double(Y2Packager::Product, name: "dummy", version: "15.0", arch: "x86_64")
+      instance_double(Y2Packager::ProductSpec, name: "dummy", version: "15.0", arch: "x86_64")
     end
-    let(:available_products) { [base_product] }
+    let(:base_products) { [base_product] }
 
     before do
-      allow(Y2Packager::Product).to receive(:available_base_products).and_return(available_products)
+      allow(Y2Packager::ProductSpec).to receive(:base_products).and_return(base_products)
       allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
       allow(Y2Packager::MediumType).to receive(:offline?).and_return(false)
     end
@@ -136,10 +139,10 @@ describe Registration::SwMgmt do
     end
 
     context "when there is no base product available" do
-      let(:available_products) { [] }
+      let(:base_products) { [] }
 
       it "returns nil" do
-        allow(Y2Packager::Product).to receive(:available_base_products).and_return([])
+        allow(Y2Packager::ProductSpec).to receive(:base_products).and_return([])
         expect(subject.installer_update_base_product("self_update_id")).to eq(nil)
       end
     end
@@ -553,17 +556,17 @@ describe Registration::SwMgmt do
             "version_version" => "15.2"
           }
 
-        selected = Y2Packager::ProductControlProduct.new(
+        selected = Y2Packager::ControlProductSpec.new(
           arch:            data["arch"],
-          label:           data["display_name"],
+          display_name:    data["display_name"],
           license_url:     "",
           name:            data["name"],
           register_target: data["register_target"],
-          version:         data["version_version"]
+          version:         data["version_version"],
+          order:           1
         )
 
-        expect(Y2Packager::ProductControlProduct).to receive(:selected)
-          .and_return(selected)
+        expect(Y2Packager::ProductSpec).to receive(:selected_base).and_return(selected)
         expect(subject.find_base_product["name"]).to eq(data["name"])
       end
     end
