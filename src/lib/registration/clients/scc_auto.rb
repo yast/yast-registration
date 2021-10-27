@@ -205,11 +205,8 @@ module Registration
 
         selected_product = Yast::AutoinstFunctions.selected_product
         log.info "selected product #{selected_product.inspect}"
-        ay_product = if selected_product.respond_to?(:name)
-          selected_product.name
-        end
 
-        if !ay_product
+        if !selected_product
           # TRANSLATORS: error message, %s is the XML path, e.g. "software/products"
           Yast::Report.Error(
             _("Missing product specification in the %s section") % "software/products"
@@ -217,6 +214,7 @@ module Registration
           return false
         end
 
+        ay_product = selected_product.name
         control_product = products.find { |p| p.name == ay_product }
 
         if !control_product
