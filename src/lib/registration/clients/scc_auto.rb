@@ -207,7 +207,7 @@ module Registration
         log.info "selected product #{selected_product.inspect}"
         ay_product = if selected_product.respond_to?(:name)
           selected_product.name
-        else
+        elsif selected_product.respond_to?(:details)
           selected_product.details.product
         end
 

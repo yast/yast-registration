@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov  1 11:28:32 UTC 2021 - Josef Reidinger <jreidinger@suse.com>
+
+- Report properly that no product is selected in autoinstallation
+  instead of nil crash (bsc#1188211)
+- 4.3.25
+
+-------------------------------------------------------------------
 Tue Oct 12 08:30:59 UTC 2021 - Ladislav Slezák <lslezak@suse.cz>
 
 - Fixed evaluating the update repositories (bsc#1188717),
