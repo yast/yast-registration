@@ -2,6 +2,9 @@
 Fri Nov 12 14:51:45 UTC 2021 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
 
 - Adapt to the ProductSpec API (bsc#1192626).
+- Report properly that no product is selected in autoinstallation
+  instead of nil crash (bsc#1188211, Josef Reidinger
+  <jreidinger@suse.com>).
 - 4.4.5
 
 -------------------------------------------------------------------
