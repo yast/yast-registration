@@ -21,6 +21,11 @@ describe Registration::UI::MigrationReposWorkflow do
       allow(Y2Packager::MediumType).to receive(:offline?).and_return(false)
       allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
       allow(Yast::Report).to receive(:Error)
+      allow(Y2Packager::ProductSpec).to receive(:base_products).and_return([new_product])
+    end
+
+    let(:new_product) do
+      instance_double(Y2Packager::RepoProductSpec, name: "openSUSE", dir: "/Leap")
     end
 
     shared_examples "media based upgrade" do |popup_method|

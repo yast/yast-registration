@@ -38,7 +38,7 @@ require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 require "registration/ui/offline_migration_workflow"
 require "registration/erb_renderer.rb"
-require "y2packager/product_control_product"
+require "y2packager/product_spec"
 require "y2packager/medium_type"
 
 Yast.import "UI"
@@ -198,20 +198,15 @@ module Registration
         # import the GPG keys before refreshing the repositories
         Yast::Packages.ImportGPGKeys
 
-        products = Y2Packager::ProductControlProduct.products
+        products = Y2Packager::ProductSpec.base_products
 
         # Lazy load it as registration does not depend on ay, but scc_auto is run only in ay context
         Yast.import "AutoinstFunctions"
 
         selected_product = Yast::AutoinstFunctions.selected_product
         log.info "selected product #{selected_product.inspect}"
-        ay_product = if selected_product.respond_to?(:name)
-          selected_product.name
-        else
-          selected_product.details.product
-        end
 
-        if !ay_product
+        if !selected_product
           # TRANSLATORS: error message, %s is the XML path, e.g. "software/products"
           Yast::Report.Error(
             _("Missing product specification in the %s section") % "software/products"
@@ -219,6 +214,7 @@ module Registration
           return false
         end
 
+        ay_product = selected_product.name
         control_product = products.find { |p| p.name == ay_product }
 
         if !control_product
@@ -228,7 +224,7 @@ module Registration
         end
 
         # mark the control file product as selected
-        Y2Packager::ProductControlProduct.selected = control_product
+        control_product.select
 
         true
       end
