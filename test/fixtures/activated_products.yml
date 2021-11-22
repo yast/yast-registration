@@ -1,5 +1,5 @@
 ---
-- !ruby/object:SUSE::Connect::Remote::Product
+- !ruby/object:OpenStruct
   table:
     :id: 1157
     :name: SUSE Linux Enterprise High Availability GEO Extension
@@ -34,7 +34,7 @@
       enabled: true
       autorefresh: true
   modifiable: true
-- !ruby/object:SUSE::Connect::Remote::Product
+- !ruby/object:OpenStruct
   table:
     :id: 1245
     :name: SUSE Linux Enterprise High Availability Extension
@@ -53,7 +53,7 @@
     - 1539
     - 1500
     :extensions:
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1157
         :name: SUSE Linux Enterprise High Availability GEO Extension
@@ -105,7 +105,7 @@
       enabled: true
       autorefresh: true
   modifiable: true
-- !ruby/object:SUSE::Connect::Remote::Product
+- !ruby/object:OpenStruct
   table:
     :id: 1117
     :name: SUSE Linux Enterprise Server
@@ -128,7 +128,7 @@
     - 1219
     - 1478
     :extensions:
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1222
         :name: SUSE Linux Enterprise Workstation Extension
@@ -189,7 +189,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1223
         :name: SUSE Linux Enterprise Software Development Kit
@@ -233,7 +233,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1150
         :name: Legacy Module
@@ -276,7 +276,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1153
         :name: Web and Scripting Module
@@ -320,7 +320,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1220
         :name: Public Cloud Module
@@ -362,7 +362,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1212
         :name: Advanced Systems Management Module
@@ -402,7 +402,7 @@
           enabled: true
           autorefresh: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1245
         :name: SUSE Linux Enterprise High Availability Extension
@@ -421,7 +421,7 @@
         - 1539
         - 1500
         :extensions:
-        - !ruby/object:SUSE::Connect::Remote::Product
+        - !ruby/object:OpenStruct
           table:
             :id: 1157
             :name: SUSE Linux Enterprise High Availability GEO Extension

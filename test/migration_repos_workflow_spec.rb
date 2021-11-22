@@ -281,7 +281,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
     it "asks for confirmation if the system was already migrated" do
       # pretend SLES15 is already activated
-      sles15 = SUSE::Connect::Remote::Product.new(
+      sles15 = OpenStruct.new(
         arch:       "x86_64",
         identifier: "SLES",
         version:    "15"

@@ -1,9 +1,9 @@
---- !ruby/object:SUSE::Connect::Remote::Service
+--- !ruby/object:OpenStruct
 table:
   :id: 1311
   :name: SUSE_Linux_Enterprise_Server_12_SP1_12.1_x86_64
   :url: https://scc.suse.com/access/services/1311?credentials=SUSE_Linux_Enterprise_Server_12_SP1_12.1_x86_64
-  :product: !ruby/object:SUSE::Connect::Remote::Product
+  :product: !ruby/object:OpenStruct
     table:
       :id: 1322
       :name: SUSE Linux Enterprise Server 12 SP1
@@ -54,7 +54,7 @@ table:
         autorefresh: false
       :product_type: base
       :extensions:
-      - !ruby/object:SUSE::Connect::Remote::Product
+      - !ruby/object:OpenStruct
         table:
           :id: 1323
           :name: SUSE Linux Enterprise Software Development Kit
@@ -110,7 +110,7 @@ table:
           :product_type: extension
           :extensions: []
         modifiable: true
-      - !ruby/object:SUSE::Connect::Remote::Product
+      - !ruby/object:OpenStruct
         table:
           :id: 1324
           :name: SUSE Linux Enterprise High Availability Extension

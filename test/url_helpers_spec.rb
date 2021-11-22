@@ -110,15 +110,6 @@ describe "Registration::UrlHelpers" do
           .and_return(false)
         expect(Registration::UrlHelpers.registration_url).to be_nil
       end
-
-      it "reads the URL from config file if present" do
-        # stub config file reading
-        url = "https://example.com"
-        expect(File).to receive(:exist?).with(SUSE::Connect::YaST::DEFAULT_CONFIG_FILE)
-          .and_return(true).twice
-        expect(YAML).to receive(:load_file).and_return("url" => url, "insecure" => false)
-        expect(Registration::UrlHelpers.registration_url).to eq(url)
-      end
     end
 
     context "at upgrade" do
@@ -166,7 +157,7 @@ describe "Registration::UrlHelpers" do
         end
 
         it "returns URL of RMT server" do
-          expect(File).to receive(:exist?).with(fixtures_file("SUSEConnect")).and_return(true)
+          allow(File).to receive(:exist?).with(fixtures_file("SUSEConnect")).and_return(true)
           expect(SUSE::Connect::Config).to receive(:new).with(suse_connect)
             .and_return(SUSE::Connect::Config.new(fixtures_file("SUSEConnect")))
           expect(Registration::UrlHelpers.registration_url).to eq("https://myserver.com")
