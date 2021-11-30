@@ -16,6 +16,7 @@ describe Registration::Registration do
       reg_code = "reg_code"
       target_distro = "sles-12-x86_64"
 
+      expect(SUSE::Connect::YaST).to receive(:create_credentials_file)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(token: reg_code), target_distro)
         .and_return([username, password]))
