@@ -158,34 +158,34 @@ describe Registration::Storage::Config do
     end
 
     let(:sles_activation) do
-      SUSE::Connect::Remote::Activation.new(
+      OpenStruct.new(
         "regcode" => "0123456789",
-        "service" => {
-          "product" => {
+        "service" => OpenStruct.new(
+          "product" => OpenStruct.new(
             "name" => "SUSE Linux Enteprise Server", "identifier" => "SLES", "isbase" => true
-          }
-        }
+          )
+        )
       )
     end
 
     let(:basesystem_activation) do
-      SUSE::Connect::Remote::Activation.new(
-        "service" => {
-          "product" => {
+      OpenStruct.new(
+        "service" => OpenStruct.new(
+          "product" => OpenStruct.new(
             "name" => "Basesystem Module", "identifier" => "sle-basesystem"
-          }
-        }
+          )
+        )
       )
     end
 
     let(:workstation_activation) do
-      SUSE::Connect::Remote::Activation.new(
+      OpenStruct.new(
         "regcode" => "ABCDEFGHIJ",
-        "service" => {
-          "product" => {
+        "service" => OpenStruct.new(
+          "product" => OpenStruct.new(
             "name" => "Workstation Extension", "identifier" => "sle-we"
-          }
-        }
+          )
+        )
       )
     end
 

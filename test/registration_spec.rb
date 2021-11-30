@@ -16,7 +16,6 @@ describe Registration::Registration do
       reg_code = "reg_code"
       target_distro = "sles-12-x86_64"
 
-      expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(token: reg_code), target_distro)
         .and_return([username, password]))
@@ -45,11 +44,11 @@ describe Registration::Registration do
       {
         "name"    => "service",
         "url"     => "https://example.com",
-        "product" => product
+        "product" => OpenStruct.new(product)
       }
     end
 
-    let(:service) { SUSE::Connect::Remote::Service.new(service_data) }
+    let(:service) { OpenStruct.new(service_data) }
     let(:destdir) { "/foo" }
 
     before do
@@ -82,11 +81,9 @@ describe Registration::Registration do
       allow(Yast::Stage).to receive(:initial).and_return(false)
       expect(Yast::Installation).to_not receive(:destdir)
 
-      expect(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-        .and_return(true)
-
-      expect(File).to receive(:read).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-        .and_return("username=SCC_foo\npassword=bar")
+      expect(SUSE::Connect::YaST).to receive(:credentials)
+        .with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return(OpenStruct.new(username: "SCC_foo", password: "bar"))
 
       subject.send(yast_method, product)
     end
