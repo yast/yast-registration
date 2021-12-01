@@ -65,11 +65,9 @@ describe Registration::Registration do
       expect(Registration::SwMgmt).to receive(:update_product_renames)
         .with("SUSE_SLES_SAP" => "SLES_SAP")
 
-      allow(File).to receive(:exist?).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-        .and_return(true)
-
-      allow(File).to receive(:read).with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-        .and_return("username=SCC_foo\npassword=bar")
+      allow(SUSE::Connect::YaST).to receive(:credentials)
+        .with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
+        .and_return(OpenStruct.new(username: "SCC_foo", password: "bar"))
     end
 
     it "adds the selected product and returns added zypp services" do
@@ -81,10 +79,6 @@ describe Registration::Registration do
       allow(Yast::Mode).to receive(:update).and_return(false)
       allow(Yast::Stage).to receive(:initial).and_return(false)
       expect(Yast::Installation).to_not receive(:destdir)
-
-      expect(SUSE::Connect::YaST).to receive(:credentials)
-        .with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
-        .and_return(OpenStruct.new(username: "SCC_foo", password: "bar"))
 
       subject.send(yast_method, product)
     end
