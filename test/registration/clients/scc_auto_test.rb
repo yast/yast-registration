@@ -91,6 +91,8 @@ describe Registration::Clients::SCCAuto do
       allow(Y2Packager::ProductSpec).to receive(:base_products).and_return([])
       # clean cache
       ::Registration::Storage::Cache.instance.addon_services = []
+      allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
+      allow(::Registration::SwMgmt).to receive(:init)
     end
 
     it "just returns true if config is not set to register and mode is not update" do

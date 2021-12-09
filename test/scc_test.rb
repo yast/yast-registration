@@ -19,6 +19,7 @@ describe "scc client" do
     allow(Registration::SwMgmt).to receive(:init)
     allow(Registration::SwMgmt).to receive(:find_base_product).and_return("name" => "SLES")
     allow(Registration::Registration).to receive(:is_registered?)
+    allow(Registration::UrlHelpers).to receive(:slp_discovery_feedback).and_return([])
   end
 
   context "the system is already registered" do
