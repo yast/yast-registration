@@ -215,6 +215,7 @@ describe Registration::Registration do
 
   describe "#get_updates_list" do
     let(:self_update_id) { "SLES" }
+    let(:self_update_version) { "15.4" }
     let(:base_product) { { "name" => "base" } }
     let(:installer_update_base_product) { { "name" => self_update_id } }
     let(:remote_product) { { "name" => "base" } }
@@ -233,34 +234,26 @@ describe Registration::Registration do
     end
 
     context "when the control file defines a self_update_id" do
-      it "returns updates list from the server for the self update id" do
+      it "returns updates list from the server for the self update id and version" do
         allow(Yast::ProductFeatures).to receive(:GetStringFeature)
           .with("globals", "self_update_id").and_return(self_update_id)
-        expect(Registration::SwMgmt).to receive(:installer_update_base_product)
-          .with(self_update_id).and_return(installer_update_base_product)
-        expect(Registration::SwMgmt).to receive(:remote_product)
-          .with(installer_update_base_product).and_return(installer_update_base_product)
-        expect(suse_connect).to receive(:list_installer_updates)
-          .with(installer_update_base_product, anything)
-          .and_return(updates)
-        expect(subject.get_updates_list).to eq(updates)
-      end
-    end
-
-    context "when the control file does not define a self_update_id" do
-      it "returns updates list from the server for the base product" do
         allow(Yast::ProductFeatures).to receive(:GetStringFeature)
-          .with("globals", "self_update_id").and_return("")
-        expect(Registration::SwMgmt).to receive(:remote_product).with(base_product)
-          .and_return(remote_product)
-        expect(suse_connect).to receive(:list_installer_updates).with(remote_product, anything)
-          .and_return(updates)
+          .with("globals", "self_update_version").and_return(self_update_version)
+        expect(suse_connect).to receive(:list_installer_updates) do |product, _options|
+          expect(product.identifier).to eq("SLES")
+          expect(product.version).to eq("15.4")
+          updates
+        end
         expect(subject.get_updates_list).to eq(updates)
       end
     end
 
     context "when an exception connecting to the server takes place" do
       before do
+        allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+          .with("globals", "self_update_id").and_return(self_update_id)
+        allow(Yast::ProductFeatures).to receive(:GetStringFeature)
+          .with("globals", "self_update_version").and_return(self_update_version)
         allow(suse_connect).to receive(:list_installer_updates).and_raise(Timeout::Error)
       end
 

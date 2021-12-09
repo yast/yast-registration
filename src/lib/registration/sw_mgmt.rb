@@ -132,6 +132,8 @@ module Registration
     # @return [Hash,nil] with pkg-binding format; return nil if the
     # given self_update_id is empty
     def self.installer_update_base_product(self_update_id, version = "")
+      return if self_update_id.empty?
+
       product_info = {
         "name"         => self_update_id,
         "arch"         => Yast::Arch.rpm_arch,
