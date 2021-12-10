@@ -123,42 +123,15 @@ describe Registration::SwMgmt do
   end
 
   describe ".installer_update_base_product" do
-    let(:base_product) do
-      instance_double(Y2Packager::ProductSpec, name: "dummy", version: "15.0", arch: "x86_64")
-    end
-    let(:base_products) { [base_product] }
-
-    before do
-      allow(Y2Packager::ProductSpec).to receive(:base_products).and_return(base_products)
-      allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
-      allow(Y2Packager::MediumType).to receive(:offline?).and_return(false)
-    end
-
     it "returns nil if the given self_update_id is empty" do
       expect(subject.installer_update_base_product("")).to eq(nil)
     end
 
-    context "when there is no base product available" do
-      let(:base_products) { [] }
-
-      it "returns nil" do
-        allow(Y2Packager::ProductSpec).to receive(:base_products).and_return([])
-        expect(subject.installer_update_base_product("self_update_id")).to eq(nil)
-      end
-    end
-
-    context "when there is some product available" do
-      it "returns a hash with the product keys 'name', 'version', 'arch' and 'release_type' " do
-        product = subject.installer_update_base_product("self_update_id")
-        expect(product).to be_a(Hash)
-        expect(product.keys.size).to eq(4)
-        expect(product).to include("name", "version", "arch", "release_type")
-      end
-
-      it "uses the given self_update_id as the product name returned" do
-        product = subject.installer_update_base_product("self_update_id")
-        expect(product["name"]).to eq("self_update_id")
-      end
+    it "returns the product hash" do
+      expect(subject.installer_update_base_product("SLES", "15.4")).to include(
+        "name"    => "SLES",
+        "version" => "15.4"
+      )
     end
   end
 

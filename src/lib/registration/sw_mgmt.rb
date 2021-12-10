@@ -40,6 +40,7 @@ require "yast2/execute"
 require "y2packager/resolvable"
 
 module Registration
+  Yast.import "Arch"
   Yast.import "AddOnProduct"
   Yast.import "Mode"
   Yast.import "Stage"
@@ -48,6 +49,7 @@ module Registration
   Yast.import "PackageLock"
   Yast.import "Installation"
   Yast.import "PackageCallbacks"
+  Yast.import "OSRelease"
   Yast.import "Popup"
   Yast.import "Product"
 
@@ -123,27 +125,19 @@ module Registration
       true
     end
 
-    # Prepare a pkg-binding product hash using the first base product available
-    # as a template and with the given self_update_id as the product name.
-    #
-    # With a media containing multiple products it is expected that all the
-    # products use the same version and arch.
+    # Prepare a pkg-binding product hash using the requested name and version,
+    # if the version is empty the fallback from the /etc/os-release file is used.
     #
     # @param self_update_id [String] product name to be used for get the installer updates
     # @return [Hash,nil] with pkg-binding format; return nil if the
-    # given self_update_id is empty or there is no base product available
-    def self.installer_update_base_product(self_update_id)
+    # given self_update_id is empty
+    def self.installer_update_base_product(self_update_id, version = "")
       return if self_update_id.empty?
 
-      # TODO: does offline makes sense for self update?
-      base_product = Y2Packager::ProductSpec.base_products.first
-      return unless base_product
-
-      # filter out not needed data
       product_info = {
         "name"         => self_update_id,
-        "arch"         => base_product.arch,
-        "version"      => version_without_release(base_product),
+        "arch"         => Yast::Arch.rpm_arch,
+        "version"      => version,
         "release_type" => nil
       }
 
