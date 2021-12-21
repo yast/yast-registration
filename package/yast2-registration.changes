@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec 21 09:40:12 UTC 2021 - Josef Reidinger <jreidinger@suse.com>
+
+- Adapt to ruby3 (bsc#1193192)
+- 4.4.8
+
+-------------------------------------------------------------------
 Thu Dec 16 13:51:06 UTC 2021 - Stefan Hundhammer <shundhammer@suse.com>
 
 - Fixed typo (bsc#1193800)
