@@ -63,6 +63,10 @@ describe Registration::Addon do
     end
 
     it "sets the registration status for dependent addons" do
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
+
       registration = double(
         activated_products: load_yaml_fixture("activated_products.yml"),
         get_addon_list:     load_yaml_fixture("pure_addons.yml")
@@ -88,6 +92,10 @@ describe Registration::Addon do
     end
 
     it "returns the addon witht the given ID" do
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
+
       addon = described_class.find_by_id(1222)
       expect(addon.identifier).to eq("sle-we")
     end
@@ -110,6 +118,10 @@ describe Registration::Addon do
 
   describe ".registration_order" do
     it "returns addons sorted in the registration order" do
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
+
       addons = load_yaml_fixture("sle15_addons.yaml")
       sorted_addons = Registration::Addon.registration_order(addons)
       expected_output = [
@@ -394,6 +406,10 @@ describe Registration::Addon do
     end
 
     it "returns all addon dependencies" do
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
+
       expect(addon.dependencies.map(&:identifier)).to eq(["sle-ha"])
     end
   end

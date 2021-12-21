@@ -43,6 +43,10 @@ describe Registration::UI::RegistrationSyncWorkflow do
     end
 
     it "downgrades the base product first" do
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
+
       installed_products = [legacy, sles]
       expect(Registration::SwMgmt).to receive(:installed_products).and_return(installed_products)
       expect(registration).to receive(:activated_products)
