@@ -137,6 +137,8 @@ describe Registration::Registration do
       end
 
       it "downloads available extensions" do
+        pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+
         addons = Registration::Registration.new.get_addon_list
 
         # HA-GEO is extension for HA so it's not included in the list

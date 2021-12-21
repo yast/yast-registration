@@ -8,6 +8,8 @@ describe "Registration::ADDON_SORTER" do
   let(:unknown_addons) { load_yaml_fixture("available_unknown_addons.yml") }
 
   it "sorts the addons in display order" do
+    pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+
     expected = [
       "SUSE Cloud for SLE 12 Compute Nodes 5 x86_64",
       "SUSE Enterprise Storage 1 x86_64",
@@ -29,6 +31,8 @@ describe "Registration::ADDON_SORTER" do
   end
 
   it "moves the unknown product types at the end" do
+    pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+
     # AdvMgmt and Legacy have undefined type => at the end
     expected = [
       "sle-sdk", "sle-we", "sle-module-public-cloud",
