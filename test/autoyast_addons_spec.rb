@@ -52,7 +52,9 @@ describe Registration::AutoyastAddons do
 
   describe "#select" do
     it "sorts the addons according to their dependencies" do
-      pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
 
       ayaddons = Registration::AutoyastAddons.new(unsorted_addons, registration)
       ayaddons.select
@@ -61,7 +63,9 @@ describe Registration::AutoyastAddons do
     end
 
     it "automatically selects the dependent addons" do
-      pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
 
       ayaddons = Registration::AutoyastAddons.new(incomplete_addons, registration)
       ayaddons.select
@@ -77,7 +81,9 @@ describe Registration::AutoyastAddons do
     end
 
     it "selects the newest available addon" do
-      pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
 
       expect(Yast::Arch).to receive(:architecture).twice.and_return("x86_64")
       ayaddons = Registration::AutoyastAddons.new(addons_only_name, registration)
@@ -91,7 +97,9 @@ describe Registration::AutoyastAddons do
 
   describe "#register" do
     it "registers the selected addons" do
-      pending "YaML loading of older OpenStruct is broken in ruby3" if RUBY_VERSION =~ /3\.0\.\d+/
+      if RUBY_VERSION.start_with?("3.0.")
+        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
+      end
 
       expect(registration).to receive(:register_product).with(
         "name" => "sle-module-basesystem", "reg_code" => nil, "arch" => "x86_64",
