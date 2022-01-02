@@ -113,10 +113,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     end
 
     it "works in textmode" do
-      if RUBY_VERSION.start_with?("3.0.")
-        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
-      end
-
       allow(Yast::UI).to receive(:TextMode).and_return(true)
       addons = load_yaml_fixture("sle15_addons.yaml")
       allow(Registration::Addon).to receive(:find_all).and_return(addons)
@@ -130,10 +126,6 @@ describe Registration::UI::AddonSelectionRegistrationDialog do
     end
 
     it "recomputes auto_selection after each widget change" do
-      if RUBY_VERSION.start_with?("3.0.")
-        pending "YaML loading of older OpenStruct is broken in ruby 3.0"
-      end
-
       addons = load_yaml_fixture("sle15_addons.yaml")
       allow(Registration::Addon).to receive(:find_all).and_return(addons)
 
