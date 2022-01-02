@@ -109,7 +109,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1536
@@ -160,7 +159,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1153
@@ -223,7 +221,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1518
@@ -279,7 +276,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1678
@@ -339,7 +335,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1427
@@ -402,7 +397,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1617
@@ -456,7 +450,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1220
@@ -517,7 +510,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1526
@@ -572,7 +564,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1529
@@ -623,7 +614,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1725
@@ -679,7 +669,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1729
@@ -733,7 +722,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1431
@@ -798,7 +786,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1212
@@ -857,7 +844,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1520
@@ -913,7 +899,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1618
@@ -972,7 +957,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1150
@@ -1034,7 +1018,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1724
@@ -1090,7 +1073,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1730
@@ -1144,7 +1126,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1432
@@ -1253,8 +1234,6 @@
               autorefresh: true
             :product_type: extension
             :extensions: []
-          modifiable: true
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1349
@@ -1310,7 +1289,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1352
@@ -1366,7 +1344,6 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1440
@@ -1426,7 +1403,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1332
@@ -1481,7 +1457,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1341
@@ -1532,7 +1507,6 @@
           autorefresh: true
         :product_type: module
         :extensions: []
-      modifiable: true
     - !ruby/object:OpenStruct
       table:
         :id: 1619
@@ -1579,5 +1553,3 @@
           autorefresh: true
         :product_type: extension
         :extensions: []
-      modifiable: true
-  modifiable: true

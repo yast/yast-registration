@@ -8,7 +8,7 @@ describe "Registration::ADDON_SORTER" do
   let(:unknown_addons) { load_yaml_fixture("available_unknown_addons.yml") }
 
   it "sorts the addons in display order" do
-    if RUBY_VERSION.start_with?("3.")
+    if RUBY_VERSION.start_with?("3.0.")
       pending "YaML loading of older OpenStruct is broken in ruby 3.0"
     end
 
@@ -33,7 +33,7 @@ describe "Registration::ADDON_SORTER" do
   end
 
   it "moves the unknown product types at the end" do
-    if RUBY_VERSION.start_with?("3.")
+    if RUBY_VERSION.start_with?("3.0.")
       pending "YaML loading of older OpenStruct is broken in ruby 3.0"
     end
 

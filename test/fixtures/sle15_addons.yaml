@@ -196,7 +196,6 @@
               :shortname: Development-Tools-Module
               :recommended: false
               :extensions: []
-            modifiable: true
           - &8 !ruby/object:OpenStruct
             table:
               :id: 1580
@@ -263,7 +262,6 @@
               :shortname: Server-Applications-Module
               :recommended: false
               :extensions: []
-            modifiable: true
           - &9 !ruby/object:OpenStruct
             table:
               :id: 1583
@@ -331,7 +329,6 @@
               :shortname: SLEWE15
               :recommended: false
               :extensions: []
-            modifiable: true
           - &10 !ruby/object:OpenStruct
             table:
               :id: 15831
@@ -399,8 +396,6 @@
               :shortname: SLEWE16
               :recommended: false
               :extensions: []
-            modifiable: true
-        modifiable: true
       - &3 !ruby/object:OpenStruct
         table:
           :id: 1581
@@ -470,7 +465,6 @@
           :shortname: Legacy-Module
           :recommended: false
           :extensions: []
-        modifiable: true
       - &4 !ruby/object:OpenStruct
         table:
           :id: 1611
@@ -532,7 +526,6 @@
           :shortname: Public-Cloud-Module
           :recommended: false
           :extensions: []
-        modifiable: true
       - &5 !ruby/object:OpenStruct
         table:
           :id: 1582
@@ -600,7 +593,6 @@
           :shortname: SLEHA15
           :recommended: false
           :extensions: []
-        modifiable: true
   depends_on: 
 - &7 !ruby/object:Registration::Addon
   pure_addon: *1

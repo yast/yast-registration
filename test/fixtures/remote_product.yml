@@ -66,7 +66,6 @@ table:
         url: https://nu.novell.com/SUSE:/Updates:/SLE-WE:/12:/x86_64/standard
         enabled: true
         autorefresh: true
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1223
@@ -109,7 +108,6 @@ table:
         url: https://nu.novell.com/SUSE:/Updates:/SLE-SDK:/12:/x86_64/standard
         enabled: true
         autorefresh: true
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1150
@@ -142,7 +140,6 @@ table:
         url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1
         enabled: true
         autorefresh: false
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1153
@@ -175,7 +172,6 @@ table:
         url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-web-scripting-POOL-x86_64-Media1
         enabled: true
         autorefresh: false
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1220
@@ -208,7 +204,6 @@ table:
         url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-public-cloud-POOL-x86_64-Media1
         enabled: true
         autorefresh: false
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1212
@@ -238,7 +233,6 @@ table:
         url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-adv-systems-management-POOL-x86_64-Media1
         enabled: true
         autorefresh: false
-    modifiable: true
   - !ruby/object:OpenStruct
     table:
       :id: 1155
@@ -294,7 +288,6 @@ table:
             url: https://nu.novell.com/SUSE:/Updates:/SLE-HAE-GEO:/12:/x86_64/standard
             enabled: true
             autorefresh: true
-        modifiable: true
       :repositories:
       - id: 1500
         name: SLE-HAE12-Pool
@@ -310,7 +303,6 @@ table:
         url: https://nu.novell.com/SUSE:/Updates:/SLE-HAE:/12:/x86_64/standard
         enabled: true
         autorefresh: true
-    modifiable: true
   :repositories:
   - id: 1220
     name: SLES12-Debuginfo-Updates
@@ -333,4 +325,3 @@ table:
     url: https://nu.novell.com/SUSE:/Updates:/SLE-SERVER:/12:/x86_64/standard
     enabled: true
     autorefresh: true
-modifiable: true

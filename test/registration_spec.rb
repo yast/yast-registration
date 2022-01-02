@@ -137,8 +137,8 @@ describe Registration::Registration do
       end
 
       it "downloads available extensions" do
-        if RUBY_VERSION.start_with?("3.")
-          pending "YaML loading of older OpenStruct is broken in ruby 3"
+        if RUBY_VERSION.start_with?("3.0.")
+          pending "YaML loading of older OpenStruct is broken in ruby 3.0"
         end
 
         addons = Registration::Registration.new.get_addon_list
