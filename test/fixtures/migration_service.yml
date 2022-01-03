@@ -109,7 +109,6 @@ table:
             autorefresh: false
           :product_type: extension
           :extensions: []
-        modifiable: true
       - !ruby/object:OpenStruct
         table:
           :id: 1324
@@ -156,6 +155,3 @@ table:
             autorefresh: false
           :product_type: extension
           :extensions: []
-        modifiable: true
-    modifiable: true
-modifiable: true

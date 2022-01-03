@@ -267,7 +267,6 @@
           :successor_ids:
           - 1337
           :extensions: []
-        modifiable: true
   children:
   - &3 !ruby/object:Registration::Addon
     pure_addon: *1

@@ -59,7 +59,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-WE:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1223
@@ -102,7 +101,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-SDK:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1150
@@ -145,7 +143,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Legacy:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1153
@@ -189,7 +186,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Web-Scripting:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1220
@@ -230,7 +226,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Public-Cloud:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1212
@@ -270,7 +265,6 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-Module-Adv-Systems-Management:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true
 - !ruby/object:OpenStruct
   table:
     :id: 1245
@@ -325,7 +319,6 @@
           url: https://nu.novell.com/SUSE:/Updates:/SLE-HA-GEO:/12:/x86_64/standard
           enabled: true
           autorefresh: true
-      modifiable: true
     :repositories:
     - id: 1500
       name: SLE-HA12-Pool
@@ -341,4 +334,3 @@
       url: https://nu.novell.com/SUSE:/Updates:/SLE-HA:/12:/x86_64/standard
       enabled: true
       autorefresh: true
-  modifiable: true

@@ -161,10 +161,6 @@ describe Registration::UI::MigrationReposWorkflow do
       end
 
       it "selects products to install" do
-        if RUBY_VERSION.start_with?("3.0.")
-          pending "YaML loading of older OpenStruct is broken in ruby 3.0"
-        end
-
         set_success_expectations
         expect(Registration::SwMgmt).to receive(:select_addon_products) do |services|
           expect(services.first.id).to eq(1311)

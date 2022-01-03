@@ -72,7 +72,12 @@ end
 
 require "yaml"
 def load_yaml_fixture(file)
-  YAML.load_file(fixtures_file(file))
+  # if yaml is already split to safe and unsafe, lets use unsafe as we need specific structures
+  if YAML.respond_to?(:unsafe_load_file)
+    YAML.unsafe_load_file(fixtures_file(file))
+  else
+    YAML.load_file(fixtures_file(file))
+  end
 end
 
 require "yast"

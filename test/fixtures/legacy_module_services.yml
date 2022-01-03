@@ -37,5 +37,3 @@
           url: https://nu.novell.com/SUSE:/Products:/SLE-12/images/repo/SLE-12-module-legacy-POOL-x86_64-Media1
           enabled: true
           autorefresh: false
-      modifiable: true
-  modifiable: true
