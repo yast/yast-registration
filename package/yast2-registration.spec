@@ -34,7 +34,7 @@ BuildRequires:  yast2-slp >= 3.1.9
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake) >= 0.2.5
 # uses Fiddle instead of FFI
-BuildRequires:  suseconnect-ruby-bindings >= 0.0.5
+BuildRequires:  suseconnect-ruby-bindings > 0.0.4
 # ProductSpec API
 BuildRequires:  yast2-packager >= 4.4.13
 BuildRequires:  yast2-update >= 3.1.36
@@ -46,7 +46,7 @@ Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
 Requires:       yast2-ruby-bindings >= 3.1.12
 # uses Fiddle instead of FFI
-Requires:       suseconnect-ruby-bindings >= 0.0.5
+Requires:       suseconnect-ruby-bindings > 0.0.4
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-slp >= 3.1.9
 # ProductSpec API
