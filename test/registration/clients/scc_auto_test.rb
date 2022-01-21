@@ -2,17 +2,6 @@
 
 require_relative "../../spec_helper"
 
-# we have enabled strict method checking in rspec, so we need to define profile method
-# by opening class. Profile is stubbed, so it is just fake class
-
-module Yast
-  class Profile
-    def self.current
-      {}
-    end
-  end
-end
-
 describe Registration::Clients::SCCAuto do
   let(:config) { ::Registration::Storage::Config.instance }
 
