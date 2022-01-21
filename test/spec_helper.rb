@@ -81,6 +81,7 @@ def load_yaml_fixture(file)
 end
 
 require "yast"
+require "yast/rspec"
 require "y2packager/product"
 def stub_product_selection
   name = "AutoinstFunctions"
@@ -98,14 +99,8 @@ end
 
 stub_product_selection
 
-# stub module to prevent its Import
-# Useful for modules from different yast packages, to avoid build dependencies
-def stub_module(name)
-  Yast.const_set name.to_sym, Class.new { def self.fake_method; end }
-end
-
 # stub classes from other modules to avoid build dependencies
-stub_module("Profile")
+Yast::RSpec::Helpers.define_yast_module("Profile", methods: [:current])
 
 # load data generators
 require_relative "factories"
