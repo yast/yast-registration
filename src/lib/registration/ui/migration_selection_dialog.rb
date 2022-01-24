@@ -181,7 +181,7 @@ module Registration
 
       # @return [String] textual representation of base product living in arr
       def base_product_text_for(arr)
-        base_product = arr.find(&:base)
+        base_product = arr.find(&:isbase)
         base_product.friendly_name || base_product.short_name ||
           (base_product.identifier + "-" + base_product.version)
       end
