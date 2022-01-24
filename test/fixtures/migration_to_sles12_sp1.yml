@@ -7,5 +7,5 @@
       :release_type: 
       :friendly_name: SUSE Linux Enterprise Server SP1 x86_64
       :shortname: SLES12-SP1
-      :base: true
+      :isbase: true
       :product_type: base
