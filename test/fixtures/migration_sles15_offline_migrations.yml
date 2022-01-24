@@ -7,7 +7,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: true
+      :isbase: true
       :product_type: base
       :free: false
       :release_stage: beta
@@ -19,7 +19,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -31,7 +31,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -43,7 +43,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -55,7 +55,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -67,7 +67,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -79,7 +79,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -91,7 +91,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -103,7 +103,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released
@@ -115,7 +115,7 @@
       :version: '15'
       :arch: x86_64
       :release_type: 
-      :base: false
+      :isbase: false
       :product_type: module
       :free: true
       :release_stage: released

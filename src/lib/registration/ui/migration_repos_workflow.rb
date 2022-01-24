@@ -549,7 +549,7 @@ module Registration
 
       # update the $releasever
       def update_releasever
-        new_base = selected_migration.find(&:base)
+        new_base = selected_migration.find(&:isbase)
 
         if new_base
           log.info "Activating new $releasever for base product: #{new_base}"
