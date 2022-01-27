@@ -21,6 +21,7 @@
 
 require "ostruct"
 require "yast"
+require "y2packager/new_repository_setup"
 require "suse/connect"
 require "registration/connect_helpers"
 
@@ -71,6 +72,8 @@ module Registration
 
         service = SUSE::Connect::YaST.activate_product(product_ident, params, email)
         log.info "Register product result: #{service}"
+        # remember the new service, might be useful later
+        Y2Packager::NewRepositorySetup.instance.add_service(service.name)
         set_registered(product_ident)
 
         renames = collect_renames([service.product])
@@ -85,6 +88,8 @@ module Registration
         log.info "Upgrading product: #{product}"
         service = SUSE::Connect::YaST.upgrade_product(product_ident, params)
         log.info "Upgrade product result: #{service}"
+        # remember the new service to not accidentally delete it as an old service
+        Y2Packager::NewRepositorySetup.instance.add_service(service.name)
         # skip loading the remote addons in offline upgrade, there is a confusion
         # between installed and the upgraded product, moreover we do not need the
         # addons list at all

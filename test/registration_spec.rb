@@ -68,6 +68,8 @@ describe Registration::Registration do
       allow(SUSE::Connect::YaST).to receive(:credentials)
         .with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)
         .and_return(OpenStruct.new(username: "SCC_foo", password: "bar"))
+
+      allow_any_instance_of(Y2Packager::NewRepositorySetup).to receive(:add_service)
     end
 
     it "adds the selected product and returns added zypp services" do
@@ -79,6 +81,13 @@ describe Registration::Registration do
       allow(Yast::Mode).to receive(:update).and_return(false)
       allow(Yast::Stage).to receive(:initial).and_return(false)
       expect(Yast::Installation).to_not receive(:destdir)
+
+      subject.send(yast_method, product)
+    end
+
+    it "stores the added service name" do
+      expect_any_instance_of(Y2Packager::NewRepositorySetup).to \
+        receive(:add_service).with("service")
 
       subject.send(yast_method, product)
     end
