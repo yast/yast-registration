@@ -95,7 +95,7 @@ module Registration
         # merge reg code if not defined in the profile but
         # available from other sources
         product = Yast::AutoinstFunctions.selected_product
-        if product && !settings["reg_code"]
+        if product&.respond_to?(:short_name) && !settings["reg_code"]
           reg_codes_loader = ::Registration::Storage::RegCodes.instance
           settings["reg_code"] = reg_codes_loader.reg_codes[product.short_name] || ""
         end

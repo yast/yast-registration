@@ -1,6 +1,7 @@
 #! /usr/bin/env rspec
 
 require_relative "../../spec_helper"
+require "y2packager/control_product_spec"
 
 describe Registration::Clients::SCCAuto do
   let(:config) { ::Registration::Storage::Config.instance }
@@ -32,8 +33,59 @@ describe Registration::Clients::SCCAuto do
   end
 
   describe "#import" do
+    let(:config) do
+      instance_double(Registration::Storage::Config)
+    end
+
+    let(:product) do
+      instance_double(Y2Packager::Product, short_name: "SLES15-SP4")
+    end
+
+    before do
+      allow(Yast::AutoinstFunctions).to receive(:selected_product).and_return(product)
+      allow(Registration::Storage::Config).to receive(:instance).and_return(config)
+    end
+
     it "imports given hash" do
-      expect { subject.import({}) }.to_not raise_error
+      expect(config).to receive(:import).with("reg_code" => "SOME-CODE")
+      subject.import("reg_code" => "SOME-CODE")
+    end
+
+    context "when the registration code is not specified" do
+      let(:loader) do
+        instance_double(Registration::Storage::RegCodes, reg_codes: reg_codes)
+      end
+
+      let(:reg_codes) do
+        { "SLES15-SP4" => "INTERNAL-USE-ONLY" }
+      end
+
+      before do
+        allow(Registration::Storage::RegCodes).to receive(:instance).and_return(loader)
+      end
+
+      it "reads the code from the registration codes loader" do
+        expect(config).to receive(:import).with("reg_code" => "INTERNAL-USE-ONLY")
+        subject.import({})
+      end
+
+      context "but respositories are not initialized yet" do
+        let(:product) { instance_double(Y2Packager::ControlProductSpec) }
+
+        it "does not read the code from the registration codes loader" do
+          expect(config).to receive(:import).with({})
+          subject.import({})
+        end
+      end
+
+      context "but the selected product is unknown" do
+        let(:product) { nil }
+
+        it "does not read the code from the registration codes loader" do
+          expect(config).to receive(:import).with({})
+          subject.import({})
+        end
+      end
     end
   end
 
