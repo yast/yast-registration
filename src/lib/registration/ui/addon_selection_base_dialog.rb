@@ -177,14 +177,13 @@ module Registration
 
           image = (installation ? "inst:" : "normal:") +
             selected + ":" + (enabled ? "enabled" : "disabled")
-          color = installation ? "white" : "black"
 
           check = "<img src='#{IMAGE_DIR}/#{IMAGES[image]}'></img>"
           widget = "#{check} #{label}"
           enabled_widget = if enabled
-            "<a href='#{id}' style='text-decoration:none; color:#{color}'>#{widget}</a>"
+            "<a href='#{id}' class='enabled-item'>#{widget}</a>"
           else
-            "<span style='color:grey'>#{widget}</span>"
+            "<span class='disabled-item'>#{widget}</span>"
           end
           "<p>#{INDENT}#{enabled_widget}</p>"
         end
