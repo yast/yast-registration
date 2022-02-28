@@ -85,14 +85,14 @@ describe Registration::AutoyastAddons do
 
   describe "#register" do
     it "registers the selected addons" do
-      expect(registration).to receive(:register_product).with(
+      expect(registration).to receive(:register_product).with({
         "name" => "sle-module-basesystem", "reg_code" => nil, "arch" => "x86_64",
         "version" => "15"
-      ).ordered
-      expect(registration).to receive(:register_product).with(
+      }).ordered
+      expect(registration).to receive(:register_product).with({
         "name" => "sle-module-desktop-applications", "reg_code" => nil,
         "arch" => "x86_64", "version" => "15"
-      ).ordered
+      }).ordered
 
       ayaddons = Registration::AutoyastAddons.new(unsorted_addons, registration)
       ayaddons.select
@@ -100,10 +100,10 @@ describe Registration::AutoyastAddons do
     end
 
     it "registers the selected addon using the provided reg. key" do
-      expect(registration).to receive(:register_product).with(
+      expect(registration).to receive(:register_product).with({
         "name" => "sle-module-basesystem", "reg_code" => "abcd42", "arch" => "x86_64",
         "version" => "15"
-      )
+      })
 
       ayaddons = Registration::AutoyastAddons.new(addons_with_reg_key, registration)
       ayaddons.select
