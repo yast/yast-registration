@@ -43,11 +43,13 @@ module Registration
       # workaround for rollback from the Leap => SLES migration,
       # maps installed => activated product
       SYNC_FALLBACKS = {
-        "openSUSE" => "SLES"
+        "openSUSE" => "SLES",
+        # openSUSE Leap 15.3 and newer
+        "Leap"     => "SLES"
       }.freeze
 
       # restore the registration status
-      # @return [Symbol] :next on sucess, :abort on error
+      # @return [Symbol] :next on success, :abort on error
       def run_sequence
         log.info "Restoring the original repository and registration status..."
 
