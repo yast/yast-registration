@@ -103,6 +103,9 @@ module Registration
       # Cleanup
       FileUtils.rm_rf(TMP_CA_CERTS_DIR)
 
+      # Reload SUSEConnect internal cert pool (suseconnect-ng only)
+      SUSE::Connect::SSLCertificate.reload if SUSE::Connect::SSLCertificate.respond_to?(:reload)
+
       # Check that last file was copied to return true or false
       File.exist?(new_files.last)
     end
