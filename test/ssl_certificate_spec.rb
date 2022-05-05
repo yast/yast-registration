@@ -55,7 +55,12 @@ describe Registration::SslCertificate do
       stub_const("Registration::SslCertificate::CA_CERTS_DIR", ca_dir.to_s)
       allow(Yast::Execute).to receive(:locally).and_call_original
       allow(FileUtils).to receive(:rm_rf).and_call_original
-      CERT_LINKS.each { |l| FileUtils.ln_sf(tmp_ca_dir.join(CERT_NAME), tmp_ca_dir.join(l)) }
+      ["openssl", "pem"].each do |d|
+        FileUtils.mkdir_p(tmp_ca_dir.join(d))
+        CERT_LINKS.each do |l|
+          FileUtils.ln_sf(tmp_ca_dir.join(d, CERT_NAME), tmp_ca_dir.join(d, l))
+        end
+      end
     end
 
     after do
@@ -66,7 +71,12 @@ describe Registration::SslCertificate do
 
     it "adds new certs under anchors to system CA certificates" do
       expect(Yast::Execute).to receive(:locally).with("trust", "extract",
-        "--format=openssl-directory", "--filter=ca-anchors", "--overwrite", tmp_ca_dir.to_s)
+        "--format=openssl-directory", "--filter=ca-anchors", "--overwrite",
+        tmp_ca_dir.join("openssl").to_s)
+        .and_return(true)
+      expect(Yast::Execute).to receive(:locally).with("trust", "extract",
+        "--format=pem-directory-hash", "--filter=ca-anchors", "--overwrite",
+        tmp_ca_dir.join("pem").to_s)
         .and_return(true)
       expect(FileUtils).to receive(:rm_rf).with(tmp_ca_dir.to_s)
         .and_return(Dir[tmp_ca_dir.join("*")])
