@@ -83,25 +83,31 @@ module Registration
     # @see CA_CERTS_DIR
     # @see TMP_CA_CERTS_DIR
     def self.update_instsys_ca
-      # Update database
-      Yast::Execute.locally("trust", "extract", "--format=openssl-directory", "--filter=ca-anchors",
-        "--overwrite", TMP_CA_CERTS_DIR)
+      FileUtils.mkdir_p(TMP_CA_CERTS_DIR)
+      # Extract system certs in openssl and pem formats
+      Yast::Execute.locally("trust", "extract", "--format=openssl-directory",
+        "--filter=ca-anchors", "--overwrite", File.join(TMP_CA_CERTS_DIR, "openssl"))
+      Yast::Execute.locally("trust", "extract", "--format=pem-directory-hash",
+        "--filter=ca-anchors", "--overwrite", File.join(TMP_CA_CERTS_DIR, "pem"))
 
       # Copy certificates/links
-      files = Dir[File.join(TMP_CA_CERTS_DIR, "*")]
-      return false if files.empty?
-      targets = ["pem", "openssl"].map { |d| File.join(CA_CERTS_DIR, d) }
-      new_files = targets.each_with_object([]) do |subdir, memo|
+      new_files = []
+      ["pem", "openssl"].each do |subdir|
+        files = Dir[File.join(TMP_CA_CERTS_DIR, subdir, "*")]
+        next if files.empty?
+        subdir = File.join(CA_CERTS_DIR, subdir)
         FileUtils.mkdir_p(subdir) unless Dir.exist?(subdir)
         files.each do |file|
           # FileUtils.cp does not seem to allow copying the links without dereferencing them.
           Yast::Execute.locally("cp", "--no-dereference", "--preserve=links", file, subdir)
-          memo << File.join(subdir, File.basename(file))
+          new_files << File.join(subdir, File.basename(file))
         end
       end
 
       # Cleanup
       FileUtils.rm_rf(TMP_CA_CERTS_DIR)
+
+      return false if new_files.empty?
 
       # Reload SUSEConnect internal cert pool (suseconnect-ng only)
       SUSE::Connect::SSLCertificate.reload if SUSE::Connect::SSLCertificate.respond_to?(:reload)
