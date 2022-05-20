@@ -27,6 +27,7 @@ require "cgi"
 
 require "registration/addon"
 require "registration/exceptions"
+require "registration/finish_dialog"
 require "registration/helpers"
 require "registration/connect_helpers"
 require "registration/sw_mgmt"
@@ -208,6 +209,13 @@ module Yast
         )
       end
 
+      # when running in a container copy the credentials and the SSL certificate
+      # from the host system
+      if Arch.is_management_container
+        ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
+        ::Registration::SslCertificate.import_from_system
+      end
+
       if Mode.update
         ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
 
@@ -268,6 +276,16 @@ module Yast
       end
     end
 
+    def finish
+      # when running in a container copy the credentials and the SSL certificate
+      # back to the host system
+      if Arch.is_management_container
+        ::Registration::FinishDialog.new.run("Write")
+      end
+
+      :next
+    end
+
     def registration_ui
       ::Registration::RegistrationUI.new(@registration)
     end
@@ -283,7 +301,8 @@ module Yast
         "addon_eula"             => ->() { addon_eula },
         "register_addons"        => ->() { register_addons },
         "update_autoyast_config" => ->() { update_autoyast_config },
-        "pkg_manager"            => ->() { pkg_manager }
+        "pkg_manager"            => ->() { pkg_manager },
+        "finish"                 => ->() { finish }
       }
     end
 
@@ -332,6 +351,10 @@ module Yast
           next:  "pkg_manager"
         },
         "pkg_manager"            => {
+          abort: :abort,
+          next:  "finish"
+        },
+        "finish"                 => {
           abort: :abort,
           next:  :next
         }

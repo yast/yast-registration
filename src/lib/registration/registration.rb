@@ -62,6 +62,12 @@ module Registration
 
       # write the global credentials
       SUSE::Connect::YaST.create_credentials_file(login, password)
+
+      # when running in a management container copy the credentials to the host system
+      if Yast::Arch.is_management_container
+        target_path = File.join(Yast::Installation.destdir, self.class.credentials_path)
+          ::FileUtils.cp(self.class.credentials_path, target_path)
+      end
     end
 
     def register_product(product, email = nil)

@@ -59,7 +59,7 @@ module Registration
         remove_ncc_credentials
         nil
       else
-        raise "Uknown action #{func} passed as first parameter"
+        raise "Unknown action #{func} passed as first parameter"
       end
     end
 
