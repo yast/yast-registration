@@ -51,18 +51,6 @@ module Registration
         # import the SMT/RMT certificate to inst-sys
         SslCertificate.import_from_system
       end
-
-      # Log the certificate details
-      # @param cert [Registration::SslCertificate] the SSL certificate
-      def log_certificate(cert)
-        # log also the dates
-        log.info("#{SslCertificateDetails.new(cert).summary}\n" \
-        "Issued on: #{cert.issued_on}\nExpires on: #{cert.expires_on}")
-
-        # log a warning for expired certificate
-        expires = cert.x509_cert.not_after.localtime
-        log.warn("The certificate has EXPIRED! (#{expires})") if expires < Time.now
-      end
     end
   end
 end

@@ -365,13 +365,13 @@ module Registration
       credentials_file = UrlHelpers.credentials_from_url(product_service.url)
 
       if credentials_file
-        if Mode.update
+        if Mode.update || Yast::Arch.is_management_container
           # at update libzypp is already switched to /mnt target,
           # update the path accordingly
           credentials_file = File.join(Installation.destdir,
             ::SUSE::Connect::YaST::DEFAULT_CREDENTIALS_DIR,
             credentials_file)
-          log.info "Using #{credentials_file} credentials path in update mode"
+          log.info "Using #{credentials_file} credentials path"
         end
         # SCC uses the same credentials for all services, just save them to
         # a different file

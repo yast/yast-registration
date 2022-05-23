@@ -230,7 +230,7 @@ module Registration
         if File.exist?(cert_file)
           log.info("Importing the SSL certificate from other system: (#{prefix})#{file} ...")
           cert = SslCertificate.load_file(cert_file)
-          log_certificate(cert)
+          cert.log_details
           if Yast::Stage.initial
             target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
             cert.import_to_instsys(target_path)
@@ -241,6 +241,19 @@ module Registration
           log.debug("SSL certificate (#{prefix})#{file} not found in the system")
         end
       end
+    end
+
+    # Log the certificate details
+    # @param cert [Registration::SslCertificate] the SSL certificate
+    def log_details
+      require "registration/ssl_certificate_details"
+      # log also the dates
+      log.info("#{SslCertificateDetails.new(self).summary}\n" \
+      "Issued on: #{issued_on}\nExpires on: #{expires_on}")
+
+      # log a warning for expired certificate
+      expires = x509_cert.not_after.localtime
+      log.warn("The certificate has EXPIRED! (#{expires})") if expires < Time.now
     end
 
   private
