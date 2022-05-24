@@ -64,8 +64,8 @@ module Registration
       # write the global credentials
       SUSE::Connect::YaST.create_credentials_file(login, password)
 
-      # when running in a management container copy the credentials to the host system
-      if Yast::Arch.is_management_container
+      # when managing a system in chroot copy the credentials to the target system
+      if Yast::WFM.scr_chrooted?
         target_path = File.join(Yast::Installation.destdir, self.class.credentials_path)
         ::FileUtils.cp(self.class.credentials_path, target_path)
         ::Registration::FinishDialog.new.run("Write")

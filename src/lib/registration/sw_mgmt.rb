@@ -365,7 +365,7 @@ module Registration
       credentials_file = UrlHelpers.credentials_from_url(product_service.url)
 
       if credentials_file
-        if Mode.update || Yast::Arch.is_management_container
+        if Mode.update || Yast::WFM.scr_chrooted?
           # at update libzypp is already switched to /mnt target,
           # update the path accordingly
           credentials_file = File.join(Installation.destdir,

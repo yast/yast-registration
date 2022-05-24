@@ -209,9 +209,9 @@ module Yast
         )
       end
 
-      # when running in a container copy the credentials and the SSL certificate
-      # from the host system
-      if Arch.is_management_container
+      # when managing a system in chroot copy the credentials and the SSL certificate
+      # from the chroot to the current system
+      if Yast::WFM.scr_chrooted?
         ::Registration::SwMgmt.copy_old_credentials(Installation.destdir)
         ::Registration::SslCertificate.import_from_system
       end
@@ -276,10 +276,12 @@ module Yast
       end
     end
 
+    # finish the registration workflow
+    # @return [symbol] result symbol (:next)
     def finish
-      # when running in a container copy the credentials and the SSL certificate
-      # back to the host system
-      if Arch.is_management_container
+      # when managing a system in chroot copy the config file and the SSL certificate
+      # to the chroot target
+      if WFM.scr_chrooted?
         ::Registration::FinishDialog.new.run("Write")
       end
 
