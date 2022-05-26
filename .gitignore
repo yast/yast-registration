@@ -5,3 +5,4 @@ package/*.bz2
 /nbproject/
 test-driver
 .yardoc/
+test/fixtures/anchors/*/*.0

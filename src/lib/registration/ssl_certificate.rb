@@ -12,6 +12,7 @@ module Registration
     include Yast::Logger
 
     Yast.import "Stage"
+    Yast.import "Installation"
 
     # Path to the registration certificate in the instsys
     INSTSYS_CERT_DIR = "/etc/pki/trust/anchors".freeze
@@ -217,6 +218,41 @@ module Registration
 
       # Update database
       self.class.update_instsys_ca
+    end
+
+    # Import the old SSL certificate if present. Tries all known locations.
+    # Uses Installation.destdir as the root system.
+    def self.import_from_system
+      prefix = Yast::Installation.destdir
+
+      SslCertificate::PATHS.each do |file|
+        cert_file = File.join(prefix, file)
+        if File.exist?(cert_file)
+          log.info("Importing the SSL certificate from other system: (#{prefix})#{file} ...")
+          cert = SslCertificate.load_file(cert_file)
+          cert.log_details
+          if Yast::Stage.initial
+            target_path = File.join(SslCertificate::INSTSYS_CERT_DIR, File.basename(cert_file))
+            cert.import_to_instsys(target_path)
+          else
+            cert.import_to_system
+          end
+        else
+          log.debug("SSL certificate (#{prefix})#{file} not found in the system")
+        end
+      end
+    end
+
+    # Log the certificate details
+    def log_details
+      require "registration/ssl_certificate_details"
+      # log also the dates
+      log.info("#{SslCertificateDetails.new(self).summary}\n" \
+      "Issued on: #{issued_on}\nExpires on: #{expires_on}")
+
+      # log a warning for expired certificate
+      expires = x509_cert.not_after.localtime
+      log.warn("The certificate has EXPIRED! (#{expires})") if expires < Time.now
     end
 
   private

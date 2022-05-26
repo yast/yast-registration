@@ -24,6 +24,7 @@ require "yast"
 require "y2packager/new_repository_setup"
 require "suse/connect"
 require "registration/connect_helpers"
+require "registration/finish_dialog"
 
 require "registration/addon"
 require "registration/helpers"
@@ -62,6 +63,13 @@ module Registration
 
       # write the global credentials
       SUSE::Connect::YaST.create_credentials_file(login, password)
+
+      # when managing a system in chroot copy the credentials to the target system
+      if Yast::WFM.scr_chrooted?
+        target_path = File.join(Yast::Installation.destdir, self.class.credentials_path)
+        ::FileUtils.cp(self.class.credentials_path, target_path)
+        ::Registration::FinishDialog.new.run("Write")
+      end
     end
 
     def register_product(product, email = nil)

@@ -12,6 +12,7 @@ describe Registration::Clients::InstMigrationRepos do
   before do
     allow(Yast::WFM).to receive(:call)
     allow(Yast::Installation).to receive(:destdir).and_return(destdir)
+    allow(Yast::Stage).to receive(:initial).and_return(true)
     allow(Registration::SwMgmt).to receive(:copy_old_credentials)
     allow(File).to receive(:exist?).and_return(false)
   end
