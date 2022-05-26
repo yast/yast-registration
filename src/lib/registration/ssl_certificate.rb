@@ -244,7 +244,6 @@ module Registration
     end
 
     # Log the certificate details
-    # @param cert [Registration::SslCertificate] the SSL certificate
     def log_details
       require "registration/ssl_certificate_details"
       # log also the dates

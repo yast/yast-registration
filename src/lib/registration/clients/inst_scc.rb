@@ -281,9 +281,7 @@ module Yast
     def finish
       # when managing a system in chroot copy the config file and the SSL certificate
       # to the chroot target
-      if WFM.scr_chrooted?
-        ::Registration::FinishDialog.new.run("Write")
-      end
+      ::Registration::FinishDialog.new.run("Write") if WFM.scr_chrooted?
 
       :next
     end
