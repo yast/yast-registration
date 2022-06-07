@@ -173,6 +173,8 @@ module Registration
     end
 
     def activated_products
+      return [] unless Registration.is_registered?
+
       log.info "Reading activated products..."
       activated = SUSE::Connect::YaST.status(connect_params).activated_products || []
       log.info "Activated products: #{activated.map(&:identifier)}"

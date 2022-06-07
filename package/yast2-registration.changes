@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun  7 12:37:04 UTC 2022 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Do not crash when cloning an unregistered system with
+  additional repositories (bsc#1200035).
+- 4.4.22
+
+-------------------------------------------------------------------
 Thu May  5 14:43:40 UTC 2022 - Ladislav Slezák <lslezak@suse.cz>
 
 - Import the SSL certificate from the <reg_server_cert> AutoYaST
