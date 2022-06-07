@@ -178,7 +178,7 @@ module Registration
       log.info "Activated products: #{activated.map(&:identifier)}"
       activated
     rescue SUSE::Connect::MissingSccCredentialsFile
-      log.warn "Missing SCC credentials file is missing. No activated products."
+      log.warn "SCC credentials file is missing. No activated products."
       []
     end
 
