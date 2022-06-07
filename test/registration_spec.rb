@@ -116,6 +116,14 @@ describe Registration::Registration do
 
       expect(Registration::Registration.new.activated_products).to eq([])
     end
+
+    context "when the credentials file is missing" do
+      it "returns an empty array" do
+        allow(SUSE::Connect::YaST).to receive(:status)
+          .and_raise(SUSE::Connect::MissingSccCredentialsFile)
+        expect(Registration::Registration.new.activated_products).to eq([])
+      end
+    end
   end
 
   describe "#get_addon_list" do

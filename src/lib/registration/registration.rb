@@ -177,6 +177,9 @@ module Registration
       activated = SUSE::Connect::YaST.status(connect_params).activated_products || []
       log.info "Activated products: #{activated.map(&:identifier)}"
       activated
+    rescue SUSE::Connect::MissingSccCredentialsFile
+      log.warn "Missing SCC credentials file is missing. No activated products."
+      []
     end
 
     # get the list of migration products
