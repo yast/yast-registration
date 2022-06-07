@@ -110,17 +110,25 @@ describe Registration::Registration do
   end
 
   describe "#activated_products" do
-    it "returns list of activated products" do
-      status = double(activated_products: [])
-      expect(SUSE::Connect::YaST).to receive(:status).and_return(status)
+    let(:sles) { double("SLES", identifier: "sles") }
+    let(:registered?) { true }
 
-      expect(Registration::Registration.new.activated_products).to eq([])
+    before do
+      allow(Registration::Registration).to receive(:is_registered?)
+        .and_return(registered?)
     end
 
-    context "when the credentials file is missing" do
+    it "returns list of activated products" do
+      status = double(activated_products: [sles])
+      allow(SUSE::Connect::YaST).to receive(:status).and_return(status)
+      expect(Registration::Registration.new.activated_products).to eq([sles])
+    end
+
+    context "when the system is not registered" do
+      let(:registered?) { false }
+
       it "returns an empty array" do
-        allow(SUSE::Connect::YaST).to receive(:status)
-          .and_raise(SUSE::Connect::MissingSccCredentialsFile)
+        expect(SUSE::Connect::YaST).to_not receive(:status)
         expect(Registration::Registration.new.activated_products).to eq([])
       end
     end
