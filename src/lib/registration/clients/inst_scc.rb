@@ -137,18 +137,28 @@ module Yast
 
     # run the addon selection dialog
     def select_addons
-      # FIXME: available_addons is called just to fill cache with popup
-      return :cancel if get_available_addons == :cancel
+      log.group "Select add-ons" do |group|
+        # FIXME: available_addons is called just to fill cache with popup
+        return :cancel if get_available_addons == :cancel
 
-      if Registration::Addon.find_all(@registration).empty?
-        log.info("Skipping an empty add on selection screen.")
-        return :skip
+        if Registration::Addon.find_all(@registration).empty?
+          log.info("Skipping an empty add on selection screen.")
+          return :skip
+        end
+
+        # FIXME: workaround to reference between old way and new storage in Addon metaclass
+        @selected_addons = Registration::Addon.selected
+        ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
+
+        ret = Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
+
+        group.summary = "Selected #{@selected_addons.size} add-ons"
+        if !Registration::Addon.auto_selected.empty?
+          group.summary += "(+ #{Registration::Addon.auto_selected.size} auto selected)"
+        end
+
+        ret
       end
-
-      # FIXME: workaround to reference between old way and new storage in Addon metaclass
-      @selected_addons = Registration::Addon.selected
-      ::Registration::Storage::InstallationOptions.instance.selected_addons = @selected_addons
-      Registration::UI::AddonSelectionRegistrationDialog.run(@registration)
     end
 
     # load available addons from SCC server
@@ -175,12 +185,14 @@ module Yast
     # register all selected addons
     # back returns directly to the extensions selection
     def register_addons
-      return false if init_registration == :cancel
-      addons = Registration::Addon.selected + Registration::Addon.auto_selected
-      addons = Registration::Addon.registration_order(addons)
-      ret = registration_ui.register_addons(addons, @known_reg_codes)
-      ret = :extensions if ret == :back
-      ret
+      log.group "Register add-ons" do
+        return false if init_registration == :cancel
+        addons = Registration::Addon.selected + Registration::Addon.auto_selected
+        addons = Registration::Addon.registration_order(addons)
+        ret = registration_ui.register_addons(addons, @known_reg_codes)
+        ret = :extensions if ret == :back
+        ret
+      end
     end
 
     # do some sanity checks and decide which workflow will be used
@@ -266,13 +278,15 @@ module Yast
 
     # preselect the addon products and in installed system run the package manager
     def pkg_manager
-      ::Registration::SwMgmt.select_addon_products
+      log.group "Select add-on products to install" do
+        ::Registration::SwMgmt.select_addon_products
 
-      # run the package manager only in installed system and if a new addon was registered
-      if Mode.normal && Registration::Addon.registered != @addons_registered_orig
-        WFM.call("sw_single")
-      else
-        :next
+        # run the package manager only in installed system and if a new addon was registered
+        if Mode.normal && Registration::Addon.registered != @addons_registered_orig
+          WFM.call("sw_single")
+        else
+          :next
+        end
       end
     end
 
@@ -294,7 +308,11 @@ module Yast
     def workflow_aliases
       {
         # skip this when going back
-        "check"                  => ->() { registration_check },
+        "check"                  => lambda do
+          log.group("Initialize registration") do
+            registration_check
+          end
+        end,
         "register"               => ->() { register_base_system },
         "select_addons"          => ->() { select_addons },
         "update"                 => [->() { update_registration }, true],
