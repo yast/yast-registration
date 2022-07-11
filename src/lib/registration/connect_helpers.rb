@@ -228,6 +228,18 @@ module Registration
           Yast::Report.Error(_("Received SSL Certificate does not match " \
                 "the expected certificate."))
         end
+      elsif Yast::Mode.autoinst && Storage::Config.instance.reg_server_cert &&
+          !Storage::Config.instance.reg_server_cert.empty?
+
+        # try just once to avoid endless loop
+        if !certificate_imported
+          cert_url = Storage::Config.instance.reg_server_cert
+          log.info "Importing certificate from #{cert_url}..."
+          cert = SslCertificate.download(cert_url)
+          return true if cert.import
+        end
+
+        report_ssl_error(error.message, cert, error_code)
       else
         report_ssl_error(error.message, cert, error_code)
       end

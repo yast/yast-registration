@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul  7 08:06:01 UTC 2022 - Ladislav Slezák <lslezak@suse.cz>
+
+- Import the SSL certificate from the <reg_server_cert> AutoYaST
+  data also in the self-update step (bsc#1199091, bsc#1198642)
+- 4.3.26
+
+-------------------------------------------------------------------
 Mon Nov  1 11:28:32 UTC 2021 - Josef Reidinger <jreidinger@suse.com>
 
 - Report properly that no product is selected in autoinstallation
