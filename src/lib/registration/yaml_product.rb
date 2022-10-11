@@ -27,7 +27,8 @@ module Registration
         "display_name" => "SUSE Linux Enterprise Desktop 15 SP5",
         "name" => "SLED",
         "arch" => "x86_64",
-        "version" => "15.4",
+        "version" => "15.4-0",
+        "version_version" => "15.4",
         "register_target" => "sle-15-x86_64"
       }
     end
