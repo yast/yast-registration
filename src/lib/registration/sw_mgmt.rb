@@ -31,6 +31,7 @@ require "registration/exceptions"
 require "registration/helpers"
 require "registration/url_helpers"
 require "registration/repo_state"
+require "registration/yaml_product"
 
 require "packager/product_patterns"
 require "y2packager/medium_type"
@@ -191,6 +192,8 @@ module Registration
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       return online_base_product if Stage.initial && Y2Packager::MediumType.online?
+
+      return YamlProduct.selected_product if YamlProduct.selected_product
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial
