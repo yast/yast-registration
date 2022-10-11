@@ -24,7 +24,7 @@ module Registration
 
       # TODO: really select
       {
-        "display_name" => "SUSE Linux Enterprise Desktop 15 SP5"
+        "display_name" => "SUSE Linux Enterprise Desktop 15 SP5",
         "name" => "SLED",
         "arch" => "x86_64",
         "version" => "15.4",
