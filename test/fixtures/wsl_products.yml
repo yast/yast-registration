@@ -1,0 +1,19 @@
+# TODO: references for this file,
+# describe what it is
+# https://jira.suse.com/browse/PED-1380
+- arch: "$arch"
+  display_name: "SUSE Linux Enterprise Desktop 15 SP4"
+  name: "SLED"
+  product_line: "sled"
+  register_target: "sle-15-$arch"
+  version: "15.4-0"
+  version_version: "15.4"
+- arch: "$arch"
+  display_name: "SUSE Linux Enterprise Server 15 SP4"
+  name: "SLES"
+  product_line: "sles"
+  register_target: "sle-15-$arch"
+  version: "15.4-0"
+  # we will convert a YAML number to a string when reading
+  # because it is easy to forget the quotes
+  version_version: 15.4
