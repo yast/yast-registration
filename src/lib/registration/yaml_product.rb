@@ -7,6 +7,9 @@ require "yast"
 module Registration
   Yast.import "Arch"
 
+  # UI should use {.available_products} and pass the user's choice to
+  # {.selected_product=}
+  #
   # Added for SLED registration on a WSL SLES image, see
   # https://jira.suse.com/browse/PED-1380
   class YamlProduct
@@ -25,18 +28,12 @@ module Registration
       @products = @products.map { |p| expand_variables(p) }
     end
 
-    def self.selected_product
-      return nil unless exist?
+    def self.selected_product=(product)
+      @selected_product = product
+    end
 
-      # TODO: really select
-      {
-        "display_name" => "SUSE Linux Enterprise Desktop 15 SP5",
-        "name" => "SLED",
-        "arch" => "x86_64",
-        "version" => "15.4-0",
-        "version_version" => "15.4",
-        "register_target" => "sle-15-x86_64"
-      }
+    def self.selected_product
+      @selected_product
     end
 
     private
