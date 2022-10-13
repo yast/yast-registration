@@ -8,7 +8,7 @@ module Registration
   Yast.import "Arch"
 
   # UI should use {.available_products} and pass the user's choice to
-  # {.selected_product=}
+  # {.select_product}
   #
   # Added for SLED registration on a WSL SLES image, see
   # https://jira.suse.com/browse/PED-1380
@@ -28,12 +28,21 @@ module Registration
       @products = @products.map { |p| expand_variables(p) }
     end
 
-    def self.selected_product=(product)
+    # @param product_name [String, nil] nil in case no product is selected, so no registration
+    def self.select_product(product_name)
+      product = available_products.find{ |p| p["name"] == product_name }
+
+      @manually_selected = true
       @selected_product = product
     end
 
     def self.selected_product
-      @selected_product
+      return @selected_product if @manually_selected
+
+      product = available_products.find{ |p| p["default"] }
+      product ||= available_products.first # use first if none have default
+
+      select_product(product["name"])
     end
 
     private
