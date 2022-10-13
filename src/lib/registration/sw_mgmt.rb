@@ -31,6 +31,8 @@ require "registration/exceptions"
 require "registration/helpers"
 require "registration/url_helpers"
 require "registration/repo_state"
+require "registration/storage"
+require "registration/yaml_products_reader"
 
 require "packager/product_patterns"
 require "y2packager/medium_type"
@@ -199,6 +201,9 @@ module Registration
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       return online_base_product if Stage.initial && Y2Packager::MediumType.online?
+
+      yaml_product = find_yaml_product
+      return yaml_product if yaml_product
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial
@@ -766,6 +771,13 @@ module Registration
       target_distro
     end
 
-    private_class_method :init_target, :target_distribution
+    def self.find_yaml_product
+      product_name = Storage::InstallationOptions.instance.product
+      return nil unless product_name
+
+      YamlProductsReader.new.read.find { |p| p["name"] == product_name }
+    end
+
+    private_class_method :init_target, :target_distribution, :find_yaml_product
   end
 end
