@@ -52,7 +52,7 @@ module Registration
 
       attr_accessor :install_updates, :email, :reg_code, :selected_addons,
         :base_registered, :custom_url, :imported_cert_sha256_fingerprint,
-        :force_registration
+        :yaml_product, :force_registration
 
       def initialize
         @email = ""
