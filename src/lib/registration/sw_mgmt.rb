@@ -307,10 +307,6 @@ module Registration
       products.map { |p| resolvable_to_h(p) }
     end
 
-    def self.base_installed_product
-      Y2Packager::Resolvable.find(kind: :product, status: :installed, category: "base").first
-    end
-
     # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
     # @param product [Hash] product Hash obtained from pkg-bindings
     # @return [SUSE::Connect::Remote::Product] the remote product

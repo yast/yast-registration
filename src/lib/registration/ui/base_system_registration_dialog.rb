@@ -320,8 +320,7 @@ module Registration
       # widget for skipping the registration
       # @return [Yast::Term]  UI term
       def skip_option
-        # do not display it in an installed system or when already registered
-        return Empty() if Stage.normal || Registration.is_registered? || product_switched?
+        return Empty() if hide_skip_option?
         Left(
           RadioButton(
             Id(:skip_registration),
@@ -332,13 +331,16 @@ module Registration
         )
       end
 
-      def product_switched?
-        installed_product = SwMgmt.base_installed_product
-        product = Storage::InstallationOptions.instance.product
-
-        return false unless installed_product && product
-
-        installed_product.name != product
+      # Whether skip option should be hidden
+      #
+      # Do not display it in an installed system or when already registered or when registration
+      # is mandatory.
+      #
+      # @return [Boolean]
+      def hide_skip_option?
+        Stage.normal ||
+          Registration.is_registered? ||
+          Storage::InstallationOptions.instance.force_registration
       end
 
       # part of the main dialog definition - the base product details
