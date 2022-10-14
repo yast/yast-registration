@@ -39,7 +39,7 @@ module Registration
     # @param product [Hash]
     # @return [Hash] new hash
     def expand_variables(product)
-      arch = Yast::Arch.architecture
+      arch = Yast::Arch.rpm_arch
 
       product.map do |key, val|
         val_s = val.to_s
