@@ -1,5 +1,21 @@
-# allow to register against products defined in yaml. Very similar concept to online medium just this time
-# for first boot purpose
+# Copyright (c) [2022] SUSE LLC
+#
+# All Rights Reserved.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of version 2 of the GNU General Public License as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, contact SUSE LLC.
+#
+# To contact SUSE LLC about this file by physical or electronic mail, you may
+# find current contact information at www.suse.com.
 
 require "yaml"
 require "yast"
@@ -7,8 +23,9 @@ require "yast"
 module Registration
   Yast.import "Arch"
 
-  # Added for SLED registration on a WSL SLES image, see
-  # https://jira.suse.com/browse/PED-1380
+  # Reads products defined by YAML file
+  #
+  # Added for SLED registration on a WSL SLES image (jsc#PED-1380).
   class YamlProductsReader
     attr_reader :path
 
@@ -23,7 +40,7 @@ module Registration
       YAML.load_file(path).map { |p| transform(p) }
     end
 
-    private
+  private
 
     DEFAULT_PATH = "/etc/YaST2/products.yaml".freeze
     private_constant :DEFAULT_PATH
