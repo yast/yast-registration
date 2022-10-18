@@ -20,7 +20,7 @@ module Registration
     def read
       return [] unless yaml_exist?
 
-      YAML.load_file(path).map { |p| expand_variables(p) }
+      YAML.load_file(path).map { |p| transform(p) }
     end
 
     private
@@ -36,16 +36,22 @@ module Registration
     # For all values:
     # - convert them to String (to allow writing "15.4" as 15.4)
     # - replace $arch substrings with the architecture
+    # - replace version with version_version as registration expects
+    # - add arch key if not defined
     # @param product [Hash]
     # @return [Hash] new hash
-    def expand_variables(product)
+    def transform(product)
       arch = Yast::Arch.rpm_arch
 
-      product.map do |key, val|
+      res = product.map do |key, val|
         val_s = val.to_s
         val_s.gsub!("$arch", arch)
         [key, val_s]
       end.to_h
+      res["version_version"] ||= res["version"]
+      res["arch"] ||= arch
+
+      res
     end
   end
 end
