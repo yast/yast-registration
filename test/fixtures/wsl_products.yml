@@ -9,3 +9,4 @@
   name: "SLES"
   register_target: "sle-15-$arch"
   version: 15.4
+  default: true
