@@ -70,7 +70,7 @@ module Registration
       end.to_h
       res["version_version"] ||= res["version"]
       res["arch"] ||= arch
-      res["default"] = res["default"] == "true"
+      res["default"] = res["default"]&.casecmp?("true") ? true : false
 
       res
     end
