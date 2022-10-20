@@ -39,5 +39,11 @@ describe Registration::YamlProductsReader do
     it "expands properly arch variable" do
       expect(subject.read.first["register_target"]).to eq "sle-15-#{Yast::Arch.rpm_arch}"
     end
+
+    it "converts default to boolean" do
+      products = subject.read
+      expect(products[0]["default"]).to eq(false)
+      expect(products[1]["default"]).to eq(true)
+    end
   end
 end

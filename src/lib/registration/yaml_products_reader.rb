@@ -51,12 +51,15 @@ module Registration
     end
 
     # For all values:
-    # - convert them to String (to allow writing "15.4" as 15.4)
-    # - replace $arch substrings with the architecture
-    # - replace version with version_version as registration expects
-    # - add arch key if not defined
+    #   - converts them to String (to allow writing "15.4" as 15.4)
+    #   - replaces $arch substring with the current architecture
+    # And also:
+    #   - replaces version with version_version as registration expects
+    #   - adds arch key if not defined
+    #   - converts value of default key to boolean
+    #
     # @param product [Hash]
-    # @return [Hash] new hash
+    # @return [Hash] A new transformed hash
     def transform(product)
       arch = Yast::Arch.rpm_arch
 
@@ -67,6 +70,7 @@ module Registration
       end.to_h
       res["version_version"] ||= res["version"]
       res["arch"] ||= arch
+      res["default"] = res["default"] == "true"
 
       res
     end
