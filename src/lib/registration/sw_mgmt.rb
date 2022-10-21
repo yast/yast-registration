@@ -31,6 +31,7 @@ require "registration/exceptions"
 require "registration/helpers"
 require "registration/url_helpers"
 require "registration/repo_state"
+require "registration/storage"
 
 require "packager/product_patterns"
 require "y2packager/medium_type"
@@ -62,9 +63,17 @@ module Registration
 
     ZYPP_DIR = "/etc/zypp".freeze
 
-    FAKE_BASE_PRODUCT = { "name" => "SLES", "arch" => "x86_64", "version" => "12-0",
-      "flavor" => "DVD", "version_version" => "12", "register_release" => "",
-      "register_target" => "sle-12-x86_64" }.freeze
+    FAKE_BASE_PRODUCT = {
+      "arch"             => "x86_64",
+      "display_name"     => "SUSE Linux Enterprise Desktop 15 SP4",
+      "flavor"           => "",
+      "name"             => "SLED",
+      "product_line"     => "sled",
+      "register_release" => "",
+      "register_target"  => "sle-15-x86_64",
+      "version"          => "15.4-0",
+      "version_version"  => "15.4"
+    }.freeze
 
     OEM_DIR = "/var/lib/suseRegister/OEM".freeze
 
@@ -191,6 +200,9 @@ module Registration
       return FAKE_BASE_PRODUCT if ENV["FAKE_BASE_PRODUCT"]
 
       return online_base_product if Stage.initial && Y2Packager::MediumType.online?
+
+      yaml_product = Storage::InstallationOptions.instance.yaml_product
+      return yaml_product if yaml_product
 
       # use the selected product if a product has been already selected
       selected = product_selected? if Stage.initial

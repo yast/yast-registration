@@ -418,12 +418,30 @@ describe Registration::SwMgmt do
     end
 
     context "in installed system" do
-      let(:products) { load_resolvable("products_legacy_installation.yml") }
-      it "returns installed products" do
+      before do
         allow(Yast::Stage).to receive(:initial).and_return(false)
-        expect(Y2Packager::Resolvable).to receive(:find).and_return(products)
-        # the SLES product in the list is installed
-        expect(subject.find_base_product["name"]).to eq(products[1].name)
+        allow(Y2Packager::Resolvable).to receive(:find).and_return(products)
+        allow(Registration::Storage::InstallationOptions.instance).to receive(:yaml_product)
+          .and_return(yaml_product)
+      end
+
+      let(:products) { load_resolvable("products_legacy_installation.yml") }
+
+      context "if a YAML product is selected" do
+        let(:yaml_product) { { "name" => "SLES", "version" => "15.4" } }
+
+        it "returns the YAML product" do
+          expect(subject.find_base_product).to eq(yaml_product)
+        end
+      end
+
+      context "if no YAML product is selected" do
+        let(:yaml_product) { nil }
+
+        it "returns installed products" do
+          # the SLES product in the list is installed
+          expect(subject.find_base_product["name"]).to eq(products[1].name)
+        end
       end
     end
 
