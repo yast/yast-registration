@@ -1,0 +1,12 @@
+# TODO: references for this file,
+# describe what it is
+# https://jira.suse.com/browse/PED-1380
+- display_name: "SUSE Linux Enterprise Desktop 15 SP4"
+  name: "SLED"
+  register_target: "sle-15-$arch"
+  version: "15.4"
+- display_name: "SUSE Linux Enterprise Server 15 SP4"
+  name: "SLES"
+  register_target: "sle-15-$arch"
+  version: "15.4"
+  default: True
