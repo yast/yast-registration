@@ -64,8 +64,7 @@ module Registration
       arch = Yast::Arch.rpm_arch
 
       res = product.map do |key, val|
-        val_s = val.to_s
-        val_s.gsub!("$arch", arch)
+        val_s = val.to_s.gsub("$arch", arch)
         [key, val_s]
       end.to_h
       res["version_version"] ||= res["version"]
