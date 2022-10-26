@@ -330,31 +330,48 @@ module Registration
     attr_accessor :registration
 
     def register_system
-      options = Storage::InstallationOptions.instance
-      base_product = SwMgmt.find_base_product
-      distro_target = base_product["register_target"]
+      log.group "Register the system" do |group|
+        options = Storage::InstallationOptions.instance
+        base_product = SwMgmt.find_base_product
+        distro_target = base_product["register_target"]
 
-      log.info "Registering system, distro_target: #{distro_target}"
+        log.info "Registering system, distro_target: #{distro_target}"
 
-      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-        _("Registering the System...")) do
-        registration.register(options.email, options.reg_code, distro_target)
+        Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+          _("Registering the System...")) do
+
+          group.summary = "System \"#{distro_target}\" registered with email " \
+            + options.email.inspect
+
+          if registration.url && registration.url != SUSE::Connect::YaST::DEFAULT_URL
+            group.summary += " using server #{registration.url}"
+          end
+
+          registration.register(options.email, options.reg_code, distro_target)
+        end
       end
     end
 
     # the credentials are read from Storage::InstallationOptions
     def register_base_product
-      options = Storage::InstallationOptions.instance
-      return if options.base_registered
+      log.group "Register the base product" do |group|
+        options = Storage::InstallationOptions.instance
+        return nil if options.base_registered
 
-      # then register the product(s)
-      base_product = SwMgmt.find_base_product
+        # then register the product(s)
+        base_product = SwMgmt.find_base_product
 
-      Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
-        _("Registering %s ...") % SwMgmt.product_label(base_product)) do
-        base_product_data = SwMgmt.base_product_to_register
-        base_product_data["reg_code"] = options.reg_code
-        registration.register_product(base_product_data, options.email)
+        Yast::Popup.Feedback(_(CONTACTING_MESSAGE),
+          _("Registering %s ...") % SwMgmt.product_label(base_product)) do
+          base_product_data = SwMgmt.base_product_to_register
+          base_product_data["reg_code"] = options.reg_code
+          ret = registration.register_product(base_product_data, options.email)
+
+          group.summary = "Registered \"#{base_product_data["name"]}-" \
+            "#{base_product_data["version"]}-#{base_product_data["arch"]}\"" if ret
+
+          ret
+        end
       end
     end
 
@@ -403,7 +420,9 @@ module Registration
             "version"  => product.version
           }
 
-          registration.register_product(product_data)
+          log.group "Register #{product.friendly_name.inspect}" do
+            registration.register_product(product_data)
+          end
         end
 
         # remember the added service

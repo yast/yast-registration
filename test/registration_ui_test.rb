@@ -46,7 +46,7 @@ describe "Registration::RegistrationUI" do
         .and_return([])
 
       options = Registration::Storage::InstallationOptions.instance
-      allow(options).to receive(:email).twice.and_return(email)
+      allow(options).to receive(:email).and_return(email)
       allow(options).to receive(:reg_code).and_return(reg_code)
       allow(options).to receive(:base_registered).and_return(false)
 
