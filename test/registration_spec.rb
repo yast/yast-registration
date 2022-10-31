@@ -62,8 +62,9 @@ describe Registration::Registration do
         receive(:registered)
 
       # the received product renames are passed to the software management
+      renames = { "SUSE_SLES_SAP" => "SLES_SAP" }
       expect(Registration::SwMgmt).to receive(:update_product_renames)
-        .with("SUSE_SLES_SAP" => "SLES_SAP")
+        .with(renames)
 
       allow(SUSE::Connect::YaST).to receive(:credentials)
         .with(SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE)

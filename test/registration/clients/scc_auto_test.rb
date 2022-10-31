@@ -47,8 +47,9 @@ describe Registration::Clients::SCCAuto do
     end
 
     it "imports given hash" do
-      expect(config).to receive(:import).with("reg_code" => "SOME-CODE")
-      subject.import("reg_code" => "SOME-CODE")
+      settings = { "reg_code" => "SOME-CODE" }
+      expect(config).to receive(:import).with(settings)
+      subject.import(settings)
     end
 
     context "when the registration code is not specified" do
@@ -65,7 +66,8 @@ describe Registration::Clients::SCCAuto do
       end
 
       it "reads the code from the registration codes loader" do
-        expect(config).to receive(:import).with("reg_code" => "INTERNAL-USE-ONLY")
+        imported = { "reg_code" => "INTERNAL-USE-ONLY" }
+        expect(config).to receive(:import).with(imported)
         subject.import({})
       end
 
