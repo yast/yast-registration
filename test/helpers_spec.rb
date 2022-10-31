@@ -166,14 +166,15 @@ describe Registration::Helpers do
   describe ".write_config" do
     it "writes the current configuration" do
       url = "https://example.com"
+      config = {
+        url:      url,
+        insecure: false
+      }
       expect(Registration::UrlHelpers).to receive(:registration_url) \
         .and_return(url)
       expect(Registration::Helpers).to receive(:insecure_registration) \
         .and_return(false)
-      expect(SUSE::Connect::YaST).to receive(:write_config).with(
-        url:      url,
-        insecure: false
-      )
+      expect(SUSE::Connect::YaST).to receive(:write_config).with(config)
 
       Registration::Helpers.write_config
     end
