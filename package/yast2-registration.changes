@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug  2 08:44:51 UTC 2023 - Ladislav Slezák <lslezak@suse.com>
+
+- Switch to the new SUSEConnect-ng (bsc#1212799)
+  - Includes a SSL reload fix (bsc#1195220)
+- 4.3.27
+
+-------------------------------------------------------------------
 Thu Jul  7 08:06:01 UTC 2022 - Ladislav Slezák <lslezak@suse.cz>
 
 - Import the SSL certificate from the <reg_server_cert> AutoYaST
