@@ -27,6 +27,7 @@ module Registration
   module Controllers
     # Implements the actions and keeps the state for the package search feature
     class PackageSearch
+      include Yast::Logger
       include Yast::I18n
 
       # @return [Array<RemotePackage>] List of selected packages

@@ -16,6 +16,7 @@ require "yast"
 module Registration
   # This class handles the AutoYaST addons
   class AutoyastAddons
+    include Yast::Logger
     include Yast::I18n
 
     attr_accessor :requested_addons, :selected_addons

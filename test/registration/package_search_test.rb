@@ -118,7 +118,9 @@ describe Registration::PackageSearch do
 
     it "limits the search to the given product" do
       expect(SUSE::Connect::PackageSearch).to receive(:search) do |_name, product:|
-        expect(product.to_triplet).to eq("SLES/15.2/x86_64")
+        expect(product.identifier).to eq("SLES")
+        expect(product.version).to eq("15.2")
+        expect(product.arch).to eq("x86_64")
         packages
       end
       subject.packages

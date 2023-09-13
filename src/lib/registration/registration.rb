@@ -175,8 +175,8 @@ module Registration
     end
 
     # get the list of migration products
-    # @param [Array<SUSE::Connect::Remote::Product>] installed_products
-    # @return [Array<Array<SUSE::Connect::Remote::Product>>] list of possible migrations,
+    # @param [Array<OpenStruct>] installed_products
+    # @return [Array<Array<OpenStruct>>] list of possible migrations,
     #   each migration contains a list of target products
     def migration_products(installed_products)
       log.info "Loading migration products for: #{installed_products}"
@@ -338,7 +338,7 @@ module Registration
     end
 
     # collect product renames
-    # @param products [Array<SUSE::Connect::Remote::Product>] remote products received from SCC
+    # @param products [Array<OpenStruct>] remote products received from SCC
     # @return [Hash] hash with product renames: { old_name => new_name }
     def collect_renames(products)
       renames = {}

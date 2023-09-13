@@ -28,6 +28,8 @@ require "registration/sw_mgmt"
 module Registration
   module Widgets
     class RegistrationCode < CWM::InputField
+      include Yast::Logger
+
       VALID_URL_SCHEMES = ["http", "https"].freeze
 
       def initialize

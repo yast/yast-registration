@@ -213,7 +213,7 @@
       :successor_ids:
       - 1324
       :extensions:
-      - &1 !ruby/object:SUSE::Connect::Remote::Product
+      - &1 !ruby/object:OpenStruct
         table:
           :id: 1157
           :name: SUSE Linux Enterprise High Availability GEO Extension
