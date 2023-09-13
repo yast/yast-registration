@@ -303,9 +303,9 @@ module Registration
       products.map { |p| resolvable_to_h(p) }
     end
 
-    # convert a libzypp Product Hash to a SUSE::Connect::Remote::Product object
+    # convert a libzypp Product Hash to a OpenStruct object
     # @param product [Hash] product Hash obtained from pkg-bindings
-    # @return [SUSE::Connect::Remote::Product] the remote product
+    # @return [OpenStruct] the remote product
     def self.remote_product(product, version_release: true)
       # default value if it does not exist
       product["version_version"] ||= product["version"]

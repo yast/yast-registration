@@ -1,10 +1,10 @@
 ---
-- !ruby/object:SUSE::Connect::Remote::Service
+- !ruby/object:OpenStruct
   table:
     :id: 1140
     :name: Legacy_Module_12_x86_64
     :url: https://scc.suse.com/access/services/1140?credentials=Legacy_Module_12_x86_64
-    :product: !ruby/object:SUSE::Connect::Remote::Product
+    :product: !ruby/object:OpenStruct
       table:
         :id: 1150
         :name: Legacy Module

@@ -1,6 +1,6 @@
 ---
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1153
       :name: Web and Scripting Module
@@ -43,7 +43,7 @@
     modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1212
       :name: Advanced Systems Management Module
@@ -84,7 +84,7 @@
     modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1223
       :name: SUSE Linux Enterprise Software Development Kit
@@ -128,7 +128,7 @@
     modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1150
       :name: Legacy Module
@@ -171,7 +171,7 @@
     modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1220
       :name: Public Cloud Module
@@ -213,7 +213,7 @@
     modifiable: true
   children: []
 - !ruby/object:Registration::Addon
-  pure_addon: !ruby/object:SUSE::Connect::Remote::Product
+  pure_addon: !ruby/object:OpenStruct
     table:
       :id: 1222
       :name: SUSE Linux Enterprise Workstation Extension

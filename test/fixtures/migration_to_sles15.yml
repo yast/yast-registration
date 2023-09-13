@@ -1,5 +1,5 @@
 ---
-- - !ruby/object:SUSE::Connect::Remote::Product
+- - !ruby/object:OpenStruct
     table:
       :identifier: SLES
       :version: '15-0'

@@ -1,5 +1,5 @@
 ---
-- !ruby/object:SUSE::Connect::Remote::Product
+- !ruby/object:OpenStruct
   table:
     :id: 1421
     :name: SUSE Linux Enterprise Server
@@ -56,7 +56,7 @@
       autorefresh: true
     :product_type: base
     :extensions:
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1574
         :name: SUSE Manager for Retail
@@ -110,7 +110,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1536
         :name: SUSE Linux Enterprise Live Patching
@@ -161,7 +161,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1153
         :name: Web and Scripting Module
@@ -224,7 +224,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1518
         :name: SUSE Manager Server
@@ -280,7 +280,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1678
         :name: SUSE Cloud Application Platform Tools Module
@@ -340,7 +340,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1427
         :name: SUSE Linux Enterprise Software Development Kit
@@ -403,7 +403,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1617
         :name: SUSE OpenStack Cloud
@@ -457,7 +457,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1220
         :name: Public Cloud Module
@@ -518,7 +518,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1526
         :name: SUSE Enterprise Storage
@@ -573,7 +573,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1529
         :name: SUSE Package Hub
@@ -624,7 +624,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1725
         :name: SUSE Manager Proxy
@@ -680,7 +680,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1729
         :name: SUSE OpenStack Cloud Crowbar
@@ -734,7 +734,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1431
         :name: SUSE Linux Enterprise Workstation Extension
@@ -799,7 +799,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1212
         :name: Advanced Systems Management Module
@@ -858,7 +858,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1520
         :name: SUSE Manager Proxy
@@ -914,7 +914,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1618
         :name: SUSE Linux Enterprise Server BCL
@@ -973,7 +973,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1150
         :name: Legacy Module
@@ -1035,7 +1035,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1724
         :name: SUSE Manager Server
@@ -1091,7 +1091,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1730
         :name: HPE Helion OpenStack Cloud
@@ -1145,7 +1145,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1432
         :name: SUSE Linux Enterprise High Availability Extension
@@ -1198,7 +1198,7 @@
           autorefresh: true
         :product_type: extension
         :extensions:
-        - !ruby/object:SUSE::Connect::Remote::Product
+        - !ruby/object:OpenStruct
           table:
             :id: 1435
             :name: SUSE Linux Enterprise High Availability GEO Extension
@@ -1255,7 +1255,7 @@
             :extensions: []
           modifiable: true
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1349
         :name: SUSE Manager Server
@@ -1311,7 +1311,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1352
         :name: SUSE Manager Proxy
@@ -1367,7 +1367,7 @@
         :product_type: extension
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1440
         :name: HPC Module
@@ -1427,7 +1427,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1332
         :name: Containers Module
@@ -1482,7 +1482,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1341
         :name: Toolchain Module
@@ -1533,7 +1533,7 @@
         :product_type: module
         :extensions: []
       modifiable: true
-    - !ruby/object:SUSE::Connect::Remote::Product
+    - !ruby/object:OpenStruct
       table:
         :id: 1619
         :name: SUSE Linux Enterprise Real Time

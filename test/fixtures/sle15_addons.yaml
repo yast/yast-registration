@@ -65,7 +65,7 @@
       :shortname: Basesystem-Module
       :recommended: true
       :extensions:
-      - &1 !ruby/object:SUSE::Connect::Remote::Product
+      - &1 !ruby/object:OpenStruct
         table:
           :id: 1578
           :name: Desktop Applications Module
@@ -130,7 +130,7 @@
           :shortname: Desktop-Applications-Module
           :recommended: false
           :extensions:
-          - &6 !ruby/object:SUSE::Connect::Remote::Product
+          - &6 !ruby/object:OpenStruct
             table:
               :id: 1579
               :name: Development Tools Module
@@ -197,7 +197,7 @@
               :recommended: false
               :extensions: []
             modifiable: true
-          - &8 !ruby/object:SUSE::Connect::Remote::Product
+          - &8 !ruby/object:OpenStruct
             table:
               :id: 1580
               :name: Server Applications Module
@@ -264,7 +264,7 @@
               :recommended: false
               :extensions: []
             modifiable: true
-          - &9 !ruby/object:SUSE::Connect::Remote::Product
+          - &9 !ruby/object:OpenStruct
             table:
               :id: 1583
               :name: SUSE Linux Enterprise Workstation Extension
@@ -401,7 +401,7 @@
               :extensions: []
             modifiable: true
         modifiable: true
-      - &3 !ruby/object:SUSE::Connect::Remote::Product
+      - &3 !ruby/object:OpenStruct
         table:
           :id: 1581
           :name: Legacy Module
@@ -471,7 +471,7 @@
           :recommended: false
           :extensions: []
         modifiable: true
-      - &4 !ruby/object:SUSE::Connect::Remote::Product
+      - &4 !ruby/object:OpenStruct
         table:
           :id: 1611
           :name: Public Cloud Module
@@ -533,7 +533,7 @@
           :recommended: false
           :extensions: []
         modifiable: true
-      - &5 !ruby/object:SUSE::Connect::Remote::Product
+      - &5 !ruby/object:OpenStruct
         table:
           :id: 1582
           :name: SUSE Linux Enterprise High Availability Extension
