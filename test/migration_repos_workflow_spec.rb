@@ -125,6 +125,7 @@ describe Registration::UI::MigrationReposWorkflow do
         expect(Registration::SwMgmt).to receive(:init).at_least(1)
         allow_any_instance_of(Registration::RepoStateStorage).to receive(:write)
         allow_any_instance_of(Registration::RollbackScript).to receive(:create)
+        allow(Yast::Report).to receive(:Error)
       end
 
       let(:set_success_expectations) do
@@ -272,7 +273,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
     it "asks for confirmation if the system was already migrated" do
       # pretend SLES15 is already activated
-      sles15 = SUSE::Connect::Remote::Product.new(
+      sles15 = OpenStruct.new(
         arch:       "x86_64",
         identifier: "SLES",
         version:    "15"

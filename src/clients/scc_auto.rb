@@ -364,7 +364,7 @@ module Yast
       registration_ui.update_system
     end
 
-    # @yieldreturn [Boolean, SUSE::Connect::Remote::Product] success flag and
+    # @yieldreturn [Boolean, OpenStruct] success flag and
     #   remote product pair
     # @return [Boolean] true on success
     def handle_product_service(&block)
