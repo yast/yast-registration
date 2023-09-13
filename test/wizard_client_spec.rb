@@ -34,6 +34,7 @@ describe Registration::UI::WizardClient do
     end
 
     it "returns :abort when an exception is raised" do
+      allow(Yast::Report).to receive(:Error)
       expect(subject).to receive(:run_sequence).and_raise("Error")
       expect(subject.run).to eq(:abort)
     end

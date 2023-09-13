@@ -63,6 +63,7 @@ describe "inst_scc client" do
     before do
       expect_any_instance_of(Yast::InstSccClient).to receive(:registration_check)
         .and_return(:update)
+      allow(Yast::Report).to receive(:Error)
     end
 
     it "switchs to manual registration when aborting selection of url" do

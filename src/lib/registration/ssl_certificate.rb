@@ -9,6 +9,8 @@ module Registration
   # class handling SSL certificate
   # TODO: move it to yast2 to share it?
   class SslCertificate
+    include Yast::Logger
+
     Yast.import "Stage"
 
     # Path to the registration certificate in the instsys

@@ -132,9 +132,9 @@ describe Registration::SwMgmt do
 
   describe ".add_services" do
     let(:service_url) { "https://example.com/foo/bar?credentials=TEST_credentials" }
-    let(:credentials) { SUSE::Connect::Credentials.new("user", "password", "file") }
+    let(:credentials) { OpenStruct.new(username: "user", password: "password", file: "file") }
     let(:product_service) do
-      SUSE::Connect::Remote::Service.new(
+      OpenStruct.new(
         "name"    => service_name,
         "url"     => service_url,
         "product" => {}
@@ -145,7 +145,7 @@ describe Registration::SwMgmt do
       expect(Yast::Pkg).to receive(:SourceSaveAll).and_return(true).twice
       expect(Yast::Pkg).to receive(:ServiceForceRefresh).with(service_name).and_return(true)
       expect(Yast::Pkg).to receive(:ServiceSave).with(service_name).and_return(true)
-      expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
+      expect(SUSE::Connect::YaST).to receive(:create_credentials_file)
 
       allow(Yast::Pkg).to receive(:SourceGetCurrent).with(false).and_return(repos.keys)
       repos.each do |id, repo|

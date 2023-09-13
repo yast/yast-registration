@@ -36,7 +36,7 @@ module Registration
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
       # run the dialog
-      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<OpenStruct>] migrations the available migration targets
       # @param [Array<Hash>] installed_products the currently installed products
       def self.run(migrations, installed_products)
         dialog = MigrationSelectionDialog.new(migrations, installed_products)
@@ -44,7 +44,7 @@ module Registration
       end
 
       # constructor
-      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<OpenStruct>] migrations the available migration targets
       # @param [Array<Hash>] installed_products the currently installed products
       def initialize(migrations, installed_products)
         textdomain "registration"
