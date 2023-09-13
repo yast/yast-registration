@@ -3,6 +3,8 @@ Wed Aug  2 08:44:51 UTC 2023 - Ladislav Slezák <lslezak@suse.com>
 
 - Switch to the new SUSEConnect-ng (bsc#1212799)
   - Includes a SSL reload fix (bsc#1195220)
+  - Depends on a new suseconnect-ruby-bindings package instead of
+    the old rubygem-suseconnect
 - 4.3.27
 
 -------------------------------------------------------------------
