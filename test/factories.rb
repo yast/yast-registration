@@ -22,12 +22,12 @@ def suse_connect_product_generator(attrs = {})
 end
 
 def addon_generator(params = {})
-  SUSE::Connect::Remote::Product.new(suse_connect_product_generator(params))
+  OpenStruct.new(suse_connect_product_generator(params))
 end
 
 def addon_with_child_generator(parent_params = {})
-  prod_child = suse_connect_product_generator
-  SUSE::Connect::Remote::Product.new(
+  prod_child = OpenStruct.new(suse_connect_product_generator)
+  OpenStruct.new(
     suse_connect_product_generator(parent_params.merge("extensions" => [prod_child]))
   )
 end
