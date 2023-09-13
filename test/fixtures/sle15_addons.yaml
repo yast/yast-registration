@@ -332,7 +332,7 @@
               :recommended: false
               :extensions: []
             modifiable: true
-          - &10 !ruby/object:SUSE::Connect::Remote::Product
+          - &10 !ruby/object:OpenStruct
             table:
               :id: 15831
               :name: SUSE Linux Enterprise Workstation Extension
