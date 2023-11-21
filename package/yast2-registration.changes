@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov 21 07:16:01 UTC 2023 - Ladislav Slezák <lslezak@suse.com>
+
+- Switch to the new SUSEConnect-ng (bsc#1212799)
+  - Includes a SSL reload fix (bsc#1195220)
+- 3.3.2
+
+-------------------------------------------------------------------
 Thu Oct 10 13:39:18 UTC 2019 - Josef Reidinger <jreidinger@suse.com>
 
 - fix crash of autoyast config dialog (bsc#1152913)
