@@ -177,17 +177,22 @@ module Registration
       def content
         VBox(
           network_button,
-          VStretch(),
-          product_details_widgets,
-          VSpacing(Yast::UI.TextMode ? 1 : 2),
-          registration_widgets,
-          VStretch()
+          HBox(
+            HStretch(),
+            VBox(
+              VStretch(),
+              Left(product_details_widgets),
+              Left(registration_widgets),
+              VStretch()
+            ),
+            HStretch()
+          )
         )
       end
 
       def registration_widgets
         HSquash(
-          VBox(
+          HBox(
             RadioButtonGroup(
               Id(:action),
               VBox(
@@ -354,9 +359,7 @@ module Registration
 
         HSquash(
           VBox(
-            VSpacing(1),
             Left(Heading(SwMgmt.product_label(SwMgmt.find_base_product))),
-            VSpacing(1),
             label
           )
         )
