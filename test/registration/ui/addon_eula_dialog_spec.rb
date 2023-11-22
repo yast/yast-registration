@@ -57,6 +57,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(first_dialog_response, second_dialog_response)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       context "and the user wants to go back" do
@@ -98,6 +99,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(:accepted)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       it "sets it as accepted" do
@@ -115,6 +117,7 @@ describe Registration::UI::AddonEulaDialog do
       before do
         allow(Yast::ProductLicense).to receive(:HandleLicenseDialogRet)
           .and_return(:refused)
+        allow(Yast::ProductLicense).to receive(:DisplayLicenseDialogWithTitle)
       end
 
       it "does not set it as accepted" do
