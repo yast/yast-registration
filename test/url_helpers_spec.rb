@@ -152,6 +152,7 @@ describe "Registration::UrlHelpers" do
 
       context "when the system has been already registered with RMT server" do
         before do
+          allow(File).to receive(:exist?).and_call_original
           allow(File).to receive(:exist?)
             .with("/mnt/etc/SUSEConnect").and_return(true)
         end
