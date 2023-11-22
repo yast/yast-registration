@@ -36,7 +36,7 @@ module Registration
       attr_accessor :selected_migration, :manual_repo_selection, :installed_products
 
       # run the dialog
-      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<OpenStruct>] migrations the available migration targets
       # @param [Array<Hash>] installed_products the currently installed products
       def self.run(migrations, installed_products)
         dialog = MigrationSelectionDialog.new(migrations, installed_products)
@@ -44,7 +44,7 @@ module Registration
       end
 
       # constructor
-      # @param [Array<SUSE::Connect::Remote::Product>] migrations the available migration targets
+      # @param [Array<OpenStruct>] migrations the available migration targets
       # @param [Array<Hash>] installed_products the currently installed products
       def initialize(migrations, installed_products)
         textdomain "registration"
@@ -162,6 +162,33 @@ module Registration
 
           Item(Id(idx), products.join(", "))
         end
+      end
+
+      # @return [String] textual representation of base product living in arr
+      def base_product_text_for(arr)
+        base_product = arr.find(&:isbase)
+        base_product.friendly_name || base_product.short_name ||
+          (base_product.identifier + "-" + base_product.version)
+      end
+
+      # @return [String] textual representation of extensions living in arr
+      def extensions_text_for(arr)
+        extensions = arr.select { |p| p.product_type == "extension" }
+        return "" if extensions.empty?
+
+        # TRANSLATORS: number of extensions to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i extension", "%i extensions", extensions.size), extensions.size)
+      end
+
+      # @return [String] textual representation of modules living in arr
+      def modules_text_for(arr)
+        modules = arr.select { |p| p.product_type == "module" }
+        return "" if modules.empty?
+
+        # TRANSLATORS: number of modules to upgrade. Will be used later to
+        #   construct whole status of upgrade
+        format(n_("%i module", "%i modules", modules.size), modules.size)
       end
 
       # update details about the selected migration

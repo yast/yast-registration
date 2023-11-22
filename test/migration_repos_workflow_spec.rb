@@ -53,6 +53,7 @@ describe Registration::UI::MigrationReposWorkflow do
       before do
         expect(Registration::SwMgmt).to receive(:init).at_least(1)
         allow_any_instance_of(Registration::RepoStateStorage).to receive(:write)
+        allow(Yast::Report).to receive(:Error)
       end
 
       let(:set_success_expectations) do
@@ -109,7 +110,7 @@ describe Registration::UI::MigrationReposWorkflow do
       end
 
       it "reports error and aborts when no installed product is found" do
-        expect(Registration::SwMgmt).to receive(:installed_products)
+        allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([])
         expect(Yast::Report).to receive(:Error)
 
@@ -118,7 +119,7 @@ describe Registration::UI::MigrationReposWorkflow do
 
       it "reports error and aborts when no migration is available" do
         # installed SLES12
-        expect(Registration::SwMgmt).to receive(:installed_products)
+        allow(Registration::SwMgmt).to receive(:installed_products)
           .and_return([load_yaml_fixture("products_legacy_installation.yml")[1]])
         expect_any_instance_of(Registration::RegistrationUI).to receive(:migration_products)
           .and_return([])

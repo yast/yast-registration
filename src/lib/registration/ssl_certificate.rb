@@ -9,6 +9,8 @@ module Registration
   # class handling SSL certificate
   # TODO: move it to yast2 to share it?
   class SslCertificate
+    include Yast::Logger
+
     Yast.import "Stage"
 
     # Path to the registration certificate in the instsys
@@ -78,6 +80,9 @@ module Registration
 
       # Cleanup
       FileUtils.rm_rf(TMP_CA_CERTS_DIR)
+
+      # Reload SUSEConnect internal cert pool (suseconnect-ng only)
+      SUSE::Connect::SSLCertificate.reload if SUSE::Connect::SSLCertificate.respond_to?(:reload)
 
       # Check that last file was copied to return true or false
       File.exist?(new_files.last)

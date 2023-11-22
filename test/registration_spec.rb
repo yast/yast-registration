@@ -16,7 +16,6 @@ describe Registration::Registration do
       reg_code = "reg_code"
       target_distro = "sles-12-x86_64"
 
-      expect_any_instance_of(SUSE::Connect::Credentials).to receive(:write)
       expect(SUSE::Connect::YaST).to(receive(:announce_system)
         .with(hash_including(token: reg_code), target_distro)
         .and_return([username, password]))
@@ -30,8 +29,8 @@ describe Registration::Registration do
   shared_examples "add_product" do |connect_method, yast_method|
     let(:available_addons) { load_yaml_fixture("available_addons.yml") }
 
-    it "adds the selected product and returns added zypp services" do
-      product = {
+    let(:product) do
+      {
         "arch"              => "x86_64",
         "name"              => "sle-sdk",
         "version"           => "12",
@@ -39,15 +38,19 @@ describe Registration::Registration do
         "identifier"        => "SLES_SAP",
         "former_identifier" => "SUSE_SLES_SAP"
       }
+    end
 
-      service_data = {
+    let(:service_data) do
+      {
         "name"    => "service",
         "url"     => "https://example.com",
-        "product" => product
+        "product" => OpenStruct.new(product)
       }
+    end
 
-      service = SUSE::Connect::Remote::Service.new(service_data)
+    let(:service) { OpenStruct.new(service_data) }
 
+    before do
       expect(SUSE::Connect::YaST).to receive(connect_method).and_return(service)
 
       expect(Registration::SwMgmt).to receive(:add_service)
@@ -57,20 +60,29 @@ describe Registration::Registration do
         receive(:registered)
 
       # the received product renames are passed to the software management
+      renames = { "SUSE_SLES_SAP" => "SLES_SAP" }
       expect(Registration::SwMgmt).to receive(:update_product_renames)
-        .with("SUSE_SLES_SAP" => "SLES_SAP")
+        .with(renames)
 
-      allow(File).to receive(:exist?).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
-      ).and_return(true)
-      allow(File).to receive(:read).with(
-        SUSE::Connect::YaST::GLOBAL_CREDENTIALS_FILE
-      ).and_return(
-        "username=SCC_foo\npassword=bar"
-      )
+      allow(SUSE::Connect::YaST).to receive(:credentials)
+        .and_return(OpenStruct.new(username: "SCC_foo", password: "bar"))
+    end
 
-      registered_service = Registration::Registration.new.send(yast_method, product)
+    it "adds the selected product and returns added zypp services" do
+      registered_service = subject.send(yast_method, product)
       expect(registered_service).to eq(service)
+    end
+
+    it "does not add the target system prefix if not at upgrade" do
+      allow(Yast::Mode).to receive(:update).and_return(false)
+      allow(Yast::Stage).to receive(:initial).and_return(false)
+      expect(Yast::Installation).to_not receive(:destdir)
+
+      subject.send(yast_method, product)
+    end
+
+    it "stores the added service name" do
+      subject.send(yast_method, product)
     end
   end
 

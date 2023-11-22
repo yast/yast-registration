@@ -120,6 +120,7 @@ describe "Registration::RegistrationUI" do
 
       # stub the registration
       allow(registration).to receive(:register_product)
+      allow(Registration::SwMgmt).to receive(:service_repos).and_return([])
     end
 
     context "when the addons are free" do
