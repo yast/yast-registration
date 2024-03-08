@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.3.28
+Version:        4.3.29
 Release:        0
 Summary:        YaST2 - Registration Module
 License:        GPL-2.0-only
@@ -27,20 +27,20 @@ Url:            https://github.com/yast/yast-registration
 Source0:        %{name}-%{version}.tar.bz2
 
 BuildRequires:  update-desktop-files
-# Popup::SuppressFeedback
-BuildRequires:  yast2 >= 4.2.76
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+BuildRequires:  yast2 >= 4.3.70
 BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-slp >= 3.1.9
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake) >= 0.2.5
 # new suseconnect-ng
 BuildRequires:  suseconnect-ruby-bindings >= 1.2.0
-# Y2Packager::MediumType.type=
-BuildRequires:  yast2-packager >= 4.2.37
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+BuildRequires:  yast2-packager >= 4.3.27
 BuildRequires:  yast2-update >= 3.1.36
 
-# Popup::SuppressFeedback
-Requires:       yast2 >= 4.2.76
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+Requires:       yast2 >= 4.3.70
 # "dupAllowVendorChange" option in Pkg.SetSolverFlags()
 Requires:       yast2-pkg-bindings >= 3.1.34
 # N_() method
@@ -49,8 +49,8 @@ Requires:       yast2-ruby-bindings >= 3.1.12
 Requires:       suseconnect-ruby-bindings >= 1.2.0
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-slp >= 3.1.9
-# Y2Packager::MediumType
-Requires:       yast2-packager >= 4.2.27
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+Requires:       yast2-packager >= 4.3.27
 Requires:       yast2-update >= 3.1.36
 
 # new calls in AutoinstGeneral
