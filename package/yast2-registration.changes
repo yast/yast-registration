@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Mar  8 14:39:20 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
+
+- Set the new product mapping when upgrading SLE_HPC to SLES SP6+
+  (with the HPC module), use the old product mapping when upgrading
+  from SLE_HPC-SP4 to SLE_HPC-SP5 (bsc#1220567)
+- 4.5.9
+
+-------------------------------------------------------------------
 Mon Oct 31 10:14:45 UTC 2022 - Martin Vidner <mvidner@suse.com>
 
 - Fix hash vs keyword arguments in RSpec expectations (bsc#1204871)

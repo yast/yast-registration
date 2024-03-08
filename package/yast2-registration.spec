@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        4.5.8
+Version:        4.5.9
 Release:        0
 Summary:        YaST2 - Registration Module
 License:        GPL-2.0-only
@@ -35,8 +35,8 @@ BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake) >= 0.2.5
 # uses Fiddle instead of FFI
 BuildRequires:  suseconnect-ruby-bindings > 0.0.4
-# ProductSpec API
-BuildRequires:  yast2-packager >= 4.4.13
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+BuildRequires:  yast2-packager >= 4.5.20
 BuildRequires:  yast2-update >= 3.1.36
 # log.group call
 BuildRequires:  yast2-ruby-bindings >= 4.5.4
@@ -51,8 +51,8 @@ Requires:       yast2-ruby-bindings >= 4.5.4
 Requires:       suseconnect-ruby-bindings > 0.0.4
 Requires:       yast2-add-on >= 3.1.8
 Requires:       yast2-slp >= 3.1.9
-# ProductSpec API
-Requires:       yast2-packager >= 4.4.13
+# support upgrade from SLEHPC to SLES + HPC in SP6+
+Requires:       yast2-packager >= 4.5.20
 Requires:       yast2-update >= 3.1.36
 
 # new calls in AutoinstGeneral

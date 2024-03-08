@@ -688,6 +688,22 @@ module Registration
         products = Y2Packager::ProductSpec.base_products
                                           .select { |p| p.is_a?(Y2Packager::RepoProductSpec) }
         log.info("Found base products on the offline medium: #{products.pretty_inspect}")
+
+        new_migration = products.any? do |p|
+          next false unless p.name == "SLES" || p.name == "SLE_HPC"
+
+          version = p.version.split(".")
+          major = version[0].to_i
+          minor = version[1].to_i
+
+          # SLE15-SP6 or newer
+          major > 15 || (major == 15 && minor >= 6)
+        end
+
+        log.info "Using SP6+ product upgrade mapping: #{new_migration}"
+        Y2Packager::ProductUpgrade.new_renames = new_migration
+        Yast::AddOnProduct.new_renames = new_migration
+
         products
       end
 
@@ -706,7 +722,7 @@ module Registration
         # first check if there is a product rename defined for the installed products
         # and the new renamed base product is available
         # key in the mapping: list of installed products, value: the new base product
-        Y2Packager::ProductUpgrade::MAPPING.each do |k, v|
+        Y2Packager::ProductUpgrade.mapping.each do |k, v|
           if (k - installed_names).empty?
             new_base = base_products.find { |p| p.name == v }
           end
