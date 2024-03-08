@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Mar 11 08:09:33 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
+
+- Set the new product mapping when upgrading SLE_HPC to SLES SP6+
+  (with the HPC module), use the old product mapping when upgrading
+  from SLE_HPC-SP3 to SLE_HPC-SP4 (bsc#1220567)
+- 4.4.24
+
+-------------------------------------------------------------------
 Wed Oct 19 08:13:54 UTC 2022 - José Iván López González <jlopez@suse.com>
 
 - Add reader for products defined in a YAML file.

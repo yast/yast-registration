@@ -18,6 +18,7 @@ require "yast"
 require "registration/addon_sorter"
 require "registration/sw_mgmt"
 require "registration/url_helpers"
+require "y2packager/product_upgrade"
 
 module Registration
   module UI
@@ -212,7 +213,26 @@ module Registration
         selected = Yast::UI.QueryWidget(:migration_targets, :CurrentItem)
         return unless selected
 
+        update_product_mapping
         Yast::UI.ChangeWidget(Id(:details), :Value, migration_details(selected))
+      end
+
+      # helper method to update the product mapping in Y2Packager::ProductUpgrade
+      def update_product_mapping
+        new_migration = current_migration.any? do |p|
+          next false unless p.identifier == "SLES" || p.identifier == "SLE_HPC"
+
+          version = p.version.split(".")
+          major = version[0].to_i
+          minor = version[1].to_i
+
+          # SLE15-SP6 or newer
+          major > 15 || (major == 15 && minor >= 6)
+        end
+
+        log.info "Using SP6+ product upgrade mapping: #{new_migration}"
+        Y2Packager::ProductUpgrade.new_renames = new_migration
+        Yast::AddOnProduct.new_renames = new_migration
       end
 
       # get migration details
@@ -339,6 +359,7 @@ module Registration
 
       # store the current UI values
       def store_values
+        update_product_mapping
         self.selected_migration = current_migration
         self.manual_repo_selection = Yast::UI.QueryWidget(:manual_repos, :Value)
       end
