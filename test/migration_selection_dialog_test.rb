@@ -33,7 +33,8 @@ describe Registration::UI::MigrationSelectionDialog do
       allow(Yast::UI).to receive(:UserInput).and_return(:abort)
       allow(Yast::Wizard).to receive(:SetContents)
       # the first migration is selected
-      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem).and_return(0)
+      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem)
+        .and_return(0).twice
       # check the correct summary
       expect(Yast::UI).to receive(:ChangeWidget) do |_id, _attr, text|
         # SLES11 uses "SUSE_SLES" product identifier while SLES15 uses just "SLES",
@@ -53,7 +54,8 @@ describe Registration::UI::MigrationSelectionDialog do
       allow(Yast::UI).to receive(:UserInput).and_return(:abort)
       allow(Yast::Wizard).to receive(:SetContents)
       # the first migration is selected
-      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem).and_return(0)
+      expect(Yast::UI).to receive(:QueryWidget).with(:migration_targets, :CurrentItem)
+        .and_return(0).twice
       # check the correct summary
       expect(Yast::UI).to receive(:ChangeWidget) do |_id, _attr, text|
         # For SLE15 there are two products (SDK and Toolchain Module) replaced
