@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 12 14:57:15 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
+
+- Use the new product mapping API (related to bsc#1220567)
+- 4.6.1
+
+-------------------------------------------------------------------
 Fri Sep 01 19:57:03 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
 
 - Branch package for SP6 (bsc#1208913)
