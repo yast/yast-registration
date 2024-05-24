@@ -79,6 +79,7 @@ module Registration
       # force reloading of the old repositories so we can detect and remove the obsoleted
       # services during migration (bsc#1159433)
       def reinit_repos
+        Yast::Pkg.SourceSaveAll
         Yast::Pkg.SourceFinishAll
         Yast::Pkg.SourceRestore
       end
