@@ -196,7 +196,8 @@ module Registration
         product = product_from_addon_repos(addon)
         return false if !product || !Yast::Pkg.ResolvableInstall(product.name, :product)
 
-        if !Yast::Pkg.PkgSolve(true) && (Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept)
+        if !Yast::Pkg.PkgSolve(true) &&
+            (Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept)
           return false
         end
 

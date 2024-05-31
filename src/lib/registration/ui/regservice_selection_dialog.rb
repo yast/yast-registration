@@ -59,11 +59,12 @@ module Registration
       #                             will be used if it's not specified.
       def initialize(services: [], heading: nil, description: nil)
         textdomain "registration"
+        description_default = _("Select a detected registration server " \
+                                "from the list\nor the default SUSE registration server.")
         super(
           services:        [scc_service] + services,
           heading:         heading || _("Local Registration Servers"),
-          description:     description || _("Select a detected registration server " \
-                                            "from the list\nor the default SUSE registration server."),
+          description:     description || description_default,
           no_selected_msg: _("No registration server selected")
         )
       end

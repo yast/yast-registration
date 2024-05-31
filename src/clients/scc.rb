@@ -83,7 +83,8 @@ module Yast
         # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
         Report.LongError(_("<p>The repository initialization failed. " \
                            "Disable (or remove) the offending service or repository " \
-                           "in the repository manager.</p><p>Details:</p><p>%s</p>") % CGI.escapeHTML(details))
+                           "in the repository manager.</p><p>Details:</p><p>%s</p>") %
+            CGI.escapeHTML(details))
 
         ret = WFM.call("repositories", WFM.Args)
         log.info "repository manager result: #{ret}"

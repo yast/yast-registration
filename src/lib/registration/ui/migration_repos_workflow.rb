@@ -370,7 +370,8 @@ module Registration
             format(_("Please, boot the original system and make sure " \
                      "that all registerable products are correctly registered.\n" \
                      "Also check that the installed system is supported for upgrade to \n" \
-                     "%{product}."), product: Y2Packager::ProductUpgrade.new_base_product.display_name)
+                     "%{product}."),
+              product: Y2Packager::ProductUpgrade.new_base_product.display_name)
           ]
 
           Yast::Report.Error(msg.join("\n\n"))
@@ -401,7 +402,8 @@ module Registration
         # TRANSLATORS: Continue/Cancel popup question, confirm the migration by user,
         # %s is a product name, e.g. "SUSE Linux Enterprise Server 15"
         message = _("The product %s\nis already activated on this system.\n\n" \
-                    "Migrating again to the same product might not work properly.") % base_product.label
+                    "Migrating again to the same product might not work properly.") %
+          base_product.label
         ui = Yast2::Popup.show(message, buttons: :continue_cancel, focus: :cancel)
         log.info("Use input: #{ui.inspect}")
 

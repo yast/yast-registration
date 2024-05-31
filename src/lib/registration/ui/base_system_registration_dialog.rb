@@ -454,8 +454,11 @@ module Registration
           # TRANSLATORS: a popup message (2/3) the user wants to skip the registration
           # %{media_name} is the media name (e.g. SLE-15-SP2-Full),
           # %{download_url} is an URL link (e.g. https://download.suse.com)
-          msg = format(_("<p>For installation without registering the system please "\
-                         "install using the %{media_name} installation media from %{download_url}.</p>"), media_name: media_name, download_url: download_url) # these cannot be nil
+          msg = format(_(
+            "<p>For installation without registering the system please "\
+            "install using the %{media_name} installation media from %{download_url}.</p>"
+          ),
+            media_name: media_name, download_url: download_url) # these cannot be nil
           warning += msg
 
         else
