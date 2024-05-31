@@ -10,11 +10,11 @@ describe "Registration::SslCertificateDetails" do
   end
 
   let(:identity) do
-    <<~EOS
+    <<~IDENTITY
       Common Name (CN): linux-1hyn
       Organization (O): WebYaST
       Organization Unit (OU): WebYaST
-    EOS
+    IDENTITY
   end
 
   let(:sha256sum) do
@@ -38,7 +38,7 @@ describe "Registration::SslCertificateDetails" do
   describe "#summary" do
     it "returns textual summary of the whole certificate" do
       # rubocop:disable Layout/TrailingWhitespace
-      expect(subject.summary).to eq(<<~EOS.chomp
+      expect(subject.summary).to eq(<<~CERT.chomp
         Certificate:
         Issued To
         #{identity}
@@ -48,7 +48,7 @@ describe "Registration::SslCertificateDetails" do
            #{sha1sum}
         SHA256 Fingerprint: 
            #{sha256sum}
-      EOS
+      CERT
                                    )
       # rubocop:enable Layout/TrailingWhitespace
     end
