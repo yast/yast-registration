@@ -37,7 +37,7 @@ describe "Registration::SslCertificateDetails" do
 
   describe "#summary" do
     it "returns textual summary of the whole certificate" do
-      # rubocop:disable Style/TrailingWhitespace
+      # rubocop:disable Layout/TrailingWhitespace
       expect(subject.summary).to eq(<<~EOS.chomp
         Certificate:
         Issued To
@@ -49,8 +49,8 @@ describe "Registration::SslCertificateDetails" do
         SHA256 Fingerprint: 
            #{sha256sum}
       EOS
-                                     # rubocop:enable Style/TrailingWhitespace
                                    )
+      # rubocop:enable Layout/TrailingWhitespace
     end
 
     it "can optionaly limit line lenght to fit terminal width" do

@@ -54,6 +54,22 @@ Style/Documentation:
 Naming/PredicateName:
   Enabled: false
 
+Naming/MethodParameterName:
+  Enabled: false
+
 # Let lslezak decide what to do with it. In general jreidinger does not see it as such big violence of style
 Style/StructInheritance:
+  Enabled: false
+
+# Allow global mixins in tests
+Style/MixinUsage:
+  Exclude:
+    - 'test/**/*.rb'
+
+# this cop will change API, so disable it
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+# it sometimes make code harder to read
+Style/GuardClause:
   Enabled: false
