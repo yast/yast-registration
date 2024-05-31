@@ -34,11 +34,12 @@ module Registration
       include RegistrationCodesLoader
 
       def initialize
-        self.reg_codes = if Stage.initial
+        value = if Stage.initial
           reg_codes_from_usb_stick || reg_codes_from_install_inf || {}
         else
           {}
         end
+        super(value)
       end
     end
 
@@ -66,9 +67,7 @@ module Registration
       include Singleton
 
       def initialize
-        self.addon_services = []
-        self.first_run = true
-        self.upgrade_failed = false
+        super(true, [], nil, nil, nil, false)
       end
     end
 

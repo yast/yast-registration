@@ -13,6 +13,7 @@ module Yast
       attr_reader :services
 
       def initialize
+        super
         @services = []
       end
 

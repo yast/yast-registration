@@ -34,6 +34,7 @@ module Registration
 
       # the constructor
       def initialize
+        super
         textdomain "registration"
 
         self.registration = Registration.new(UrlHelpers.registration_url)

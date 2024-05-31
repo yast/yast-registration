@@ -31,6 +31,7 @@ module Registration
       VALID_URL_SCHEMES = ["http", "https"].freeze
 
       def initialize
+        super
         textdomain "registration"
       end
 

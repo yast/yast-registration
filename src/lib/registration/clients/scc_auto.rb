@@ -59,6 +59,7 @@ module Registration
       CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
       def initialize
+        super
         textdomain "registration"
 
         @config = ::Registration::Storage::Config.instance
