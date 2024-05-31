@@ -59,7 +59,6 @@ module Registration
 
   private
 
-    attr_writer :selected_addons
     attr_accessor :registration
 
     # select the requested addons
