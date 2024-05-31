@@ -165,7 +165,7 @@ module Registration
         base_activation = connect_status.activations.find do |activation|
           activation.service&.product&.isbase
         end
-        base_activation && base_activation.regcode
+        base_activation&.regcode
       end
 
       # Returns the elements for the <addons> section

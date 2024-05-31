@@ -38,7 +38,7 @@ module Registration
       sha256 = certificate.fingerprint(Fingerprint::SHA256).value
       summary += if small_space
         # split the long SHA256 digest to two lines in small text mode UI
-        INDENT + sha256[0..59] + "\n" + INDENT + sha256[60..-1]
+        INDENT + sha256[0..59] + "\n" + INDENT + sha256[60..]
       else
         INDENT + sha256
       end

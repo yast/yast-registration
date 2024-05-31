@@ -123,7 +123,7 @@ module Registration
       # collect the known reg. codes from the current configuration
       # @return [Hash] reg. codes hash
       def collect_known_reg_codes
-        config.addons.map { |a| [a["name"], a["reg_code"]] }.to_h
+        config.addons.to_h { |a| [a["name"], a["reg_code"]] }
       end
 
       # add for reg. codes for selected paid extensions

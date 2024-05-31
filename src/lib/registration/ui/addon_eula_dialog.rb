@@ -133,7 +133,7 @@ module Registration
 
           eula_reader = EulaReader.new(tmpdir)
           license = find_license(addon, eula_reader)
-          return :accepted if license && license.accepted?
+          return :accepted if license&.accepted?
 
           setup_eula_dialog(addon, eula_reader, tmpdir)
           ret = run_eula_dialog(eula_reader)

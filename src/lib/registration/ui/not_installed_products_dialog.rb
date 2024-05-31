@@ -156,7 +156,7 @@ module Registration
         #   not installed. (1/2)
         summary = _("<p>The add-ons listed below are registered but not installed: </p>")
 
-        summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join("")}</ul>"
+        summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join}</ul>"
 
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)

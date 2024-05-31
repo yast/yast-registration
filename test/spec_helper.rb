@@ -106,7 +106,7 @@ Yast::RSpec::Helpers.define_yast_module("Profile", methods: [:current])
 require_relative "factories"
 
 # force loading all files to report proper code coverage
-Dir.chdir(libdir) { Dir["**/*.rb"].each { |f| require f } }
+Dir.chdir(libdir) { Dir["**/*.rb"].sort.each { |f| require f } }
 
 # configure RSpec
 RSpec.configure do |config|

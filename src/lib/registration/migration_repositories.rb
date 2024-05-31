@@ -132,7 +132,7 @@ module Registration
     # return services of different type than module
     # @return [Array] list of services
     def non_module_services
-      services.select { |s| s.product.product_type != "module" }
+      services.reject { |s| s.product.product_type == "module" }
     end
   end
 end
