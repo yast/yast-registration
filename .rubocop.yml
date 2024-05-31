@@ -55,7 +55,7 @@ Naming/PredicateName:
   Enabled: false
 
 Naming/MethodParameterName:
-  Style/SlicingWithRange:Enabled: false
+  Enabled: false
 
 # Let lslezak decide what to do with it. In general jreidinger does not see it as such big violence of style
 Style/StructInheritance:
