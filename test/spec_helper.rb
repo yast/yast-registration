@@ -85,11 +85,11 @@ require "yast/rspec"
 require "y2packager/product"
 def stub_product_selection
   name = "AutoinstFunctions"
-  Yast.const_set name.to_sym, Class.new {
+  Yast.const_set(name.to_sym, Class.new do
     def self.selected_product
       Y2Packager::Product.new(name: "SLES", short_name: "SLES15")
     end
-  }
+  end)
 end
 
 require "y2packager/resolvable"

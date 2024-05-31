@@ -54,7 +54,7 @@ describe Registration::RemotePackage do
 
     context "when the package is not selected" do
       it "does not modify the status" do
-        expect { package.unselect! }.to_not change { package.status }
+        expect { package.unselect! }.to_not(change { package.status })
       end
     end
   end
