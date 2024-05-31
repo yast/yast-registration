@@ -1,4 +1,3 @@
-
 require "yast"
 
 require "registration/addon"
@@ -51,11 +50,11 @@ module Registration
       # - register the add-on
       def run
         aliases = {
-          "find_products"       => [->() { find_products }, true],
-          "register_base"       => ->() { register_base },
-          "load_remote_addons"  => ->() { load_remote_addons },
-          "select_media_addons" => [->() { select_media_addons }, true],
-          "register_addons"     => [->() { register_addons }, true]
+          "find_products"       => [-> { find_products }, true],
+          "register_base"       => -> { register_base },
+          "load_remote_addons"  => -> { load_remote_addons },
+          "select_media_addons" => [-> { select_media_addons }, true],
+          "register_addons"     => [-> { register_addons }, true]
         }
 
         sequence = {
@@ -89,7 +88,7 @@ module Registration
 
         begin
           Sequencer.Run(aliases, sequence)
-        rescue => e
+        rescue StandardError => e
           log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
           # TRANSLATORS: error message, %s are details
           Yast::Report.Error(_("Internal error: %s") % e.message)
@@ -111,7 +110,7 @@ module Registration
         if products.empty?
           repo_data = Pkg.SourceGeneralData(repo_id)
           log.warn "Repository #{repo_data["name"]} (#{repo_data["alias"]}) " \
-            "does not provide any product resolvable"
+                   "does not provide any product resolvable"
           log.warn "Skipping add-on registration"
           return :finish
         end
@@ -130,8 +129,8 @@ module Registration
 
           if !Registration.is_registered? &&
               Yast::Popup.YesNo(_("The base system has to be registered " \
-                  "in order to register the '%s' add-on.\nSkip the base system " \
-                  "and the add-on registration?") %
+                                  "in order to register the '%s' add-on.\nSkip the base system " \
+                                  "and the add-on registration?") %
               Pkg.SourceGeneralData(repo_id)["name"])
 
             return :skip

@@ -1,6 +1,6 @@
 require_relative "spec_helper"
 
-require "registration/erb_renderer.rb"
+require "registration/erb_renderer"
 
 describe Registration::ErbRenderer do
   subject { Registration::ErbRenderer.new(Registration::Storage::Config.instance) }

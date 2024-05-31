@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
@@ -58,8 +56,10 @@ module Registration
     #   the download fails with DownloadError exception
     # @return [String] the contents of the downloaded file
     def self.download_file(file_url, insecure: false, redirection_count: 10)
-      raise DownloadError,
-        "Redirection not allowed or limit has been reached" if redirection_count < 0
+      if redirection_count < 0
+        raise DownloadError,
+          "Redirection not allowed or limit has been reached"
+      end
 
       file_url = URI(file_url) unless file_url.is_a?(URI)
       http = Net::HTTP.new(file_url.host, file_url.port)
@@ -93,7 +93,7 @@ module Registration
         download_file(location, insecure: insecure, redirection_count: redirection_count - 1)
       else
         log.error "HTTP request failed: Error #{response.code}:" \
-          "#{response.message}: #{response.body}"
+                  "#{response.message}: #{response.body}"
 
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end

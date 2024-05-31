@@ -1,4 +1,3 @@
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2015 SUSE LLC
 #
@@ -54,7 +53,7 @@ module Registration
     def activate_services
       # disable the update repositories if not required
       if !install_updates
-        # note: the module update repositories are kept enabled
+        # NOTE: the module update repositories are kept enabled
         # see https://bugzilla.suse.com/show_bug.cgi?id=953536
         SwMgmt.set_repos_state(services_repositories(only_updates: true), false)
       end
@@ -107,7 +106,7 @@ module Registration
 
       log.info "Setting the solver flags for online migration"
       Yast::Pkg.SetSolverFlags("ignoreAlreadyRecommended" => true,
-                               "dupAllowVendorChange"     => false)
+        "dupAllowVendorChange"     => false)
     end
 
     # preselect all applicable patches (except optional ones)

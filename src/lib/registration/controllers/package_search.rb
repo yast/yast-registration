@@ -99,6 +99,7 @@ module Registration
       def select_addon(addon)
         log_addon("selecting the addon", addon)
         return if addon.registered? || addon.selected?
+
         addon.selected if addon.auto_selected? || enable_addon?(addon)
       end
 
@@ -108,6 +109,7 @@ module Registration
       def unselect_addon(addon)
         log_addon("unselecting the addon", addon)
         return if addon.registered? || needed_addon?(addon)
+
         addon.unselected if disable_addon?(addon)
       end
 
@@ -194,7 +196,7 @@ module Registration
       # @param addon [Registration::Addon]
       def log_addon(msg, addon)
         log.info "#{msg}: #{addon.inspect}, registered=#{addon.registered?}, " \
-          "selected=#{addon.selected?}, auto_selected=#{addon.auto_selected?}"
+                 "selected=#{addon.selected?}, auto_selected=#{addon.auto_selected?}"
       end
     end
   end

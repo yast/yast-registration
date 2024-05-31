@@ -1,4 +1,3 @@
-
 require "yast"
 require "registration/eula_downloader"
 require "registration/eula_reader"
@@ -88,7 +87,7 @@ module Registration
         log.error "Download failed: #{e.message}: #{e.backtrace}"
         # %s is an extension name, e.g. "SUSE Linux Enterprise Software Development Kit"
         Yast::Report.Error(_("Downloading the license for\n%s\nfailed.") % addon.label)
-        return false
+        false
       end
 
       # prepare data for displaying the EULA dialog
@@ -155,6 +154,7 @@ module Registration
       def find_license(addon, eula_reader)
         license_file = eula_reader.licenses[Y2Packager::License::DEFAULT_LANG]
         return nil unless license_file
+
         content = Yast::SCR.Read(path(".target.string"), license_file)
         return nil unless content
 

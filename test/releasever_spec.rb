@@ -43,7 +43,7 @@ describe Registration::Releasever do
     it "refreshes the repositories containing an expression in the URL" do
       allow(Yast::Pkg).to receive(:SourceGeneralData).with(repo).and_return(
         "raw_url" => "https://example.com/SLE_${releasever_major}" \
-        "${releasever_minor:+_SP$releasever_minor}"
+                     "${releasever_minor:+_SP$releasever_minor}"
       )
       expect(Yast::Pkg).to receive(:SourceForceRefreshNow).with(repo)
       subject.activate

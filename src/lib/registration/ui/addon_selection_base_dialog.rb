@@ -66,13 +66,13 @@ module Registration
       # @param [Boolean] enable true for filtering devel releases
       def filter_devel_releases(enable)
         self.class.filter_devel = enable
-        if enable
-          @addons = @all_addons.select do |a|
+        @addons = if enable
+          @all_addons.select do |a|
             a.registered? || a.selected? || a.auto_selected? ||
               a.released?
           end
         else
-          @addons = @all_addons
+          @all_addons
         end
       end
 
@@ -122,8 +122,8 @@ module Registration
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
         richtext_checkbox(id:     addon_widget_id(addon),
-                          label:  label,
-                          status: addon.status)
+          label:  label,
+          status: addon.status)
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
@@ -285,29 +285,29 @@ module Registration
       def generic_help_text
         # help text (2/3)
         _("<p>Please note, that some extensions or modules might need "\
-            "specific registration code.</p>") +
+          "specific registration code.</p>") +
           # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log "\
-              "into the SUSE Customer Center and remove them manually there.</p>")
+            "into the SUSE Customer Center and remove them manually there.</p>")
       end
 
       def checkboxes_help
         header = _("<p>The extensions and modules can have several states depending " \
-          "how they were selected.</p>")
+                   "how they were selected.</p>")
 
         # TRANSLATORS: help text for checked check box
         selected = _("The extension or module is selected to install by user or is " \
-          "pre-selected as a recommended addon.") + "<br>"
+                     "pre-selected as a recommended addon.") + "<br>"
         # TRANSLATORS: help text for unchecked check box
         deselected = _("The extension or module is not selected to install.") + "<br>"
         # TRANSLATORS: help text for automatically checked check box (it has a
         # different look that a user selected check box)
         auto_selected = _("The extension or module was selected automatically as a dependency " \
-          "of another extension or module.")
+                          "of another extension or module.")
 
         if Yast::UI.TextMode
           return header + "<p>" \
-              "[x] = " + selected +
+                          "[x] = " + selected +
               "[ ] = " + deselected +
               "[a] = " + auto_selected +
               "</p>"
@@ -316,7 +316,7 @@ module Registration
         mode = (ENV["Y2STYLE"] == "installation.qss") ? "inst" : "normal"
 
         header + "<p>" \
-          "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:on:enabled"]}'></img> = " + selected +
+                 "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:on:enabled"]}'></img> = " + selected +
           "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:off:enabled"]}'></img> = " + deselected +
           "<img src='#{IMAGE_DIR}/#{IMAGES["#{mode}:auto:enabled"]}'></img> = " + auto_selected +
           "</p>"
@@ -328,6 +328,7 @@ module Registration
 
         @all_addons.each do |a|
           next unless a.recommended
+
           log.info("Preselecting a default addon: #{a.friendly_name}")
           a.selected
         end

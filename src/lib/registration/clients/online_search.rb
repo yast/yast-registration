@@ -65,13 +65,13 @@ module Registration
       # @see #select_packages
       def workflow_aliases
         {
-          "check_support"   => ->() { check_support },
-          "find_addons"     => ->() { find_addons },
-          "search_packages" => ->() { search_packages },
-          "display_summary" => ->() { display_summary },
-          "display_eula"    => ->() { display_eula },
-          "register_addons" => ->() { register_addons },
-          "select_packages" => ->() { select_packages }
+          "check_support"   => -> { check_support },
+          "find_addons"     => -> { find_addons },
+          "search_packages" => -> { search_packages },
+          "display_summary" => -> { display_summary },
+          "display_eula"    => -> { display_eula },
+          "register_addons" => -> { register_addons },
+          "select_packages" => -> { select_packages }
         }
       end
 
@@ -169,6 +169,7 @@ module Registration
       # @return [:next]
       def display_summary
         return :next if selected_addons.empty? && selected_packages.empty?
+
         ::Registration::Dialogs::OnlineSearchSummary.run(
           selected_packages, selected_addons
         )
@@ -181,6 +182,7 @@ module Registration
       #
       def display_eula
         return :next if selected_addons.empty?
+
         ::Registration::UI::AddonEulaDialog.run(selected_addons)
       end
 
@@ -190,6 +192,7 @@ module Registration
       #   or :next if there are not licenses to accept
       def register_addons
         return :next if selected_addons.empty?
+
         registration_ui.register_addons(selected_addons, {})
       end
 
@@ -216,12 +219,14 @@ module Registration
 
       def registration
         return @registration if @registration
+
         url = ::Registration::UrlHelpers.registration_url
         @registration = ::Registration::Registration.new(url)
       end
 
       def selected_addons
         return @selected_addons if @selected_addons
+
         addons = ::Registration::Addon.selected + ::Registration::Addon.auto_selected
         @selected_addons = ::Registration::Addon.registration_order(addons)
       end

@@ -1,4 +1,3 @@
-
 require "yast"
 require "yast/suse_connect"
 require "ui/event_dispatcher"
@@ -209,6 +208,7 @@ module Registration
       #               :email and :custom_url.
       def reg_options
         return @reg_options unless @reg_options.nil?
+
         options = Storage::InstallationOptions.instance
 
         reg_code = options.reg_code
@@ -321,6 +321,7 @@ module Registration
       # @return [Yast::Term]  UI term
       def skip_option
         return Empty() if hide_skip_option?
+
         Left(
           RadioButton(
             Id(:skip_registration),
@@ -366,7 +367,7 @@ module Registration
       def help_text
         # help text
         _("Enter SUSE Customer Center credentials here to register the system to " \
-            "get updates and extensions.")
+          "get updates and extensions.")
       end
 
       #
@@ -453,14 +454,14 @@ module Registration
           # TRANSLATORS: a popup message (2/3) the user wants to skip the registration
           # %{media_name} is the media name (e.g. SLE-15-SP2-Full),
           # %{download_url} is an URL link (e.g. https://download.suse.com)
-          warning += _("<p>For installation without registering the system please "\
-              "install using the %{media_name} installation media from %{download_url}.</p>") %
-            { media_name: media_name, download_url: download_url } # these cannot be nil
+          msg = format(_("<p>For installation without registering the system please "\
+                         "install using the %{media_name} installation media from %{download_url}.</p>"), media_name: media_name, download_url: download_url) # these cannot be nil
+          warning += msg
 
         else
           # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
           warning += _("<p>For installations without registration please "\
-            "install using full installation media.</p>")
+                       "install using full installation media.</p>")
         end
         warning
       end
@@ -505,10 +506,10 @@ module Registration
 
         if register_system_and_base_product
           store_registration_status
-          return :next
+          :next
         else
           reset_registration
-          return nil
+          nil
         end
       end
 
@@ -577,6 +578,7 @@ module Registration
 
         url = UrlHelpers.registration_url
         return :cancel if url == :cancel
+
         log.info "Initializing registration with URL: #{url.inspect}"
         self.registration = Registration.new(url)
       end
@@ -649,6 +651,7 @@ module Registration
         # do not scan again if the system has been registered during installation
         # (the user is going back)
         return [] if Registration.is_registered? && !Yast::Mode.normal
+
         services = UrlHelpers.slp_discovery_feedback
         services.map { |svc| UrlHelpers.service_url(svc.slp_url) }
       end

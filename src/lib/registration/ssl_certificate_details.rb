@@ -1,4 +1,3 @@
-
 require "yast"
 require "erb"
 

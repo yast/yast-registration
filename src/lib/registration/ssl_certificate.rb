@@ -1,4 +1,3 @@
-
 require "openssl"
 require "suse/connect"
 require "registration/downloader"
@@ -96,6 +95,7 @@ module Registration
       ["pem", "openssl"].each do |subdir|
         files = Dir[File.join(TMP_CA_CERTS_DIR, subdir, "*")]
         next if files.empty?
+
         subdir = File.join(CA_CERTS_DIR, subdir)
         FileUtils.mkdir_p(subdir) unless Dir.exist?(subdir)
         files.each do |file|
@@ -248,7 +248,7 @@ module Registration
       require "registration/ssl_certificate_details"
       # log also the dates
       log.info("#{SslCertificateDetails.new(self).summary}\n" \
-      "Issued on: #{issued_on}\nExpires on: #{expires_on}")
+               "Issued on: #{issued_on}\nExpires on: #{expires_on}")
 
       # log a warning for expired certificate
       expires = x509_cert.not_after.localtime

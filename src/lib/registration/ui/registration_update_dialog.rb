@@ -1,4 +1,3 @@
-
 require "yast"
 
 require "registration/registration"
@@ -63,7 +62,7 @@ module Registration
           self.registration = nil
           # automatic registration refresh during system upgrade failed, register from scratch
           Report.Error(_("Automatic registration upgrade failed.\n" \
-                "You can manually register the system from scratch."))
+                         "You can manually register the system from scratch."))
           :register
         end
       end
@@ -72,6 +71,7 @@ module Registration
       # @return [Boolean] true on success
       def update_system_registration
         return false if init_registration == :cancel
+
         registration_ui.update_system
       end
 
@@ -110,6 +110,7 @@ module Registration
 
         url = UrlHelpers.registration_url
         return :cancel if url == :cancel
+
         log.info "Initializing registration with URL: #{url.inspect}"
         self.registration = Registration.new(url)
         self.registration_ui = RegistrationUI.new(registration)

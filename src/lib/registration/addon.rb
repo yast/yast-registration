@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 SUSE LLC
 #
@@ -58,6 +56,7 @@ module Registration
       # @return [Addon,nil] The addon with the given ID or nil if it was not found
       def find_by_id(id)
         raise AddonsNotLoaded unless @cached_addons
+
         @cached_addons.find { |a| a.id == id }
       end
 
@@ -117,6 +116,7 @@ module Registration
 
         loop do
           break if to_process.empty?
+
           next_addon = to_process.find do |addon|
             addon.depends_on.nil? || !to_process.include?(addon.depends_on)
           end
@@ -145,6 +145,7 @@ module Registration
         to_process.each do |(pure, dependency)|
           # this avoid endless loop if there is circular dependency.
           next if processed.include?(pure)
+
           processed << pure
           addon = Addon.new(pure)
           result << addon
@@ -378,8 +379,8 @@ module Registration
 
       require "yaml"
       header = "# see " \
-        "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
-        "# for an example how to read this dump file\n"
+               "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
+               "# for an example how to read this dump file\n"
       File.write("/var/log/YaST2/registration_addons.yml",
         header + @cached_addons.to_yaml)
     end

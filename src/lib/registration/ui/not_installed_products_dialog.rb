@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2017 SUSE LLC
 #
@@ -103,8 +101,10 @@ module Registration
             not_installed = install_products
             # TRANSLATORS: Popup error showing all the add-ons that weren't
             # installed, %s is the add-ons identifiers.
-            Yast::Popup.Error(_("These add-ons were not installed:\n\n%s") %
-                              not_installed.join("\n")) unless not_installed.empty?
+            unless not_installed.empty?
+              Yast::Popup.Error(_("These add-ons were not installed:\n\n%s") %
+                                not_installed.join("\n"))
+            end
             update_summary
           when :sync
             registration_ui.synchronize_products(SwMgmt.installed_products)
@@ -196,8 +196,8 @@ module Registration
         product = product_from_addon_repos(addon)
         return false if !product || !Yast::Pkg.ResolvableInstall(product.name, :product)
 
-        if !Yast::Pkg.PkgSolve(true)
-          return false if Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept
+        if !Yast::Pkg.PkgSolve(true) && (Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept)
+          return false
         end
 
         Yast::PackagesUI.ConfirmLicenses

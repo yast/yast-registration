@@ -165,6 +165,7 @@ module Registration
       # @param ignore_case [Boolean] Whether the search is case sensitive or not
       def search_package(text, ignore_case)
         return unless valid_search_text?(text)
+
         # TRANSLATORS: searching for packages
         Yast::Popup.Feedback(searching_message, searching_header) do
           @packages = controller.search(text, ignore_case)
@@ -219,6 +220,7 @@ module Registration
       # @param text [String] Text to search for
       def valid_search_text?(text)
         return true if text.to_s.size >= MINIMAL_SEARCH_TEXT_SIZE
+
         Yast2::Popup.show(
           format(
             # TRANSLATORS: the minimal size of the text to search for package names

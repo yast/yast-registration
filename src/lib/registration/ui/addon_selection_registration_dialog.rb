@@ -32,7 +32,7 @@ module Registration
           content,
           # help text (1/3)
           _("<p>Here you can select available extensions and modules for your "\
-              "system.</p>") + generic_help_text + checkboxes_help,
+            "system.</p>") + generic_help_text + checkboxes_help,
           # always enable Back/Next, the dialog cannot be the first in workflow
           true,
           true

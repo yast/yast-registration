@@ -63,7 +63,7 @@ module Registration
           services:        [scc_service] + services,
           heading:         heading || _("Local Registration Servers"),
           description:     description || _("Select a detected registration server " \
-                             "from the list\nor the default SUSE registration server."),
+                                            "from the list\nor the default SUSE registration server."),
           no_selected_msg: _("No registration server selected")
         )
       end

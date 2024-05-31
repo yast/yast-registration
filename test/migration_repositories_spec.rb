@@ -16,7 +16,7 @@ describe Registration::MigrationRepositories do
     before do
       expect(Yast::Stage).to receive(:initial).and_return(false)
       expect(Yast::Pkg).to receive(:SetSolverFlags).with("ignoreAlreadyRecommended" => true,
-                                                         "dupAllowVendorChange"     => false)
+        "dupAllowVendorChange"     => false)
       expect(Yast::Pkg).to receive(:PkgSolve)
       expect(Yast::Pkg).to receive(:PkgUpdateAll)
       expect(Yast::Pkg).to receive(:SourceLoad)
@@ -70,7 +70,7 @@ describe Registration::MigrationRepositories do
   describe "#activate_repositories" do
     before do
       expect(Yast::Pkg).to receive(:SetSolverFlags).with("ignoreAlreadyRecommended" => true,
-                                                         "dupAllowVendorChange"     => false)
+        "dupAllowVendorChange"     => false)
       expect(Yast::Pkg).to receive(:PkgSolve)
       expect(Yast::Pkg).to receive(:PkgUpdateAll)
       expect(Yast::Pkg).to receive(:SourceLoad)

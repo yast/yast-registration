@@ -1,4 +1,3 @@
-
 require "yast"
 
 require "registration/fingerprint"
@@ -56,9 +55,9 @@ module Registration
         help_text = "<p><b>#{caption}</b></p>"
         help_text += _(
           "<p>Product registration includes your product in SUSE Customer " \
-            "Center database,\nenabling you to get online updates and " \
-            "technical support.\nTo register while installing automatically, " \
-            "select <b>Run Product Registration</b>.</p>"
+          "Center database,\nenabling you to get online updates and " \
+          "technical support.\nTo register while installing automatically, " \
+          "select <b>Run Product Registration</b>.</p>"
         )
         help_text += _(
           "<p>If your network deploys a custom registration server, set the " \
@@ -217,7 +216,7 @@ module Registration
           [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
         end
 
-        import_data = Hash[data]
+        import_data = data.to_h
         # keep the current addons
         import_data["addons"] = config.addons
         config.import(import_data)
@@ -245,7 +244,7 @@ module Registration
           end
         end
 
-        store_config if ret == :next || ret == :addons
+        store_config if [:next, :addons].include?(ret)
 
         ret
       end

@@ -51,6 +51,7 @@ module Registration
 
     def select!
       return if selected?
+
       @old_status = @status
       @status = :selected
     end

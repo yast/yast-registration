@@ -117,6 +117,7 @@ module Registration
       # If the system is not registered, it does nothing
       def read
         return unless ::Registration::Registration.is_registered?
+
         config = SUSE::Connect::Config.new
         @email = config.email
         @reg_server = config.url

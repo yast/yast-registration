@@ -1,4 +1,3 @@
-
 require "erb"
 require "yast"
 
@@ -43,8 +42,8 @@ module Registration
       # @return [Symbol] user input (:import, :cancel)
       def run
         log.info "Certificate import dialog: issuer: #{certificate.issuer_name}, " \
-          "subject: #{certificate.subject_name}, SHA1: " \
-          "#{certificate.fingerprint(Fingerprint::SHA1).value}"
+                 "subject: #{certificate.subject_name}, SHA1: " \
+                 "#{certificate.fingerprint(Fingerprint::SHA1).value}"
 
         Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 
@@ -110,8 +109,8 @@ module Registration
         details = SslCertificateDetails.new(certificate)
 
         "<h2>#{_("Secure Connection Error")}</h2>\n" \
-          "<p>#{_("Details:")} #{h(url)}: #{h(msg)}</p>\n" \
-          "<h3>#{_("Failed Certificate Details")}</h3>\n" +
+        "<p>#{_("Details:")} #{h(url)}: #{h(msg)}</p>\n" \
+        "<h3>#{_("Failed Certificate Details")}</h3>\n" +
           details.richtext_summary
       end
 
@@ -120,25 +119,25 @@ module Registration
       def warning_text
         # help text (RichText) for importing a SSL certificate (1/5)
         _("<p>Secure connections (e.g. HTTPS) use SSL certificates for " \
-        "verifying the authenticity of the server and encrypting the data " \
-        "being transferred.</p>") +
+          "verifying the authenticity of the server and encrypting the data " \
+          "being transferred.</p>") +
 
           # help text (RichText) for importing a SSL certificate (2/5)
           _("<p>You can choose to import the certificate into the list of known " \
-              "certificate authorities (CA), meaning that you trust the subject " \
-              "and the issuer of the unknown certificate.</p>") +
+            "certificate authorities (CA), meaning that you trust the subject " \
+            "and the issuer of the unknown certificate.</p>") +
 
           # help text (RichText) for importing a SSL certificate (3/5)
           _("<p>Importing a certificate will, for example, allow you to use " \
-          "a self-signed certificate.</p>") +
+            "a self-signed certificate.</p>") +
 
           # help text (RichText) for importing a SSL certificate (4/5)
           _("<p><b>Important:</b> You should always verify the fingerprints " \
-          "of certificates you import to ensure they are genuine.</p>") +
+            "of certificates you import to ensure they are genuine.</p>") +
 
           # help text (RichText) for importing a SSL certificate (5/5)
           _("<p><b>Importing an unknown certificate without " \
-              "verification is a big security risk.</b></p>")
+            "verification is a big security risk.</b></p>")
       end
     end
   end

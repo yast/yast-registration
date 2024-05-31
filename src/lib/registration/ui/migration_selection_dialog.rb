@@ -65,12 +65,12 @@ module Registration
           dialog_content,
           # TRANSLATORS: help text (1/3)
           _("<p>Here you can select the migration target products. The registration" \
-              "server may offer several possible migration to new products.</p>") +
+            "server may offer several possible migration to new products.</p>") +
           # TRANSLATORS: help text (2/3)
           _("<p>Only one migration target from the list can be selected.</p>") +
           # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
           (_("<p>Use the <b>%s</b> check box to manually select the migration " \
-                "repositories later.</p>") % _("Manually Select Migration Repositories")),
+             "repositories later.</p>") % _("Manually Select Migration Repositories")),
           Yast::GetInstArgs.enable_back,
           true
         )
@@ -133,7 +133,6 @@ module Registration
           migration_selection_widget,
           VWeight(15,
             RichText(Id(:details), Opt(:vstretch), "")),
-
           VSpacing(Yast::UI.TextMode ? 0 : 1),
           # TRANSLATORS: check button label
           CheckBox(Id(:manual_repos), _("Manually Adjust the Repositories for Migration")),
@@ -249,7 +248,7 @@ module Registration
             same_products?(installed_product, product)
           end
 
-          details << "<li>" + product_summary(migrated_product, installed_product) + "</li>"
+          details << ("<li>" + product_summary(migrated_product, installed_product) + "</li>")
         end
 
         # TRANSLATORS: RichText header (details for the selected item)
@@ -297,10 +296,9 @@ module Registration
           # %{url} is the URL of the SMT/RMT registration server
           # %{product} is a full product name, e.g. "SUSE Linux Enterprise Server 12"
           return Yast::HTML.Colorize(
-            _("ERROR: Product <b>%{product}</b> is not available at the " \
-                "registration server (%{url}). Make the product available " \
-                "to allow using this migration.") %
-            { product: product_name, url: url },
+            format(_("ERROR: Product <b>%{product}</b> is not available at the " \
+                     "registration server (%{url}). Make the product available " \
+                     "to allow using this migration."), product: product_name, url: url),
             "red"
           )
         end
@@ -338,13 +336,13 @@ module Registration
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} is a product name, e.g. "SUSE Linux Enterprise Server 12"
           # %{new_product} is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
-          return _("%{old_product} <b>will be upgraded to</b> %{new_product}.") \
-            % { old_product: old_product_name, new_product: new_product_name }
+          format(_("%{old_product} <b>will be upgraded to</b> %{new_product}."),
+            old_product: old_product_name, new_product: new_product_name)
         else
           # TRANSLATORS: Summary message, rich text format
           # %{old_product} and %{new_product} are product names
-          return _("%{old_product} <b>will be downgraded to</b> %{new_product}.") \
-            % { old_product: old_product_name, new_product: new_product_name }
+          format(_("%{old_product} <b>will be downgraded to</b> %{new_product}."),
+            old_product: old_product_name, new_product: new_product_name)
         end
       end
 
@@ -378,9 +376,9 @@ module Registration
       def report_unavailable_migration
         # TRANSLATORS: an error popup message
         Yast::Report.Error(_("The selected migration contains a product\n" \
-              "which is not available at the registration server.\n\n" \
-              "Select a different migration target or make the missing products\n" \
-              "available at the registration server."))
+                             "which is not available at the registration server.\n\n" \
+                             "Select a different migration target or make the missing products\n" \
+                             "available at the registration server."))
       end
     end
   end

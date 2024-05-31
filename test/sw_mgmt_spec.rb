@@ -54,7 +54,7 @@ describe Registration::SwMgmt do
   describe ".init" do
     before do
       allow(Yast::PackageLock).to receive(:Connect).and_return("connected" => connected,
-                                                               "aborted"   => aborted)
+        "aborted"   => aborted)
     end
 
     context "when the libzypp lock can be obtained" do
@@ -412,8 +412,8 @@ describe Registration::SwMgmt do
       # mapping of the "system-installation()" provides
       allow(Y2Packager::ProductReader).to receive(:installation_package_mapping)
         .and_return("SLES"     => "skelcd-control-SLES",
-                    "SLED"     => "skelcd-control-SLED",
-                    "SLES_SAP" => "skelcd-control-SLES_SAP")
+          "SLED"     => "skelcd-control-SLED",
+          "SLES_SAP" => "skelcd-control-SLES_SAP")
       allow(Y2Packager::MediumType).to receive(:online?).and_return(false)
     end
 

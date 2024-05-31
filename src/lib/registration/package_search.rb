@@ -116,9 +116,11 @@ module Registration
     # @return [Hash<String,Symbol>]
     def status_map
       return @status_map if @status_map
+
       pkgs = Y2Packager::Resolvable.find({ kind: :package }, [:name, :status])
       @status_map = pkgs.each_with_object({}) do |pkg, all|
         next if all.key?(pkg.name)
+
         all[pkg.name] = pkg.status
       end
     end

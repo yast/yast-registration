@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 SUSE LLC
 #
@@ -210,8 +208,8 @@ module Registration
       migration_paths = []
       ConnectHelpers.catch_registration_errors(show_update_hint: true) do
         migration_paths = SUSE::Connect::YaST
-                          .system_offline_migrations(installed_products,
-                            target_base_product, connect_params)
+          .system_offline_migrations(installed_products,
+            target_base_product, connect_params)
       end
 
       log.info "Received possible migrations paths: #{migration_paths}"
@@ -228,6 +226,7 @@ module Registration
     def get_updates_list
       id = Yast::ProductFeatures.GetStringFeature("globals", "self_update_id")
       return [] if id.empty?
+
       version = Yast::ProductFeatures.GetStringFeature("globals", "self_update_version")
       version = Yast::OSRelease.ReleaseVersion if version.empty?
       product = SwMgmt.installer_update_base_product(id, version)
@@ -296,9 +295,7 @@ module Registration
       params = connect_params
 
       # use product specific reg. code (e.g. for addons)
-      if product.is_a?(Hash) && product["reg_code"]
-        params[:token] = product["reg_code"]
-      end
+      params[:token] = product["reg_code"] if product.is_a?(Hash) && product["reg_code"]
 
       product_service = block.call(remote_product, params)
       log.info "registration result: #{product_service}"
@@ -311,13 +308,9 @@ module Registration
     def update_services(product_service)
       old_service = product_service.obsoleted_service_name
       # sanity check
-      if old_service && !old_service.empty? && old_service != product_service.name
-        # old_service comes from SCC. So it could be that we have already removed
-        # this service from the system meanwhile --> checking first.
-        if ::Registration::SwMgmt.service_installed?(old_service)
-          log.info "Found obsoleted service: #{old_service}"
-          ::Registration::SwMgmt.remove_service(old_service)
-        end
+      if old_service && !old_service.empty? && old_service != product_service.name && ::Registration::SwMgmt.service_installed?(old_service)
+        log.info "Found obsoleted service: #{old_service}"
+        ::Registration::SwMgmt.remove_service(old_service)
       end
 
       # read the global credentials
@@ -330,18 +323,18 @@ module Registration
     # returns SSL verify callback
     def verify_callback
       lambda do |verify_ok, context|
-        begin
-          # we cannot raise an exception with details here (all exceptions in
-          # verify_callback are caught and ignored), we need to store the error
-          # details in a global instance
-          store_ssl_error(context) unless verify_ok
 
-          verify_ok
-        rescue StandardError => e
-          log.error "Exception in SSL verify callback: #{e.class}: #{e.message} : #{e.backtrace}"
-          # the exception will be ignored, but reraise anyway...
-          raise e
-        end
+        # we cannot raise an exception with details here (all exceptions in
+        # verify_callback are caught and ignored), we need to store the error
+        # details in a global instance
+        store_ssl_error(context) unless verify_ok
+
+        verify_ok
+      rescue StandardError => e
+        log.error "Exception in SSL verify callback: #{e.class}: #{e.message} : #{e.backtrace}"
+        # the exception will be ignored, but reraise anyway...
+        raise e
+
       end
     end
 

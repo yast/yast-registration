@@ -1,4 +1,3 @@
-
 module Registration
   class Fingerprint
     attr_reader :sum, :value
