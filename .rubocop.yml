@@ -55,7 +55,7 @@ Naming/PredicateName:
   Enabled: false
 
 Naming/MethodParameterName:
-  Enabled: false
+  Style/SlicingWithRange:Enabled: false
 
 # Let lslezak decide what to do with it. In general jreidinger does not see it as such big violence of style
 Style/StructInheritance:
@@ -72,4 +72,9 @@ Style/OptionalBooleanParameter:
 
 # it sometimes make code harder to read
 Style/GuardClause:
+  Enabled: false
+
+# disable missing ending range as it is not supported in ruby 2.7
+# TODO: is it bug in rubocop that with target ruby version 2.7 it stil do it?
+Style/SlicingWithRange:
   Enabled: false

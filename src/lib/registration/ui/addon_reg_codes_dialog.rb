@@ -82,7 +82,7 @@ module Registration
           box1 = addon_regcode_items(display_addons[0..half - 1])
           box2 = HBox(
             HSpacing(2),
-            addon_regcode_items(display_addons[half..])
+            addon_regcode_items(display_addons[half..-1])
           )
         else
           box1 = addon_regcode_items(addons_with_regcode)
