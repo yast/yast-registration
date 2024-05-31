@@ -236,10 +236,8 @@ module Registration
             refresh_widget_state
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
-          when :next
-            # FIXME: input validation
-            break
-          when :back, :addons
+          # FIXME: input validation for next
+          when :back, :addons, :next
             break
           end
         end

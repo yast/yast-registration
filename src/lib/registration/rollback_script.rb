@@ -64,7 +64,7 @@ module Registration
     # full path to the script
     # @return [String] path
     def script_path
-      @path ||= File.join(root, BACKUP_DIR, DEFAULT_SCRIPT_NAME)
+      @script_path ||= File.join(root, BACKUP_DIR, DEFAULT_SCRIPT_NAME)
     end
   end
 end
