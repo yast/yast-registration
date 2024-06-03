@@ -3,7 +3,7 @@ inherit_from:
   /usr/share/YaST2/data/devtools/data/rubocop-1.24.1_yast_style.yml
 
 AllCops:
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 2.5
 
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -72,9 +72,4 @@ Style/OptionalBooleanParameter:
 
 # it sometimes make code harder to read
 Style/GuardClause:
-  Enabled: false
-
-# disable missing ending range as it is not supported in ruby 2.7
-# TODO: is it bug in rubocop that with target ruby version 2.7 it stil do it?
-Style/SlicingWithRange:
   Enabled: false
