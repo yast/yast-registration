@@ -60,7 +60,7 @@ module Registration
       def initialize(services: [], heading: nil, description: nil)
         textdomain "registration"
         description_default = _("Select a detected registration server " \
-                                "from the list\nor the default SUSE registration server.")
+          "from the list\nor the default SUSE registration server.")
         super(
           services:        [scc_service] + services,
           heading:         heading || _("Local Registration Servers"),

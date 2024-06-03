@@ -248,7 +248,7 @@ module Registration
       require "registration/ssl_certificate_details"
       # log also the dates
       log.info("#{SslCertificateDetails.new(self).summary}\n" \
-               "Issued on: #{issued_on}\nExpires on: #{expires_on}")
+        "Issued on: #{issued_on}\nExpires on: #{expires_on}")
 
       # log a warning for expired certificate
       expires = x509_cert.not_after.localtime

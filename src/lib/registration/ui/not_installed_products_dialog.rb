@@ -161,7 +161,7 @@ module Registration
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)
         summary += _("<p>It's preferable to <b>deactivate</b> your products at your " \
-                     "registration server if you don't plan to use them anymore.</p>")
+          "registration server if you don't plan to use them anymore.</p>")
 
         summary
       end

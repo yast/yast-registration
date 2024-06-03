@@ -92,7 +92,7 @@ module Registration
         text = [_("<p>The system is already registered.</p>")]
         text << actions_help
         text << _("<p>If you want to deregister your system you need to log "\
-                  "into the SUSE Customer Center and remove the system manually there.</p>")
+          "into the SUSE Customer Center and remove the system manually there.</p>")
         text.join
       end
 

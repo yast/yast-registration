@@ -111,7 +111,7 @@ module Registration
             error_code_message + error_msg)
         when 500..599
           report_error(message_prefix + _("Registration server error.\n" \
-                                          "Retry the operation later."), error_msg)
+            "Retry the operation later."), error_msg)
         else
           report_error(message_prefix + _("Connection to registration server failed."),
             error_code_message + error_msg)
@@ -224,7 +224,7 @@ module Registration
         else
           # error message
           Yast::Report.Error(_("Received SSL Certificate does not match " \
-                               "the expected certificate."))
+            "the expected certificate."))
         end
       elsif Yast::Mode.autoinst && Storage::Config.instance.reg_server_cert &&
           !Storage::Config.instance.reg_server_cert.empty?
@@ -264,9 +264,9 @@ module Registration
         # imported but the registration server still cannot be accessed securely,
         # user has to solve the certificate issue manually.
         Yast::Report.Error(_("A certificate has been already imported\n" \
-                             "but the server connection still cannot be trusted.\n\n" \
-                             "Please fix the certificate issue manually, ensure that the server\n" \
-                             "can be connected securely and start the YaST module again."))
+          "but the server connection still cannot be trusted.\n\n" \
+          "Please fix the certificate issue manually, ensure that the server\n" \
+          "can be connected securely and start the YaST module again."))
 
         return false
       end
@@ -311,8 +311,8 @@ module Registration
       # TRANSLATORS: error message, %s is a server URL,
       # e.g. https://smt.example.com
       msg = _("An old registration server was detected at\n%s.\n" \
-              "Make sure the latest product supporting the new registration\n" \
-              "protocol is installed at the server.") % display_url
+        "Make sure the latest product supporting the new registration\n" \
+        "protocol is installed at the server.") % display_url
 
       error_msg.replace(msg)
     end
@@ -351,12 +351,12 @@ module Registration
         msg += "\n\n"
         # TRANSLATORS: additional hint for an error message
         msg += _("If you are upgrading from SLE11 make sure the SCC server\n" \
-                 "knows the old NCC registration. Synchronization from NCC to SCC\n" \
-                 "might take very long time.\n\n" \
-                 "If the SLE11 system was installed recently you could log into\n" \
-                 "%s to speed up the synchronization process.\n" \
-                 "Just wait several minutes after logging in and then retry \n" \
-                 "the upgrade again.") % \
+          "knows the old NCC registration. Synchronization from NCC to SCC\n" \
+          "might take very long time.\n\n" \
+          "If the SLE11 system was installed recently you could log into\n" \
+          "%s to speed up the synchronization process.\n" \
+          "Just wait several minutes after logging in and then retry \n" \
+          "the upgrade again.") % \
           SUSE::Connect::YaST::DEFAULT_URL
       end
 

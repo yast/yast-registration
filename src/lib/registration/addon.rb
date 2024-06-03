@@ -379,8 +379,8 @@ module Registration
 
       require "yaml"
       header = "# see " \
-               "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
-               "# for an example how to read this dump file\n"
+        "https://github.com/yast/yast-registration/tree/master/devel/dump_reader.rb\n" \
+        "# for an example how to read this dump file\n"
       File.write("/var/log/YaST2/registration_addons.yml",
         header + @cached_addons.to_yaml)
     end

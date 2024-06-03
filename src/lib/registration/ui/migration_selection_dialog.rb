@@ -70,7 +70,7 @@ module Registration
           _("<p>Only one migration target from the list can be selected.</p>") +
           # TRANSLATORS: help text (3/3), %s is replaced by the (translated) check box label
           (_("<p>Use the <b>%s</b> check box to manually select the migration " \
-             "repositories later.</p>") % _("Manually Select Migration Repositories")),
+            "repositories later.</p>") % _("Manually Select Migration Repositories")),
           Yast::GetInstArgs.enable_back,
           true
         )
@@ -274,9 +274,9 @@ module Registration
           # TRANSLATORS: Summary message in rich text format
           # %s is a product name, e.g. "SUSE Linux Enterprise Server 12 SP1 x86_64"
           return _("The registration server does not offer migrations for Product " \
-                   "<b>%s</b> so it will <b>stay unchanged</b>. We recommend you " \
-                   "to check if it's correct and to configure the repositories " \
-                   "manually when needed.") % product_name
+            "<b>%s</b> so it will <b>stay unchanged</b>. We recommend you " \
+            "to check if it's correct and to configure the repositories " \
+            "manually when needed.") % product_name
 
         end
 
@@ -297,8 +297,8 @@ module Registration
           # %{product} is a full product name, e.g. "SUSE Linux Enterprise Server 12"
           return Yast::HTML.Colorize(
             format(_("ERROR: Product <b>%{product}</b> is not available at the " \
-                     "registration server (%{url}). Make the product available " \
-                     "to allow using this migration."), product: product_name, url: url),
+              "registration server (%{url}). Make the product available " \
+              "to allow using this migration."), product: product_name, url: url),
             "red"
           )
         end
@@ -376,9 +376,9 @@ module Registration
       def report_unavailable_migration
         # TRANSLATORS: an error popup message
         Yast::Report.Error(_("The selected migration contains a product\n" \
-                             "which is not available at the registration server.\n\n" \
-                             "Select a different migration target or make the missing products\n" \
-                             "available at the registration server."))
+          "which is not available at the registration server.\n\n" \
+          "Select a different migration target or make the missing products\n" \
+          "available at the registration server."))
       end
     end
   end

@@ -55,15 +55,15 @@ module Registration
         help_text = "<p><b>#{caption}</b></p>"
         help_text += _(
           "<p>Product registration includes your product in SUSE Customer " \
-          "Center database,\nenabling you to get online updates and " \
-          "technical support.\nTo register while installing automatically, " \
-          "select <b>Run Product Registration</b>.</p>"
+            "Center database,\nenabling you to get online updates and " \
+            "technical support.\nTo register while installing automatically, " \
+            "select <b>Run Product Registration</b>.</p>"
         )
         help_text += _(
           "<p>If your network deploys a custom registration server, set the " \
-          "correct URL of the server\nand the location of the RMT " \
-          "certificate in <b>RMT Server Settings</b>. Refer\nto your RMT " \
-          "manual for further assistance.</p>"
+            "correct URL of the server\nand the location of the RMT " \
+            "certificate in <b>RMT Server Settings</b>. Refer\nto your RMT " \
+            "manual for further assistance.</p>"
         )
 
         # FIXME: the dialog should be created by external code before calling this

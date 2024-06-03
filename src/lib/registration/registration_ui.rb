@@ -299,8 +299,8 @@ module Registration
       # %s are all the product names splited by '\n' e.g
       # "SUSE Linux Enterprise Server 12\nSUSE Enterprise Storage 1 x86_64"
       msg = _("The add-ons listed below are registered but not installed: \n\n%s\n\n" \
-              "Would you like to downgrade also them in the registration server? \n" \
-              "If not they will be deactivated. ") % addon_names.join("\n")
+        "Would you like to downgrade also them in the registration server? \n" \
+        "If not they will be deactivated. ") % addon_names.join("\n")
 
       Yast::Popup.YesNo(msg) ? addons : []
     end
@@ -367,7 +367,7 @@ module Registration
 
           if ret
             group.summary = "Registered \"#{base_product_data["name"]}-" \
-                            "#{base_product_data["version"]}-#{base_product_data["arch"]}\""
+              "#{base_product_data["version"]}-#{base_product_data["arch"]}\""
           end
 
           ret

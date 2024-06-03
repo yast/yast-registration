@@ -183,8 +183,8 @@ module Registration
         # pressing [Continue] starts the registration module, [Cancel] aborts
         # the online migration
         register = Yast::Popup.ContinueCancel(_("The system is not registered,\n" \
-                                                "to run the online migration you need\n" \
-                                                "to register the system first."))
+          "to run the online migration you need\n" \
+          "to register the system first."))
 
         return :abort unless register
 
@@ -273,9 +273,9 @@ module Registration
         # installed to the current migration products list.
         # %s is an addon friendly name, e.g 'SUSE Enterprise Storage 2 x86_64'
         msg = _("The '%s' extension is registered but not installed.\n" \
-                "If you accept it will be added for be installed, in other case " \
-                "it will be unregistered at the end of the migration.\n\n" \
-                "Do you want to add it?")
+          "If you accept it will be added for be installed, in other case " \
+          "it will be unregistered at the end of the migration.\n\n" \
+          "Do you want to add it?")
 
         addons =
           Addon.registered_not_installed.each_with_object([]) do |addon, result|
@@ -369,9 +369,9 @@ module Registration
             _("No migration product found."),
             # TRANSLATORS: Help message, %{product} is the product name
             format(_("Please, boot the original system and make sure " \
-                     "that all registerable products are correctly registered.\n" \
-                     "Also check that the installed system is supported for upgrade to \n" \
-                     "%{product}."),
+              "that all registerable products are correctly registered.\n" \
+              "Also check that the installed system is supported for upgrade to \n" \
+              "%{product}."),
               product: Y2Packager::ProductUpgrade.new_base_product.display_name)
           ]
 
@@ -403,7 +403,7 @@ module Registration
         # TRANSLATORS: Continue/Cancel popup question, confirm the migration by user,
         # %s is a product name, e.g. "SUSE Linux Enterprise Server 15"
         message = _("The product %s\nis already activated on this system.\n\n" \
-                    "Migrating again to the same product might not work properly.") %
+          "Migrating again to the same product might not work properly.") %
           base_product.label
         ui = Yast2::Popup.show(message, buttons: :continue_cancel, focus: :cancel)
         log.info("Use input: #{ui.inspect}")
@@ -807,8 +807,8 @@ module Registration
         #   User requested media based upgrade which does not use SCC/SMT/RMT
         #   but the downloaded media (physical DVD or shared repo on a local server).
         ret = _("<h2>Media Based Upgrade</h2><p>The media based upgrade is requested. " \
-                "In this mode YaST will not contact the registration server to obtain " \
-                "the new software repositories required for migration.</p>") +
+          "In this mode YaST will not contact the registration server to obtain " \
+          "the new software repositories required for migration.</p>") +
           # TRANSLATORS: Media based upgrade requested by user (2/3)
           _("<p>Please add the installation media manually in the next step.</p>")
 
@@ -817,7 +817,7 @@ module Registration
         # TRANSLATORS: a warning message, upgrading the registered systems
         #   using media is not supported
         ret + _("<h2>Warning!</h2><p><b>The media based upgrade for registered " \
-                "systems is not supported!<b></p>") +
+          "systems is not supported!<b></p>") +
           _("<p>If you upgrade the system using media the registration status " \
             "will not be updated and the system will be still registered " \
             "using the previous product. The packages from the registration " \

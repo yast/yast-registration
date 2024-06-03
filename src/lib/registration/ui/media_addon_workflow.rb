@@ -110,7 +110,7 @@ module Registration
         if products.empty?
           repo_data = Pkg.SourceGeneralData(repo_id)
           log.warn "Repository #{repo_data["name"]} (#{repo_data["alias"]}) " \
-                   "does not provide any product resolvable"
+            "does not provide any product resolvable"
           log.warn "Skipping add-on registration"
           return :finish
         end
@@ -129,8 +129,8 @@ module Registration
 
           if !Registration.is_registered? &&
               Yast::Popup.YesNo(_("The base system has to be registered " \
-                                  "in order to register the '%s' add-on.\nSkip the base system " \
-                                  "and the add-on registration?") %
+                "in order to register the '%s' add-on.\nSkip the base system " \
+                "and the add-on registration?") %
               Pkg.SourceGeneralData(repo_id)["name"])
 
             return :skip

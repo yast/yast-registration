@@ -62,7 +62,7 @@ module Registration
           self.registration = nil
           # automatic registration refresh during system upgrade failed, register from scratch
           Report.Error(_("Automatic registration upgrade failed.\n" \
-                         "You can manually register the system from scratch."))
+            "You can manually register the system from scratch."))
           :register
         end
       end

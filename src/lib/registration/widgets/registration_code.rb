@@ -97,9 +97,9 @@ module Registration
       def help
         _(
           "<p>\n" \
-          "The RMT Server URL must use http or https protocol, " \
-          "other schemes are not supported." \
-          "</p>\n"
+            "The RMT Server URL must use http or https protocol, " \
+            "other schemes are not supported." \
+            "</p>\n"
         )
       end
 

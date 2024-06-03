@@ -93,7 +93,7 @@ module Registration
         download_file(location, insecure: insecure, redirection_count: redirection_count - 1)
       else
         log.error "HTTP request failed: Error #{response.code}:" \
-                  "#{response.message}: #{response.body}"
+          "#{response.message}: #{response.body}"
 
         raise DownloadError, "Downloading #{file_url} failed: #{response.message}"
       end

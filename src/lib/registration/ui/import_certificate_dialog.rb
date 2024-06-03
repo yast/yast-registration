@@ -42,8 +42,8 @@ module Registration
       # @return [Symbol] user input (:import, :cancel)
       def run
         log.info "Certificate import dialog: issuer: #{certificate.issuer_name}, " \
-                 "subject: #{certificate.subject_name}, SHA1: " \
-                 "#{certificate.fingerprint(Fingerprint::SHA1).value}"
+          "subject: #{certificate.subject_name}, SHA1: " \
+          "#{certificate.fingerprint(Fingerprint::SHA1).value}"
 
         Yast::UI.OpenDialog(Opt(:decorated), import_dialog_content)
 
@@ -109,8 +109,8 @@ module Registration
         details = SslCertificateDetails.new(certificate)
 
         "<h2>#{_("Secure Connection Error")}</h2>\n" \
-        "<p>#{_("Details:")} #{h(url)}: #{h(msg)}</p>\n" \
-        "<h3>#{_("Failed Certificate Details")}</h3>\n" +
+          "<p>#{_("Details:")} #{h(url)}: #{h(msg)}</p>\n" \
+          "<h3>#{_("Failed Certificate Details")}</h3>\n" +
           details.richtext_summary
       end
 

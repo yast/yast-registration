@@ -114,7 +114,7 @@ module Registration
         # when a migration repository cannot be accessed, there are [Skip]
         # and [Abort] buttons displayed below the question
         question = _("Repository '%s'\ncannot be loaded.\n\n"\
-                     "Skip the repository or abort?") % data["name"]
+          "Skip the repository or abort?") % data["name"]
         ret = Popup.ErrorAnyQuestion(Label.ErrorMsg, question, Label.SkipButton,
           Label.AbortButton, :focus_yes)
 
@@ -680,11 +680,11 @@ module Registration
           remote_addon.selected
         else
           product_label = "#{product["display_name"]} (#{product["name"]}" \
-                          "-#{product["version_version"]}-#{product["arch"]})"
+            "-#{product["version_version"]}-#{product["arch"]})"
 
           # TRANSLATORS: %s is a product name
           Report.Error(_("Cannot find remote product %s.\n" \
-                         "The product cannot be registered.") % product_label)
+            "The product cannot be registered.") % product_label)
         end
       end
     end

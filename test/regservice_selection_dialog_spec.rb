@@ -83,7 +83,7 @@ describe Registration::UI::RegserviceSelectionDialog do
         .with(_("Local Registration Servers"))
       expect(dialog).to receive(:Label)
         .with(_("Select a detected registration server " \
-                "from the list\nor the default SUSE registration server."))
+          "from the list\nor the default SUSE registration server."))
       dialog.run
     end
 

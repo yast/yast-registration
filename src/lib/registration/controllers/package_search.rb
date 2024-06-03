@@ -196,7 +196,7 @@ module Registration
       # @param addon [Registration::Addon]
       def log_addon(msg, addon)
         log.info "#{msg}: #{addon.inspect}, registered=#{addon.registered?}, " \
-                 "selected=#{addon.selected?}, auto_selected=#{addon.auto_selected?}"
+          "selected=#{addon.selected?}, auto_selected=#{addon.auto_selected?}"
       end
     end
   end

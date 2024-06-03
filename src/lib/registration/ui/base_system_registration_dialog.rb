@@ -447,7 +447,7 @@ module Registration
         # TRANSLATORS:
         # Popup (1/3) : Installation cannot be continued without registration.
         warning = _("<p>This installation is online only which requires registration for "\
-                    "package repositories.</p>")
+          "package repositories.</p>")
 
         # these cannot be nil
         if !media_name.empty? && !download_url.empty?
@@ -456,7 +456,7 @@ module Registration
           # %{download_url} is an URL link (e.g. https://download.suse.com)
           msg = format(_(
             "<p>For installation without registering the system please "\
-            "install using the %{media_name} installation media from %{download_url}.</p>"
+              "install using the %{media_name} installation media from %{download_url}.</p>"
           ),
             media_name: media_name, download_url: download_url) # these cannot be nil
           warning += msg
@@ -464,7 +464,7 @@ module Registration
         else
           # TRANSLATORS: a popup message (3/3) the user wants to skip the registration
           warning += _("<p>For installations without registration please "\
-                       "install using full installation media.</p>")
+            "install using full installation media.</p>")
         end
         warning
       end

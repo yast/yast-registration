@@ -73,3 +73,8 @@ Style/OptionalBooleanParameter:
 # it sometimes make code harder to read
 Style/GuardClause:
   Enabled: false
+
+# use indented style as there is a lot of multiline strings and it often
+# too much fragile that string as default style makes really narrow strings
+Layout/LineEndStringConcatenationIndentation:
+  EnforcedStyle: indented

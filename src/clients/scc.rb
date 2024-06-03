@@ -80,11 +80,13 @@ module Yast
       # @return [Boolean] true if the repository manager was successfuly closed,
       #   false after pressing [Cancel]
       def fix_repositories(details)
-        # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
-        Report.LongError(_("<p>The repository initialization failed. " \
-                           "Disable (or remove) the offending service or repository " \
-                           "in the repository manager.</p><p>Details:</p><p>%s</p>") %
-            CGI.escapeHTML(details))
+        Report.LongError(
+          # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
+          _("<p>The repository initialization failed. " \
+            "Disable (or remove) the offending service or repository " \
+            "in the repository manager.</p><p>Details:</p><p>%s</p>") %
+            CGI.escapeHTML(details)
+        )
 
         ret = WFM.call("repositories", WFM.Args)
         log.info "repository manager result: #{ret}"

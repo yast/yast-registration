@@ -41,7 +41,7 @@ describe Registration::UI::MigrationSelectionDialog do
         # are different products with different statuses ("SUSE_SLES" will be uninstalled,
         # "SLES" will be installed)
         expect(text).to include("SUSE Linux Enterprise Server 11 SP4 <b>will be " \
-                                "upgraded to</b> SUSE Linux Enterprise Server 15")
+          "upgraded to</b> SUSE Linux Enterprise Server 15")
       end
 
       sles11sp4 = load_yaml_fixture("installed_sles11-sp4_products.yml")
@@ -59,9 +59,9 @@ describe Registration::UI::MigrationSelectionDialog do
         # For SLE15 there are two products (SDK and Toolchain Module) replaced
         # by single product (Development Tools Module)
         expect(text).to include("SUSE Linux Enterprise Software Development Kit 12 SP3 "\
-                                "<b>will be upgraded to</b> Development Tools Module 15")
+          "<b>will be upgraded to</b> Development Tools Module 15")
         expect(text).to include("Toolchain Module <b>will be upgraded to</b> " \
-                                "Development Tools Module 15")
+          "Development Tools Module 15")
       end
 
       sles12sp3 = load_yaml_fixture("installed_sles12-sp3_products.yml")
