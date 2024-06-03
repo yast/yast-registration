@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/abort_confirmation"
+
 Yast.import "Popup"
 Yast.import "Mode"
 

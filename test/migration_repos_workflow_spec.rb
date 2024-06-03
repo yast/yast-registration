@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/migration_repos_workflow"
+
 describe Registration::UI::MigrationReposWorkflow do
   describe "#run_sequence" do
     before do

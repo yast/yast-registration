@@ -2,6 +2,10 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/base_system_registration_dialog"
+
+Yast.import "Packages"
+
 describe Registration::UI::BaseSystemRegistrationDialog do
   include Yast::UIShortcuts
 

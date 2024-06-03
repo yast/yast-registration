@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/migration_repositories"
+
 describe Registration::MigrationRepositories do
   describe ".reset" do
     it "resets the selected packages" do

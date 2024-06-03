@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/registration_update_dialog"
+
 describe Registration::UI::RegistrationUpdateDialog do
   subject { Registration::UI::RegistrationUpdateDialog }
 

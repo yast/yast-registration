@@ -2,6 +2,9 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/migration_repos_selection_dialog"
+require "registration/migration_repositories"
+
 include Yast::UIShortcuts
 
 describe Registration::UI::MigrationReposSelectionDialog do

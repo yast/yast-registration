@@ -2,6 +2,7 @@
 
 require_relative "../../spec_helper"
 require "y2packager/control_product_spec"
+require "registration/clients/scc_auto"
 
 describe Registration::Clients::SCCAuto do
   let(:config) { ::Registration::Storage::Config.instance }

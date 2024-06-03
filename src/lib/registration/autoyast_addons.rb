@@ -13,6 +13,8 @@
 
 require "yast"
 
+require "registration/addon"
+
 module Registration
   # This class handles the AutoYaST addons
   class AutoyastAddons
@@ -132,6 +134,8 @@ module Registration
     end
 
     def registration_ui
+      require "registration/registration_ui"
+
       @registration_ui ||= RegistrationUI.new(registration)
     end
   end

@@ -3,6 +3,8 @@
 require_relative "spec_helper"
 require "yaml"
 
+require "registration/autoyast_addons"
+
 describe Registration::AutoyastAddons do
   let(:registration) { double("registration") }
   let(:unsorted_addons) do
