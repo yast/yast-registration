@@ -308,6 +308,8 @@ module Registration
     def update_services(product_service)
       old_service = product_service.obsoleted_service_name
       # sanity check
+      # old_service comes from SCC. So it could be that we have already removed
+      # this service from the system meanwhile --> checking first.
       if old_service && !old_service.empty? && old_service != product_service.name &&
           ::Registration::SwMgmt.service_installed?(old_service)
         log.info "Found obsoleted service: #{old_service}"
