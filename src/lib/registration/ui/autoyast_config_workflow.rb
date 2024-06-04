@@ -1,4 +1,3 @@
-
 require "yast"
 require "registration/helpers"
 require "registration/connect_helpers"
@@ -42,11 +41,11 @@ module Registration
       # @return [Symbol] the user input
       def run
         aliases = {
-          "general"         => ->() { configure_registration },
-          "addons"          => [->() { select_addons }, true],
-          "remote_addons"   => [->() { select_remote_addons }, true],
-          "addons_eula"     => [->() { addons_eula }, true],
-          "addons_regcodes" => [->() { addons_reg_codes }, true]
+          "general"         => -> { configure_registration },
+          "addons"          => [-> { select_addons }, true],
+          "remote_addons"   => [-> { select_remote_addons }, true],
+          "addons_eula"     => [-> { addons_eula }, true],
+          "addons_regcodes" => [-> { addons_reg_codes }, true]
         }
 
         sequence = {
@@ -124,7 +123,7 @@ module Registration
       # collect the known reg. codes from the current configuration
       # @return [Hash] reg. codes hash
       def collect_known_reg_codes
-        Hash[config.addons.map { |a| [a["name"], a["reg_code"]] }]
+        config.addons.to_h { |a| [a["name"], a["reg_code"]] }
       end
 
       # add for reg. codes for selected paid extensions

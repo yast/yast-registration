@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 SUSE LLC
 #
@@ -260,14 +258,14 @@ module Registration
         # TRANSLATORS: updates popup question (1/2), multiline, max. ~60 chars/line
         msg = _("The registration server offers update repositories.\n\n")
 
-        if Yast::Mode.installation
+        msg += if Yast::Mode.installation
           # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
-          msg += _("Would you like to enable these repositories during installation\n" \
-              "in order to receive the latest updates?")
+          _("Would you like to enable these repositories during installation\n" \
+            "in order to receive the latest updates?")
         else # Yast::Mode.update
           # TRANSLATORS: updates popup question (2/2), multiline, max. ~60 chars/line
-          msg += _("Would you like to enable these repositories during upgrade\n" \
-              "in order to receive the latest updates?")
+          _("Would you like to enable these repositories during upgrade\n" \
+            "in order to receive the latest updates?")
         end
 
         options.install_updates = Yast::Popup.YesNo(msg)
@@ -301,8 +299,8 @@ module Registration
       # %s are all the product names splited by '\n' e.g
       # "SUSE Linux Enterprise Server 12\nSUSE Enterprise Storage 1 x86_64"
       msg = _("The add-ons listed below are registered but not installed: \n\n%s\n\n" \
-              "Would you like to downgrade also them in the registration server? \n" \
-              "If not they will be deactivated. ") % addon_names.join("\n")
+        "Would you like to downgrade also them in the registration server? \n" \
+        "If not they will be deactivated. ") % addon_names.join("\n")
 
       Yast::Popup.YesNo(msg) ? addons : []
     end
@@ -367,8 +365,10 @@ module Registration
           base_product_data["reg_code"] = options.reg_code
           ret = registration.register_product(base_product_data, options.email)
 
-          group.summary = "Registered \"#{base_product_data["name"]}-" \
-            "#{base_product_data["version"]}-#{base_product_data["arch"]}\"" if ret
+          if ret
+            group.summary = "Registered \"#{base_product_data["name"]}-" \
+              "#{base_product_data["version"]}-#{base_product_data["arch"]}\""
+          end
 
           ret
         end
@@ -404,7 +404,7 @@ module Registration
     # @param silent_reg_code_mismatch [Boolean]
     # @return [Boolean] success
     def register_selected_addon(product, reg_code, silent_reg_code_mismatch:)
-      success = ConnectHelpers.catch_registration_errors(
+      ConnectHelpers.catch_registration_errors(
         message_prefix:           "#{product.label}\n",
         silent_reg_code_mismatch: silent_reg_code_mismatch
       ) do
@@ -431,7 +431,6 @@ module Registration
         # mark as registered
         product.registered
       end
-      success
     end
 
     # enable/disable update repositories according to the user selection

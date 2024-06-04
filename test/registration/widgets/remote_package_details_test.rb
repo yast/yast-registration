@@ -43,9 +43,9 @@ describe Registration::Widgets::RemotePackageDetails do
     it "displays the result details" do
       expect(subject).to receive(:value=)
         .with("<b>Name:</b> yast2<br>" \
-              "<b>Version:</b> 4.2.49-1.1<br>" \
-              "<b>Architecture:</b> x86_64<br>" \
-              "<b>Module/Extension:</b> Basesystem Module (registered)")
+          "<b>Version:</b> 4.2.49-1.1<br>" \
+          "<b>Architecture:</b> x86_64<br>" \
+          "<b>Module/Extension:</b> Basesystem Module (registered)")
       subject.update(package)
     end
   end

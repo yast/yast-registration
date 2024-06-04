@@ -1,4 +1,5 @@
 require_relative "spec_helper"
+require "registration/ui/addon_selection_registration_dialog"
 require "registration/addon"
 
 describe Registration::UI::AddonSelectionRegistrationDialog do

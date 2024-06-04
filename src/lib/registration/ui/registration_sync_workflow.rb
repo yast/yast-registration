@@ -34,6 +34,7 @@ module Registration
 
       # the constructor
       def initialize
+        super
         textdomain "registration"
 
         self.registration = Registration.new(UrlHelpers.registration_url)
@@ -62,6 +63,7 @@ module Registration
           SwMgmt.installed_products.each_with_object([]) do |product, result|
             name = product["name"]
             next unless activated.include?(name) || activated.include?(SYNC_FALLBACKS[name])
+
             result << product
           end
 
@@ -74,6 +76,7 @@ module Registration
 
         # downgrade all installed products
         return :abort unless downgrade_products(products)
+
         remove_rollback_script
 
         reload_repos

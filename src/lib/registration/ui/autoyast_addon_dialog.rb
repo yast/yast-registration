@@ -1,4 +1,3 @@
-
 require "yast"
 
 module Registration
@@ -36,7 +35,7 @@ module Registration
       def run
         # help text
         help_text = _("<p>Here you can select which extensions or modules"\
-            "will be registered together with the base product.</p>")
+          "will be registered together with the base product.</p>")
 
         Wizard.SetContents(_("Register Optional Extensions or Modules"), content,
           help_text, true, true)

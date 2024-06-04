@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/offline_migration_workflow"
+
 describe Registration::UI::OfflineMigrationWorkflow do
   describe "#main" do
     before do

@@ -63,10 +63,10 @@ module Registration
     def transform(product)
       arch = Yast::Arch.rpm_arch
 
-      res = product.map do |key, val|
+      res = product.to_h do |key, val|
         val_s = val.to_s.gsub("$arch", arch)
         [key, val_s]
-      end.to_h
+      end
       res["version_version"] ||= res["version"]
       res["arch"] ||= arch
       res["default"] = res["default"]&.casecmp?("true") ? true : false

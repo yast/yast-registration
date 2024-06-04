@@ -1,9 +1,9 @@
 # use the shared Yast defaults
 inherit_from:
-  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml
+  /usr/share/YaST2/data/devtools/data/rubocop-1.24.1_yast_style.yml
 
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.5
 
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -24,7 +24,7 @@ Metrics/ClassLength:
 Metrics/CyclomaticComplexity:
   Max: 25
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
 
 # TODO: this need some non-trivial refactoring...
@@ -42,7 +42,7 @@ Lint/ShadowedException:
     - 'src/lib/registration/connect_helpers.rb'
 
 # Offense count: 5
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: false
 
 # Offense count: 29
@@ -51,9 +51,30 @@ Style/Documentation:
 
 # Offense count: 1
 # Configuration parameters: NamePrefix, NamePrefixBlacklist.
-Style/PredicateName:
+Naming/PredicateName:
+  Enabled: false
+
+Naming/MethodParameterName:
   Enabled: false
 
 # Let lslezak decide what to do with it. In general jreidinger does not see it as such big violence of style
 Style/StructInheritance:
   Enabled: false
+
+# Allow global mixins in tests
+Style/MixinUsage:
+  Exclude:
+    - 'test/**/*.rb'
+
+# this cop will change API, so disable it
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+# it sometimes make code harder to read
+Style/GuardClause:
+  Enabled: false
+
+# use indented style as there is a lot of multiline strings and it often
+# too much fragile that string as default style makes really narrow strings
+Layout/LineEndStringConcatenationIndentation:
+  EnforcedStyle: indented

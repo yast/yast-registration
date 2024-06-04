@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
@@ -108,7 +106,7 @@ module Registration
     # @param url [String] URL as string
     def self.credentials_from_url(url)
       parsed_url = URI(url)
-      params = Hash[URI.decode_www_form(parsed_url.query)]
+      params = URI.decode_www_form(parsed_url.query).to_h
 
       params["credentials"]
     end
@@ -132,6 +130,7 @@ module Registration
     def self.reg_url_from_autoyast_config
       server = ::Registration::Storage::Config.instance.reg_server
       return server if server && !server.empty?
+
       SUSE::Connect::YaST::DEFAULT_URL
     end
 
@@ -165,6 +164,7 @@ module Registration
           if old_conf.found?
             # use default if ncc was used in past
             return nil if old_conf.ncc?
+
             # if specific server is used, then also use it
             return old_conf.stripped_url.to_s
           end

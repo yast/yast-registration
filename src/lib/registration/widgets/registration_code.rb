@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2017 SUSE LLC
 #
@@ -33,6 +31,7 @@ module Registration
       VALID_URL_SCHEMES = ["http", "https"].freeze
 
       def initialize
+        super
         textdomain "registration"
       end
 
@@ -98,9 +97,9 @@ module Registration
       def help
         _(
           "<p>\n" \
-          "The RMT Server URL must use http or https protocol, " \
-          "other schemes are not supported." \
-          "</p>\n"
+            "The RMT Server URL must use http or https protocol, " \
+            "other schemes are not supported." \
+            "</p>\n"
         )
       end
 

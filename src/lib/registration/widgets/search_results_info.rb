@@ -26,6 +26,7 @@ module Registration
     class SearchResultsInfo < CWM::CustomWidget
       # Constructor
       def initialize
+        super
         textdomain "registration"
       end
 

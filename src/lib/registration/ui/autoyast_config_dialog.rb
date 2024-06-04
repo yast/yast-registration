@@ -1,4 +1,3 @@
-
 require "yast"
 
 require "registration/fingerprint"
@@ -62,9 +61,9 @@ module Registration
         )
         help_text += _(
           "<p>If your network deploys a custom registration server, set the " \
-          "correct URL of the server\nand the location of the RMT " \
-          "certificate in <b>RMT Server Settings</b>. Refer\nto your RMT " \
-          "manual for further assistance.</p>"
+            "correct URL of the server\nand the location of the RMT " \
+            "certificate in <b>RMT Server Settings</b>. Refer\nto your RMT " \
+            "manual for further assistance.</p>"
         )
 
         # FIXME: the dialog should be created by external code before calling this
@@ -217,7 +216,7 @@ module Registration
           [w.to_s, Yast::UI.QueryWidget(Id(w), :Value)]
         end
 
-        import_data = Hash[data]
+        import_data = data.to_h
         # keep the current addons
         import_data["addons"] = config.addons
         config.import(import_data)
@@ -237,15 +236,13 @@ module Registration
             refresh_widget_state
           when :abort, :cancel
             break if Popup.ReallyAbort(true)
-          when :next
-            # FIXME: input validation
-            break
-          when :back, :addons
+          # FIXME: input validation for next
+          when :back, :addons, :next
             break
           end
         end
 
-        store_config if ret == :next || ret == :addons
+        store_config if [:next, :addons].include?(ret)
 
         ret
       end

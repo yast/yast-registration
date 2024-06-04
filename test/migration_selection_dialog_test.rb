@@ -1,6 +1,9 @@
 #! /usr/bin/env rspec
 
 require_relative "spec_helper"
+
+require "registration/ui/migration_selection_dialog"
+
 include Yast::UIShortcuts
 
 describe Registration::UI::MigrationSelectionDialog do

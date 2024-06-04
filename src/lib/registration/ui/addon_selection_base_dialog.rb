@@ -66,13 +66,13 @@ module Registration
       # @param [Boolean] enable true for filtering devel releases
       def filter_devel_releases(enable)
         self.class.filter_devel = enable
-        if enable
-          @addons = @all_addons.select do |a|
+        @addons = if enable
+          @all_addons.select do |a|
             a.registered? || a.selected? || a.auto_selected? ||
               a.released?
           end
         else
-          @addons = @all_addons
+          @all_addons
         end
       end
 
@@ -122,8 +122,8 @@ module Registration
         # (%s is an extension name)
         label = addon.available? ? addon.label : (_("%s (not available)") % addon.label)
         richtext_checkbox(id:     addon_widget_id(addon),
-                          label:  label,
-                          status: addon.status)
+          label:  label,
+          status: addon.status)
       end
 
       IMAGE_DIR = "/usr/share/YaST2/theme/current/wizard".freeze
@@ -285,10 +285,10 @@ module Registration
       def generic_help_text
         # help text (2/3)
         _("<p>Please note, that some extensions or modules might need "\
-            "specific registration code.</p>") +
+          "specific registration code.</p>") +
           # help text (3/3)
           _("<p>If you want to remove any extension or module you need to log "\
-              "into the SUSE Customer Center and remove them manually there.</p>")
+            "into the SUSE Customer Center and remove them manually there.</p>")
       end
 
       def checkboxes_help
@@ -307,7 +307,7 @@ module Registration
 
         if Yast::UI.TextMode
           return header + "<p>" \
-              "[x] = " + selected +
+            "[x] = " + selected +
               "[ ] = " + deselected +
               "[a] = " + auto_selected +
               "</p>"
@@ -328,6 +328,7 @@ module Registration
 
         @all_addons.each do |a|
           next unless a.recommended
+
           log.info("Preselecting a default addon: #{a.friendly_name}")
           a.selected
         end

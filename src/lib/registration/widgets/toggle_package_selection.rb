@@ -26,6 +26,7 @@ module Registration
     class TogglePackageSelection < CWM::PushButton
       # Constructor
       def initialize
+        super
         textdomain "registration"
         self.widget_id = "toggle_package_selection"
       end

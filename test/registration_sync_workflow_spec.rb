@@ -2,6 +2,8 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/registration_sync_workflow"
+
 describe Registration::UI::RegistrationSyncWorkflow do
   describe "#run_sequence" do
     let(:registration) { Registration::Registration.new }

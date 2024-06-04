@@ -88,7 +88,7 @@ module Yast
     # @return [Boolean] true if the media add-on worklow should be started
     def media_workflow?
       return false if WFM.Args[0] != "register_media_addon"
-      return true if WFM.Args[1].is_a?(Fixnum)
+      return true if WFM.Args[1].is_a?(Integer)
 
       log.warn "Invalid argument: #{WFM.Args[1].inspect}, a Fixnum is expected"
       log.warn "Starting the standard workflow"
@@ -187,6 +187,7 @@ module Yast
     def register_addons
       log.group "Register add-ons" do
         return false if init_registration == :cancel
+
         addons = Registration::Addon.selected + Registration::Addon.auto_selected
         addons = Registration::Addon.registration_order(addons)
         ret = registration_ui.register_addons(addons, @known_reg_codes)
@@ -313,14 +314,14 @@ module Yast
             registration_check
           end
         end,
-        "register"               => ->() { register_base_system },
-        "select_addons"          => ->() { select_addons },
-        "update"                 => [->() { update_registration }, true],
-        "addon_eula"             => ->() { addon_eula },
-        "register_addons"        => ->() { register_addons },
-        "update_autoyast_config" => ->() { update_autoyast_config },
-        "pkg_manager"            => ->() { pkg_manager },
-        "finish"                 => ->() { finish }
+        "register"               => -> { register_base_system },
+        "select_addons"          => -> { select_addons },
+        "update"                 => [-> { update_registration }, true],
+        "addon_eula"             => -> { addon_eula },
+        "register_addons"        => -> { register_addons },
+        "update_autoyast_config" => -> { update_autoyast_config },
+        "pkg_manager"            => -> { pkg_manager },
+        "finish"                 => -> { finish }
       }
     end
 
@@ -400,6 +401,7 @@ module Yast
 
       url = ::Registration::UrlHelpers.registration_url
       return :cancel if url == :cancel
+
       log.info "Initializing registration with URL: #{url.inspect}"
       @registration = ::Registration::Registration.new(url)
     end

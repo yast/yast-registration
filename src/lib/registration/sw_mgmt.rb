@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
@@ -116,7 +114,7 @@ module Registration
         # when a migration repository cannot be accessed, there are [Skip]
         # and [Abort] buttons displayed below the question
         question = _("Repository '%s'\ncannot be loaded.\n\n"\
-            "Skip the repository or abort?") % data["name"]
+          "Skip the repository or abort?") % data["name"]
         ret = Popup.ErrorAnyQuestion(Label.ErrorMsg, question, Label.SkipButton,
           Label.AbortButton, :focus_yes)
 
@@ -247,9 +245,10 @@ module Registration
     def self.evaluate_product(p, selected, installed)
       if Stage.initial && Mode.auto
         Yast.import "AutoinstFunctions"
-        # note: AutoinstFunctions.selected_product should never be nil when
+        # NOTE: AutoinstFunctions.selected_product should never be nil when
         # AY let it pass here
         return false unless AutoinstFunctions.selected_product
+
         p.name == AutoinstFunctions.selected_product.name
       elsif Stage.initial && !Mode.update
         # during installation the ["type"] value is not valid yet yet
@@ -550,8 +549,8 @@ module Registration
       Yast::Execute.locally!("cp", "-a", file, new_file)
 
       use_credentials(new_file)
-    rescue Cheetah::ExecutionFailed => error
-      log.warn "Cannot copy the old credentials file #{file} to #{new_file}: #{error.message}"
+    rescue Cheetah::ExecutionFailed => e
+      log.warn "Cannot copy the old credentials file #{file} to #{new_file}: #{e.message}"
     end
 
     # Use credentials from a file
@@ -685,7 +684,7 @@ module Registration
 
           # TRANSLATORS: %s is a product name
           Report.Error(_("Cannot find remote product %s.\n" \
-                "The product cannot be registered.") % product_label)
+            "The product cannot be registered.") % product_label)
         end
       end
     end

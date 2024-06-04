@@ -2,6 +2,10 @@
 
 require_relative "spec_helper"
 
+require "registration/ui/base_system_registration_dialog"
+
+Yast.import "Packages"
+
 describe Registration::UI::BaseSystemRegistrationDialog do
   include Yast::UIShortcuts
 
@@ -219,7 +223,7 @@ describe Registration::UI::BaseSystemRegistrationDialog do
           end
 
           context "when full_system_media_name and full_system_download_url" \
-                  " is NOT defined in control.xml" do
+            " is NOT defined in control.xml" do
             before do
               allow(Yast::ProductFeatures).to receive(:GetStringFeature)
                 .with("globals", "full_system_media_name").and_return("")

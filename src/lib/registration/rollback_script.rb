@@ -40,7 +40,7 @@ module Registration
     # @note The script can be created only when the target root is mounted.
     def create
       log.info "Creating registration rollback script #{script_path}"
-      src_file = File.expand_path("../../../data/registration/registration_rollback.sh", __FILE__)
+      src_file = File.expand_path("../../data/registration/registration_rollback.sh", __dir__)
       ::FileUtils.cp(src_file, script_path)
     end
 
@@ -64,7 +64,7 @@ module Registration
     # full path to the script
     # @return [String] path
     def script_path
-      @path ||= File.join(root, BACKUP_DIR, DEFAULT_SCRIPT_NAME)
+      @script_path ||= File.join(root, BACKUP_DIR, DEFAULT_SCRIPT_NAME)
     end
   end
 end

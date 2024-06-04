@@ -30,6 +30,7 @@ module Registration
       # @param packages [Array<RemotePackage>] Packages to install
       # @param addons [Array<Addon>] Addons to register
       def initialize(packages, addons)
+        super()
         textdomain "registration"
         @packages = packages
         @addons = addons

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2017 SUSE LLC
 #
@@ -103,8 +101,10 @@ module Registration
             not_installed = install_products
             # TRANSLATORS: Popup error showing all the add-ons that weren't
             # installed, %s is the add-ons identifiers.
-            Yast::Popup.Error(_("These add-ons were not installed:\n\n%s") %
-                              not_installed.join("\n")) unless not_installed.empty?
+            unless not_installed.empty?
+              Yast::Popup.Error(_("These add-ons were not installed:\n\n%s") %
+                                not_installed.join("\n"))
+            end
             update_summary
           when :sync
             registration_ui.synchronize_products(SwMgmt.installed_products)
@@ -156,12 +156,12 @@ module Registration
         #   not installed. (1/2)
         summary = _("<p>The add-ons listed below are registered but not installed: </p>")
 
-        summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join("")}</ul>"
+        summary += "<ul>#{not_installed_addon_names.map { |a| "<li>#{a}</li>" }.join}</ul>"
 
         # TRANSLATORS: A RichText warning about all the products registered but
         #   not installed. (2/2)
         summary += _("<p>It's preferable to <b>deactivate</b> your products at your " \
-                     "registration server if you don't plan to use them anymore.</p>")
+          "registration server if you don't plan to use them anymore.</p>")
 
         summary
       end
@@ -196,8 +196,9 @@ module Registration
         product = product_from_addon_repos(addon)
         return false if !product || !Yast::Pkg.ResolvableInstall(product.name, :product)
 
-        if !Yast::Pkg.PkgSolve(true)
-          return false if Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept
+        if !Yast::Pkg.PkgSolve(true) &&
+            (Yast::PackagesUI.RunPackageSelector("mode" => :summaryMode) != :accept)
+          return false
         end
 
         Yast::PackagesUI.ConfirmLicenses

@@ -349,7 +349,7 @@ describe Registration::Addon do
     it "returns true if the old addon is a predecessor" do
       # "sle-haegeo" (SLE11-SP2) has been renamed to "sle-ha-geo" (SLE12)
       product = addon_generator("zypper_name"       => "sle-ha-geo",
-                                "former_identifier" => "sle-haegeo")
+        "former_identifier" => "sle-haegeo")
 
       new_addon = Registration::Addon.new(product)
       old_addon = { "name" => "sle-haegeo", "version" => "12", "arch" => "x86_64" }

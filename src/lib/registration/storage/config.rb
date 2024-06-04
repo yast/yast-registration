@@ -117,6 +117,7 @@ module Registration
       # If the system is not registered, it does nothing
       def read
         return unless ::Registration::Registration.is_registered?
+
         config = SUSE::Connect::Config.new
         @email = config.email
         @reg_server = config.url
@@ -164,7 +165,7 @@ module Registration
         base_activation = connect_status.activations.find do |activation|
           activation.service&.product&.isbase
         end
-        base_activation && base_activation.regcode
+        base_activation&.regcode
       end
 
       # Returns the elements for the <addons> section

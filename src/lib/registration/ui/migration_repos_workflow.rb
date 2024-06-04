@@ -57,6 +57,7 @@ module Registration
 
       # the constructor
       def initialize
+        super
         textdomain "registration"
 
         url = UrlHelpers.registration_url
@@ -90,17 +91,17 @@ module Registration
         log.info "Starting migration repositories sequence"
 
         aliases = {
-          "registration_check"           => [->() { registration_check }, true],
-          "not_installed_products_check" => [->() { not_installed_products_check }, true],
-          "find_products"                => [->() { find_products }, true],
-          "load_migration_products"      => [->() { load_migration_products }, true],
-          "select_migration_products"    => ->() { select_migration_products },
-          "update_releasever"            => ->() { update_releasever },
-          "register_migration_products"  => [->() { register_migration_products }, true],
-          "activate_migration_repos"     => [->() { activate_migration_repos }, true],
-          "select_migration_repos"       => ->() { select_migration_repos },
-          "select_products"              => ->() { select_products },
-          "store_repos_state"            => ->() { store_repos_state }
+          "registration_check"           => [-> { registration_check }, true],
+          "not_installed_products_check" => [-> { not_installed_products_check }, true],
+          "find_products"                => [-> { find_products }, true],
+          "load_migration_products"      => [-> { load_migration_products }, true],
+          "select_migration_products"    => -> { select_migration_products },
+          "update_releasever"            => -> { update_releasever },
+          "register_migration_products"  => [-> { register_migration_products }, true],
+          "activate_migration_repos"     => [-> { activate_migration_repos }, true],
+          "select_migration_repos"       => -> { select_migration_repos },
+          "select_products"              => -> { select_products },
+          "store_repos_state"            => -> { store_repos_state }
         }
 
         ui = Yast::Sequencer.Run(aliases, WORKFLOW_SEQUENCE)
@@ -182,8 +183,8 @@ module Registration
         # pressing [Continue] starts the registration module, [Cancel] aborts
         # the online migration
         register = Yast::Popup.ContinueCancel(_("The system is not registered,\n" \
-              "to run the online migration you need\n" \
-              "to register the system first."))
+          "to run the online migration you need\n" \
+          "to register the system first."))
 
         return :abort unless register
 
@@ -272,9 +273,9 @@ module Registration
         # installed to the current migration products list.
         # %s is an addon friendly name, e.g 'SUSE Enterprise Storage 2 x86_64'
         msg = _("The '%s' extension is registered but not installed.\n" \
-              "If you accept it will be added for be installed, in other case " \
-              "it will be unregistered at the end of the migration.\n\n" \
-              "Do you want to add it?")
+          "If you accept it will be added for be installed, in other case " \
+          "it will be unregistered at the end of the migration.\n\n" \
+          "Do you want to add it?")
 
         addons =
           Addon.registered_not_installed.each_with_object([]) do |addon, result|
@@ -367,10 +368,11 @@ module Registration
             # TRANSLATORS. Error message
             _("No migration product found."),
             # TRANSLATORS: Help message, %{product} is the product name
-            _("Please, boot the original system and make sure " \
+            format(_("Please, boot the original system and make sure " \
               "that all registerable products are correctly registered.\n" \
               "Also check that the installed system is supported for upgrade to \n" \
-              "%{product}.") % { product: Y2Packager::ProductUpgrade.new_base_product.display_name }
+              "%{product}."),
+              product: Y2Packager::ProductUpgrade.new_base_product.display_name)
           ]
 
           Yast::Report.Error(msg.join("\n\n"))
@@ -401,7 +403,8 @@ module Registration
         # TRANSLATORS: Continue/Cancel popup question, confirm the migration by user,
         # %s is a product name, e.g. "SUSE Linux Enterprise Server 15"
         message = _("The product %s\nis already activated on this system.\n\n" \
-          "Migrating again to the same product might not work properly.") % base_product.label
+          "Migrating again to the same product might not work properly.") %
+          base_product.label
         ui = Yast2::Popup.show(message, buttons: :continue_cancel, focus: :cancel)
         log.info("Use input: #{ui.inspect}")
 
@@ -479,6 +482,7 @@ module Registration
 
         # check the repositories (and possibly disable the invalid repositories)
         return :abort unless SwMgmt.check_repositories
+
         # reload the available packages
         Yast::Pkg.SourceLoad
 
@@ -595,7 +599,7 @@ module Registration
           add_offline_base_product
 
           explicit_media_upgrade
-          return :skip
+          :skip
         # the system is registered, continue with the SCC/SMT/RMT based upgrade
         elsif Registration.is_registered?
           log.info "The system is registered, using the registration server for upgrade"
@@ -603,15 +607,15 @@ module Registration
           if Yast::Stage.initial && Y2Packager::MediumType.offline?
             Y2Packager::MediumType.type = :online
           end
-          return :next
+          :next
         elsif Y2Packager::MediumType.online?
           log.warn "The system is NOT registered for online medium. Stopping"
           Yast::Popup.LongMessage(unregistered_online_message)
-          return :abort
+          :abort
         else
           # the system is unregistered we can only upgrade via media
           unregistered_media_upgrade
-          return :skip
+          :skip
         end
       end
 
@@ -686,7 +690,7 @@ module Registration
       # @return [Array<Y2Packager::RepoProductSpec>] the products found in the offline medium
       def full_medium_products
         products = Y2Packager::ProductSpec.base_products
-                                          .select { |p| p.is_a?(Y2Packager::RepoProductSpec) }
+          .select { |p| p.is_a?(Y2Packager::RepoProductSpec) }
         log.info("Found base products on the offline medium: #{products.pretty_inspect}")
 
         # in SP6+ always use the new product mapping
@@ -709,14 +713,12 @@ module Registration
         new_base = nil
         base_products = full_medium_products
         installed_names = Y2Packager::Resolvable.find(kind: :product, status: :installed)
-                                                .map(&:name)
+          .map(&:name)
         # first check if there is a product rename defined for the installed products
         # and the new renamed base product is available
         # key in the mapping: list of installed products, value: the new base product
         Y2Packager::ProductUpgrade.mapping.each do |k, v|
-          if (k - installed_names).empty?
-            new_base = base_products.find { |p| p.name == v }
-          end
+          new_base = base_products.find { |p| p.name == v } if (k - installed_names).empty?
         end
 
         # if no product rename was found then use the 1:1 upgrade
@@ -763,7 +765,7 @@ module Registration
           _("<p>Please add the installation media manually in the next step.</p>") +
           # TRANSLATORS: Unregistered system message (3/3)
           _("<p>If you cannot provide the installation media you can abort the migration " \
-          "and boot the original system to register it. Then start the migration again.</p>")
+            "and boot the original system to register it. Then start the migration again.</p>")
       end
 
       # Informative message

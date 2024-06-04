@@ -1,4 +1,3 @@
-
 require "yast"
 require "registration/ui/abort_confirmation"
 
@@ -48,9 +47,9 @@ module Registration
           content,
           # help text
           _("<p>Enter registration codes for the requested extensions or modules.</p>\n"\
-              "<p>Registration codes are required for successfull registration." \
-              "If you cannot provide a registration code then go back and deselect " \
-              "the respective extension or module.</p>"),
+            "<p>Registration codes are required for successfull registration." \
+            "If you cannot provide a registration code then go back and deselect " \
+            "the respective extension or module.</p>"),
           true,
           true
         )
@@ -75,7 +74,7 @@ module Registration
         # display the second column if needed
         if addons_with_regcode.size > MAX_REGCODES_PER_COLUMN
           # display only the addons which fit two column layout
-          display_addons = addons_with_regcode[0..2 * MAX_REGCODES_PER_COLUMN - 1]
+          display_addons = addons_with_regcode[0..(2 * MAX_REGCODES_PER_COLUMN) - 1]
 
           # round the half up (more items in the first column for odd number of items)
           half = (display_addons.size + 1) / 2
@@ -170,7 +169,7 @@ module Registration
         pairs = addons_with_regcode.map do |a|
           [a.identifier, Yast::UI.QueryWidget(Id(a.identifier), :Value)]
         end
-        known_reg_codes.merge!(Hash[pairs])
+        known_reg_codes.merge!(pairs.to_h)
       end
 
       # the main event loop - handle the user in put in the dialog

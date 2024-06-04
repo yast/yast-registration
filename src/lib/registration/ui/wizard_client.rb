@@ -51,11 +51,11 @@ module Registration
         ret = run_sequence
         log.info "Sequence result: #{ret}"
         ret
-      rescue => e
+      rescue StandardError => e
         log.error "Caught error: #{e.class}: #{e.message.inspect}, #{e.backtrace}"
         # TRANSLATORS: error message, %s are details
         Yast::Report.Error(_("Internal error: %s") % e.message)
-        return :abort
+        :abort
       end
 
       # This is main workflow sequence, it needs to be redefined in the derived class.

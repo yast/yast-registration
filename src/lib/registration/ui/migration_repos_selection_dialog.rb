@@ -48,8 +48,8 @@ module Registration
           dialog_content,
           # TRANSLATORS: help text
           _("<p>In this dialog you can manually select which repositories will" \
-              "be used for online migration. The packages will be upgraded to the" \
-              "highest version found in the selected repositories.</p>"),
+            "be used for online migration. The packages will be upgraded to the" \
+            "highest version found in the selected repositories.</p>"),
           true,
           true
         )

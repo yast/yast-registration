@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2016 SUSE, LLC. All Rights Reserved.
 #
@@ -46,9 +44,10 @@ module Registration
       with_tempfile("regcodes-") do |path|
         REGCODES_NAME_HANDLERS.each do |name, handler|
           next unless get_file_from_url(scheme: "usb", host: "",
-                                        urlpath: "/#{name}",
-                                        localfile: path,
-                                        urltok: {}, destdir: "")
+            urlpath: "/#{name}",
+            localfile: path,
+            urltok: {}, destdir: "")
+
           codes = send(handler, path)
           return codes if codes
         end
@@ -82,11 +81,12 @@ module Registration
     # @return [Hash{String => String},nil]
     def reg_codes_from_xml(filename)
       return nil unless File.readable?(filename) && File.file?(filename)
+
       xml_hash = Yast::XML.XMLToYCPFile(filename)
       parse_xml(xml_hash)
     rescue Yast::XMLDeserializationError => e
       log.error "Invalid reg codes XML: #{e.inspect}"
-      return nil
+      nil
     end
 
     # @param xml_hash [Hash] as used in AY and returned by Yast::XML.XMLToYCPFile
@@ -97,7 +97,7 @@ module Registration
       pairs = addons.map do |a|
         [a.fetch("name", ""), a.fetch("reg_code", "")]
       end
-      Hash[pairs]
+      pairs.to_h
     end
 
     # The format is: lines with a key and a value,
@@ -106,12 +106,13 @@ module Registration
     # @return [Hash{String => String},nil]
     def reg_codes_from_txt(filename)
       return nil unless File.readable?(filename) && File.file?(filename)
+
       text = File.read(filename)
       # TODO: report parse errors in log
       pairs = text.each_line.map do |l|
         l.chomp.split(/\s+/, 2)
       end
-      Hash[pairs.reject(&:empty?)]
+      pairs.reject(&:empty?).to_h
     end
   end
 end

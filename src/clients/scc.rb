@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2013 Novell, Inc. All Rights Reserved.
 #
@@ -30,70 +28,75 @@ require "registration/sw_mgmt"
 require "cgi/util"
 
 module Yast
-  class SccClient < Client
-    include Yast::Logger
+  unless defined?(SccClient)
+    class SccClient < Client
+      include Yast::Logger
 
-    Yast.import "CommandLine"
-    Yast.import "Pkg"
-    Yast.import "Report"
-    Yast.import "Wizard"
+      Yast.import "CommandLine"
+      Yast.import "Pkg"
+      Yast.import "Report"
+      Yast.import "Wizard"
 
-    def main
-      textdomain "registration"
+      def main
+        textdomain "registration"
 
-      if WFM.Args.include?("help")
-        print_help
-      else
-        Wizard.CreateDialog
+        if WFM.Args.include?("help")
+          print_help
+        else
+          Wizard.CreateDialog
 
-        begin
-          ::Registration::SwMgmt.init
+          begin
+            ::Registration::SwMgmt.init
 
-          return WFM.call("inst_scc", WFM.Args)
-        rescue Registration::SourceRestoreError => e
-          retry if fix_repositories(e.message)
-        rescue Registration::PkgAborted => e
-          # Libzypp init has failed because another application
-          # has already locked the zypp stack. The user has already
-          # decided to exit the module. So nothing more has to be
-          # done here.
-          log.info "User abort..."
-        ensure
-          Wizard.CloseDialog
+            WFM.call("inst_scc", WFM.Args)
+          rescue Registration::SourceRestoreError => e
+            retry if fix_repositories(e.message)
+          rescue Registration::PkgAborted => e
+            # Libzypp init has failed because another application
+            # has already locked the zypp stack. The user has already
+            # decided to exit the module. So nothing more has to be
+            # done here.
+            log.info "User abort..."
+          ensure
+            Wizard.CloseDialog
+          end
         end
       end
+
+    private
+
+      # Print help in command line mode
+      def print_help
+        cmdline_description = {
+          "id"   => "scc",
+          # Command line help text for the repository module, %1 is "SUSEconnect"
+          "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
+        }
+
+        CommandLine.Run(cmdline_description)
+      end
+
+      # Let the user manually fix the broken repositories
+      # @return [Boolean] true if the repository manager was successfuly closed,
+      #   false after pressing [Cancel]
+      def fix_repositories(details)
+        Report.LongError(
+          # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
+          _("<p>The repository initialization failed. " \
+            "Disable (or remove) the offending service or repository " \
+            "in the repository manager.</p><p>Details:</p><p>%s</p>") %
+            CGI.escapeHTML(details)
+        )
+
+        ret = WFM.call("repositories", WFM.Args)
+        log.info "repository manager result: #{ret}"
+
+        # drop all loaded repos, force complete reloading
+        Pkg.SourceFinishAll
+        ret == :next
+      end
     end
-
-  private
-
-    # Print help in command line mode
-    def print_help
-      cmdline_description = {
-        "id"   => "scc",
-        # Command line help text for the repository module, %1 is "SUSEconnect"
-        "help" => _("Use '%s' instead of this YaST module.") % "SUSEconnect"
-      }
-
-      CommandLine.Run(cmdline_description)
-    end
-
-    # Let the user manually fix the broken repositories
-    # @return [Boolean] true if the repository manager was successfuly closed,
-    #   false after pressing [Cancel]
-    def fix_repositories(details)
-      # TRANSLATORS: Error message in RichText format, %s contains the details from libzypp
-      Report.LongError(_("<p>The repository initialization failed. " \
-        "Disable (or remove) the offending service or repository " \
-        "in the repository manager.</p><p>Details:</p><p>%s</p>") % CGI.escapeHTML(details))
-
-      ret = WFM.call("repositories", WFM.Args)
-      log.info "repository manager result: #{ret}"
-
-      # drop all loaded repos, force complete reloading
-      Pkg.SourceFinishAll
-      ret == :next
-    end
-  end unless defined?(SccClient)
+  end
 end
 
 Yast::SccClient.new.main

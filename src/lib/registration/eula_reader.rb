@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2014 Novell, Inc. All Rights Reserved.
 #
@@ -97,7 +95,7 @@ module Registration
       # we cannot find any suitable language, just pick any from the list
       # (return the first item from alphabetically sorted list to have
       # consistent results and not to be completely random)
-      languages.sort.first
+      languages.min
     end
 
     # helper for removing the country suffix, e.g. "de_DE" => "de"

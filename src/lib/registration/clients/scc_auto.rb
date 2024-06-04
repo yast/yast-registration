@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ***************************************************************************
 #
 # Copyright (c) 2019 SUSE LLC
@@ -37,7 +35,7 @@ require "registration/ssl_certificate"
 require "registration/url_helpers"
 require "registration/ui/autoyast_config_workflow"
 require "registration/ui/offline_migration_workflow"
-require "registration/erb_renderer.rb"
+require "registration/erb_renderer"
 require "y2packager/product_spec"
 require "y2packager/medium_type"
 
@@ -61,6 +59,7 @@ module Registration
       CONTACTING_MESSAGE = N_("Contacting the Registration Server")
 
       def initialize
+        super
         textdomain "registration"
 
         @config = ::Registration::Storage::Config.instance
@@ -99,7 +98,7 @@ module Registration
         # available (e.g. Online medium), just skip reading the regcode because
         # the short_name (which is required to find the regcode) is unknown at
         # this point. See bsc#1194440.
-        if product&.respond_to?(:short_name) && !settings["reg_code"]
+        if product.respond_to?(:short_name) && !settings["reg_code"]
           reg_codes_loader = ::Registration::Storage::RegCodes.instance
           settings["reg_code"] = reg_codes_loader.reg_codes[product.short_name] || ""
         end
@@ -134,8 +133,8 @@ module Registration
 
         # special handling for the online installation medium,
         # we need to evaluate the base products defined in the control.xml
-        if Yast::Stage.initial && Y2Packager::MediumType.online?
-          return false unless online_medium_config
+        if Yast::Stage.initial && Y2Packager::MediumType.online? && !online_medium_config
+          return false
         end
 
         ret = ::Registration::ConnectHelpers.catch_registration_errors do
@@ -273,14 +272,14 @@ module Registration
         case slp_urls.size
         when 0
           Yast::Report.Error(_("SLP discovery failed, no server found"))
-          return nil
+          nil
         when 1
-          return slp_urls.first
+          slp_urls.first
         else
           # more than one server found: let the user select, we cannot automatically
           # decide which one to use, asking user in AutoYast mode is not nice
           # but better than aborting the installation...
-          return ::Registration::UrlHelpers.slp_service_url
+          ::Registration::UrlHelpers.slp_service_url
         end
       end
 
@@ -288,6 +287,7 @@ module Registration
       # @param url [String] URL of the certificate
       def import_certificate(url)
         return unless url && !url.empty?
+
         log.info "Importing certificate from #{url}..."
 
         cert = Yast::Popup.Feedback(_("Downloading SSL Certificate"), url) do

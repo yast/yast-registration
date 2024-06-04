@@ -52,7 +52,7 @@ module Registration
       lang = Yast::WFM.GetLanguage
       log.info "Current language: #{lang}"
 
-      if lang == "POSIX" || lang == "C"
+      if ["POSIX", "C"].include?(lang)
         log.info "Ignoring #{lang.inspect} language"
         return nil
       end
@@ -119,10 +119,10 @@ module Registration
         reg_ssl_verify = Yast::Linuxrc.InstallInf("reg_ssl_verify")
         log.info "Boot reg_ssl_verify option: #{reg_ssl_verify.inspect}"
 
-        return reg_ssl_verify == "0"
+        reg_ssl_verify == "0"
       else
         config = SUSE::Connect::Config.new
-        return config.insecure
+        config.insecure
       end
     end
 
@@ -130,6 +130,7 @@ module Registration
     def self.copy_certificate_to_target
       cert_file = SslCertificate.default_certificate_path
       return unless File.exist?(cert_file) # no certificate imported?
+
       # copy the imported certificate
       log.info "Copying SSL certificate (#{cert_file}) to the target system..."
       cert_target_file = File.join(Yast::Installation.destdir,
@@ -235,13 +236,13 @@ module Registration
       # error message
       msg = _("The base product was not found,\ncheck your system.") + "\n\n"
 
-      if Yast::Stage.initial
+      msg += if Yast::Stage.initial
         # TRANSLATORS: %s = bugzilla URL
-        msg += _("The installation medium or the installer itself is seriously broken.\n" \
-            "Report a bug at %s.") % "https://bugzilla.suse.com"
+        _("The installation medium or the installer itself is seriously broken.\n" \
+          "Report a bug at %s.") % "https://bugzilla.suse.com"
       else
-        msg += _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
-            "is a symlink pointing to the base product .prod file.")
+        _("Make sure a product is installed and /etc/products.d/baseproduct\n" \
+          "is a symlink pointing to the base product .prod file.")
       end
 
       Yast::Report.Error(msg)
