@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Tue Sep 24 11:43:29 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
 
-- Disable the SLE_BCI repository after registration (PED-8817)
+- Disable the SLE_BCI repository after registration (jsc#PED-8817)
 - 4.7.1
 
 -------------------------------------------------------------------
