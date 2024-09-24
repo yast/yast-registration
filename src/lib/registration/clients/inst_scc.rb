@@ -115,8 +115,15 @@ module Yast
       base_reg_dialog = ::Registration::UI::BaseSystemRegistrationDialog.new
       ret = base_reg_dialog.run
 
-      # remember the created registration object for later use
-      @registration = base_reg_dialog.registration if ret == :next
+      if ret == :next
+        # remember the created registration object for later use
+        @registration = base_reg_dialog.registration
+
+        # disable the BCI repository after registering, it is intended for
+        # not registered systems
+        Registration::SwMgmt.disable_bci
+      end
+
       # tell #registration_check whether the user wants to go back (bnc#940915)
       @back_from_register = (ret == :back)
 
