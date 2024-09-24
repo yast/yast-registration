@@ -746,4 +746,22 @@ describe Registration::SwMgmt do
     end
   end
 
+  describe ".disable_bci" do
+    it "disables the SLE_BCI repository" do
+      expect(Yast::Pkg).to receive(:SourceGetCurrent).and_return([42])
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(42).and_return("alias" => "SLE_BCI")
+      expect(Yast::Pkg).to receive(:SourceSetEnabled).with(42, false)
+
+      subject.disable_bci
+    end
+
+    it "does not change anything if the SLE_BCI repository is not present" do
+      expect(Yast::Pkg).to receive(:SourceGetCurrent).and_return([42])
+      expect(Yast::Pkg).to receive(:SourceGeneralData).with(42).and_return("alias" => "repo")
+      expect(Yast::Pkg).not_to receive(:SourceSetEnabled)
+
+      subject.disable_bci
+    end
+  end
+
 end
