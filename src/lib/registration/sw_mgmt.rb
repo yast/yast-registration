@@ -598,6 +598,23 @@ module Registration
       end
     end
 
+    # name of the SLE BCI repository
+    SLE_BCI = "SLE_BCI".freeze
+
+    # disable the BCI repository
+    def self.disable_bci
+      enabled_repos = Yast::Pkg.SourceGetCurrent(true)
+
+      enabled_repos.each do |repo|
+        repo_data = Yast::Pkg.SourceGeneralData(repo)
+
+        if repo_data["alias"] == SLE_BCI
+          log.info "Disabling #{SLE_BCI} repository"
+          Yast::Pkg.SourceSetEnabled(repo, false)
+        end
+      end
+    end
+
     # a helper method for iterating over repositories
     # @param repo_aliases [Array<String>] list of repository aliases
     # @param block block evaluated for each found repository
