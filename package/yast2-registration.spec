@@ -17,7 +17,7 @@
 
 
 Name:           yast2-registration
-Version:        5.0.3
+Version:        5.0.4
 Release:        0
 Summary:        YaST2 - Registration Module
 License:        GPL-2.0-only
@@ -26,7 +26,6 @@ Url:            https://github.com/yast/yast-registration
 
 Source0:        %{name}-%{version}.tar.bz2
 
-BuildRequires:  update-desktop-files
 # Y2Packager::NewRepositorySetup
 BuildRequires:  yast2 >= 4.4.42
 BuildRequires:  yast2-devtools >= 4.2.2
